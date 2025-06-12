@@ -175,9 +175,10 @@ const EventMatrix = ({
     return result
   }
   const eventSeries = data.eventSeriesList?.list
+  const topLevelTask = data.task
   const allTasks = (
     includeTask
-      ? [data.task].concat(data.task?.descendantTasks)
+      ? [topLevelTask].concat(topLevelTask?.descendantTasks)
       : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
   ).filter(t => t.selectable)
 
@@ -430,7 +431,8 @@ const EventMatrix = ({
                         leaf={task}
                         ascendantObjects={task.ascendantTasks}
                         parentField="parentTask"
-                        hideParents={taskUuid !== task.uuid}
+                        hideParents={includeTask && taskUuid !== task.uuid}
+                        lastParentTask={topLevelTask}
                       />
                     </td>
                     <td>{getEvent(taskEvents, 0, task)}</td>
