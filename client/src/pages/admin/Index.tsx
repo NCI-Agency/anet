@@ -79,8 +79,6 @@ const RECENT_ACTIVITIES = gql`
       name
       rank
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      user
-      domainUsername
     }
     activity {
       time

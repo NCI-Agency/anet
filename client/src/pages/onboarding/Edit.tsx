@@ -32,8 +32,6 @@ const GQL_GET_SELF = gql`
       gender
       endOfTourDate
       user
-      domainUsername
-      openIdSubject
       code
       emailAddresses {
         network
