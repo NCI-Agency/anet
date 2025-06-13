@@ -16,8 +16,8 @@ import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
 
-const GQL_GET_ORGANIZATION = gql`
-  query ($uuid: String) {
+const GQL_GET_SUPERUSERS_AND_ADMINS = gql`
+  query ($uuid: String, $personQuery: PersonSearchQueryInput) {
     organization(uuid: $uuid) {
       ascendantOrgs(query: { status: ACTIVE }) {
         administratingPositions {
@@ -27,19 +27,11 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            emailAddresses {
-              network
-              address
-            }
           }
         }
       }
     }
-  }
-`
 
-const GQL_GET_ADMINISTRATORS = gql`
-  query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
       list {
         uuid
@@ -108,14 +100,11 @@ const HelpFetchSuperusers = ({
   currentUser,
   pageDispatchers
 }: HelpFetchSuperusersProps) => {
-  // Retrieve superusers
-  const orgQuery = API.useApiQuery(GQL_GET_ORGANIZATION, {
-    uuid: orgUuid
-  })
-
-  // Retrieve administrators
-  const adminQuery = API.useApiQuery(GQL_GET_ADMINISTRATORS, {
+  // Retrieve superusers and admins
+  const orgQuery = API.useApiQuery(GQL_GET_SUPERUSERS_AND_ADMINS, {
+    uuid: orgUuid,
     personQuery: {
+      pageSize: 0,
       pendingVerification: false,
       positionType: "ADMINISTRATOR",
       sortBy: "NAME",
@@ -130,7 +119,6 @@ const HelpFetchSuperusers = ({
       currentUser={currentUser}
       pageDispatchers={pageDispatchers}
       {...orgQuery}
-      admins={adminQuery.data?.personList?.list || []}
       orgUuid={orgUuid}
     />
   )
@@ -140,7 +128,6 @@ interface HelpConditionalProps {
   loading?: boolean
   error?: any
   data?: any
-  admins?: any[]
   orgUuid?: string
   appSettings?: any
   currentUser?: any
@@ -151,7 +138,6 @@ const HelpConditional = ({
   loading,
   error,
   data,
-  admins,
   orgUuid,
   appSettings,
   currentUser,
@@ -172,10 +158,12 @@ const HelpConditional = ({
   }
 
   let superusers = []
+  let admins = []
   if (data) {
     superusers = getAllSuperusers(data.organization)
       .filter(p => p.person)
       .map(p => p.person)
+    admins = data.personList?.list
   }
 
   return (
