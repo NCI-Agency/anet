@@ -181,6 +181,10 @@ const EventMatrix = ({
       ? [topLevelTask].concat(topLevelTask?.descendantTasks)
       : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
   ).filter(t => t.selectable)
+  // if topLevelTask task is not in allTasks, add it at the top
+  if (includeTask && !allTasks.find(t => t.uuid === taskUuid)) {
+    allTasks.unshift(topLevelTask)
+  }
 
   function isReportIncluded(report, dateToCheck, task, event?) {
     if (

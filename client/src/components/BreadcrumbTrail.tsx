@@ -43,14 +43,13 @@ export const BreadcrumbTrail = ({
     ascendantObjects,
     parentField
   )
-  // if hideParents is true, we remove all tasks up until the last parent task
   if (hideParents) {
+    // if hideParents is true, we remove all tasks up until the last parent task
     const lastParentTaskIndex =
       trail.findIndex(node => node.uuid === lastParentTask.uuid) || 0
     trail.splice(0, Math.min(trail.length - 1, lastParentTaskIndex + 1))
-  }
-  // if lastParentTask is the same as leaf, we remove everything before it
-  else if (lastParentTask && lastParentTask.uuid === leaf.uuid) {
+  } else if (lastParentTask && lastParentTask.uuid === leaf.uuid) {
+    // if lastParentTask is the same as leaf, we remove everything before it
     trail.splice(0, trail.length - 1)
   }
   return (
@@ -58,7 +57,7 @@ export const BreadcrumbTrail = ({
       {trail.map((node, i) => (
         <React.Fragment key={node.uuid}>
           {(i > 0 || hideParents) && (
-            <span style={{ paddingLeft: 10, paddingRight: 10 }}>»</span>
+            <span style={{ paddingLeft: 10, paddingRight: 10 }}> » </span>
           )}
           <LinkTo
             modelType={modelType}
