@@ -6358,6 +6358,18 @@
 			SET scope = 0;
 		</sql>
 	</changeSet>
+	<changeSet id="add-help-text-remove-links" author="jlnat">
+		<delete tableName="adminSettings">
+			<where>key = 'HELP_LINK_URL'</where>
+		</delete>
+		<delete tableName="adminSettings">
+			<where>key = 'CONTACT_EMAIL'</where>
+		</delete>
+		<insert tableName="adminSettings">
+			<column name="key" value="HELP_TEXT" />
+			<column name="value" value="" />
+		</insert>
+	</changeSet>
 
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->

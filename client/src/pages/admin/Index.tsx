@@ -25,6 +25,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Organization } from "models"
 import moment from "moment"
@@ -35,6 +36,7 @@ import { connect } from "react-redux"
 import { toast } from "react-toastify"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import utils from "utils"
 import { v4 as uuidv4 } from "uuid"
 
 const GQL_GET_ADMIN_SETTINGS = gql`
@@ -190,6 +192,18 @@ const SPECIAL_FIELDS = {
       const formValue = convertValueToForm(key, plainValue)
       // validation will be done by setFieldValue
       setFieldTouched(key, true, false) // onBlur doesn't work when selecting an option
+      setFieldValue(key, formValue)
+    }
+  },
+  HELP_TEXT: {
+    widget: () => <RichTextEditor />,
+    convertValueToForm: value => value,
+    convertFormToValue: value =>
+      value && !utils.isEmptyHtml(value) ? value : null,
+    onChange: (key, value, setFieldTouched, setFieldValue) => {
+      const plainValue = convertFormToValue(key, value)
+      const formValue = convertValueToForm(key, plainValue)
+      setFieldTouched(key, true, false)
       setFieldValue(key, formValue)
     }
   }

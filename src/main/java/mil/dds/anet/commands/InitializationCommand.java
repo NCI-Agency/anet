@@ -138,12 +138,6 @@ public class InitializationCommand {
     saveAdminSetting(engine, AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION,
         defaultApprovalOrgUuid);
 
-    // Set contact email as default
-    saveAdminSetting(engine, AdminSettingKeys.CONTACT_EMAIL, "team-anet@example.com");
-
-    // Set help link url as default
-    saveAdminSetting(engine, AdminSettingKeys.HELP_LINK_URL, "https://google.com");
-
     // Set empty external documentation link text
     saveAdminSetting(engine, AdminSettingKeys.EXTERNAL_DOCUMENTATION_LINK_TEXT, "");
 
@@ -164,6 +158,9 @@ public class InitializationCommand {
 
     // Set empty unlimited exports authorization group
     saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_AUTHORIZATION_GROUP, "");
+
+    // Set empty help text
+    saveAdminSetting(engine, AdminSettingKeys.HELP_TEXT, "");
   }
 
   private void saveAdminSetting(final AnetObjectEngine engine, final AdminSettingKeys key,
