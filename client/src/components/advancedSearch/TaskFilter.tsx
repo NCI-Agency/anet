@@ -9,7 +9,7 @@ import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import TaskTable from "components/TaskTable"
 import { Task } from "models"
 import pluralize from "pluralize"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
@@ -57,6 +57,7 @@ const HierarchicalOverlayTable = ({
 }: HierarchicalOverlayTableProps) => {
   const [expandedItems, setExpandedItems] = useState(new Set<string>())
   const [childrenMap, setChildrenMap] = useState(new Map<string, any[]>())
+  const [rootTasks, setRootTasks] = useState<any[]>([])
 
   const fetchChildren = async task => {
     const query = gql`
@@ -101,6 +102,42 @@ const HierarchicalOverlayTable = ({
     }
   }
 
+  useEffect(() => {
+    if (!items) {
+      return
+    }
+
+    const topLevelItems = items.filter(task => !task.parentTask)
+    const nonTopLevelItems = items.filter(task => task.parentTask)
+    nonTopLevelItems.forEach(task => {
+      // if the top-level of each non-top-level tasks are not in the topLevelItems,
+      // it means they were queried through a search,
+      // so we need to get them, add them to the topLevelItems,
+      // and expand all the tasks leading up to them
+      const topLevelItem = task.ascendantTasks.find(
+        ascendant => ascendant.parentTask === null
+      )
+      if (!topLevelItems.some(item => item.uuid === topLevelItem.uuid)) {
+        topLevelItems.push(topLevelItem)
+        task.ascendantTasks.forEach(ascendant => {
+          const isTopLevel = ascendant.parentTask === null
+          // adding the top-level task to the topLevelItems
+          if (
+            isTopLevel &&
+            !topLevelItems.some(item => item.uuid === ascendant.uuid)
+          ) {
+            topLevelItems.push(ascendant)
+          }
+          // expanding the ascendant task leading up to the task
+          if (!expandedItems.has(ascendant.uuid)) {
+            handleExpand(ascendant)
+          }
+        })
+      }
+    })
+    setRootTasks(topLevelItems)
+  }, [items])
+
   const buildFlattenedList = (tasks, level = 0) => {
     return tasks.flatMap(task => {
       const isTaskSelected = selectedItems?.some(
@@ -130,35 +167,7 @@ const HierarchicalOverlayTable = ({
     })
   }
 
-  const topLevelItems = items.filter(task => !task.parentTask)
-  const nonTopLevelItems = items.filter(task => task.parentTask)
-  nonTopLevelItems.forEach(task => {
-    // if the top-level of each non-top-level tasks are not in the topLevelItems,
-    // it means they were queried through a search,
-    // so we need to get them, add them to the topLevelItems,
-    // and expand all the tasks leading up to them
-    const topLevelItem = task.ascendantTasks.find(
-      ascendant => ascendant.parentTask === null
-    )
-    if (!topLevelItems.some(item => item.uuid === topLevelItem.uuid)) {
-      topLevelItems.push(topLevelItem)
-      task.ascendantTasks.forEach(ascendant => {
-        const isTopLevel = ascendant.parentTask === null
-        // adding the top-level task to the topLevelItems
-        if (
-          isTopLevel &&
-          !topLevelItems.some(item => item.uuid === ascendant.uuid)
-        ) {
-          topLevelItems.push(ascendant)
-        }
-        // expanding the ascendant task leading up to the task
-        if (!expandedItems.has(ascendant.uuid)) {
-          handleExpand(ascendant)
-        }
-      })
-    }
-  })
-  const flattenedItems = buildFlattenedList(topLevelItems)
+  const flattenedItems = buildFlattenedList(rootTasks)
 
   const enhancedRenderRow = task => {
     const hasChildren = task.childrenTasks?.length > 0
