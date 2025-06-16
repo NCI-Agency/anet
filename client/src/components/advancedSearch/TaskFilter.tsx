@@ -18,8 +18,15 @@ const taskFields = `
   childrenTasks(query: { pageSize: 1 }) {
     uuid
   }
-  parentTask {
+  ascendantTasks {
     uuid
+    shortName
+    parentTask {
+      uuid
+    }
+    childrenTasks {
+      uuid
+    }
   }
   descendantTasks {
     uuid
@@ -124,6 +131,13 @@ const HierarchicalOverlayTable = ({
   }
 
   const topLevelItems = items.filter(task => !task.parentTask)
+  const nonTopLevelItems = items.filter(task => task.parentTask)
+  nonTopLevelItems.forEach(task => {
+    const parent = task.ascendantTasks.find(ascendant => ascendant.parentTask === null)
+    if (!topLevelItems.some(item => item.uuid === parent.uuid)) {
+      topLevelItems.push(parent)
+    }
+  })
   const flattenedItems = buildFlattenedList(topLevelItems)
 
   const enhancedRenderRow = task => {
