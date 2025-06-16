@@ -20,6 +20,7 @@ import {
   MODEL_TO_OBJECT_TYPE,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -41,7 +42,7 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Person } from "models"
 import moment from "moment"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -71,6 +72,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -97,8 +99,16 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
   const person2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPerson = mergeState.merged
 
+  useEffect(() => {
+    setIsDirty(false)
+  }, [person1, person2])
+  useEffect(() => {
+    setIsDirty(!!mergedPerson)
+  }, [mergedPerson])
+
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} />
         <h4>Merge People Tool</h4>
@@ -413,7 +423,10 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           intent="primary"
-          onClick={mergePeople}
+          onClick={() => {
+            setIsDirty(false)
+            mergePeople()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge People
@@ -441,6 +454,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
         }
       })
       .catch(error => {
+        setIsDirty(true)
         setSaveError(error)
         jumpToTop()
       })
