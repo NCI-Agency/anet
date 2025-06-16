@@ -133,9 +133,29 @@ const HierarchicalOverlayTable = ({
   const topLevelItems = items.filter(task => !task.parentTask)
   const nonTopLevelItems = items.filter(task => task.parentTask)
   nonTopLevelItems.forEach(task => {
-    const parent = task.ascendantTasks.find(ascendant => ascendant.parentTask === null)
-    if (!topLevelItems.some(item => item.uuid === parent.uuid)) {
-      topLevelItems.push(parent)
+    // if the top-level of each non-top-level tasks are not in the topLevelItems,
+    // it means they were queried through a search,
+    // so we need to get them, add them to the topLevelItems,
+    // and expand all the tasks leading up to them
+    const topLevelItem = task.ascendantTasks.find(
+      ascendant => ascendant.parentTask === null
+    )
+    if (!topLevelItems.some(item => item.uuid === topLevelItem.uuid)) {
+      topLevelItems.push(topLevelItem)
+      task.ascendantTasks.forEach(ascendant => {
+        const isTopLevel = ascendant.parentTask === null
+        // adding the top-level task to the topLevelItems
+        if (
+          isTopLevel &&
+          !topLevelItems.some(item => item.uuid === ascendant.uuid)
+        ) {
+          topLevelItems.push(ascendant)
+        }
+        // expanding the ascendant task leading up to the task
+        if (!expandedItems.has(ascendant.uuid)) {
+          handleExpand(ascendant)
+        }
+      })
     }
   })
   const flattenedItems = buildFlattenedList(topLevelItems)
