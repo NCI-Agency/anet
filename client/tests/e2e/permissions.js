@@ -252,8 +252,8 @@ test.serial("checking admin permissions", async t => {
   await driver.wait(until.elementIsVisible($userInput), shortWaitMs)
   const $userButton = await $('label[for="user_true"]')
   await $userButton.click()
-  const $domainUsernameInput = await $("#domainUsername")
-  await driver.wait(until.elementIsVisible($domainUsernameInput), shortWaitMs)
+  const $addusersButton = await $("#addusersButton")
+  await driver.wait(until.elementIsVisible($addusersButton), shortWaitMs)
 
   // Cancel Create Person
   const $cancelButton = await driver.findElement(
