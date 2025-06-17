@@ -182,7 +182,7 @@ const EventMatrix = ({
       : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
   ).filter(t => t.selectable)
   // if topLevelTask task is not in allTasks, add it at the top
-  if (includeTask && !allTasks.find(t => t.uuid === taskUuid)) {
+  if (includeTask && !allTasks.find(t => t.uuid === topLevelTask?.uuid)) {
     allTasks.unshift(topLevelTask)
   }
 

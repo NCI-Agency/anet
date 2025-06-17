@@ -1,5 +1,4 @@
 import LinkTo from "components/LinkTo"
-import { last } from "lodash"
 import React from "react"
 import utils from "utils"
 
@@ -43,7 +42,7 @@ export const BreadcrumbTrail = ({
     ascendantObjects,
     parentField
   )
-  if (hideParents) {
+  if (hideParents && lastParentTask) {
     // if hideParents is true, we remove all tasks up until the last parent task
     const lastParentTaskIndex =
       trail.findIndex(node => node.uuid === lastParentTask.uuid) || 0
@@ -57,7 +56,17 @@ export const BreadcrumbTrail = ({
       {trail.map((node, i) => (
         <React.Fragment key={node.uuid}>
           {(i > 0 || hideParents) && (
-            <span style={{ paddingLeft: 10, paddingRight: 10 }}> » </span>
+            <div
+              style={{
+                display: "inline-block",
+                marginLeft: 10,
+                marginRight: 10,
+                width: 7
+              }}
+            >
+              {" "}
+              »{" "}
+            </div>
           )}
           <LinkTo
             modelType={modelType}
