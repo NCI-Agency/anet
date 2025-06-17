@@ -805,7 +805,7 @@ const CompactRowReportAction = ({ action }: CompactRowReportActionProps) => {
   return (
     <CompactRowReportActionS className="workflow-action">
       <ActionStatus action={action} />
-      <ActionButton action={action} />
+      <ActionButton action={action} isCompact />
     </CompactRowReportActionS>
   )
 }
