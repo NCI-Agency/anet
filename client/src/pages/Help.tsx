@@ -2,8 +2,8 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import EmailAddressTable from "components/EmailAddressTable"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -11,14 +11,13 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
-import Settings from "settings"
-import utils from "utils"
 
-const GQL_GET_ORGANIZATION = gql`
-  query ($uuid: String) {
+const GQL_GET_SUPERUSERS_AND_ADMINS = gql`
+  query ($uuid: String, $personQuery: PersonSearchQueryInput) {
     organization(uuid: $uuid) {
       ascendantOrgs(query: { status: ACTIVE }) {
         administratingPositions {
@@ -28,12 +27,17 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            emailAddresses {
-              network
-              address
-            }
           }
         }
+      }
+    }
+
+    personList(query: $personQuery) {
+      list {
+        uuid
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
@@ -96,16 +100,25 @@ const HelpFetchSuperusers = ({
   currentUser,
   pageDispatchers
 }: HelpFetchSuperusersProps) => {
-  // Retrieve superusers
-  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
-    uuid: orgUuid
+  // Retrieve superusers and admins
+  const orgQuery = API.useApiQuery(GQL_GET_SUPERUSERS_AND_ADMINS, {
+    uuid: orgUuid,
+    personQuery: {
+      pageSize: 0,
+      pendingVerification: false,
+      positionType: "ADMINISTRATOR",
+      sortBy: "NAME",
+      sortOrder: "ASC",
+      status: "ACTIVE"
+    }
   })
+
   return (
     <HelpConditional
       appSettings={appSettings}
       currentUser={currentUser}
       pageDispatchers={pageDispatchers}
-      {...queryResult}
+      {...orgQuery}
       orgUuid={orgUuid}
     />
   )
@@ -130,8 +143,7 @@ const HelpConditional = ({
   currentUser,
   pageDispatchers
 }: HelpConditionalProps) => {
-  const url = appSettings.HELP_LINK_URL
-  const email = appSettings.CONTACT_EMAIL
+  const helpText = appSettings.HELP_TEXT
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -146,18 +158,27 @@ const HelpConditional = ({
   }
 
   let superusers = []
+  let admins = []
   if (data) {
     superusers = getAllSuperusers(data.organization)
       .filter(p => p.person)
       .map(p => p.person)
+    admins = data.personList?.list
   }
 
   return (
     <div className="help-page">
       <Fieldset title="Need help with ANET?">
-        <p className="help-text">There are a few ways to get help:</p>
+        <h1 className="help-text">There are a few ways to get help:</h1>
 
-        <h4>1. Use the guided tours</h4>
+        {helpText && (
+          <>
+            <h2>Read the help text</h2>
+            <RichTextEditor readOnly value={helpText} />
+          </>
+        )}
+
+        <h2>Use the guided tours</h2>
         <p>
           If you're stuck on a page and you don't know what to do, look for the{" "}
           <strong>"Take a tour"</strong> link near the top of the page.
@@ -168,42 +189,40 @@ const HelpConditional = ({
           style={screenshotCss}
         />
 
-        <h4>2. Email your superuser</h4>
+        <h2>Contact your superuser or administrator</h2>
         <p>
-          Your organization's superusers are able to modify a lot of data in the
-          system regarding how your organization, position and profile are set
-          up.
+          Your organization's superusers and administrators are able to modify a
+          lot of data in the system regarding how your organization, position
+          and profile are set up.
         </p>
-        <p>Your superusers:</p>
-        <ul>
-          {superusers.map(user => (
-            <li key={user.uuid}>
-              {user.rank} {user.name}:
-              <EmailAddressTable
-                label={Settings.fields.person.emailAddresses.label}
-                emailAddresses={user.emailAddresses}
-              />
-            </li>
-          ))}
-          {superusers.length === 0 && <em>No superusers found</em>}
-        </ul>
-
-        <h4>3. Check out the FAQ</h4>
-        <p>
-          Many common issues are explained in the FAQ document, especially for
-          common superuser tasks.
-        </p>
-        <p>
-          <a href={url} target="help">
-            <strong>The FAQ is available on the portal.</strong>
-          </a>
-        </p>
-
-        <h4>4. Contact ANET support</h4>
-        <p>
-          Technical issues may be able to be resolved by the ANET
-          administrators: {utils.createMailtoLink(email)}
-        </p>
+        <div className="d-flex flex-column mt-3 gap-4">
+          <div>
+            {superusers.length > 0 && (
+              <>
+                <b>Your superusers:</b>
+                <div className="superusers-list d-flex flex-column gap-2 p-2">
+                  {superusers.map(user => (
+                    <LinkTo modelType="Person" model={user} key={user.uuid} />
+                  ))}
+                </div>
+              </>
+            )}
+            {superusers.length === 0 && <em>No superusers found</em>}
+          </div>
+          <div>
+            {admins.length > 0 && (
+              <>
+                <b>Your admins:</b>
+                <div className="admins-list d-flex flex-column gap-2 p-2">
+                  {admins.map(user => (
+                    <LinkTo modelType="Person" model={user} key={user.uuid} />
+                  ))}
+                </div>
+              </>
+            )}
+            {admins.length === 0 && <em>No admins found</em>}
+          </div>
+        </div>
       </Fieldset>
     </div>
   )
