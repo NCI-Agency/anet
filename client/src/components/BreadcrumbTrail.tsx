@@ -23,7 +23,7 @@ interface BreadcrumbTrailProps {
   parentField: string
   isLink?: boolean
   hideParents?: boolean
-  lastParentTask?: any
+  ascendantTask?: any
   style?: any
 }
 
@@ -34,7 +34,7 @@ export const BreadcrumbTrail = ({
   parentField,
   isLink,
   hideParents,
-  lastParentTask,
+  ascendantTask,
   style
 }: BreadcrumbTrailProps) => {
   const trail = utils.getAscendantObjectsAsList(
@@ -42,13 +42,13 @@ export const BreadcrumbTrail = ({
     ascendantObjects,
     parentField
   )
-  if (hideParents && lastParentTask) {
+  if (hideParents && ascendantTask) {
     // if hideParents is true, we remove all tasks up until the last parent task
-    const lastParentTaskIndex =
-      trail.findIndex(node => node.uuid === lastParentTask.uuid) || 0
-    trail.splice(0, Math.min(trail.length - 1, lastParentTaskIndex + 1))
-  } else if (lastParentTask && lastParentTask.uuid === leaf.uuid) {
-    // if lastParentTask is the same as leaf, we remove everything before it
+    const ascendantTaskIndex =
+      trail.findIndex(node => node.uuid === ascendantTask.uuid) || 0
+    trail.splice(0, Math.min(trail.length - 1, ascendantTaskIndex + 1))
+  } else if (ascendantTask && ascendantTask.uuid === leaf.uuid) {
+    // if ascendantTask is the same as leaf, we remove everything before it
     trail.splice(0, trail.length - 1)
   }
   return (

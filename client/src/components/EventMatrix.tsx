@@ -436,7 +436,7 @@ const EventMatrix = ({
                         ascendantObjects={task.ascendantTasks}
                         parentField="parentTask"
                         hideParents={includeTask && taskUuid !== task.uuid}
-                        lastParentTask={topLevelTask}
+                        ascendantTask={topLevelTask}
                       />
                     </td>
                     <td>{getEvent(taskEvents, 0, task)}</td>
