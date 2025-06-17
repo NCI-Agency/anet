@@ -6358,6 +6358,7 @@
 			SET scope = 0;
 		</sql>
 	</changeSet>
+	
 	<changeSet id="add-help-text-remove-links" author="jlnat">
 		<delete tableName="adminSettings">
 			<where>key = 'HELP_LINK_URL'</where>

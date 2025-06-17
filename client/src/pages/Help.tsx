@@ -200,7 +200,7 @@ const HelpConditional = ({
             {superusers.length > 0 && (
               <>
                 <b>Your superusers:</b>
-                <div className="d-flex flex-column gap-2 p-2">
+                <div className="superusers-list d-flex flex-column gap-2 p-2">
                   {superusers.map(user => (
                     <LinkTo modelType="Person" model={user} key={user.uuid} />
                   ))}
@@ -213,7 +213,7 @@ const HelpConditional = ({
             {admins.length > 0 && (
               <>
                 <b>Your admins:</b>
-                <div className="d-flex flex-column gap-2 p-2">
+                <div className="admins-list d-flex flex-column gap-2 p-2">
                   {admins.map(user => (
                     <LinkTo modelType="Person" model={user} key={user.uuid} />
                   ))}
