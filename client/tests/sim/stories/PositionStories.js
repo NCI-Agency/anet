@@ -151,10 +151,12 @@ const _createPosition = async function(user) {
   const person = await getRandomObject(
     "people",
     {},
-    "uuid domainUsername",
+    "uuid users { domainUsername }",
     randomObject =>
       randomObject?.uuid === user.uuid ||
-      randomObject?.domainUsername === specialUser.name
+      (randomObject?.users ?? []).some(
+        u => u.domainUsername === specialUser.name
+      )
   )
   const location = await getRandomObject("locations", {
     type: Location.LOCATION_TYPES.POINT_LOCATION
@@ -485,8 +487,10 @@ const deletePersonFromPosition = async function(user) {
             name
             type
             person {
-              domainUsername
               name
+              users {
+                domainUsername
+              }
             }
           }
         }
@@ -504,7 +508,9 @@ const deletePersonFromPosition = async function(user) {
   ).data.positionList.list.filter(
     p =>
       p.person &&
-      p.person.domainUsername !== specialUser.name &&
+      !(p.person.users ?? []).some(
+        u => u.domainUsername === specialUser.name
+      ) &&
       p.type !== Position.TYPE.ADMINISTRATOR
   )
   const position = faker.helpers.arrayElement(positions)
