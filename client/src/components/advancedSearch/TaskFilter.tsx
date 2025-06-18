@@ -9,7 +9,7 @@ import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import TaskTable from "components/TaskTable"
 import { Task } from "models"
 import pluralize from "pluralize"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
@@ -28,9 +28,6 @@ const taskFields = `
     childrenTasks {
       uuid
     }
-    descendantTasks {
-      uuid
-    }
     ascendantTasks {
       uuid
       shortName
@@ -38,10 +35,12 @@ const taskFields = `
         uuid
       }
     }
+    descendantTasks {
+      uuid
+    }
   }
   descendantTasks {
     uuid
-    shortName
   }
 `
 
@@ -72,17 +71,145 @@ const HierarchicalOverlayTable = ({
   const [rootTasks, setRootTasks] = useState<any[]>([])
   const [flattenedItems, setFlattenedItems] = useState([])
 
-  const handleExpand = task => {
-    if (expandedItems.has(task.uuid)) {
-      setExpandedItems(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(task.uuid)
-        return newSet
+  const getChildren = useCallback(
+    parentTask => {
+      return (
+        taskList?.filter(task => task?.parentTask?.uuid === parentTask.uuid) ||
+        []
+      )
+    },
+    [taskList]
+  )
+
+  const buildFlattenedList = useCallback(
+    (tasks, level = 0) => {
+      return tasks.flatMap(task => {
+        const isTaskSelected = selectedItems?.some(
+          item => item.uuid === task.uuid
+        )
+        const isDescendantTaskSelected = selectedItems?.some(item =>
+          task.descendantTasks?.some(child => child.uuid === item.uuid)
+        )
+        const isAscendantTaskSelected = selectedItems
+          ?.filter(item => item.uuid !== task.uuid)
+          ?.some(item =>
+            task.ascendantTasks?.some(child => child.uuid === item.uuid)
+          )
+        const isCollapsed = !expandedItems.has(task.uuid)
+        const isDescendantTaskSelectedAndCollapsed =
+          isDescendantTaskSelected && isCollapsed ? null : false
+        const isSelected =
+          isTaskSelected || isAscendantTaskSelected
+            ? true
+            : isDescendantTaskSelectedAndCollapsed
+        const disabled = isAscendantTaskSelected
+        const taskWithLevel = { ...task, level, isSelected, disabled }
+        const children = expandedItems.has(task.uuid) ? getChildren(task) : []
+        return [taskWithLevel, ...buildFlattenedList(children, level + 1)]
       })
-    } else {
-      setExpandedItems(prev => new Set([...prev, task.uuid]))
-    }
-  }
+    },
+    [selectedItems, expandedItems, getChildren]
+  )
+
+  const handleExpand = useCallback(
+    task => {
+      if (expandedItems.has(task.uuid)) {
+        setExpandedItems(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(task.uuid)
+          return newSet
+        })
+      } else {
+        setExpandedItems(prev => new Set([...prev, task.uuid]))
+      }
+    },
+    [expandedItems]
+  )
+
+  const enhancedRenderRow = useCallback(
+    task => {
+      const hasChildren = getChildren(task).length > 0
+      const isExpanded = expandedItems.has(task.uuid)
+      const isSelected = selectedItems?.some(item => item.uuid === task.uuid)
+
+      const handleToggleSelection = e => {
+        e.stopPropagation()
+        if (isSelected) {
+          handleRemoveItem(task)
+        } else {
+          handleAddItem(task)
+        }
+      }
+
+      const displayLabel = task.longName
+        ? `${task.shortName}: ${task.longName}`
+        : task.shortName
+      const padding = Math.min(task.level, 3) * 20 + (hasChildren ? 0 : 26)
+      const indentedLabel = (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingLeft: padding,
+            gap: 10,
+            cursor: "auto"
+          }}
+        >
+          {hasChildren && (
+            <span
+              onClick={e => {
+                e.stopPropagation()
+                handleExpand(task)
+              }}
+              style={{ cursor: "pointer", pointerEvents: "all" }}
+            >
+              <Icon
+                icon={
+                  isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
+                }
+                size={IconSize.STANDARD}
+              />
+            </span>
+          )}
+          {hasChildren ? (
+            <Icon
+              icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
+              size={IconSize.STANDARD}
+            />
+          ) : (
+            <Icon icon={IconNames.DOCUMENT} size={IconSize.STANDARD} />
+          )}
+          <Icon icon={IconNames.STAR} size={12} />
+          <span
+            onClick={handleToggleSelection}
+            style={{
+              cursor: "pointer",
+              flexGrow: "1"
+            }}
+          >
+            {displayLabel}
+          </span>
+        </div>
+      )
+
+      return (
+        <React.Fragment key={task.uuid}>
+          <td className="taskName" onClick={e => e.stopPropagation()}>
+            {indentedLabel}
+          </td>
+        </React.Fragment>
+      )
+    },
+    [
+      expandedItems,
+      selectedItems,
+      handleAddItem,
+      handleRemoveItem,
+      getChildren,
+      handleExpand
+    ]
+  )
 
   useEffect(() => {
     if (!items?.length) {
@@ -109,123 +236,15 @@ const HierarchicalOverlayTable = ({
       }
     })
     setExpandedItems(newExpandedItems)
-  }, [items, setTaskList, setExpandedItems])
+  }, [items])
 
   useEffect(() => {
     setRootTasks(taskList.filter(task => !task.parentTask))
-  }, [taskList, setRootTasks])
+  }, [taskList])
 
   useEffect(() => {
     setFlattenedItems(buildFlattenedList(rootTasks))
-  }, [rootTasks, selectedItems, expandedItems, setFlattenedItems])
-
-  const getChildren = parentTask => {
-    return (
-      taskList?.filter(task => task?.parentTask?.uuid === parentTask.uuid) || []
-    )
-  }
-
-  const buildFlattenedList = (tasks, level = 0) => {
-    return tasks.flatMap(task => {
-      const isTaskSelected = selectedItems?.some(
-        item => item.uuid === task.uuid
-      )
-      const isDescendantTaskSelected = selectedItems?.some(item =>
-        task.descendantTasks?.some(child => child.uuid === item.uuid)
-      )
-      const isAscendantTaskSelected = selectedItems
-        ?.filter(item => item.uuid !== task.uuid)
-        ?.some(item =>
-          task.ascendantTasks?.some(child => child.uuid === item.uuid)
-        )
-      const isCollapsed = !expandedItems.has(task.uuid)
-      const isDescendantTaskSelectedAndCollapsed =
-        isDescendantTaskSelected && isCollapsed ? null : false
-      const isSelected =
-        isTaskSelected || isAscendantTaskSelected
-          ? true
-          : isDescendantTaskSelectedAndCollapsed
-      const disabled = isAscendantTaskSelected
-      const taskWithLevel = { ...task, level, isSelected, disabled }
-      const children = expandedItems.has(task.uuid) ? getChildren(task) : []
-      return [taskWithLevel, ...buildFlattenedList(children, level + 1)]
-    })
-  }
-
-  const enhancedRenderRow = task => {
-    const hasChildren = getChildren(task).length > 0
-    const isExpanded = expandedItems.has(task.uuid)
-    const isSelected = selectedItems?.some(item => item.uuid === task.uuid)
-
-    const handleToggleSelection = e => {
-      e.stopPropagation()
-      if (isSelected) {
-        handleRemoveItem(task)
-      } else {
-        handleAddItem(task)
-      }
-    }
-
-    const displayLabel = task.longName
-      ? `${task.shortName}: ${task.longName}`
-      : task.shortName
-    const padding = Math.min(task.level, 3) * 20 + (hasChildren ? 0 : 26)
-    const indentedLabel = (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          paddingLeft: padding,
-          gap: 10,
-          cursor: "auto"
-        }}
-      >
-        {hasChildren && (
-          <span
-            onClick={e => {
-              e.stopPropagation()
-              handleExpand(task)
-            }}
-            style={{ cursor: "pointer", pointerEvents: "all" }}
-          >
-            <Icon
-              icon={
-                isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
-              }
-              size={IconSize.STANDARD}
-            />
-          </span>
-        )}
-        {hasChildren ? (
-          <Icon
-            icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
-            size={IconSize.STANDARD}
-          />
-        ) : (
-          <Icon icon={IconNames.DOCUMENT} size={IconSize.STANDARD} />
-        )}
-        <Icon icon={IconNames.STAR} size={12} />
-        <span
-          onClick={handleToggleSelection}
-          style={{
-            cursor: "pointer",
-            flexGrow: "1"
-          }}
-        >
-          {displayLabel}
-        </span>
-      </div>
-    )
-
-    return (
-      <React.Fragment key={task.uuid}>
-        <td className="taskName" onClick={e => e.stopPropagation()}>
-          {indentedLabel}
-        </td>
-      </React.Fragment>
-    )
-  }
+  }, [rootTasks, buildFlattenedList])
 
   return (
     <AdvancedMultiSelectOverlayTable
