@@ -21,15 +21,27 @@ const taskFields = `
   ascendantTasks {
     uuid
     shortName
+    longName
     parentTask {
       uuid
     }
     childrenTasks {
       uuid
     }
+    descendantTasks {
+      uuid
+    }
+    ascendantTasks {
+      uuid
+      shortName
+      parentTask {
+        uuid
+      }
+    }
   }
   descendantTasks {
     uuid
+    shortName
   }
 `
 
@@ -56,34 +68,9 @@ const HierarchicalOverlayTable = ({
   ...otherProps
 }: HierarchicalOverlayTableProps) => {
   const [expandedItems, setExpandedItems] = useState(new Set<string>())
-  const [childrenMap, setChildrenMap] = useState(new Map<string, any[]>())
+  const [taskList, setTaskList] = useState<any[]>([])
   const [rootTasks, setRootTasks] = useState<any[]>([])
-
-  const fetchChildren = async task => {
-    const query = gql`
-      query ($query: TaskSearchQueryInput) {
-        taskList(query: $query) {
-          list {
-            uuid
-            shortName
-            longName
-            ascendantTasks {
-              ${taskFields}
-            }
-            childrenTasks {
-              uuid
-            }
-            descendantTasks {
-              uuid
-            }
-          }
-        }
-      }
-    `
-    const queryVars = { parentTaskUuid: task.uuid }
-    const data = await API.query(query, { query: queryVars })
-    return data.taskList.list
-  }
+  const [flattenedItems, setFlattenedItems] = useState([])
 
   const handleExpand = task => {
     if (expandedItems.has(task.uuid)) {
@@ -92,51 +79,51 @@ const HierarchicalOverlayTable = ({
         newSet.delete(task.uuid)
         return newSet
       })
-    } else if (!childrenMap.has(task.uuid)) {
-      fetchChildren(task).then(children => {
-        setChildrenMap(prev => new Map(prev).set(task.uuid, children))
-        setExpandedItems(prev => new Set([...prev, task.uuid]))
-      })
     } else {
       setExpandedItems(prev => new Set([...prev, task.uuid]))
     }
   }
 
   useEffect(() => {
-    if (!items) {
+    if (!items?.length) {
+      setTaskList([])
       return
     }
 
-    const topLevelItems = items.filter(task => !task.parentTask)
+    const neededTasks = [...items]
     const nonTopLevelItems = items.filter(task => task.parentTask)
     nonTopLevelItems.forEach(task => {
-      // if the top-level of each non-top-level tasks are not in the topLevelItems,
-      // it means they were queried through a search,
-      // so we need to get them, add them to the topLevelItems,
-      // and expand all the tasks leading up to them
-      const topLevelItem = task.ascendantTasks.find(
-        ascendant => ascendant.parentTask === null
+      const missingTasks = task.ascendantTasks.filter(
+        ascendant => !neededTasks.some(t => t.uuid === ascendant.uuid)
       )
-      if (!topLevelItems.some(item => item.uuid === topLevelItem.uuid)) {
-        topLevelItems.push(topLevelItem)
-        task.ascendantTasks.forEach(ascendant => {
-          const isTopLevel = ascendant.parentTask === null
-          // adding the top-level task to the topLevelItems
-          if (
-            isTopLevel &&
-            !topLevelItems.some(item => item.uuid === ascendant.uuid)
-          ) {
-            topLevelItems.push(ascendant)
-          }
-          // expanding the ascendant task leading up to the task
-          if (!expandedItems.has(ascendant.uuid)) {
-            handleExpand(ascendant)
-          }
-        })
+      neededTasks.push(...missingTasks)
+    })
+
+    setTaskList(neededTasks)
+    const newExpandedItems = new Set<string>()
+    neededTasks.forEach(task => {
+      if (!items.some(item => item.uuid === task.uuid)) {
+        if (!newExpandedItems.has(task.uuid)) {
+          newExpandedItems.add(task.uuid)
+        }
       }
     })
-    setRootTasks(topLevelItems)
-  }, [items])
+    setExpandedItems(newExpandedItems)
+  }, [items, setTaskList, setExpandedItems])
+
+  useEffect(() => {
+    setRootTasks(taskList.filter(task => !task.parentTask))
+  }, [taskList, setRootTasks])
+
+  useEffect(() => {
+    setFlattenedItems(buildFlattenedList(rootTasks))
+  }, [rootTasks, selectedItems, expandedItems, setFlattenedItems])
+
+  const getChildren = parentTask => {
+    return (
+      taskList?.filter(task => task?.parentTask?.uuid === parentTask.uuid) || []
+    )
+  }
 
   const buildFlattenedList = (tasks, level = 0) => {
     return tasks.flatMap(task => {
@@ -160,17 +147,13 @@ const HierarchicalOverlayTable = ({
           : isDescendantTaskSelectedAndCollapsed
       const disabled = isAscendantTaskSelected
       const taskWithLevel = { ...task, level, isSelected, disabled }
-      const children = expandedItems.has(task.uuid)
-        ? childrenMap.get(task.uuid) || []
-        : []
+      const children = expandedItems.has(task.uuid) ? getChildren(task) : []
       return [taskWithLevel, ...buildFlattenedList(children, level + 1)]
     })
   }
 
-  const flattenedItems = buildFlattenedList(rootTasks)
-
   const enhancedRenderRow = task => {
-    const hasChildren = task.childrenTasks?.length > 0
+    const hasChildren = getChildren(task).length > 0
     const isExpanded = expandedItems.has(task.uuid)
     const isSelected = selectedItems?.some(item => item.uuid === task.uuid)
 
