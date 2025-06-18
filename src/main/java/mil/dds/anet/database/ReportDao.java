@@ -275,9 +275,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public int updateToDraftState(Report r) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createUpdate(
-          "/* UpdateFutureEngagementToDraft */ UPDATE reports SET state = :state , \"approvalStepUuid\" = NULL "
-              + "WHERE uuid = :reportUuid")
+      return handle
+          .createUpdate("/* UpdateFutureEngagementToDraft */ UPDATE reports SET state = :state, "
+              + "\"releasedAt\" = NULL, \"approvalStepUuid\" = NULL WHERE uuid = :reportUuid")
           .bind("state", DaoUtils.getEnumId(ReportState.DRAFT)).bind("reportUuid", r.getUuid())
           .execute();
     } finally {
@@ -947,6 +947,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       r.setApprovalStep(steps.get(0));
       r.setState(ReportState.PENDING_APPROVAL);
     }
+    // Clear release date
+    r.setReleasedAt(null);
     final int numRows = update(r, user);
     if (numRows != 0 && !Utils.isEmptyOrNull(steps)) {
       sendApprovalNeededEmail(r, steps.get(0));
@@ -969,9 +971,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     // Update the report
     final ApprovalStep nextStep = getNextStep(r, step);
     r.setApprovalStepUuid(DaoUtils.getUuid(nextStep));
+    // Clear release date
+    r.setReleasedAt(null);
     if (nextStep == null) {
       if (r.getCancelledReason() != null) {
-        // Done with cancel, move to CANCELLED and set releasedAt
+        // Done with cancel, move to CANCELLED and set release date
         r.setState(ReportState.CANCELLED);
         r.setReleasedAt(Instant.now());
       } else {
@@ -1024,7 +1028,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     }
     engine().getReportActionDao().insert(action);
 
-    // Move the report to PUBLISHED state
+    // Move the report to PUBLISHED state and set release date
     r.setState(ReportState.PUBLISHED);
     r.setReleasedAt(Instant.now());
     final Optional<ReportPerson> firstAuthor =

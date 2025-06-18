@@ -162,6 +162,13 @@ public class ReportResource {
     if (r.getState() != ReportState.DRAFT && !AuthUtils.isAdmin(author)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only create Draft reports");
     }
+    if (r.getState() != ReportState.PUBLISHED && r.getState() != ReportState.CANCELLED) {
+      // Clear release date
+      r.setReleasedAt(null);
+    } else if (r.getReleasedAt() == null) {
+      // Set release date
+      r.setReleasedAt(Instant.now());
+    } // else keep the release date passed in by the admin
 
     ResourceUtils.assertAllowedClassification(r.getClassification());
 
@@ -258,9 +265,18 @@ public class ReportResource {
     // State should not change when report is being edited by an approver
     // State should change to draft when the report is being edited by one of the existing authors,
     // except when the editor is admin and is editing their own published report
-    if (isAuthor && !(AuthUtils.isAdmin(editor) && r.getState() == ReportState.PUBLISHED)) {
-      r.setState(ReportState.DRAFT);
-      r.setApprovalStep(null);
+    if (isAuthor) {
+      if (AuthUtils.isAdmin(editor)
+          && (r.getState() == ReportState.PUBLISHED || r.getState() == ReportState.CANCELLED)) {
+        // Keep the existing release date
+        r.setReleasedAt(existing.getReleasedAt());
+      } else {
+        // Set back to draft
+        r.setState(ReportState.DRAFT);
+        r.setApprovalStep(null);
+        // Clear release date
+        r.setReleasedAt(null);
+      }
     }
 
     // Update the advisor org
@@ -538,6 +554,8 @@ public class ReportResource {
     // Update the report
     r.setApprovalStep(null);
     r.setState(ReportState.REJECTED);
+    // Clear release date
+    r.setReleasedAt(null);
     final int numRows = reportDao.update(r, approver);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,

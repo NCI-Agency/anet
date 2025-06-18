@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -103,7 +104,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
           + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText"
-          + " createdAt updatedAt customFields classification";
+          + " createdAt updatedAt releasedAt customFields classification";
   private static final String ROLLUP_FIELDS =
       String.format("{ org { %1$s } published cancelled }", _ORGANIZATION_FIELDS);
   private static final String _TASK_FIELDS = "uuid shortName longName category";
@@ -1760,6 +1761,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Report returned2 = withCredentials(elizabeth.getDomainUsername(),
         t -> queryExecutor.report(FIELDS, saved.getUuid()));
     assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
+    assertThat(returned2.getReleasedAt()).isNotNull();
 
     // The author should not be able to submit the report now
     try {
@@ -2146,11 +2148,15 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("Retrieve the advisor reports insight")
         .withLocation(getLocationInput(getLocation(author, "General Hospital")))
         .withEngagementDate(engagementDate)
+        .withReleasedAt(Instant.now().truncatedTo(ChronoUnit.MILLIS))
         .withReportPeople(getReportPeopleInput(List.of(reportPerson))).build();
     final Report created =
         withCredentials(adminUser, t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
+    // Check that report is published and release date is set
+    assertThat(created.getState()).isEqualTo(ReportState.PUBLISHED);
+    assertThat(created.getReleasedAt()).isEqualTo(rInput.getReleasedAt());
   }
 
   private Location getLocation(Person user, String name) {
@@ -2383,7 +2389,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withIntent("Testing unpublishing").withKeyOutcomes("Unpublishing works")
         .withNextSteps("Approve before unpublishing")
         .withReportText("<p>Trying to get this report unpublished</p>")
-        .withLocation(getLocationInput(loc)).withEngagementDate(engagementDate).build();
+        .withLocation(getLocationInput(loc)).withEngagementDate(engagementDate)
+        .withReleasedAt(Instant.now()).build();
 
     // Reference task EF7
     final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("EF7").build();
@@ -2403,6 +2410,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
+    // Check that release date is cleared
+    assertThat(created.getReleasedAt()).isNull();
 
     // Submit the report
     int numRows = withCredentials(author.getDomainUsername(),
@@ -2422,6 +2431,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approved).isNotNull();
     assertThat(approved.getState()).isEqualTo(ReportState.APPROVED);
+    // Check that release date is still cleared
+    assertThat(created.getReleasedAt()).isNull();
 
     // Try to unpublish report that is not published
     try {
@@ -2438,7 +2449,16 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Report published = withCredentials(author.getDomainUsername(),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(published).isNotNull();
+    // Check that report is published and release date is set
     assertThat(published.getState()).isEqualTo(ReportState.PUBLISHED);
+    assertThat(published.getReleasedAt()).isNotNull();
+
+    // Edit a published report as admin
+    final Report updatedReport = withCredentials(adminUser,
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(published), false));
+    // Check that report is still published and release date is unchanged
+    assertThat(updatedReport.getState()).isEqualTo(published.getState());
+    assertThat(updatedReport.getReleasedAt()).isEqualTo(published.getReleasedAt());
 
     // Try to unpublish published report by regular user
     try {
@@ -2465,6 +2485,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(unpublished).isNotNull();
     assertThat(unpublished.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(unpublished.getWorkflow()).hasSize(published.getWorkflow().size() + 1);
+    // Check that release date is cleared
+    assertThat(unpublished.getReleasedAt()).isNull();
 
     // Clean up
     final Integer nrDeleted = withCredentials(author.getDomainUsername(),

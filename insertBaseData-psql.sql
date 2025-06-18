@@ -1149,11 +1149,11 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd')
   AND r.state != 0;
 
--- Insert report with created at and updated at date for two days before current timestamp
-INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
+-- Insert report with created at, updated at and released at date for two days before current timestamp
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "releasedAt", "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('8655bf58-4452-4ac0-9221-70b035d8eb7e', CURRENT_TIMESTAMP + INTERVAL '-2 day', CURRENT_TIMESTAMP + INTERVAL '-2 day', (SELECT uuid from locations where name='General Hospital'), 'Discuss further improvements in Annual Budgeting process',
   'Today I met with Edwin the dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
-  'Meet with the dude again next week', 2, '2020-05-25', 0,
+  'Meet with the dude again next week', 2, CURRENT_TIMESTAMP + INTERVAL '-2 day', '2020-05-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, FALSE, TRUE),
