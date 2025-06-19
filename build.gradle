@@ -143,7 +143,7 @@ dependencies {
 	// For inferring MIME types of attachments
 	implementation 'org.apache.tika:tika-core:3.1.0'
         // For sanitizing SVG uploads
-        implementation 'io.github.borewit:svg-sanitizer:0.2.1'
+        implementation 'io.github.borewit:svg-sanitizer:0.3.1'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.19.1'
