@@ -140,7 +140,7 @@ describe("Merge locations page", () => {
     expect(await modalDialog.isExisting()).to.be.true
     await $(".btn-danger").click()
   })
-  it("Should be able to select to incompatible locations to merge", async() => {
+  it("Should display fields values of the left location", async() => {
     await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
     await (await MergeLocations.getTitle()).waitForDisplayed()
@@ -165,7 +165,24 @@ describe("Merge locations page", () => {
     expect(
       await (await MergeLocations.getColumnContent("left", "Type")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.type)
+  })
 
+  it("Should not allow to select the same location", async() => {
+    await (
+      await MergeLocations.getRightLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.leftCountry.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.leftCountry.fullName
+    )
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergeLocations.getFirstItemRadioButtonFromAdvancedSelect()
+      ).isExisting()
+    ).to.be.false
+  })
+
+  it("Should be able to select to incompatible locations to merge", async() => {
     await (
       await MergeLocations.getRightLocationField()
     ).setValue(EXAMPLE_LOCATIONS.right.search)
