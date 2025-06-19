@@ -37,7 +37,7 @@ public class AuthorizationGroupResource {
   public AuthorizationGroup getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final AuthorizationGroup t = dao.getByUuid(uuid);
     if (t == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Authorization group not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found");
     }
     return t;
   }
@@ -55,8 +55,7 @@ public class AuthorizationGroupResource {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     if (a.getName() == null || a.getName().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Authorization group name must not be empty");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community name must not be empty");
     }
     a = dao.insert(a);
 
@@ -74,7 +73,7 @@ public class AuthorizationGroupResource {
     final List<Position> existingAdministrativePositions =
         dao.getAdministrativePositionsForAuthorizationGroup(
             ApplicationContextProvider.getEngine().getContext(), DaoUtils.getUuid(a)).join();
-    // User has to be admin or must hold an administrative position for the authorizationGroup
+    // User has to be admin or must hold an administrative position for the community
     if (!AuthUtils.isAdmin(user)) {
       final Position userPosition = DaoUtils.getPosition(user);
       final boolean canUpdate = existingAdministrativePositions.stream()
@@ -82,12 +81,15 @@ public class AuthorizationGroupResource {
       if (!canUpdate) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
       }
+      // Load the existing community, so we can keep the original the value of
+      // forSensitiveInformation, as non-admins are not allowed to change it!
+      final AuthorizationGroup existing = dao.getByUuid(a.getUuid());
+      a.setForSensitiveInformation(existing.getForSensitiveInformation());
     }
 
     final int numRows = dao.update(a);
     if (numRows == 0) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Couldn't process authorization group update");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process community update");
     }
 
     // Update administrative positions

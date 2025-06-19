@@ -2,7 +2,7 @@ import { expect } from "chai"
 import { v4 as uuidv4 } from "uuid"
 import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
 
-const AUTHORIZATION_GROUP_NAME_PREFIX = "test authorization group"
+const AUTHORIZATION_GROUP_NAME_PREFIX = "test community"
 const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"
 let authorizationGroupName
 let authorizationGroupDescription
@@ -22,14 +22,14 @@ const POSITION2_COMPLETE = "EF 2.1 Advisor B"
 
 const SHORT_WAIT_MS = 200
 
-describe("When creating/editing an authorization group", () => {
-  describe("When creating an authorization group as admin", () => {
-    it("Should navigate to the create authorization group page", async() => {
+describe("When creating/editing a community", () => {
+  describe("When creating a community as admin", () => {
+    it("Should navigate to the create community page", async() => {
       await CreateAuthorizationGroup.open()
       await (await CreateAuthorizationGroup.getForm()).waitForExist()
       await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
     })
-    it("Should save an authorization group with only a name and description", async() => {
+    it("Should save a community with only a name and description", async() => {
       authorizationGroupName = `${AUTHORIZATION_GROUP_NAME_PREFIX} ${uuidv4()}`
       authorizationGroupDescription = `${AUTHORIZATION_GROUP_DESCRIPTION_PREFIX} ${authorizationGroupName}`
       await (await CreateAuthorizationGroup.getName()).waitForDisplayed()
@@ -71,9 +71,34 @@ describe("When creating/editing an authorization group", () => {
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
-      expect(alertMessage).to.equal("Authorization Group saved")
+      expect(alertMessage).to.equal("Community saved")
     })
-    it("Should save an authorization group with some members", async() => {
+    it("Should save the community with distributionList and forSensitiveInformation", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getDistributionList()).click()
+      await (
+        await CreateAuthorizationGroup.getForSensitiveInformation()
+      ).click()
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Community saved")
+      expect(
+        await (await CreateAuthorizationGroup.getDistributionList()).getText()
+      ).to.equal("Yes")
+      expect(
+        await (
+          await CreateAuthorizationGroup.getForSensitiveInformation()
+        ).getText()
+      ).to.equal("Yes")
+    })
+    it("Should save the community with some members", async() => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -185,7 +210,7 @@ describe("When creating/editing an authorization group", () => {
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
-      expect(alertMessage).to.equal("Authorization Group saved")
+      expect(alertMessage).to.equal("Community saved")
       /* eslint-disable no-unused-expressions */
       expect(
         await (
@@ -210,7 +235,7 @@ describe("When creating/editing an authorization group", () => {
       ).to.be.true
       /* eslint-enable no-unused-expressions */
     })
-    it("Should save an authorization group with assigned superusers", async() => {
+    it("Should save the community with assigned superusers", async() => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -284,7 +309,7 @@ describe("When creating/editing an authorization group", () => {
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
-      expect(alertMessage).to.equal("Authorization Group saved")
+      expect(alertMessage).to.equal("Community saved")
       /* eslint-disable no-unused-expressions */
       expect(
         await (
@@ -307,11 +332,9 @@ describe("When creating/editing an authorization group", () => {
     })
   })
 
-  describe("When editing an authorization group as assigned superuser", () => {
-    it("Should navigate to the my authorization groups page", async() => {
-      await CreateAuthorizationGroup.openAsSuperuser(
-        "/authorizationGroups/mine"
-      )
+  describe("When editing a community as assigned superuser", () => {
+    it("Should navigate to the my communities page", async() => {
+      await CreateAuthorizationGroup.openAsSuperuser("/communities/mine")
       await (
         await CreateAuthorizationGroup.getMyAuthorizationGroups()
       ).waitForExist()
@@ -324,7 +347,7 @@ describe("When creating/editing an authorization group", () => {
         )
       ).click()
     })
-    it("Should be able to save the authorization group with a changed name and description", async() => {
+    it("Should be able to save the community with a changed name and description", async() => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -339,15 +362,45 @@ describe("When creating/editing an authorization group", () => {
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
-      expect(alertMessage).to.equal("Authorization Group saved")
+      expect(alertMessage).to.equal("Community saved")
       expect(
         await (await CreateAuthorizationGroup.getNameDisplay()).getText()
-      ).to.equal(`Authorization Group ${authorizationGroupName}-edited`)
+      ).to.equal(`Community ${authorizationGroupName}-edited`)
       expect(
         await (await CreateAuthorizationGroup.getDescription()).getText()
       ).to.equal(`${authorizationGroupDescription}-edited`)
     })
-    it("Should not be able to change the authorization group's assigned superusers", async() => {
+    it("Should be able to change the community's distributionList", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getDistributionList()).click()
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Community saved")
+      expect(
+        await (await CreateAuthorizationGroup.getDistributionList()).getText()
+      ).to.equal("No")
+    })
+    it("Should not be able to change the community's forSensitiveInformation", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getForSensitiveInformation()
+        ).isClickable()
+      ).to.be.false
+    })
+    it("Should not be able to change the community's assigned superusers", async() => {
       // Should not be able to add administrative positions
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -365,13 +418,7 @@ describe("When creating/editing an authorization group", () => {
         ).isExisting()
       ).to.be.false
     })
-    it("Should be able to save the authorization group with changed members", async() => {
-      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
-      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
-      await (await CreateAuthorizationGroup.getEditButton()).click()
-      await (await CreateAuthorizationGroup.getForm()).waitForExist()
-      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
-
+    it("Should be able to save the community with changed members", async() => {
       // Add a position
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
@@ -418,7 +465,7 @@ describe("When creating/editing an authorization group", () => {
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
-      expect(alertMessage).to.equal("Authorization Group saved")
+      expect(alertMessage).to.equal("Community saved")
       /* eslint-disable no-unused-expressions */
       expect(
         await (

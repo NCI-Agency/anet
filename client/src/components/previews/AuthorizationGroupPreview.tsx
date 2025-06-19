@@ -8,6 +8,7 @@ import PositionTable from "components/PositionTable"
 import { AuthorizationGroup } from "models"
 import React from "react"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_EMAIL_ADDRESSES = `
   emailAddresses {
@@ -22,6 +23,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      distributionList
+      forSensitiveInformation
       administrativePositions {
         uuid
         name
@@ -106,7 +109,7 @@ const AuthorizationGroupPreview = ({
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Authorization Group ${authorizationGroup.name}`}</h4>
+        <h4 className="ellipsized-text">{`Community ${authorizationGroup.name}`}</h4>
       </div>
       <div className="preview-section">
         <DictionaryField
@@ -121,6 +124,20 @@ const AuthorizationGroupPreview = ({
           dictProps={Settings.fields.authorizationGroup.status}
           value={AuthorizationGroup.humanNameOfStatus(
             authorizationGroup.status
+          )}
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.authorizationGroup.distributionList}
+          value={utils.formatBoolean(authorizationGroup.distributionList)}
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.authorizationGroup.forSensitiveInformation}
+          value={utils.formatBoolean(
+            authorizationGroup.forSensitiveInformation
           )}
         />
       </div>

@@ -1,5 +1,5 @@
 import Model from "components/Model"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -11,7 +11,7 @@ export default class AuthorizationGroup extends Model {
 
   static displayName() {
     // TODO: Get the display name from the dictionary
-    return "Authorization Group"
+    return "Community"
   }
 
   static schema = {}
@@ -23,6 +23,8 @@ export default class AuthorizationGroup extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
+    distributionList: yup.boolean().required().default(false),
+    forSensitiveInformation: yup.boolean().required().default(false),
     administrativePositions: yup.array().nullable().default([]),
     authorizationGroupRelatedObjects: yup.array().nullable().default([])
   })
@@ -37,12 +39,25 @@ export default class AuthorizationGroup extends Model {
     super(Model.fillObject(props, AuthorizationGroup.yupSchema))
   }
 
+  static pathFor(instance, query) {
+    const uuid = instance.uuid
+    let url = ["", "communities", uuid].join("/")
+    url += utils.formatQueryString(query)
+    return url
+  }
+
+  static pathForNew(query) {
+    let url = ["", "communities", "new"].join("/")
+    url += utils.formatQueryString(query)
+    return url
+  }
+
   humanNameOfStatus() {
     return AuthorizationGroup.humanNameOfStatus(this.status)
   }
 
   iconUrl() {
-    return AUTHORIZATION_GROUPS_ICON
+    return COMMUNITIES_ICON
   }
 
   toString() {

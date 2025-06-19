@@ -1159,13 +1159,13 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor",
   ((SELECT uuid FROM people where "domainUsername" = 'jack'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, TRUE, FALSE);
 
 -- Authorization groups
-INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt", "updatedAt") VALUES
-  ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1', 'The complete EF 1.1 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1', 'The complete EF 2.1 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2', 'The complete EF 2.2 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ab1a7d99-4529-44b1-a118-bdee3ca8296b', 'EF 5', 'The complete EF 5 organization', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('89d8d60a-f3ff-4fa6-8246-805fd74d14fd', 'Unlimited exporters', 'Unlimited exporters', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "authorizationGroups" (uuid, name, description, status, "distributionList", "forSensitiveInformation", "createdAt", "updatedAt") VALUES
+  ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1', 'The complete EF 1.1 organisation', 0, TRUE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1', 'The complete EF 2.1 organisation', 0, FALSE, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2', 'The complete EF 2.2 organisation', 0, FALSE, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ab1a7d99-4529-44b1-a118-bdee3ca8296b', 'EF 5', 'The complete EF 5 organization', 0, TRUE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('89d8d60a-f3ff-4fa6-8246-805fd74d14fd', 'Unlimited exporters', 'Unlimited exporters', 0, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Authorization group members
 INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")

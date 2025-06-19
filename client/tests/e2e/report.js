@@ -183,7 +183,7 @@ test.serial("Draft and submit a report", async t => {
   const $addAuthGroupShortcutButtons = await $$(
     "#authorizationGroups-shortcut-list button"
   )
-  // Add all recent authorization groups
+  // Add all recent communities
   const nrAuthGroups = $addAuthGroupShortcutButtons.length
   for (let i = 0; i < nrAuthGroups; i++) {
     await (await $("#authorizationGroups-shortcut-list button")).click()
