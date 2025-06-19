@@ -142,12 +142,13 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           .bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason())).execute();
 
       // Write sensitive information (if allowed)
-      ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
+      final ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
       if (rsi != null) {
         rsi.setText(Utils.sanitizeHtml(rsi.getText()));
       }
-      rsi = engine().getReportSensitiveInformationDao().insert(rsi, user, r);
-      r.setReportSensitiveInformation(rsi);
+      final ReportSensitiveInformation newRsi =
+          engine().getReportSensitiveInformationDao().insert(rsi, user, r);
+      r.setReportSensitiveInformation(newRsi);
 
       final ReportBatch rb = handle.attach(ReportBatch.class);
       if (r.getReportPeople() != null) {
@@ -238,11 +239,16 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final Handle handle = getDbHandle();
     try {
       // Write sensitive information (if allowed)
-      ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
+      final ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
       if (rsi != null) {
         rsi.setText(Utils.sanitizeHtml(rsi.getText()));
       }
-      engine().getReportSensitiveInformationDao().insertOrUpdate(rsi, user, r);
+      final Object o = engine().getReportSensitiveInformationDao().insertOrUpdate(rsi, user, r);
+      if (o instanceof ReportSensitiveInformation newRsi) {
+        r.setReportSensitiveInformation(newRsi);
+      } else {
+        r.setReportSensitiveInformation(rsi);
+      }
 
       DaoUtils.setUpdateFields(r);
 
