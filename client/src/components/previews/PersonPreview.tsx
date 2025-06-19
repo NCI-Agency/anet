@@ -13,6 +13,7 @@ import {
 } from "components/Model"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
+import UserTable from "components/UserTable"
 import { Person, Position } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
@@ -31,7 +32,10 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       phoneNumber
       user
-      domainUsername
+      users {
+        uuid
+        domainUsername
+      }
       biography
       obsoleteCountry
       country {
@@ -159,8 +163,13 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
                 />
                 <DictionaryField
                   wrappedComponent={PreviewField}
-                  dictProps={Settings.fields.person.domainUsername}
-                  value={person.domainUsername}
+                  dictProps={Settings.fields.person.users}
+                  value={
+                    <UserTable
+                      label={Settings.fields.person.users.label}
+                      users={person.users}
+                    />
+                  }
                 />
               </>
             )}

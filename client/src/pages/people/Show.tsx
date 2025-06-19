@@ -41,6 +41,7 @@ import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
+import UserTable from "components/UserTable"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
@@ -76,7 +77,10 @@ const GQL_GET_PERSON = gql`
       updatedAt
       phoneNumber
       user
-      domainUsername
+      users {
+        uuid
+        domainUsername
+      }
       biography
       obsoleteCountry
       country {
@@ -191,6 +195,12 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   }, [data])
   if (done) {
     return result
+  }
+  if (data && data.person === null) {
+    // User is not allowed to fetch this person;
+    // could happen if someone (inadvertently) clears out their own domainUsername
+    loadAppData()
+    return null
   }
   if (data) {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
@@ -481,7 +491,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       user: {
         accessCond: isAdmin
       },
-      domainUsername: {
+      users: {
         accessCond: isAdmin
       }
     }
@@ -544,6 +554,12 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       ),
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
+      users: (
+        <UserTable
+          label={Settings.fields.person.users.label}
+          users={person.users}
+        />
+      ),
       phoneNumber: person.phoneNumber || (
         <em>
           No {Settings.fields.person.phoneNumber.label.toLowerCase()} available

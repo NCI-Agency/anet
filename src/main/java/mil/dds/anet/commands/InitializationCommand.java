@@ -9,6 +9,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -114,13 +115,18 @@ public class InitializationCommand {
     adminPos.setRole(Position.PositionRole.MEMBER);
     adminPos = engine.getPositionDao().insert(adminPos);
 
-    // Create admin user
+    // Create admin person
     Person admin = new Person();
     admin.setName(adminFullName);
-    admin.setDomainUsername(adminDomainUsername);
     admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
+
+    // Create admin user
+    User user = new User();
+    user.setDomainUsername(adminDomainUsername);
+    user.setPersonUuid(admin.getUuid());
+    engine.getUserDao().insert(user);
 
     // Create default approval workflow
     final ApprovalStep defaultStep = new ApprovalStep();

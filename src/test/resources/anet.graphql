@@ -924,7 +924,6 @@ type Person {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
@@ -941,6 +940,7 @@ type Person {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [User]
   uuid: String
 }
 
@@ -952,7 +952,6 @@ input PersonInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
-  domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   entityAvatar: EntityAvatarInput
@@ -967,6 +966,7 @@ input PersonInput {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [UserInput]
   uuid: String
 }
 
@@ -1304,7 +1304,6 @@ type ReportPerson {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
@@ -1323,6 +1322,7 @@ type ReportPerson {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [User]
   uuid: String
 }
 
@@ -1336,7 +1336,6 @@ input ReportPersonInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
-  domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   entityAvatar: EntityAvatarInput
@@ -1353,6 +1352,7 @@ input ReportPersonInput {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [UserInput]
   uuid: String
 }
 
@@ -1667,6 +1667,12 @@ enum TokenScope {
 }
 
 """"""
+type User {
+  domainUsername: String
+  uuid: String
+}
+
+""""""
 type UserActivity {
   count: Long!
   organization: Organization
@@ -1696,4 +1702,10 @@ input UserActivitySearchQueryInput {
 enum UserActivitySearchSortBy {
   COUNT
   NONE
+}
+
+""""""
+input UserInput {
+  domainUsername: String
+  uuid: String
 }

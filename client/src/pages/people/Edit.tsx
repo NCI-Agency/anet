@@ -37,7 +37,10 @@ const GQL_GET_PERSON = gql`
       phoneNumber
       pendingVerification
       user
-      domainUsername
+      users {
+        uuid
+        domainUsername
+      }
       biography
       obsoleteCountry
       country {

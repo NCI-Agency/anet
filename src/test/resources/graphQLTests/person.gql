@@ -19,7 +19,11 @@ person(uuid:"${personUuid}") {
     address
   }
   phoneNumber
-  domainUsername
+  user
+  users {
+    uuid
+    domainUsername
+  }
   biography
   obsoleteCountry
   country {

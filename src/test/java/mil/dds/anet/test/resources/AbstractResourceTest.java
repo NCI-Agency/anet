@@ -51,6 +51,7 @@ import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -96,7 +97,7 @@ public abstract class AbstractResourceTest {
   protected Person admin;
 
   private static final String PERSON_FIELDS =
-      "{ uuid name domainUsername user rank status phoneNumber biography"
+      "{ uuid name user users { uuid domainUsername } rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type superuserType status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } "
           + " emailAddresses { network address } }";
@@ -105,7 +106,7 @@ public abstract class AbstractResourceTest {
   void setUp() {
     // Update full-text index
     refreshMaterializedViews();
-    admin = findOrPutPersonInDb(Person.builder().withDomainUsername(adminUser).build());
+    admin = findOrPutPersonInDb(adminUser, Person.builder().build());
   }
 
   private void refreshMaterializedViews() {
@@ -121,13 +122,17 @@ public abstract class AbstractResourceTest {
     }
   }
 
+  public Person findOrPutPersonInDb(Person stub) {
+    return findOrPutPersonInDb(null, stub);
+  }
+
   /*
    * Finds the specified person in the database. If missing, creates them.
    */
-  public Person findOrPutPersonInDb(Person stub) {
+  public Person findOrPutPersonInDb(String domainUsername, Person stub) {
     try {
-      if (stub.getDomainUsername() != null) {
-        final Person user = findPerson(stub);
+      if (domainUsername != null) {
+        final Person user = findPerson(domainUsername);
         if (user != null) {
           return user;
         }
@@ -152,56 +157,55 @@ public abstract class AbstractResourceTest {
     }
   }
 
-  public Person findPerson(Person stub) {
-    return withCredentials(stub.getDomainUsername(), t -> queryExecutor.me(PERSON_FIELDS));
+  public Person findPerson(String domainUsername) {
+    return withCredentials(domainUsername, t -> queryExecutor.me(PERSON_FIELDS));
   }
 
   // Location in the test database
   public Location getGeneralHospital() {
-    return withCredentials(admin.getDomainUsername(),
+    return withCredentials(getDomainUsername(admin),
         t -> queryExecutor.location("{ uuid }", "0855fb0a-995e-4a79-a132-4024ee2983ff"));
   }
 
   // Advisors in the test database
   public Person getSuperuser() {
-    final Person rebecca =
-        findOrPutPersonInDb(Person.builder().withDomainUsername("rebecca").build());
+    final Person rebecca = findOrPutPersonInDb("rebecca", Person.builder().build());
     assertThat(rebecca).isNotNull();
     return rebecca;
   }
 
   public Person getRegularUser() {
-    final Person erin = findOrPutPersonInDb(Person.builder().withDomainUsername("erin").build());
+    final Person erin = findOrPutPersonInDb("erin", Person.builder().build());
     assertThat(erin).isNotNull();
     return erin;
   }
 
   public Person getAndrewAnderson() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("andrew").build());
+    return findOrPutPersonInDb("andrew", Person.builder().build());
   }
 
   public Person getBobBobtown() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("bob").build());
+    return findOrPutPersonInDb("bob", Person.builder().build());
   }
 
   public Person getElizabethElizawell() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("elizabeth").build());
+    return findOrPutPersonInDb("elizabeth", Person.builder().build());
   }
 
   public Person getJackJackson() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername(jackUser).build());
+    return findOrPutPersonInDb(jackUser, Person.builder().build());
   }
 
   public Person getNickNicholson() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("nick").build());
+    return findOrPutPersonInDb("nick", Person.builder().build());
   }
 
   public Person getReinaReinton() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("reina").build());
+    return findOrPutPersonInDb("reina", Person.builder().build());
   }
 
   public Person getYoshieBeau() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("yoshie").build());
+    return findOrPutPersonInDb("yoshie", Person.builder().build());
   }
 
   public Person getBenRogers() {
@@ -284,6 +288,27 @@ public abstract class AbstractResourceTest {
 
   public mil.dds.anet.beans.Person getSteveStevesonBean() {
     return getInput(getSteveSteveson(), mil.dds.anet.beans.Person.class);
+  }
+
+  protected String getDomainUsername(Person person) {
+    if (!Utils.isEmptyOrNull(person.getUsers())) {
+      return person.getUsers().get(0).getDomainUsername();
+    }
+    return null;
+  }
+
+  protected String getDomainUsername(PersonInput person) {
+    if (!Utils.isEmptyOrNull(person.getUsers())) {
+      return person.getUsers().get(0).getDomainUsername();
+    }
+    return null;
+  }
+
+  protected String getDomainUsername(mil.dds.anet.beans.Person person) {
+    if (!Utils.isEmptyOrNull(person.getUsers())) {
+      return person.getUsers().get(0).getDomainUsername();
+    }
+    return null;
   }
 
   // Convert from GraphQL type to input type

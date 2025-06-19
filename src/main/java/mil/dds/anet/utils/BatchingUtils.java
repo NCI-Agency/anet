@@ -29,6 +29,7 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -345,6 +346,11 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.USER_PERSON.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<User>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getUserDao().getUsers(foreignKeys), dispatcherService),
             dataLoaderOptions));
   }
 
