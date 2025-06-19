@@ -206,15 +206,6 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={Settings.fields.person.openIdSubject}
-                value={mergedPerson.openIdSubject}
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="openIdSubject"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-              <DictionaryField
-                wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.position}
                 value={
                   <LinkTo modelType="Position" model={mergedPerson.position} />
@@ -596,21 +587,6 @@ const PersonColumn = ({
             action={() => {
               dispatchMergeActions(
                 setAMergedField("domainUsername", person.domainUsername, align)
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.person.openIdSubject}
-            fieldName="openIdSubject"
-            value={person.openIdSubject}
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField("openIdSubject", person.openIdSubject, align)
               )
             }}
             mergeState={mergeState}

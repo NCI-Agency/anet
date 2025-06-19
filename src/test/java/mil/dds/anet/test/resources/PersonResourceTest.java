@@ -57,7 +57,7 @@ public class PersonResourceTest extends AbstractResourceTest {
       "uuid name code type role status organization { uuid } %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS = String.format(
       "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } code"
-          + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
+          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
           + " customFields %1$s",
       _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
@@ -81,6 +81,8 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final PersonInput newPersonInput = PersonInput.builder().withName("testCreatePerson Person")
         .withStatus(Status.ACTIVE)
+        // set user/domainUsername
+        .withUser(true).withDomainUsername("testCreatePerson")
         // set HTML of biography
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
@@ -94,6 +96,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPerson).isNotNull();
     assertThat(newPerson.getUuid()).isNotNull();
     assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
+    // check that admin can set user/domainUsername
+    assertThat(newPerson.getUser()).isTrue();
+    assertThat(newPerson.getDomainUsername()).isEqualTo("testCreatePerson");
     // check that HTML of biography is sanitized after create
     assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after create
@@ -104,6 +109,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     updatedNewPersonInput.setName("testCreatePerson updated name");
     updatedNewPersonInput.setCode("A123456");
 
+    // update domainUsername
+    updatedNewPersonInput.setName("testCreatePersonUpdated");
     // update HTML of biography
     updatedNewPersonInput.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
     // update JSON of customFields
@@ -117,6 +124,8 @@ public class PersonResourceTest extends AbstractResourceTest {
         t -> queryExecutor.person(FIELDS, updatedNewPersonInput.getUuid()));
     assertThat(retPerson.getName()).isEqualTo(updatedNewPersonInput.getName());
     assertThat(retPerson.getCode()).isEqualTo(updatedNewPersonInput.getCode());
+    // check that admin can update domainUsername
+    assertThat(retPerson.getDomainUsername()).isEqualTo(updatedNewPersonInput.getDomainUsername());
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after update
@@ -142,7 +151,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPos.getUuid()).isNotNull();
 
     final PersonInput newPerson2Input =
-        PersonInput.builder().withName("Namey McNameface").withUser(true).withStatus(Status.ACTIVE)
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
             .withDomainUsername("testcreateperson").withPosition(getPositionInput(newPos)).build();
     final Person newPerson2 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPerson2Input));
@@ -377,17 +386,16 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPos).isNotNull();
     assertThat(retPos.getUuid()).isNotNull();
 
-    final PersonInput newPersonInput = PersonInput.builder().withName("Namey McNameface")
-        .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
-        .withOpenIdSubject(DaoUtils.getNewUuid()).withUser(true)
-        .withPosition(getPositionInput(retPos)).build();
+    final PersonInput newPersonInput =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
+            .withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(retPos)).build();
     final Person retPerson =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput));
     assertThat(retPerson).isNotNull();
     assertThat(retPerson.getUuid()).isNotNull();
     assertThat(retPerson.getStatus()).isEqualTo(Status.ACTIVE);
     assertThat(retPerson.getDomainUsername()).isEqualTo(newPersonInput.getDomainUsername());
-    assertThat(retPerson.getOpenIdSubject()).isEqualTo(newPersonInput.getOpenIdSubject());
     assertThat(retPerson.getUser()).isEqualTo(newPersonInput.getUser());
     assertThat(retPerson.getPosition()).isNotNull();
 
@@ -400,7 +408,6 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, retPerson.getUuid()));
     assertThat(retPerson2.getStatus()).isEqualTo(Status.INACTIVE);
     assertThat(retPerson2.getDomainUsername()).isEqualTo(retPerson.getDomainUsername());
-    assertThat(retPerson2.getOpenIdSubject()).isEqualTo(retPerson.getOpenIdSubject());
     assertThat(retPerson2.getUser()).isEqualTo(retPerson.getUser());
     assertThat(retPerson2.getPosition()).isNull();
   }
@@ -413,6 +420,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(jackUser, t -> queryExecutor.person(FIELDS, noPosUuid));
     assertThat(noPosPerson).isNotNull();
     assertThat(noPosPerson.getUuid()).isEqualTo(noPosUuid);
+    assertThat(noPosPerson.getUser()).isTrue();
     assertThat(noPosPerson.getDomainUsername()).isEqualTo(noPosDomainUsername);
 
     // Inactivate user nopos
@@ -425,15 +433,13 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, noPosUuid));
     assertThat(noPosInactive.getStatus()).isEqualTo(Status.INACTIVE);
     assertThat(noPosInactive.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
-    assertThat(noPosInactive.getOpenIdSubject()).isEqualTo(noPosPerson.getOpenIdSubject());
     assertThat(noPosInactive.getUser()).isEqualTo(noPosPerson.getUser());
 
     // Reactivate user nopos by querying as nopos
     final Person noPosAuth = withCredentials(noPosDomainUsername, t -> queryExecutor.me(FIELDS));
     assertThat(noPosAuth.getStatus()).isEqualTo(Status.ACTIVE);
+    assertThat(noPosAuth.getUser()).isTrue();
     assertThat(noPosAuth.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
-    assertThat(noPosAuth.getOpenIdSubject()).isEqualTo(noPosPerson.getOpenIdSubject());
-    assertThat(noPosAuth.getUser()).isEqualTo(noPosPerson.getUser());
     assertThat(noPosAuth.getPendingVerification()).isTrue();
 
     // Until verified, user nopos should not be able to query other stuff
@@ -443,6 +449,8 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // Verify user nopos
     final PersonInput noPosReactivateInput = getPersonInput(noPosAuth);
+    noPosReactivateInput.setUser(false);
+    noPosReactivateInput.setDomainUsername("erin");
     noPosReactivateInput.setPendingVerification(false);
     nrUpdated = withCredentials(noPosDomainUsername,
         t -> mutationExecutor.updateMe("", noPosReactivateInput));
@@ -452,9 +460,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person noPosReactivated =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, noPosUuid));
     assertThat(noPosReactivated.getStatus()).isEqualTo(Status.ACTIVE);
+    assertThat(noPosReactivated.getUser()).isTrue();
     assertThat(noPosReactivated.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
-    assertThat(noPosReactivated.getOpenIdSubject()).isEqualTo(noPosPerson.getOpenIdSubject());
-    assertThat(noPosReactivated.getUser()).isEqualTo(noPosPerson.getUser());
     assertThat(noPosReactivated.getPendingVerification()).isFalse();
 
     // User nopos should now be able to query other stuff again
@@ -462,6 +469,18 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(noPosDomainUsername, t -> queryExecutor.person(FIELDS, noPosUuid));
     assertThat(p2).isNotNull();
     assertThat(p2.getUuid()).isEqualTo(noPosUuid);
+
+    // User nopos should not be able to change their own user/domainUsername
+    final PersonInput noPosUpdatedInput = getPersonInput(noPosReactivated);
+    noPosUpdatedInput.setUser(!noPosReactivated.getUser());
+    noPosUpdatedInput.setDomainUsername("erin");
+    nrUpdated =
+        withCredentials(noPosDomainUsername, t -> mutationExecutor.updateMe("", noPosUpdatedInput));
+    assertThat(nrUpdated).isEqualTo(1);
+    final Person noPosUpdated =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, noPosUuid));
+    assertThat(noPosUpdated.getUser()).isEqualTo(noPosPerson.getUser());
+    assertThat(noPosUpdated.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
   }
 
   @Test
@@ -481,7 +500,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // interlocutor
     final PersonInput interlocutorInput =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE)
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
             .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
 
     try {
@@ -490,6 +509,9 @@ public class PersonResourceTest extends AbstractResourceTest {
       if (isSuperuser) {
         assertThat(p).isNotNull();
         assertThat(p.getUuid()).isNotNull();
+        // only admins can set user/domainUsername
+        assertThat(p.getUser()).isFalse();
+        assertThat(p.getDomainUsername()).isNull();
       } else {
         fail("Expected an Exception");
       }
@@ -501,7 +523,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // advisor with no position
     final PersonInput advisorNoPositionInput =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE)
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
             .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
 
     try {
@@ -510,6 +532,9 @@ public class PersonResourceTest extends AbstractResourceTest {
       if (isSuperuser) {
         assertThat(anp).isNotNull();
         assertThat(anp.getUuid()).isNotNull();
+        // only admins can set user/domainUsername
+        assertThat(anp.getUser()).isFalse();
+        assertThat(anp.getDomainUsername()).isNull();
       } else {
         fail("Expected an Exception");
       }
@@ -528,9 +553,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getList()).isNotEmpty();
     final Position freePos = searchObjects.getList().get(0);
 
-    final PersonInput advisorPositionInput = PersonInput.builder().withName("Namey McNameface")
-        .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
-        .withPosition(getPositionInput(freePos)).build();
+    final PersonInput advisorPositionInput =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
+            .withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(freePos)).build();
 
     try {
       final Person ap = withCredentials(user.getDomainUsername(),
@@ -538,6 +564,9 @@ public class PersonResourceTest extends AbstractResourceTest {
       if (isSuperuser) {
         assertThat(ap).isNotNull();
         assertThat(ap.getUuid()).isNotNull();
+        // only admins can set user/domainUsername
+        assertThat(ap.getUser()).isFalse();
+        assertThat(ap.getDomainUsername()).isNull();
       } else {
         fail("Expected an Exception");
       }
@@ -561,9 +590,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(foundPos2).isPresent();
     final Position freePos2 = foundPos2.get();
 
-    final PersonInput advisorPosition2Input = PersonInput.builder().withName("Namey McNameface")
-        .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
-        .withPosition(getPositionInput(freePos2)).build();
+    final PersonInput advisorPosition2Input =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
+            .withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(freePos2)).build();
 
     try {
       withCredentials(user.getDomainUsername(),

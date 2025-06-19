@@ -178,7 +178,6 @@ export default class Person extends Model {
     phoneNumber
     user
     domainUsername
-    openIdSubject
     biography
     obsoleteCountry
     country {

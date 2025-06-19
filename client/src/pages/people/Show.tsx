@@ -77,7 +77,6 @@ const GQL_GET_PERSON = gql`
       phoneNumber
       user
       domainUsername
-      openIdSubject
       biography
       obsoleteCountry
       country {
@@ -483,9 +482,6 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         accessCond: isAdmin
       },
       domainUsername: {
-        accessCond: isAdmin
-      },
-      openIdSubject: {
         accessCond: isAdmin
       }
     }

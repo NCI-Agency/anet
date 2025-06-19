@@ -3,6 +3,7 @@ package mil.dds.anet.test.integration.utils;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
@@ -22,7 +23,7 @@ public class TestBeans {
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
     p.setBiography("");
-    p.setDomainUsername("test");
+    p.setDomainUsername("test-" + UUID.randomUUID());
     p.setGender("Male");
     p.setEndOfTourDate(
         ZonedDateTime.of(2036, 8, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
