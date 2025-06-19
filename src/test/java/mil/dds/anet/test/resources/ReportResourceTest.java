@@ -1965,14 +1965,14 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // update HTML of report sensitive information
     returned2.getReportSensitiveInformation()
-        .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
+        .setText(UtilsTest.getCombinedHtmlTestCase().getInput() + "<p>test</p>");
     final Report updated = withCredentials(elizabeth.getDomainUsername(),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned2), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after update
     assertThat(updated.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput() + "<p>test</p>");
 
     final Report returned3 =
         withCredentials(jackUser, t -> queryExecutor.report(FIELDS, returned.getUuid()));

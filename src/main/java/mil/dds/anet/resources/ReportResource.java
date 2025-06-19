@@ -350,11 +350,6 @@ public class ReportResource {
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
         r.getCustomSensitiveInformation());
 
-    // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
-    // when sensitive info is 'empty' HTML
-    r.setReportSensitiveInformation(null);
-    r.loadReportSensitiveInformation(engine.getContext()).join();
-
     // Return the report in the response; used in autoSave by the client form
     return existing;
   }
