@@ -138,7 +138,7 @@ const HORIZONTAL_SPACING = 10
 const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
 const ARROW_INDENT = 5
-const DIAGRAM_PADDING = 100
+const DIAGRAM_PADDING = 20
 enum PositionFilterOption {
   none = "none",
   leaders = "leaders",
@@ -214,10 +214,13 @@ const OrganizationFlowChart = ({
     PositionFilterOption.none
   )
   const chartRef = useRef<HTMLDivElement>(null)
+  const [diagramWidth, setDiagramWidth] = useState(1)
+  const [diagramHeight, setDiagramHeight] = useState(1)
+  const [nodes, setNodes] = useState([])
+  const [edges, setEdges] = useState([])
+  const [reactFlowInstance, setReactFlowInstance] = useState(null)
   const lowestDepth = useRef(0)
-  const lowestY = useRef(0)
-  const diagramHeight = useRef(0)
-  const { fitView } = useReactFlow()
+  useReactFlow()
 
   const downloadImage = async() => {
     if (!chartRef.current) {
@@ -256,10 +259,6 @@ const OrganizationFlowChart = ({
   const decreaseDepthLimit = () => {
     setDepthLimit(prev => Math.max(0, prev - 1))
   }
-
-  const reframe = useCallback(() => {
-    fitView()
-  }, [fitView])
 
   const calculateLayout = useCallback(
     (
@@ -334,8 +333,8 @@ const OrganizationFlowChart = ({
         type: "custom"
       }
 
-      let nodes = [currentNode]
-      let edges = []
+      let newNodes = [currentNode]
+      let newEdges = []
       if (children.length > 0) {
         let childX = currentX + (isRoot ? 0 : LEVEL_INDENT)
         let childY =
@@ -376,10 +375,10 @@ const OrganizationFlowChart = ({
               VERTICAL_SPACING
           }
 
-          nodes = nodes.concat(childLayout.nodes)
-          edges = edges.concat(childLayout.edges)
+          newNodes = newNodes.concat(childLayout.nodes)
+          newEdges = newEdges.concat(childLayout.edges)
 
-          edges.push({
+          newEdges.push({
             id: `edge-${node.uuid}-${child.uuid}`,
             source: node.uuid,
             target: child.uuid,
@@ -396,19 +395,14 @@ const OrganizationFlowChart = ({
         })
       }
 
-      // update the lowestY
-      if (currentY > lowestY.current) {
-        lowestY.current = currentY
-      }
-
       // update the lowest depth
       if (depth > lowestDepth.current) {
         lowestDepth.current = depth
       }
 
       // place the root node in the middle of its children
-      if (isRoot && nodes.length > 1) {
-        const directChildNodes = nodes
+      if (isRoot && newNodes.length > 1) {
+        const directChildNodes = newNodes
           .slice(1)
           .filter(({ data }) => data?.depth === 1)
         const childCount = directChildNodes.length
@@ -416,24 +410,20 @@ const OrganizationFlowChart = ({
           if (childCount % 2 === 0) {
             const middleLeft = directChildNodes[childCount / 2 - 1]
             const middleRight = directChildNodes[childCount / 2]
-            nodes[0].position.x =
+            newNodes[0].position.x =
               (middleLeft.position.x + middleRight.position.x) / 2
           } else {
             const middle = directChildNodes[Math.floor(childCount / 2)]
-            nodes[0].position.x = middle.position.x
+            newNodes[0].position.x = middle.position.x
           }
         }
       }
-      return { nodes, edges }
+      return { nodes: newNodes, edges: newEdges }
     },
     [depthLimit, showApp6Symbols, positionsFilter]
   )
 
-  const { nodes, edges } = useMemo(() => {
-    if (!organization) {
-      return { nodes: [], edges: [] }
-    }
-
+  useEffect(() => {
     const maxDepth = Math.max(
       ...organization.descendantOrgs.map(org => org.ascendantOrgs.length - 1),
       0
@@ -445,8 +435,6 @@ const OrganizationFlowChart = ({
         organization?.descendantOrgs ?? []
       )
     )
-    lowestY.current = 0
-    diagramHeight.current = 0
     const layout = calculateLayout(
       organization,
       organization.descendantOrgs,
@@ -455,25 +443,65 @@ const OrganizationFlowChart = ({
       0,
       0
     )
-    diagramHeight.current =
-      lowestY.current + NODE_HEIGHT + VERTICAL_SPACING + DIAGRAM_PADDING
-    return {
-      nodes: layout.nodes.map(node => ({
+
+    setNodes(
+      layout.nodes.map(node => ({
         ...node,
         data: { ...node.data, showApp6Symbols }
-      })),
-      edges: layout.edges
+      }))
+    )
+    setEdges(layout.edges)
+  }, [organization, depthLimit, showApp6Symbols, calculateLayout])
+
+  const reframe = () => {
+    if (!reactFlowInstance || !nodes?.length) {
+      return
     }
-  }, [organization, showApp6Symbols, depthLimit, calculateLayout])
+
+    // calculate bounds of the nodes
+    const minX = Math.min(...nodes.map(n => n.position.x))
+    const maxX = Math.max(...nodes.map(n => n.position.x + NODE_WIDTH))
+    const minY = Math.min(...nodes.map(n => n.position.y))
+    const maxY = Math.max(
+      ...nodes.map(
+        n =>
+          n.position.y +
+          NODE_HEIGHT +
+          (n?.data?.positions?.length || 0) * PERSON_AVATAR_HEIGHT
+      )
+    )
+
+    // calculate size within the nodes
+    const graphW = maxX - minX
+    const graphH = maxY - minY
+    const containerW = width
+    // only allow 80% of the window height
+    const containerH = window.innerHeight * 0.8
+
+    // find the zoom, with a max value of 1
+    const zoom = Math.min(
+      1,
+      (containerW - DIAGRAM_PADDING * 2) / graphW,
+      (containerH - DIAGRAM_PADDING * 2) / graphH
+    )
+
+    // Get final dimensions, width can't be lower than container width
+    const scaledW = Math.max(containerW, graphW * zoom + DIAGRAM_PADDING * 2)
+    const scaledH = graphH * zoom + DIAGRAM_PADDING * 2
+    setDiagramWidth(scaledW)
+    setDiagramHeight(scaledH)
+
+    // center the graph
+    const translateX = (scaledW - graphW * zoom) / 2 - minX * zoom
+    const translateY = (scaledH - graphH * zoom) / 2 - minY * zoom
+    reactFlowInstance.setViewport({ x: translateX, y: translateY, zoom })
+  }
 
   useEffect(() => {
-    setTimeout(() => {
-      fitView()
-    })
-    // we want to reframe whenever the width, depthLimit or positionsFilter change
-  }, [width, depthLimit, positionsFilter, fitView])
+    reframe()
+  }, [reactFlowInstance, nodes, width, showApp6Symbols])
 
-  if (!organization) {
+  if (!organization || !nodes?.length) {
     return <p>Loading...</p>
   }
 
@@ -535,14 +563,14 @@ const OrganizationFlowChart = ({
       </ControlsContainer>
       <DivS
         ref={chartRef}
-        width={width ? `${width}px` : "100%"}
-        height={diagramHeight.current ? `${diagramHeight.current}px` : "100vh"}
+        width={`${diagramWidth}px`}
+        height={`${diagramHeight}px`}
         backgroundColor={BACKGROUND_COLOR}
       >
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          fitView
+          onInit={setReactFlowInstance}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           nodesDraggable={false}
@@ -726,7 +754,13 @@ const DivS = styled.div`
 `
 
 const CustomNode = ({
-  data: { organization, symbolValues, depth, positions, showSymbol }
+  data: {
+    organization,
+    symbolValues,
+    depth,
+    positions,
+    showApp6Symbols: showSymbol
+  }
 }: NodeProps) => (
   <DivS
     className="d-flex flex-column"
