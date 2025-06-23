@@ -3,6 +3,7 @@ import ShowTask from "../pages/showTask.page"
 
 const TASK_12B_UUID = "9d3da7f4-8266-47af-b518-995f587250c9"
 const TASK_EF1_UUID = "1145e584-4485-4ce0-89c4-2fa2e1fe846a"
+const TASK_EF1_2_UUID = "fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0"
 
 describe("Show task page", () => {
   beforeEach("Open the show task page", async() => {
@@ -100,6 +101,35 @@ describe("Show task page", () => {
       const closeButton = await ShowTask.getModalCloseButton()
       await closeButton.click()
       await modal.waitForExist({ reverse: true })
+    })
+  })
+})
+
+describe("Show task page", () => {
+  describe("When in the show page of a task with children tasks", () => {
+    it("the task's full path should be displayed in the event matrix", async() => {
+      await ShowTask.openAsAdminUser(TASK_EF1_2_UUID)
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(4)
+
+      const containsStarIcon = await tasks.map(
+        async task =>
+          await (await task.$(".bp5-popover-target img")).isExisting()
+      )
+      // only first task (self) should contain the task icon
+      expect(containsStarIcon).to.deep.equal([true, false, false, false])
+
+      const taskPath = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      // only first task (self) should contain the full path,
+      // the remaining ones should contain what comes after the current task
+      expect(taskPath).to.deep.equal([
+        "EF 1.2",
+        "» 1.2.A",
+        "» 1.2.B",
+        "» 1.2.C"
+      ])
     })
   })
 })
