@@ -30,7 +30,6 @@ import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.GenericRelatedObject;
@@ -338,13 +337,19 @@ public class ReportResource {
           oldTask -> reportDao.removeTaskFromReport(DaoUtils.getUuid(oldTask), r));
     }
 
-    // Update AuthorizationGroups:
-    if (r.getAuthorizationGroups() != null) {
-      final List<AuthorizationGroup> existingAuthorizationGroups =
-          reportDao.getAuthorizationGroupsForReport(r.getUuid());
-      Utils.addRemoveElementsByUuid(existingAuthorizationGroups, r.getAuthorizationGroups(),
-          newAg -> reportDao.addAuthorizationGroupToReport(newAg, r), oldAg -> reportDao
-              .removeAuthorizationGroupFromReport(DaoUtils.getUuid(oldAg), r.getUuid()));
+    // Update AuthorizedMembers:
+    if (r.getAuthorizedMembers() != null) {
+      logger.debug("Editing authorized members for {}", r);
+      final List<GenericRelatedObject> existingAuthorizedMembers =
+          existing.loadAuthorizedMembers(engine.getContext()).join();
+      Utils.updateElementsByKey(existingAuthorizedMembers, r.getAuthorizedMembers(),
+          GenericRelatedObject::getRelatedObjectUuid, newRelatedObject -> {
+            final List<GenericRelatedObject> newRelatedObjects = List.of(newRelatedObject);
+            reportDao.insertReportAuthorizedMembers(DaoUtils.getUuid(r), newRelatedObjects);
+          }, oldRelatedObject -> {
+            final List<GenericRelatedObject> oldRelatedObjects = List.of(oldRelatedObject);
+            reportDao.deleteReportAuthorizedMembers(DaoUtils.getUuid(r), oldRelatedObjects);
+          }, null);
     }
 
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),

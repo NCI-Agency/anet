@@ -21,6 +21,10 @@ import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class DaoUtils {
@@ -162,6 +166,113 @@ public class DaoUtils {
     final Set<String> checkAuthGroupUuids = new HashSet<>(checkAuthorizationGroupUuids);
     checkAuthGroupUuids.retainAll(userAuthorizationGroupUuids);
     return !checkAuthGroupUuids.isEmpty();
+  }
+
+  public static String getAuthorizationGroupUuidsForRelatedObject(String queryComment,
+      String relatedObjectParam, String relatedObjectType, String relatedTableAlias,
+      String mainSelectClause, String mainWhereClause) {
+    final StringBuilder sql = getAuthorizationOuterQuery(queryComment);
+    sql.append(getAuthorizationInnerQuery(relatedObjectParam, relatedObjectType, relatedTableAlias,
+        mainSelectClause, mainWhereClause));
+    return sql.toString();
+  }
+
+  private static StringBuilder getAuthorizationOuterQuery(String queryComment) {
+    final StringBuilder sql = new StringBuilder(queryComment);
+    sql.append(" WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
+        + " (SELECT uuid, uuid as parent_uuid FROM organizations"
+        + " UNION SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
+        + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
+    return sql;
+  }
+
+  private static StringBuilder getAuthorizationInnerQuery(String relatedObjectParam,
+      String relatedObjectType, String relatedTableAlias, String mainSelectClause,
+      String mainWhereClause) {
+    // Build the query using UNION ALL, so it can be optimized
+    final StringBuilder sql = new StringBuilder();
+    final String positionClause = isForPerson(relatedObjectType)
+        ? " AND positions.\"currentPersonUuid\" = :" + relatedObjectParam
+        : " AND positions.uuid = :" + relatedObjectParam;
+
+    if (isForPerson(relatedObjectType)) {
+      // Check for person
+      sql.append(mainSelectClause);
+      sql.append(mainWhereClause + " AND " + relatedTableAlias + ".\"relatedObjectType\" = '"
+          + PersonDao.TABLE_NAME + "' AND " + relatedTableAlias + ".\"relatedObjectUuid\" = :"
+          + relatedObjectParam);
+      sql.append(" UNION ALL ");
+    }
+
+    if (isForPersonOrPosition(relatedObjectType)) {
+      // Check for position
+      sql.append(mainSelectClause + ", positions");
+      sql.append(mainWhereClause + positionClause + " AND " + relatedTableAlias
+          + ".\"relatedObjectType\" = '" + PositionDao.TABLE_NAME + "' AND " + relatedTableAlias
+          + ".\"relatedObjectUuid\" = positions.uuid");
+      sql.append(" UNION ALL ");
+    }
+
+    // Recursively check for organization (and transitive parents thereof)
+    sql.append(mainSelectClause);
+    if (isForPersonOrPosition(relatedObjectType)) {
+      sql.append(", positions");
+    }
+    sql.append(", parent_orgs");
+    sql.append(mainWhereClause);
+    if (isForPersonOrPosition(relatedObjectType)) {
+      sql.append(positionClause);
+    }
+    sql.append(
+        " AND " + relatedTableAlias + ".\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME
+            + "' AND " + relatedTableAlias + ".\"relatedObjectUuid\" = parent_orgs.parent_uuid");
+    if (isForPersonOrPosition(relatedObjectType)) {
+      sql.append(" AND positions.\"organizationUuid\" = parent_orgs.uuid");
+    } else {
+      sql.append(" AND parent_orgs.uuid = :" + relatedObjectParam);
+    }
+    return sql;
+  }
+
+  public static String getReportsWhenAuthorized(String isAuthorParam, String relatedObjectParam) {
+    // Author
+    final String authorQuery =
+        "SELECT \"reportUuid\" FROM \"reportPeople\"" + " WHERE \"isAuthor\" = :" + isAuthorParam
+            + " AND \"personUuid\" = :" + relatedObjectParam;
+
+    // Authorized through person, position or organization
+    final String memberTableAlias = "ram";
+    final String memberSelectClause =
+        "SELECT r.uuid FROM reports r INNER JOIN \"reportAuthorizedMembers\" " + memberTableAlias
+            + " ON r.uuid = " + memberTableAlias + ".\"reportUuid\"";
+    final String mainWhereClause = " WHERE TRUE";
+    final StringBuilder memberQuery = DaoUtils.getAuthorizationInnerQuery(relatedObjectParam,
+        PersonDao.TABLE_NAME, memberTableAlias, memberSelectClause, mainWhereClause);
+
+    // Authorized through community
+    final String communityTableAlias = "agro";
+    final String communitySelectClause =
+        memberSelectClause + " INNER JOIN \"authorizationGroupRelatedObjects\" "
+            + communityTableAlias + " ON " + memberTableAlias + ".\"relatedObjectType\" = '"
+            + AuthorizationGroupDao.TABLE_NAME + "' AND " + memberTableAlias
+            + ".\"relatedObjectUuid\" = " + communityTableAlias + ".\"authorizationGroupUuid\"";
+    final StringBuilder communityQuery = DaoUtils.getAuthorizationInnerQuery(relatedObjectParam,
+        PersonDao.TABLE_NAME, communityTableAlias, communitySelectClause, mainWhereClause);
+
+    return "(reports.uuid IN (" + authorQuery + ") OR reports.uuid IN ("
+        + getAuthorizationOuterQuery("") + memberQuery + " UNION ALL " + communityQuery + "))";
+  }
+
+  private static boolean isForPerson(String relatedObjectType) {
+    return PersonDao.TABLE_NAME.equals(relatedObjectType);
+  }
+
+  private static boolean isForPosition(String relatedObjectType) {
+    return PositionDao.TABLE_NAME.equals(relatedObjectType);
+  }
+
+  private static boolean isForPersonOrPosition(String relatedObjectType) {
+    return isForPerson(relatedObjectType) || isForPosition(relatedObjectType);
   }
 
   public static ZoneId getServerNativeZoneId() {

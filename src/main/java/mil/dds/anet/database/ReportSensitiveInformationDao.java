@@ -3,7 +3,6 @@ package mil.dds.anet.database;
 import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -14,7 +13,6 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.springframework.stereotype.Component;
@@ -146,7 +144,7 @@ public class ReportSensitiveInformationDao
 
   /**
    * A user is allowed to access a report's sensitive information if either of the following holds
-   * true: • the user is an author of the report; • the user is in a community for the report.
+   * true: • the user is an author of the report; • the user is an authorized member of the report.
    *
    * @param user the user executing the request
    * @param report the report
@@ -159,18 +157,8 @@ public class ReportSensitiveInformationDao
       // No user or no report
       return false;
     }
-    if (report.isAuthor(user)) {
-      // Author is always authorized
-      return true;
-    }
-
-    // Check communities
     final ReportDao reportDao = engine().getReportDao();
-    final List<String> authorizationGroupUuids =
-        reportDao.getAuthorizationGroupsForReport(reportUuid).stream()
-            .map(AbstractAnetBean::getUuid).toList();
-    final Set<String> userAuthorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
-    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
+    return !reportDao.getReportsWhenAuthorized(user, report).isEmpty();
   }
 
 }

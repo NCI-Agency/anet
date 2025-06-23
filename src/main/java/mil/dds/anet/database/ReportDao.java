@@ -1,6 +1,7 @@
 package mil.dds.anet.database;
 
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
@@ -23,8 +24,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.EmailAddress;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -43,7 +44,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -65,7 +66,9 @@ import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -141,6 +144,19 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           .bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
           .bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason())).execute();
 
+      final ReportBatch rb = handle.attach(ReportBatch.class);
+      if (r.getReportPeople() != null) {
+        // Setify based on uuid to prevent violations of unique key constraint.
+        Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
+        r.getReportPeople().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
+        rb.insertReportPeople(r.getUuid(), new ArrayList<>(reportPeopleMap.values()));
+      }
+
+      if (r.getTasks() != null) {
+        rb.insertReportTasks(r.getUuid(), r.getTasks());
+      }
+
+      insertReportAuthorizedMembers(DaoUtils.getUuid(r), r.getAuthorizedMembers());
       // Write sensitive information (if allowed)
       final ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
       if (rsi != null) {
@@ -150,20 +166,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           engine().getReportSensitiveInformationDao().insert(rsi, user, r);
       r.setReportSensitiveInformation(newRsi);
 
-      final ReportBatch rb = handle.attach(ReportBatch.class);
-      if (r.getReportPeople() != null) {
-        // Setify based on uuid to prevent violations of unique key constraint.
-        Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
-        r.getReportPeople().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
-        rb.insertReportPeople(r.getUuid(), new ArrayList<>(reportPeopleMap.values()));
-      }
-
-      if (r.getAuthorizationGroups() != null) {
-        rb.insertReportAuthorizationGroups(r.getUuid(), r.getAuthorizationGroups());
-      }
-      if (r.getTasks() != null) {
-        rb.insertReportTasks(r.getUuid(), r.getTasks());
-      }
       return r;
     } finally {
       closeDbHandle(handle);
@@ -177,9 +179,17 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     void insertReportPeople(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
-    @SqlBatch("INSERT INTO \"reportAuthorizationGroups\" (\"reportUuid\", \"authorizationGroupUuid\") VALUES (:reportUuid, :uuid)")
-    void insertReportAuthorizationGroups(@Bind("reportUuid") String reportUuid,
-        @BindBean List<AuthorizationGroup> authorizationGroups);
+    @SqlBatch("INSERT INTO \"reportAuthorizedMembers\""
+        + " (\"reportUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
+        + "VALUES (:reportUuid, :relatedObjectType, :relatedObjectUuid)")
+    void insertReportAuthorizedMembers(@Bind("reportUuid") String reportUuid,
+        @BindBean List<GenericRelatedObject> attachmentRelatedObjects);
+
+    @SqlUpdate("DELETE FROM \"reportAuthorizedMembers\" WHERE \"reportUuid\" = :reportUuid"
+        + " AND \"relatedObjectUuid\" IN ( <relatedObjectUuids> )")
+    void deleteReportAuthorizedMembers(@Bind("reportUuid") String reportUuid,
+        @BindList(value = "relatedObjectUuids",
+            onEmpty = NULL_STRING) List<String> relatedObjectUuids);
 
     @SqlBatch("INSERT INTO \"reportTasks\" (\"reportUuid\", \"taskUuid\") VALUES (:reportUuid, :uuid)")
     void insertReportTasks(@Bind("reportUuid") String reportUuid, @BindBean List<Task> tasks);
@@ -331,33 +341,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   @Transactional
-  public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle.createUpdate(
-          "/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
-              + "VALUES (:authorizationGroupUuid, :reportUuid)")
-          .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", a.getUuid()).execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public int removeAuthorizationGroupFromReport(String authorizationGroupUuid, String reportUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle.createUpdate(
-          "/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
-              + "WHERE \"reportUuid\" = :reportUuid AND \"authorizationGroupUuid\" = :authorizationGroupUuid")
-          .bind("reportUuid", reportUuid).bind("authorizationGroupUuid", authorizationGroupUuid)
-          .execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
   public int addTaskToReport(Task p, Report r) {
     final Handle handle = getDbHandle();
     try {
@@ -390,16 +373,69 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         reportUuid);
   }
 
-  @Transactional
-  public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
+  class ReportAuthorizedMembersBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
+    private static final String SQL =
+        "/* batch.getReportAuthorizedMembers */ SELECT * FROM \"reportAuthorizedMembers\" "
+            + "WHERE \"reportUuid\" IN ( <foreignKeys> ) "
+            + "ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
+
+    public ReportAuthorizedMembersBatcher() {
+      super(ReportDao.this.databaseHandler, SQL, "foreignKeys",
+          new GenericRelatedObjectMapper("reportUuid"), "reportUuid");
+    }
+  }
+
+  public List<List<GenericRelatedObject>> getReportAuthorizedMembers(List<String> foreignKeys) {
+    return new ReportDao.ReportAuthorizedMembersBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<GenericRelatedObject>> getAuthorizedMembers(GraphQLContext context,
+      Report report) {
+    return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
+        FkDataLoaderKey.REPORT_REPORT_AUTHORIZED_MEMBERS, report.getUuid());
+  }
+
+
+  public void insertReportAuthorizedMembers(String uuid,
+      List<GenericRelatedObject> reportAuthorizedMembers) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createQuery("/* getAuthorizationGroupsForReport */ SELECT "
-          + AuthorizationGroupDao.AUTHORIZATION_GROUP_FIELDS
-          + " FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
-          + "WHERE \"reportAuthorizationGroups\".\"reportUuid\" = :reportUuid "
-          + "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = \"authorizationGroups\".uuid")
-          .bind("reportUuid", reportUuid).map(new AuthorizationGroupMapper()).list();
+      if (!Utils.isEmptyOrNull(reportAuthorizedMembers)) {
+        final ReportDao.ReportBatch ab = handle.attach(ReportDao.ReportBatch.class);
+        ab.insertReportAuthorizedMembers(uuid, reportAuthorizedMembers);
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public void deleteReportAuthorizedMembers(String uuid,
+      List<GenericRelatedObject> reportAuthorizedMembers) {
+    final Handle handle = getDbHandle();
+    try {
+      if (!Utils.isEmptyOrNull(reportAuthorizedMembers)) {
+        final ReportDao.ReportBatch ab = handle.attach(ReportDao.ReportBatch.class);
+        ab.deleteReportAuthorizedMembers(uuid, reportAuthorizedMembers.stream()
+            .map(GenericRelatedObject::getRelatedObjectUuid).toList());
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public Set<String> getReportsWhenAuthorized(Person user, Report report) {
+    final Handle handle = getDbHandle();
+    try {
+      final String reportUuidParam = "reportUuid";
+      final String isAuthorParam = "isAuthor";
+      final String relatedObjectParam = "userUuid";
+      return handle
+          .createQuery("/* getReportsWhenAuthorized */ SELECT uuid FROM reports WHERE uuid = :"
+              + reportUuidParam + " AND "
+              + DaoUtils.getReportsWhenAuthorized(isAuthorParam, relatedObjectParam))
+          .bind(reportUuidParam, DaoUtils.getUuid(report)).bind(isAuthorParam, true)
+          .bind(relatedObjectParam, DaoUtils.getUuid(user)).mapTo(String.class).set();
     } finally {
       closeDbHandle(handle);
     }
@@ -460,9 +496,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           "/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?",
           reportUuid);
 
-      // Delete relation to communities
+      // Delete relation to authorized members
       handle.execute(
-          "/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?",
+          "/* deleteReport.\"authorizedMembers\" */ DELETE FROM \"reportAuthorizedMembers\" where \"reportUuid\" = ?",
           reportUuid);
 
       final AnetObjectEngine instance = engine();
@@ -1132,12 +1168,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     // update location
     update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
         isParam ? obj.getLocationUuid() : null, "locations", "reports.locationUuid"));
-    // update authorizationGroups
-    update.stmts.add(new SubscriptionUpdateStatement("authorizationGroups",
-        "SELECT \"authorizationGroupUuid\" FROM \"reportAuthorizationGroups\""
-            + " WHERE \"reportUuid\" = " + paramOrJoin("reports.uuid", isParam),
-        // param is already added above
-        Collections.emptyMap()));
     // update event
     update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
         isParam ? obj.getEventUuid() : null, "events", "reports.eventUuid"));
