@@ -41,6 +41,7 @@ import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
+import AuthorizationGroupTable from "pages/reports/AuthorizationGroupTable"
 import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -427,6 +428,40 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     label={null}
                   />
                 )}
+                {optionalFields.reportSensitiveInformation.active &&
+                  report.reportSensitiveInformation?.text && (
+                    <>
+                      <CompactRow
+                        id="reportSensitiveInformation"
+                        content={
+                          <RichTextEditor
+                            readOnly
+                            showAvatar={false}
+                            value={report.reportSensitiveInformation.text}
+                          />
+                        }
+                        className="reportField"
+                        hideIfEmpty
+                        label="Sensitive information"
+                        labelAlignment="top"
+                      />
+                      <CompactRow
+                        id="authorizationGroups"
+                        content={
+                          !report.authorizationGroups?.length ? (
+                            "No groups are authorized!"
+                          ) : (
+                            <AuthorizationGroupTable
+                              authorizationGroups={report.authorizationGroups}
+                            />
+                          )
+                        }
+                        className="reportField"
+                        hideIfEmpty
+                        label="Authorized groups"
+                      />
+                    </>
+                )}
                 {optionalFields.assessments.active && (
                   <CompactReportViewS>
                     {getAttendeesAndAssessments(
@@ -650,6 +685,10 @@ const CompactReportViewS = styled.table`
 const OPTIONAL_FIELDS_INIT = {
   assessments: {
     text: "Assessments",
+    active: false
+  },
+  reportSensitiveInformation: {
+    text: "Sensitive Information",
     active: false
   },
   workflow: {
