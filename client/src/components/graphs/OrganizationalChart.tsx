@@ -485,7 +485,7 @@ const OrganizationFlowChart = ({
       (containerH - DIAGRAM_PADDING * 2) / graphH
     )
 
-    // Get final dimensions, width can't be lower than container width
+    // get final dimensions, width can't be lower than container width
     const scaledW = Math.max(containerW, graphW * zoom + DIAGRAM_PADDING * 2)
     const scaledH = graphH * zoom + DIAGRAM_PADDING * 2
     setDiagramWidth(scaledW)
@@ -535,7 +535,7 @@ const OrganizationFlowChart = ({
         <div>
           <label htmlFor="depthInput">Depth:</label>
           <div className="depth-controls">
-            <Button onClick={decreaseDepthLimit}>
+            <Button onClick={decreaseDepthLimit} disabled={depthLimit === 0}>
               <Icon icon={IconNames.REMOVE} />
             </Button>
             <input
@@ -547,7 +547,10 @@ const OrganizationFlowChart = ({
               max={maxDepth}
               style={{ width: "3em" }}
             />
-            <Button onClick={increaseDepthLimit}>
+            <Button
+              onClick={increaseDepthLimit}
+              disabled={depthLimit === maxDepth}
+            >
               <Icon icon={IconNames.ADD} />
             </Button>
           </div>
