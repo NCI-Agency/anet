@@ -144,19 +144,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           .bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
           .bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason())).execute();
 
-      final ReportBatch rb = handle.attach(ReportBatch.class);
-      if (r.getReportPeople() != null) {
-        // Setify based on uuid to prevent violations of unique key constraint.
-        Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
-        r.getReportPeople().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
-        rb.insertReportPeople(r.getUuid(), new ArrayList<>(reportPeopleMap.values()));
-      }
-
-      if (r.getTasks() != null) {
-        rb.insertReportTasks(r.getUuid(), r.getTasks());
-      }
-
-      insertReportAuthorizedMembers(DaoUtils.getUuid(r), r.getAuthorizedMembers());
       // Write sensitive information (if allowed)
       final ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
       if (rsi != null) {
@@ -165,6 +152,21 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       final ReportSensitiveInformation newRsi =
           engine().getReportSensitiveInformationDao().insert(rsi, user, r);
       r.setReportSensitiveInformation(newRsi);
+
+      final ReportBatch rb = handle.attach(ReportBatch.class);
+      if (r.getReportPeople() != null) {
+        // Setify based on uuid to prevent violations of unique key constraint.
+        Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
+        r.getReportPeople().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
+        rb.insertReportPeople(r.getUuid(), new ArrayList<>(reportPeopleMap.values()));
+      }
+
+      insertReportAuthorizedMembers(DaoUtils.getUuid(r), r.getAuthorizedMembers());
+
+      if (r.getTasks() != null) {
+        rb.insertReportTasks(r.getUuid(), r.getTasks());
+      }
+
 
       return r;
     } finally {

@@ -68,7 +68,7 @@ public class ReportSensitiveInformationDao
       Report report) {
     final Handle handle = getDbHandle();
     try {
-      if (rsi == null || !isAuthorized(user, report) || Utils.isEmptyHtml(rsi.getText())) {
+      if (rsi == null || Utils.isEmptyHtml(rsi.getText())) {
         return null;
       }
       DaoUtils.setInsertFields(rsi);
