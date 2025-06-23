@@ -6477,6 +6477,48 @@
 		<dropUniqueConstraint tableName="savedSearches" constraintName="UQ_OwnerUuidName" />
 	</changeSet>
 
+	<changeSet id="add-reportAuthorizedMembers" author="gjvoosten">
+		<createTable tableName="reportAuthorizedMembers">
+			<column name="reportUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint
+			constraintName="FK_reportAuthorizedMembers_report"
+			baseTableName="reportAuthorizedMembers"
+			baseColumnNames="reportUuid"
+			referencedTableName="reports"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addUniqueConstraint
+			constraintName="UQ_ReportAuthorizedMembers"
+			tableName="reportAuthorizedMembers"
+			columnNames="reportUuid, relatedObjectType, relatedObjectUuid"
+		/>
+		<createIndex
+			tableName="reportAuthorizedMembers"
+			indexName="IDX_reportAuthorizedMembers_reportUuid">
+			<column name="reportUuid"/>
+		</createIndex>
+
+		<!-- Migrate existing reportAuthorizationGroups -->
+		<sql>
+			INSERT INTO "reportAuthorizedMembers" ("reportUuid", "relatedObjectType", "relatedObjectUuid")
+			SELECT "reportUuid", 'authorizationGroups', "authorizationGroupUuid"
+			FROM "reportAuthorizationGroups";
+		</sql>
+
+		<dropTable tableName="reportAuthorizationGroups" />
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
