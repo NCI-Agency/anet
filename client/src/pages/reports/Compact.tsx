@@ -34,6 +34,7 @@ import {
   usePageTitle
 } from "components/Page"
 import "components/RelatedObjectNotes"
+import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
@@ -41,7 +42,6 @@ import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
-import AuthorizationGroupTable from "pages/reports/AuthorizationGroupTable"
 import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -228,10 +228,34 @@ const GQL_GET_REPORT = gql`
         uuid
         text
       }
-      authorizationGroups {
-        uuid
-        name
-        description
+      authorizedMembers {
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on AuthorizationGroup {
+            uuid
+            name
+          }
+          ... on Organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Person {
+            uuid
+            name
+            rank
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Position {
+            uuid
+            type
+            name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+        }
       }
       customFields
       ${GRAPHQL_ASSESSMENTS_FIELDS}
@@ -446,19 +470,16 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                         labelAlignment="top"
                       />
                       <CompactRow
-                        id="authorizationGroups"
+                        id="authorizedMembers"
                         content={
-                          !report.authorizationGroups?.length ? (
-                            "No groups are authorized!"
-                          ) : (
-                            <AuthorizationGroupTable
-                              authorizationGroups={report.authorizationGroups}
-                            />
-                          )
+                          <RelatedObjectsTable
+                            title="Authorized Members"
+                            relatedObjects={report.authorizedMembers}
+                          />
                         }
                         className="reportField"
                         hideIfEmpty
-                        label="Authorized groups"
+                        label="Authorized Members"
                       />
                     </>
                 )}

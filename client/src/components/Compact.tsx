@@ -340,7 +340,7 @@ const EmptySpaceTdS = styled.td`
 
 interface CompactRowProps {
   label?: React.ReactNode
-  labelAlignment?: boolean
+  labelAlignment?: string
   content?: React.ReactNode
   hideIfEmpty?: boolean
 }
