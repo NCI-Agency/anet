@@ -25,6 +25,7 @@ import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
@@ -267,8 +268,9 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         qb.addListArg("authorizationGroupUuids", query.getAuthorizationGroupUuid());
       }
       qb.addWhereClause(
-          "reports.uuid IN (SELECT ra.\"reportUuid\" FROM \"reportAuthorizationGroups\" ra"
-              + " WHERE ra.\"authorizationGroupUuid\" IN ( <authorizationGroupUuids> ))");
+          "reports.uuid IN (SELECT ram.\"reportUuid\" FROM \"reportAuthorizedMembers\" ram"
+              + " WHERE ram.\"relatedObjectType\" = '" + AuthorizationGroupDao.TABLE_NAME + "'"
+              + " AND ram.\"relatedObjectUuid\" IN ( <authorizationGroupUuids> ))");
     }
 
     if (query.getAttendeePositionUuid() != null) {
@@ -284,15 +286,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getSensitiveInfo()) {
-      qb.addFromClause(
-          "LEFT JOIN \"reportAuthorizationGroups\" ra ON ra.\"reportUuid\" = reports.uuid"
-              + " LEFT JOIN \"authorizationGroups\" ag ON ag.uuid = ra.\"authorizationGroupUuid\""
-              + " LEFT JOIN \"authorizationGroupRelatedObjects\" agro ON agro.\"authorizationGroupUuid\" = ag.uuid"
-              + " LEFT JOIN positions pos ON pos.uuid = agro.\"relatedObjectUuid\"");
-      qb.addWhereClause("agro.\"relatedObjectType\" = :relatedObjectTypePosition");
-      qb.addWhereClause("pos.\"currentPersonUuid\" = :userUuid");
-      qb.addSqlArg("relatedObjectTypePosition", PositionDao.TABLE_NAME);
-      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+      qb.addWhereClause(
+          "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportsSensitiveInformation\")");
+      final String isAuthorParam = "isAuthorForSensitiveInfo";
+      final String relatedObjectParam = "personUuidForSensitiveInfo";
+      qb.addWhereClause(DaoUtils.getReportsWhenAuthorized(isAuthorParam, relatedObjectParam));
+      qb.addSqlArg(isAuthorParam, true);
+      qb.addSqlArg(relatedObjectParam, DaoUtils.getUuid(query.getUser()));
     }
 
     if (query.getClassification() != null) {
