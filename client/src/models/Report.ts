@@ -260,7 +260,7 @@ export default class Report extends Model {
         .object()
         .nullable()
         .default({ uuid: null, text: null }),
-      authorizationGroups: yup.array().nullable().default([]),
+      authorizedMembers: yup.array().nullable().default([]),
       classification: yup.string().nullable().default(null),
       event: yup.object().nullable(),
       assessments: yup.array().nullable().default([])
@@ -278,7 +278,7 @@ export default class Report extends Model {
         cancelled ? schema : Report.testPrimaryAttendees(schema, false)
       ),
     reportSensitiveInformation: yup.object().nullable().default({}),
-    authorizationGroups: yup
+    authorizedMembers: yup
       .array()
       .nullable()
       .when(
@@ -292,7 +292,7 @@ export default class Report extends Model {
             ? schema.nullable()
             : schema.required().min(
               1,
-              `You should provide authorized communities who can access the sensitive information.
+              `You should provide authorized members who can access the sensitive information.
                If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`
             )
       )

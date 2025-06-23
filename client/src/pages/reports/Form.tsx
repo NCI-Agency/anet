@@ -4,13 +4,13 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
-  AuthorizationGroupOverlayRow,
   EventOverlayRow,
   LocationOverlayRow,
   PersonDetailedOverlayRow,
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -37,6 +37,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -44,15 +45,7 @@ import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
-import {
-  AuthorizationGroup,
-  Event,
-  Location,
-  Person,
-  Position,
-  Report,
-  Task
-} from "models"
+import { Event, Location, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import CreateNewLocation from "pages/locations/CreateNewLocation"
 import { RECURRENCE_TYPE } from "periodUtils"
@@ -62,7 +55,6 @@ import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import COMMUNITIES_ICON from "resources/communities.png"
 import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -70,7 +62,6 @@ import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
-import AuthorizationGroupTable from "./AuthorizationGroupTable"
 import ReportPeople, {
   forceOnlyAttendingPersonPerRoleToPrimary
 } from "./ReportPeople"
@@ -132,19 +123,6 @@ const GQL_GET_RECENTS = gql`
     taskList(query: $taskQuery) {
       list {
         ${Task.autocompleteQuery}
-      }
-    }
-    authorizationGroupList(
-      query: {
-        pageSize: 6
-        status: ACTIVE
-        inMyReports: true
-        sortBy: RECENT
-        sortOrder: DESC
-      }
-    ) {
-      list {
-        ${AuthorizationGroup.autocompleteQuery}
       }
     }
   }
@@ -356,8 +334,7 @@ const ReportForm = ({
     recents = {
       locations: data.locationList.list,
       persons: data.personList.list,
-      tasks: data.taskList.list,
-      authorizationGroups: data.authorizationGroupList.list
+      tasks: data.taskList.list
     }
   }
 
@@ -515,7 +492,7 @@ const ReportForm = ({
         }
 
         const authorizationGroupsFilters = {
-          allAuthorizationGroups: {
+          allEntities: {
             label: "Communities for sensitive information",
             queryVars: { forSensitiveInformation: true }
           }
@@ -1172,68 +1149,30 @@ const ReportForm = ({
                         }
                       />
                       <FastField
-                        name="authorizationGroups"
-                        label="Authorized communities"
+                        name="authorizedMembers"
+                        label="Authorized Members"
                         component={FieldHelper.SpecialField}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("authorizationGroups", value, true)
-                        }}
                         widget={
-                          <AdvancedMultiSelect
-                            fieldName="authorizationGroups"
-                            placeholder="Search for communities…"
-                            value={values.authorizationGroups}
-                            renderSelected={
-                              <AuthorizationGroupTable
-                                authorizationGroups={values.authorizationGroups}
-                                showDelete
-                              />
-                            }
-                            overlayColumns={["Name", "Description"]}
-                            overlayRenderRow={AuthorizationGroupOverlayRow}
-                            filterDefs={authorizationGroupsFilters}
-                            objectType={AuthorizationGroup}
-                            queryParams={{
-                              status: Model.STATUS.ACTIVE
-                            }}
-                            fields={AuthorizationGroup.autocompleteQuery}
-                            addon={COMMUNITIES_ICON}
-                          />
-                        }
-                        extraColElem={
-                          <>
-                            <FieldHelper.FieldShortcuts
-                              title="Recent Communities"
-                              shortcuts={recents.authorizationGroups.filter(
-                                ag =>
-                                  !values.authorizationGroups?.find(
-                                    authorizationGroup =>
-                                      authorizationGroup.uuid === ag.uuid
-                                  )
-                              )}
-                              fieldName="authorizationGroups"
-                              objectType={AuthorizationGroup}
-                              curValue={values.authorizationGroups}
-                              onChange={value => {
-                                // validation will be done by setFieldValue
-                                setFieldTouched(
-                                  "authorizationGroups",
-                                  true,
-                                  false
-                                ) // onBlur doesn't work when selecting an option
-                                setFieldValue(
-                                  "authorizationGroups",
-                                  value,
-                                  true
-                                )
-                              }}
-                              handleAddItem={
-                                FieldHelper.handleMultiSelectAddItem
+                          <RelatedObjectsTableInput
+                            title="Authorized Members"
+                            relatedObjects={values.authorizedMembers}
+                            objectType={ENTITY_TYPES.AUTHORIZATION_GROUPS}
+                            entityTypes={[
+                              ENTITY_TYPES.AUTHORIZATION_GROUPS,
+                              ENTITY_TYPES.POSITIONS,
+                              ENTITY_TYPES.ORGANIZATIONS,
+                              ENTITY_TYPES.PEOPLE
+                            ]}
+                            entityFilters={[
+                              {
+                                [ENTITY_TYPES.AUTHORIZATION_GROUPS]:
+                                  authorizationGroupsFilters
                               }
-                            />
-                          </>
+                            ]}
+                            setRelatedObjects={value =>
+                              setFieldValue("authorizedMembers", value)}
+                            showDelete
+                          />
                         }
                       />
                     </div>
@@ -1597,6 +1536,12 @@ const ReportForm = ({
 
   function save(values, sendEmail) {
     const report = Report.filterClientSideFields(new Report(values))
+    report.authorizedMembers = values.authorizedMembers.map(
+      ({ relatedObjectType, relatedObjectUuid }) => ({
+        relatedObjectType,
+        relatedObjectUuid
+      })
+    )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
       // They might have been set before the report has been marked as future.
