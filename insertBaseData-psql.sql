@@ -33,7 +33,7 @@ TRUNCATE TABLE "people" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 TRUNCATE TABLE "reportActions" CASCADE;
-TRUNCATE TABLE "reportAuthorizationGroups" CASCADE;
+TRUNCATE TABLE "reportAuthorizedMembers" CASCADE;
 TRUNCATE TABLE "reportPeople" CASCADE;
 TRUNCATE TABLE "reportTasks" CASCADE;
 TRUNCATE TABLE "reportsSensitiveInformation" CASCADE;
@@ -313,7 +313,7 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 1.1 Advisor for Mining', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor for Space Issues', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor for Interagency Advising', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1.1 Superuser', 2, 0, 1, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c829e8bc-959e-4e57-9e6f-0a8fc128145f', 'EF 1.1 Superuser', 2, 0, 1, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('525d6c4b-deaa-4218-b8fd-abfb7c81a4c2', 'EF 1.2 Advisor', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor for Accounting', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -497,7 +497,7 @@ INSERT INTO organizations(uuid, "shortName", "longName", app6context, "app6stand
   ('291abe56-e2c2-4a3a-8419-1661e5c5ac17', 'EF 2', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 3', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4', '', '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('fe0dfb8d-2e74-4a1e-8b2a-3d987fc2ce4a', 'EF 5', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF7', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF8', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -1016,6 +1016,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Topferness, Christopf'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, FALSE, TRUE),
   ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, TRUE, FALSE),
+  ('d4e1ae87-e519-4ec6-b0a4-5c3b19a0183e', 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', FALSE, TRUE, FALSE),
   ('1ad0c049-6ce8-4890-84f6-5e6a364764c4', 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', FALSE, FALSE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.B'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3');
@@ -1229,27 +1230,16 @@ INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relat
   FROM positions p
   WHERE p.status = 1;
 
--- Report authorization groups for reports with sensitive information
-INSERT INTO "reportAuthorizationGroups" ("reportUuid", "authorizationGroupUuid")
-  SELECT DISTINCT rp."reportUuid", agro."authorizationGroupUuid"
-  FROM "reportPeople" rp
-  JOIN people p ON p.uuid = rp."personUuid" AND rp."isPrimary"= TRUE
-  JOIN "peoplePositions" pp on pp."personUuid" = p.uuid
-  JOIN positions pos on pp."positionUuid" = pos.uuid,
-  "authorizationGroupRelatedObjects" agro
-  WHERE EXISTS (
-    SELECT *
-    FROM "reportsSensitiveInformation" rsi
-    WHERE rsi."reportUuid" = rp."reportUuid"
-  )
-  AND agro."relatedObjectType" = 'organizations'
-  AND pos."organizationUuid" = agro."relatedObjectUuid"
-  AND NOT EXISTS (
-    SELECT *
-    FROM "reportAuthorizationGroups" rap
-    WHERE rap."reportUuid" = rp."reportUuid"
-    AND rap."authorizationGroupUuid" = agro."authorizationGroupUuid"
-  );
+-- Report authorized members for reports with sensitive information
+INSERT INTO "reportAuthorizedMembers" ("reportUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  -- authorizationGroup EF 2.1
+  ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', 'authorizationGroups', '39a78d51-c351-452c-9206-4305ec8dd76d'),
+  -- person Elizabeth
+  ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', 'people', 'a9d65d96-d107-45c3-bbaa-1133a354335b'),
+  -- position EF 1.1 Superuser
+  ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', 'positions', 'c829e8bc-959e-4e57-9e6f-0a8fc128145f'),
+  -- organization EF 5
+  ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', 'organizations', 'fe0dfb8d-2e74-4a1e-8b2a-3d987fc2ce4a');
 
 -- Create "customSensitiveInformation" for some interlocutors
 INSERT INTO "customSensitiveInformation" (uuid, "customFieldName", "customFieldValue", "relatedObjectType", "relatedObjectUuid", "createdAt", "updatedAt") VALUES
