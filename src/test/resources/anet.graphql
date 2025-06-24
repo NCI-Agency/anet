@@ -1674,7 +1674,9 @@ enum TokenScope {
 
 """"""
 type User {
+  createdAt: Instant
   domainUsername: String
+  updatedAt: Instant
   uuid: String
 }
 
@@ -1712,6 +1714,8 @@ enum UserActivitySearchSortBy {
 
 """"""
 input UserInput {
+  createdAt: Instant
   domainUsername: String
+  updatedAt: Instant
   uuid: String
 }
