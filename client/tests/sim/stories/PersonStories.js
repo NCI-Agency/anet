@@ -40,6 +40,13 @@ function personName(gender, locale) {
   }
 }
 
+function createUsers(domainUsername) {
+  if (domainUsername) {
+    return [{ domainUsername }]
+  }
+  return null
+}
+
 async function randomPerson(isUser, status) {
   const gender = fuzzy.withProbability(0.1)
     ? "NOT SPECIFIED"
@@ -102,7 +109,7 @@ async function randomPerson(isUser, status) {
     endOfTourDate: () => faker.date.future(),
     biography: async() => await createHtmlParagraphs(),
     user: () => isUser,
-    domainUsername: () => domainUsername,
+    users: () => createUsers(domainUsername),
     emailAddresses: () => createEmailAddresses(isUser, email)
   }
 }
@@ -110,7 +117,6 @@ async function randomPerson(isUser, status) {
 function modifiedPerson() {
   return {
     name: identity,
-    domainUsername: identity,
     status: identity,
     country: identity,
     rank: identity,
@@ -119,6 +125,7 @@ function modifiedPerson() {
     endOfTourDate: () => faker.date.future(),
     biography: async() => await createHtmlParagraphs(),
     user: identity,
+    users: identity,
     emailAddresses: (value, instance) => {
       const name = Person.parseFullName(instance.name)
       const email = faker.internet.displayName({
@@ -140,7 +147,7 @@ const _createPerson = async function(user, isUser, status) {
   await personGenerator.status.always()
   await personGenerator.rank.always()
   await personGenerator.user.always()
-  await personGenerator.domainUsername.always()
+  await personGenerator.users.always()
   await personGenerator.country.always()
   await personGenerator.gender.always()
   await personGenerator.endOfTourDate.always()
@@ -202,7 +209,11 @@ const updatePerson = async function(user) {
             endOfTourDate
             gender
             name
-            domainUsername
+            user
+            users {
+              uuid
+              domainUsername
+            }
             phoneNumber
             rank
             role
@@ -218,7 +229,8 @@ const updatePerson = async function(user) {
   const person = people && people[0]
   const personGenerator = await populate(person, modifiedPerson())
   await personGenerator.name.rarely()
-  await personGenerator.domainUsername.never()
+  await personGenerator.user.never()
+  await personGenerator.users.never()
   await personGenerator.phoneNumber.sometimes()
   await personGenerator.rank.sometimes()
   await personGenerator.country.never()

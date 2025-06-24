@@ -20,7 +20,7 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final var martImportedReports = withCredentials(user.getDomainUsername(),
+      final var martImportedReports = withCredentials(getDomainUsername(user),
           t -> queryExecutor.martImportedReports(getListFields(
               "{ sequence person { uuid } report { uuid } receivedAt submittedAt success errors }"),
               0, 0));

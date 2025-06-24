@@ -647,8 +647,8 @@ fields:
       placeholder: Last name
     user:
       label: ANET user
-    domainUsername:
-      label: Domain username
+    users:
+      label: User accounts
     position:
       label: Current Position
       placeholder: Fill in the person's current position
@@ -1331,7 +1331,7 @@ fields:
         - position
         - prevPositions
         - user
-        - domainUsername
+        - users
         - authorizationGroups
         - emailAddresses
         - multipleButtons

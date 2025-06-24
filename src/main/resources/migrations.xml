@@ -6402,6 +6402,55 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-multiple-users-per-person" author="gjvoosten">
+		<!-- Create new table -->
+		<createTable tableName="users">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="domainUsername" type="varchar(512)">
+				<constraints nullable="false" />
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_users_person"
+			baseTableName="users"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<createIndex
+			tableName="users"
+			indexName="IDX_users_domainUsername">
+			<column name="domainUsername" />
+		</createIndex>
+		<addUniqueConstraint
+			tableName="users"
+			columnNames="domainUsername"
+			constraintName="UQ_UsersDomainUsername"
+		/>
+
+		<!-- Migrate existing domainUsername -->
+		<sql>
+			INSERT INTO users (uuid, "domainUsername", "personUuid")
+			SELECT ${uuid_function}, "domainUsername", uuid
+			FROM people
+			WHERE TRIM("domainUsername") != '';
+		</sql>
+
+		<!-- Drop old domainUsername column -->
+		<sql>
+			ALTER TABLE people DROP COLUMN "domainUsername" CASCADE;
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -6464,6 +6513,7 @@
 			ALTER TABLE positions DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE reports DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE tasks DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE users DROP COLUMN IF EXISTS core_text;
 
 			<!-- Drop more_text columns -->
 			ALTER TABLE attachments DROP COLUMN IF EXISTS more_text;
@@ -6702,6 +6752,11 @@
 						|| to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high})
 				) STORED;
 
+			ALTER TABLE users
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(users."domainUsername", '')), ${fts_low})
+				) STORED;
+
 			<!-- Add generated more_text columns -->
 			ALTER TABLE attachments
 				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
@@ -6745,7 +6800,6 @@
 
 			ALTER TABLE people
 				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
 					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
 						|| to_tsvector('simple', coalesce(people.biography, '')), ${fts_low}) ||
@@ -7101,6 +7155,7 @@
 					|| coalesce(tsvector_agg(assessments.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg("emailAddresses".core_text), ''::tsvector)
+					|| coalesce(tsvector_agg(users.core_text), ''::tsvector)
 			FROM people
 			LEFT JOIN mv_lts_people ON people.uuid = mv_lts_people.uuid
 			LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
@@ -7113,6 +7168,7 @@
 			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
 			LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'people'
 				AND "emailAddresses"."relatedObjectUuid" = people.uuid
+			LEFT JOIN users ON users."personUuid" = people.uuid
 			GROUP BY people.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);

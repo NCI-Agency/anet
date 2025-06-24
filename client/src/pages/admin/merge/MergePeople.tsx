@@ -30,6 +30,7 @@ import {
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
+import UserTable from "components/UserTable"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -198,10 +199,15 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={Settings.fields.person.domainUsername}
-                value={mergedPerson.domainUsername}
+                dictProps={Settings.fields.person.users}
+                value={
+                  <UserTable
+                    label={Settings.fields.person.users.label}
+                    users={mergedPerson.users}
+                  />
+                }
                 align={ALIGN_OPTIONS.CENTER}
-                fieldName="domainUsername"
+                fieldName="users"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -469,10 +475,7 @@ const ColTitle = styled(Form.Group)`
 
 const peopleFilters = {
   allPersons: {
-    label: "All",
-    queryVars: {
-      pendingVerification: false
-    }
+    label: "All"
   }
 }
 
@@ -583,13 +586,18 @@ const PersonColumn = ({
           />
           <DictionaryField
             wrappedComponent={MergeField}
-            dictProps={Settings.fields.person.domainUsername}
-            fieldName="domainUsername"
-            value={person.domainUsername}
+            dictProps={Settings.fields.person.users}
+            fieldName="users"
+            value={
+              <UserTable
+                label={Settings.fields.person.users.label}
+                users={person.users}
+              />
+            }
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("domainUsername", person.domainUsername, align)
+                setAMergedField("users", person.users, align)
               )
             }}
             mergeState={mergeState}

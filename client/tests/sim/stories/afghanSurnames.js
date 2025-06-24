@@ -1,12 +1,12 @@
 const names = [
-  { name: "ACHAKZAI", ethnicGroup: ["Pashto"] },
-  { name: "AFGHAN", ethnicGroup: ["Dari"] },
-  { name: "AFGHANZADA", ethnicGroup: ["Persian", "Dari"] },
-  { name: "AHMADZAI", ethnicGroup: ["Pashto"] },
-  { name: "AKHTAR", ethnicGroup: ["Urdu", "Indian", "Bengali", "Pashto"] },
-  { name: "ALAKOZAI", ethnicGroup: ["Pashto"] },
+  { name: "Achakzai", ethnicGroup: ["Pashto"] },
+  { name: "Afghan", ethnicGroup: ["Dari"] },
+  { name: "Afghanzada", ethnicGroup: ["Persian", "Dari"] },
+  { name: "Ahmadzai", ethnicGroup: ["Pashto"] },
+  { name: "Akhtar", ethnicGroup: ["Urdu", "Indian", "Bengali", "Pashto"] },
+  { name: "Alakozai", ethnicGroup: ["Pashto"] },
   {
-    name: "ALAM",
+    name: "Alam",
     ethnicGroup: [
       "Bengali",
       "Indian",
@@ -18,21 +18,21 @@ const names = [
       "Dari"
     ]
   },
-  { name: "ALIZAI", ethnicGroup: ["Pashto"] },
-  { name: "ANWARZAI", ethnicGroup: ["Pashto"] },
-  { name: "AURAKZAI", ethnicGroup: ["Pashto"] },
-  { name: "AYOUBI", ethnicGroup: ["Persian", "Pashto", "Arabic"] },
-  { name: "AYUBI", ethnicGroup: ["Persian", "Pashto", "Urdu"] },
-  { name: "BARAKZAI", ethnicGroup: ["Pashto"] },
-  { name: "DAWLATZAI", ethnicGroup: ["Pashto", "Dari"] },
-  { name: "DURANI", ethnicGroup: ["Pashto"] },
-  { name: "DURRANI", ethnicGroup: ["Pashto"] },
+  { name: "Alizai", ethnicGroup: ["Pashto"] },
+  { name: "Anwarzai", ethnicGroup: ["Pashto"] },
+  { name: "Aurakzai", ethnicGroup: ["Pashto"] },
+  { name: "Ayoubi", ethnicGroup: ["Persian", "Pashto", "Arabic"] },
+  { name: "Ayubi", ethnicGroup: ["Persian", "Pashto", "Urdu"] },
+  { name: "Barakzai", ethnicGroup: ["Pashto"] },
+  { name: "Dawlatzai", ethnicGroup: ["Pashto", "Dari"] },
+  { name: "Durani", ethnicGroup: ["Pashto"] },
+  { name: "Durrani", ethnicGroup: ["Pashto"] },
   {
-    name: "FAROOQ",
+    name: "Farooq",
     ethnicGroup: ["Urdu", "Indian", "Bengali", "Pashto", "Arabic"]
   },
   {
-    name: "GUL",
+    name: "Gul",
     ethnicGroup: [
       "Pakistani",
       "Pashto",
@@ -43,9 +43,9 @@ const names = [
       "Persian"
     ]
   },
-  { name: "HABIBZAI", ethnicGroup: ["Pashto"] },
+  { name: "Habibzai", ethnicGroup: ["Pashto"] },
   {
-    name: "HAIDER",
+    name: "Haider",
     ethnicGroup: [
       "Urdu",
       "Punjabi",
@@ -56,12 +56,12 @@ const names = [
       "Arabic"
     ]
   },
-  { name: "HASANZAI", ethnicGroup: ["Pashto"] },
-  { name: "HASSANZAI", ethnicGroup: ["Pashto"] },
-  { name: "HUSSAINI", ethnicGroup: ["Persian", "Dari", "Urdu", "Arabic"] },
-  { name: "IBRAHIMI", ethnicGroup: ["Pashto", "Arabic", "Albanian"] },
+  { name: "Hasanzai", ethnicGroup: ["Pashto"] },
+  { name: "Hassanzai", ethnicGroup: ["Pashto"] },
+  { name: "Hussaini", ethnicGroup: ["Persian", "Dari", "Urdu", "Arabic"] },
+  { name: "Ibrahimi", ethnicGroup: ["Pashto", "Arabic", "Albanian"] },
   {
-    name: "IQBAL",
+    name: "Iqbal",
     ethnicGroup: [
       "Urdu",
       "Bengali",
@@ -73,9 +73,9 @@ const names = [
       "Indonesian"
     ]
   },
-  { name: "ISHAQZAI", ethnicGroup: ["Pashto"] },
+  { name: "Ishaqzai", ethnicGroup: ["Pashto"] },
   {
-    name: "KABIR",
+    name: "Kabir",
     ethnicGroup: [
       "Bengali",
       "Nigerian",
@@ -85,9 +85,9 @@ const names = [
       "Persian"
     ]
   },
-  { name: "KARZAI", ethnicGroup: ["Dari"] },
+  { name: "Karzai", ethnicGroup: ["Dari"] },
   {
-    name: "KHAN",
+    name: "Khan",
     ethnicGroup: [
       "Punjabi",
       "Pashto",
@@ -99,10 +99,10 @@ const names = [
       "Bengali"
     ]
   },
-  { name: "KUMAKI", ethnicGroup: ["Pashto"] },
-  { name: "MALIKZAI", ethnicGroup: ["Pashto"] },
+  { name: "Kumaki", ethnicGroup: ["Pashto"] },
+  { name: "Malikzai", ethnicGroup: ["Pashto"] },
   {
-    name: "MOHAMMAD",
+    name: "Mohammad",
     ethnicGroup: [
       "Indian",
       "Bengali",
@@ -113,11 +113,11 @@ const names = [
       "Punjabi"
     ]
   },
-  { name: "MOHAMMADZAI", ethnicGroup: ["Pashto"] },
-  { name: "NABIZADA", ethnicGroup: ["Persian", "Dari"] },
-  { name: "NIAZAI", ethnicGroup: ["Pashto"] },
+  { name: "Mohammadzai", ethnicGroup: ["Pashto"] },
+  { name: "Nabizada", ethnicGroup: ["Persian", "Dari"] },
+  { name: "Niazai", ethnicGroup: ["Pashto"] },
   {
-    name: "NOOR",
+    name: "Noor",
     ethnicGroup: [
       "Pakistani",
       "Urdu",
@@ -130,46 +130,46 @@ const names = [
       "Muslim"
     ]
   },
-  { name: "NOORZAI", ethnicGroup: ["Pashto"] },
-  { name: "NURISTANI", ethnicGroup: ["Dari"] },
-  { name: "OMARZAI", ethnicGroup: ["Pashto"] },
-  { name: "ORAKZAI", ethnicGroup: ["Pashto", "Pakistani"] },
-  { name: "PATHAN", ethnicGroup: ["Indian", "Bengali", "Urdu", "Pashto"] },
-  { name: "POPALZAI", ethnicGroup: ["Pashto"] },
-  { name: "POYA", ethnicGroup: ["Dari"] },
-  { name: "QURAISHI", ethnicGroup: ["Persian", "Pashto", "Urdu", "Indian"] },
+  { name: "Noorzai", ethnicGroup: ["Pashto"] },
+  { name: "Nuristani", ethnicGroup: ["Dari"] },
+  { name: "Omarzai", ethnicGroup: ["Pashto"] },
+  { name: "Orakzai", ethnicGroup: ["Pashto", "Pakistani"] },
+  { name: "Pathan", ethnicGroup: ["Indian", "Bengali", "Urdu", "Pashto"] },
+  { name: "Popalzai", ethnicGroup: ["Pashto"] },
+  { name: "Poya", ethnicGroup: ["Dari"] },
+  { name: "Quraishi", ethnicGroup: ["Persian", "Pashto", "Urdu", "Indian"] },
   {
-    name: "QURESHI",
+    name: "Qureshi",
     ethnicGroup: ["Sindhi", "Urdu", "Punjabi", "Pashto", "Balochi", "Indian"]
   },
   {
-    name: "RAHMAN",
+    name: "Rahman",
     ethnicGroup: ["Bengali", "Indian", "Urdu", "Malay", "Pashto", "Arabic"]
   },
-  { name: "RAHMANZAI", ethnicGroup: ["Pashto"] },
+  { name: "Rahmanzai", ethnicGroup: ["Pashto"] },
   {
-    name: "RASUL",
+    name: "Rasul",
     ethnicGroup: ["Urdu", "Pashto", "Bengali", "Indian", "Arabic", "Indonesian"]
   },
   {
-    name: "REHMAN",
+    name: "Rehman",
     ethnicGroup: ["Urdu", "Punjabi", "Sindhi", "Indian", "Bengali", "Pashto"]
   },
-  { name: "SADOZAI", ethnicGroup: ["Pashto", "Balochi"] },
-  { name: "SAFI", ethnicGroup: ["Pashto", "Dari", "Pakistani"] },
+  { name: "Sadozai", ethnicGroup: ["Pashto", "Balochi"] },
+  { name: "Safi", ethnicGroup: ["Pashto", "Dari", "Pakistani"] },
   {
-    name: "SALEEM",
+    name: "Saleem",
     ethnicGroup: ["Urdu", "Punjabi", "Arabic", "Indian", "Pashto"]
   },
-  { name: "SEDIQI", ethnicGroup: ["Dari", "Persian"] },
-  { name: "SHAHNAWAZ", ethnicGroup: ["Dari"] },
-  { name: "SHAHZAD", ethnicGroup: ["Urdu", "Pashto"] },
-  { name: "SHERKHANZAI", ethnicGroup: ["Dari"] },
-  { name: "SHERZAI", ethnicGroup: ["Pashto"] },
-  { name: "SHINWARI", ethnicGroup: ["Pashto"] },
-  { name: "SHIRZAI", ethnicGroup: ["Pashto"] },
+  { name: "Sediqi", ethnicGroup: ["Dari", "Persian"] },
+  { name: "Shahnawaz", ethnicGroup: ["Dari"] },
+  { name: "Shahzad", ethnicGroup: ["Urdu", "Pashto"] },
+  { name: "Sherkhanzai", ethnicGroup: ["Dari"] },
+  { name: "Sherzai", ethnicGroup: ["Pashto"] },
+  { name: "Shinwari", ethnicGroup: ["Pashto"] },
+  { name: "Shirzai", ethnicGroup: ["Pashto"] },
   {
-    name: "SIDDIQUE",
+    name: "Siddique",
     ethnicGroup: [
       "Punjabi",
       "Urdu",
@@ -181,7 +181,7 @@ const names = [
     ]
   },
   {
-    name: "SIDDIQUI",
+    name: "Siddiqui",
     ethnicGroup: [
       "Urdu",
       "Sindhi",
@@ -192,10 +192,10 @@ const names = [
       "Indian"
     ]
   },
-  { name: "SIDIQI", ethnicGroup: ["Pashto", "Persian", "Dari"] },
-  { name: "STANIKZAI", ethnicGroup: ["Pashto"] },
+  { name: "Sidiqi", ethnicGroup: ["Pashto", "Persian", "Dari"] },
+  { name: "Stanikzai", ethnicGroup: ["Pashto"] },
   {
-    name: "ULLAH",
+    name: "Ullah",
     ethnicGroup: [
       "Pakistani",
       "Pashto",
@@ -207,16 +207,16 @@ const names = [
       "Indian"
     ]
   },
-  { name: "WALI", ethnicGroup: ["Urdu", "Pashto", "Bengali", "Arabic"] },
-  { name: "WARDAK", ethnicGroup: ["Pashto"] },
-  { name: "YOUSAFZAI", ethnicGroup: ["Pashto"] },
-  { name: "YOUSUFZAI", ethnicGroup: ["Pashto"] },
-  { name: "YUSUFI", ethnicGroup: ["Dari", "Tajik", "Urdu"] },
-  { name: "YUSUFZAI", ethnicGroup: ["Pashto", "Dari"] },
-  { name: "ZADRAN", ethnicGroup: ["Pashto"] },
-  { name: "ZAHID", ethnicGroup: ["Urdu", "Punjabi", "Bengali", "Dari"] },
-  { name: "ZAHIR", ethnicGroup: ["Bengali", "Muslim", "Arabic", "Dari"] },
-  { name: "ZALMAI", ethnicGroup: ["Dari", "Pashto"] },
-  { name: "ZAZAI", ethnicGroup: ["Pashto", "Dari"] }
+  { name: "Wali", ethnicGroup: ["Urdu", "Pashto", "Bengali", "Arabic"] },
+  { name: "Wardak", ethnicGroup: ["Pashto"] },
+  { name: "Yousafzai", ethnicGroup: ["Pashto"] },
+  { name: "Yousufzai", ethnicGroup: ["Pashto"] },
+  { name: "Yusufi", ethnicGroup: ["Dari", "Tajik", "Urdu"] },
+  { name: "Yusufzai", ethnicGroup: ["Pashto", "Dari"] },
+  { name: "Zadran", ethnicGroup: ["Pashto"] },
+  { name: "Zahid", ethnicGroup: ["Urdu", "Punjabi", "Bengali", "Dari"] },
+  { name: "Zahir", ethnicGroup: ["Bengali", "Muslim", "Arabic", "Dari"] },
+  { name: "Zalmai", ethnicGroup: ["Dari", "Pashto"] },
+  { name: "Zazai", ethnicGroup: ["Pashto", "Dari"] }
 ]
 export default names

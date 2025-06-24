@@ -55,7 +55,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   void testCreateAsSuperuser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
     try {
-      withCredentials(getSuperuser().getDomainUsername(),
+      withCredentials(getDomainUsername(getSuperuser()),
           t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -115,7 +115,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     updatedAuthorizationGroupInput.setForSensitiveInformation(true);
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
-    final Integer nrUpdated = withCredentials(getSuperuser().getDomainUsername(),
+    final Integer nrUpdated = withCredentials(getDomainUsername(getSuperuser()),
         t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,

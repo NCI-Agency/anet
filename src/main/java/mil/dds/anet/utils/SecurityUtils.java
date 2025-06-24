@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.UserDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -81,9 +83,7 @@ public class SecurityUtils {
 
   private static Person updatePerson(final PersonDao dao, final Person person,
       final String username) {
-    logger.trace("updating user={} with domainUsername={} (was {})", person, username,
-        person.getDomainUsername());
-    person.setDomainUsername(username);
+    logger.trace("updating user={} with domainUsername={}", person, username);
     if (person.getStatus() != WithStatus.Status.ACTIVE || !Boolean.TRUE.equals(person.getUser())) {
       logger.trace("reactivating user={}", person);
       person.setStatus(WithStatus.Status.ACTIVE);
@@ -102,7 +102,6 @@ public class SecurityUtils {
     newPerson.setUser(true);
     newPerson.setPendingVerification(true);
     // Copy some data from the authentication token
-    newPerson.setDomainUsername(username);
     newPerson.setName(name);
     /*
      * Note: there's also token.getGender(), but that's not generally available in AD/LDAP, and
@@ -110,6 +109,15 @@ public class SecurityUtils {
      * which is hard to accomplish with current Keycloak code.
      */
     final Person person = dao.insert(newPerson);
+
+    final User newUser = new User();
+    // Copy some data from the authentication token
+    newUser.setDomainUsername(username);
+    newUser.setPersonUuid(person.getUuid());
+    final UserDao userDao = ApplicationContextProvider.getEngine().getUserDao();
+    final User user = userDao.insert(newUser);
+    person.setUsers(List.of(user));
+
     if (!Utils.isEmptyOrNull(email)) {
       final EmailAddressDao emailAddressDao =
           ApplicationContextProvider.getEngine().getEmailAddressDao();

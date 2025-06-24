@@ -5,14 +5,20 @@ TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
 TRUNCATE TABLE "assessmentRelatedObjects" CASCADE;
 TRUNCATE TABLE "assessments" CASCADE;
-TRUNCATE TABLE "attachments" CASCADE;
 TRUNCATE TABLE "attachmentRelatedObjects" CASCADE;
+TRUNCATE TABLE "attachments" CASCADE;
+TRUNCATE TABLE "authorizationGroupAdministrativePositions" CASCADE;
 TRUNCATE TABLE "authorizationGroupRelatedObjects" CASCADE;
 TRUNCATE TABLE "authorizationGroups" CASCADE;
 TRUNCATE TABLE "comments" CASCADE;
 TRUNCATE TABLE "customSensitiveInformation" CASCADE;
 TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "entityAvatars" CASCADE;
+TRUNCATE TABLE "eventOrganizations" CASCADE;
+TRUNCATE TABLE "eventPeople" CASCADE;
+TRUNCATE TABLE "eventTasks" CASCADE;
+TRUNCATE TABLE "events" CASCADE;
+TRUNCATE TABLE "eventSeries" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locationRelationships" CASCADE;
 TRUNCATE TABLE "martImportedReports" CASCADE;
@@ -22,16 +28,16 @@ TRUNCATE TABLE "notes" CASCADE;
 TRUNCATE TABLE "organizationAdministrativePositions" CASCADE;
 TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
-TRUNCATE TABLE "people" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
+TRUNCATE TABLE "people" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 TRUNCATE TABLE "reportActions" CASCADE;
 TRUNCATE TABLE "reportAuthorizationGroups" CASCADE;
 TRUNCATE TABLE "reportPeople" CASCADE;
 TRUNCATE TABLE "reportTasks" CASCADE;
-TRUNCATE TABLE "reports" CASCADE;
 TRUNCATE TABLE "reportsSensitiveInformation" CASCADE;
+TRUNCATE TABLE "reports" CASCADE;
 TRUNCATE TABLE "savedSearches" CASCADE;
 TRUNCATE TABLE "subscriptionUpdates" CASCADE;
 TRUNCATE TABLE "subscriptions" CASCADE;
@@ -39,6 +45,7 @@ TRUNCATE TABLE "taskResponsiblePositions" CASCADE;
 TRUNCATE TABLE "taskTaskedOrganizations" CASCADE;
 TRUNCATE TABLE "tasks" CASCADE;
 TRUNCATE TABLE "userActivities" CASCADE;
+TRUNCATE TABLE "users" CASCADE;
 
 -- Countries are inserted by the migrations!
 DELETE FROM "locations" WHERE type != 'PAC';
@@ -47,49 +54,82 @@ DELETE FROM "locations" WHERE type != 'PAC';
 SET time zone 'UTC';
 
 -- Create people
-INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", "domainUsername", "countryUuid", gender, "endOfTourDate", "createdAt", "updatedAt") VALUES
+INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", "countryUuid", gender, "endOfTourDate", "createdAt", "updatedAt") VALUES
 -- Advisors
-  ('b5d495af-44d5-4c35-851a-1039352a8307', 'Jackson, Jack', 0, '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', true, 'jack', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Germany'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('a9d65d96-d107-45c3-bbaa-1133a354335b', 'Elizawell, Elizabeth', 0, '+1-777-7777', 'OF-2', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', true, 'elizabeth', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', 'Solenoid, Selena', 0, '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', true, 'selena', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'Erinson, Erin', 0, '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', true, 'erin', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Australia'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('1ad0c049-6ce8-4890-84f6-5e6a364764c4', 'Reinton, Reina', 0, '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', true, 'reina', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('39d02d26-49eb-43b5-9cec-344777213a67', 'Dvisor, A', 0, '+444-44-4444', 'OF-2', 'A Dvisor was born for this job', true, 'advisor', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('31cba227-f6c6-49e9-9483-fce441bea624', 'Bratton, Creed', 0, '+444-44-4444', 'CIV', 'Let me first settle in.', true, 'creed', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('d4e1ae87-e519-4ec6-b0a4-5c3b19a0183e', 'Malone, Kevin', 0, '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', true, 'kevin', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('02fdbd68-866f-457a-990c-fbd79bc9b96c', 'Guist, Lin', 0, '+444-44-4444', 'CIV', 'Lin can speak so many languages', true, 'lin', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', 'Preter, Inter', 0, '+444-44-4444', 'CIV', 'Inter is fluent in various languages', true, 'inter', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c71f707a-667f-4713-9552-8510d69a308b', 'Rogers, Ben', 0, '+99-9999-9999', 'CIV', NULL, true, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c033862b-a4ef-4043-acd5-a2b399a10f00', 'Rivers, Kevin', 0, '+99-9999-9999', 'CIV', NULL, true, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b5d495af-44d5-4c35-851a-1039352a8307', 'Jackson, Jack', 0, '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Germany'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('a9d65d96-d107-45c3-bbaa-1133a354335b', 'Elizawell, Elizabeth', 0, '+1-777-7777', 'OF-2', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', 'Solenoid, Selena', 0, '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'Erinson, Erin', 0, '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Australia'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('1ad0c049-6ce8-4890-84f6-5e6a364764c4', 'Reinton, Reina', 0, '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('39d02d26-49eb-43b5-9cec-344777213a67', 'Dvisor, A', 0, '+444-44-4444', 'OF-2', 'A Dvisor was born for this job', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('31cba227-f6c6-49e9-9483-fce441bea624', 'Bratton, Creed', 0, '+444-44-4444', 'CIV', 'Let me first settle in.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('d4e1ae87-e519-4ec6-b0a4-5c3b19a0183e', 'Malone, Kevin', 0, '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('02fdbd68-866f-457a-990c-fbd79bc9b96c', 'Guist, Lin', 0, '+444-44-4444', 'CIV', 'Lin can speak so many languages', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', 'Preter, Inter', 0, '+444-44-4444', 'CIV', 'Inter is fluent in various languages', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c71f707a-667f-4713-9552-8510d69a308b', 'Rogers, Ben', 0, '+99-9999-9999', 'CIV', NULL, true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c033862b-a4ef-4043-acd5-a2b399a10f00', 'Rivers, Kevin', 0, '+99-9999-9999', 'CIV', NULL, true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Advisors with no position for testing
-  ('bdd91de7-09c7-4f09-97e4-d3325bb92dab', 'Noposition, Ihave', 0, '+444-44-4545', 'OF-2', 'I need a career change', true, 'nopos', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('7914ceba-7f89-493b-bd03-eee7e19c60a8', 'Reportguy, Ima', 0, '+444-44-4545', 'CIV', 'I need a career change', true, 'reportguy', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'France'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('d9f3ee10-6e01-4d57-9916-67978608e9ba', 'Reportgirl, Ima', 0, '+444-44-4545', 'CIV', 'I need a career change', true, 'reportgirl', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Mexico'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('7a15d0cc-520f-451c-80d8-399b4642c852', 'Beau, Yoshie', 0, '+1-202-7320', 'CIV', NULL, true, 'yoshie', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('f73f5cc9-69fd-4ceb-81b9-a0a840914bd8', 'Sharton, Shardul', 1, '+99-9999-9999', 'CIV', NULL, false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('bdd91de7-09c7-4f09-97e4-d3325bb92dab', 'Noposition, Ihave', 0, '+444-44-4545', 'OF-2', 'I need a career change', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7914ceba-7f89-493b-bd03-eee7e19c60a8', 'Reportguy, Ima', 0, '+444-44-4545', 'CIV', 'I need a career change', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'France'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('d9f3ee10-6e01-4d57-9916-67978608e9ba', 'Reportgirl, Ima', 0, '+444-44-4545', 'CIV', 'I need a career change', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Mexico'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7a15d0cc-520f-451c-80d8-399b4642c852', 'Beau, Yoshie', 0, '+1-202-7320', 'CIV', NULL, true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('f73f5cc9-69fd-4ceb-81b9-a0a840914bd8', 'Sharton, Shardul', 1, '+99-9999-9999', 'CIV', NULL, false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Interlocutors
-  ('90fa5784-9e63-4353-8119-357bcd88e287', 'Steveson, Steve', 0, '+011-232-12324', 'OF-4', 'this is a sample person who could be a Interlocutor!', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'Rogwell, Roger', 0, '+1-412-7324', 'OF-3', 'Roger is another test person we have in the database', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('237e8bf7-2ae4-4d49-b7c8-eca6a92d4767', 'Topferness, Christopf', 0, '+1-422222222', 'CIV', 'Christopf works in the MoD Office', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('5fa54ffd-cc90-493a-b4b1-73e9c4568177', 'Chrisville, Chris', 0, '+1-412-7324', 'OF-3', 'Chris is another test person we have in the database', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('0c5a8ba7-7436-47fd-bead-b8393246a300', 'Kyleson, Kyle', 0, '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('cebeb179-2a64-4d0c-a06b-76e68f80b5e5', 'Bemerged, Myposwill', 0, '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('3cb2076c-5317-47fe-86ad-76f298993917', 'Merged, Duplicate Winner', 0, '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'Merged, Duplicate Loser', 0, NULL, 'CTR', 'Loser is a test person who will be merged', false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('7d90bf90-b3b1-4e99-84bf-5e50b9dcc9d6', 'Huntman, Hunter', 0, '+1-412-9314', 'CIV', NULL, false, NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('33f708e0-bf7c-47a0-baf1-730afa4f0c98', 'Nicholson, Nick', 0, '+1-202-7324', 'CIV', NULL, true, 'nick', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('90fa5784-9e63-4353-8119-357bcd88e287', 'Steveson, Steve', 0, '+011-232-12324', 'OF-4', 'this is a sample person who could be a Interlocutor!', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'Rogwell, Roger', 0, '+1-412-7324', 'OF-3', 'Roger is another test person we have in the database', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('237e8bf7-2ae4-4d49-b7c8-eca6a92d4767', 'Topferness, Christopf', 0, '+1-422222222', 'CIV', 'Christopf works in the MoD Office', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5fa54ffd-cc90-493a-b4b1-73e9c4568177', 'Chrisville, Chris', 0, '+1-412-7324', 'OF-3', 'Chris is another test person we have in the database', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('0c5a8ba7-7436-47fd-bead-b8393246a300', 'Kyleson, Kyle', 0, '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('cebeb179-2a64-4d0c-a06b-76e68f80b5e5', 'Bemerged, Myposwill', 0, '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('3cb2076c-5317-47fe-86ad-76f298993917', 'Merged, Duplicate Winner', 0, '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'Merged, Duplicate Loser', 0, NULL, 'CTR', 'Loser is a test person who will be merged', false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7d90bf90-b3b1-4e99-84bf-5e50b9dcc9d6', 'Huntman, Hunter', 0, '+1-412-9314', 'CIV', NULL, false, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('33f708e0-bf7c-47a0-baf1-730afa4f0c98', 'Nicholson, Nick', 0, '+1-202-7324', 'CIV', NULL, true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Superusers
-  ('98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', 'Bobtown, Bob', 0, '+1-444-7324', 'CIV', 'Bob is a Superuser in EF 1.1', true, 'bob', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ff0cec0b-8eca-48ee-82fe-addce6136f3b', 'Henderson, Henry', 0, '+2-456-7324', 'OF-6', 'Henry is a Superuser in EF 2.1', true, 'henry', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('19fe53bb-90f4-4482-abfc-d85b85deabd9', 'Jacobson, Jacob', 0, '+2-456-7324', 'CIV', 'Jacob is a Superuser in EF 2.2', true, 'jacob', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('f683335a-91e3-4788-aa3f-9eed384f4ac1', 'Beccabon, Rebecca', 0, '+2-456-7324', 'CTR', 'Rebecca is a Superuser in EF 2.2', true, 'rebecca', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Germany'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 'Anderson, Andrew', 0, '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', true, 'andrew', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ad442c97-ca89-4c63-9a4d-336f17ca856b', 'Schrute, Dwight', 0, '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', true, 'dwight', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('b6754f19-b67e-4603-bfe6-af8c61760eef', 'Halpert, Jim', 0, '+1-412-7324', 'CIV', 'Lets prank dwight.', true, 'jim', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c94abd40-21ba-4592-9ce4-95e6c2cfd912', 'Linton, Billie', 0, '+1-264-7324', 'CIV', 'Billie is a powerful superuser', true, 'billie', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Anguilla'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', 'Bobtown, Bob', 0, '+1-444-7324', 'CIV', 'Bob is a Superuser in EF 1.1', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ff0cec0b-8eca-48ee-82fe-addce6136f3b', 'Henderson, Henry', 0, '+2-456-7324', 'OF-6', 'Henry is a Superuser in EF 2.1', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('19fe53bb-90f4-4482-abfc-d85b85deabd9', 'Jacobson, Jacob', 0, '+2-456-7324', 'CIV', 'Jacob is a Superuser in EF 2.2', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Italy'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('f683335a-91e3-4788-aa3f-9eed384f4ac1', 'Beccabon, Rebecca', 0, '+2-456-7324', 'CTR', 'Rebecca is a Superuser in EF 2.2', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Germany'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 'Anderson, Andrew', 0, '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ad442c97-ca89-4c63-9a4d-336f17ca856b', 'Schrute, Dwight', 0, '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b6754f19-b67e-4603-bfe6-af8c61760eef', 'Halpert, Jim', 0, '+1-412-7324', 'CIV', 'Lets prank dwight.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c94abd40-21ba-4592-9ce4-95e6c2cfd912', 'Linton, Billie', 0, '+1-264-7324', 'CIV', 'Billie is a powerful superuser', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Anguilla'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Administrators
-  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Dmin, Arthur', '0', NULL, 'CIV', 'An administrator', true, 'arthur', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Albania'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'Scott, Michael', '0', NULL, 'CIV', 'Worlds best boss.', true, 'michael', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Dmin, Arthur', '0', NULL, 'CIV', 'An administrator', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Albania'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'Scott, Michael', '0', NULL, 'CIV', 'Worlds best boss.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Create users
+INSERT INTO users (uuid, "domainUsername", "personUuid", "createdAt", "updatedAt") VALUES
+-- Advisors
+  (uuid_generate_v4(), 'jack', 'b5d495af-44d5-4c35-851a-1039352a8307', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'elizabeth', 'a9d65d96-d107-45c3-bbaa-1133a354335b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'selena', '00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'erin', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'reina', '1ad0c049-6ce8-4890-84f6-5e6a364764c4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'advisor', '39d02d26-49eb-43b5-9cec-344777213a67', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'creed', '31cba227-f6c6-49e9-9483-fce441bea624', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'kevin', 'd4e1ae87-e519-4ec6-b0a4-5c3b19a0183e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'lin', '02fdbd68-866f-457a-990c-fbd79bc9b96c', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'inter', 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Advisors with no position for testing
+  (uuid_generate_v4(), 'nopos', 'bdd91de7-09c7-4f09-97e4-d3325bb92dab', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'reportguy', '7914ceba-7f89-493b-bd03-eee7e19c60a8', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'reportgirl', 'd9f3ee10-6e01-4d57-9916-67978608e9ba', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'yoshie', '7a15d0cc-520f-451c-80d8-399b4642c852', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Interlocutors
+  (uuid_generate_v4(), 'nick', '33f708e0-bf7c-47a0-baf1-730afa4f0c98', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Superusers
+  (uuid_generate_v4(), 'bob', '98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'henry', 'ff0cec0b-8eca-48ee-82fe-addce6136f3b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'jacob', '19fe53bb-90f4-4482-abfc-d85b85deabd9', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'rebecca', 'f683335a-91e3-4788-aa3f-9eed384f4ac1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'andrew', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'dwight', 'ad442c97-ca89-4c63-9a4d-336f17ca856b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'jim', 'b6754f19-b67e-4603-bfe6-af8c61760eef', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'billie', 'c94abd40-21ba-4592-9ce4-95e6c2cfd912', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Administrators
+  (uuid_generate_v4(), 'arthur', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'michael', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE people
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"Lorem ipsum dolor sit amet","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
@@ -321,98 +361,98 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
 
 -- Put Andrew in the EF 1 Manager Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1 Manager'), (SELECT uuid from people where "domainUsername" = 'andrew'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'andrew') WHERE name = 'EF 1 Manager';
+  ((SELECT uuid from positions where name = 'EF 1 Manager'), '1a557db0-5af5-4ea3-b926-28b5f2e88bf7', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '1a557db0-5af5-4ea3-b926-28b5f2e88bf7' WHERE name = 'EF 1 Manager';
 
 -- Put Bob into the Superuser Billet in EF 1.1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.1 Superuser'), (SELECT uuid from people where "domainUsername" = 'bob'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'bob') WHERE name = 'EF 1.1 Superuser';
+  ((SELECT uuid from positions where name = 'EF 1.1 Superuser'), '98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '98fa4da5-ec99-457b-a4bc-2aa9064e2ca7' WHERE name = 'EF 1.1 Superuser';
 
 -- Put Henry into the Superuser Billet in EF 2.1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Superuser'), (SELECT uuid from people where "domainUsername" = 'henry'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'henry') WHERE name = 'EF 2.1 Superuser';
+  ((SELECT uuid from positions where name = 'EF 2.1 Superuser'), 'ff0cec0b-8eca-48ee-82fe-addce6136f3b', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'ff0cec0b-8eca-48ee-82fe-addce6136f3b' WHERE name = 'EF 2.1 Superuser';
 
 -- Rotate an advisor through a billet ending up with Jack in the EF 2.1 Advisor B Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "domainUsername" = 'erin'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'erin') WHERE name = 'EF 2.1 Advisor B';
+  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9' WHERE name = 'EF 2.1 Advisor B';
 UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "domainUsername" = 'jack'), '2021-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'jack') WHERE name = 'EF 2.1 Advisor B';
+  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), 'b5d495af-44d5-4c35-851a-1039352a8307', '2021-01-01');
+UPDATE positions SET "currentPersonUuid" = 'b5d495af-44d5-4c35-851a-1039352a8307' WHERE name = 'EF 2.1 Advisor B';
 
 -- Rotate advisors through billets ending up with Dvisor in the EF 2.2 Advisor Sewing Facilities Billet and Selena in the EF 1.2 Advisor Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'advisor'), '2020-01-01');
+  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), '39d02d26-49eb-43b5-9cec-344777213a67', '2020-01-01');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'selena'), '2020-01-01');
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), '00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', '2020-01-01');
 
 UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
 UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
 
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'advisor'), '2021-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'advisor') WHERE name = 'EF 2.2 Advisor Sewing Facilities';
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), '39d02d26-49eb-43b5-9cec-344777213a67', '2021-01-01');
+UPDATE positions SET "currentPersonUuid" = '39d02d26-49eb-43b5-9cec-344777213a67' WHERE name = 'EF 2.2 Advisor Sewing Facilities';
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'selena'), '2021-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'selena') WHERE name = 'EF 1.2 Advisor';
+  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), '00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', '2021-01-01');
+UPDATE positions SET "currentPersonUuid" = '00b19ebf-0d4d-4b0f-93c8-9023ccb59c49' WHERE name = 'EF 1.2 Advisor';
 
 -- Put Elizabeth into the EF 1.1 Advisor A Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), (SELECT uuid from people where "domainUsername" = 'elizabeth'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'elizabeth') WHERE name = 'EF 1.1 Advisor A';
+  ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), 'a9d65d96-d107-45c3-bbaa-1133a354335b', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'a9d65d96-d107-45c3-bbaa-1133a354335b' WHERE name = 'EF 1.1 Advisor A';
 
 -- Put Reina into the EF 2.2 Advisor C Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor C'), (SELECT uuid from people where "domainUsername" = 'reina'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'reina') WHERE name = 'EF 2.2 Advisor C';
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor C'), '1ad0c049-6ce8-4890-84f6-5e6a364764c4', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '1ad0c049-6ce8-4890-84f6-5e6a364764c4' WHERE name = 'EF 2.2 Advisor C';
 
 -- Put Erin into the EF 2.2 Advisor D Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), (SELECT uuid from people where "domainUsername" = 'erin'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'erin') WHERE name = 'EF 2.2 Advisor D';
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9' WHERE name = 'EF 2.2 Advisor D';
 
 -- Put Jacob in the EF 2.2 Superuser Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Superuser'), (SELECT uuid from people where "domainUsername" = 'jacob'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'jacob') WHERE name = 'EF 2.2 Superuser';
+  ((SELECT uuid from positions where name = 'EF 2.2 Superuser'), '19fe53bb-90f4-4482-abfc-d85b85deabd9', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '19fe53bb-90f4-4482-abfc-d85b85deabd9' WHERE name = 'EF 2.2 Superuser';
 
 -- Put Rebecca in the EF 2.2 Final Reviewer Position
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'), (SELECT uuid from people where "domainUsername" = 'rebecca'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'rebecca') WHERE name = 'EF 2.2 Final Reviewer';
+  ((SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'), 'f683335a-91e3-4788-aa3f-9eed384f4ac1', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'f683335a-91e3-4788-aa3f-9eed384f4ac1' WHERE name = 'EF 2.2 Final Reviewer';
 
 -- Put Arthur into the Admin Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'ANET Administrator'), (SELECT uuid from people where "domainUsername" = 'arthur'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'arthur') WHERE name = 'ANET Administrator';
+  ((SELECT uuid from positions where name = 'ANET Administrator'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '87fdbc6a-3109-4e11-9702-a894d6ca31ef' WHERE name = 'ANET Administrator';
 
 -- Put Creed into the EF 5.1 Quality Ensurance
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Quality Assurance'), (SELECT uuid from people where "domainUsername" = 'creed'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'creed') WHERE name = 'EF 5.1 Advisor Quality Assurance';
+  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Quality Assurance'), '31cba227-f6c6-49e9-9483-fce441bea624', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '31cba227-f6c6-49e9-9483-fce441bea624' WHERE name = 'EF 5.1 Advisor Quality Assurance';
 
 -- Put Kevin into the EF 5.1 Accounting
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Accounting'), (SELECT uuid from people where "domainUsername" = 'kevin'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'kevin') WHERE name = 'EF 5.1 Advisor Accounting';
+  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Accounting'), 'd4e1ae87-e519-4ec6-b0a4-5c3b19a0183e', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'd4e1ae87-e519-4ec6-b0a4-5c3b19a0183e' WHERE name = 'EF 5.1 Advisor Accounting';
 
 -- Put Jim into the EF 5.1 Sales 1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 1'), (SELECT uuid from people where "domainUsername" = 'jim'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'jim') WHERE name = 'EF 5.1 Superuser Sales 1';
+  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 1'), 'b6754f19-b67e-4603-bfe6-af8c61760eef', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'b6754f19-b67e-4603-bfe6-af8c61760eef' WHERE name = 'EF 5.1 Superuser Sales 1';
 
 -- Put Dwight into the EF 5.1 Sales 2
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 2'), (SELECT uuid from people where "domainUsername" = 'dwight'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'dwight') WHERE name = 'EF 5.1 Superuser Sales 2';
+  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 2'), 'ad442c97-ca89-4c63-9a4d-336f17ca856b', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'ad442c97-ca89-4c63-9a4d-336f17ca856b' WHERE name = 'EF 5.1 Superuser Sales 2';
 
 -- Put Michael into the EF 5 Admin
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where "domainUsername" = 'michael'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'michael') WHERE name = 'EF 5 Admin';
+  ((SELECT uuid from positions where name = 'EF 5 Admin'), '46ba6a73-0cd7-4efb-8e99-215e98cc5987', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '46ba6a73-0cd7-4efb-8e99-215e98cc5987' WHERE name = 'EF 5 Admin';
 
 -- Put Kevin Rivers into the EF 6 Approver
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
@@ -426,28 +466,28 @@ UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name =
 
 -- Put Nick into the EF 9 Advisor
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 9 Advisor'), (SELECT uuid from people where "domainUsername" = 'nick'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'nick') WHERE name = 'EF 9 Advisor';
+  ((SELECT uuid from positions where name = 'EF 9 Advisor'), '33f708e0-bf7c-47a0-baf1-730afa4f0c98', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '33f708e0-bf7c-47a0-baf1-730afa4f0c98' WHERE name = 'EF 9 Advisor';
 
 -- Put Yoshie Beau into the EF 9 Approver
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 9 Approver'), (SELECT uuid from people where "domainUsername" = 'yoshie'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'yoshie') WHERE name = 'EF 9 Approver';
+  ((SELECT uuid from positions where name = 'EF 9 Approver'), '7a15d0cc-520f-451c-80d8-399b4642c852', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '7a15d0cc-520f-451c-80d8-399b4642c852' WHERE name = 'EF 9 Approver';
 
 -- Put Billie into the EF 9 Superuser
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 9 Superuser'), (SELECT uuid from people where "domainUsername" = 'billie'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'billie') WHERE name = 'EF 9 Superuser';
+  ((SELECT uuid from positions where name = 'EF 9 Superuser'), 'c94abd40-21ba-4592-9ce4-95e6c2cfd912', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'c94abd40-21ba-4592-9ce4-95e6c2cfd912' WHERE name = 'EF 9 Superuser';
 
 -- Put Lin into the LNG Advisor A
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'LNG Advisor A'), (SELECT uuid from people where "domainUsername" = 'lin'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'lin') WHERE name = 'LNG Advisor A';
+  ((SELECT uuid from positions where name = 'LNG Advisor A'), '02fdbd68-866f-457a-990c-fbd79bc9b96c', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = '02fdbd68-866f-457a-990c-fbd79bc9b96c' WHERE name = 'LNG Advisor A';
 
 -- Put Inter into the LNG Advisor B
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'LNG Advisor B'), (SELECT uuid from people where "domainUsername" = 'inter'), '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'inter') WHERE name = 'LNG Advisor B';
+  ((SELECT uuid from positions where name = 'LNG Advisor B'), 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc' WHERE name = 'LNG Advisor B';
 
 -- Top-level organizations
 INSERT INTO organizations(uuid, "shortName", "longName", app6context, "app6standardIdentity", "app6symbolSet", "createdAt", "updatedAt") VALUES
@@ -860,7 +900,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', TRUE, TRUE, FALSE);
 
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "keyOutcomes", "nextSteps", state, "engagementDate", duration, atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='General Hospital'), 'Run through FY2016 Numbers on tool usage',
@@ -871,7 +911,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', TRUE, FALSE, TRUE),
   ((SELECT uuid FROM people where name = 'Rogwell, Roger'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', FALSE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.A'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600'),
   ((SELECT uuid from tasks where "shortName" = '1.1.B'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600');
@@ -884,7 +924,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '3e717721-d675-4ff3-b687-533b50978f9e', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '3e717721-d675-4ff3-b687-533b50978f9e', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '3e717721-d675-4ff3-b687-533b50978f9e', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.C'), '3e717721-d675-4ff3-b687-533b50978f9e');
 
@@ -896,7 +936,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '5d11abd0-242b-41ef-8420-a931d19ee513', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '5d11abd0-242b-41ef-8420-a931d19ee513', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '5d11abd0-242b-41ef-8420-a931d19ee513', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.A'), '5d11abd0-242b-41ef-8420-a931d19ee513');
 
@@ -907,8 +947,8 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'bob'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', TRUE, FALSE, FALSE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', FALSE, TRUE, FALSE);
+  ('98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', TRUE, FALSE, FALSE),
+  ('b5d495af-44d5-4c35-851a-1039352a8307', 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', FALSE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.B'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd');
 
@@ -920,7 +960,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Rogwell, Roger'), 'c9884c73-31c5-441e-ad6b-350513e28b84', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), 'c9884c73-31c5-441e-ad6b-350513e28b84', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', 'c9884c73-31c5-441e-ad6b-350513e28b84', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.A'), 'c9884c73-31c5-441e-ad6b-350513e28b84');
 
@@ -931,7 +971,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '5f681376-6eac-464d-8d46-02ff89d45071', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '5f681376-6eac-464d-8d46-02ff89d45071', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '5f681376-6eac-464d-8d46-02ff89d45071', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.C'), '5f681376-6eac-464d-8d46-02ff89d45071');
 
@@ -942,7 +982,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '5367a91a-9f70-469d-b0a4-69990ea8ac82', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '5367a91a-9f70-469d-b0a4-69990ea8ac82', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '5367a91a-9f70-469d-b0a4-69990ea8ac82', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.A'), '5367a91a-9f70-469d-b0a4-69990ea8ac82');
 
@@ -953,7 +993,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 1.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Rogwell, Roger'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'elizabeth'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', TRUE, TRUE, FALSE);
+  ('a9d65d96-d107-45c3-bbaa-1133a354335b', '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '2.A'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5');
 
@@ -964,7 +1004,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 1.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Rogwell, Roger'), 'e5319bc4-91f2-473b-92c7-e796bc84b169', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'elizabeth'), 'e5319bc4-91f2-473b-92c7-e796bc84b169', TRUE, TRUE, FALSE);
+  ('a9d65d96-d107-45c3-bbaa-1133a354335b', 'e5319bc4-91f2-473b-92c7-e796bc84b169', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '2.A'), 'e5319bc4-91f2-473b-92c7-e796bc84b169');
 
@@ -975,8 +1015,8 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Topferness, Christopf'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where "domainUsername" = 'reina'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', FALSE, FALSE, FALSE);
+  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, TRUE, FALSE),
+  ('1ad0c049-6ce8-4890-84f6-5e6a364764c4', 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', FALSE, FALSE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.B'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3');
 INSERT INTO "reportsSensitiveInformation" (uuid, "createdAt", "updatedAt", text, "reportUuid") VALUES
@@ -989,7 +1029,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Topferness, Christopf'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', TRUE, TRUE, FALSE);
+  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.B'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8');
 
@@ -1000,7 +1040,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Topferness, Christopf'), '3fa48376-0519-48ba-8d91-2fa18c7a040f', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), '3fa48376-0519-48ba-8d91-2fa18c7a040f', TRUE, TRUE, FALSE);
+  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '3fa48376-0519-48ba-8d91-2fa18c7a040f', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.B'), '3fa48376-0519-48ba-8d91-2fa18c7a040f');
 
@@ -1010,7 +1050,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   'Reschedule Meeting','', 4, CURRENT_TIMESTAMP, 0, 1,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), 'a485a567-3e21-4219-9de7-2704c20a6f71', TRUE, TRUE, FALSE);
+  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'a485a567-3e21-4219-9de7-2704c20a6f71', TRUE, TRUE, FALSE);
 
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid","customFields") VALUES
   ('59be259b-30b9-4d04-9e21-e8ceb58cbe9c', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
@@ -1018,9 +1058,9 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'),
    '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.assetsUsed"],"itemsAgreed":[],"echelons":"Ut enim ad minim veniam","systemProcess":"","multipleButtons":["advise"],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, TRUE, FALSE),
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, TRUE, FALSE),
   ((SELECT uuid FROM people where name = 'Sharton, Shardul'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'lin'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, FALSE),
+  ('02fdbd68-866f-457a-990c-fbd79bc9b96c', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, FALSE),
   ((SELECT uuid FROM people where name = 'Kyleson, Kyle'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, TRUE),
   ((SELECT uuid FROM people where name = 'Chrisville, Chris'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, TRUE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
@@ -1032,9 +1072,9 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   'keep on testing!', 'check the classification', 0, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), 'NU');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', TRUE, TRUE, FALSE),
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'c3008f90-6a27-4343-b278-827a0a0dc6bf', TRUE, TRUE, FALSE),
   ((SELECT uuid FROM people where name = 'Sharton, Shardul'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'lin'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, FALSE),
+  ('02fdbd68-866f-457a-990c-fbd79bc9b96c', 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, FALSE),
   ((SELECT uuid FROM people where name = 'Kyleson, Kyle'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, TRUE),
   ((SELECT uuid FROM people where name = 'Chrisville, Chris'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, TRUE);
 
@@ -1043,7 +1083,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   'I need to edit this report so unpublish it please','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e', TRUE, TRUE, FALSE),
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bb9dad1a-1c6c-45de-91e8-aecda261d21e', TRUE, TRUE, FALSE),
   ((SELECT uuid FROM people where name = 'Sharton, Shardul'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e', TRUE, FALSE, TRUE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.2.A'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e'),
@@ -1055,8 +1095,8 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   'Keep testing', 0, '2022-08-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), '34265a98-7f82-4f16-b132-abcb60d307ad', TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '34265a98-7f82-4f16-b132-abcb60d307ad', FALSE, FALSE, FALSE);
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', '34265a98-7f82-4f16-b132-abcb60d307ad', TRUE, TRUE, FALSE),
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '34265a98-7f82-4f16-b132-abcb60d307ad', FALSE, FALSE, FALSE);
 
 -- Erin's Draft report
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid", "customFields") VALUES
@@ -1066,7 +1106,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Topferness, Christopf'), '530b735e-1134-4daa-9e87-4491c888a4f7', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), '530b735e-1134-4daa-9e87-4491c888a4f7', TRUE, TRUE, FALSE);
+  ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '530b735e-1134-4daa-9e87-4491c888a4f7', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '2.A'), '530b735e-1134-4daa-9e87-4491c888a4f7');
 
@@ -1156,7 +1196,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'Steveson, Steve'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, TRUE, FALSE);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, TRUE, FALSE);
 
 -- Authorization groups
 INSERT INTO "authorizationGroups" (uuid, name, description, status, "distributionList", "forSensitiveInformation", "createdAt", "updatedAt") VALUES
@@ -1510,7 +1550,7 @@ INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "
 -- Test data for assessments
 
 -- Reports for task assessments
-INSERT INTO public.reports ("createdAt", "updatedAt", intent, exsum, text, "nextSteps", state, "engagementDate", atmosphere, "atmosphereDetails", "keyOutcomes", "cancelledReason", "releasedAt", uuid, "advisorOrganizationUuid", "approvalStepUuid", "locationUuid", "interlocutorOrganizationUuid", "legacyId", duration, "customFields", classification) VALUES
+INSERT INTO reports ("createdAt", "updatedAt", intent, exsum, text, "nextSteps", state, "engagementDate", atmosphere, "atmosphereDetails", "keyOutcomes", "cancelledReason", "releasedAt", uuid, "advisorOrganizationUuid", "approvalStepUuid", "locationUuid", "interlocutorOrganizationUuid", "legacyId", duration, "customFields", classification) VALUES
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReport', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, '4915d7b7-6857-4324-98eb-f7be5b0ed170', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReport with questionFor11B', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment task11COnceReport with questionForNegative', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 2, '', 'test', NULL, CURRENT_TIMESTAMP, '17c518f6-4444-48d9-b63b-7da7e2023ecc', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
@@ -1519,7 +1559,7 @@ INSERT INTO public.reports ("createdAt", "updatedAt", intent, exsum, text, "next
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReportRestricted', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, 'e4498f99-8473-4d42-a86c-557b495ebd6c', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL);
 
 -- Report tasks for task assessments
-INSERT INTO public."reportTasks" ("reportUuid", "taskUuid") VALUES
+INSERT INTO "reportTasks" ("reportUuid", "taskUuid") VALUES
   ('e4498f99-8473-4d42-a86c-557b495ebd6c', '42afd501-1a2c-4758-9da5-f996b2c97156'),
   ('7676b6ca-c0b2-46a2-9b92-0d255d2532eb', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
   ('b0bea024-48bf-4d30-914a-a19d6c39d82c', '0701a964-5d79-4090-8f35-a40856556675'),
@@ -1528,7 +1568,7 @@ INSERT INTO public."reportTasks" ("reportUuid", "taskUuid") VALUES
   ('4915d7b7-6857-4324-98eb-f7be5b0ed170', '2200a820-c4c7-4c9c-946c-f0c9c9e045c5');
 
 -- Report people for task assessments
-INSERT INTO public."reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee", "isAuthor", "isInterlocutor") VALUES
+INSERT INTO "reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee", "isAuthor", "isInterlocutor") VALUES
   (true, 'b5d495af-44d5-4c35-851a-1039352a8307', 'e4498f99-8473-4d42-a86c-557b495ebd6c', true, true, false),
   (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '4915d7b7-6857-4324-98eb-f7be5b0ed170', true, true, false),
   (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', true, true, false),
@@ -1537,7 +1577,7 @@ INSERT INTO public."reportPeople" ("isPrimary", "personUuid", "reportUuid", "isA
   (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '17c518f6-4444-48d9-b63b-7da7e2023ecc', true, true, false);
 
 -- Report actions for task assessments
-INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '764a393a-a292-40c5-8f96-28263dc906c0', false),
@@ -1564,7 +1604,7 @@ INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "pers
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false);
 
 -- Notes for task assessments
-INSERT INTO public.assessments (uuid, "authorUuid", "assessmentValues", "createdAt", "updatedAt", "assessmentKey") VALUES
+INSERT INTO assessments (uuid, "authorUuid", "assessmentValues", "createdAt", "updatedAt", "assessmentKey") VALUES
   ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"issues":"<p>Test assessment taskSemiannuallyRestricted</p>","__recurrence":"semiannually","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-12 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskSemiannuallyRestricted'),
   ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"GREEN","issues":"<p>Test assessment taskMonthly</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskMonthly'),
   ('b79c0643-6bdc-4813-b567-404313043d92', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"AMBER","issues":"<p>Test assessment taskMonthly with questionFor11B</p>","questionFor11B":"Test assessment taskMonthly with questionFor11B","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskMonthly'),
@@ -1585,7 +1625,7 @@ INSERT INTO public.assessments (uuid, "authorUuid", "assessmentValues", "created
   ('ef3bb6b5-6ab2-48ba-a9be-5515446fd0a3', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport with questionForNegative","questionForNegative":"Test assessment task11COnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.task11COnceReport');
 
 -- Note related objects for task assessments
-INSERT INTO public."assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
   ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'tasks', '4831e09b-2bbb-4717-9bfa-91071e62260a'),
   ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', 'tasks', '9b9f4205-0721-4893-abf8-69e020d4db23'),
   ('b79c0643-6bdc-4813-b567-404313043d92', 'tasks', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
@@ -1620,7 +1660,7 @@ INSERT INTO public."assessmentRelatedObjects" ("assessmentUuid", "relatedObjectT
   ('140ec8fe-29f5-4132-b565-4ad76c3a9acc', 'reports', '764a393a-a292-40c5-8f96-28263dc906c0');
 
 -- Reports for person assessments
-INSERT INTO public.reports ("createdAt", "updatedAt", intent, exsum, text, "nextSteps", state, "engagementDate", atmosphere, "atmosphereDetails", "keyOutcomes", "cancelledReason", "releasedAt", uuid, "advisorOrganizationUuid", "approvalStepUuid", "locationUuid", "interlocutorOrganizationUuid", "legacyId", duration, "customFields", classification) VALUES
+INSERT INTO reports ("createdAt", "updatedAt", intent, exsum, text, "nextSteps", state, "engagementDate", atmosphere, "atmosphereDetails", "keyOutcomes", "cancelledReason", "releasedAt", uuid, "advisorOrganizationUuid", "approvalStepUuid", "locationUuid", "interlocutorOrganizationUuid", "legacyId", duration, "customFields", classification) VALUES
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment personOnceReportLinguist with questionForLin', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, '216afd92-ba73-479d-ac59-ade83ab38b36', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment personOnceReportLinguist with questionForNegative and questionForLin', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 2, '', 'test', NULL, CURRENT_TIMESTAMP, 'afad83a1-85d9-4a3d-a090-351b11a9edce', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment interlocutorOnceReport', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
@@ -1631,7 +1671,7 @@ INSERT INTO public.reports ("createdAt", "updatedAt", intent, exsum, text, "next
   (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment personOnceReportLinguist with questionForNegative', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 2, '', 'test', NULL, CURRENT_TIMESTAMP, 'dcafe728-4017-4854-9212-dc87b4d19cb7', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL);
 
 -- Report tasks for person assessments
-INSERT INTO public."reportTasks" ("reportUuid", "taskUuid") VALUES
+INSERT INTO "reportTasks" ("reportUuid", "taskUuid") VALUES
   ('cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', '076793eb-9950-4ea6-bbd5-2d8b8827828c'),
   ('dcafe728-4017-4854-9212-dc87b4d19cb7', '076793eb-9950-4ea6-bbd5-2d8b8827828c'),
   ('216afd92-ba73-479d-ac59-ade83ab38b36', '076793eb-9950-4ea6-bbd5-2d8b8827828c'),
@@ -1642,7 +1682,7 @@ INSERT INTO public."reportTasks" ("reportUuid", "taskUuid") VALUES
   ('9db10db0-794a-488d-a636-55e7195e9167', '076793eb-9950-4ea6-bbd5-2d8b8827828c');
 
 -- Report people for person assessments
-INSERT INTO public."reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee", "isAuthor", "isInterlocutor") VALUES
+INSERT INTO "reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee", "isAuthor", "isInterlocutor") VALUES
   (true, 'b5d495af-44d5-4c35-851a-1039352a8307', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', true, true, false),
   (false, 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', true, false, false),
   (false, 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', 'dcafe728-4017-4854-9212-dc87b4d19cb7', true, false, false),
@@ -1661,7 +1701,7 @@ INSERT INTO public."reportPeople" ("isPrimary", "personUuid", "reportUuid", "isA
   (true, '0c5a8ba7-7436-47fd-bead-b8393246a300', '9db10db0-794a-488d-a636-55e7195e9167', true, false, true);
 
 -- Report actions for person assessments
-INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
@@ -1696,7 +1736,7 @@ INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "pers
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false);
 
 -- Notes for person assessments
-INSERT INTO public.assessments (uuid, "authorUuid", "assessmentValues", "createdAt", "updatedAt", "assessmentKey") VALUES
+INSERT INTO assessments (uuid, "authorUuid", "assessmentValues", "createdAt", "updatedAt", "assessmentKey") VALUES
   ('9402cdc5-cd59-4c3d-a17d-807b5f5ad2b8', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
   ('6cd909f7-e861-4f4e-8cae-38dfc98c19d9', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question4":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
   ('3c7929a6-330d-48eb-8eff-e7ef3e765391', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question3":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
@@ -1717,7 +1757,7 @@ INSERT INTO public.assessments (uuid, "authorUuid", "assessmentValues", "created
   ('2fbaedc0-8783-4fe2-8411-ed41ffa45f5a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment personOnceReportLinguistLin with questionForLin","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguistLin');
 
 -- Note related objects for person assessments
-INSERT INTO public."assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
   ('9ce0ad6d-5a40-40db-a56c-b0c8f4e3a517', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
   ('d6ef3959-614c-409c-8d27-449954afa61e', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
   ('b494790b-445c-4174-8c60-3257f988d2c4', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
@@ -1758,6 +1798,8 @@ INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "succ
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
 -- authorizationGroups currently have no links
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_events";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_eventSeries";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_locations";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_organizations";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_people";
@@ -1768,6 +1810,8 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_tasks";
 -- Update the full-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_attachments";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_events";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_eventSeries";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_locations";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_organizations";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_people";
@@ -1775,44 +1819,3 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_positions";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_reports";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_tasks";
 
--- LEAVE THIS AS LAST STATEMENT
--- Truncate all the dates (on reports etc.) to dates that could have been generated by
--- Java (millisecond precision) rather than by the database itself (microsecond precision)
-UPDATE reports SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt"),
-  "releasedAt"=date_trunc('milliseconds', "releasedAt"),
-  "engagementDate"=date_trunc('second', "engagementDate");
-UPDATE people SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt"),
-  "endOfTourDate"=date_trunc('second', "endOfTourDate");
-UPDATE positions SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");
-UPDATE "peoplePositions" SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "endedAt"=date_trunc('milliseconds', "endedAt");
-UPDATE organizations SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");
-UPDATE tasks SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt"),
-  "plannedCompletion"=date_trunc('second', "updatedAt"),
-  "projectedCompletion"=date_trunc('second', "updatedAt");
-UPDATE locations SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");
-UPDATE "authorizationGroups" SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");
-UPDATE notes SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");
-UPDATE attachments SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");
-UPDATE assessments SET
-  "createdAt"=date_trunc('milliseconds', "createdAt"),
-  "updatedAt"=date_trunc('milliseconds', "updatedAt");

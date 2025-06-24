@@ -170,7 +170,7 @@ class NoteResourceTest extends AbstractResourceTest {
     assertFreeTextNotes(interlocutorPerson.getNotes(), testNoteInputs, 1);
 
     // - S: read it as someone else
-    final Person bobPerson = withCredentials(getBobBobtown().getDomainUsername(),
+    final Person bobPerson = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid));
     assertFreeTextNotes(bobPerson.getNotes(), testNoteInputs, 1);
 

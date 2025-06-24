@@ -26,9 +26,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
-import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,9 +34,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 @GraphQLApi
 public class PersonResource {
-
-  private static final String DUPLICATE_PERSON_DOMAINUSERNAME =
-      "Another person is already using this domainUsername.";
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
@@ -90,7 +85,7 @@ public class PersonResource {
     // Only admins can set user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
       p.setUser(false);
-      p.setDomainUsername(null);
+      p.setUsers(null);
     }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
@@ -99,16 +94,15 @@ public class PersonResource {
 
     p.setBiography(
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
-    Person created;
-    try {
-      created = dao.insert(p);
-    } catch (UnableToExecuteStatementException e) {
-      throw ResponseUtils.handleSqlException(e, DUPLICATE_PERSON_DOMAINUSERNAME);
-    }
+    final Person created = dao.insert(p);
 
     if (DaoUtils.getUuid(created.getPosition()) != null) {
       engine.getPositionDao().setPersonInPosition(created.getUuid(),
           DaoUtils.getUuid(created.getPosition()));
+    }
+
+    if (AuthUtils.isAdmin(user)) {
+      engine.getUserDao().updateUsers(p, p.getUsers());
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
@@ -160,7 +154,7 @@ public class PersonResource {
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
       p.setUser(existing.getUser());
-      p.setDomainUsername(existing.getDomainUsername());
+      p.setUsers(existing.getUsers());
     }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
@@ -190,10 +184,10 @@ public class PersonResource {
       }
     }
 
-    // If person changed to inactive, clear out the user status and domainUsername
+    // If person changed to inactive, update the status
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
-      AnetAuditLogger.log("Person {} user status set to false", p);
+      AnetAuditLogger.log("Person {} set to inactive", p);
       dao.updateAuthenticationDetails(p);
     }
 
@@ -214,15 +208,14 @@ public class PersonResource {
 
     p.setBiography(
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
-    final int numRows;
-    try {
-      numRows = dao.update(p);
-    } catch (UnableToExecuteStatementException e) {
-      throw ResponseUtils.handleSqlException(e, DUPLICATE_PERSON_DOMAINUSERNAME);
-    }
+    final int numRows = dao.update(p);
 
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
+    }
+
+    if (AuthUtils.isAdmin(user)) {
+      engine.getUserDao().updateUsers(p, p.getUsers());
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
@@ -308,13 +301,10 @@ public class PersonResource {
     return numRows;
   }
 
-  /**
-   * Convenience method for API testing.
-   */
   @GraphQLQuery(name = "me")
   @AllowUnverifiedUsers
   public Person getCurrentUser(@GraphQLRootContext GraphQLContext context) {
-    return DaoUtils.getUserFromContext(context);
+    return dao.getByUuid(DaoUtils.getUuid(DaoUtils.getUserFromContext(context)));
   }
 
   @GraphQLMutation(name = "updateMe")
@@ -330,7 +320,7 @@ public class PersonResource {
     if (!AuthUtils.isAdmin(user)) {
       final Person existing = dao.getByUuid(p.getUuid());
       p.setUser(existing.getUser());
-      p.setDomainUsername(existing.getDomainUsername());
+      p.setUsers(existing.getUsers());
     }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {

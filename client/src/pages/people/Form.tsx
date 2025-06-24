@@ -28,6 +28,7 @@ import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
+import UserInputTable from "components/UserInputTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
@@ -510,15 +511,16 @@ const PersonForm = ({
                         {values.user && (
                           <DictionaryField
                             wrappedComponent={FastField}
-                            dictProps={Settings.fields.person.domainUsername}
-                            name="domainUsername"
-                            component={FieldHelper.InputField}
+                            as="div"
+                            dictProps={Settings.fields.person.users}
+                            component={FieldHelper.SpecialField}
                             extraColElem={
                               <span className="text-danger">
-                                Be careful when changing this field; you might
-                                lock someone out or create duplicate accounts.
+                                Be careful when editing this field; you might
+                                lock someone out.
                               </span>
                             }
+                            widget={<UserInputTable users={values.users} />}
                           />
                         )}
                       </>

@@ -33,6 +33,7 @@ import {
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
+import UserTable from "components/UserTable"
 import { Field, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -55,7 +56,10 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       phoneNumber
       user
-      domainUsername
+      users {
+        uuid
+        domainUsername
+      }
       biography
       obsoleteCountry
       country {
@@ -339,7 +343,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     const mappedNonCustomFields = mapNonCustomFields()
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
-      domainUsername: {
+      users: {
         accessCond: isAdmin
       }
     }
@@ -403,6 +407,12 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
+      users: (
+        <UserTable
+          label={Settings.fields.person.users.label}
+          users={person.users}
+        />
+      ),
       emailAddresses: (
         <EmailAddressTable
           label={Settings.fields.person.emailAddresses.label}
