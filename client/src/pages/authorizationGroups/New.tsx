@@ -22,7 +22,7 @@ const AuthorizationGroupNew = ({
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("New Authorization Group")
+  usePageTitle("New Community")
 
   const authorizationGroup = new AuthorizationGroup()
 
@@ -30,7 +30,7 @@ const AuthorizationGroupNew = ({
     <div>
       <AuthorizationGroupForm
         initialValues={authorizationGroup}
-        title="Create a new Authorization Group"
+        title="Create a new Community"
       />
     </div>
   )

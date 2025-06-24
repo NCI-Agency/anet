@@ -454,7 +454,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           "/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?",
           reportUuid);
 
-      // Delete relation to authorization groups
+      // Delete relation to communities
       handle.execute(
           "/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?",
           reportUuid);

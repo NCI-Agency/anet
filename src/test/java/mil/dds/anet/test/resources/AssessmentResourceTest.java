@@ -43,7 +43,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       String.format("{ uuid shortName %1$s }", _ASSESSMENTS_FIELDS);
 
-  // The authorization groups defined in the dictionary give Erin read access and Jack write access;
+  // The communities defined in the dictionary give Erin read access and Jack write access;
   // these test objects can be used for the assessments authorization tests
   // Task EF 2
   private static final String TEST_TASK_EF2_UUID = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7";
@@ -198,7 +198,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantPersonAssessmentsEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for person through the AssessmentResource
     // methods, with
-    // empty write authorization groups defined in the dictionary
+    // empty write communities defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_TASK_2B_UUID);
   }
@@ -207,7 +207,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantPersonAssessmentsNoAuthGroups() {
     // Instant ('once') assessment tests for person through the AssessmentResource
     // methods, with no
-    // authorization groups defined in the dictionary
+    // communities defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_TASK_2B_UUID);
   }
@@ -223,7 +223,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantPersonAssessmentsViaReportEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for person through
-    // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
+    // ReportResource::updateReportAssessments, with empty write communities defined in the
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_TASK_2B_UUID);
@@ -232,7 +232,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantPersonAssessmentsViaReportNoAuthGroups() {
     // Instant ('once') assessment tests for person through
-    // ReportResource::updateReportAssessments, with no authorization groups defined in the
+    // ReportResource::updateReportAssessments, with no communities defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_TASK_2B_UUID);
@@ -249,7 +249,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantTaskAssessmentsEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for task through the AssessmentResource methods,
     // with empty
-    // write authorization groups defined in the dictionary
+    // write communities defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
         "fields.task.assessments.taskOnceReportNoWrite", false, TEST_TASK_2B_UUID);
   }
@@ -258,7 +258,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantTaskAssessmentsNoAuthGroups() {
     // Instant ('once') assessment tests for task through the AssessmentResource methods,
     // with no
-    // authorization groups defined in the dictionary
+    // communities defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
         "fields.task.assessments.taskOnceReport", false, TEST_TASK_2B_UUID);
   }
@@ -274,7 +274,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantTaskAssessmentsViaReportEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for task through
-    // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
+    // ReportResource::updateReportAssessments, with empty write communities defined in the
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups(
         "testInstantTaskAssessmentsViaReportNoAuthGroups",
@@ -284,7 +284,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantTaskAssessmentsViaReportNoAuthGroups() {
     // Instant ('once') assessment tests for task through
-    // ReportResource::updateReportAssessments, with no authorization groups defined in the
+    // ReportResource::updateReportAssessments, with no communities defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantTaskAssessmentsViaReportNoAuthGroups",
         "fields.task.assessments.taskOnceReport", false, TEST_TASK_2B_UUID);
@@ -402,7 +402,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testOndemandAssessmentsEmptyWriteAuthGroups() {
-    // On-demand assessment tests, with empty write authorization groups defined in the
+    // On-demand assessment tests, with empty write communities defined in the
     // dictionary
     final String assessmentKey = "fields.regular.person.assessments.advisorOndemandNoWrite";
     final String recurrence = "ondemand";
@@ -448,7 +448,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testOndemandAssessmentsNoAuthGroups() {
-    // On-demand assessment tests, with no authorization groups defined in the dictionary
+    // On-demand assessment tests, with no communities defined in the dictionary
     final String assessmentKey = "fields.regular.person.assessments.advisorOndemand";
     final String recurrence = "ondemand";
 
@@ -608,7 +608,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testPeriodicPersonAssessmentsEmptyWriteAuthGroups() {
-    // Periodic assessment tests for person, with empty write authorization groups
+    // Periodic assessment tests for person, with empty write communities
     // defined in
     // the dictionary
     final String assessmentKey = "fields.regular.person.assessments.advisorQuarterlyNoWrite";
@@ -667,7 +667,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testPeriodicPersonAssessmentsNoAuthGroups() {
-    // Periodic assessment tests for person, with no authorization groups defined in the
+    // Periodic assessment tests for person, with no communities defined in the
     // dictionary
     final String assessmentKey = "fields.regular.person.assessments.interlocutorQuarterly";
     final String recurrence = "quarterly";
@@ -835,7 +835,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testPeriodicTaskAssessmentsEmptyWriteAuthGroups() {
-    // Periodic assessment tests for task, with empty write authorization groups defined
+    // Periodic assessment tests for task, with empty write communities defined
     // in the
     // dictionary
     final String assessmentKey = "fields.task.assessments.taskSemiannuallyNoWrite";
@@ -896,7 +896,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testPeriodicTaskAssessmentsNoAuthGroups() {
-    // Periodic assessment tests for task, with no authorization groups defined in the
+    // Periodic assessment tests for task, with no communities defined in the
     // dictionary
     final String assessmentKey = "fields.task.assessments.taskMonthly";
     final String recurrence = "monthly";

@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const PAGE_URL = "/authorizationGroups/new"
+const PAGE_URL = "/communities/new"
 
 class CreateAuthorizationGroup extends Page {
   async getForm() {
@@ -39,6 +39,14 @@ class CreateAuthorizationGroup extends Page {
 
   async getStatusInactiveButton() {
     return browser.$('label[for="status_INACTIVE"]')
+  }
+
+  async getDistributionList() {
+    return browser.$("#distributionList")
+  }
+
+  async getForSensitiveInformation() {
+    return browser.$("#forSensitiveInformation")
   }
 
   async getRelatedObjectsInput() {
@@ -104,7 +112,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async open() {
-    // Only admin users can create authorization groups
+    // Only admin users can create communities
     await super.openAsAdminUser(PAGE_URL)
   }
 

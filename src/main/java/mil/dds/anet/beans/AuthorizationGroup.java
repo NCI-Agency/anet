@@ -26,6 +26,12 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean distributionList = false;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean forSensitiveInformation = false;
 
   public String getName() {
     return name;
@@ -96,6 +102,22 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
     this.status = status;
   }
 
+  public Boolean getDistributionList() {
+    return distributionList;
+  }
+
+  public void setDistributionList(Boolean distributionList) {
+    this.distributionList = distributionList;
+  }
+
+  public Boolean getForSensitiveInformation() {
+    return forSensitiveInformation;
+  }
+
+  public void setForSensitiveInformation(Boolean forSensitiveInformation) {
+    this.forSensitiveInformation = forSensitiveInformation;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof AuthorizationGroup a)) {
@@ -104,17 +126,19 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
     return Objects.equals(a.getUuid(), uuid) && Objects.equals(a.getName(), name)
         && Objects.equals(a.getDescription(), description)
         && Objects.equals(a.getAuthorizationGroupRelatedObjects(), authorizationGroupRelatedObjects)
-        && Objects.equals(a.getStatus(), status);
+        && Objects.equals(a.getStatus(), status)
+        && Objects.equals(a.getDistributionList(), distributionList)
+        && Objects.equals(a.getForSensitiveInformation(), forSensitiveInformation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, description, authorizationGroupRelatedObjects, status);
+    return Objects.hash(uuid, name, description, authorizationGroupRelatedObjects, status,
+        distributionList, forSensitiveInformation);
   }
 
   @Override
   public String toString() {
     return String.format("(%s) - %s", uuid, name);
   }
-
 }

@@ -808,14 +808,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   />
                   {(hasAuthorizationGroups && (
                     <div>
-                      <h5>Authorized groups:</h5>
+                      <h5>Authorized communities:</h5>
                       <AuthorizationGroupTable
                         authorizationGroups={values.authorizationGroups}
                       />
                     </div>
                   )) || (
                     <h5 className="alert alert-warning">
-                      No groups are authorized!
+                      No communities are authorized!
                     </h5>
                   )}
                 </Fieldset>

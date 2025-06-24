@@ -62,7 +62,7 @@ import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -516,8 +516,8 @@ const ReportForm = ({
 
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
-            label: "All authorization groups",
-            queryVars: {}
+            label: "Communities for sensitive information",
+            queryVars: { forSensitiveInformation: true }
           }
         }
 
@@ -1173,7 +1173,7 @@ const ReportForm = ({
                       />
                       <FastField
                         name="authorizationGroups"
-                        label="Authorization Groups"
+                        label="Authorized communities"
                         component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
@@ -1183,7 +1183,7 @@ const ReportForm = ({
                         widget={
                           <AdvancedMultiSelect
                             fieldName="authorizationGroups"
-                            placeholder="Search for authorization groups…"
+                            placeholder="Search for communities…"
                             value={values.authorizationGroups}
                             renderSelected={
                               <AuthorizationGroupTable
@@ -1199,13 +1199,13 @@ const ReportForm = ({
                               status: Model.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
-                            addon={AUTHORIZATION_GROUPS_ICON}
+                            addon={COMMUNITIES_ICON}
                           />
                         }
                         extraColElem={
                           <>
                             <FieldHelper.FieldShortcuts
-                              title="Recent Authorization Groups"
+                              title="Recent Communities"
                               shortcuts={recents.authorizationGroups.filter(
                                 ag =>
                                   !values.authorizationGroups?.find(

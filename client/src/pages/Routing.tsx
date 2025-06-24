@@ -148,7 +148,7 @@ const Routing = () => {
           <Route path="edit" element={<TaskEdit />} />
         </Route>
       </Route>
-      <Route path="authorizationGroups">
+      <Route path="communities">
         {currentUser.isAdmin() && (
           <Route path="new" element={<AuthorizationGroupNew />} />
         )}
