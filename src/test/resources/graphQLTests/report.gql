@@ -191,10 +191,31 @@ report(uuid:"${reportUuid}") {
     uuid
     text
   }
-  authorizationGroups {
-    uuid
-    name
-    description
+  authorizedMembers {
+    relatedObjectType
+    relatedObjectUuid
+    relatedObject {
+      ... on AuthorizationGroup {
+        uuid
+        name
+      }
+      ... on Organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      ... on Person {
+        uuid
+        name
+        rank
+      }
+      ... on Position {
+        uuid
+        type
+        name
+      }
+    }
   }
   assessments {
     uuid
