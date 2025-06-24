@@ -35,8 +35,10 @@ class MergePeople extends Page {
     return browser.$("table > tbody > tr:first-child > td:nth-child(2) > span")
   }
 
-  async getSamePositionsToast() {
-    return browser.$('//div[text()="Please select different people"]')
+  async getFirstItemRadioButtonFromAdvancedSelect() {
+    return browser.$(
+      "table > tbody > tr:first-child > td:first-child > input.form-check-input"
+    )
   }
 
   async getMergePeopleButton() {

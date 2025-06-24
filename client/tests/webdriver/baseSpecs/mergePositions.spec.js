@@ -155,9 +155,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.validLeft.fullName
     )
-    await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
-
-    await (await MergePositions.getSamePositionsToast()).waitForDisplayed()
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergePositions.getFirstItemRadioButtonFromAdvancedSelect()
+      ).isExisting()
+    ).to.be.false
   })
 
   it("Should not allow to select two occupied positions", async() => {

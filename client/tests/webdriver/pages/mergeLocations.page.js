@@ -33,6 +33,12 @@ class MergeLocations extends Page {
     )
   }
 
+  async getFirstItemRadioButtonFromAdvancedSelect() {
+    return browser.$(
+      "table > tbody > tr:first-child > td:first-child > input.form-check-input"
+    )
+  }
+
   async getMergeLocationsButton() {
     return browser.$('//button[text()="Merge Locations"]')
   }
