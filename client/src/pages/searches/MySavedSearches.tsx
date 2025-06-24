@@ -114,23 +114,14 @@ const MySavedSearches = ({
           <Table striped responsive className="mt-3 mb-3">
             <thead>
               <tr>
-                <th style={{ width: "20%" }}>Search Name</th>
                 <th style={{ width: "70%" }}>Description</th>
+                <th style={{ width: "20%" }}>Search Name</th>
                 <th style={{ width: "10%" }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {paginatedSearches.map(savedSearch => (
                 <tr key={savedSearch.uuid} className="align-middle">
-                  <td style={{ paddingRight: 0 }}>
-                    <Button
-                      className="text-start text-decoration-none"
-                      variant="link"
-                      onClick={() => showSearch(savedSearch)}
-                    >
-                      {savedSearch.name}
-                    </Button>
-                  </td>
                   <td style={{ paddingLeft: 0 }}>
                     <Button
                       className="text-start text-decoration-none"
@@ -143,6 +134,15 @@ const MySavedSearches = ({
                           style={{ pointerEvents: "none" }}
                         />
                       )}
+                    </Button>
+                  </td>
+                  <td style={{ paddingRight: 0 }}>
+                    <Button
+                      className="text-start text-decoration-none"
+                      variant="link"
+                      onClick={() => showSearch(savedSearch)}
+                    >
+                      {savedSearch.name}
                     </Button>
                   </td>
                   <td>
