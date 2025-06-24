@@ -43,7 +43,7 @@ class TaskFilter extends Page {
     return taskRows.length
   }
 
-  async openAllCollpasedTasks() {
+  async openAllCollapsedTasks() {
     await browser.waitUntil(
       async() =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
@@ -66,6 +66,7 @@ class TaskFilter extends Page {
     await openFilterButton.waitForDisplayed()
     await openFilterButton.click()
     await browser.keys(searchText)
+    await browser.pause(1000) // wait for the searchText to be processed
     await browser.waitUntil(
       async() =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
@@ -73,11 +74,9 @@ class TaskFilter extends Page {
   }
 
   async closeTaskFilter() {
-    await browser.pause(2000)
     const closeButton = await browser.$(".bp5-icon.bp5-icon-cross")
     await closeButton.waitForDisplayed()
     await closeButton.click()
-    await browser.pause(2000)
   }
 }
 

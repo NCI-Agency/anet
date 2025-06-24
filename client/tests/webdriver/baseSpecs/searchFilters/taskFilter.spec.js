@@ -8,7 +8,7 @@ describe("When using the task filter on the reports search", () => {
 
     expect(await TaskFilter.getTaskCount()).to.equal(13)
 
-    await TaskFilter.openAllCollpasedTasks()
+    await TaskFilter.openAllCollapsedTasks()
     // depending on the test run sequence, one more task may have been created
     expect(await TaskFilter.getTaskCount()).to.be.oneOf([50, 51])
   })
@@ -17,14 +17,14 @@ describe("When using the task filter on the reports search", () => {
     await TaskFilter.searchTasks("Milestone the First in EF 1.1")
     expect(await TaskFilter.getTaskCount()).to.equal(3)
     // the tasks should already load expanded, so it should yield the same result
-    await TaskFilter.openAllCollpasedTasks()
+    await TaskFilter.openAllCollapsedTasks()
     expect(await TaskFilter.getTaskCount()).to.equal(3)
     await TaskFilter.closeTaskFilter()
 
     await TaskFilter.searchTasks("TAAC")
     expect(await TaskFilter.getTaskCount()).to.equal(1)
     // the only task should now expand, leading to a bigger task count
-    await TaskFilter.openAllCollpasedTasks()
+    await TaskFilter.openAllCollapsedTasks()
     expect(await TaskFilter.getTaskCount()).to.equal(7)
     await TaskFilter.closeTaskFilter()
   })
