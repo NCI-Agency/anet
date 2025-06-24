@@ -12,10 +12,17 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import { toPng } from "html-to-image"
 import { Organization } from "models"
 import { PositionRole } from "models/Position"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import ReactFlow, {
@@ -207,6 +214,7 @@ const OrganizationFlowChart = ({
   width,
   exportTitle
 }: OrganizationFlowChartProps) => {
+  const { topbarOffset } = useContext(ResponsiveLayoutContext)
   const [showApp6Symbols, setShowApp6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
@@ -326,8 +334,7 @@ const OrganizationFlowChart = ({
           organization: node,
           symbolValues,
           positions,
-          depth,
-          showSymbol: showApp6Symbols
+          depth
         },
         position: { x: currentX, y: currentY },
         type: "custom"
@@ -420,7 +427,7 @@ const OrganizationFlowChart = ({
       }
       return { nodes: newNodes, edges: newEdges }
     },
-    [depthLimit, showApp6Symbols, positionsFilter]
+    [depthLimit, positionsFilter]
   )
 
   useEffect(() => {
@@ -447,13 +454,13 @@ const OrganizationFlowChart = ({
     setNodes(
       layout.nodes.map(node => ({
         ...node,
-        data: { ...node.data, showApp6Symbols }
+        data: { ...node.data, showSymbol: showApp6Symbols }
       }))
     )
     setEdges(layout.edges)
   }, [organization, depthLimit, showApp6Symbols, calculateLayout])
 
-  const reframe = () => {
+  const reframe = useCallback(() => {
     if (!reactFlowInstance || !nodes?.length) {
       return
     }
@@ -467,7 +474,7 @@ const OrganizationFlowChart = ({
         n =>
           n.position.y +
           NODE_HEIGHT +
-          (n?.data?.positions?.length || 0) * PERSON_AVATAR_HEIGHT
+          (n?.data?.positions?.length ?? 0) * PERSON_AVATAR_HEIGHT
       )
     )
 
@@ -475,8 +482,7 @@ const OrganizationFlowChart = ({
     const graphW = maxX - minX
     const graphH = maxY - minY
     const containerW = width
-    // only allow 80% of the window height
-    const containerH = window.innerHeight * 0.8
+    const containerH = window.innerHeight - topbarOffset
 
     // find the zoom, with a max value of 1
     const zoom = Math.min(
@@ -495,11 +501,11 @@ const OrganizationFlowChart = ({
     const translateX = (scaledW - graphW * zoom) / 2 - minX * zoom
     const translateY = (scaledH - graphH * zoom) / 2 - minY * zoom
     reactFlowInstance.setViewport({ x: translateX, y: translateY, zoom })
-  }
+  }, [reactFlowInstance, nodes, width, topbarOffset])
 
   useEffect(() => {
     reframe()
-  }, [reactFlowInstance, nodes, width, showApp6Symbols])
+  }, [reframe])
 
   if (!organization || !nodes?.length) {
     return <p>Loading...</p>
@@ -757,13 +763,7 @@ const DivS = styled.div`
 `
 
 const CustomNode = ({
-  data: {
-    organization,
-    symbolValues,
-    depth,
-    positions,
-    showApp6Symbols: showSymbol
-  }
+  data: { organization, symbolValues, depth, positions, showSymbol }
 }: NodeProps) => (
   <DivS
     className="d-flex flex-column"
