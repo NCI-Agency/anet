@@ -39,7 +39,7 @@ public class SavedSearchResource {
       AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
       return created;
     } catch (UnableToExecuteStatementException e) {
-      throw ResponseUtils.handleSqlException(e, "Duplicate name for saved search");
+      throw ResponseUtils.handleSqlException(e, "Unable to create saved search");
     }
   }
 
