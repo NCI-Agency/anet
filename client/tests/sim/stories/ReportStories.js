@@ -20,6 +20,41 @@ const getRandomPerson = async function() {
   )
 }
 
+async function getAuthorizedMembers() {
+  const authorizedMemberTypes = {
+    authorizationGroups: {
+      status: Model.STATUS.ACTIVE,
+      forSensitiveInformation: true
+    },
+    organizations: { status: Model.STATUS.ACTIVE },
+    people: { status: Model.STATUS.ACTIVE, pendingVerification: false },
+    positions: { status: Model.STATUS.ACTIVE }
+  }
+  const nrOfAuthorizedMembers = faker.number.int({ min: 1, max: 5 })
+  const authorizedMembers = []
+  const authorizedMemberUuids = new Set()
+  for (let i = 0; i < nrOfAuthorizedMembers; i++) {
+    const authorizedMemberType = faker.helpers.arrayElement(
+      Object.keys(authorizedMemberTypes)
+    )
+    const authorizedMember = await getRandomObject(
+      authorizedMemberType,
+      authorizedMemberTypes[authorizedMemberType]
+    )
+    if (
+      authorizedMember?.uuid &&
+      !authorizedMemberUuids.has(authorizedMember.uuid)
+    ) {
+      authorizedMemberUuids.add(authorizedMember.uuid)
+      authorizedMembers.push({
+        relatedObjectType: authorizedMemberType,
+        relatedObjectUuid: authorizedMember.uuid
+      })
+    }
+  }
+  return authorizedMembers
+}
+
 async function populateReport(report, args) {
   const location = await getRandomObject("locations", {
     status: Model.STATUS.ACTIVE,
@@ -131,8 +166,10 @@ async function populateReport(report, args) {
     reportText: async() => await createHtmlParagraphs(),
     nextSteps: () => faker.lorem.sentence(),
     keyOutcomes: () => faker.lorem.sentence(),
-    reportSensitiveInformation: () => null,
-    authorizationGroups: () => [],
+    reportSensitiveInformation: async() => ({
+      text: await createHtmlParagraphs()
+    }),
+    authorizedMembers: async() => await getAuthorizedMembers(),
     state,
     releasedAt: () => {
       // Set the releasedAt value on a random date between 1 and 7 days after the engagement
@@ -160,7 +197,7 @@ async function populateReport(report, args) {
   await reportGenerator.keyOutcomes.always()
   await reportGenerator.reportSensitiveInformation
     .and()
-    .authorizationGroups.rarely()
+    .authorizedMembers.rarely()
   await reportGenerator.state.always()
   await reportGenerator.releasedAt.always()
 
