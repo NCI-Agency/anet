@@ -6519,6 +6519,12 @@
 		<dropTable tableName="reportAuthorizationGroups" />
 	</changeSet>
 
+	<changeSet id="add-displayInHomepage-to-savedSearches" author="jlnat">
+		<addColumn tableName="savedSearches">
+			<column name="displayInHomepage" type="boolean" defaultValueBoolean="false" />
+		</addColumn>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

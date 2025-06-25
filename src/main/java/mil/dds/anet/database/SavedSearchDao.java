@@ -57,8 +57,8 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     try {
       handle
           .createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
-              + "(uuid, \"ownerUuid\", name, \"objectType\", query) "
-              + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
+              + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"displayInHomepage\") "
+              + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query, :displayInHomepage)")
           .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
           .bind("objectType", DaoUtils.getEnumId(obj.getObjectType())).execute();
@@ -72,9 +72,8 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
   public int updateInternal(SavedSearch obj) {
     final Handle handle = getDbHandle();
     try {
-      return handle
-          .createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-              + "SET name = :name, \"objectType\" = :objectType, query = :query WHERE uuid = :uuid")
+      return handle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, WHERE uuid = :uuid")
           .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
     } finally {
       closeDbHandle(handle);
