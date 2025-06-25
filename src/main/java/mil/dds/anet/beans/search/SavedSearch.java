@@ -31,6 +31,9 @@ public class SavedSearch extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   String query;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean displayInHomepage;
 
   public String getName() {
     return name;
@@ -38,6 +41,14 @@ public class SavedSearch extends AbstractAnetBean {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Boolean getDisplayInHomepage() {
+    return displayInHomepage;
+  }
+
+  public void setDisplayInHomepage(Boolean displayInHomepage) {
+    this.displayInHomepage = displayInHomepage;
   }
 
   @GraphQLQuery(name = "owner")
@@ -96,17 +107,18 @@ public class SavedSearch extends AbstractAnetBean {
     return Objects.equal(getUuid(), other.getUuid()) && Objects.equal(name, other.getName())
         && Objects.equal(getOwnerUuid(), other.getOwnerUuid())
         && Objects.equal(objectType, other.getObjectType())
-        && Objects.equal(query, other.getQuery());
+        && Objects.equal(query, other.getQuery())
+        && Objects.equal(displayInHomepage, other.getDisplayInHomepage());
   }
 
   @Override
   public String toString() {
-    return String.format("SavedSearch[uuid:%s, name:%s, query:%s, owner:%s]", getUuid(), name,
-        query, getOwnerUuid());
+    return String.format("SavedSearch[uuid:%s, name:%s, query:%s, owner:%s, displayInHomepage:%s]",
+        getUuid(), name, query, getOwnerUuid(), displayInHomepage);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(uuid, name, owner, objectType, query);
+    return Objects.hashCode(uuid, name, owner, objectType, query, displayInHomepage);
   }
 }
