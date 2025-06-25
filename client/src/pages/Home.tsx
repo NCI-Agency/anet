@@ -44,6 +44,17 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
   }
 `
 
+const GQL_GET_HOMEPAGE_SAVED_SEARCHES = gql`
+  query {
+    savedSearches: myHomepageSearches {
+      uuid
+      name
+      objectType
+      query
+    }
+  }
+`
+
 interface HomeTileProps {
   pageDispatchers?: PageDispatchersPropType
   query: any
@@ -323,6 +334,39 @@ const UsersPendingVerification = ({
   )
 }
 
+interface MySavedSearchesProps {
+  pageDispatchers?: PageDispatchersPropType
+}
+const MySavedSearches = ({ pageDispatchers }: MySavedSearchesProps) => {
+  const { data, loading, error } = API.useApiQuery(
+    GQL_GET_HOMEPAGE_SAVED_SEARCHES
+  )
+
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+  if (data?.savedSearches.length) {
+    console.log("Homepage saved searches:", data.savedSearches)
+  } else {
+    return null
+  }
+
+  return (
+    <>
+      {data.savedSearches.map(search => (
+        <div key={search.uuid}>
+          {search.name}
+        </div>
+      ))}
+    </>
+  )
+}
+
 interface HomeProps {
   setSearchQuery: (...args: unknown[]) => unknown
   pageDispatchers?: PageDispatchersPropType
@@ -402,6 +446,8 @@ const Home = ({
       )}
 
       <MySubscriptionUpdates />
+
+      <MySavedSearches pageDispatchers={pageDispatchers} />
     </div>
   )
 }
