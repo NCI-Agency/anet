@@ -198,6 +198,10 @@ class ShowTask extends Page {
       timeout: 20000
     })
   }
+
+  async getEventMatrixTasks() {
+    return browser.$$("#tasks-table-header ~ tr")
+  }
 }
 
 export default new ShowTask()
