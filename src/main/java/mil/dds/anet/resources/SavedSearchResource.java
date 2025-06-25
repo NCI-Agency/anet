@@ -44,6 +44,14 @@ public class SavedSearchResource {
     return dao.getSearchesByOwner(DaoUtils.getUserFromContext(context));
   }
 
+  @GraphQLQuery(name = "myHomepageSearches")
+  public List<SavedSearch> getMyHomepageSearches(@GraphQLRootContext GraphQLContext context) {
+    Person user = DaoUtils.getUserFromContext(context);
+    List<SavedSearch> searches = dao.getSearchesByOwner(user);
+    return searches.stream()
+        .filter(s -> s.getDisplayInHomepage() != null && s.getDisplayInHomepage()).toList();
+  }
+
   @GraphQLMutation(name = "deleteSavedSearch")
   public Integer deleteSavedSearch(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String savedSearchUuid) {

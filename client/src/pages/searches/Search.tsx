@@ -1858,7 +1858,7 @@ const Search = ({
           <Formik
             enableReinitialize
             onSubmit={onSubmitSaveSearch}
-            initialValues={{ name: "" }}
+            initialValues={{ name: "", displayInHomepage: false }}
           >
             {({ values, submitForm }) => (
               <Form className="d-flex flex-column gap-3">
@@ -1868,6 +1868,21 @@ const Search = ({
                   placeholder="Give this saved search a name (optional)"
                   vertical
                 />
+                <div className="form-check">
+                  <Field
+                    name="displayInHomepage"
+                    type="checkbox"
+                    className="form-check-input"
+                    id="displayInHomepageCheckbox"
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="displayInHomepageCheckbox"
+                  >
+                    Display in homepage
+                  </label>
+                </div>
+
                 <div className="submit-buttons">
                   <div>
                     <Button
@@ -1949,6 +1964,7 @@ const Search = ({
   function saveSearch(values, form) {
     const savedSearch = {
       name: values.name,
+      displayInHomepage: values.displayInHomepage,
       query: JSON.stringify(getSearchQuery(searchQuery))
     }
     if (searchQuery.objectType) {
