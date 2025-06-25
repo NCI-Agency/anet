@@ -1857,7 +1857,7 @@ const Search = ({
                 <Field
                   name="name"
                   component={FieldHelper.InputField}
-                  placeholder="Give this saved search a name"
+                  placeholder="Give this saved search a name (optional)"
                   vertical
                 />
                 <div className="submit-buttons">

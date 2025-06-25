@@ -34,13 +34,9 @@ public class SavedSearchResource {
       @GraphQLArgument(name = "savedSearch") SavedSearch savedSearch) {
     Person user = DaoUtils.getUserFromContext(context);
     savedSearch.setOwnerUuid(user.getUuid());
-    try {
-      final SavedSearch created = dao.insert(savedSearch);
-      AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
-      return created;
-    } catch (UnableToExecuteStatementException e) {
-      throw ResponseUtils.handleSqlException(e, "Unable to create saved search");
-    }
+    final SavedSearch created = dao.insert(savedSearch);
+    AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
+    return created;
   }
 
   @GraphQLQuery(name = "mySearches")
