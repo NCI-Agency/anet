@@ -9,7 +9,6 @@ class Admin extends Page {
 
   async openAsAdminUser() {
     await super.openAsAdminUser(PAGE_URL)
-    console.log(PAGE_URL)
   }
 
   async updateHelpText(helpText) {
