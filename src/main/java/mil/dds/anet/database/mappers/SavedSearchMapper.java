@@ -17,6 +17,7 @@ public class SavedSearchMapper implements RowMapper<SavedSearch> {
     ss.setName(rs.getString("name"));
     ss.setObjectType(MapperUtils.getEnumIdx(rs, "objectType", SearchObjectType.class));
     ss.setQuery(rs.getString("query"));
+    ss.setDisplayInHomepage(rs.getObject("displayInHomepage", Boolean.class));
     return ss;
   }
 
