@@ -18,16 +18,21 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { deserializeQueryParams } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  SearchDescription
+} from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import { Report } from "models"
 import { superuserTour, userTour } from "pages/GuidedTour"
-import React, { useContext } from "react"
+import SearchResults from "pages/searches/SearchResults"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_REPORT_COUNT = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -336,32 +341,79 @@ const UsersPendingVerification = ({
 
 interface MySavedSearchesProps {
   pageDispatchers?: PageDispatchersPropType
+  setSearchQuery: (...args: unknown[]) => unknown
 }
-const MySavedSearches = ({ pageDispatchers }: MySavedSearchesProps) => {
+const MySavedSearches = ({
+  pageDispatchers,
+  setSearchQuery
+}: MySavedSearchesProps) => {
+  const navigate = useNavigate()
+  const [savedQueries, setSavedQueries] = useState({})
+
   const { data, loading, error } = API.useApiQuery(
     GQL_GET_HOMEPAGE_SAVED_SEARCHES
   )
-
   const { done, result } = useBoilerplate({
     loading,
     error,
     pageDispatchers
   })
+
+  useEffect(() => {
+    if (data?.savedSearches) {
+      const newSavedQueries = {}
+      data.savedSearches.forEach(search => {
+        const objType = SEARCH_OBJECT_TYPES[search.objectType]
+        const queryParams = utils.parseJsonSafe(search.query)
+        deserializeQueryParams(
+          objType,
+          queryParams,
+          (objectType, filters, text) => {
+            newSavedQueries[search.uuid] = { objectType, filters, text }
+          }
+        )
+      })
+      setSavedQueries(newSavedQueries)
+    }
+  }, [data])
+
   if (done) {
     return result
   }
-  if (data?.savedSearches.length) {
-    console.log("Homepage saved searches:", data.savedSearches)
-  } else {
+  if (!Object.keys(savedQueries).length) {
     return null
+  }
+
+  function showSearch(uuid) {
+    setSearchQuery(savedQueries[uuid])
+    navigate("/search")
   }
 
   return (
     <>
-      {data.savedSearches.map(search => (
-        <div key={search.uuid}>
-          {search.name}
-        </div>
+      {data.savedSearches.map((search, i) => (
+        <Fieldset
+          title={i === 0 ? "My Saved Searches" : null}
+          key={search.uuid}
+        >
+          <div className="d-flex flex-column gap-3">
+            <Button
+              className="text-start text-decoration-none p-0"
+              variant="link"
+              onClick={() => showSearch(search.uuid)}
+            >
+              <SearchDescription
+                searchQuery={savedQueries[search.uuid]}
+                style={{ fontSize: 20 }}
+              />
+            </Button>
+            <SearchResults
+              searchQuery={search.query}
+              objectType={search.objectType}
+              pageDispatchers={pageDispatchers}
+            />
+          </div>
+        </Fieldset>
       ))}
     </>
   )
@@ -447,7 +499,10 @@ const Home = ({
 
       <MySubscriptionUpdates />
 
-      <MySavedSearches pageDispatchers={pageDispatchers} />
+      <MySavedSearches
+        pageDispatchers={pageDispatchers}
+        setSearchQuery={setSearchQuery}
+      />
     </div>
   )
 }
