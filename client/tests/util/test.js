@@ -93,6 +93,7 @@ test.beforeEach(t => {
     const options = new chrome.Options(capabilities)
       .setBrowserVersion("131") // or "stable"
       .addArguments([
+        "--incognito",
         "--headless=old",
         "--disable-gpu",
         "--disable-search-engine-choice-screen",

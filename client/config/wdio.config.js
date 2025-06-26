@@ -68,11 +68,11 @@ const config = {
       acceptInsecureCerts: true,
       "goog:chromeOptions": {
         // run in incognito mode
-        // args: ['--incognito'],
         // Note: it is important to have a big window height as otherwise
         // while scrolling some form fields might go under the header and
         // therefore we would get failing tests related to these fields.
         args: [
+          "--incognito",
           "--headless=old",
           "--disable-gpu",
           "--disable-search-engine-choice-screen",
