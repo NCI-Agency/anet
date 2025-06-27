@@ -361,19 +361,31 @@ const MySavedSearches = ({
 
   useEffect(() => {
     if (data?.savedSearches) {
-      const newSavedQueries = {}
-      data.savedSearches.forEach(search => {
-        const objType = SEARCH_OBJECT_TYPES[search.objectType]
-        const queryParams = utils.parseJsonSafe(search.query)
-        deserializeQueryParams(
-          objType,
-          queryParams,
-          (objectType, filters, text) => {
-            newSavedQueries[search.uuid] = { objectType, filters, text }
-          }
+      Promise.all(
+        data.savedSearches.map(
+          search =>
+            new Promise(resolve => {
+              const objType = SEARCH_OBJECT_TYPES[search.objectType]
+              const queryParams = utils.parseJsonSafe(search.query)
+              deserializeQueryParams(
+                objType,
+                queryParams,
+                (objectType, filters, text) => {
+                  resolve({
+                    uuid: search.uuid,
+                    value: { objectType, filters, text }
+                  })
+                }
+              )
+            })
         )
+      ).then(results => {
+        const newSavedQueries = {}
+        results.forEach(({ uuid, value }) => {
+          newSavedQueries[uuid] = value
+        })
+        setSavedQueries(newSavedQueries)
       })
-      setSavedQueries(newSavedQueries)
     }
   }, [data])
 
