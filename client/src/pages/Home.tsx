@@ -27,7 +27,7 @@ import { Report } from "models"
 import { superuserTour, userTour } from "pages/GuidedTour"
 import SearchResults from "pages/searches/SearchResults"
 import React, { useContext, useEffect, useState } from "react"
-import { Button, Col, Container, Row } from "react-bootstrap"
+import { Badge, Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -349,6 +349,7 @@ const MySavedSearches = ({
 }: MySavedSearchesProps) => {
   const navigate = useNavigate()
   const [savedQueries, setSavedQueries] = useState({})
+  const [searchCount, setSearchCount] = useState({})
 
   const { data, loading, error } = API.useApiQuery(
     GQL_GET_HOMEPAGE_SAVED_SEARCHES
@@ -396,7 +397,7 @@ const MySavedSearches = ({
     return null
   }
 
-  function showSearch(uuid) {
+  const showSearch = uuid => {
     setSearchQuery(savedQueries[uuid])
     navigate("/search")
   }
@@ -418,11 +419,16 @@ const MySavedSearches = ({
                 searchQuery={savedQueries[search.uuid]}
                 style={{ fontSize: 20 }}
               />
+              <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">
+                {searchCount?.[search.uuid] || 0}
+              </Badge>
             </Button>
             <SearchResults
+              pageDispatchers={pageDispatchers}
               searchQuery={search.query}
               objectType={search.objectType}
-              pageDispatchers={pageDispatchers}
+              setSearchCount={(count: number) =>
+                setSearchCount(prev => ({ ...prev, [search.uuid]: count }))}
             />
           </div>
         </Fieldset>
