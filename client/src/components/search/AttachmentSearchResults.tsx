@@ -3,9 +3,7 @@ import API from "api"
 import AttachmentTable from "components/Attachment/AttachmentTable"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-import {
-  DEFAULT_PAGESIZE
-} from "components/search/common"
+import { DEFAULT_PAGESIZE } from "components/search/common"
 import _isEqual from "lodash/isEqual"
 import { Attachment } from "models"
 import React, { useEffect, useRef, useState } from "react"
