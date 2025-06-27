@@ -52,8 +52,10 @@ const SearchResultsSection = ({
   queryParams.pageSize = DEFAULT_PAGESIZE
 
   const updateCount = count => {
-    setTotalCount(count)
-    setObjectTypeResultCount(objectType, count)
+    if (totalCount !== count) {
+      setTotalCount(count)
+      setObjectTypeResultCount(objectType, count)
+    }
   }
 
   return (

@@ -108,7 +108,9 @@ const AttachmentSearchResults = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.attachmentList?.totalCount
-  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
   if (done) {
     return result
   }

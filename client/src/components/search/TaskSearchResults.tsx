@@ -77,7 +77,9 @@ const TaskSearchResults = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.taskList?.totalCount
-  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
   if (done) {
     return result
   }

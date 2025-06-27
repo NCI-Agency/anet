@@ -106,7 +106,9 @@ const PeopleSearchResults = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.personList?.totalCount
-  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
   if (done) {
     return result
   }

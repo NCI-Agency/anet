@@ -115,7 +115,9 @@ const AuthorizationGroupSearchResults = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.authorizationGroupList?.totalCount
-  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
   if (done) {
     return result
   }
