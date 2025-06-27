@@ -9,7 +9,7 @@ import OrganizationSearchResults from "components/search/OrganizationSearchResul
 import PeopleSearchResults from "components/search/PeopleSearchResults"
 import PositionSearchResults from "components/search/PositionSearchResults"
 import TaskSearchResults from "components/search/TaskSearchResults"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Alert, Badge } from "react-bootstrap"
 import utils from "utils"
 
@@ -28,18 +28,22 @@ const SEARCH_COMPONENTS = {
 }
 
 interface SearchResultsSectionProps {
-  type: string
+  pageDispatchers: PageDispatchersPropType
+  objectType: string
   searchQuery: any
-  pageDispatchers?: PageDispatchersPropType
+  isOnlySearchResult: boolean
+  setObjectTypeResultCount: (...args: unknown[]) => unknown
 }
 
 const SearchResultsSection = ({
-  type,
+  pageDispatchers,
+  objectType,
   searchQuery,
-  pageDispatchers
+  isOnlySearchResult,
+  setObjectTypeResultCount
 }: SearchResultsSectionProps) => {
   const [totalCount, setTotalCount] = useState(0)
-  const TableComponent = SEARCH_COMPONENTS[type]
+  const TableComponent = SEARCH_COMPONENTS[objectType]
   if (!TableComponent) {
     return null
   }
@@ -47,46 +51,72 @@ const SearchResultsSection = ({
   const queryParams = utils.parseJsonSafe(searchQuery)
   queryParams.pageSize = DEFAULT_PAGESIZE
 
+  const updateCount = count => {
+    setTotalCount(count)
+    setObjectTypeResultCount(objectType, count)
+  }
+
   return (
-    <div className="mb-4">
-      <h6 className="mb-2">
-        {SEARCH_OBJECT_LABELS[type]}
-        <Badge pill bg="secondary" className="ms-2">
-          {totalCount}
-        </Badge>
-      </h6>
+    <div
+      className="mb-4"
+      style={{
+        display: !isOnlySearchResult && totalCount === 0 ? "none" : undefined
+      }}
+    >
+      {!isOnlySearchResult && (
+        <h6 className="mb-2">
+          {SEARCH_OBJECT_LABELS[objectType]}
+          <Badge pill bg="secondary" className="ms-2">
+            {totalCount}
+          </Badge>
+        </h6>
+      )}
       <TableComponent
         pageDispatchers={pageDispatchers}
         queryParams={queryParams}
-        setTotalCount={setTotalCount}
+        setTotalCount={updateCount}
       />
     </div>
   )
 }
 
 interface SearchResultsProps {
+  pageDispatchers?: PageDispatchersPropType
   searchQuery: any
   objectType?: string
-  pageDispatchers?: PageDispatchersPropType
+  setSearchCount: (...args: unknown[]) => unknown
 }
 const SearchResults = ({
+  pageDispatchers,
   searchQuery,
   objectType,
-  pageDispatchers
+  setSearchCount
 }: SearchResultsProps) => {
+  const [objectTypeResultCount, setObjectTypeResultCount] = useState({})
   const objectTypes = useMemo(
     () => (objectType ? [objectType] : Object.values(SEARCH_OBJECT_TYPES)),
     [objectType]
   )
+
+  useEffect(() => {
+    const searchCount = Object.values(objectTypeResultCount).reduce(
+      (sum: number, count: number) => sum + count,
+      0
+    )
+    setSearchCount(searchCount)
+  }, [objectTypeResultCount])
 
   return (
     <div>
       {objectTypes.map(type => (
         <SearchResultsSection
           key={type}
-          type={type}
-          searchQuery={searchQuery}
           pageDispatchers={pageDispatchers}
+          objectType={type}
+          searchQuery={searchQuery}
+          isOnlySearchResult={!!objectType?.length}
+          setObjectTypeResultCount={(objType: string, count: number) =>
+            setObjectTypeResultCount(prev => ({ ...prev, [objType]: count }))}
         />
       ))}
     </div>
