@@ -1,29 +1,29 @@
 import { SEARCH_OBJECT_TYPES } from "actions"
-import AttachmentTable from "components/Attachment/AttachmentTable"
-import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import EventTable from "components/EventTable"
-import LocationTable from "components/LocationTable"
-import OrganizationTable from "components/OrganizationTable"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-import PersonTable from "components/PersonTable"
-import PositionTable from "components/PositionTable"
+import { PageDispatchersPropType } from "components/Page"
 import ReportCollection from "components/ReportCollection"
-import TaskTable from "components/TaskTable"
+import AttachmentSearchResults from "components/search/AttachmentSearchResults"
+import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
+import EventSearchResults from "components/search/EventSearchResults"
+import LocationSearchResults from "components/search/LocationSearchResults"
+import OrganizationSearchResults from "components/search/OrganizationSearchResults"
+import PeopleSearchResults from "components/search/PeopleSearchResults"
+import PositionSearchResults from "components/search/PositionSearchResults"
+import TaskSearchResults from "components/search/TaskSearchResults"
 import React, { useMemo } from "react"
 import utils from "utils"
 
 const DEFAULT_PAGESIZE = 10
 
 const SEARCH_COMPONENTS = {
-  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: OrganizationTable,
-  [SEARCH_OBJECT_TYPES.PEOPLE]: PersonTable,
-  [SEARCH_OBJECT_TYPES.POSITIONS]: PositionTable,
-  [SEARCH_OBJECT_TYPES.TASKS]: TaskTable,
-  [SEARCH_OBJECT_TYPES.LOCATIONS]: LocationTable,
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: OrganizationSearchResults,
+  [SEARCH_OBJECT_TYPES.PEOPLE]: PeopleSearchResults,
+  [SEARCH_OBJECT_TYPES.POSITIONS]: PositionSearchResults,
+  [SEARCH_OBJECT_TYPES.TASKS]: TaskSearchResults,
+  [SEARCH_OBJECT_TYPES.LOCATIONS]: LocationSearchResults,
   [SEARCH_OBJECT_TYPES.REPORTS]: ReportCollection,
-  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: AuthorizationGroupTable,
-  [SEARCH_OBJECT_TYPES.ATTACHMENTS]: AttachmentTable,
-  [SEARCH_OBJECT_TYPES.EVENTS]: EventTable
+  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: AuthorizationGroupSearchResults,
+  [SEARCH_OBJECT_TYPES.ATTACHMENTS]: AttachmentSearchResults,
+  [SEARCH_OBJECT_TYPES.EVENTS]: EventSearchResults
 }
 
 interface SearchResultsSectionProps {
@@ -42,39 +42,6 @@ const SearchResultsSection = ({
     return null
   }
 
-  let gql, varName
-  switch (type) {
-    case SEARCH_OBJECT_TYPES.ORGANIZATIONS:
-      varName = "organizationQuery"
-      break
-    case SEARCH_OBJECT_TYPES.PEOPLE:
-      varName = "personQuery"
-      break
-    case SEARCH_OBJECT_TYPES.POSITIONS:
-      varName = "positionQuery"
-      break
-    case SEARCH_OBJECT_TYPES.TASKS:
-      varName = "taskQuery"
-      break
-    case SEARCH_OBJECT_TYPES.LOCATIONS:
-      varName = "locationQuery"
-      break
-    case SEARCH_OBJECT_TYPES.REPORTS:
-      varName = "reportQuery"
-      break
-    case SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS:
-      varName = "authorizationGroupQuery"
-      break
-    case SEARCH_OBJECT_TYPES.ATTACHMENTS:
-      varName = "attachmentQuery"
-      break
-    case SEARCH_OBJECT_TYPES.EVENTS:
-      varName = "eventQuery"
-      break
-    default:
-      return null
-  }
-
   const queryParams = utils.parseJsonSafe(searchQuery)
   queryParams.pageSize = DEFAULT_PAGESIZE
 
@@ -84,7 +51,10 @@ const SearchResultsSection = ({
         {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
       </h6>
 
-      <TableComponent queryParams={queryParams} />
+      <TableComponent
+        pageDispatchers={pageDispatchers}
+        queryParams={queryParams}
+        setTotalCount={() => {}}
     </div>
   )
 }
