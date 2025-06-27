@@ -107,7 +107,9 @@ const PositionSearchResults = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.positionList?.totalCount
-  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
   if (done) {
     return result
   }

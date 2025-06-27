@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import {
   clearSearchQuery,
   DEFAULT_PAGE_PROPS,
@@ -350,6 +352,7 @@ const MySavedSearches = ({
   const navigate = useNavigate()
   const [savedQueries, setSavedQueries] = useState({})
   const [searchCount, setSearchCount] = useState({})
+  const [collapsed, setCollapsed] = useState({})
 
   const { data, loading, error } = API.useApiQuery(
     GQL_GET_HOMEPAGE_SAVED_SEARCHES
@@ -386,6 +389,12 @@ const MySavedSearches = ({
           newSavedQueries[uuid] = value
         })
         setSavedQueries(newSavedQueries)
+        setCollapsed(
+          results.reduce((acc, { uuid }) => ({ ...acc, [uuid]: true }), {})
+        )
+        setSearchCount(
+          results.reduce((acc, { uuid }) => ({ ...acc, [uuid]: 0 }), {})
+        )
       })
     }
   }, [data])
@@ -410,26 +419,56 @@ const MySavedSearches = ({
           key={search.uuid}
         >
           <div className="d-flex flex-column gap-3">
-            <Button
-              className="text-start text-decoration-none p-0"
-              variant="link"
-              onClick={() => showSearch(search.uuid)}
+            <div className="d-flex align-items-center">
+              <Button
+                className="d-flex align-items-center w-100 text-start text-decoration-none p-0"
+                variant="link"
+                onClick={() =>
+                  setCollapsed(prev => ({
+                    ...prev,
+                    [search.uuid]: !prev[search.uuid]
+                  }))}
+              >
+                <span className="flex-grow-1">
+                  <SearchDescription
+                    searchQuery={savedQueries[search.uuid]}
+                    style={{ fontSize: 20, pointerEvents: "none" }}
+                  />
+                  <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">
+                    {searchCount[search.uuid]}
+                  </Badge>
+                </span>
+                <span className="ms-2">
+                  <Icon
+                    className="align-middle"
+                    icon={
+                      collapsed[search.uuid]
+                        ? IconNames.CHEVRON_DOWN
+                        : IconNames.CHEVRON_UP
+                    }
+                    style={{ fontSize: 22, color: "initial" }}
+                  />
+                </span>
+              </Button>
+            </div>
+            <div
+              style={{ display: collapsed[search.uuid] ? "none" : undefined }}
             >
-              <SearchDescription
-                searchQuery={savedQueries[search.uuid]}
-                style={{ fontSize: 20 }}
+              <SearchResults
+                pageDispatchers={pageDispatchers}
+                searchQuery={search.query}
+                objectType={search.objectType}
+                setSearchCount={count =>
+                  setSearchCount(prev => ({ ...prev, [search.uuid]: count }))}
               />
-              <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">
-                {searchCount?.[search.uuid] || 0}
-              </Badge>
-            </Button>
-            <SearchResults
-              pageDispatchers={pageDispatchers}
-              searchQuery={search.query}
-              objectType={search.objectType}
-              setSearchCount={(count: number) =>
-                setSearchCount(prev => ({ ...prev, [search.uuid]: count }))}
-            />
+              <Button
+                className="text-start p-0"
+                variant="link"
+                onClick={() => showSearch(search.uuid)}
+              >
+                Show full search results
+              </Button>
+            </div>
           </div>
         </Fieldset>
       ))}
