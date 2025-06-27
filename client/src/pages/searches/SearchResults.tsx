@@ -1,4 +1,4 @@
-import { SEARCH_OBJECT_TYPES } from "actions"
+import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import { PageDispatchersPropType } from "components/Page"
 import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
@@ -9,7 +9,8 @@ import OrganizationSearchResults from "components/search/OrganizationSearchResul
 import PeopleSearchResults from "components/search/PeopleSearchResults"
 import PositionSearchResults from "components/search/PositionSearchResults"
 import TaskSearchResults from "components/search/TaskSearchResults"
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
+import { Alert, Badge } from "react-bootstrap"
 import utils from "utils"
 
 const DEFAULT_PAGESIZE = 10
@@ -37,6 +38,7 @@ const SearchResultsSection = ({
   searchQuery,
   pageDispatchers
 }: SearchResultsSectionProps) => {
+  const [totalCount, setTotalCount] = useState(0)
   const TableComponent = SEARCH_COMPONENTS[type]
   if (!TableComponent) {
     return null
@@ -48,13 +50,16 @@ const SearchResultsSection = ({
   return (
     <div className="mb-4">
       <h6 className="mb-2">
-        {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
+        {SEARCH_OBJECT_LABELS[type]}
+        <Badge pill bg="secondary" className="ms-2">
+          {totalCount}
+        </Badge>
       </h6>
-
       <TableComponent
         pageDispatchers={pageDispatchers}
         queryParams={queryParams}
-        setTotalCount={() => {}}
+        setTotalCount={setTotalCount}
+      />
     </div>
   )
 }
