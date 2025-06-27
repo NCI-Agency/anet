@@ -3,9 +3,7 @@ import API from "api"
 import EventTable from "components/EventTable"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-import {
-  DEFAULT_PAGESIZE
-} from "components/search/common"
+import { DEFAULT_PAGESIZE } from "components/search/common"
 import _isEqual from "lodash/isEqual"
 import React, { useEffect, useRef, useState } from "react"
 

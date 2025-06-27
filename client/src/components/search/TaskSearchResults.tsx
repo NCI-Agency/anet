@@ -1,9 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-import {
-  DEFAULT_PAGESIZE
-} from "components/search/common"
+import { DEFAULT_PAGESIZE } from "components/search/common"
 import TaskTable from "components/TaskTable"
 import _isEqual from "lodash/isEqual"
 import React, { useEffect, useRef, useState } from "react"
