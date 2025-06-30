@@ -415,6 +415,7 @@ const MySavedSearches = ({
     <>
       {data.savedSearches.map((search, i) => (
         <Fieldset
+          className="mb-4"
           title={i === 0 ? "My Saved Searches" : null}
           key={search.uuid}
         >
@@ -447,6 +448,7 @@ const MySavedSearches = ({
                         ? IconNames.CHEVRON_DOWN
                         : IconNames.CHEVRON_UP
                     }
+                    size={20}
                     style={{ fontSize: 22, color: "initial" }}
                   />
                 </span>
