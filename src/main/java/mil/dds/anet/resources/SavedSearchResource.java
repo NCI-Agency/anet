@@ -34,6 +34,10 @@ public class SavedSearchResource {
       @GraphQLArgument(name = "savedSearch") SavedSearch savedSearch) {
     Person user = DaoUtils.getUserFromContext(context);
     savedSearch.setOwnerUuid(user.getUuid());
+    if (savedSearch.getDisplayInHomepage()) {
+      Double maxPriority = dao.getMaxPriorityForOwner(user.getUuid());
+      savedSearch.setPriority(maxPriority == null ? 0.0 : maxPriority + 1.0);
+    }
     final SavedSearch created = dao.insert(savedSearch);
     AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
     return created;
@@ -41,15 +45,20 @@ public class SavedSearchResource {
 
   @GraphQLQuery(name = "mySearches")
   public List<SavedSearch> getMySearches(@GraphQLRootContext GraphQLContext context) {
-    return dao.getSearchesByOwner(DaoUtils.getUserFromContext(context));
+    return dao.getSearchesByOwner(DaoUtils.getUserFromContext(context)).stream()
+        .sorted(
+            Comparator.comparing(SavedSearch::getPriority, Comparator.nullsLast(Double::compareTo)))
+        .toList();
   }
 
   @GraphQLQuery(name = "myHomepageSearches")
   public List<SavedSearch> getMyHomepageSearches(@GraphQLRootContext GraphQLContext context) {
     Person user = DaoUtils.getUserFromContext(context);
-    List<SavedSearch> searches = dao.getSearchesByOwner(user);
-    return searches.stream()
-        .filter(s -> s.getDisplayInHomepage() != null && s.getDisplayInHomepage()).toList();
+    return dao.getSearchesByOwner(user).stream()
+        .filter(s -> Boolean.TRUE.equals(s.getDisplayInHomepage()))
+        .sorted(
+            Comparator.comparing(SavedSearch::getPriority, Comparator.nullsLast(Double::compareTo)))
+        .toList();
   }
 
   @GraphQLMutation(name = "deleteSavedSearch")

@@ -1496,6 +1496,8 @@ input SavedSearchInput {
   query: String
   updatedAt: Instant
   uuid: String
+  displayInHomepage: Boolean
+  priority: Float
 }
 
 """"""
