@@ -850,12 +850,14 @@ const SearchFilterDisplay = ({
 
 interface SearchDescriptionProps {
   searchQuery?: SearchQueryPropType
+  showText?: boolean
   showPlaceholders?: boolean
   style?: any
 }
 
 export const SearchDescription = ({
   searchQuery,
+  showText,
   showPlaceholders,
   style
 }: SearchDescriptionProps) => {
@@ -871,6 +873,16 @@ export const SearchDescription = ({
   const filters = searchQuery.filters
   return (
     <span className="asLink" style={style}>
+      {showText && (
+        <>
+          Search for{" "}
+          {searchQuery.text && (
+            <span>
+              <em>"{searchQuery.text}"</em> in{" "}
+            </span>
+          )}
+        </>
+      )}
       <b>
         {searchQuery.objectType
           ? SEARCH_OBJECT_LABELS[searchQuery.objectType]
