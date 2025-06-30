@@ -46,8 +46,6 @@ interface MySavedSearchesProps {
   pageDispatchers?: PageDispatchersPropType
 }
 
-const DEFAULT_PAGESIZE = 10
-
 const MySavedSearches = ({
   setSearchQuery,
   pageDispatchers
@@ -55,7 +53,6 @@ const MySavedSearches = ({
   const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
   const [deserializedQueries, setDeserializedQueries] = useState({})
-  const [pageNum, setPageNum] = useState(0)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
   )
@@ -68,18 +65,10 @@ const MySavedSearches = ({
 
   const savedSearches = useMemo(() => data?.savedSearches || [], [data])
   const totalCount = savedSearches.length
-  const paginatedSearches = useMemo(
-    () =>
-      savedSearches.slice(
-        pageNum * DEFAULT_PAGESIZE,
-        (pageNum + 1) * DEFAULT_PAGESIZE
-      ),
-    [savedSearches, pageNum]
-  )
 
   useEffect(() => {
     const newQueries = {}
-    paginatedSearches.forEach(search => {
+    savedSearches.forEach(search => {
       const objType = SEARCH_OBJECT_TYPES[search.objectType]
       const queryParams = utils.parseJsonSafe(search.query)
       deserializeQueryParams(
@@ -91,7 +80,7 @@ const MySavedSearches = ({
         }
       )
     })
-  }, [paginatedSearches])
+  }, [savedSearches])
 
   if (done) {
     return result
@@ -103,12 +92,9 @@ const MySavedSearches = ({
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="float-end"
-        pageNum={pageNum}
-        pageSize={DEFAULT_PAGESIZE}
         totalCount={totalCount}
-        goToPage={setPageNum}
       >
-        {paginatedSearches.length === 0 ? (
+        {savedSearches.length === 0 ? (
           <p>No saved searches found.</p>
         ) : (
           <Table striped responsive className="mt-3 mb-3">
@@ -120,7 +106,7 @@ const MySavedSearches = ({
               </tr>
             </thead>
             <tbody>
-              {paginatedSearches.map(savedSearch => (
+              {savedSearches.map(savedSearch => (
                 <tr key={savedSearch.uuid} className="align-middle">
                   <td style={{ paddingLeft: 0 }}>
                     <Button
