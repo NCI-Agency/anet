@@ -432,6 +432,7 @@ const MySavedSearches = ({
                 <span className="flex-grow-1">
                   <SearchDescription
                     searchQuery={savedQueries[search.uuid]}
+                    showText
                     style={{ fontSize: 20, pointerEvents: "none" }}
                   />
                   <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">

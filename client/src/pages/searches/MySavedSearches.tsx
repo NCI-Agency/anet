@@ -131,6 +131,7 @@ const MySavedSearches = ({
                       {deserializedQueries[savedSearch.uuid] && (
                         <SearchDescription
                           searchQuery={deserializedQueries[savedSearch.uuid]}
+                          showText
                           style={{ pointerEvents: "none" }}
                         />
                       )}
