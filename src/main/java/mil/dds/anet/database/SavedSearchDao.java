@@ -55,10 +55,9 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
   public SavedSearch insertInternal(SavedSearch obj) {
     final Handle handle = getDbHandle();
     try {
-      handle
-          .createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
-              + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"displayInHomepage\") "
-              + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query, :displayInHomepage)")
+      handle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+          + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"displayInHomepage\", priority) "
+          + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query, :displayInHomepage, :priority)")
           .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
           .bind("objectType", DaoUtils.getEnumId(obj.getObjectType())).execute();
@@ -73,7 +72,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     final Handle handle = getDbHandle();
     try {
       return handle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, WHERE uuid = :uuid")
+          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, priority = :priority WHERE uuid = :uuid")
           .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
     } finally {
       closeDbHandle(handle);
@@ -87,6 +86,18 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
       return handle
           .createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" WHERE uuid = :uuid")
           .bind("uuid", uuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public Double getMaxPriorityForOwner(String ownerUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery(
+              "SELECT MAX(priority) FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
+          .bind("ownerUuid", ownerUuid).mapTo(Double.class).findOne().orElse(null);
     } finally {
       closeDbHandle(handle);
     }
