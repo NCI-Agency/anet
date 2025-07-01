@@ -10,6 +10,7 @@ interface DraggableRowProps {
   moveRow: (from: number, to: number) => void
   onDropRow: (uuid: string, toIndex: number) => void
   dragHandleProps?: any
+  asTableRow?: boolean
   children: React.ReactNode
 }
 
@@ -20,6 +21,7 @@ const DraggableRow = ({
   moveRow,
   onDropRow,
   dragHandleProps,
+  asTableRow,
   children
 }: DraggableRowProps) => {
   const ref = useRef(null)
@@ -50,6 +52,30 @@ const DraggableRow = ({
     })
   })
   drag(drop(ref))
+  if (asTableRow) {
+    return (
+      <tr
+        ref={ref}
+        style={{
+          opacity: dragActive ? 0.4 : 1,
+          background: dragActive ? "#f0f4ff" : undefined,
+          cursor: "pointer",
+          verticalAlign: "baseline",
+          textAlign: "center"
+        }}
+      >
+        <td>
+          <span {...dragHandleProps} style={{ cursor: "grab" }}>
+            <Icon
+              icon={IconNames.DRAG_HANDLE_VERTICAL}
+              style={{ fontSize: 22 }}
+            />
+          </span>
+        </td>
+        {children}
+      </tr>
+    )
+  }
   return (
     <div
       ref={ref}
