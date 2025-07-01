@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Icon } from "@blueprintjs/core"
+import { Checkbox, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
@@ -19,6 +19,7 @@ import {
   SearchDescription
 } from "components/SearchFilters"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import { update } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
@@ -33,6 +34,7 @@ const GQL_GET_SAVED_SEARCHES = gql`
       uuid
       name
       objectType
+      displayInHomepage
       priority
       query
     }
@@ -51,6 +53,18 @@ const GQL_UPDATE_PRIORITY = gql`
   }
 `
 
+const GQL_UPDATE_DISPLAY_IN_HOMEPAGE = gql`
+  mutation updateSavedSearchDisplayInHomepage(
+    $uuid: String!
+    $displayInHomepage: Boolean!
+  ) {
+    updateSavedSearchDisplayInHomepage(
+      uuid: $uuid
+      displayInHomepage: $displayInHomepage
+    )
+  }
+`
+
 interface MySavedSearchesProps {
   setSearchQuery: (...args: unknown[]) => unknown
   pageDispatchers?: PageDispatchersPropType
@@ -63,7 +77,8 @@ const MySavedSearches = ({
   const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
   const [deserializedQueries, setDeserializedQueries] = useState({})
-  const [searches, setSearches] = useState([])
+  const [homepageSearches, setHomepageSearches] = useState([])
+  const [nonHomepageSearches, setNonHomepageSearches] = useState([])
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
   )
@@ -75,6 +90,32 @@ const MySavedSearches = ({
   usePageTitle("My Saved Searches")
 
   const totalCount = useMemo(() => data?.savedSearches?.length || 0, [data])
+
+  const updateDisplayInHomepage = search => {
+    API.mutation(GQL_UPDATE_DISPLAY_IN_HOMEPAGE, {
+      uuid: search.uuid,
+      displayInHomepage: !search.displayInHomepage
+    })
+    const updatedHomepageSearches = [...homepageSearches]
+    const updatedNonHomepageSearches = [...nonHomepageSearches]
+    if (search.displayInHomepage) {
+      const index = homepageSearches.findIndex(s => s.uuid === search.uuid)
+      const [removed] = updatedHomepageSearches.splice(index, 1)
+      removed.displayInHomepage = false
+      removed.priority = null
+      updatedNonHomepageSearches.push(removed)
+    } else {
+      const index = nonHomepageSearches.findIndex(s => s.uuid === search.uuid)
+      const [removed] = updatedNonHomepageSearches.splice(index, 1)
+      removed.displayInHomepage = true
+      removed.priority = homepageSearches.length
+        ? homepageSearches[homepageSearches.length - 1].priority + 1.0
+        : 0.0
+      updatedHomepageSearches.push(removed)
+    }
+    setHomepageSearches([...updatedHomepageSearches])
+    setNonHomepageSearches([...updatedNonHomepageSearches])
+  }
 
   useEffect(() => {
     if (data?.savedSearches) {
@@ -91,19 +132,31 @@ const MySavedSearches = ({
           }
         )
       })
-      setSearches(data.savedSearches)
+      setHomepageSearches(
+        data.savedSearches.filter(
+          ({ displayInHomepage }) => !!displayInHomepage
+        )
+      )
+      setNonHomepageSearches(
+        data.savedSearches.filter(({ displayInHomepage }) => !displayInHomepage)
+      )
     }
-  }, [data, setDeserializedQueries, setSearches])
+  }, [
+    data,
+    setDeserializedQueries,
+    setHomepageSearches,
+    setNonHomepageSearches
+  ])
 
   if (done) {
     return result
   }
-  if (!searches.length) {
+  if (!homepageSearches.length && !nonHomepageSearches.length) {
     return null
   }
 
   const moveRow = (from, to) => {
-    const updated = [...searches]
+    const updated = [...homepageSearches]
     const [removed] = updated.splice(from, 1)
     updated.splice(to, 0, removed)
 
@@ -111,7 +164,7 @@ const MySavedSearches = ({
     if (to === 0) {
       newPriority = updated[0].priority - 1
     } else if (to === updated.length - 1) {
-      newPriority = updated[updated.length - 1].priority + 1
+      newPriority = updated[updated.length - 1].priority + 1.0
     } else {
       const above = updated[to - 1].priority
       const below = updated[to + 1].priority
@@ -119,15 +172,63 @@ const MySavedSearches = ({
     }
 
     updated[to].priority = newPriority
-    setSearches([...updated])
+    setHomepageSearches([...updated])
   }
 
   const onDropRow = (uuid, toIndex) => {
-    const search = searches.find(s => s.uuid === uuid)
+    const search = homepageSearches.find(s => s.uuid === uuid)
     if (!search) {
       return
     }
     API.mutation(GQL_UPDATE_PRIORITY, { uuid, priority: search.priority })
+  }
+
+  const renderRowTds = search => {
+    return (
+      <>
+        <td style={{ paddingLeft: 0 }}>
+          <Button
+            className="text-start text-decoration-none"
+            variant="link"
+            onClick={() => showSearch(search)}
+          >
+            {deserializedQueries[search.uuid] && (
+              <SearchDescription
+                searchQuery={deserializedQueries[search.uuid]}
+                showText
+                style={{ pointerEvents: "none" }}
+              />
+            )}
+          </Button>
+        </td>
+        <td style={{ paddingRight: 0 }}>
+          <Button
+            className="text-start text-decoration-none"
+            variant="link"
+            onClick={() => showSearch(search)}
+          >
+            {search.name}
+          </Button>
+        </td>
+        <td className="text-center">
+          <Checkbox
+            checked={search.displayInHomepage}
+            onChange={() => updateDisplayInHomepage(search)}
+          />
+        </td>
+        <td className="text-start">
+          <ConfirmDestructive
+            onConfirm={() => onConfirmDelete(search.uuid)}
+            objectType="search"
+            objectDisplay={search.name}
+            variant="danger"
+            operation="delete"
+          >
+            <Icon icon={IconNames.TRASH} />
+          </ConfirmDestructive>
+        </td>
+      </>
+    )
   }
 
   return (
@@ -138,67 +239,40 @@ const MySavedSearches = ({
         className="float-end"
         totalCount={totalCount}
       >
-        {searches.length === 0 ? (
+        {homepageSearches.length + nonHomepageSearches.length === 0 ? (
           <p>No saved searches found.</p>
         ) : (
           <DndProvider backend={HTML5Backend}>
-            <Table striped responsive className="mt-3 mb-3">
+            <Table striped responsive>
               <thead>
-                <tr>
+                <tr style={{ verticalAlign: "middle" }}>
                   <th style={{ width: "5%" }} />
-                  <th style={{ width: "65%" }}>Description</th>
+                  <th style={{ width: "70%" }}>Description</th>
                   <th style={{ width: "20%" }}>Search Name</th>
-                  <th style={{ width: "10%" }}>Action</th>
+                  <th style={{ width: "5%" }}>Display In Homepage</th>
+                  <th style={{ width: "5%" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {searches.map((savedSearch, i) => (
+                {homepageSearches.map((search, i) => (
                   <DraggableRow
                     itemType="SAVED_SEARCH_ROW"
-                    row={savedSearch}
+                    row={search}
                     index={i}
-                    key={i}
+                    key={search.uuid}
                     moveRow={moveRow}
                     onDropRow={onDropRow}
                     dragHandleProps={{}}
                     asTableRow
                   >
-                    <td style={{ paddingLeft: 0 }}>
-                      <Button
-                        className="text-start text-decoration-none"
-                        variant="link"
-                        onClick={() => showSearch(savedSearch)}
-                      >
-                        {deserializedQueries[savedSearch.uuid] && (
-                          <SearchDescription
-                            searchQuery={deserializedQueries[savedSearch.uuid]}
-                            showText
-                            style={{ pointerEvents: "none" }}
-                          />
-                        )}
-                      </Button>
-                    </td>
-                    <td style={{ paddingRight: 0 }}>
-                      <Button
-                        className="text-start text-decoration-none"
-                        variant="link"
-                        onClick={() => showSearch(savedSearch)}
-                      >
-                        {savedSearch.name}
-                      </Button>
-                    </td>
-                    <td>
-                      <ConfirmDestructive
-                        onConfirm={() => onConfirmDelete(savedSearch.uuid)}
-                        objectType="search"
-                        objectDisplay={savedSearch.name}
-                        variant="danger"
-                        operation="delete"
-                      >
-                        <Icon icon={IconNames.TRASH} />
-                      </ConfirmDestructive>
-                    </td>
+                    {renderRowTds(search)}
                   </DraggableRow>
+                ))}
+                {nonHomepageSearches.map((search, i) => (
+                  <tr key={search.uuid} className="align-middle">
+                    <td />
+                    {renderRowTds(search)}
+                  </tr>
                 ))}
               </tbody>
             </Table>
