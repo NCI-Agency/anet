@@ -1351,7 +1351,12 @@ export const ReadonlyCustomFields = ({
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
         const value = Object.get(values, fieldName) || null
-        if (hideIfEmpty && _isEmpty(value)) {
+        if (
+          hideIfEmpty &&
+          (value == null ||
+            value === "" ||
+            (value instanceof Object && _isEmpty(value)))
+        ) {
           return null
         }
         return ReadonlyFieldComponent ? (
