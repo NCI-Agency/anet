@@ -155,6 +155,10 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
       whereClauses
           .add(String.format("%s %s :%s", startFieldName, startComp.getOperator(), startParamName));
       DaoUtils.addInstantAsLocalDateTime(sqlArgs, startParamName, startFieldValue);
+    } else if (DaoUtils.isRelativeDate(endFieldValue) && endComp == Comparison.BEFORE) {
+      whereClauses.add(String.format("%s %s :%s", startFieldName, Comparison.AFTER.getOperator(),
+          startParamName));
+      DaoUtils.addInstantAsLocalDateTime(sqlArgs, startParamName, Instant.now());
     }
     if (endFieldValue != null) {
       whereClauses

@@ -195,16 +195,18 @@ public class DaoUtils {
     return instant == null ? null : LocalDateTime.ofInstant(instant, getServerNativeZoneId());
   }
 
+  private static final long MAX_RELATIVE_TIME = 999L * 24L * 60L * 60L * 1000L; // 999 days
+
   /*
    * For all search interfaces we accept either specific dates as number of milliseconds since the
-   * Unix Epoch, OR a number of milliseconds before today's date, where these relative times should
-   * be negative, i.e. before Epoch.
+   * Unix Epoch, OR a number of milliseconds before or after today's date, where these relative
+   * times should be at most 999 days before or after Epoch.
    */
   public static boolean isRelativeDate(Instant input) {
     if (input == null) {
       return false;
     }
-    return input.toEpochMilli() < 0;
+    return Math.abs(input.toEpochMilli()) <= MAX_RELATIVE_TIME;
   }
 
   private static Instant handleRelativeDate(Instant input) {
