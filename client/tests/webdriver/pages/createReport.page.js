@@ -253,7 +253,13 @@ export class CreateReport extends Page {
 
   async getAttendeeAssessment(name) {
     return (await this.getAttendeesAssessments()).$(
-      `.//td//a[text()="${name}"]`
+      `.//th//a[text()="${name}"]`
+    )
+  }
+
+  async getAttendeeAssessmentLabel(name, i) {
+    return (await this.getAttendeeAssessment(name)).$(
+      `../../../following-sibling::tr[${i}]/td`
     )
   }
 
@@ -267,7 +273,13 @@ export class CreateReport extends Page {
 
   async getTaskAssessment(shortName) {
     return (await this.getTasksAssessments()).$(
-      `.//td//a[text()="${shortName}"]`
+      `.//th//a[text()="${shortName}"]`
+    )
+  }
+
+  async getTaskAssessmentLabel(shortName, i) {
+    return (await this.getTaskAssessment(shortName)).$(
+      `../../../../following-sibling::tr[${i}]/td`
     )
   }
 

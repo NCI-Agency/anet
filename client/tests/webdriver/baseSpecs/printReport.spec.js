@@ -8,10 +8,13 @@ const INTERLOCUTORS = [
   "CIV KYLESON, Kyle",
   "CIV SHARTON, Shardul"
 ]
+const INTERLOCUTORS_WITH_ASSESSMENTS = INTERLOCUTORS
 
 const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
+const ADVISORS_WITH_ASSESSMENTS = ["CIV GUIST, Lin"]
 
 const TASKS = ["EF 1 » EF 1.2 » 1.2.A", "EF 1 » EF 1.2 » 1.2.B"]
+const TASKS_WITH_ASSESSMENTS = TASKS
 
 const DEFAULT_REPORT_CLASSIFICATION = "DEMO USE ONLY"
 
@@ -97,15 +100,51 @@ describe("Show print report page", () => {
         "interlocutors-assessments",
         true
       )
-      for (const interlocutor of INTERLOCUTORS) {
+      for (const interlocutor of INTERLOCUTORS_WITH_ASSESSMENTS) {
         expect(displayedInterlocutors).to.contain(interlocutor)
+
+        const attendeeAssessmentLabel =
+          await ShowReport.getAttendeeAssessmentLabel(
+            "interlocutors-assessments",
+            interlocutor,
+            1
+          )
+        // eslint-disable-next-line no-unused-expressions
+        expect(await attendeeAssessmentLabel.isExisting()).to.be.true
+        expect(await attendeeAssessmentLabel.getText()).to.equal(
+          "Engagement assessment of interlocutor"
+        )
       }
       const displayedAdvisors = await ShowReport.getCompactViewElements(
         "advisors-assessments",
         true
       )
-      for (const advisor of ADVISORS) {
+      for (const advisor of ADVISORS_WITH_ASSESSMENTS) {
         expect(displayedAdvisors).to.contain(advisor)
+
+        const attendeeAssessment1Label =
+          await ShowReport.getAttendeeAssessmentLabel(
+            "advisors-assessments",
+            advisor,
+            1
+          )
+        // eslint-disable-next-line no-unused-expressions
+        expect(await attendeeAssessment1Label.isExisting()).to.be.true
+        expect(await attendeeAssessment1Label.getText()).to.equal(
+          "Engagement assessment of linguist"
+        )
+
+        const attendeeAssessment2Label =
+          await ShowReport.getAttendeeAssessmentLabel(
+            "advisors-assessments",
+            advisor,
+            3
+          )
+        // eslint-disable-next-line no-unused-expressions
+        expect(await attendeeAssessment2Label.isExisting()).to.be.true
+        expect(await attendeeAssessment2Label.getText()).to.equal(
+          "Engagement assessment of linguist Guist, Lin"
+        )
       }
     })
     it("Should display all tasks", async() => {
@@ -120,8 +159,33 @@ describe("Show print report page", () => {
         "tasks-assessments",
         true
       )
-      for (const task of TASKS) {
+      for (const task of TASKS_WITH_ASSESSMENTS) {
         expect(displayedTasks).to.contain(task)
+
+        const taskShortName = task.split(" » ")?.pop()
+        const taskAssessment1Label =
+          await ShowReport.getTaskEngagementAssessmentLabel(
+            "tasks-assessments",
+            taskShortName,
+            1
+          )
+        // eslint-disable-next-line no-unused-expressions
+        expect(await taskAssessment1Label.isExisting()).to.be.true
+        expect(await taskAssessment1Label.getText()).to.equal(
+          "Restricted engagement assessment of objective"
+        )
+
+        const taskAssessment2Label =
+          await ShowReport.getTaskEngagementAssessmentLabel(
+            "tasks-assessments",
+            taskShortName,
+            3
+          )
+        // eslint-disable-next-line no-unused-expressions
+        expect(await taskAssessment2Label.isExisting()).to.be.true
+        expect(await taskAssessment2Label.getText()).to.equal(
+          "Engagement assessment of objective"
+        )
       }
     })
   })

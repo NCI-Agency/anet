@@ -13,20 +13,90 @@ describe("Show report page", () => {
   describe("When on the show page of a report with assessments", () => {
     it("We should see a table of tasks instant assessments related to the current report", async() => {
       await (
-        await ShowReport.getTasksEngagementAssessments()
+        await ShowReport.getTasksEngagementAssessments(
+          "tasks-engagement-assessments"
+        )
       ).waitForDisplayed()
+      /* eslint-disable no-unused-expressions */
+      // Should show the assessment labels
+      const TASK1 = "1.2.A"
+      expect(
+        await (
+          await ShowReport.getTaskEngagementAssessment(
+            "tasks-engagement-assessments",
+            TASK1
+          )
+        ).isExisting()
+      ).to.be.true
+      const task1Assessment1Label =
+        await ShowReport.getTaskEngagementAssessmentLabel(
+          "tasks-engagement-assessments",
+          TASK1,
+          1
+        )
+      expect(await task1Assessment1Label.isExisting()).to.be.true
+      expect(await task1Assessment1Label.getText()).to.equal(
+        "Restricted engagement assessment of objective"
+      )
+      const task1Assessment2Label =
+        await ShowReport.getTaskEngagementAssessmentLabel(
+          "tasks-engagement-assessments",
+          TASK1,
+          3
+        )
+      expect(await task1Assessment2Label.isExisting()).to.be.true
+      expect(await task1Assessment2Label.getText()).to.equal(
+        "Engagement assessment of objective"
+      )
+      const TASK2 = "1.2.B"
+      expect(
+        await (
+          await ShowReport.getTaskEngagementAssessment(
+            "tasks-engagement-assessments",
+            TASK2
+          )
+        ).isExisting()
+      ).to.be.true
+      const task2Assessment1Label =
+        await ShowReport.getTaskEngagementAssessmentLabel(
+          "tasks-engagement-assessments",
+          TASK2,
+          1
+        )
+      expect(await task2Assessment1Label.isExisting()).to.be.true
+      expect(await task2Assessment1Label.getText()).to.equal(
+        "Restricted engagement assessment of objective"
+      )
+      const task2Assessment2Label =
+        await ShowReport.getTaskEngagementAssessmentLabel(
+          "tasks-engagement-assessments",
+          TASK2,
+          3
+        )
+      expect(await task2Assessment2Label.isExisting()).to.be.true
+      expect(await task2Assessment2Label.getText()).to.equal(
+        "Engagement assessment of objective"
+      )
+      /* eslint-enable no-unused-expressions */
+
       // The tasks on the page have an svg type of assessment (LikertScale widgets)
       // and two other questions
       const svgAssessments = await (
-        await ShowReport.getTasksEngagementAssessments()
+        await ShowReport.getTasksEngagementAssessments(
+          "tasks-engagement-assessments"
+        )
       ).$$("svg")
       expect(svgAssessments).to.have.length(4)
       const question2Assessments = await (
-        await ShowReport.getTasksEngagementAssessments()
+        await ShowReport.getTasksEngagementAssessments(
+          "tasks-engagement-assessments"
+        )
       ).$$("[name*=question2]")
       expect(question2Assessments).to.have.length(4)
       const question3Assessments = await (
-        await ShowReport.getTasksEngagementAssessments()
+        await ShowReport.getTasksEngagementAssessments(
+          "tasks-engagement-assessments"
+        )
       ).$$("[name*=question3]")
       expect(question3Assessments).to.have.length(4)
     })
