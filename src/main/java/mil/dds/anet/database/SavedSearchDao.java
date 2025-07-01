@@ -103,4 +103,15 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     }
   }
 
+  public int updatePriority(String uuid, Double priority) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("UPDATE \"savedSearches\" SET priority = :priority WHERE uuid = :uuid")
+          .bind("uuid", uuid).bind("priority", priority).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
 }
