@@ -114,4 +114,32 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     }
   }
 
+  public int updateSavedSearchDisplayInHomepage(String uuid, Boolean displayInHomepage) {
+    final Handle handle = getDbHandle();
+    try {
+      if (Boolean.TRUE.equals(displayInHomepage)) {
+        // Fetch ownerUuid from the SavedSearch
+        String ownerUuid =
+            handle.createQuery("SELECT \"ownerUuid\" FROM \"savedSearches\" WHERE uuid = :uuid")
+                .bind("uuid", uuid).mapTo(String.class).findOne().orElse(null);
+
+        // Compute new priority
+        Double maxPriority = getMaxPriorityForOwner(ownerUuid);
+        double newPriority = (maxPriority == null) ? 0.0 : maxPriority + 1.0;
+
+        // Set displayInHomepage true and set new priority
+        return handle.createUpdate(
+            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, priority = :priority WHERE uuid = :uuid")
+            .bind("uuid", uuid).bind("displayInHomepage", true).bind("priority", newPriority)
+            .execute();
+      } else {
+        // Set displayInHomepage false and clear priority
+        return handle.createUpdate(
+            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, priority = NULL WHERE uuid = :uuid")
+            .bind("uuid", uuid).bind("displayInHomepage", false).execute();
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
 }
