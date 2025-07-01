@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Person;
@@ -78,5 +79,11 @@ public class SavedSearchResource {
           "Couldn't process saved search delete");
     }
     return numDeleted;
+  }
+
+  @GraphQLMutation(name = "updateSavedSearchPriority")
+  public Integer updateSavedSearchPriority(@GraphQLArgument(name = "uuid") String uuid,
+      @GraphQLArgument(name = "priority") Double priority) {
+    return dao.updatePriority(uuid, priority);
   }
 }
