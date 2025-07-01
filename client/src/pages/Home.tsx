@@ -428,7 +428,7 @@ const MySavedSearches = ({
     if (to === 0) {
       newPriority = updated[0].priority - 1
     } else if (to === updated.length - 1) {
-      newPriority = updated[updated.length - 1].priority + 1
+      newPriority = updated[updated.length - 1].priority + 1.0
     } else {
       const above = updated[to - 1].priority
       const below = updated[to + 1].priority
