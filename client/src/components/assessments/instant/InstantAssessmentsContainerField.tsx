@@ -70,39 +70,46 @@ const InstantAssessmentRow = ({
   }
 
   return (
-    <tr>
-      <td>
-        {!_isEmpty(entityInstantAssessmentConfig?.questions) &&
-          (readOnlyAccess ? (
-            <ReadonlyCustomFields
-              parentFieldName={parentFieldName}
-              fieldsConfig={entityInstantAssessmentConfig.questions}
-              values={values}
-              isCompact={isCompact}
-              hideIfEmpty={isCompact}
-            />
-          ) : (
-            <CustomFieldsContainer
-              parentFieldName={parentFieldName}
-              fieldsConfig={entityInstantAssessmentConfig.questions}
+    <>
+      {assessmentConfig?.label && (
+        <tr>
+          <td className="fw-bold text-secondary">{assessmentConfig.label}</td>
+        </tr>
+      )}
+      <tr>
+        <td>
+          {!_isEmpty(entityInstantAssessmentConfig?.questions) &&
+            (readOnlyAccess ? (
+              <ReadonlyCustomFields
+                parentFieldName={parentFieldName}
+                fieldsConfig={entityInstantAssessmentConfig.questions}
+                values={values}
+                isCompact={isCompact}
+                hideIfEmpty={isCompact}
+              />
+            ) : (
+              <CustomFieldsContainer
+                parentFieldName={parentFieldName}
+                fieldsConfig={entityInstantAssessmentConfig.questions}
+                formikProps={formikProps}
+                isCompact={isCompact}
+                hideIfEmpty={isCompact}
+              />
+            ))}
+          {!_isEmpty(entityInstantAssessmentConfig?.questionSets) && (
+            <QuestionSet
+              entity={entity}
+              relatedObject={relatedObject}
+              questionSets={entityInstantAssessmentConfig.questionSets}
+              parentFieldName={`${parentFieldName}.questionSets`}
               formikProps={formikProps}
               isCompact={isCompact}
-              hideIfEmpty={isCompact}
+              readonly={readOnlyAccess}
             />
-          ))}
-        {!_isEmpty(entityInstantAssessmentConfig?.questionSets) && (
-          <QuestionSet
-            entity={entity}
-            relatedObject={relatedObject}
-            questionSets={entityInstantAssessmentConfig.questionSets}
-            parentFieldName={`${parentFieldName}.questionSets`}
-            formikProps={formikProps}
-            isCompact={isCompact}
-            readonly={readOnlyAccess}
-          />
-        )}
-      </td>
-    </tr>
+          )}
+        </td>
+      </tr>
+    </>
   )
 }
 
@@ -165,7 +172,7 @@ const InstantAssessmentsContainerField = ({
           return (
             <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
               <tr>
-                <td>
+                <th>
                   {modelType === Task.resourceName ? (
                     <BreadcrumbTrail
                       modelType={modelType}
@@ -180,7 +187,7 @@ const InstantAssessmentsContainerField = ({
                       showAvatar={!isCompact}
                     />
                   )}
-                </td>
+                </th>
               </tr>
               {entityInstantAssessments.map(([ak, ac]) => (
                 <InstantAssessmentRow
