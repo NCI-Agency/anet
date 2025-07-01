@@ -597,7 +597,6 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         isCompact
         canRead={canReadAssessments}
         readonly
-        showEntitiesWithoutAssessments
       />
     ) : (
       attendees.map(attendee => (
