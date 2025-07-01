@@ -86,4 +86,10 @@ public class SavedSearchResource {
       @GraphQLArgument(name = "priority") Double priority) {
     return dao.updatePriority(uuid, priority);
   }
+
+  @GraphQLMutation(name = "updateSavedSearchDisplayInHomepage")
+  public Integer updateSavedSearchDisplayInHomepage(@GraphQLArgument(name = "uuid") String uuid,
+      @GraphQLArgument(name = "displayInHomepage") Boolean displayInHomepage) {
+    return dao.updateSavedSearchDisplayInHomepage(uuid, displayInHomepage);
+  }
 }

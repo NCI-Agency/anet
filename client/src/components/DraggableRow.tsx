@@ -31,11 +31,18 @@ const DraggableRow = ({
       if (!ref.current) {
         return
       }
-      if (item.index === index) {
+      if (item.uuid === row.uuid) {
         return
       }
-      moveRow(item.index, index)
-      item.index = index
+
+      const dragIndex = item.index
+      const hoverIndex = index
+      if (dragIndex === hoverIndex) {
+        return
+      }
+
+      moveRow(dragIndex, hoverIndex)
+      item.index = hoverIndex
     }
   })
   const [{ isDragging: dragActive }, drag, preview] = useDrag({
