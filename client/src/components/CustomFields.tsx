@@ -941,7 +941,7 @@ const CompactLikertScale = ({
   values,
   levels
 }: CompactLikertScaleProps) => {
-  const fieldValue = Number(Object.get(values, name) || 0).toFixed(0)
+  const fieldValue = Number(Object.get(values, name) || 0).toFixed(1)
   const sortedLevels = levels.sort((a, b) => a.endValue - b.endValue)
   const levelLabel =
     sortedLevels.find(level => fieldValue <= level.endValue)?.label || null
