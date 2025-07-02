@@ -26,6 +26,9 @@ export default class Location extends Model {
     Settings.fields.location.customFields
   )
 
+  static LATITUDE_ERROR = "Latitude must be a number between -90 and +90"
+  static LONGITUDE_ERROR = "Longitude must be a number between -180 and +180"
+
   static LOCATION_FORMATS = {
     LAT_LON: "LAT_LON",
     MGRS: "MGRS"
@@ -74,8 +77,9 @@ export default class Location extends Model {
       lat: yup
         .number()
         .nullable()
-        .min(-90, "Latitude must be a number between -90 and +90")
-        .max(90, "Latitude must be a number between -90 and +90")
+        .typeError(Location.LATITUDE_ERROR)
+        .min(-90, Location.LATITUDE_ERROR)
+        .max(90, Location.LATITUDE_ERROR)
         .test("lat", "Please enter latitude", function(lat) {
           const { lng } = this.parent
           if (utils.isNumeric(lng)) {
@@ -87,8 +91,9 @@ export default class Location extends Model {
       lng: yup
         .number()
         .nullable()
-        .min(-180, "Longitude must be a number between -180 and +180")
-        .max(180, "Longitude must be a number between -180 and +180")
+        .typeError(Location.LONGITUDE_ERROR)
+        .min(-180, Location.LONGITUDE_ERROR)
+        .max(180, Location.LONGITUDE_ERROR)
         .test("lng", "Please enter longitude", function(lng) {
           const { lat } = this.parent
           if (utils.isNumeric(lat)) {
@@ -101,24 +106,19 @@ export default class Location extends Model {
       displayedCoordinate: yup
         .string()
         .nullable()
-        .test({
-          name: "displayedCoordinate",
-          test: function(displayedCoordinate) {
+        .test(
+          "displayedCoordinate",
+          "Please enter a valid MGRS coordinate",
+          function(displayedCoordinate) {
             if (_isEmpty(displayedCoordinate)) {
               return true
             }
-            if (Location.locationFormat === Location.LOCATION_FORMATS.MGRS) {
-              const latLngValue = convertMGRSToLatLng(displayedCoordinate)
-              return !latLngValue[0] || !latLngValue[1]
-                ? this.createError({
-                  message: "Please enter a valid MGRS coordinate",
-                  path: "displayedCoordinate"
-                })
-                : true
-            }
-            return true
+            const latLngValue = convertMGRSToLatLng(displayedCoordinate)
+            return (
+              utils.isNumeric(latLngValue[0]) && utils.isNumeric(latLngValue[1])
+            )
           }
-        })
+        )
         .default(null),
       parentLocations: yup.array().nullable().default([]),
       childrenLocations: yup.array().nullable().default([]),

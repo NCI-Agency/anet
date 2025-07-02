@@ -194,7 +194,11 @@ const MGRSFormField = ({
 
   return (
     <Row style={{ marginBottom: "1rem" }}>
-      <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
+      <Col
+        sm={2}
+        as={Form.Label}
+        htmlFor={getQualifiedFieldName(name, "displayedCoordinate")}
+      >
         {labels[locationFormat]}
       </Col>
 
@@ -205,16 +209,13 @@ const MGRSFormField = ({
               name={getQualifiedFieldName(name, "displayedCoordinate")}
               component={FieldHelper.InputFieldNoLabel}
               onChange={e => updateCoordinatesOnChange(e.target.value)}
-              onBlur={e => {
-                updateCoordinatesOnBlur(e.target.value)
-              }}
+              onBlur={e => updateCoordinatesOnBlur(e.target.value)}
             />
           </Col>
           <CoordinateActionButtons
             name={name}
             coordinates={coordinates}
             isSubmitting={isSubmitting}
-            disabled={!displayedCoordinate}
             onClear={() => {
               setFieldTouched(
                 getQualifiedFieldName(name, "displayedCoordinate"),
@@ -223,11 +224,10 @@ const MGRSFormField = ({
               )
               setFieldValue(
                 getQualifiedFieldName(name, "displayedCoordinate"),
-                null,
-                false
+                null
               )
-              setFieldValue(getQualifiedFieldName(name, "lat"), null, false)
-              setFieldValue(getQualifiedFieldName(name, "lng"), null, false)
+              setFieldValue(getQualifiedFieldName(name, "lat"), null)
+              setFieldValue(getQualifiedFieldName(name, "lng"), null)
             }}
             setLocationFormat={setLocationFormat}
           />
@@ -235,18 +235,30 @@ const MGRSFormField = ({
       </Col>
     </Row>
   )
-  // Lat-Lng fields are read only, no need to validate in onChange or onBlur
-  function updateCoordinatesOnChange(val) {
+
+  function setCoordinatesOnChangeOrBlur(val) {
     setFieldValue(getQualifiedFieldName(name, "displayedCoordinate"), val)
+    // lat/lng fields are read only, no need to validate
     const newLatLng = convertMGRSToLatLng(val)
-    setFieldValue(getQualifiedFieldName(name, "lat"), newLatLng[0], false)
-    setFieldValue(getQualifiedFieldName(name, "lng"), newLatLng[1], false)
+    setFieldValue(
+      getQualifiedFieldName(name, "lat"),
+      newLatLng[0] ?? null,
+      false
+    )
+    setFieldValue(
+      getQualifiedFieldName(name, "lng"),
+      newLatLng[1] ?? null,
+      false
+    )
   }
+
+  function updateCoordinatesOnChange(val) {
+    setCoordinatesOnChangeOrBlur(val)
+  }
+
   function updateCoordinatesOnBlur(val) {
     setFieldTouched(getQualifiedFieldName(name, "displayedCoordinate"), true)
-    const newLatLng = convertMGRSToLatLng(val)
-    setFieldValue(getQualifiedFieldName(name, "lat"), newLatLng[0], false)
-    setFieldValue(getQualifiedFieldName(name, "lng"), newLatLng[1], false)
+    setCoordinatesOnChangeOrBlur(val)
   }
 }
 
@@ -300,9 +312,7 @@ const LatLonFormField = ({
               name={getQualifiedFieldName(name, "lat")}
               component={FieldHelper.InputFieldNoLabel}
               onChange={e => setLatOnChange(e.target.value)}
-              onBlur={e => {
-                setParsedLatOnBlur(e.target.value)
-              }}
+              onBlur={e => setParsedLatOnBlur(e.target.value)}
             />
           </Col>
           <Col sm={3}>
@@ -310,16 +320,13 @@ const LatLonFormField = ({
               name={getQualifiedFieldName(name, "lng")}
               component={FieldHelper.InputFieldNoLabel}
               onChange={e => setLngOnChange(e.target.value)}
-              onBlur={e => {
-                setParsedLngOnBlur(e.target.value)
-              }}
+              onBlur={e => setParsedLngOnBlur(e.target.value)}
             />
           </Col>
           <CoordinateActionButtons
             name={name}
             coordinates={coordinates}
             isSubmitting={isSubmitting}
-            disabled={!utils.isNumeric(lat) && !utils.isNumeric(lng)}
             onClear={() => {
               // setting second param to false prevents validation since lat, lng can be null together
               setFieldTouched(getQualifiedFieldName(name, "lat"), false, false)
@@ -338,44 +345,43 @@ const LatLonFormField = ({
     </Row>
   )
 
-  // Don't parse in onChange, it limits user
-  // displayedCoordinate is in read-only field, no need to validate
-  function setLatOnChange(val) {
-    setFieldValue(getQualifiedFieldName(name, "lat"), val)
+  function setLatLngOnChangeOrBlur(
+    fieldName,
+    fieldValue,
+    newLat,
+    newLng,
+    parse = false
+  ) {
+    // Don't parse in onChange, it limits user
+    setFieldValue(
+      getQualifiedFieldName(name, fieldName),
+      parse ? parseCoordinate(fieldValue) : fieldValue
+    )
+    // displayedCoordinate is read-only, no need to validate
+    const newDisplayedCoordinate = convertLatLngToMGRS(newLat, newLng)
     setFieldValue(
       getQualifiedFieldName(name, "displayedCoordinate"),
-      convertLatLngToMGRS(val, lng),
+      newDisplayedCoordinate,
       false
     )
+  }
+
+  function setLatOnChange(val) {
+    setLatLngOnChangeOrBlur("lat", val, val, lng)
   }
 
   function setLngOnChange(val) {
-    setFieldValue(getQualifiedFieldName(name, "lng"), val)
-    setFieldValue(
-      getQualifiedFieldName(name, "displayedCoordinate"),
-      convertLatLngToMGRS(lat, val),
-      false
-    )
+    setLatLngOnChangeOrBlur("lng", val, lat, val)
   }
 
   function setParsedLatOnBlur(val) {
-    setFieldValue(
-      getQualifiedFieldName(name, "displayedCoordinate"),
-      convertLatLngToMGRS(val, lng),
-      false
-    )
     setFieldTouched(getQualifiedFieldName(name, "lat"), true)
-    setFieldValue(getQualifiedFieldName(name, "lat"), parseCoordinate(val))
+    setLatLngOnChangeOrBlur("lat", val, val, lng, true)
   }
 
   function setParsedLngOnBlur(val) {
-    setFieldValue(
-      getQualifiedFieldName(name, "displayedCoordinate"),
-      convertLatLngToMGRS(lat, val),
-      false
-    )
     setFieldTouched(getQualifiedFieldName(name, "lng"), true)
-    setFieldValue(getQualifiedFieldName(name, "lng"), parseCoordinate(val))
+    setLatLngOnChangeOrBlur("lng", val, lat, val, true)
   }
 }
 
@@ -384,7 +390,6 @@ interface CoordinateActionButtonsProps {
   coordinates?: CoordinatesPropType
   onClear: (...args: unknown[]) => unknown
   isSubmitting: boolean
-  disabled?: boolean
   setLocationFormat: (...args: unknown[]) => unknown
 }
 
@@ -395,9 +400,10 @@ const CoordinateActionButtons = ({
   coordinates = DEFAULT_COORDINATES,
   onClear,
   isSubmitting,
-  disabled = true,
   setLocationFormat
 }: CoordinateActionButtonsProps) => {
+  const { lat, lng, displayedCoordinate } = coordinates
+  const disabled = lat == null && lng == null && !displayedCoordinate
   return (
     <Col sm={3} style={{ padding: "0 8px" }}>
       <Tooltip content="Clear coordinates">
