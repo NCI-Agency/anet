@@ -126,9 +126,9 @@ interface ReportSummaryProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
   setTotalCount?: (...args: unknown[]) => unknown
-  paginationKey: string
-  setPagination: (...args: unknown[]) => unknown
-  pagination: any
+  paginationKey?: string
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
 }
 
 const ReportSummary = ({
@@ -143,14 +143,12 @@ const ReportSummary = ({
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    queryParamsUnchanged && pagination[paginationKey]
-      ? pagination[paginationKey].pageNum
-      : 0
+    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
   )
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
-      setPagination(paginationKey, 0)
+      setPagination?.(paginationKey, 0)
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
@@ -176,21 +174,20 @@ const ReportSummary = ({
     return result
   }
 
-  const reports = data ? data.reportList.list : []
+  const paginatedReports = data ? data.reportList : []
+  const { pageSize, pageNum: curPage, list: reports } = paginatedReports
   if (_get(reports, "length", 0) === 0) {
     return <em>No reports found</em>
   }
-
-  const { pageSize } = data.reportList
 
   return (
     <div>
       <UltimatePaginationTopDown
         className="float-end"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
+        pageSize={setPagination && pageSize}
+        pageNum={setPagination && curPage}
+        totalCount={setPagination && totalCount}
+        goToPage={setPagination && setPage}
       >
         {reports.map(report => (
           <ReportSummaryRow report={report} key={report.uuid} />
