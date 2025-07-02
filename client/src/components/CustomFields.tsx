@@ -377,12 +377,13 @@ const GeoLocationField = ({
   function updateCoordinateFields(latLng) {
     const parsedLat = parseCoordinate(latLng.lat)
     const parsedLng = parseCoordinate(latLng.lng)
+    const parsedMgrs = convertLatLngToMGRS(parsedLat, parsedLng)
+    formikProps.setFieldTouched(`${name}.lat`, false, false)
+    formikProps.setFieldTouched(`${name}.lng`, false, false)
+    formikProps.setFieldTouched(`${name}.displayedCoordinate`, false, false)
     formikProps.setFieldValue(`${name}.lat`, parsedLat)
     formikProps.setFieldValue(`${name}.lng`, parsedLng)
-    formikProps.setFieldValue(
-      `${name}.displayedCoordinate`,
-      convertLatLngToMGRS(parsedLat, parsedLng)
-    )
+    formikProps.setFieldValue(`${name}.displayedCoordinate`, parsedMgrs)
   }
 }
 

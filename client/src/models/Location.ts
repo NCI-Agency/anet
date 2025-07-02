@@ -1,10 +1,10 @@
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS
+  GRAPHQL_NOTES_FIELDS,
+  yupCoordinateSchema
 } from "components/Model"
-import { convertLatLngToMGRS, convertMGRSToLatLng } from "geoUtils"
-import _isEmpty from "lodash/isEmpty"
+import { convertLatLngToMGRS } from "geoUtils"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 import utils from "utils"
@@ -25,9 +25,6 @@ export default class Location extends Model {
   static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.location.customFields
   )
-
-  static LATITUDE_ERROR = "Latitude must be a number between -90 and +90"
-  static LONGITUDE_ERROR = "Longitude must be a number between -180 and +180"
 
   static LOCATION_FORMATS = {
     LAT_LON: "LAT_LON",
@@ -74,52 +71,6 @@ export default class Location extends Model {
         .required()
         .default(() => Model.STATUS.ACTIVE),
       type: yup.string().required().default(""),
-      lat: yup
-        .number()
-        .nullable()
-        .typeError(Location.LATITUDE_ERROR)
-        .min(-90, Location.LATITUDE_ERROR)
-        .max(90, Location.LATITUDE_ERROR)
-        .test("lat", "Please enter latitude", function(lat) {
-          const { lng } = this.parent
-          if (utils.isNumeric(lng)) {
-            return utils.isNumeric(lat)
-          }
-          return true
-        })
-        .default(null),
-      lng: yup
-        .number()
-        .nullable()
-        .typeError(Location.LONGITUDE_ERROR)
-        .min(-180, Location.LONGITUDE_ERROR)
-        .max(180, Location.LONGITUDE_ERROR)
-        .test("lng", "Please enter longitude", function(lng) {
-          const { lat } = this.parent
-          if (utils.isNumeric(lat)) {
-            return utils.isNumeric(lng)
-          }
-          return true
-        })
-        .default(null),
-      // not actually in the database, but used for validation
-      displayedCoordinate: yup
-        .string()
-        .nullable()
-        .test(
-          "displayedCoordinate",
-          "Please enter a valid MGRS coordinate",
-          function(displayedCoordinate) {
-            if (_isEmpty(displayedCoordinate)) {
-              return true
-            }
-            const latLngValue = convertMGRSToLatLng(displayedCoordinate)
-            return (
-              utils.isNumeric(latLngValue[0]) && utils.isNumeric(latLngValue[1])
-            )
-          }
-        )
-        .default(null),
       parentLocations: yup.array().nullable().default([]),
       childrenLocations: yup.array().nullable().default([]),
       // FIXME: resolve code duplication in yup schema for approval steps
@@ -166,6 +117,7 @@ export default class Location extends Model {
         .nullable()
         .default([])
     })
+    .concat(yupCoordinateSchema)
     // not actually in the database, the database contains the JSON customFields
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
