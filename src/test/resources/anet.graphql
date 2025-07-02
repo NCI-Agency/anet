@@ -1483,6 +1483,9 @@ type SavedSearch {
   query: String
   updatedAt: Instant
   uuid: String
+  displayInHomepage: Boolean
+  priority: Float
+  homepagePriority: Float
 }
 
 """"""
@@ -1496,6 +1499,7 @@ input SavedSearchInput {
   uuid: String
   displayInHomepage: Boolean
   priority: Float
+  homepagePriority: Float
 }
 
 """"""
