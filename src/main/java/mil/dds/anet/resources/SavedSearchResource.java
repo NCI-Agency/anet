@@ -35,9 +35,12 @@ public class SavedSearchResource {
       @GraphQLArgument(name = "savedSearch") SavedSearch savedSearch) {
     Person user = DaoUtils.getUserFromContext(context);
     savedSearch.setOwnerUuid(user.getUuid());
+    Double maxPriority = dao.getMaxPriorityForOwner(user.getUuid());
+    savedSearch.setPriority(maxPriority == null ? 0.0 : maxPriority + 1.0);
     if (savedSearch.getDisplayInHomepage()) {
-      Double maxPriority = dao.getMaxPriorityForOwner(user.getUuid());
-      savedSearch.setPriority(maxPriority == null ? 0.0 : maxPriority + 1.0);
+      Double maxHomepagePriority = dao.getMaxHomepagePriorityForOwner(user.getUuid());
+      savedSearch
+          .setHomepagePriority(maxHomepagePriority == null ? 0.0 : maxHomepagePriority + 1.0);
     }
     final SavedSearch created = dao.insert(savedSearch);
     AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
@@ -56,9 +59,8 @@ public class SavedSearchResource {
   public List<SavedSearch> getMyHomepageSearches(@GraphQLRootContext GraphQLContext context) {
     Person user = DaoUtils.getUserFromContext(context);
     return dao.getSearchesByOwner(user).stream()
-        .filter(s -> Boolean.TRUE.equals(s.getDisplayInHomepage()))
-        .sorted(
-            Comparator.comparing(SavedSearch::getPriority, Comparator.nullsLast(Double::compareTo)))
+        .filter(s -> Boolean.TRUE.equals(s.getDisplayInHomepage())).sorted(Comparator
+            .comparing(SavedSearch::getHomepagePriority, Comparator.nullsLast(Double::compareTo)))
         .toList();
   }
 
@@ -85,6 +87,12 @@ public class SavedSearchResource {
   public Integer updateSavedSearchPriority(@GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "priority") Double priority) {
     return dao.updatePriority(uuid, priority);
+  }
+
+  @GraphQLMutation(name = "updateSavedSearchHomepagePriority")
+  public Integer updateSavedSearchHomepagePriority(@GraphQLArgument(name = "uuid") String uuid,
+      @GraphQLArgument(name = "homepagePriority") Double homepagePriority) {
+    return dao.updateHomepagePriority(uuid, homepagePriority);
   }
 
   @GraphQLMutation(name = "updateSavedSearchDisplayInHomepage")
