@@ -33,7 +33,7 @@ public class SavedSearch extends AbstractAnetBean {
   String query;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean displayInHomepage;
+  private Boolean displayInHomepage = false;
   @GraphQLQuery
   @GraphQLInputField
   private Double priority;
