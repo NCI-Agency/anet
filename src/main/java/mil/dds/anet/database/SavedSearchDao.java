@@ -56,8 +56,8 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     final Handle handle = getDbHandle();
     try {
       handle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
-          + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"displayInHomepage\", priority) "
-          + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query, :displayInHomepage, :priority)")
+          + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"displayInHomepage\", priority, \"homepagePriority\") "
+          + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query, :displayInHomepage, :priority, :homepagePriority)")
           .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
           .bind("objectType", DaoUtils.getEnumId(obj.getObjectType())).execute();
@@ -72,7 +72,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     final Handle handle = getDbHandle();
     try {
       return handle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, priority = :priority WHERE uuid = :uuid")
+          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, priority = :priority, \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
           .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
     } finally {
       closeDbHandle(handle);
@@ -103,6 +103,17 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     }
   }
 
+  public Double getMaxHomepagePriorityForOwner(String ownerUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createQuery(
+          "SELECT MAX(\"homepagePriority\") FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
+          .bind("ownerUuid", ownerUuid).mapTo(Double.class).findOne().orElse(null);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   public int updatePriority(String uuid, Double priority) {
     final Handle handle = getDbHandle();
     try {
@@ -114,28 +125,36 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     }
   }
 
+  public int updateHomepagePriority(String uuid, Double homepagePriority) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "UPDATE \"savedSearches\" SET \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
+          .bind("uuid", uuid).bind("homepagePriority", homepagePriority).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   public int updateSavedSearchDisplayInHomepage(String uuid, Boolean displayInHomepage) {
     final Handle handle = getDbHandle();
     try {
       if (Boolean.TRUE.equals(displayInHomepage)) {
-        // Fetch ownerUuid from the SavedSearch
         String ownerUuid =
             handle.createQuery("SELECT \"ownerUuid\" FROM \"savedSearches\" WHERE uuid = :uuid")
                 .bind("uuid", uuid).mapTo(String.class).findOne().orElse(null);
 
-        // Compute new priority
-        Double maxPriority = getMaxPriorityForOwner(ownerUuid);
-        double newPriority = (maxPriority == null) ? 0.0 : maxPriority + 1.0;
+        Double maxHomepagePriority = getMaxHomepagePriorityForOwner(ownerUuid);
+        double newHomepagePriority =
+            (maxHomepagePriority == null) ? 0.0 : maxHomepagePriority + 1.0;
 
-        // Set displayInHomepage true and set new priority
         return handle.createUpdate(
-            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, priority = :priority WHERE uuid = :uuid")
-            .bind("uuid", uuid).bind("displayInHomepage", true).bind("priority", newPriority)
-            .execute();
+            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
+            .bind("uuid", uuid).bind("displayInHomepage", true)
+            .bind("homepagePriority", newHomepagePriority).execute();
       } else {
-        // Set displayInHomepage false and clear priority
         return handle.createUpdate(
-            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, priority = NULL WHERE uuid = :uuid")
+            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, \"homepagePriority\" = NULL WHERE uuid = :uuid")
             .bind("uuid", uuid).bind("displayInHomepage", false).execute();
       }
     } finally {

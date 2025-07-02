@@ -37,6 +37,9 @@ public class SavedSearch extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private Double priority;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Double homepagePriority;
 
   public String getName() {
     return name;
@@ -60,6 +63,14 @@ public class SavedSearch extends AbstractAnetBean {
 
   public void setPriority(Double priority) {
     this.priority = priority;
+  }
+
+  public Double getHomepagePriority() {
+    return homepagePriority;
+  }
+
+  public void setHomepagePriority(Double homepagePriority) {
+    this.homepagePriority = homepagePriority;
   }
 
   @GraphQLQuery(name = "owner")
@@ -126,12 +137,13 @@ public class SavedSearch extends AbstractAnetBean {
   @Override
   public String toString() {
     return String.format(
-        "SavedSearch[uuid:%s, name:%s, query:%s, owner:%s, displayInHomepage:%s, priority:%f]",
-        getUuid(), name, query, getOwnerUuid(), displayInHomepage, priority);
+        "SavedSearch[uuid:%s, name:%s, query:%s, owner:%s, displayInHomepage:%s, priority:%f, homepagePriority:%s]",
+        getUuid(), name, query, getOwnerUuid(), displayInHomepage, priority, homepagePriority);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(uuid, name, owner, objectType, query, displayInHomepage, priority);
+    return Objects.hashCode(uuid, name, owner, objectType, query, displayInHomepage, priority,
+        homepagePriority);
   }
 }
