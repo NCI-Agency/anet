@@ -17,7 +17,8 @@ import org.junit.jupiter.api.Test;
 
 class SavedSearchResourceTest extends AbstractResourceTest {
 
-  private static final String FIELDS = "{ uuid name objectType query owner { uuid } }";
+  private static final String FIELDS =
+      "{ uuid name objectType query displayInHomepage priority homepagePriority owner { uuid } }";
 
   @Test
   void testSavedSearches() throws IOException {
@@ -25,7 +26,7 @@ class SavedSearchResourceTest extends AbstractResourceTest {
     final SavedSearchInput ssi =
         SavedSearchInput.builder().withName("Test Saved Search created by SavedSearchResourceTest")
             .withObjectType(SearchObjectType.REPORTS).withQuery("{\"text\" : \"spreadsheets\"}")
-            .build();
+            .withDisplayInHomepage(false).build();
 
     final SavedSearch ss =
         withCredentials(jackUser, t -> mutationExecutor.createSavedSearch(FIELDS, ssi));
