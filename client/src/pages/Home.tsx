@@ -60,15 +60,21 @@ const GQL_GET_HOMEPAGE_SAVED_SEARCHES = gql`
       uuid
       name
       objectType
-      priority
+      homepagePriority
       query
     }
   }
 `
 
-const GQL_UPDATE_PRIORITY = gql`
-  mutation updateSavedSearchPriority($uuid: String!, $priority: Float!) {
-    updateSavedSearchPriority(uuid: $uuid, priority: $priority)
+const GQL_UPDATE_HOMEPAGE_PRIORITY = gql`
+  mutation updateSavedSearchHomepagePriority(
+    $uuid: String!
+    $homepagePriority: Float!
+  ) {
+    updateSavedSearchHomepagePriority(
+      uuid: $uuid
+      homepagePriority: $homepagePriority
+    )
   }
 `
 
@@ -424,18 +430,18 @@ const MySavedSearches = ({
     const [removed] = updated.splice(from, 1)
     updated.splice(to, 0, removed)
 
-    let newPriority
+    let newHomepagePriority
     if (to === 0) {
-      newPriority = updated[0].priority - 1
+      newHomepagePriority = updated[0].homepagePriority - 1
     } else if (to === updated.length - 1) {
-      newPriority = updated[updated.length - 1].priority + 1.0
+      newHomepagePriority = updated[updated.length - 1].homepagePriority + 1.0
     } else {
-      const above = updated[to - 1].priority
-      const below = updated[to + 1].priority
-      newPriority = (above + below) / 2
+      const above = updated[to - 1].homepagePriority
+      const below = updated[to + 1].homepagePriority
+      newHomepagePriority = (above + below) / 2
     }
 
-    updated[to].priority = newPriority
+    updated[to].homepagePriority = newHomepagePriority
     setSearches([...updated])
   }
 
@@ -444,7 +450,10 @@ const MySavedSearches = ({
     if (!search) {
       return
     }
-    API.mutation(GQL_UPDATE_PRIORITY, { uuid, priority: search.priority })
+    API.mutation(GQL_UPDATE_HOMEPAGE_PRIORITY, {
+      uuid,
+      homepagePriority: search.homepagePriority
+    })
   }
 
   const showSearch = uuid => {
