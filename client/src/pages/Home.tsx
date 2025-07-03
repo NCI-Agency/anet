@@ -426,23 +426,25 @@ const MySavedSearches = ({
   }
 
   const moveRow = (from, to) => {
-    const updated = [...searches]
-    const [removed] = updated.splice(from, 1)
-    updated.splice(to, 0, removed)
+    setSearches(prevSearches => {
+      const updated = [...prevSearches]
+      const [removed] = updated.splice(from, 1)
+      updated.splice(to, 0, removed)
 
-    let newHomepagePriority
-    if (to === 0) {
-      newHomepagePriority = updated[0].homepagePriority - 1
-    } else if (to === updated.length - 1) {
-      newHomepagePriority = updated[updated.length - 1].homepagePriority + 1.0
-    } else {
-      const above = updated[to - 1].homepagePriority
-      const below = updated[to + 1].homepagePriority
-      newHomepagePriority = (above + below) / 2
-    }
+      let newHomepagePriority
+      if (to === 0) {
+        newHomepagePriority = updated[0].homepagePriority - 1
+      } else if (to === updated.length - 1) {
+        newHomepagePriority = updated[updated.length - 1].homepagePriority + 1.0
+      } else {
+        const above = updated[to - 1].homepagePriority
+        const below = updated[to + 1].homepagePriority
+        newHomepagePriority = (above + below) / 2
+      }
 
-    updated[to].homepagePriority = newHomepagePriority
-    setSearches([...updated])
+      updated[to].homepagePriority = newHomepagePriority
+      return updated
+    })
   }
 
   const onDropRow = (uuid, toIndex) => {
