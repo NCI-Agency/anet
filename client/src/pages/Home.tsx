@@ -357,6 +357,38 @@ const UsersPendingVerification = ({
   )
 }
 
+interface HiddenSearchResultsCountersProps {
+  searches: any[]
+  pageDispatchers: PageDispatchersPropType
+  setSearchCount: (...args: unknown[]) => unknown
+}
+
+const HiddenSearchResultsCounters = React.memo(
+  function HiddenSearchResultsCounters({
+    searches,
+    pageDispatchers,
+    setSearchCount
+  }: HiddenSearchResultsCountersProps) {
+    return (
+      <div style={{ display: "none" }}>
+        {searches.map(search => (
+          <SearchResults
+            key={search.uuid}
+            pageDispatchers={pageDispatchers}
+            searchQuery={search.query}
+            objectType={search.objectType}
+            setSearchCount={count =>
+              setSearchCount(prev => ({
+                ...prev,
+                [search.uuid]: count
+              }))}
+          />
+        ))}
+      </div>
+    )
+  }
+)
+
 interface MySavedSearchesProps {
   pageDispatchers?: PageDispatchersPropType
   setSearchQuery: (...args: unknown[]) => unknown
@@ -464,82 +496,85 @@ const MySavedSearches = ({
   }
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      {searches.map((search, i) => (
-        <Fieldset
-          className="mb-4"
-          title={i === 0 ? "My Saved Searches" : null}
-          key={search.uuid}
-        >
-          <DraggableRow
-            itemType="SAVED_SEARCH_ROW"
-            row={search}
-            index={i}
-            moveRow={moveRow}
-            onDropRow={onDropRow}
-            dragHandleProps={{}}
+    <>
+      <DndProvider backend={HTML5Backend}>
+        {searches.map((search, i) => (
+          <Fieldset
+            className="mb-4"
+            title={i === 0 ? "My Saved Searches" : null}
+            key={search.uuid}
           >
-            <div className="d-flex flex-column gap-3">
-              <div className="d-flex align-items-center">
-                <Button
-                  className="d-flex align-items-center w-100 text-start text-decoration-none p-0"
-                  variant="link"
-                  onClick={() =>
-                    setCollapsed(prev => ({
-                      ...prev,
-                      [search.uuid]: !prev[search.uuid]
-                    }))}
-                >
-                  <span className="flex-grow-1">
-                    <SearchDescription
-                      searchQuery={savedQueries[search.uuid]}
-                      showText
-                      style={{ fontSize: 20, pointerEvents: "none" }}
+            <DraggableRow
+              itemType="SAVED_SEARCH_ROW"
+              row={search}
+              index={i}
+              moveRow={moveRow}
+              onDropRow={onDropRow}
+              dragHandleProps={{}}
+            >
+              <div className="d-flex flex-column gap-3">
+                <div className="d-flex align-items-center">
+                  <Button
+                    className="d-flex align-items-center w-100 text-start text-decoration-none p-0"
+                    variant="link"
+                    onClick={() =>
+                      setCollapsed(prev => ({
+                        ...prev,
+                        [search.uuid]: !prev[search.uuid]
+                      }))}
+                  >
+                    <span className="flex-grow-1">
+                      <SearchDescription
+                        searchQuery={savedQueries[search.uuid]}
+                        showText
+                        style={{ fontSize: 20, pointerEvents: "none" }}
+                      />
+                      <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">
+                        {searchCount[search.uuid]}
+                      </Badge>
+                    </span>
+                    <span className="ms-2">
+                      <Icon
+                        className="align-middle"
+                        icon={
+                          collapsed[search.uuid]
+                            ? IconNames.CHEVRON_DOWN
+                            : IconNames.CHEVRON_UP
+                        }
+                        size={20}
+                        style={{ fontSize: 22, color: "initial" }}
+                      />
+                    </span>
+                  </Button>
+                </div>
+                {!collapsed[search.uuid] && (
+                  <>
+                    <SearchResults
+                      pageDispatchers={pageDispatchers}
+                      searchQuery={search.query}
+                      objectType={search.objectType}
+                      setSearchCount={() => {}}
                     />
-                    <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">
-                      {searchCount[search.uuid]}
-                    </Badge>
-                  </span>
-                  <span className="ms-2">
-                    <Icon
-                      className="align-middle"
-                      icon={
-                        collapsed[search.uuid]
-                          ? IconNames.CHEVRON_DOWN
-                          : IconNames.CHEVRON_UP
-                      }
-                      size={20}
-                      style={{ fontSize: 22, color: "initial" }}
-                    />
-                  </span>
-                </Button>
+                    <Button
+                      className="text-start p-0"
+                      variant="link"
+                      onClick={() => showSearch(search.uuid)}
+                    >
+                      Show full search results
+                    </Button>
+                  </>
+                )}
               </div>
-              <div
-                style={{ display: collapsed[search.uuid] ? "none" : undefined }}
-              >
-                <SearchResults
-                  pageDispatchers={pageDispatchers}
-                  searchQuery={search.query}
-                  objectType={search.objectType}
-                  setSearchCount={count =>
-                    setSearchCount(prev => ({
-                      ...prev,
-                      [search.uuid]: count
-                    }))}
-                />
-                <Button
-                  className="text-start p-0"
-                  variant="link"
-                  onClick={() => showSearch(search.uuid)}
-                >
-                  Show full search results
-                </Button>
-              </div>
-            </div>
-          </DraggableRow>
-        </Fieldset>
-      ))}
-    </DndProvider>
+            </DraggableRow>
+          </Fieldset>
+        ))}
+      </DndProvider>
+      <HiddenSearchResultsCounters
+        searches={data.savedSearches}
+        pageDispatchers={pageDispatchers}
+        setSearchCount={setSearchCount}
+      />
+    </>
   )
 }
 
