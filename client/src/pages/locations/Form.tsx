@@ -492,12 +492,13 @@ const LocationForm = ({
         function updateCoordinateFields(latLng) {
           const parsedLat = parseCoordinate(latLng.lat)
           const parsedLng = parseCoordinate(latLng.lng)
+          const parsedMgrs = convertLatLngToMGRS(parsedLat, parsedLng)
+          setFieldTouched("lat", false, false)
+          setFieldTouched("lng", false, false)
+          setFieldTouched("displayedCoordinate", false, false)
           setFieldValue("lat", parsedLat)
           setFieldValue("lng", parsedLng)
-          setFieldValue(
-            "displayedCoordinate",
-            convertLatLngToMGRS(parsedLat, parsedLng)
-          )
+          setFieldValue("displayedCoordinate", parsedMgrs)
         }
       }}
     </Formik>

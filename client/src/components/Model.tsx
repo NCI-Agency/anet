@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { convertMGRSToLatLng } from "geoUtils"
 import { JSONPath } from "jsonpath-plus"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
@@ -263,6 +264,58 @@ export const yupEmailAddressesWithValidation = (
     .default([])
 export const yupEmailAddresses = yupEmailAddressesWithValidation()
 
+const LATITUDE_ERROR = "Latitude must be a number between -90 and +90"
+const LONGITUDE_ERROR = "Longitude must be a number between -180 and +180"
+
+export const yupCoordinateSchema = yup.object().shape({
+  lat: yup
+    .number()
+    .nullable()
+    .typeError(LATITUDE_ERROR)
+    .min(-90, LATITUDE_ERROR)
+    .max(90, LATITUDE_ERROR)
+    .test("lat", "Please enter latitude", function(lat) {
+      const { lng } = this.parent
+      if (utils.isNumeric(lng)) {
+        return utils.isNumeric(lat)
+      }
+      return true
+    })
+    .default(null),
+  lng: yup
+    .number()
+    .nullable()
+    .typeError(LONGITUDE_ERROR)
+    .min(-180, LONGITUDE_ERROR)
+    .max(180, LONGITUDE_ERROR)
+    .test("lng", "Please enter longitude", function(lng) {
+      const { lat } = this.parent
+      if (utils.isNumeric(lat)) {
+        return utils.isNumeric(lng)
+      }
+      return true
+    })
+    .default(null),
+  // not actually in the database, but used for validation
+  displayedCoordinate: yup
+    .string()
+    .nullable()
+    .test(
+      "displayedCoordinate",
+      "Please enter a valid MGRS coordinate",
+      function(displayedCoordinate) {
+        if (_isEmpty(displayedCoordinate)) {
+          return true
+        }
+        const latLngValue = convertMGRSToLatLng(displayedCoordinate)
+        return (
+          utils.isNumeric(latLngValue[0]) && utils.isNumeric(latLngValue[1])
+        )
+      }
+    )
+    .default(null)
+})
+
 export const CUSTOM_FIELD_TYPE = {
   TEXT: "text",
   NUMBER: "number",
@@ -321,8 +374,7 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
         : testContext.createError({ message: "Invalid JSON" })
     )
     .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.JSON]),
-  [CUSTOM_FIELD_TYPE.GEO_LOCATION]: yup
-    .object()
+  [CUSTOM_FIELD_TYPE.GEO_LOCATION]: yupCoordinateSchema
     .nullable()
     .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.GEO_LOCATION]),
   [CUSTOM_FIELD_TYPE.ENUM]: yup
