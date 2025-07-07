@@ -11,11 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     MutationExecutor.class})
 public class SpringTestConfig extends AnetApplication {
 
-  static {
-    // Disable Liquibase analytics!
-    System.setProperty("liquibase.analytics.enabled", "false");
-  }
-
   public static void main(String[] args) {
     SpringApplication.run(SpringTestConfig.class, args);
   }

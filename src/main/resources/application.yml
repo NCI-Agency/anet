@@ -14,6 +14,7 @@ spring:
       ddl-auto: none
 
   liquibase:
+    analytics-enabled: false
     change-log: classpath:db-changelog.yml
 
   # Security through Keycloak
