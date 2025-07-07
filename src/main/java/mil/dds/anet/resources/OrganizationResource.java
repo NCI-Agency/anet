@@ -54,7 +54,7 @@ public class OrganizationResource {
     return hasPermission(user, organization.getUuid());
   }
 
-  public static void assertPermission(final Person user, final String organizationUuid) {
+  public void assertPermission(final Person user, final String organizationUuid) {
     if (!hasPermission(user, organizationUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }

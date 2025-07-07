@@ -45,7 +45,7 @@ public class LocationResource {
     return AuthUtils.isSuperuser(user);
   }
 
-  public static void assertPermission(final Person user, final String locationUuid) {
+  public void assertPermission(final Person user, final String locationUuid) {
     if (!hasPermission(user, locationUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
