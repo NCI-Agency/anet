@@ -35,6 +35,7 @@ import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
 import { connect } from "react-redux"
 import { Link, useLocation, useNavigate } from "react-router-dom"
+import searchQuery from "reducers/searchQuery"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
@@ -382,6 +383,7 @@ const HiddenSearchResultsCounters = React.memo(
                 ...prev,
                 [search.uuid]: count
               }))}
+            pageSize={1}
           />
         ))}
       </div>
