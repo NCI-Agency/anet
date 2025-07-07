@@ -6295,7 +6295,7 @@ __metadata:
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
-    milsymbol: "npm:2.2.0"
+    milsymbol: "npm:3.0.2"
     ml-matrix: "npm:6.12.1"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.5.48"
@@ -14596,10 +14596,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"milsymbol@npm:2.2.0":
-  version: 2.2.0
-  resolution: "milsymbol@npm:2.2.0"
-  checksum: 10c0/a9f6ebceb553cecce6356bb47a90196ad0eefd49b767d61424119fbb65327bd634d9dc5fee036857edd560f258a48d3731805bb2a7f775384c6e8b004fc9f599
+"milsymbol@npm:3.0.2":
+  version: 3.0.2
+  resolution: "milsymbol@npm:3.0.2"
+  checksum: 10c0/2826f3c49a4d0030b488576e27b578d74e78f179e63bceab411213154b3f907703f5af57631cf22585c8f0cddf575279109c5225c4dfaf4d720d8fb94e273f6b
   languageName: node
   linkType: hard
 
