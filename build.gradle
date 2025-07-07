@@ -113,7 +113,7 @@ dependencyManagement {
 dependencies {
 	// Supported database is PostgreSQL:
 	implementation 'org.postgresql:postgresql:42.7.5'
-	implementation 'org.liquibase:liquibase-core:4.31.1'
+	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
 	implementation 'com.google.guava:guava:33.4.7-jre' // Pick the non-Android version
