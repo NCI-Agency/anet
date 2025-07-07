@@ -12,6 +12,10 @@ import {
   LAST_MONTH,
   LAST_WEEK,
   LAST_X_DAYS,
+  NEXT_DAY,
+  NEXT_MONTH,
+  NEXT_WEEK,
+  NEXT_X_DAYS,
   ON,
   RANGE_TYPE_LABELS
 } from "dateUtils"
@@ -90,6 +94,18 @@ const DateRangeFilter = ({
       </option>,
       <option key="last_x_days" value={LAST_X_DAYS}>
         {RANGE_TYPE_LABELS[LAST_X_DAYS]}
+      </option>,
+      <option key="next_day" value={NEXT_DAY}>
+        {RANGE_TYPE_LABELS[NEXT_DAY]}
+      </option>,
+      <option key="next_week" value={NEXT_WEEK}>
+        {RANGE_TYPE_LABELS[NEXT_WEEK]}
+      </option>,
+      <option key="next_month" value={NEXT_MONTH}>
+        {RANGE_TYPE_LABELS[NEXT_MONTH]}
+      </option>,
+      <option key="next_x_days" value={NEXT_X_DAYS}>
+        {RANGE_TYPE_LABELS[NEXT_X_DAYS]}
       </option>
     ]
     const options = onlyBetween
@@ -128,6 +144,9 @@ const DateRangeFilter = ({
   if (value.relative === LAST_X_DAYS) {
     dateRangeDisplay = `Last ${value.days ?? "?"} ${pluralize("day", value.days)}`
   }
+  if (value.relative === NEXT_X_DAYS) {
+    dateRangeDisplay = `Next ${value.days ?? "?"} ${pluralize("day", value.days)}`
+  }
   const dateStart = value.start && moment(value.start).toDate()
   const dateEnd = value.end && moment(value.end).toDate()
   return !asFormField ? (
@@ -165,7 +184,7 @@ const DateRangeFilter = ({
             onChange={handleChangeEnd}
           />
         )}
-        {value.relative === LAST_X_DAYS && (
+        {[NEXT_X_DAYS, LAST_X_DAYS].includes(value.relative) && (
           <IntegerInput
             min={1}
             max={999}
@@ -224,10 +243,19 @@ export const deserialize = ({ queryKey }, query, key) => {
   }
 
   if (Object.hasOwn(query, endKey)) {
-    filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
-    toQueryValue[endKey] = query[endKey]
-    if (!Object.hasOwn(query, startKey)) {
-      filterValue.relative = BEFORE
+    const endVal = query[endKey]
+    toQueryValue[endKey] = endVal
+    const nextValues = [NEXT_DAY, NEXT_WEEK, NEXT_MONTH]
+    if (nextValues.indexOf(+endVal) !== -1) {
+      filterValue.relative = endVal
+    } else if (utils.isNumeric(endVal)) {
+      filterValue.relative = NEXT_X_DAYS
+      filterValue.days = parseInt(endVal) / NEXT_DAY
+    } else {
+      filterValue.end = moment(endVal).format(DATE_FORMAT)
+      if (!Object.hasOwn(query, startKey)) {
+        filterValue.relative = BEFORE
+      }
     }
   }
 
