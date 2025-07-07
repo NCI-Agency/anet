@@ -6656,7 +6656,7 @@ __metadata:
     circular-dependency-plugin: "npm:5.2.2"
     classnames: "npm:2.5.1"
     clean-webpack-plugin: "npm:4.0.0"
-    config: "npm:3.3.12"
+    config: "npm:4.0.0"
     copy-webpack-plugin: "npm:13.0.0"
     core-js: "npm:3.41.0"
     countries-list: "npm:3.1.1"
@@ -8574,12 +8574,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"config@npm:3.3.12":
-  version: 3.3.12
-  resolution: "config@npm:3.3.12"
+"config@npm:4.0.0":
+  version: 4.0.0
+  resolution: "config@npm:4.0.0"
   dependencies:
     json5: "npm:^2.2.3"
-  checksum: 10c0/496b3ef740754527cbc59d11df234f5be5b5f44511d14ca7fa6117fda0959ccd4cc6d8da2d94cb0dfcdf77d9d7aaaa34558d6dcce0a7860a3a8cf8a54c77b237
+  checksum: 10c0/8dee527a8aefa02eebc7cabcb793608619010cf9c8645aae1dff9dba3ee41ff49790ad8b7267952b7a6d9a1bae5e724e0fa9f3da44be1f9b8abb035df1d7a361
   languageName: node
   linkType: hard
 
