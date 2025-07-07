@@ -217,7 +217,8 @@ jacocoTestReport {
 //Set project version to git tag
 def proc = "git describe".execute(null, projectDir);
 proc.waitFor();
-project.version = proc.text.trim();
+def projectVersion = proc.text.trim();
+project.version = projectVersion
 
 runtime {
 	options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
@@ -247,14 +248,14 @@ runtime {
 	]
 
 	jpackage {
-		appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
+		appVersion = projectVersion.replace("-",".") // rpmbuild doesn't like versions with dashes
 	}
 }
 
 processResources {
 	filesMatching('**/version.properties') {
 		filter {
-			it.replace('APP_VERSION_TOKEN', project.version)
+			it.replace('APP_VERSION_TOKEN', projectVersion)
 		}
 	}
 }
@@ -437,7 +438,7 @@ task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 		}
 	}
 	inputDir = project.file('build/install')
-	def resultTags = ["ncia/anet-app-server:${project.version}"]
+	def resultTags = ["ncia/anet-app-server:${projectVersion}"]
 	if (projectBranch=="main")
 		resultTags << 'ncia/anet-app-server:latest'
 	images = resultTags
@@ -448,7 +449,7 @@ task dockerPushLatestImage(type: DockerPushImage) {
 }
 
 task dockerPushImage(type: DockerPushImage) {
-	images = ["ncia/anet-app-server:${project.version}"]
+	images = ["ncia/anet-app-server:${projectVersion}"]
 }
 
 // Database container (PostgreSQL)
