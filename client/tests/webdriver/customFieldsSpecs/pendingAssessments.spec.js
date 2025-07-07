@@ -266,11 +266,17 @@ describe("In new report page", () => {
       await browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
       await (await CreateReport.getTasksAssessments()).scrollIntoView()
       const taskAssessmentRows = await CreateReport.getTaskAssessmentRows()
-      expect(taskAssessmentRows).to.have.length(3) // a heading and two assessments
-      for (let i = 0; i < 2; i += 2) {
-        const task = taskAssessmentRows[i]
+      expect(taskAssessmentRows).to.have.length(5) // a heading and two assessments
+      const task = taskAssessmentRows[0]
+      for (let i = 1; i < 5; i += 2) {
+        const label = taskAssessmentRows[i]
         const assessment = taskAssessmentRows[i + 1]
         const questions = await assessment.$$("td > div")
+        expect(await label.getText()).to.equal(
+          i === 1
+            ? "Restricted engagement assessment of objective"
+            : "Engagement assessment of objective"
+        )
         switch (await task.getText()) {
           case "EF 1 » EF 1.2 » 1.2.A":
             expect(questions).to.have.length(3)
@@ -303,10 +309,14 @@ describe("In new report page", () => {
       await (await CreateReport.getAttendeesAssessments()).scrollIntoView()
       const attendeeAssessmentRows =
         await CreateReport.getAttendeeAssessmentRows()
-      expect(attendeeAssessmentRows).to.have.length(6)
-      for (let i = 0; i < 6; i += 2) {
+      expect(attendeeAssessmentRows).to.have.length(9)
+      for (let i = 0; i < 9; i += 3) {
         const attendee = attendeeAssessmentRows[i]
-        const assessment = attendeeAssessmentRows[i + 1]
+        const label = attendeeAssessmentRows[i + 1]
+        const assessment = attendeeAssessmentRows[i + 2]
+        expect(await label.getText()).to.equal(
+          "Engagement assessment of interlocutor"
+        )
         const questions = await assessment.$$("td > div")
         switch (await attendee.getText()) {
           case "OF-3 ROGWELL, Roger":
@@ -337,10 +347,14 @@ describe("In new report page", () => {
       await (await CreateReport.getAttendeesAssessments()).scrollIntoView()
       const attendeeAssessmentRows =
         await CreateReport.getAttendeeAssessmentRows()
-      expect(attendeeAssessmentRows).to.have.length(6)
-      for (let i = 0; i < 6; i += 2) {
+      expect(attendeeAssessmentRows).to.have.length(9)
+      for (let i = 0; i < 9; i += 3) {
         const attendee = attendeeAssessmentRows[i]
-        const assessment = attendeeAssessmentRows[i + 1]
+        const label = attendeeAssessmentRows[i + 1]
+        const assessment = attendeeAssessmentRows[i + 2]
+        expect(await label.getText()).to.equal(
+          "Engagement assessment of interlocutor"
+        )
         const questions = await assessment.$$("td > div")
         switch (await attendee.getText()) {
           case "OF-3 ROGWELL, Roger":

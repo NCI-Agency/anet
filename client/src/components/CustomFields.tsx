@@ -942,7 +942,7 @@ const CompactLikertScale = ({
   values,
   levels
 }: CompactLikertScaleProps) => {
-  const fieldValue = Number(Object.get(values, name) || 0).toFixed(0)
+  const fieldValue = Number(Object.get(values, name) || 0).toFixed(1)
   const sortedLevels = levels.sort((a, b) => a.endValue - b.endValue)
   const levelLabel =
     sortedLevels.find(level => fieldValue <= level.endValue)?.label || null
@@ -1352,7 +1352,12 @@ export const ReadonlyCustomFields = ({
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
         const value = Object.get(values, fieldName) || null
-        if (hideIfEmpty && _isEmpty(value)) {
+        if (
+          hideIfEmpty &&
+          (value == null ||
+            value === "" ||
+            (value instanceof Object && _isEmpty(value)))
+        ) {
           return null
         }
         return ReadonlyFieldComponent ? (

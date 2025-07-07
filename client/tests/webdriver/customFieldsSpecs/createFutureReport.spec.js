@@ -144,6 +144,15 @@ describe("Create report form page", () => {
           await CreateFutureReport.getAttendeeAssessment(INTERLOCUTOR_VALUE)
         ).isExisting()
       ).to.be.true
+      const attendeeAssessmentLabel =
+        await CreateFutureReport.getAttendeeAssessmentLabel(
+          INTERLOCUTOR_VALUE,
+          1
+        )
+      expect(await attendeeAssessmentLabel.isExisting()).to.be.true
+      expect(await attendeeAssessmentLabel.getText()).to.equal(
+        "Engagement assessment of interlocutor"
+      )
       // Task assessments should be shown in the form
       expect(
         await (await CreateFutureReport.getTasksAssessments()).isExisting()
@@ -151,6 +160,18 @@ describe("Create report form page", () => {
       expect(
         await (await CreateFutureReport.getTaskAssessment(TASK)).isExisting()
       ).to.be.true
+      const taskAssessment1Label =
+        await CreateFutureReport.getTaskAssessmentLabel(TASK, 1)
+      expect(await taskAssessment1Label.isExisting()).to.be.true
+      expect(await taskAssessment1Label.getText()).to.equal(
+        "Restricted engagement assessment of objective"
+      )
+      const taskAssessment2Label =
+        await CreateFutureReport.getTaskAssessmentLabel(TASK, 3)
+      expect(await taskAssessment2Label.isExisting()).to.be.true
+      expect(await taskAssessment2Label.getText()).to.equal(
+        "Engagement assessment of objective"
+      )
       /* eslint-enable no-unused-expressions */
 
       // Save report

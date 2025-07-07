@@ -18,8 +18,36 @@ class ShowReport extends Page {
     return browser.$("//a[text()='Edit']")
   }
 
-  async getTasksEngagementAssessments() {
-    return browser.$("#tasks-engagement-assessments")
+  async getAttendeesAssessments(id) {
+    return browser.$(`#${id}`)
+  }
+
+  async getAttendeeAssessment(id, name) {
+    return (await this.getAttendeesAssessments(id)).$(
+      `.//th//a[text()="${name}"]`
+    )
+  }
+
+  async getAttendeeAssessmentLabel(id, name, i) {
+    return (await this.getAttendeeAssessment(id, name)).$(
+      `../../../following-sibling::tr[${i}]/td`
+    )
+  }
+
+  async getTasksEngagementAssessments(id) {
+    return browser.$(`#${id}`)
+  }
+
+  async getTaskEngagementAssessment(id, shortName) {
+    return (await this.getTasksEngagementAssessments(id)).$(
+      `.//th//a[text()="${shortName}"]`
+    )
+  }
+
+  async getTaskEngagementAssessmentLabel(id, shortName, i) {
+    return (await this.getTaskEngagementAssessment(id, shortName)).$(
+      `../../../../following-sibling::tr[${i}]/td`
+    )
   }
 
   async getTask12BUrl() {
@@ -206,7 +234,7 @@ class ShowReport extends Page {
 
   async getCompactViewElements(type, withAssessments) {
     const elements = await (withAssessments
-      ? browser.$$(`#${type} > tbody > tr > td > span`)
+      ? browser.$$(`#${type} > tbody > tr > th > span`)
       : browser.$$(`#${type} > td > span`))
     return await elements.map(async element => (await element).getText())
   }

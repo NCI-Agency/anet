@@ -70,39 +70,46 @@ const InstantAssessmentRow = ({
   }
 
   return (
-    <tr>
-      <td>
-        {!_isEmpty(entityInstantAssessmentConfig?.questions) &&
-          (readOnlyAccess ? (
-            <ReadonlyCustomFields
-              parentFieldName={parentFieldName}
-              fieldsConfig={entityInstantAssessmentConfig.questions}
-              values={values}
-              isCompact={isCompact}
-              hideIfEmpty={isCompact}
-            />
-          ) : (
-            <CustomFieldsContainer
-              parentFieldName={parentFieldName}
-              fieldsConfig={entityInstantAssessmentConfig.questions}
+    <>
+      {assessmentConfig?.label && (
+        <tr>
+          <td className="fw-bold text-secondary">{assessmentConfig.label}</td>
+        </tr>
+      )}
+      <tr>
+        <td>
+          {!_isEmpty(entityInstantAssessmentConfig?.questions) &&
+            (readOnlyAccess ? (
+              <ReadonlyCustomFields
+                parentFieldName={parentFieldName}
+                fieldsConfig={entityInstantAssessmentConfig.questions}
+                values={values}
+                isCompact={isCompact}
+                hideIfEmpty={isCompact}
+              />
+            ) : (
+              <CustomFieldsContainer
+                parentFieldName={parentFieldName}
+                fieldsConfig={entityInstantAssessmentConfig.questions}
+                formikProps={formikProps}
+                isCompact={isCompact}
+                hideIfEmpty={isCompact}
+              />
+            ))}
+          {!_isEmpty(entityInstantAssessmentConfig?.questionSets) && (
+            <QuestionSet
+              entity={entity}
+              relatedObject={relatedObject}
+              questionSets={entityInstantAssessmentConfig.questionSets}
+              parentFieldName={`${parentFieldName}.questionSets`}
               formikProps={formikProps}
               isCompact={isCompact}
-              hideIfEmpty={isCompact}
+              readonly={readOnlyAccess}
             />
-          ))}
-        {!_isEmpty(entityInstantAssessmentConfig?.questionSets) && (
-          <QuestionSet
-            entity={entity}
-            relatedObject={relatedObject}
-            questionSets={entityInstantAssessmentConfig.questionSets}
-            parentFieldName={`${parentFieldName}.questionSets`}
-            formikProps={formikProps}
-            isCompact={isCompact}
-            readonly={readOnlyAccess}
-          />
-        )}
-      </td>
-    </tr>
+          )}
+        </td>
+      </tr>
+    </>
   )
 }
 
@@ -122,7 +129,6 @@ interface InstantAssessmentsContainerFieldProps {
   canRead?: boolean
   canWrite?: boolean
   readonly?: boolean
-  showEntitiesWithoutAssessments?: boolean
 }
 
 const InstantAssessmentsContainerField = ({
@@ -135,8 +141,7 @@ const InstantAssessmentsContainerField = ({
   isCompact,
   canRead = false,
   canWrite = false,
-  readonly = false,
-  showEntitiesWithoutAssessments
+  readonly = false
 }: InstantAssessmentsContainerFieldProps) => {
   const { values } = formikProps
 
@@ -151,25 +156,12 @@ const InstantAssessmentsContainerField = ({
       !_isEmpty(filteredAssessment?.questionSets)
     )
   }
-  // Sort entities to display the ones without any assessment at the beginning,
-  // then the ones with assessments. Keep the original sort order within each section.
-  function sortEntries(e1, e2) {
-    const e1hasAssessments = e1
-      .getInstantAssessments()
-      .some(([, ac]) => hasFilteredAssessments(ac, e1))
-    const e2hasAssessments = e2
-      .getInstantAssessments()
-      .some(([, ac]) => hasFilteredAssessments(ac, e2))
-    return Number(e1hasAssessments) - Number(e2hasAssessments)
-  }
   function getEntitiesWithAssessments(entity) {
     return entity
       .getInstantAssessments()
       .some(([, ac]) => hasFilteredAssessments(ac, entity))
   }
-  const filteredEntities = showEntitiesWithoutAssessments
-    ? entities.sort(sortEntries)
-    : entities.filter(getEntitiesWithAssessments)
+  const filteredEntities = entities.filter(getEntitiesWithAssessments)
   return (
     <Table id={id}>
       <tbody>
@@ -180,7 +172,7 @@ const InstantAssessmentsContainerField = ({
           return (
             <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
               <tr>
-                <td>
+                <th>
                   {modelType === Task.resourceName ? (
                     <BreadcrumbTrail
                       modelType={modelType}
@@ -195,7 +187,7 @@ const InstantAssessmentsContainerField = ({
                       showAvatar={!isCompact}
                     />
                   )}
-                </td>
+                </th>
               </tr>
               {entityInstantAssessments.map(([ak, ac]) => (
                 <InstantAssessmentRow
