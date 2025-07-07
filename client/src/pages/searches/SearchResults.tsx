@@ -33,6 +33,7 @@ interface SearchResultsSectionProps {
   searchQuery: any
   isOnlySearchResult: boolean
   setObjectTypeResultCount: (...args: unknown[]) => unknown
+  pageSize?: number
 }
 
 const SearchResultsSection = ({
@@ -40,7 +41,8 @@ const SearchResultsSection = ({
   objectType,
   searchQuery,
   isOnlySearchResult,
-  setObjectTypeResultCount
+  setObjectTypeResultCount,
+  pageSize
 }: SearchResultsSectionProps) => {
   const [totalCount, setTotalCount] = useState(0)
   const TableComponent = SEARCH_COMPONENTS[objectType]
@@ -49,7 +51,7 @@ const SearchResultsSection = ({
   }
 
   const queryParams = utils.parseJsonSafe(searchQuery)
-  queryParams.pageSize = DEFAULT_PAGESIZE
+  queryParams.pageSize = pageSize || DEFAULT_PAGESIZE
 
   const updateCount = count => {
     if (totalCount !== count) {
@@ -87,12 +89,14 @@ interface SearchResultsProps {
   searchQuery: any
   objectType?: string
   setSearchCount: (...args: unknown[]) => unknown
+  pageSize?: number
 }
 const SearchResults = ({
   pageDispatchers,
   searchQuery,
   objectType,
-  setSearchCount
+  setSearchCount,
+  pageSize
 }: SearchResultsProps) => {
   const [objectTypeResultCount, setObjectTypeResultCount] = useState({})
   const objectTypes = useMemo(
@@ -119,6 +123,7 @@ const SearchResults = ({
           isOnlySearchResult={!!objectType?.length}
           setObjectTypeResultCount={(objType: string, count: number) =>
             setObjectTypeResultCount(prev => ({ ...prev, [objType]: count }))}
+          pageSize={pageSize}
         />
       ))}
     </div>
