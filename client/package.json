@@ -199,7 +199,7 @@
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-e2e",
     "test-e2e": "SERVER_URL=${SERVER_URL:-'http://localhost:8180'} NODE_ENV=test ava --config ava.config.js",
     "test-wdio": "SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test wdio run ./config/wdio.config.js --suite base --suite ${TEST_WDIO_SUITE:-withCustomFields}",
-    "test-jest": "ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test jest --testPathPattern='tests/jest'",
+    "test-jest": "ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test jest --testPathPatterns='tests/jest'",
     "test-all-noCF": "yarn run test-wdio-noCF",
     "test-wdio-noCF": "env TEST_WDIO_SUITE=noCustomFields ANET_DICTIONARY_NAME=testDictionaries/no-custom-fields.yml yarn run test-wdio",
     "test-junit-report": "yarn run test-jest && yarn run test-wdio-junit && yarn run test-e2e-junit",
