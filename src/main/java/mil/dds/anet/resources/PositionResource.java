@@ -49,7 +49,7 @@ public class PositionResource {
     return AuthUtils.canAdministrateOrg(user, position.getOrganizationUuid());
   }
 
-  public static void assertPermission(final Person user, final Position position) {
+  public void assertPermission(final Person user, final Position position) {
     if (!hasPermission(user, position)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
