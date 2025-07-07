@@ -23,6 +23,14 @@ class ShowPosition extends Page {
   async getEditHistoryButton() {
     return browser.$("div.edit-history button")
   }
+
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
+  async getEntityAvatar() {
+    return browser.$("fieldset div.row div.text-center canvas")
+  }
 }
 
 export default new ShowPosition()

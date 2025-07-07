@@ -44,6 +44,14 @@ describe("Show location page", () => {
     })
   })
 
+  describe("When on the show page of an location with entity avatar", () => {
+    it("We should see the avatar", async() => {
+      await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
+      await (await ShowLocation.getEntityAvatar()).waitForExist()
+      await (await ShowLocation.getEntityAvatar()).waitForDisplayed()
+    })
+  })
+
   describe("When on the show page of a location with organizations", () => {
     it("We should see rows in the organizations table", async() => {
       await ShowLocation.open(LOCATION_WITH_ORGANIZATIONS_UUID)

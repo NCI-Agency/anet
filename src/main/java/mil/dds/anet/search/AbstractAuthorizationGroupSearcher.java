@@ -43,6 +43,16 @@ public abstract class AbstractAuthorizationGroupSearcher
 
     qb.addEnumEqualsClause("status", "\"authorizationGroups\".status", query.getStatus());
 
+    if (Boolean.TRUE.equals(query.getDistributionList())) {
+      qb.addObjectEqualsClause("distributionList", "\"authorizationGroups\".\"distributionList\"",
+          true);
+    }
+
+    if (Boolean.TRUE.equals(query.getForSensitiveInformation())) {
+      qb.addObjectEqualsClause("forSensitiveInformation",
+          "\"authorizationGroups\".\"forSensitiveInformation\"", true);
+    }
+
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
           engine().getAuthorizationGroupDao().getSubscriptionUpdate(null)));

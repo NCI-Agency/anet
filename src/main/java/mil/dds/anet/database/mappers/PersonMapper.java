@@ -2,8 +2,10 @@ package mil.dds.anet.database.mappers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.User;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -15,6 +17,10 @@ public class PersonMapper implements RowMapper<Person> {
 
     if (MapperUtils.containsColumnNamed(rs, "positions_uuid")) {
       p.setPosition(PositionMapper.fillInFields(new Position(), rs));
+    }
+
+    if (MapperUtils.containsColumnNamed(rs, "users_uuid")) {
+      p.setUsers(List.of(UserMapper.fillInFields(new User(), rs)));
     }
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
@@ -40,8 +46,6 @@ public class PersonMapper implements RowMapper<Person> {
     a.setEndOfTourDate(MapperUtils.getInstantAsLocalDateTime(rs, "people_endOfTourDate"));
     a.setRank(MapperUtils.getOptionalString(rs, "people_rank"));
     a.setBiography(MapperUtils.getOptionalString(rs, "people_biography"));
-    a.setDomainUsername(MapperUtils.getOptionalString(rs, "people_domainUsername"));
-    a.setOpenIdSubject(MapperUtils.getOptionalString(rs, "people_openIdSubject"));
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
 
     return a;

@@ -614,7 +614,7 @@ properties:
     type: integer
     minimum: 0
     title: The maximum number of characters allowed in selected text fields
-    description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
+    description: Used in the UI for report intent, report key outcomes, report next steps, community description
 
   confidentialityLabel:
     type: object
@@ -748,7 +748,7 @@ properties:
       authorizationGroup:
         type: object
         additionalProperties: false
-        required: [status, name, description, administrativePositions, authorizationGroupRelatedObjects]
+        required: [status, name, description, distributionList, forSensitiveInformation, administrativePositions, authorizationGroupRelatedObjects]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -756,6 +756,10 @@ properties:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
+          distributionList:
+            "$ref": "#/$defs/labeledField"
+          forSensitiveInformation:
+            "$ref": "#/$defs/labeledField"
           administrativePositions:
             "$ref": "#/$defs/labeledField"
           authorizationGroupRelatedObjects:
@@ -913,7 +917,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [status, firstName, lastName, position, prevPositions, domainUsername, openIdSubject,
+        required: [status, firstName, lastName, position, prevPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
@@ -929,9 +933,7 @@ properties:
             "$ref": "#/$defs/labeledField"
           user:
             "$ref": "#/$defs/inputField"
-          domainUsername:
-            "$ref": "#/$defs/inputField"
-          openIdSubject:
+          users:
             "$ref": "#/$defs/labeledField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
@@ -1077,7 +1079,8 @@ properties:
         additionalProperties: false
         required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs,
                    location, administratingPositions, profile, app6context, app6standardIdentity, app6symbolSet, app6hq,
-                   app6amplifier, emailAddresses, authorizationGroups]
+                   app6amplifier, app6entity, app6entityType, app6entitySubtype, app6sectorOneModifier, app6sectorTwoModifier,
+                   emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -1110,15 +1113,25 @@ properties:
           profile:
             "$ref": "#/$defs/inputField"
           app6context:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6standardIdentity:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6symbolSet:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6hq:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6amplifier:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
+          app6entity:
+            "$ref": "#/$defs/labeledField"
+          app6entityType:
+            "$ref": "#/$defs/labeledField"
+          app6entitySubtype:
+            "$ref": "#/$defs/labeledField"
+          app6sectorOneModifier:
+            "$ref": "#/$defs/labeledField"
+          app6sectorTwoModifier:
+            "$ref": "#/$defs/labeledField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           authorizationGroups:

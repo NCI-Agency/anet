@@ -6,6 +6,7 @@ import API from "api"
 import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import BaseGeoLocation from "components/GeoLocation"
@@ -16,6 +17,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -30,6 +32,7 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getLeafletMap,
+  getOtherSide,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -65,6 +68,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
@@ -104,10 +108,15 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
     } else {
       setSaveWarning(null)
     }
+    setIsDirty(false)
   }, [location1, location2])
+  useEffect(() => {
+    setIsDirty(!!mergedLocation)
+  }, [mergedLocation])
 
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} warning={saveWarning} />
         <h4>Merge Locations Tool</h4>
@@ -160,6 +169,26 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
           )}
           {areAllSet(location1, location2, mergedLocation) && (
             <fieldset>
+              <MergeField
+                label="Avatar"
+                value={
+                  <EntityAvatarDisplay
+                    avatar={mergedLocation.entityAvatar}
+                    defaultAvatar={Location.relatedObjectType}
+                    height={128}
+                    width={128}
+                    style={{
+                      maxWidth: "100%",
+                      display: "block",
+                      margin: "0 auto"
+                    }}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="entityAvatar"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.name}
@@ -322,7 +351,10 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
-          onClick={mergeLocations}
+          onClick={() => {
+            setIsDirty(false)
+            mergeLocations()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge Locations
@@ -355,6 +387,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
         }
       })
       .catch(error => {
+        setIsDirty(true)
         setSaveError(error)
         jumpToTop()
       })
@@ -406,6 +439,7 @@ const LocationColumn = ({
   locationFormatLabel
 }: LocationColumnProps) => {
   const location = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]) &&
     !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT])
@@ -418,6 +452,7 @@ const LocationColumn = ({
           fieldName="location"
           placeholder="Select a location to merge"
           value={location}
+          disabledValue={otherSide}
           overlayColumns={["Name"]}
           overlayRenderRow={LocationOverlayRow}
           filterDefs={getLocationFilters()}
@@ -435,6 +470,32 @@ const LocationColumn = ({
       </ColTitle>
       {areAllSet(location) && (
         <fieldset>
+          <MergeField
+            label="Avatar"
+            fieldName="entityAvatar"
+            value={
+              <EntityAvatarDisplay
+                avatar={location.entityAvatar}
+                defaultAvatar={Location.relatedObjectType}
+                height={128}
+                width={128}
+                style={{
+                  maxWidth: "100%",
+                  display: "block",
+                  margin: "0 auto"
+                }}
+              />
+            }
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("entityAvatar", location.entityAvatar, align)
+              )
+            }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.name}

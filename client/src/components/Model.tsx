@@ -102,6 +102,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       }
       ... on Location {
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       ... on Organization {
         shortName
@@ -117,6 +118,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       ... on Position {
         type
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       ... on Report {
         intent
@@ -141,8 +143,8 @@ export const GRAPHQL_ENTITY_FIELDS = {
   Report: "uuid intent engagementDate",
   Person: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
   Organization: `uuid shortName ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
-  Position: "uuid name",
-  Location: "uuid name",
+  Position: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
+  Location: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
   Task: "uuid shortName longName",
   AuthorizationGroup: "uuid name description",
   Attachment: "uuid caption mimeType contentLength",

@@ -3,6 +3,7 @@ package mil.dds.anet.test.integration.utils;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
@@ -11,6 +12,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.utils.DaoUtils;
 
 public class TestBeans {
@@ -22,7 +24,9 @@ public class TestBeans {
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
     p.setBiography("");
-    p.setDomainUsername("test");
+    User u = new User();
+    u.setDomainUsername("test-" + UUID.randomUUID());
+    p.setUsers(List.of(u));
     p.setGender("Male");
     p.setEndOfTourDate(
         ZonedDateTime.of(2036, 8, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());

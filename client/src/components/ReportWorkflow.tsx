@@ -67,7 +67,7 @@ const ApprovalStepModal = ({ action }: ApprovalStepModalProps) => {
         onClick={() => setShowModal(true)}
         variant="default"
       >
-        <span>{step.name}</span>
+        <div className="worflow-step-name">{step.name}</div>
       </Button>
       <Modal centered show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -102,9 +102,10 @@ export const ActionStatus = ({ action }: ActionStatusProps) => (
 
 interface ActionButtonProps {
   action: any
+  isCompact?: boolean
 }
 
-export const ActionButton = ({ action }: ActionButtonProps) => {
+export const ActionButton = ({ action, isCompact }: ActionButtonProps) => {
   const step = action.step
   const actionType = ACTION_TYPE_DETAILS[action.type]
   return step ? (
@@ -113,14 +114,17 @@ export const ActionButton = ({ action }: ActionButtonProps) => {
     <Button
       className={actionType.cssClass + " btn-sm"}
       variant="outline-secondary"
-      disabled
+      disabled={!isCompact}
+      style={{ paddingBottom: isCompact ? 8 : 0 }}
     >
       <span>
         <LinkTo
           modelType="Person"
           model={action.person}
           whenUnspecified={SYSTEM_USER}
-          isLink={false}
+          isLink={!!isCompact}
+          showAvatar={!isCompact}
+          showIcon={!!isCompact}
         />
       </span>
     </Button>

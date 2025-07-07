@@ -11,13 +11,15 @@ const testOrgs = {
     app6contextInput: "1",
     app6context: "Exercise",
     app6standardIdentityInput: "2",
-    app6standardIdentity: "Assumed friend",
+    app6standardIdentity: "Assumed Friend",
     app6symbolSetInput: "10",
-    app6symbolSet: "Land unit",
+    app6symbolSet: "Land Unit",
     app6hqInput: "3",
-    app6hq: "Feint/dummy headquarters",
+    app6hq: "Feint / Dummy Headquarters",
     app6amplifierInput: "12",
-    app6amplifier: "Echelon at brigade and below: Squad"
+    app6amplifier: "Squad",
+    app6entityInput: "12",
+    app6entity: "Movement and Manoeuvre"
   },
   secondLevel: {
     shortName: "TO 1.1",
@@ -26,12 +28,12 @@ const testOrgs = {
     profile: "Test Organization 1.1 profile",
     app6standardIdentityInput: "3",
     app6standardIdentity: "Friend",
-    app6symbolSetInput: "11",
-    app6symbolSet: "Land civilian unit/organization",
+    app6symbolSetInput: "10",
+    app6symbolSet: "Land Unit",
     app6hqInput: "5",
-    app6hq: "Feint/dummy task force",
+    app6hq: "Feint / Dummy Task Force",
     app6amplifierInput: "11",
-    app6amplifier: "Echelon at brigade and below: Team/crew"
+    app6amplifier: "Team / Crew"
   },
   thirdLevel: {
     shortName: "TO 1.1.1",
@@ -74,21 +76,27 @@ describe("When creating an organization", () => {
     expect(await (await ShowOrganization.getProfile()).getText()).to.include(
       testOrg.profile
     )
-    expect(await (await ShowOrganization.getApp6context()).getText()).to.equal(
-      testOrg.app6context
-    )
+    await ShowOrganization.hoverOverApp6Symbol()
     expect(
-      await (await ShowOrganization.getApp6standardIdentity()).getText()
+      await (await ShowOrganization.getApp6Value("app6context")).getText()
+    ).to.equal(testOrg.app6context)
+    expect(
+      await (
+        await ShowOrganization.getApp6Value("app6standardIdentity")
+      ).getText()
     ).to.equal(testOrg.app6standardIdentity)
     expect(
-      await (await ShowOrganization.getApp6symbolSet()).getText()
+      await (await ShowOrganization.getApp6Value("app6symbolSet")).getText()
     ).to.equal(testOrg.app6symbolSet)
-    expect(await (await ShowOrganization.getApp6hq()).getText()).to.equal(
-      testOrg.app6hq
-    )
     expect(
-      await (await ShowOrganization.getApp6amplifier()).getText()
+      await (await ShowOrganization.getApp6Value("app6hq")).getText()
+    ).to.equal(testOrg.app6hq)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6amplifier")).getText()
     ).to.equal(testOrg.app6amplifier)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6entity")).getText()
+    ).to.equal(testOrg.app6entity)
   })
   it("Should be able to create a sub-organization for the newly created top-level organization", async() => {
     await (
@@ -104,27 +112,18 @@ describe("When creating an organization", () => {
     expect(
       await (await CreateOrganization.getParentOrganizationInput()).getValue()
     ).to.equal(topLevelOrg.shortName)
+    await CreateOrganization.openEditApp6Modal()
     expect(
-      await (await CreateOrganization.getApp6contextExtraColumn()).getText()
-    ).to.equal(`${topLevelOrg.app6context} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6context")
+    ).to.equal(`${topLevelOrg.app6context} (inherited)`)
     expect(
-      await (
-        await CreateOrganization.getApp6standardIdentityExtraColumn()
-      ).getText()
-    ).to.equal(`${topLevelOrg.app6standardIdentity} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6standardIdentity")
+    ).to.equal(`${topLevelOrg.app6standardIdentity} (inherited)`)
     expect(
-      await (await CreateOrganization.getApp6symbolSetExtraColumn()).getText()
-    ).to.equal(`${topLevelOrg.app6symbolSet} (inherited from parent)`)
-    /* eslint-disable no-unused-expressions */
-    expect(await (await CreateOrganization.getApp6hqExtraColumn()).isExisting())
-      .to.be.false
-    expect(
-      await (
-        await CreateOrganization.getApp6amplifierExtraColumn()
-      ).isExisting()
-    ).to.be.false
-    /* eslint-enable no-unused-expressions */
-
+      await CreateOrganization.getApp6DropdownValue("app6symbolSet")
+    ).to.equal(`${topLevelOrg.app6symbolSet} (inherited)`)
+    expect(await CreateOrganization.getApp6DropdownValue("app6hq")).to.equal("")
+    await CreateOrganization.closeEditApp6Modal()
     await CreateOrganization.fillOrganization(testOrgs.secondLevel)
     await CreateOrganization.submitForm()
     await ShowOrganization.waitForAlertSuccessToLoad()
@@ -144,20 +143,23 @@ describe("When creating an organization", () => {
       testOrg.profile
     )
     // This one should be inherited from the top level
-    expect(await (await ShowOrganization.getApp6context()).getText()).to.equal(
-      `${testOrgs.topLevel.app6context} (inherited from parent)`
-    )
+    await ShowOrganization.hoverOverApp6Symbol()
     expect(
-      await (await ShowOrganization.getApp6standardIdentity()).getText()
+      await (await ShowOrganization.getApp6Value("app6context")).getText()
+    ).to.equal(`${testOrgs.topLevel.app6context} (inherited)`)
+    expect(
+      await (
+        await ShowOrganization.getApp6Value("app6standardIdentity")
+      ).getText()
     ).to.equal(testOrg.app6standardIdentity)
     expect(
-      await (await ShowOrganization.getApp6symbolSet()).getText()
+      await (await ShowOrganization.getApp6Value("app6symbolSet")).getText()
     ).to.equal(testOrg.app6symbolSet)
-    expect(await (await ShowOrganization.getApp6hq()).getText()).to.equal(
-      testOrg.app6hq
-    )
     expect(
-      await (await ShowOrganization.getApp6amplifier()).getText()
+      await (await ShowOrganization.getApp6Value("app6hq")).getText()
+    ).to.equal(testOrg.app6hq)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6amplifier")).getText()
     ).to.equal(testOrg.app6amplifier)
   })
   it("Should be able to create a sub-organization for the newly created second-level organization", async() => {
@@ -175,58 +177,49 @@ describe("When creating an organization", () => {
       await (await CreateOrganization.getParentOrganizationInput()).getValue()
     ).to.equal(secondLevelOrg.shortName)
     // This one should be inherited from the top level
+    await CreateOrganization.openEditApp6Modal()
     expect(
-      await (await CreateOrganization.getApp6contextExtraColumn()).getText()
-    ).to.equal(`${testOrgs.topLevel.app6context} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6context")
+    ).to.equal(`${testOrgs.topLevel.app6context} (inherited)`)
     expect(
-      await (
-        await CreateOrganization.getApp6standardIdentityExtraColumn()
-      ).getText()
-    ).to.equal(`${secondLevelOrg.app6standardIdentity} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6standardIdentity")
+    ).to.equal(`${secondLevelOrg.app6standardIdentity} (inherited)`)
     expect(
-      await (await CreateOrganization.getApp6symbolSetExtraColumn()).getText()
-    ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited from parent)`)
-    /* eslint-disable no-unused-expressions */
-    expect(await (await CreateOrganization.getApp6hqExtraColumn()).isExisting())
-      .to.be.false
-    expect(
-      await (
-        await CreateOrganization.getApp6amplifierExtraColumn()
-      ).isExisting()
-    ).to.be.false
-    /* eslint-enable no-unused-expressions */
+      await CreateOrganization.getApp6DropdownValue("app6symbolSet")
+    ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited)`)
+    expect(await CreateOrganization.getApp6DropdownValue("app6hq")).to.equal("")
+    await CreateOrganization.closeEditApp6Modal()
 
     await CreateOrganization.fillOrganization(testOrgs.thirdLevel)
 
     await (await CreateOrganization.getClearParentOrganizationButton()).click()
-    /* eslint-disable no-unused-expressions */
+    await (await CreateOrganization.getShortNameInput()).click()
+    await CreateOrganization.openEditApp6Modal()
     expect(
-      await (await CreateOrganization.getApp6contextExtraColumn()).isExisting()
-    ).to.be.false
+      await CreateOrganization.getApp6DropdownValue("app6context")
+    ).to.equal("")
     expect(
-      await (
-        await CreateOrganization.getApp6standardIdentityExtraColumn()
-      ).isExisting()
-    ).to.be.false
-    /* eslint-enable no-unused-expressions */
+      await CreateOrganization.getApp6DropdownValue("app6standardIdentity")
+    ).to.equal("")
+    await CreateOrganization.closeEditApp6Modal()
 
     // Search by uuid as the full-text index may not yet be updated
     const url = await browser.getUrl()
     const searchParams = new URL(url).searchParams
     const secondLevelOrgUuid = searchParams.get("parentOrgUuid")
     await CreateOrganization.selectParentOrganizationByText(secondLevelOrgUuid)
+    await CreateOrganization.openEditApp6Modal()
     // This one should be inherited from the top level
     expect(
-      await (await CreateOrganization.getApp6contextExtraColumn()).getText()
-    ).to.equal(`${testOrgs.topLevel.app6context} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6context")
+    ).to.equal(`${testOrgs.topLevel.app6context} (inherited)`)
     expect(
-      await (
-        await CreateOrganization.getApp6standardIdentityExtraColumn()
-      ).getText()
-    ).to.equal(`${secondLevelOrg.app6standardIdentity} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6standardIdentity")
+    ).to.equal(`${secondLevelOrg.app6standardIdentity} (inherited)`)
     expect(
-      await (await CreateOrganization.getApp6symbolSetExtraColumn()).getText()
-    ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited from parent)`)
+      await CreateOrganization.getApp6DropdownValue("app6symbolSet")
+    ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited)`)
+    await CreateOrganization.closeEditApp6Modal()
 
     await CreateOrganization.submitForm()
     await ShowOrganization.waitForAlertSuccessToLoad()
@@ -245,22 +238,18 @@ describe("When creating an organization", () => {
     expect(await (await ShowOrganization.getProfile()).getText()).to.include(
       testOrg.profile
     )
+    await ShowOrganization.hoverOverApp6Symbol()
     // This one should be inherited from the top level
-    expect(await (await ShowOrganization.getApp6context()).getText()).to.equal(
-      `${testOrgs.topLevel.app6context} (inherited from parent)`
-    )
     expect(
-      await (await ShowOrganization.getApp6standardIdentity()).getText()
-    ).to.equal(
-      `${testOrgs.secondLevel.app6standardIdentity} (inherited from parent)`
-    )
+      await (await ShowOrganization.getApp6Value("app6context")).getText()
+    ).to.equal(`${testOrgs.topLevel.app6context} (inherited)`)
     expect(
-      await (await ShowOrganization.getApp6symbolSet()).getText()
-    ).to.equal(`${testOrgs.secondLevel.app6symbolSet} (inherited from parent)`)
-    /* eslint-disable no-unused-expressions */
-    expect(await (await ShowOrganization.getApp6hq()).getText()).to.be.empty
-    expect(await (await ShowOrganization.getApp6amplifier()).getText()).to.be
-      .empty
-    /* eslint-enable no-unused-expressions */
+      await (
+        await ShowOrganization.getApp6Value("app6standardIdentity")
+      ).getText()
+    ).to.equal(`${testOrgs.secondLevel.app6standardIdentity} (inherited)`)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6symbolSet")).getText()
+    ).to.equal(`${testOrgs.secondLevel.app6symbolSet} (inherited)`)
   })
 })

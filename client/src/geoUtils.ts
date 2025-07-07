@@ -1,4 +1,4 @@
-import { forward, toPoint } from "mgrs"
+import MGRS from "geographiclib-mgrs"
 import utils from "utils"
 
 export function parseCoordinate(latLng, validate = "") {
@@ -31,7 +31,7 @@ export function parseCoordinate(latLng, validate = "") {
   const safeRoundedValue = Math.round(value * 10 ** precision * 10) / 10
   /*
    * Also, coordinates are truncated instead of rounding when changing
-   * precision level in order to aviod inconsistencies during (MGRS <--> Lat/Lon) conversion.
+   * precision level in order to avoid inconsistencies during (MGRS <--> Lat/Lon) conversion.
    */
   return Math.trunc(safeRoundedValue) / 10 ** precision
 }
@@ -43,7 +43,7 @@ export function convertLatLngToMGRS(lat, lng) {
   let mgrs = ""
   try {
     if (utils.isNumeric(parsedLat) && utils.isNumeric(parsedLng)) {
-      mgrs = forward([parsedLng, parsedLat])
+      mgrs = MGRS.forward([parsedLng, parsedLat])
     }
   } catch (e) {
     mgrs = ""
@@ -54,16 +54,8 @@ export function convertLatLngToMGRS(lat, lng) {
 export function convertMGRSToLatLng(mgrs) {
   let latLng
   try {
-    // mgrs library accepts an input with even number of character as valid input, no matter how long the input is
-    // example: normal mgrs value= 36SVK8138315670, add even number of characters (36SVK8138315670FF or 36SVK8138315670QQQQ) => still valid for mgrs library
-    // Add our own validation to invalidate the examples above and make sure we allow max 10 digits at the end of an mgrs value.
-    // https://gis.stackexchange.com/a/304034
-    if (mgrs.match(/^\d{1,2}[^IO]{3}(\d{10}|\d{8}|\d{6}|\d{4}|\d{2})$/im)) {
-      // toPoint returns an array of [lon, lat]
-      latLng = mgrs ? toPoint(mgrs) : ["", ""]
-    } else {
-      throw new Error("Bad MGRS value")
-    }
+    // toPoint returns an array of [lon, lat]
+    latLng = mgrs ? MGRS.toPoint(mgrs) : ["", ""]
   } catch (e) {
     latLng = ["", ""]
   }

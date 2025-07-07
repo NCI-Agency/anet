@@ -115,6 +115,7 @@ export default class Event extends Model {
           name
           lat
           lng
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         tasks {
           uuid
@@ -143,6 +144,7 @@ export default class Event extends Model {
             name
             lat
             lng
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
         people {
@@ -155,6 +157,7 @@ export default class Event extends Model {
             name
             type
             code
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             organization {
               uuid
               shortName
@@ -167,6 +170,7 @@ export default class Event extends Model {
               name
               lat
               lng
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
           }
         }

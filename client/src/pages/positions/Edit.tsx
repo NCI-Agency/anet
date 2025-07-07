@@ -14,7 +14,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
-import { Position } from "models"
+import { Attachment, Position } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -33,6 +33,7 @@ const GQL_GET_POSITION = gql`
       superuserType
       role
       description
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       emailAddresses {
         network
         address
@@ -46,6 +47,7 @@ const GQL_GET_POSITION = gql`
         name
         type
         role
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         person {
           uuid
           name
@@ -67,6 +69,9 @@ const GQL_GET_POSITION = gql`
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
+      attachments {
+        ${Attachment.basicFieldsQuery}
+      }
     }
   }
 `

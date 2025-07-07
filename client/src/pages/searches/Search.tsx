@@ -60,7 +60,7 @@ import {
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import DOWNLOAD_ICON from "resources/download.png"
 import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -73,8 +73,7 @@ import Settings from "settings"
 
 // By default limit exports to the first 1000 results
 const MAX_NR_OF_EXPORTS = 1000
-export const UNLIMITED_EXPORTS_AUTHORIZATION_GROUP =
-  "UNLIMITED_EXPORTS_AUTHORIZATION_GROUP"
+export const UNLIMITED_EXPORTS_COMMUNITY = "UNLIMITED_EXPORTS_COMMUNITY"
 
 const GQL_EMAIL_ADDRESSES = `
   emailAddresses(network: $emailNetwork) {
@@ -108,6 +107,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -131,9 +131,11 @@ const GQL_GET_PERSON_LIST = gql`
           type
           role
           code
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           location {
             uuid
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid
@@ -160,10 +162,12 @@ const GQL_GET_POSITION_LIST = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid
@@ -219,6 +223,7 @@ const GQL_GET_LOCATION_LIST = gql`
         lat
         lng
         type
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
@@ -237,6 +242,8 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
         name
         description
         status
+        distributionList
+        forSensitiveInformation
         authorizationGroupRelatedObjects {
           relatedObjectType
           relatedObjectUuid
@@ -293,6 +300,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             }
             ... on Location {
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Organization {
               shortName
@@ -308,6 +316,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             ... on Position {
               type
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Report {
               intent
@@ -367,6 +376,7 @@ const GQL_GET_EVENT_LIST = gql`
           name
           lat
           lng
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -1318,7 +1328,7 @@ const Search = ({
   )
   const exportMaxResults = currentUser?.authorizationGroups
     ?.map(ag => ag.uuid)
-    ?.includes(appSettings[UNLIMITED_EXPORTS_AUTHORIZATION_GROUP])
+    ?.includes(appSettings[UNLIMITED_EXPORTS_COMMUNITY])
     ? 0
     : MAX_NR_OF_EXPORTS
 
@@ -1474,7 +1484,7 @@ const Search = ({
                 to="authorizationGroups"
                 disabled={!hasAuthorizationGroupsResults}
               >
-                <img src={AUTHORIZATION_GROUPS_ICON} alt="" />{" "}
+                <img src={COMMUNITIES_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]}{" "}
                 {hasAuthorizationGroupsResults && (
                   <Badge pill bg="secondary" className="float-end">
@@ -1763,7 +1773,7 @@ const Search = ({
           id="authorizationGroups"
           title={
             <>
-              Authorization Groups
+              Communities
               {hasAuthorizationGroupsResults && (
                 <Badge pill bg="secondary" className="ms-1">
                   {numAuthorizationGroups}
@@ -1851,11 +1861,11 @@ const Search = ({
             initialValues={{ name: "" }}
           >
             {({ values, submitForm }) => (
-              <Form>
+              <Form className="d-flex flex-column gap-3">
                 <Field
                   name="name"
                   component={FieldHelper.InputField}
-                  placeholder="Give this saved search a name"
+                  placeholder="Give this saved search a name (optional)"
                   vertical
                 />
                 <div className="submit-buttons">

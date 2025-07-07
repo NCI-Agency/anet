@@ -20,6 +20,7 @@ import {
   MODEL_TO_OBJECT_TYPE,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -29,10 +30,12 @@ import {
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
+import UserTable from "components/UserTable"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
+  getOtherSide,
   MERGE_SIDES,
   mergedPersonIsValid,
   selectAllFields,
@@ -41,7 +44,7 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Person } from "models"
 import moment from "moment"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -71,6 +74,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -97,8 +101,16 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
   const person2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPerson = mergeState.merged
 
+  useEffect(() => {
+    setIsDirty(false)
+  }, [person1, person2])
+  useEffect(() => {
+    setIsDirty(!!mergedPerson)
+  }, [mergedPerson])
+
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} />
         <h4>Merge People Tool</h4>
@@ -187,19 +199,15 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={Settings.fields.person.domainUsername}
-                value={mergedPerson.domainUsername}
+                dictProps={Settings.fields.person.users}
+                value={
+                  <UserTable
+                    label={Settings.fields.person.users.label}
+                    users={mergedPerson.users}
+                  />
+                }
                 align={ALIGN_OPTIONS.CENTER}
-                fieldName="domainUsername"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.person.openIdSubject}
-                value={mergedPerson.openIdSubject}
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="openIdSubject"
+                fieldName="users"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -413,7 +421,10 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           intent="primary"
-          onClick={mergePeople}
+          onClick={() => {
+            setIsDirty(false)
+            mergePeople()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge People
@@ -441,6 +452,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
         }
       })
       .catch(error => {
+        setIsDirty(true)
         setSaveError(error)
         jumpToTop()
       })
@@ -463,10 +475,7 @@ const ColTitle = styled(Form.Group)`
 
 const peopleFilters = {
   allPersons: {
-    label: "All",
-    queryVars: {
-      pendingVerification: false
-    }
+    label: "All"
   }
 }
 
@@ -486,6 +495,7 @@ const PersonColumn = ({
   dispatchMergeActions
 }: PersonColumnProps) => {
   const person = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const idForPerson = label.replace(/\s+/g, "")
 
   return (
@@ -498,6 +508,7 @@ const PersonColumn = ({
           fieldName="person"
           placeholder="Select a person to merge"
           value={person}
+          disabledValue={otherSide}
           overlayColumns={["name"]}
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
@@ -538,6 +549,7 @@ const PersonColumn = ({
               )
             }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <MergeField
@@ -574,28 +586,18 @@ const PersonColumn = ({
           />
           <DictionaryField
             wrappedComponent={MergeField}
-            dictProps={Settings.fields.person.domainUsername}
-            fieldName="domainUsername"
-            value={person.domainUsername}
+            dictProps={Settings.fields.person.users}
+            fieldName="users"
+            value={
+              <UserTable
+                label={Settings.fields.person.users.label}
+                users={person.users}
+              />
+            }
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("domainUsername", person.domainUsername, align)
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.person.openIdSubject}
-            fieldName="openIdSubject"
-            value={person.openIdSubject}
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField("openIdSubject", person.openIdSubject, align)
+                setAMergedField("users", person.users, align)
               )
             }}
             mergeState={mergeState}

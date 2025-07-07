@@ -6,8 +6,8 @@ const PERSON_UUID = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"
 const PERSON_WITH_AG_UUID = "31cba227-f6c6-49e9-9483-fce441bea624" // CIV Bratton, Creed
 
 describe("Show person page", () => {
-  describe("When on the show page of a person with authorizationGroup(s)", () => {
-    it("We should see a table with authorizationGroups", async() => {
+  describe("When on the show page of a person with communities", () => {
+    it("We should see a table with communities", async() => {
       await ShowPerson.open(PERSON_WITH_AG_UUID)
       await (await ShowPerson.getAuthorizationGroupsTable()).waitForExist()
       await (await ShowPerson.getAuthorizationGroupsTable()).waitForDisplayed()
@@ -15,10 +15,10 @@ describe("Show person page", () => {
         await (await ShowPerson.getAuthorizationGroupsTable()).getText()
       ).to.contain("EF 5")
     })
-    it("We can go to the show page of authorizationGroup", async() => {
+    it("We can go to the show page of a community", async() => {
       await (await ShowPerson.getAuthorizationGroup(1)).click()
       await expect(await browser.getUrl()).to.include(
-        "/authorizationGroups/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
+        "/communities/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
       )
     })
   })

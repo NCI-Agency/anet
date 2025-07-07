@@ -50,6 +50,46 @@ const EXAMPLE_POSITIONS = {
 }
 
 describe("Merge positions page", () => {
+  it("Should display a warning when leaving the page with unsaved changes", async() => {
+    await MergePositions.openPage()
+    await (await MergePositions.getTitle()).waitForExist()
+    await (await MergePositions.getTitle()).waitForDisplayed()
+    await (
+      await MergePositions.getLeftPositionField()
+    ).setValue(EXAMPLE_POSITIONS.validLeft.search)
+    await MergePositions.waitForAdvancedSelectLoading(
+      EXAMPLE_POSITIONS.validLeft.fullName
+    )
+    await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when only one position is selected, should allow to leave
+    await (await $("#anet-logo")).click()
+    // eslint-disable-next-line no-unused-expressions
+    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+
+    await MergePositions.openPage()
+    await (await MergePositions.getTitle()).waitForExist()
+    await (await MergePositions.getTitle()).waitForDisplayed()
+    await (
+      await MergePositions.getLeftPositionField()
+    ).setValue(EXAMPLE_POSITIONS.validLeft.search)
+    await MergePositions.waitForAdvancedSelectLoading(
+      EXAMPLE_POSITIONS.validLeft.fullName
+    )
+    await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
+    await (
+      await MergePositions.getRightPositionField()
+    ).setValue(EXAMPLE_POSITIONS.validRight.search)
+    await MergePositions.waitForAdvancedSelectLoading(
+      EXAMPLE_POSITIONS.validRight.fullName
+    )
+    await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when both positions are selected, should show warning
+    await (await $("#anet-logo")).click()
+    const modalDialog = await $(".modal-dialog")
+    // eslint-disable-next-line no-unused-expressions
+    expect(await modalDialog.isExisting()).to.be.true
+    await $(".btn-danger").click()
+  })
   it("Should display fields values of the left position", async() => {
     // Open merge positions page.
     await MergePositions.openPage()
@@ -115,9 +155,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.validLeft.fullName
     )
-    await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
-
-    await (await MergePositions.getSamePositionsToast()).waitForDisplayed()
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergePositions.getFirstItemRadioButtonFromAdvancedSelect()
+      ).isExisting()
+    ).to.be.false
   })
 
   it("Should not allow to select two occupied positions", async() => {

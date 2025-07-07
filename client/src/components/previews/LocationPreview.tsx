@@ -1,9 +1,11 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
@@ -23,6 +25,7 @@ const GQL_GET_LOCATION = gql`
       digram
       trigram
       description
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
   }
 `
@@ -64,6 +67,13 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
         <h4 className="ellipsized-text">{`Location ${location.name}`}</h4>
       </div>
       <div className="preview-section">
+        <div className="text-center">
+          <EntityAvatarDisplay
+            avatar={location.entityAvatar}
+            defaultAvatar={Location.relatedObjectType}
+          />
+        </div>
+
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.location.type}

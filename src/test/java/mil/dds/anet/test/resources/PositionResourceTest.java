@@ -49,8 +49,9 @@ public class PositionResourceTest extends AbstractResourceTest {
   public static final String FIELDS = String.format(
       "{ %1$s person { %2$s } organization { %3$s } associatedPositions { uuid }"
           + " previousPeople { createdAt startTime endTime position { uuid }"
-          + " person { uuid name rank } } }",
-      _POSITION_FIELDS, _PERSON_FIELDS, _ORGANIZATION_FIELDS);
+          + " person { uuid name rank } } attachments %4$s }",
+      _POSITION_FIELDS, _PERSON_FIELDS, _ORGANIZATION_FIELDS,
+      AttachmentResourceTest.ATTACHMENT_FIELDS);
   private static final String PA_FIELDS =
       "{ uuid associatedPositions { uuid } responsibleTasks(query: ?responsibleTasksQuery) { uuid } }";
 
@@ -436,10 +437,9 @@ public class PositionResourceTest extends AbstractResourceTest {
         PositionSearchQueryInput.builder().withHasPendingAssessments(true).build();
     final TaskSearchQueryInput responsibleTasksQuery =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).build();
-    final AnetBeanList_Position searchResults =
-        withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.positionList(getListFields(PA_FIELDS), query,
-                "responsibleTasksQuery", responsibleTasksQuery));
+    final AnetBeanList_Position searchResults = withCredentials(getDomainUsername(getRegularUser()),
+        t -> queryExecutor.positionList(getListFields(PA_FIELDS), query, "responsibleTasksQuery",
+            responsibleTasksQuery));
     assertThat(searchResults).isNotNull();
     final List<Position> list = searchResults.getList();
     assertThat(list).isNotEmpty();
@@ -468,10 +468,9 @@ public class PositionResourceTest extends AbstractResourceTest {
             .withOrgRecurseStrategy(RecurseStrategy.CHILDREN).build();
     final TaskSearchQueryInput responsibleTasksQuery =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).build();
-    final AnetBeanList_Position searchResults =
-        withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.positionList(getListFields(PA_FIELDS), query,
-                "responsibleTasksQuery", responsibleTasksQuery));
+    final AnetBeanList_Position searchResults = withCredentials(getDomainUsername(getRegularUser()),
+        t -> queryExecutor.positionList(getListFields(PA_FIELDS), query, "responsibleTasksQuery",
+            responsibleTasksQuery));
     assertThat(searchResults).isNotNull();
     final List<Position> list = searchResults.getList();
     assertThat(list).isNotEmpty();
@@ -630,14 +629,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
 
     // try to update a position from the user's org
-    final Organization userOrg = withCredentials(user.getDomainUsername(),
+    final Organization userOrg = withCredentials(getDomainUsername(user),
         t -> queryExecutor.organization(ORGANIZATION_FIELDS, position.getOrganization().getUuid()));
     final List<Position> userOrgPositions = userOrg.getPositions();
     assertThat(userOrgPositions).isNotNull();
     assertThat(userOrgPositions).isNotEmpty();
     final Position p1 = userOrgPositions.get(0);
     try {
-      final Integer nrUpdated = withCredentials(user.getDomainUsername(),
+      final Integer nrUpdated = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.updatePosition("", getPositionInput(p1)));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
@@ -665,7 +664,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // try to update the new position (not related to the user's organization)
     try {
-      final Integer nrUpdated = withCredentials(user.getDomainUsername(),
+      final Integer nrUpdated = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.updatePosition("", getPositionInput(newPosition)));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
@@ -683,7 +682,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     try {
       p3.setType(PositionType.SUPERUSER);
       final Integer nrUpdated =
-          withCredentials(user.getDomainUsername(), t -> mutationExecutor.updatePosition("", p3));
+          withCredentials(getDomainUsername(user), t -> mutationExecutor.updatePosition("", p3));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {

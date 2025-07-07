@@ -69,6 +69,7 @@ const GQL_GET_REPORT = gql`
       location {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       authors {
         uuid
@@ -118,6 +119,7 @@ const GQL_GET_REPORT = gql`
           role
           code
           status
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           organization {
             uuid
             shortName
@@ -761,25 +763,10 @@ export const CompactWorkflowRow = ({ content }: CompactWorkflowRowProps) => {
 const CompactWorkflowRowS = styled(CompactRowS)`
   & > td {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
-    flex-wrap: wrap;
-    align-items: center;
-    text-align: center;
-    & > div {
-      position: relative;
-      margin-right: 12px;
-    }
-    & > div:not(:last-child):after {
-      position: absolute;
-      right: -18px;
-      top: 0;
-      content: "→";
-    }
-    & > div > button {
-      padding: 0 5px !important;
-      margin: 0;
-    }
+    text-align: left;
+    list-style-type: disc;
   }
 `
 
@@ -818,13 +805,32 @@ const CompactRowReportAction = ({ action }: CompactRowReportActionProps) => {
   return (
     <CompactRowReportActionS className="workflow-action">
       <ActionStatus action={action} />
-      <ActionButton action={action} />
+      <ActionButton action={action} isCompact />
     </CompactRowReportActionS>
   )
 }
 
 const CompactRowReportActionS = styled.div`
+  margin: 0px !important;
+  display: list-item !important;
+  text-align: left !important;
+
   & button {
-    background-color: #ddd !important;
+    width: fit-content !important;
+    vertical-align: middle;
+    background-color: unset !important;
+    margin: 0px !important;
+    padding: 0px;
+    border: none;
+  }
+
+  & button::after {
+    display: none;
+  }
+
+  & .action-status {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
   }
 `

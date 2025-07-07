@@ -29,7 +29,7 @@ describe("When looking at anet object forms with dictionary that doesn't include
     await (await CreateTask.getForm()).waitForExist()
     await (await CreateTask.getForm()).waitForDisplayed()
   })
-  it("Should see that authorization groups form successfully loads", async() => {
+  it("Should see that communities form successfully loads", async() => {
     await CreateAuthorizationGroup.open()
     await (await CreateAuthorizationGroup.getForm()).waitForExist()
     await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()

@@ -64,6 +64,21 @@ public class Organization extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String app6amplifier;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6entity;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6entityType;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6entitySubtype;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6sectorOneModifier;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6sectorTwoModifier;
   // annotated below
   private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
   // annotated below
@@ -193,6 +208,46 @@ public class Organization extends AbstractEmailableAnetBean
 
   public void setApp6amplifier(String app6amplifier) {
     this.app6amplifier = app6amplifier;
+  }
+
+  public String getApp6entity() {
+    return app6entity;
+  }
+
+  public void setApp6entity(String app6entity) {
+    this.app6entity = app6entity;
+  }
+
+  public String getApp6entityType() {
+    return app6entityType;
+  }
+
+  public void setApp6entityType(String app6entityType) {
+    this.app6entityType = app6entityType;
+  }
+
+  public String getApp6entitySubtype() {
+    return app6entitySubtype;
+  }
+
+  public void setApp6entitySubtype(String app6entitySubtype) {
+    this.app6entitySubtype = app6entitySubtype;
+  }
+
+  public String getApp6sectorOneModifier() {
+    return app6sectorOneModifier;
+  }
+
+  public void setApp6sectorOneModifier(String app6sectorOneModifier) {
+    this.app6sectorOneModifier = app6sectorOneModifier;
+  }
+
+  public String getApp6sectorTwoModifier() {
+    return app6sectorTwoModifier;
+  }
+
+  public void setApp6sectorTwoModifier(String app6sectorTwoModifier) {
+    this.app6sectorTwoModifier = app6sectorTwoModifier;
   }
 
   @GraphQLQuery(name = "parentOrg")
@@ -430,14 +485,20 @@ public class Organization extends AbstractEmailableAnetBean
         && Objects.equals(other.getApp6standardIdentity(), app6standardIdentity)
         && Objects.equals(other.getApp6symbolSet(), app6symbolSet)
         && Objects.equals(other.getApp6hq(), app6hq)
-        && Objects.equals(other.getApp6amplifier(), app6amplifier);
+        && Objects.equals(other.getApp6amplifier(), app6amplifier)
+        && Objects.equals(other.getApp6entity(), app6entity)
+        && Objects.equals(other.getApp6entityType(), app6entityType)
+        && Objects.equals(other.getApp6entitySubtype(), app6entitySubtype)
+        && Objects.equals(other.getApp6sectorOneModifier(), app6sectorOneModifier)
+        && Objects.equals(other.getApp6sectorTwoModifier(), app6sectorTwoModifier);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
-        profile, app6context, app6standardIdentity, app6symbolSet, app6hq, app6amplifier, createdAt,
-        updatedAt);
+        profile, app6context, app6standardIdentity, app6symbolSet, app6hq, app6amplifier,
+        app6entity, app6entityType, app6entitySubtype, app6sectorOneModifier, app6sectorTwoModifier,
+        createdAt, updatedAt);
   }
 
   @Override

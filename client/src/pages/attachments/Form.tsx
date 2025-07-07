@@ -168,6 +168,7 @@ const AttachmentForm = ({
                               ENTITY_TYPES.LOCATIONS,
                               ENTITY_TYPES.ORGANIZATIONS,
                               ENTITY_TYPES.PEOPLE,
+                              ENTITY_TYPES.POSITIONS,
                               ENTITY_TYPES.REPORTS
                             ]}
                             setRelatedObjects={value =>

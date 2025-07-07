@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 class AuthorizationGroupResourceTest extends AbstractResourceTest {
   protected static final String FIELDS = "{ uuid name description status"
+      + " distributionList forSensitiveInformation"
       + " administrativePositions { uuid name code type role status location { uuid name }"
       + " organization { uuid shortName longName identificationCode }"
       + " person { uuid name rank } }"
@@ -54,12 +55,37 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   void testCreateAsSuperuser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
     try {
-      withCredentials(getSuperuser().getDomainUsername(),
+      withCredentials(getDomainUsername(getSuperuser()),
           t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
+  }
+
+  @Test
+  void testEditAsAdmin() {
+    final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
+    final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
+        t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
+    assertThat(authorizationGroup).isNotNull();
+    final AuthorizationGroupInput updatedAuthorizationGroupInput =
+        getAuthorizationGroupInput(authorizationGroup);
+    updatedAuthorizationGroupInput.setDistributionList(true);
+    updatedAuthorizationGroupInput.setForSensitiveInformation(true);
+    updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
+    updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
+    final Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
+    assertThat(nrUpdated).isOne();
+    final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
+        t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
+    assertThat(updatedAuthorizationGroup.getDistributionList()).isTrue();
+    assertThat(updatedAuthorizationGroup.getForSensitiveInformation()).isTrue();
+    assertThat(updatedAuthorizationGroup.getAdministrativePositions())
+        .hasSize(authorizationGroupInput.getAdministrativePositions().size() - 1);
+    assertThat(updatedAuthorizationGroup.getAuthorizationGroupRelatedObjects())
+        .hasSize(authorizationGroupInput.getAuthorizationGroupRelatedObjects().size() - 1);
   }
 
   @Test
@@ -85,13 +111,18 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(authorizationGroup).isNotNull();
     final AuthorizationGroupInput updatedAuthorizationGroupInput =
         getAuthorizationGroupInput(authorizationGroup);
+    updatedAuthorizationGroupInput.setDistributionList(true);
+    updatedAuthorizationGroupInput.setForSensitiveInformation(true);
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
-    final Integer nrUpdated = withCredentials(getSuperuser().getDomainUsername(),
+    final Integer nrUpdated = withCredentials(getDomainUsername(getSuperuser()),
         t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
         t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
+    assertThat(updatedAuthorizationGroup.getDistributionList()).isTrue();
+    // Superuser should not be able to change this field!
+    assertThat(updatedAuthorizationGroup.getForSensitiveInformation()).isFalse();
     assertThat(updatedAuthorizationGroup.getAdministrativePositions())
         .hasSize(authorizationGroupInput.getAdministrativePositions().size() - 1);
     assertThat(updatedAuthorizationGroup.getAuthorizationGroupRelatedObjects())
@@ -127,8 +158,9 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
 
   private AuthorizationGroupInput getAuthorizationGroupInput() {
     final String noposPersonUuid = "bdd91de7-09c7-4f09-97e4-d3325bb92dab";
-    return AuthorizationGroupInput.builder().withName("test authorization group")
-        .withDescription("test authorization group description").withStatus(Status.ACTIVE)
+    return AuthorizationGroupInput.builder().withName("test community")
+        .withDescription("test community description").withStatus(Status.ACTIVE)
+        .withDistributionList(false).withForSensitiveInformation(false)
         .withAdministrativePositions(
             getPositionsInput(List.of(admin.getPosition(), getSuperuser().getPosition())))
         .withAuthorizationGroupRelatedObjects(List.of(
@@ -143,7 +175,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
 
   @Test
   void testAuthorizationGroupsByRelatedObject() {
-    // Authorization group EF 5 should transitively contain all related objects below
+    // Community EF 5 should transitively contain all related objects below
     final String expectedAuthorizationGroupUuid = "ab1a7d99-4529-44b1-a118-bdee3ca8296b";
     final String fields = "{ uuid authorizationGroups { uuid } }";
 

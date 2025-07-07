@@ -170,13 +170,14 @@ export default class Location extends Model {
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid name type digram trigram"
+  static autocompleteQuery = `uuid name type digram trigram ${GRAPHQL_ENTITY_AVATAR_FIELDS}`
 
   static allFieldsQuery = `
     uuid
     name
     digram
     trigram
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     description
     type
     lat
@@ -216,11 +217,13 @@ export default class Location extends Model {
       uuid
       name
       type
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     childrenLocations {
       uuid
       name
       type
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     customFields
     ${GRAPHQL_NOTES_FIELDS}

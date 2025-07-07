@@ -4,6 +4,7 @@ type AccessToken {
   description: String
   expiresAt: Instant
   name: String
+  scope: TokenScope
   tokenHash: String
   uuid: String
 }
@@ -14,6 +15,7 @@ input AccessTokenInput {
   description: String
   expiresAt: Instant
   name: String
+  scope: TokenScope
   tokenHash: String
   uuid: String
 }
@@ -338,6 +340,8 @@ type AuthorizationGroup {
   authorizationGroupRelatedObjects: [GenericRelatedObject]
   createdAt: Instant
   description: String
+  distributionList: Boolean
+  forSensitiveInformation: Boolean
   isSubscribed: Boolean
   name: String
   status: Status
@@ -351,6 +355,8 @@ input AuthorizationGroupInput {
   authorizationGroupRelatedObjects: [GenericRelatedObjectInput]
   createdAt: Instant
   description: String
+  distributionList: Boolean
+  forSensitiveInformation: Boolean
   name: String
   status: Status
   updatedAt: Instant
@@ -359,7 +365,9 @@ input AuthorizationGroupInput {
 
 """"""
 input AuthorizationGroupSearchQueryInput {
+  distributionList: Boolean
   emailNetwork: String
+  forSensitiveInformation: Boolean
   inMyReports: Boolean
   pageNum: Int
   pageSize: Int
@@ -635,6 +643,7 @@ type Location {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   digram: String
+  entityAvatar: EntityAvatar
   isSubscribed: Boolean
   lat: Float
   lng: Float
@@ -657,6 +666,7 @@ input LocationInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   digram: String
+  entityAvatar: EntityAvatarInput
   lat: Float
   lng: Float
   name: String
@@ -834,7 +844,12 @@ type Organization {
   administratingPositions: [Position]
   app6amplifier: String
   app6context: String
+  app6entity: String
+  app6entitySubtype: String
+  app6entityType: String
   app6hq: String
+  app6sectorOneModifier: String
+  app6sectorTwoModifier: String
   app6standardIdentity: String
   app6symbolSet: String
   approvalSteps: [ApprovalStep]
@@ -870,7 +885,12 @@ input OrganizationInput {
   administratingPositions: [PositionInput]
   app6amplifier: String
   app6context: String
+  app6entity: String
+  app6entitySubtype: String
+  app6entityType: String
   app6hq: String
+  app6sectorOneModifier: String
+  app6sectorTwoModifier: String
   app6standardIdentity: String
   app6symbolSet: String
   approvalSteps: [ApprovalStepInput]
@@ -932,7 +952,6 @@ type Person {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
@@ -941,7 +960,6 @@ type Person {
   name: String
   notes: [Note]
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -950,6 +968,7 @@ type Person {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [User]
   uuid: String
 }
 
@@ -961,14 +980,12 @@ input PersonInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
-  domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   entityAvatar: EntityAvatarInput
   gender: String
   name: String
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -977,6 +994,7 @@ input PersonInput {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [UserInput]
   uuid: String
 }
 
@@ -1047,6 +1065,7 @@ type Position {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   emailAddresses(network: String): [EmailAddress]
+  entityAvatar: EntityAvatar
   isApprover: Boolean
   isSubscribed: Boolean
   location: Location
@@ -1074,6 +1093,7 @@ input PositionInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   emailAddresses: [EmailAddressInput]
+  entityAvatar: EntityAvatarInput
   location: LocationInput
   name: String
   organization: OrganizationInput
@@ -1312,7 +1332,6 @@ type ReportPerson {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
@@ -1322,7 +1341,6 @@ type ReportPerson {
   name: String
   notes: [Note]
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -1332,6 +1350,7 @@ type ReportPerson {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [User]
   uuid: String
 }
 
@@ -1345,7 +1364,6 @@ input ReportPersonInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
-  domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   entityAvatar: EntityAvatarInput
@@ -1353,7 +1371,6 @@ input ReportPersonInput {
   interlocutor: Boolean!
   name: String
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -1363,6 +1380,7 @@ input ReportPersonInput {
   status: Status
   updatedAt: Instant
   user: Boolean
+  users: [UserInput]
   uuid: String
 }
 
@@ -1679,6 +1697,20 @@ enum TaskSearchSortBy {
 }
 
 """"""
+enum TokenScope {
+  GRAPHQL
+  NVG
+}
+
+""""""
+type User {
+  createdAt: Instant
+  domainUsername: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
 type UserActivity {
   count: Long!
   organization: Organization
@@ -1708,4 +1740,12 @@ input UserActivitySearchQueryInput {
 enum UserActivitySearchSortBy {
   COUNT
   NONE
+}
+
+""""""
+input UserInput {
+  createdAt: Instant
+  domainUsername: String
+  updatedAt: Instant
+  uuid: String
 }

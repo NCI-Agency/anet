@@ -16,6 +16,8 @@ public class AuthorizationGroupMapper implements RowMapper<AuthorizationGroup> {
     a.setDescription(rs.getString("authorizationGroups_description"));
     a.setStatus(
         MapperUtils.getEnumIdx(rs, "authorizationGroups_status", AuthorizationGroup.Status.class));
+    a.setDistributionList(rs.getBoolean("authorizationGroups_distributionList"));
+    a.setForSensitiveInformation(rs.getBoolean("authorizationGroups_forSensitiveInformation"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

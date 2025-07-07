@@ -157,32 +157,34 @@ const InsightsShow = ({
   const insightDefaultQueryParams = {
     [NOT_APPROVED_REPORTS]: {
       state: [Report.STATE.PENDING_APPROVAL],
-      updatedAtEnd: defaultPastDates.referenceDate.endOf("day").valueOf()
+      updatedAtEnd: defaultPastDates.referenceDate.endOf("day").toISOString()
     },
     [CANCELLED_REPORTS]: {
       state: [Report.STATE.CANCELLED],
       cancelledReason: null,
       engagementDateStart: defaultPastDates.referenceDate
         .startOf("day")
-        .valueOf()
+        .toISOString()
     },
     [REPORTS_BY_TASK]: {
       state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
       engagementDateStart: defaultPastDates.referenceDate
         .startOf("day")
-        .valueOf()
+        .toISOString()
     },
     [REPORTS_BY_DAY_OF_WEEK]: {
       state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
-      engagementDateStart: defaultPastDates.startDate.startOf("day").valueOf(),
-      engagementDateEnd: defaultPastDates.endDate.endOf("day").valueOf(),
+      engagementDateStart: defaultPastDates.startDate
+        .startOf("day")
+        .toISOString(),
+      engagementDateEnd: defaultPastDates.endDate.endOf("day").toISOString(),
       includeEngagementDayOfWeek: true
     },
     [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
       engagementDateStart: defaultFutureDates.startDate
         .startOf("day")
-        .valueOf(),
-      engagementDateEnd: defaultFutureDates.endDate.endOf("day").valueOf()
+        .toISOString(),
+      engagementDateEnd: defaultFutureDates.endDate.endOf("day").toISOString()
     },
     [PENDING_ASSESSMENTS_BY_POSITION]: {
       hasPendingAssessments: true,

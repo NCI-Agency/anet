@@ -307,8 +307,8 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
       final Set<String> authorizationGroupUuids, final Assessment assessment,
       final UpdateType updateType) {
     // Admins always have access
-    // Note that a `null` user means this is called through a merge function, by an admin
-    if (user == null || AuthUtils.isAdmin(user)) {
+    // Note that system user means this is called through e.g. a worker or a merge function
+    if (Person.isSystemUser(user) || AuthUtils.isAdmin(user)) {
       return true;
     }
 
@@ -326,19 +326,19 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
         if (checkInstantAssessment(user, assessmentRelatedObjects, engine)) {
           return true;
         }
-        // else check authorization groups (below)
+        // else check communities (below)
       }
       case "ondemand" -> {
         // On-demand assessment:
         checkOndemandAssessment(assessmentRelatedObjects);
-        // now check authorization groups (below)
+        // now check communities (below)
       }
       default -> {
         // Periodic assessment:
         if (checkPeriodicAssessment(user, assessmentRelatedObjects, engine)) {
           return true;
         }
-        // else check authorization groups (below)
+        // else check communities (below)
       }
     }
 
@@ -405,7 +405,7 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
                         .completedFuture(approvers.stream().map(Position::getUuid).toList())))
             .join();
     // Allowed if user is an approver
-    return approverPositions.contains(DaoUtils.getUuid(user.getPosition()));
+    return approverPositions.contains(DaoUtils.getUuid(DaoUtils.getPosition(user)));
   }
 
   private void checkOndemandAssessment(List<GenericRelatedObject> assessmentRelatedObjects) {

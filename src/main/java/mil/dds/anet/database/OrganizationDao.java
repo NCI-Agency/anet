@@ -13,6 +13,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -43,8 +44,9 @@ public class OrganizationDao
 
   private static final String[] fields =
       {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "app6context",
-          "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "createdAt",
-          "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
+          "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "app6entity",
+          "app6entityType", "app6entitySubtype", "app6sectorOneModifier", "app6sectorTwoModifier",
+          "createdAt", "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "organizations";
   public static final String ORGANIZATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
@@ -204,11 +206,15 @@ public class OrganizationDao
       handle.createUpdate(
           "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, "
               + "\"identificationCode\", profile, app6context, \"app6standardIdentity\", "
-              + "\"app6symbolSet\", app6hq, app6amplifier, \"createdAt\", \"updatedAt\", "
-              + "\"parentOrgUuid\", \"locationUuid\", \"customFields\") "
+              + "\"app6symbolSet\", app6hq, app6amplifier, app6entity, \"app6entityType\", "
+              + "\"app6entitySubtype\", \"app6sectorOneModifier\", \"app6sectorTwoModifier\", "
+              + "\"createdAt\", \"updatedAt\", \"parentOrgUuid\", \"locationUuid\", "
+              + "\"customFields\") "
               + "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :profile, "
               + ":app6context, :app6standardIdentity, :app6symbolSet, :app6hq, :app6amplifier, "
-              + ":createdAt, :updatedAt, :parentOrgUuid, :locationUuid, :customFields)")
+              + ":app6entity, :app6entityType, :app6entitySubtype, :app6sectorOneModifier, "
+              + ":app6sectorTwoModifier, :createdAt, :updatedAt, :parentOrgUuid, "
+              + ":locationUuid, :customFields)")
           .bindBean(org).bind("createdAt", DaoUtils.asLocalDateTime(org.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(org.getStatus()))
@@ -241,9 +247,12 @@ public class OrganizationDao
           + "\"identificationCode\" = :identificationCode, profile = :profile, "
           + "app6context = :app6context, \"app6standardIdentity\" = :app6standardIdentity, "
           + "\"app6symbolSet\" = :app6symbolSet, app6hq = :app6hq, app6amplifier = :app6amplifier, "
-          + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, "
-          + "\"locationUuid\" = :locationUuid, \"customFields\" = :customFields WHERE uuid = :uuid")
-          .bindBean(org).bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
+          + "app6entity = :app6entity, \"app6entityType\" = :app6entityType, "
+          + "\"app6entitySubtype\" = :app6entitySubtype, \"app6sectorOneModifier\" = :app6sectorOneModifier, "
+          + "\"app6sectorTwoModifier\" = :app6sectorTwoModifier, " + "\"updatedAt\" = :updatedAt, "
+          + "\"parentOrgUuid\" = :parentOrgUuid, \"locationUuid\" = :locationUuid, \"customFields\" = :customFields "
+          + "WHERE uuid = :uuid").bindBean(org)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(org.getStatus()))
           .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
           .bind("locationUuid", DaoUtils.getUuid(org.getLocation())).execute();
@@ -386,7 +395,7 @@ public class OrganizationDao
           winnerOrganization.getEmailAddresses());
 
       // Update customSensitiveInformation for winner
-      DaoUtils.saveCustomSensitiveInformation(null, OrganizationDao.TABLE_NAME,
+      DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, OrganizationDao.TABLE_NAME,
           winnerOrganizationUuid, winnerOrganization.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);

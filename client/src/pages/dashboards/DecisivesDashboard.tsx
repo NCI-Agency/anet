@@ -8,7 +8,7 @@ import {
 } from "actions"
 import API from "api"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -73,12 +73,14 @@ const GQL_GET_STATIC_DATA = gql`
       list {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     locationList(query: $locationQuery) {
       list {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     taskList(query: $taskQuery) {
@@ -330,8 +332,8 @@ const BaseDecisivesDashboardImpl = ({
   function setDecisivesDefaultSearchQuery() {
     const queryParams = {
       state: [Report.STATE.PUBLISHED],
-      engagementDateStart: moment().subtract(8, "d").endOf("day").valueOf(),
-      engagementDateEnd: moment().subtract(1, "d").endOf("day").valueOf()
+      engagementDateStart: moment().subtract(8, "d").endOf("day").toISOString(),
+      engagementDateEnd: moment().subtract(1, "d").endOf("day").toISOString()
     }
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,

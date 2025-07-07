@@ -21,6 +21,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      distributionList
+      forSensitiveInformation
       administrativePositions {
         uuid
         name
@@ -28,9 +30,11 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid
@@ -67,9 +71,14 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             uuid
             type
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
+    }
+
+    reportList(query: { authorizationGroupUuid: [$uuid], pageSize: 1 }) {
+      totalCount
     }
   }
 `
@@ -105,13 +114,15 @@ const AuthorizationGroupEdit = ({
   const authorizationGroup = new AuthorizationGroup(
     data ? data.authorizationGroup : {}
   )
+  const hasReports = !!data?.reportList?.totalCount
 
   return (
     <div>
       <AuthorizationGroupForm
         edit
         initialValues={authorizationGroup}
-        title={`Authorization Group ${authorizationGroup.name}`}
+        title={`Community ${authorizationGroup.name}`}
+        hasReports={hasReports}
       />
     </div>
   )

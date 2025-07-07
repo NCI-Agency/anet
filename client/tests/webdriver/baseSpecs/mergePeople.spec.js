@@ -88,6 +88,46 @@ const EXAMPLE_PEOPLE = {
 }
 
 describe("Merge people who are both non-users", () => {
+  it("Should display a warning when leaving the page with unsaved changes", async() => {
+    await MergePeople.openPage()
+    await (await MergePeople.getTitle()).waitForExist()
+    await (await MergePeople.getTitle()).waitForDisplayed()
+    await (
+      await MergePeople.getLeftPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validLeft.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validLeft.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when only one person is selected, should allow to leave
+    await (await $("#anet-logo")).click()
+    // eslint-disable-next-line no-unused-expressions
+    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+
+    await MergePeople.openPage()
+    await (await MergePeople.getTitle()).waitForExist()
+    await (await MergePeople.getTitle()).waitForDisplayed()
+    await (
+      await MergePeople.getLeftPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validLeft.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validLeft.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
+    await (
+      await MergePeople.getRightPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validRight.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validRight.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when both people are selected, should show warning
+    await (await $("#anet-logo")).click()
+    const modalDialog = await $(".modal-dialog")
+    // eslint-disable-next-line no-unused-expressions
+    expect(await modalDialog.isExisting()).to.be.true
+    await $(".btn-danger").click()
+  })
   it("Should display fields values of the left person", async() => {
     // Open merge people page.
     await MergePeople.openPage()
@@ -158,9 +198,12 @@ describe("Merge people who are both non-users", () => {
     await MergePeople.waitForAdvancedSelectLoading(
       EXAMPLE_PEOPLE.validLeft.fullName
     )
-    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
-
-    await (await MergePeople.getSamePositionsToast()).waitForDisplayed()
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergePeople.getFirstItemRadioButtonFromAdvancedSelect()
+      ).isExisting()
+    ).to.be.false
   })
 
   it("Should display fields values of the right person", async() => {

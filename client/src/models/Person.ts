@@ -74,11 +74,15 @@ export default class Person extends Model {
         .boolean()
         .default(false)
         .label(Settings.fields.person.user?.label),
-      domainUsername: yup
-        .string()
+      users: yup
+        .array()
+        .of(
+          yup.object().shape({
+            address: yup.string().nullable()
+          })
+        )
         .nullable()
-        .default("")
-        .label(Settings.fields.person.domainUsername?.label),
+        .default([]),
       emailAddresses: yupEmailAddressesWithValidation(
         "emailAddress",
         "emailAddress error",
@@ -164,9 +168,9 @@ export default class Person extends Model {
 
   static autocompleteQuery =
     `uuid name rank status user endOfTourDate ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
-    " position { uuid name type role code status" +
+    ` position { uuid name type role code status ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
-    " location { uuid name } }"
+    ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} } }`
 
   static allFieldsQuery = `
     uuid
@@ -177,8 +181,10 @@ export default class Person extends Model {
     pendingVerification
     phoneNumber
     user
-    domainUsername
-    openIdSubject
+    users {
+      uuid
+      domainUsername
+    }
     biography
     obsoleteCountry
     country {
@@ -198,6 +204,7 @@ export default class Person extends Model {
       type
       superuserType
       role
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       organization {
         uuid
         shortName
@@ -210,6 +217,7 @@ export default class Person extends Model {
         name
         type
         role
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         person {
           uuid
           name
@@ -231,6 +239,7 @@ export default class Person extends Model {
       position {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         previousPeople {
           startTime
           endTime
@@ -347,7 +356,7 @@ export default class Person extends Model {
     if (this.rank) {
       return this.rank + " " + militaryName
     } else {
-      return militaryName || this.domainUsername || this.uuid
+      return militaryName || this.uuid
     }
   }
 

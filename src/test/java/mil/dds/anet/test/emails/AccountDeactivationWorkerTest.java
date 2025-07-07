@@ -13,6 +13,7 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.config.AnetDictionary;
@@ -166,7 +167,11 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
         new EmailAddress(Utils.getEmailNetworkForNotifications(), email);
     testPerson.setEmailAddresses(List.of(emailAddress));
     testPerson.setStatus(WithStatus.Status.ACTIVE);
-    testPerson.setDomainUsername(domainName);
+    final User testUser = new User();
+    testUser.setUuid(UUID.randomUUID().toString());
+    testUser.setDomainUsername(domainName);
+    testUser.setPersonUuid(testPerson.getUuid());
+    testPerson.setUsers(List.of(testUser));
     testPerson.setPosition(new Position());
     return testPerson;
   }

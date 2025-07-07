@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
+import { getChoices } from "components/App6Symbol"
 import Model from "components/Model"
 import { Organization } from "models"
-import Settings from "settings"
 import utils from "utils"
 import {
   createEmailAddresses,
@@ -109,9 +109,11 @@ async function createHierarchy(user, grow, args) {
         return
       }
     }
-    const app6values = Object.keys(
-      Settings.fields.organization[app6field].choices
-    )
+    const app6values = Object.keys(getChoices(app6field, org))
+    if (app6values.length === 0) {
+      // some combination might yield no choices for a certain field
+      app6values.push(null)
+    }
     org[app6field] = faker.helpers.arrayElement(app6values)
   }
 
@@ -162,14 +164,18 @@ async function createHierarchy(user, grow, args) {
         [0.5, 2],
         [0.5, 4]
       ])
-      setRandomApp6Value(org, "app6amplifier", [[0.95, null]])
     } else {
       setRandomApp6Value(org, "app6context", [[0.95, null]])
       setRandomApp6Value(org, "app6standardIdentity", [[0.95, null]])
       setRandomApp6Value(org, "app6symbolSet", [[0.95, null]])
       setRandomApp6Value(org, "app6hq", [[0.95, null]])
-      setRandomApp6Value(org, "app6amplifier", [[0.95, null]])
     }
+    setRandomApp6Value(org, "app6amplifier", [[0.95, null]])
+    setRandomApp6Value(org, "app6entity", [[0.5, null]])
+    setRandomApp6Value(org, "app6entityType", [[0.8, null]])
+    setRandomApp6Value(org, "app6entitySubtype", [[0.9, null]])
+    setRandomApp6Value(org, "app6sectorOneModifier", [[0.95, null]])
+    setRandomApp6Value(org, "app6sectorTwoModifier", [[0.95, null]])
 
     console.debug(
       `Creating ${level > 0 ? "sub-" : ""}organization ${org.longName.green} (${

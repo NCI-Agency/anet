@@ -43,7 +43,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       String.format("{ uuid shortName %1$s }", _ASSESSMENTS_FIELDS);
 
-  // The authorization groups defined in the dictionary give Erin read access and Jack write access;
+  // The communities defined in the dictionary give Erin read access and Jack write access;
   // these test objects can be used for the assessments authorization tests
   // Task EF 2
   private static final String TEST_TASK_EF2_UUID = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7";
@@ -198,7 +198,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantPersonAssessmentsEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for person through the AssessmentResource
     // methods, with
-    // empty write authorization groups defined in the dictionary
+    // empty write communities defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_TASK_2B_UUID);
   }
@@ -207,7 +207,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantPersonAssessmentsNoAuthGroups() {
     // Instant ('once') assessment tests for person through the AssessmentResource
     // methods, with no
-    // authorization groups defined in the dictionary
+    // communities defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_TASK_2B_UUID);
   }
@@ -223,7 +223,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantPersonAssessmentsViaReportEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for person through
-    // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
+    // ReportResource::updateReportAssessments, with empty write communities defined in the
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_TASK_2B_UUID);
@@ -232,7 +232,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantPersonAssessmentsViaReportNoAuthGroups() {
     // Instant ('once') assessment tests for person through
-    // ReportResource::updateReportAssessments, with no authorization groups defined in the
+    // ReportResource::updateReportAssessments, with no communities defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
         "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_TASK_2B_UUID);
@@ -249,7 +249,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantTaskAssessmentsEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for task through the AssessmentResource methods,
     // with empty
-    // write authorization groups defined in the dictionary
+    // write communities defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
         "fields.task.assessments.taskOnceReportNoWrite", false, TEST_TASK_2B_UUID);
   }
@@ -258,7 +258,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   void testInstantTaskAssessmentsNoAuthGroups() {
     // Instant ('once') assessment tests for task through the AssessmentResource methods,
     // with no
-    // authorization groups defined in the dictionary
+    // communities defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
         "fields.task.assessments.taskOnceReport", false, TEST_TASK_2B_UUID);
   }
@@ -274,7 +274,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantTaskAssessmentsViaReportEmptyWriteAuthGroups() {
     // Instant ('once') assessment tests for task through
-    // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
+    // ReportResource::updateReportAssessments, with empty write communities defined in the
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups(
         "testInstantTaskAssessmentsViaReportNoAuthGroups",
@@ -284,7 +284,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testInstantTaskAssessmentsViaReportNoAuthGroups() {
     // Instant ('once') assessment tests for task through
-    // ReportResource::updateReportAssessments, with no authorization groups defined in the
+    // ReportResource::updateReportAssessments, with no communities defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantTaskAssessmentsViaReportNoAuthGroups",
         "fields.task.assessments.taskOnceReport", false, TEST_TASK_2B_UUID);
@@ -343,12 +343,12 @@ class AssessmentResourceTest extends AbstractResourceTest {
         succeedAssessmentCreate(adminUser, testAssessmentInputAdmin);
 
     // - F: read it as someone not in the read and write auth.groups
-    final Person bobPerson = withCredentials(getBobBobtown().getDomainUsername(),
+    final Person bobPerson = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid));
     assertAssessments(bobPerson.getAssessments(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
-    final Person erinPerson = withCredentials(getRegularUser().getDomainUsername(),
+    final Person erinPerson = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid));
     final List<Assessment> testAssessments = erinPerson.getAssessments();
     assertAssessments(testAssessments, testAssessmentInputs, assessmentKey, 1);
@@ -387,7 +387,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(jackUser, updatedAssessmentAdmin);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputAdmin)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
 
@@ -395,14 +395,14 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(adminUser, updatedAssessmentJack);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputJack)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
 
   @Test
   void testOndemandAssessmentsEmptyWriteAuthGroups() {
-    // On-demand assessment tests, with empty write authorization groups defined in the
+    // On-demand assessment tests, with empty write communities defined in the
     // dictionary
     final String assessmentKey = "fields.regular.person.assessments.advisorOndemandNoWrite";
     final String recurrence = "ondemand";
@@ -448,7 +448,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testOndemandAssessmentsNoAuthGroups() {
-    // On-demand assessment tests, with no authorization groups defined in the dictionary
+    // On-demand assessment tests, with no communities defined in the dictionary
     final String assessmentKey = "fields.regular.person.assessments.advisorOndemand";
     final String recurrence = "ondemand";
 
@@ -491,28 +491,28 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
     // - F: create without relatedObjects
     AssessmentInput testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence);
-    failAssessmentCreate(getRegularUser().getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInputFail);
 
     // - F: create for a report
     final GenericRelatedObjectInput testReportNroInput =
         createAssessmentRelatedObject(ReportDao.TABLE_NAME, TEST_REPORT_UUID);
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
-    failAssessmentCreate(getRegularUser().getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInputFail);
 
     // - F: create for a report and a person
     final GenericRelatedObjectInput testInterlocutorNroInput =
         createAssessmentRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence,
         testReportNroInput, testInterlocutorNroInput);
-    failAssessmentCreate(getRegularUser().getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInputFail);
 
     // - S: create for a person as someone with counterpart not in the write auth.groups
     final AssessmentInput testAssessmentInput =
         createAssessment(assessmentKey, "erin", recurrence, testInterlocutorNroInput);
     final List<AssessmentInput> testAssessmentInputs = Lists.newArrayList(testAssessmentInput);
     final Assessment createdAssessment =
-        succeedAssessmentCreate(getRegularUser().getDomainUsername(), testAssessmentInput);
+        succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
 
     // - F: create for a person as someone without counterpart not in the write auth.groups
     testAssessmentInputFail =
@@ -534,12 +534,12 @@ class AssessmentResourceTest extends AbstractResourceTest {
         succeedAssessmentCreate(adminUser, testAssessmentInputAdmin);
 
     // - F: read it as someone not in the read and write auth.groups
-    final Person bobPerson = withCredentials(getBobBobtown().getDomainUsername(),
+    final Person bobPerson = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID));
     assertAssessments(bobPerson.getAssessments(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
-    final Person reinaPerson = withCredentials(getReinaReinton().getDomainUsername(),
+    final Person reinaPerson = withCredentials(getDomainUsername(getReinaReinton()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID));
     assertAssessments(reinaPerson.getAssessments(), testAssessmentInputs, assessmentKey, 1);
 
@@ -555,7 +555,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment =
-        succeedAssessmentUpdate(getRegularUser().getDomainUsername(), updatedAssessmentInput);
+        succeedAssessmentUpdate(getDomainUsername(getRegularUser()), updatedAssessmentInput);
 
     // - F: update it as someone without counterpart not in the write auth.groups
     final AssessmentInput updatedAssessmentInputReina = getAssessmentInput(createdAssessment);
@@ -584,9 +584,9 @@ class AssessmentResourceTest extends AbstractResourceTest {
     failAssessmentDelete("reina", updatedAssessment);
 
     // - S: delete it as someone with counterpart not in the write auth.groups
-    succeedAssessmentDelete(getRegularUser().getDomainUsername(), updatedAssessment);
+    succeedAssessmentDelete(getDomainUsername(getRegularUser()), updatedAssessment);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInput)).isTrue();
-    assertAssessments(withCredentials(getReinaReinton().getDomainUsername(),
+    assertAssessments(withCredentials(getDomainUsername(getReinaReinton()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
 
@@ -594,21 +594,21 @@ class AssessmentResourceTest extends AbstractResourceTest {
     // assessment author shouldn't matter
     succeedAssessmentDelete(jackUser, updatedAssessmentAdmin);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputAdmin)).isTrue();
-    assertAssessments(withCredentials(getReinaReinton().getDomainUsername(),
+    assertAssessments(withCredentials(getDomainUsername(getReinaReinton()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
 
     // - S: delete it as admin
     succeedAssessmentDelete(adminUser, updatedAssessmentJack);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputJack)).isTrue();
-    assertAssessments(withCredentials(getReinaReinton().getDomainUsername(),
+    assertAssessments(withCredentials(getDomainUsername(getReinaReinton()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
 
   @Test
   void testPeriodicPersonAssessmentsEmptyWriteAuthGroups() {
-    // Periodic assessment tests for person, with empty write authorization groups
+    // Periodic assessment tests for person, with empty write communities
     // defined in
     // the dictionary
     final String assessmentKey = "fields.regular.person.assessments.advisorQuarterlyNoWrite";
@@ -628,10 +628,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessment(assessmentKey, "erin", recurrence, testPersonNroInput);
     final List<AssessmentInput> testAssessmentInputs = Lists.newArrayList(testAssessmentInput);
     final Assessment createdAssessment =
-        succeedAssessmentCreate(getRegularUser().getDomainUsername(), testAssessmentInput);
+        succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
 
     // - S: read it with no read auth.groups defined in the dictionary
-    final Person andrewPerson = withCredentials(getAndrewAnderson().getDomainUsername(),
+    final Person andrewPerson = withCredentials(getDomainUsername(getAndrewAnderson()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID));
     assertAssessments(andrewPerson.getAssessments(), testAssessmentInputs, assessmentKey, 1);
 
@@ -650,7 +650,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment =
-        succeedAssessmentUpdate(getRegularUser().getDomainUsername(), updatedAssessmentInput);
+        succeedAssessmentUpdate(getDomainUsername(getRegularUser()), updatedAssessmentInput);
 
     // - F: delete it as someone without counterpart and with empty write auth.groups defined in the
     // dictionary
@@ -658,16 +658,16 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
     // - S: delete it as someone with counterpart and with empty write auth.groups defined in the
     // dictionary
-    succeedAssessmentDelete(getRegularUser().getDomainUsername(), updatedAssessment);
+    succeedAssessmentDelete(getDomainUsername(getRegularUser()), updatedAssessment);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInput)).isTrue();
-    assertAssessments(withCredentials(getAndrewAnderson().getDomainUsername(),
+    assertAssessments(withCredentials(getDomainUsername(getAndrewAnderson()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
 
   @Test
   void testPeriodicPersonAssessmentsNoAuthGroups() {
-    // Periodic assessment tests for person, with no authorization groups defined in the
+    // Periodic assessment tests for person, with no communities defined in the
     // dictionary
     final String assessmentKey = "fields.regular.person.assessments.interlocutorQuarterly";
     final String recurrence = "quarterly";
@@ -680,10 +680,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessment(assessmentKey, "andrew", recurrence, testPersonNroInput);
     final List<AssessmentInput> testAssessmentInputs = Lists.newArrayList(testAssessmentInput);
     final Assessment createdAssessment =
-        succeedAssessmentCreate(getRegularUser().getDomainUsername(), testAssessmentInput);
+        succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
 
     // - S: read it with no auth.groups defined in the dictionary
-    final Person andrewPerson = withCredentials(getAndrewAnderson().getDomainUsername(),
+    final Person andrewPerson = withCredentials(getDomainUsername(getAndrewAnderson()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID));
     assertAssessments(andrewPerson.getAssessments(), testAssessmentInputs, assessmentKey, 1);
 
@@ -696,13 +696,13 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment =
-        succeedAssessmentUpdate(getRegularUser().getDomainUsername(), updatedAssessmentInput);
+        succeedAssessmentUpdate(getDomainUsername(getRegularUser()), updatedAssessmentInput);
 
     // - S: delete it as someone without counterpart and with no auth.groups defined in the
     // dictionary
     succeedAssessmentDelete("andrew", updatedAssessment);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInput)).isTrue();
-    assertAssessments(withCredentials(getAndrewAnderson().getDomainUsername(),
+    assertAssessments(withCredentials(getDomainUsername(getAndrewAnderson()),
         t -> queryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
@@ -716,28 +716,28 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
     // - F: create without relatedObjects
     AssessmentInput testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence);
-    failAssessmentCreate(taskResponsible.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(taskResponsible), testAssessmentInputFail);
 
     // - F: create for a report
     final GenericRelatedObjectInput testReportNroInput =
         createAssessmentRelatedObject(ReportDao.TABLE_NAME, TEST_REPORT_UUID);
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
-    failAssessmentCreate(taskResponsible.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(taskResponsible), testAssessmentInputFail);
 
     // - F: create for a report and a task
     final GenericRelatedObjectInput testTaskNroInput =
         createAssessmentRelatedObject(TaskDao.TABLE_NAME, TEST_TASK_12A_UUID);
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput, testTaskNroInput);
-    failAssessmentCreate(taskResponsible.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(taskResponsible), testAssessmentInputFail);
 
     // - S: create for a task as someone with task permission not in the write auth.groups
     final AssessmentInput testAssessmentInput =
         createAssessment(assessmentKey, "andrew", recurrence, testTaskNroInput);
     final List<AssessmentInput> testAssessmentInputs = Lists.newArrayList(testAssessmentInput);
     final Assessment createdAssessment =
-        succeedAssessmentCreate(taskResponsible.getDomainUsername(), testAssessmentInput);
+        succeedAssessmentCreate(getDomainUsername(taskResponsible), testAssessmentInput);
 
     // - F: create for a task as someone without task permission not in the write auth.groups
     testAssessmentInputFail = createAssessment(assessmentKey, "erin", recurrence, testTaskNroInput);
@@ -758,12 +758,12 @@ class AssessmentResourceTest extends AbstractResourceTest {
         succeedAssessmentCreate(adminUser, testAssessmentInputAdmin);
 
     // - F: read it as someone not in the read and write auth.groups
-    final Task bobTask = withCredentials(getBobBobtown().getDomainUsername(),
+    final Task bobTask = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertAssessments(bobTask.getAssessments(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
-    final Task erinTask = withCredentials(getRegularUser().getDomainUsername(),
+    final Task erinTask = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertAssessments(erinTask.getAssessments(), testAssessmentInputs, assessmentKey, 1);
 
@@ -779,7 +779,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment =
-        succeedAssessmentUpdate(taskResponsible.getDomainUsername(), updatedAssessmentInput);
+        succeedAssessmentUpdate(getDomainUsername(taskResponsible), updatedAssessmentInput);
 
     // - F: update it as someone without task permission not in the write auth.groups
     final AssessmentInput updatedAssessmentInputErin = getAssessmentInput(createdAssessment);
@@ -808,10 +808,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
     failAssessmentDelete("erin", createdAssessment);
 
     // - S: delete it as someone with task permission not in the write auth.groups
-    succeedAssessmentDelete(taskResponsible.getDomainUsername(), updatedAssessment);
+    succeedAssessmentDelete(getDomainUsername(taskResponsible), updatedAssessment);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInput)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
 
@@ -820,7 +820,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(jackUser, updatedAssessmentAdmin);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputAdmin)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
 
@@ -828,14 +828,14 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(adminUser, updatedAssessmentJack);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputJack)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
 
   @Test
   void testPeriodicTaskAssessmentsEmptyWriteAuthGroups() {
-    // Periodic assessment tests for task, with empty write authorization groups defined
+    // Periodic assessment tests for task, with empty write communities defined
     // in the
     // dictionary
     final String assessmentKey = "fields.task.assessments.taskSemiannuallyNoWrite";
@@ -856,10 +856,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessment(assessmentKey, "andrew", recurrence, testTaskNroInput);
     final List<AssessmentInput> testAssessmentInputs = Lists.newArrayList(testAssessmentInput);
     final Assessment createdAssessment =
-        succeedAssessmentCreate(taskResponsible.getDomainUsername(), testAssessmentInput);
+        succeedAssessmentCreate(getDomainUsername(taskResponsible), testAssessmentInput);
 
     // - S: read it with no read auth.groups defined in the dictionary
-    final Task erinTask = withCredentials(getRegularUser().getDomainUsername(),
+    final Task erinTask = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertAssessments(erinTask.getAssessments(), testAssessmentInputs, assessmentKey, 1);
 
@@ -878,7 +878,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment =
-        succeedAssessmentUpdate(taskResponsible.getDomainUsername(), updatedAssessmentInput);
+        succeedAssessmentUpdate(getDomainUsername(taskResponsible), updatedAssessmentInput);
 
     // - F: delete it as someone without task permission and with empty write auth.groups defined in
     // the dictionary
@@ -886,17 +886,17 @@ class AssessmentResourceTest extends AbstractResourceTest {
 
     // - S: delete it as someone with task permission and with empty write auth.groups defined in
     // the dictionary
-    succeedAssessmentDelete(taskResponsible.getDomainUsername(), updatedAssessment);
+    succeedAssessmentDelete(getDomainUsername(taskResponsible), updatedAssessment);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInput)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
 
   @Test
   void testPeriodicTaskAssessmentsNoAuthGroups() {
-    // Periodic assessment tests for task, with no authorization groups defined in the
+    // Periodic assessment tests for task, with no communities defined in the
     // dictionary
     final String assessmentKey = "fields.task.assessments.taskMonthly";
     final String recurrence = "monthly";
@@ -911,7 +911,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final Assessment createdAssessment = succeedAssessmentCreate("erin", testAssessmentInput);
 
     // - S: read it with no auth.groups defined in the dictionary
-    final Task erinTask = withCredentials(getRegularUser().getDomainUsername(),
+    final Task erinTask = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertAssessments(erinTask.getAssessments(), testAssessmentInputs, assessmentKey, 1);
 
@@ -930,7 +930,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete("erin", updatedAssessment);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInput)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 1);
   }
@@ -949,48 +949,48 @@ class AssessmentResourceTest extends AbstractResourceTest {
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
-    final Report createdReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
 
     // - F: create without relatedObjects
     AssessmentInput testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create for a report
     final GenericRelatedObjectInput testReportNroInput =
         createAssessmentRelatedObject(ReportDao.TABLE_NAME, reportUuid);
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create for a person
     final GenericRelatedObjectInput testAdvisorNroInput =
         createAssessmentRelatedObject(PersonDao.TABLE_NAME, reportAuthor.getUuid());
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testAdvisorNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create for a task
     final GenericRelatedObjectInput testTaskNroInput =
         createAssessmentRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence, testTaskNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create for two reports
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput, testReportNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create for a person and a task
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testAdvisorNroInput, testTaskNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create for a report, a person and a task
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence,
         testReportNroInput, testAdvisorNroInput, testTaskNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - F: create as non-author for a report and a person
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence,
@@ -1002,7 +1002,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessmentRelatedObject(ReportDao.TABLE_NAME, "non-existing");
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence,
         testInvalidReportNroInput, forPerson ? testAdvisorNroInput : testTaskNroInput);
-    failAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputFail);
+    failAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputFail);
 
     // - S: create as author for a report and a person/task
     final AssessmentInput testAssessmentInputAuthor = createAssessment(assessmentKey, "author",
@@ -1010,7 +1010,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> testAssessmentInputs =
         Lists.newArrayList(testAssessmentInputAuthor);
     final Assessment createdAssessmentAuthor =
-        succeedAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputAuthor);
+        succeedAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputAuthor);
 
     // - S: create as someone else in the write auth.groups
     final AssessmentInput testAssessmentInputJack = createAssessment(assessmentKey, "jack",
@@ -1027,18 +1027,18 @@ class AssessmentResourceTest extends AbstractResourceTest {
         succeedAssessmentCreate(adminUser, testAssessmentInputAdmin);
 
     // - S: read it as author
-    final Report updatedReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report updatedReport = withCredentials(getDomainUsername(reportAuthor),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     final List<Assessment> testAssessments = updatedReport.getAssessments();
     assertAssessments(testAssessments, testAssessmentInputs, assessmentKey, 2);
 
     // - S: read it as someone else in the read auth.groups
-    final Report erinReport = withCredentials(getRegularUser().getDomainUsername(),
+    final Report erinReport = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertAssessments(erinReport.getAssessments(), testAssessmentInputs, assessmentKey, 2);
 
     // - F: read it as someone else not in the read and write auth.groups
-    final Report bobReport = withCredentials(getBobBobtown().getDomainUsername(),
+    final Report bobReport = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertAssessments(bobReport.getAssessments(), Collections.emptyList(), assessmentKey, 2);
 
@@ -1061,7 +1061,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInputAuthor);
     final Assessment updatedAssessmentAuthor =
-        succeedAssessmentUpdate(reportAuthor.getDomainUsername(), updatedAssessmentInputAuthor);
+        succeedAssessmentUpdate(getDomainUsername(reportAuthor), updatedAssessmentInputAuthor);
 
     // - S: update it as someone else in the write auth.groups
     // assessment author shouldn't matter
@@ -1084,10 +1084,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
     failAssessmentDelete("erin", updatedAssessmentAuthor);
 
     // - S: delete it as author
-    succeedAssessmentDelete(reportAuthor.getDomainUsername(), updatedAssessmentAuthor);
+    succeedAssessmentDelete(getDomainUsername(reportAuthor), updatedAssessmentAuthor);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputAuthor)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
@@ -1096,7 +1096,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(jackUser, updatedAssessmentAdmin);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputAdmin)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
@@ -1104,12 +1104,12 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(adminUser, updatedAssessmentJack);
     assertThat(updatedAssessmentsInput.remove(updatedAssessmentInputJack)).isTrue();
     assertAssessments(
-        withCredentials(getRegularUser().getDomainUsername(),
+        withCredentials(getDomainUsername(getRegularUser()),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
     // Delete the test report
-    withCredentials(reportAuthor.getDomainUsername(),
+    withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
   }
 
@@ -1127,7 +1127,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
-    final Report createdReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
 
     // - S: create as author for a report and a person
@@ -1142,7 +1142,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> testAssessmentInputs =
         Lists.newArrayList(testAssessmentInputAuthor);
     final Assessment createdAssessmentAuthor =
-        succeedAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputAuthor);
+        succeedAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputAuthor);
     assertAssessments(
         withCredentials(jackUser, t -> queryExecutor.report(REPORT_FIELDS, createdReport.getUuid()))
             .getAssessments(),
@@ -1158,7 +1158,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     failAssessmentDelete(jackUser, createdAssessmentAuthor);
 
     // - S: delete it as author
-    succeedAssessmentDelete(reportAuthor.getDomainUsername(), createdAssessmentAuthor);
+    succeedAssessmentDelete(getDomainUsername(reportAuthor), createdAssessmentAuthor);
     testAssessmentInputs.remove(testAssessmentInputAuthor);
     assertAssessments(
         withCredentials(jackUser, t -> queryExecutor.report(REPORT_FIELDS, createdReport.getUuid()))
@@ -1166,7 +1166,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         testAssessmentInputs, assessmentKey, 2);
 
     // Delete the test report
-    withCredentials(reportAuthor.getDomainUsername(),
+    withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", createdReport.getUuid()));
   }
 
@@ -1184,7 +1184,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
-    final Report createdReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
 
     // - S: create as author for a report and a person
@@ -1199,7 +1199,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<AssessmentInput> testAssessmentInputs =
         Lists.newArrayList(testAssessmentInputAuthor);
     final Assessment createdAssessmentAuthor =
-        succeedAssessmentCreate(reportAuthor.getDomainUsername(), testAssessmentInputAuthor);
+        succeedAssessmentCreate(getDomainUsername(reportAuthor), testAssessmentInputAuthor);
     assertAssessments(
         withCredentials(jackUser, t -> queryExecutor.report(REPORT_FIELDS, createdReport.getUuid()))
             .getAssessments(),
@@ -1215,7 +1215,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedAssessmentDelete(jackUser, createdAssessmentAuthor);
 
     // Delete the test report
-    withCredentials(reportAuthor.getDomainUsername(),
+    withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", createdReport.getUuid()));
   }
 
@@ -1234,16 +1234,16 @@ class AssessmentResourceTest extends AbstractResourceTest {
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
-    final Report createdReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
-    final int nrSubmitted = withCredentials(reportAuthor.getDomainUsername(),
+    final int nrSubmitted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.submitReport("", reportUuid));
     assertThat(nrSubmitted).isOne();
 
     // - F: create without relatedObjects
     AssessmentInput testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for a report
@@ -1251,7 +1251,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessmentRelatedObject(ReportDao.TABLE_NAME, reportUuid);
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for a person
@@ -1259,32 +1259,32 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessmentRelatedObject(PersonDao.TABLE_NAME, reportAuthor.getUuid());
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testAdvisorNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for a task
     final GenericRelatedObjectInput testTaskNroInput =
         createAssessmentRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence, testTaskNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for two reports
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput, testReportNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for a person and a task
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testAdvisorNroInput, testTaskNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for a report, a person and a task
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence,
         testReportNroInput, testAdvisorNroInput, testTaskNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create as non-author for a report and a person
@@ -1297,7 +1297,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         createAssessmentRelatedObject(ReportDao.TABLE_NAME, "non-existing");
     testAssessmentInputFail = createAssessment(assessmentKey, "test", recurrence,
         testInvalidReportNroInput, forPerson ? testAdvisorNroInput : testTaskNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputFail);
 
     // - F: create for a report and a person/task, against a non-existing report
@@ -1305,20 +1305,20 @@ class AssessmentResourceTest extends AbstractResourceTest {
         recurrence, testReportNroInput, forPerson ? testAdvisorNroInput : testTaskNroInput);
     testAssessmentInputFail =
         createAssessment(assessmentKey, "test", recurrence, testInvalidReportNroInput);
-    failUpdateReportAssessments(reportAuthor.getDomainUsername(), "non-existing",
+    failUpdateReportAssessments(getDomainUsername(reportAuthor), "non-existing",
         testAssessmentInputFail);
 
     // - S: create as author for a report and a person
     final List<AssessmentInput> testAssessmentInputs =
         Lists.newArrayList(testAssessmentInputAuthor);
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputAuthor);
 
     // - S: create as approver
     final AssessmentInput testAssessmentInputApprover = createAssessment(assessmentKey, "approver",
         recurrence, testReportNroInput, testAdvisorNroInput);
     testAssessmentInputs.add(testAssessmentInputApprover);
-    succeedUpdateReportAssessments(reportApprover.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportApprover), reportUuid,
         testAssessmentInputAuthor, testAssessmentInputApprover);
 
     // - S: create as someone else in the write auth.groups
@@ -1336,23 +1336,23 @@ class AssessmentResourceTest extends AbstractResourceTest {
         testAssessmentInputApprover, testAssessmentInputJack, testAssessmentInputAdmin);
 
     // - S: read it as author
-    final Report updatedReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report updatedReport = withCredentials(getDomainUsername(reportAuthor),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     final List<Assessment> testAssessments = updatedReport.getAssessments();
     assertAssessments(testAssessments, testAssessmentInputs, assessmentKey, 2);
 
     // - S: read it as approver
-    final Report approverReport = withCredentials(reportApprover.getDomainUsername(),
+    final Report approverReport = withCredentials(getDomainUsername(reportApprover),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertAssessments(approverReport.getAssessments(), testAssessmentInputs, assessmentKey, 2);
 
     // - S: read it as someone else in the read auth.groups
-    final Report erinReport = withCredentials(getRegularUser().getDomainUsername(),
+    final Report erinReport = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertAssessments(erinReport.getAssessments(), testAssessmentInputs, assessmentKey, 2);
 
     // - F: read it as someone else not in the read and write auth.groups
-    final Report bobReport = withCredentials(getBobBobtown().getDomainUsername(),
+    final Report bobReport = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertAssessments(bobReport.getAssessments(), Collections.emptyList(), assessmentKey, 2);
 
@@ -1370,7 +1370,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInputAuthor = createdAssessmentsInput.get(0);
     updatedAssessmentInputAuthor
         .setAssessmentValues(createAssessmentValues("updated by author", recurrence));
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         Iterables.toArray(createdAssessmentsInput, AssessmentInput.class));
 
     // - S: update it as approver
@@ -1378,7 +1378,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInputApprover = createdAssessmentsInput.get(2);
     updatedAssessmentInputApprover
         .setAssessmentValues(createAssessmentValues("updated by approver", recurrence));
-    succeedUpdateReportAssessments(reportApprover.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportApprover), reportUuid,
         Iterables.toArray(createdAssessmentsInput, AssessmentInput.class));
 
     // - S: update it as someone else in the write auth.groups
@@ -1399,25 +1399,25 @@ class AssessmentResourceTest extends AbstractResourceTest {
     failUpdateReportAssessments("erin", reportUuid);
 
     // - S: delete it as author
-    final List<Assessment> updatedAssessments = withCredentials(reportAuthor.getDomainUsername(),
+    final List<Assessment> updatedAssessments = withCredentials(getDomainUsername(reportAuthor),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments();
     final List<AssessmentInput> updatedAssessmentsInput = getAssessmentsInput(updatedAssessments);
     Collections.reverse(updatedAssessmentsInput);
     assertThat(updatedAssessmentsInput.remove(0)).isNotNull();
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         Iterables.toArray(updatedAssessmentsInput, AssessmentInput.class));
     assertAssessments(
-        withCredentials(reportAuthor.getDomainUsername(),
+        withCredentials(getDomainUsername(reportAuthor),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
     // - S: delete it as approver
     // assessment author shouldn't matter
     assertThat(updatedAssessmentsInput.remove(2)).isNotNull();
-    succeedUpdateReportAssessments(reportApprover.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportApprover), reportUuid,
         Iterables.toArray(updatedAssessmentsInput, AssessmentInput.class));
     assertAssessments(
-        withCredentials(reportAuthor.getDomainUsername(),
+        withCredentials(getDomainUsername(reportAuthor),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
@@ -1426,7 +1426,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedUpdateReportAssessments(jackUser, reportUuid,
         Iterables.toArray(updatedAssessmentsInput, AssessmentInput.class));
     assertAssessments(
-        withCredentials(reportAuthor.getDomainUsername(),
+        withCredentials(getDomainUsername(reportAuthor),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
@@ -1435,18 +1435,18 @@ class AssessmentResourceTest extends AbstractResourceTest {
     succeedUpdateReportAssessments(adminUser, reportUuid,
         Iterables.toArray(updatedAssessmentsInput, AssessmentInput.class));
     assertAssessments(
-        withCredentials(reportAuthor.getDomainUsername(),
+        withCredentials(getDomainUsername(reportAuthor),
             t -> queryExecutor.report(REPORT_FIELDS, reportUuid)).getAssessments(),
         updatedAssessmentsInput, assessmentKey, 2);
 
     // Get the test report
-    final Report report = withCredentials(reportAuthor.getDomainUsername(),
+    final Report report = withCredentials(getDomainUsername(reportAuthor),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
-    withCredentials(reportAuthor.getDomainUsername(),
+    withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
     // Then delete it
-    final int nrDeleted = withCredentials(reportAuthor.getDomainUsername(),
+    final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
     assertThat(nrDeleted).isOne();
   }
@@ -1465,10 +1465,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
-    final Report createdReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
-    final int nrSubmitted = withCredentials(reportAuthor.getDomainUsername(),
+    final int nrSubmitted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.submitReport("", reportUuid));
     assertThat(nrSubmitted).isOne();
 
@@ -1483,7 +1483,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         recurrence, testReportNroInput, forPerson ? testInterlocutorNroInput : testTaskNroInput);
     final List<AssessmentInput> testAssessmentInputs =
         Lists.newArrayList(testAssessmentInputAuthor);
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputAuthor);
 
     // - S: read it as someone else with no read auth.groups defined in the dictionary
@@ -1504,7 +1504,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     failUpdateReportAssessments(jackUser, reportUuid);
 
     // - S: delete it as author
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid);
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid);
     testAssessmentInputs.remove(testAssessmentInputAuthor);
     assertAssessments(
         withCredentials(jackUser, t -> queryExecutor.report(REPORT_FIELDS, reportUuid))
@@ -1512,13 +1512,13 @@ class AssessmentResourceTest extends AbstractResourceTest {
         testAssessmentInputs, assessmentKey, 2);
 
     // Get the test report
-    final Report report = withCredentials(reportAuthor.getDomainUsername(),
+    final Report report = withCredentials(getDomainUsername(reportAuthor),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
-    withCredentials(reportAuthor.getDomainUsername(),
+    withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
     // Then delete it
-    final int nrDeleted = withCredentials(reportAuthor.getDomainUsername(),
+    final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
     assertThat(nrDeleted).isOne();
   }
@@ -1537,10 +1537,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
-    final Report createdReport = withCredentials(reportAuthor.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
-    final int nrSubmitted = withCredentials(reportAuthor.getDomainUsername(),
+    final int nrSubmitted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.submitReport("", reportUuid));
     assertThat(nrSubmitted).isOne();
 
@@ -1555,7 +1555,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         recurrence, testReportNroInput, forPerson ? testInterlocutorNroInput : testTaskNroInput);
     final List<AssessmentInput> testAssessmentInputs =
         Lists.newArrayList(testAssessmentInputAuthor);
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid,
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
         testAssessmentInputAuthor);
 
     // - S: read it as someone else with no auth.groups defined in the dictionary
@@ -1573,7 +1573,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         Iterables.toArray(updatedAssessmentsInput, AssessmentInput.class));
 
     // - S: delete it as someone else with no auth.groups defined in the dictionary
-    succeedUpdateReportAssessments(reportAuthor.getDomainUsername(), reportUuid);
+    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid);
     testAssessmentInputs.remove(testAssessmentInputAuthor);
     assertAssessments(
         withCredentials(jackUser, t -> queryExecutor.report(REPORT_FIELDS, reportUuid))
@@ -1581,13 +1581,13 @@ class AssessmentResourceTest extends AbstractResourceTest {
         testAssessmentInputs, assessmentKey, 2);
 
     // Get the test report
-    final Report report = withCredentials(reportAuthor.getDomainUsername(),
+    final Report report = withCredentials(getDomainUsername(reportAuthor),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
-    withCredentials(reportAuthor.getDomainUsername(),
+    withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
     // Then delete it
-    final int nrDeleted = withCredentials(reportAuthor.getDomainUsername(),
+    final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
     assertThat(nrDeleted).isOne();
   }

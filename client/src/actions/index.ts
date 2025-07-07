@@ -36,7 +36,7 @@ export const SEARCH_OBJECT_LABELS = {
   [SEARCH_OBJECT_TYPES.POSITIONS]: "Positions",
   [SEARCH_OBJECT_TYPES.LOCATIONS]: "Locations",
   [SEARCH_OBJECT_TYPES.TASKS]: pluralize(Settings.fields.task.shortLabel),
-  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: "Authorization Groups",
+  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: "Communities",
   [SEARCH_OBJECT_TYPES.ATTACHMENTS]: "Attachments",
   [SEARCH_OBJECT_TYPES.EVENTS]: "Events"
 }

@@ -22,7 +22,7 @@ const ANET_OBJECT_TYPES = {
   Objectives: {
     sampleFilters: ["Within Organization"]
   },
-  "Authorization Groups": {
+  Communities: {
     sampleFilters: []
   },
   Attachments: {

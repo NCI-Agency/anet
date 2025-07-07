@@ -35,7 +35,7 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
       final MartImportedReportSearchQueryInput query = MartImportedReportSearchQueryInput.builder()
           .withPageNum(0).withPageSize(0).withSortBy(MartImportedReportSearchSortBy.RECEIVED_AT)
           .withSortOrder(SortOrder.DESC).build();
-      final var martImportedReports = withCredentials(user.getDomainUsername(),
+      final var martImportedReports = withCredentials(getDomainUsername(user),
           t -> queryExecutor.martImportedReportList(getListFields(
               "{ sequence person { uuid } report { uuid } receivedAt submittedAt state errors }"),
               query));
@@ -59,7 +59,7 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
           MartImportedReportSearchQueryInput.builder().withReportUuid(REPORT_UUID).withPageNum(0)
               .withPageSize(0).withSortBy(MartImportedReportSearchSortBy.RECEIVED_AT)
               .withSortOrder(SortOrder.DESC).build();
-      final var martImportedReports = withCredentials(user.getDomainUsername(),
+      final var martImportedReports = withCredentials(getDomainUsername(user),
           t -> queryExecutor.martImportedReportList(getListFields(
               "{ sequence person { uuid } report { uuid } receivedAt submittedAt state errors }"),
               query));

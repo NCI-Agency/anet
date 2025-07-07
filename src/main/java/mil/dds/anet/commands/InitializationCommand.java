@@ -9,6 +9,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -114,13 +115,18 @@ public class InitializationCommand {
     adminPos.setRole(Position.PositionRole.MEMBER);
     adminPos = engine.getPositionDao().insert(adminPos);
 
-    // Create admin user
+    // Create admin person
     Person admin = new Person();
     admin.setName(adminFullName);
-    admin.setDomainUsername(adminDomainUsername);
     admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
+
+    // Create admin user
+    User user = new User();
+    user.setDomainUsername(adminDomainUsername);
+    user.setPersonUuid(admin.getUuid());
+    engine.getUserDao().insert(user);
 
     // Create default approval workflow
     final ApprovalStep defaultStep = new ApprovalStep();
@@ -137,12 +143,6 @@ public class InitializationCommand {
     // Set Default Approval Chain.
     saveAdminSetting(engine, AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION,
         defaultApprovalOrgUuid);
-
-    // Set contact email as default
-    saveAdminSetting(engine, AdminSettingKeys.CONTACT_EMAIL, "team-anet@example.com");
-
-    // Set help link url as default
-    saveAdminSetting(engine, AdminSettingKeys.HELP_LINK_URL, "https://google.com");
 
     // Set empty external documentation link text
     saveAdminSetting(engine, AdminSettingKeys.EXTERNAL_DOCUMENTATION_LINK_TEXT, "");
@@ -162,8 +162,11 @@ public class InitializationCommand {
     // Set daily rollup max report age days as default
     saveAdminSetting(engine, AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, "14");
 
-    // Set empty unlimited exports authorization group
-    saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_AUTHORIZATION_GROUP, "");
+    // Set empty unlimited exports community
+    saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_COMMUNITY, "");
+
+    // Set empty help text
+    saveAdminSetting(engine, AdminSettingKeys.HELP_TEXT, "");
   }
 
   private void saveAdminSetting(final AnetObjectEngine engine, final AdminSettingKeys key,

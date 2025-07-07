@@ -899,7 +899,7 @@ hr.assignModalSplit {
   font-size: 2rem;
 }
 
-.help-page h4 {
+.help-page h2 {
   margin-top: 5rem;
 }
 
@@ -961,6 +961,13 @@ header.searchPagination {
   overflow-y: scroll;
 }
 
+#taskUuid-popover, #parentTaskUuid-popover {
+  min-width: 50vw;
+  & .bp5-icon {
+    color: #5f6b7c;
+  }
+}
+
 .advanced-search {
   padding: 15px;
 }
@@ -1007,6 +1014,45 @@ header.searchPagination {
 .scroll-anchor-container {
   /* trick so we don't have no man's land between two scroll anchor containers */
   padding-bottom: 1px;
+}
+
+.integer-input {
+  width: 5rem;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+
+  input {
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:focus-visible {
+      border-color: #86b7fe;
+      outline: none;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+  }
+
+  .integer-input-buttons {
+    position: absolute;
+    right: 5px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    button {
+      padding: 0;
+      min-width: 15px;
+      min-height: 15px;
+      line-height: 15px;
+    }
+  }
 }
 
 @keyframes flash {

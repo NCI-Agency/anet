@@ -43,6 +43,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             }
             ... on Location {
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Organization {
               shortName
@@ -58,6 +59,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             ... on Position {
               type
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Report {
               intent

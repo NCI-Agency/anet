@@ -1,5 +1,10 @@
 import { gql } from "@apollo/client"
-import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
+import {
+  Button as BlueprintButton,
+  Classes as BlueprintClasses,
+  Popover,
+  PopoverInteractionKind
+} from "@blueprintjs/core"
 import API from "api"
 import classNames from "classnames"
 import Model from "components/Model"
@@ -97,10 +102,11 @@ export interface AdvancedSelectProps {
   extraAddon?: React.ReactNode
   value?: any | any[]
   valueKey?: string
+  disabledValue?: any | any[]
   renderSelected?: React.ReactElement
   overlayTable?: React.ReactElement // how to render the selected items
   overlayColumns: string[] // search results component for in the overlay
-  overlayRenderRow: (...args: unknown[]) => unknown
+  overlayRenderRow?: (...args: unknown[]) => unknown
   closeOverlayOnAdd?: boolean // set to true if you want the overlay to be closed after an add action
   filterDefs: any
   onChange?: (...args: unknown[]) => unknown // config of the search filters
@@ -110,9 +116,11 @@ export interface AdvancedSelectProps {
   queryParams?: any
   // Optional: GraphQL string of fields to return from search.
   fields?: string
+  showDismiss?: boolean
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
   createEntityComponent?: (...args: unknown[]) => React.ReactNode
+  autoComplete?: string
 }
 
 const AdvancedSelect = ({
@@ -127,6 +135,7 @@ const AdvancedSelect = ({
   extraAddon,
   value,
   valueKey = "uuid",
+  disabledValue,
   renderSelected,
   overlayTable: OverlayTable,
   overlayColumns,
@@ -137,9 +146,11 @@ const AdvancedSelect = ({
   objectType,
   queryParams,
   fields,
+  showDismiss,
   handleAddItem,
   handleRemoveItem,
-  createEntityComponent
+  createEntityComponent,
+  autoComplete
 }: AdvancedSelectProps) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
@@ -307,77 +318,101 @@ const AdvancedSelect = ({
               <Popover
                 popoverClassName="advanced-select-popover bp5-popover-content-sizing"
                 content={
-                  <Row id={`${fieldName}-popover`} className="border-between">
-                    {(showCreateEntityComponent && (
-                      <Col md="12">
-                        {createEntityComponent(searchTerms, setDoReset)}
-                      </Col>
-                    )) || (
-                      <>
-                        <FilterAsNav
-                          items={filterDefs}
-                          currentFilter={filterType}
-                          handleOnClick={changeFilterType}
-                        />
-
-                        <FilterAsDropdown
-                          items={filterDefs}
-                          handleOnChange={handleOnChangeSelect}
-                        />
-
-                        <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
-                          <OverlayTable
-                            fieldName={fieldName}
-                            items={items}
-                            pageNum={pageNum}
-                            selectedItems={value}
-                            valueKey={valueKey}
-                            handleAddItem={item => {
-                              handleAddItem(item)
-                              if (closeOverlayOnAdd) {
-                                setDoReset(true)
-                              }
-                            }}
-                            handleRemoveItem={handleRemoveItem}
-                            objectType={objectType}
-                            columns={[""].concat(overlayColumns)}
-                            renderRow={overlayRenderRow}
-                            isLoading={isLoading}
-                            loaderMessage={
-                              <div style={{ width: "300px" }}>
-                                <div>No results found.</div>
-                                {createEntityComponent && (
-                                  <div>
-                                    <Button
-                                      id="createEntityLink"
-                                      onClick={() =>
-                                        setShowCreateEntityComponent(true)}
-                                    >
-                                      Create a new {fieldName}
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
-                            }
-                          />
-                          <UltimatePagination
-                            Component="footer"
-                            componentClassName="searchPagination"
-                            className="float-end"
-                            pageNum={pageNum}
-                            pageSize={pageSize}
-                            totalCount={totalCount}
-                            goToPage={goToPage}
-                          />
-                        </Col>
-                      </>
+                  <div
+                    style={{
+                      position: showDismiss && "relative",
+                      padding: showDismiss && "10px"
+                    }}
+                  >
+                    {showDismiss && (
+                      <BlueprintButton
+                        icon="cross"
+                        variant="minimal"
+                        onClick={() => setDoReset(true)}
+                        className={BlueprintClasses.POPOVER_DISMISS}
+                        style={{
+                          position: "absolute",
+                          top: "5px",
+                          right: "5px",
+                          zIndex: 10
+                        }}
+                      />
                     )}
-                  </Row>
+                    <Row id={`${fieldName}-popover`} className="border-between">
+                      {(showCreateEntityComponent && (
+                        <Col md="12">
+                          {createEntityComponent(searchTerms, setDoReset)}
+                        </Col>
+                      )) || (
+                        <>
+                          <FilterAsNav
+                            items={filterDefs}
+                            currentFilter={filterType}
+                            handleOnClick={changeFilterType}
+                          />
+                          <FilterAsDropdown
+                            items={filterDefs}
+                            handleOnChange={handleOnChangeSelect}
+                          />
+                          <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
+                            <OverlayTable
+                              fieldName={fieldName}
+                              items={items}
+                              pageNum={pageNum}
+                              selectedItems={value}
+                              disabledItems={disabledValue}
+                              valueKey={valueKey}
+                              handleAddItem={item => {
+                                handleAddItem(item)
+                                if (closeOverlayOnAdd) {
+                                  setDoReset(true)
+                                }
+                              }}
+                              handleRemoveItem={handleRemoveItem}
+                              objectType={objectType}
+                              columns={[""].concat(overlayColumns)}
+                              renderRow={overlayRenderRow}
+                              isLoading={isLoading}
+                              loaderMessage={
+                                <div style={{ width: "300px" }}>
+                                  <div>No results found.</div>
+                                  {createEntityComponent && (
+                                    <div>
+                                      <Button
+                                        id="createEntityLink"
+                                        onClick={() =>
+                                          setShowCreateEntityComponent(true)}
+                                      >
+                                        Create a new {fieldName}
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              }
+                            />
+                            <UltimatePagination
+                              Component="footer"
+                              componentClassName="searchPagination"
+                              className="float-end"
+                              pageNum={pageNum}
+                              pageSize={pageSize}
+                              totalCount={totalCount}
+                              goToPage={goToPage}
+                            />
+                          </Col>
+                        </>
+                      )}
+                    </Row>
+                  </div>
                 }
                 isOpen={showOverlay}
                 captureDismiss
                 disabled={disabled}
-                interactionKind={PopoverInteractionKind.CLICK}
+                interactionKind={
+                  showDismiss
+                    ? PopoverInteractionKind.CLICK_TARGET_ONLY
+                    : PopoverInteractionKind.CLICK
+                }
                 onInteraction={handleInteraction}
                 usePortal
                 autoFocus={false}
@@ -398,6 +433,7 @@ const AdvancedSelect = ({
                 <InputGroup>
                   <Form.Control
                     name={fieldName}
+                    autoComplete={autoComplete}
                     value={searchTerms || ""}
                     placeholder={placeholder}
                     onChange={changeSearchTerms}

@@ -1,7 +1,6 @@
 package mil.dds.anet;
 
 import graphql.GraphQLContext;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,7 @@ import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.UserActivityDao;
+import mil.dds.anet.database.UserDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -166,6 +166,10 @@ public class AnetObjectEngine {
 
   public AssessmentDao getAssessmentDao() {
     return ApplicationContextProvider.getBean(AssessmentDao.class);
+  }
+
+  public UserDao getUserDao() {
+    return ApplicationContextProvider.getBean(UserDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,
@@ -325,10 +329,10 @@ public class AnetObjectEngine {
 
   public GraphQLContext getContext() {
     if (context == null) {
-      final Map<String, Object> ctx = new HashMap<>();
-      // FIXME: create this per (non-GraphQL) request, and make it batch and cache?
       final BatchingUtils batchingUtils = new BatchingUtils(this, false, false);
-      ctx.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
+      final Map<String, Object> ctx = Map.of( // -
+          "dataLoaderRegistry", batchingUtils.getDataLoaderRegistry(), // -
+          "principal", Person.SYSTEM_USER);
       context = ThreadLocal.withInitial(() -> GraphQLContext.of(ctx));
     }
     return context.get();

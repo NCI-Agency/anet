@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import App6SymbolPreview from "components/App6SymbolPreview"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -24,6 +25,7 @@ const GQL_LOCATION_FIELDS = `
     uuid
     name
     type
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_ORGANIZATION_FIELDS = `
@@ -52,6 +54,7 @@ const GQL_POSITION_FIELDS = `
     status
     type
     role
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_GET_ORGANIZATION = gql`
@@ -65,6 +68,11 @@ const GQL_GET_ORGANIZATION = gql`
       app6symbolSet
       app6hq
       app6amplifier
+      app6entity
+      app6entityType
+      app6entitySubtype
+      app6sectorOneModifier
+      app6sectorTwoModifier
       emailAddresses {
         network
         address
@@ -142,8 +150,6 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
   const organization = new Organization(
     data.organization ? data.organization : {}
   )
-  const { parentContext, parentStandardIdentity, parentSymbolSet } =
-    Organization.getApp6ParentFields(organization, organization)
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -156,6 +162,7 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
             avatar={organization.entityAvatar}
             defaultAvatar={Organization.relatedObjectType}
           />
+          <App6SymbolPreview values={organization} size={120} maxHeight={200} />
         </div>
 
         <DictionaryField
@@ -247,87 +254,6 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
             value={<RichTextEditor readOnly value={organization.profile} />}
           />
         )}
-      </div>
-
-      <h4>APP-06 symbology</h4>
-      <div className="preview-section">
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.organization.app6context}
-          value={
-            (parentContext && (
-              <em>
-                {
-                  Settings.fields.organization.app6context.choices[
-                    parentContext
-                  ]
-                }{" "}
-                (inherited from parent)
-              </em>
-            )) ||
-            Settings.fields.organization.app6context.choices[
-              organization.app6context
-            ]
-          }
-        />
-
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.organization.app6standardIdentity}
-          value={
-            (parentStandardIdentity && (
-              <em>
-                {
-                  Settings.fields.organization.app6standardIdentity.choices[
-                    parentStandardIdentity
-                  ]
-                }{" "}
-                (inherited from parent)
-              </em>
-            )) ||
-            Settings.fields.organization.app6standardIdentity.choices[
-              [organization.app6standardIdentity]
-            ]
-          }
-        />
-
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.organization.app6symbolSet}
-          value={
-            (parentSymbolSet && (
-              <em>
-                {
-                  Settings.fields.organization.app6symbolSet.choices[
-                    parentSymbolSet
-                  ]
-                }{" "}
-                (inherited from parent)
-              </em>
-            )) ||
-            Settings.fields.organization.app6symbolSet.choices[
-              organization.app6symbolSet
-            ]
-          }
-        />
-
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.organization.app6hq}
-          value={
-            Settings.fields.organization.app6hq.choices[organization.app6hq]
-          }
-        />
-
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.organization.app6amplifier}
-          value={
-            Settings.fields.organization.app6amplifier.choices[
-              organization.app6amplifier
-            ]
-          }
-        />
       </div>
 
       <OrganizationLaydown

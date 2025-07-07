@@ -14,8 +14,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -623,6 +625,21 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid,
           loserUuid);
 
+      // Update attachments
+      updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
+          winnerUuid, loserUuid);
+
+      // Update the avatar
+      final EntityAvatarDao entityAvatarDao = engine().getEntityAvatarDao();
+      entityAvatarDao.delete(PositionDao.TABLE_NAME, winnerUuid);
+      entityAvatarDao.delete(PositionDao.TABLE_NAME, loserUuid);
+      final EntityAvatar winnerEntityAvatar = winner.getEntityAvatar();
+      if (winnerEntityAvatar != null) {
+        winnerEntityAvatar.setRelatedObjectType(PositionDao.TABLE_NAME);
+        winnerEntityAvatar.setRelatedObjectUuid(winnerUuid);
+        entityAvatarDao.upsert(winnerEntityAvatar);
+      }
+
       // Update approvers
       updateM2mForMerge("approvers", "approvalStepUuid", "positionUuid", winnerUuid, loserUuid);
 
@@ -649,8 +666,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           winner.getEmailAddresses());
 
       // Update customSensitiveInformation for winner
-      DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
-          winner.getCustomSensitiveInformation());
+      DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, PositionDao.TABLE_NAME,
+          winnerUuid, winner.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 

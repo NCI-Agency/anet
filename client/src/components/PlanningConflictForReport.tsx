@@ -47,8 +47,10 @@ const PlanningConflictForReport = ({
         state: Object.values(Report.STATE),
         engagementDateStart: moment(report.engagementDate)
           .startOf("day")
-          .valueOf(),
-        engagementDateEnd: moment(report.engagementDate).endOf("day").valueOf()
+          .toISOString(),
+        engagementDateEnd: moment(report.engagementDate)
+          .endOf("day")
+          .toISOString()
       }
     }
   )

@@ -1,11 +1,20 @@
 import styled from "@emotion/styled"
-import { Event, EventSeries, Organization, Person } from "models"
+import {
+  Event,
+  EventSeries,
+  Location,
+  Organization,
+  Person,
+  Position
+} from "models"
 import React, { useEffect, useRef } from "react"
 import { CircleStencil, RectangleStencil } from "react-advanced-cropper"
 import DEFAULT_EVENT_AVATAR from "resources/default-event-avatar.svg"
 import DEFAULT_EVENT_SERIES_AVATAR from "resources/default-eventSeries-avatar.svg"
+import DEFAULT_LOCATION_AVATAR from "resources/default-location-avatar.svg"
 import DEFAULT_ORGANIZATION_AVATAR from "resources/default-organization-avatar.svg"
 import DEFAULT_PERSON_AVATAR from "resources/default-person-avatar.svg"
+import DEFAULT_POSITION_AVATAR from "resources/default-position-avatar.svg"
 
 export const AVATAR_SETTINGS = {
   [Organization.relatedObjectType]: {
@@ -25,6 +34,16 @@ export const AVATAR_SETTINGS = {
   },
   [EventSeries.relatedObjectType]: {
     default: DEFAULT_EVENT_SERIES_AVATAR,
+    stencil: RectangleStencil,
+    rounded: false
+  },
+  [Location.relatedObjectType]: {
+    default: DEFAULT_LOCATION_AVATAR,
+    stencil: RectangleStencil,
+    rounded: false
+  },
+  [Position.relatedObjectType]: {
+    default: DEFAULT_POSITION_AVATAR,
     stencil: RectangleStencil,
     rounded: false
   }

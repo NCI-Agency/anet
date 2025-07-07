@@ -147,14 +147,14 @@ const EventMatrix = ({
     }
     const eventQuery = {
       pageSize: 0,
-      startDate: weekDays[0].valueOf(),
-      endDate: weekDays[6].endOf("day").valueOf()
+      startDate: weekDays[0].toISOString(),
+      endDate: weekDays[6].endOf("day").toISOString()
     }
     const reportQuery = {
       taskUuid: taskUuid ? [taskUuid] : (tasks?.map(t => t.uuid) ?? []),
       pageSize: 0,
-      engagementDateStart: weekDays[0].valueOf(),
-      engagementDateEnd: weekDays[6].endOf("day").valueOf()
+      engagementDateStart: weekDays[0].toISOString(),
+      engagementDateEnd: weekDays[6].endOf("day").toISOString()
     }
     fetchEventsAndReports(eventQuery, reportQuery).then(response => {
       setEvents(response?.eventList?.list)
@@ -175,11 +175,16 @@ const EventMatrix = ({
     return result
   }
   const eventSeries = data.eventSeriesList?.list
+  const topLevelTask = data.task
   const allTasks = (
     includeTask
-      ? [data.task].concat(data.task?.descendantTasks)
+      ? [topLevelTask].concat(topLevelTask?.descendantTasks)
       : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
   ).filter(t => t.selectable)
+  // if topLevelTask task is not in allTasks, add it at the top
+  if (includeTask && !allTasks.find(t => t.uuid === topLevelTask?.uuid)) {
+    allTasks.unshift(topLevelTask)
+  }
 
   function isReportIncluded(report, dateToCheck, task, event?) {
     if (
@@ -430,6 +435,8 @@ const EventMatrix = ({
                         leaf={task}
                         ascendantObjects={task.ascendantTasks}
                         parentField="parentTask"
+                        hideParents={includeTask && taskUuid !== task.uuid}
+                        ascendantTask={topLevelTask}
                       />
                     </td>
                     <td>{getEvent(taskEvents, 0, task)}</td>

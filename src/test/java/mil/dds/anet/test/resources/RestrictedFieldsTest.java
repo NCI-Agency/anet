@@ -32,7 +32,7 @@ class RestrictedFieldsTest extends AbstractResourceTest {
   private static final String EMAIL_ADDRESSES_FIELDS =
       "emailAddresses(network: ?" + EMAIL_NETWORK_PARAMETER + ") { network address }";
   private static final String PERSON_FIELDS =
-      "{ uuid name domainUsername phoneNumber " + EMAIL_ADDRESSES_FIELDS + " }";
+      "{ uuid name users { uuid domainUsername } phoneNumber " + EMAIL_ADDRESSES_FIELDS + " }";
   private static final String ORGANIZATION_FIELDS =
       "{ uuid shortName longName identificationCode " + EMAIL_ADDRESSES_FIELDS + " }";
   private static final String POSITION_FIELDS =
@@ -110,7 +110,7 @@ class RestrictedFieldsTest extends AbstractResourceTest {
 
   @Test
   void testAsAuthorizedUser() {
-    // Jim is in the EF 5 authorization group which can access all restricted fields
+    // Jim is in the EF 5 community which can access all restricted fields
     testAsAuthorizedUser("jim");
   }
 

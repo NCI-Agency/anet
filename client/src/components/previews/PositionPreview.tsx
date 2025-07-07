@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
@@ -23,6 +24,7 @@ const GQL_GET_POSITION = gql`
       status
       code
       description
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       emailAddresses {
         network
         address
@@ -44,6 +46,7 @@ const GQL_GET_POSITION = gql`
         uuid
         name
         type
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         person {
           uuid
           name
@@ -74,6 +77,7 @@ const GQL_GET_POSITION = gql`
         type
         lat
         lng
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
@@ -105,6 +109,13 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
         <h4 className="ellipsized-text">{`Position ${position.name}`}</h4>
       </div>
       <div className="preview-section">
+        <div className="text-center">
+          <EntityAvatarDisplay
+            avatar={position.entityAvatar}
+            defaultAvatar={Position.relatedObjectType}
+          />
+        </div>
+
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.type}

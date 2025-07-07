@@ -6,6 +6,7 @@ import API from "api"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AssociatedPositions from "components/AssociatedPositions"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositions from "components/EditAssociatedPositions"
@@ -18,6 +19,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -41,7 +43,7 @@ import useMergeObjects, {
 import { Location, Position } from "models"
 import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -70,6 +72,7 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -99,8 +102,16 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
     !Location.hasCoordinates(position1?.location) &&
     !Location.hasCoordinates(position2?.location)
 
+  useEffect(() => {
+    setIsDirty(false)
+  }, [position1, position2])
+  useEffect(() => {
+    setIsDirty(!!mergedPosition)
+  }, [mergedPosition])
+
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} />
         <h4>Merge Positions Tool</h4>
@@ -150,6 +161,26 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
           )}
           {areAllSet(position1, position2, mergedPosition) && (
             <fieldset>
+              <MergeField
+                label="Avatar"
+                value={
+                  <EntityAvatarDisplay
+                    avatar={mergedPosition.entityAvatar}
+                    defaultAvatar={Position.relatedObjectType}
+                    height={128}
+                    width={128}
+                    style={{
+                      maxWidth: "100%",
+                      display: "block",
+                      margin: "0 auto"
+                    }}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="entityAvatar"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.position.name}
@@ -376,7 +407,10 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
-          onClick={mergePositions}
+          onClick={() => {
+            setIsDirty(false)
+            mergePositions()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge Positions
@@ -408,6 +442,7 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
         }
       })
       .catch(error => {
+        setIsDirty(true)
         setSaveError(error)
         jumpToTop()
       })
@@ -457,6 +492,7 @@ const PositionColumn = ({
   dispatchMergeActions
 }: PositionColumnProps) => {
   const position = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
     !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT]?.location)
@@ -471,6 +507,7 @@ const PositionColumn = ({
           fieldName="position"
           placeholder="Select a position to merge"
           value={position}
+          disabledValue={otherSide}
           overlayColumns={["Position", "Organization", "Current Occupant"]}
           overlayRenderRow={PositionOverlayRow}
           filterDefs={getPositionFilters(mergeState, align)}
@@ -488,6 +525,32 @@ const PositionColumn = ({
       </ColTitle>
       {areAllSet(position) && (
         <fieldset>
+          <MergeField
+            label="Avatar"
+            fieldName="entityAvatar"
+            value={
+              <EntityAvatarDisplay
+                avatar={position.entityAvatar}
+                defaultAvatar={Position.relatedObjectType}
+                height={128}
+                width={128}
+                style={{
+                  maxWidth: "100%",
+                  display: "block",
+                  margin: "0 auto"
+                }}
+              />
+            }
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("entityAvatar", position.entityAvatar, align)
+              )
+            }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.position.name}

@@ -37,6 +37,11 @@ const GQL_GET_ORGANIZATION = gql`
       app6symbolSet
       app6hq
       app6amplifier
+      app6entity
+      app6entityType
+      app6entitySubtype
+      app6sectorOneModifier
+      app6sectorTwoModifier
       emailAddresses {
         network
         address
@@ -84,6 +89,7 @@ const GQL_GET_ORGANIZATION = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         location {
           uuid
           name

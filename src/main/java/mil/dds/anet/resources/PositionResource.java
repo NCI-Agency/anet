@@ -37,6 +37,11 @@ public class PositionResource {
     this.engine = anetObjectEngine;
   }
 
+  public static boolean hasPermission(final Person user, final String positionUuid) {
+    return hasPermission(user,
+        ApplicationContextProvider.getEngine().getPositionDao().getByUuid(positionUuid));
+  }
+
   public static boolean hasPermission(final Person user, final Position position) {
     if (position.getType() == PositionType.ADMINISTRATOR) {
       return AuthUtils.isAdmin(user);

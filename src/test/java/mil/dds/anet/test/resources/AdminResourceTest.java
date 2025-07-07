@@ -79,15 +79,15 @@ class AdminResourceTest extends AbstractResourceTest {
     final Position position = user.getPosition();
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
 
-    final List<AdminSetting> settings = withCredentials(user.getDomainUsername(),
-        t -> queryExecutor.adminSettings("{ key value }"));
+    final List<AdminSetting> settings =
+        withCredentials(getDomainUsername(user), t -> queryExecutor.adminSettings("{ key value }"));
     final List<AdminSettingInput> input = settings.stream()
         .map(
             as -> AdminSettingInput.builder().withKey(as.getKey()).withValue(as.getValue()).build())
         .toList();
 
     try {
-      final Integer nrUpdated = withCredentials(user.getDomainUsername(),
+      final Integer nrUpdated = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.saveAdminSettings("", input));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(input.size());
@@ -105,11 +105,11 @@ class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     // Cache a person
-    personDao.findByOpenIdSubject(user.getOpenIdSubject(), true);
+    personDao.findByDomainUsername(getDomainUsername(user), true);
 
     try {
       final String result =
-          withCredentials(user.getDomainUsername(), t -> mutationExecutor.clearCache(""));
+          withCredentials(getDomainUsername(user), t -> mutationExecutor.clearCache(""));
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.USERCACHE_MESSAGE);
       } else {
@@ -127,7 +127,7 @@ class AdminResourceTest extends AbstractResourceTest {
 
     try {
       final String result =
-          withCredentials(user.getDomainUsername(), t -> mutationExecutor.reloadDictionary(""));
+          withCredentials(getDomainUsername(user), t -> mutationExecutor.reloadDictionary(""));
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_MESSAGE);
       } else {
@@ -141,15 +141,14 @@ class AdminResourceTest extends AbstractResourceTest {
   }
 
   private void recentActivities(Person user) {
-    final String recentActivityFields =
-        "user { uuid rank name domainUsername } activity { time ip request }";
+    final String recentActivityFields = "user { uuid rank name } activity { time ip request }";
     final String fields =
         String.format("{ byActivity { %1$s } byUser { %1$s } }", recentActivityFields);
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
       final RecentActivities recentActivities =
-          withCredentials(user.getDomainUsername(), t -> queryExecutor.recentActivities(fields));
+          withCredentials(getDomainUsername(user), t -> queryExecutor.recentActivities(fields));
       if (isAdmin) {
         assertThat(recentActivities.getByUser()).isNotEmpty();
         assertThat(recentActivities.getByActivity()).isNotEmpty();

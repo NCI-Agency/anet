@@ -50,6 +50,7 @@ const GQL_GET_APP_DATA = gql`
         role
         status
         isApprover
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         authorizationGroupsAdministrated {
           uuid
         }
@@ -66,6 +67,7 @@ const GQL_GET_APP_DATA = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         associatedPositions {
           uuid
@@ -74,6 +76,7 @@ const GQL_GET_APP_DATA = gql`
           type
           role
           status
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           organization {
             uuid
             shortName
@@ -84,6 +87,7 @@ const GQL_GET_APP_DATA = gql`
           location {
             uuid
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           person {
             uuid
@@ -97,6 +101,7 @@ const GQL_GET_APP_DATA = gql`
               role
               code
               status
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
               organization {
                 uuid
                 shortName
@@ -149,6 +154,7 @@ const GQL_GET_APP_DATA = gql`
           uuid
           name
           code
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           organization {
             uuid
             shortName

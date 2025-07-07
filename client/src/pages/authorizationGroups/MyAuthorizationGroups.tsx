@@ -23,6 +23,8 @@ const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
           name
           description
           status
+          distributionList
+          forSensitiveInformation
           authorizationGroupRelatedObjects {
             relatedObjectType
             relatedObjectUuid
@@ -44,6 +46,7 @@ const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
                 uuid
                 type
                 name
+                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
               }
             }
           }
@@ -70,7 +73,7 @@ const MyAuthorizationGroups = ({
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("My Authorization Groups")
+  usePageTitle("My Communities")
   if (done) {
     return result
   }
@@ -80,10 +83,7 @@ const MyAuthorizationGroups = ({
 
   return (
     <div>
-      <Fieldset
-        id="my-authorization-groups"
-        title="Authorization Groups I administrate"
-      >
+      <Fieldset id="my-authorization-groups" title="Communities I administrate">
         <AuthorizationGroupTable
           authorizationGroups={authorizationGroupsAdministrated}
           showMembers

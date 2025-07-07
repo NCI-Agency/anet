@@ -30,6 +30,16 @@ import mil.dds.anet.views.UuidFetcher;
 public class Person extends AbstractEmailableAnetBean
     implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
 
+  public static final Person SYSTEM_USER;
+  static {
+    SYSTEM_USER = new Person();
+    SYSTEM_USER.setUuid("-2");
+  }
+
+  public static boolean isSystemUser(Person user) {
+    return SYSTEM_USER.equals(user);
+  }
+
   private static final Comparator<Person> COMPARATOR =
       Comparator.comparing(Person::getName).thenComparing(Person::getUuid);
 
@@ -65,12 +75,8 @@ public class Person extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String biography;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String domainUsername;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String openIdSubject;
+  // annotated below
+  private List<User> users;
   // annotated below
   private Position position;
   // annotated below
@@ -220,22 +226,26 @@ public class Person extends AbstractEmailableAnetBean
     this.biography = Utils.trimStringReturnNull(biography);
   }
 
+  @GraphQLQuery(name = "users")
   @AllowUnverifiedUsers
-  public String getDomainUsername() {
-    return domainUsername;
+  public CompletableFuture<List<User>> loadUsers(@GraphQLRootContext GraphQLContext context) {
+    if (users != null) {
+      return CompletableFuture.completedFuture(users);
+    } else {
+      return engine().getUserDao().getUsersForPerson(context, uuid).thenApply(o -> {
+        users = o;
+        return o;
+      });
+    }
   }
 
-  public void setDomainUsername(String domainUsername) {
-    this.domainUsername = domainUsername;
+  public List<User> getUsers() {
+    return users;
   }
 
-  @AllowUnverifiedUsers
-  public String getOpenIdSubject() {
-    return openIdSubject;
-  }
-
-  public void setOpenIdSubject(String openIdSubject) {
-    this.openIdSubject = openIdSubject;
+  @GraphQLInputField(name = "users")
+  public void setUsers(List<User> users) {
+    this.users = users;
   }
 
   @GraphQLQuery(name = "position")
@@ -408,8 +418,6 @@ public class Person extends AbstractEmailableAnetBean
         && Objects.equals(other.getUser(), user)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
-        && Objects.equals(other.getDomainUsername(), domainUsername)
-        && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
@@ -421,7 +429,7 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
-        domainUsername, openIdSubject, pendingVerification, code, createdAt, updatedAt);
+        pendingVerification, code, createdAt, updatedAt);
   }
 
   @Override

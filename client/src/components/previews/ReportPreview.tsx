@@ -37,6 +37,7 @@ const GQL_GET_REPORT = gql`
         name
         lat
         lng
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       authors {
         uuid
@@ -60,6 +61,7 @@ const GQL_GET_REPORT = gql`
           type
           code
           status
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           organization {
             uuid
             shortName
@@ -70,6 +72,7 @@ const GQL_GET_REPORT = gql`
           location {
             uuid
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
         previousPositions {
@@ -79,6 +82,7 @@ const GQL_GET_REPORT = gql`
             uuid
             name
             code
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             organization {
               uuid
               shortName
@@ -89,6 +93,7 @@ const GQL_GET_REPORT = gql`
             location {
               uuid
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
           }
         }

@@ -38,8 +38,9 @@ const capabilities = {
   browserName: "Chrome",
   browserVersion: "latest",
   "goog:chromeOptions": {
+    // Run in incognito mode
     // Maximize the window so we can see what's going on
-    args: ["--start-maximized"]
+    args: ["--incognito", "--start-maximized"]
   },
   "bstack:options": bstackOptions
 }
