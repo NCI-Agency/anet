@@ -35,7 +35,7 @@ public class EventSeriesResource {
     return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
   }
 
-  public static void assertPermission(final Person user, final String orgUuid) {
+  public void assertPermission(final Person user, final String orgUuid) {
     if (!hasPermission(user, orgUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
