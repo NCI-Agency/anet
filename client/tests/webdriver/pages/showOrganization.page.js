@@ -34,7 +34,7 @@ class ShowOrganization extends Page {
   async hoverOverApp6Symbol() {
     const previewElement = await browser.$("#app6-symbol-preview")
     await previewElement.moveTo()
-    const popover = await browser.$(".bp5-popover-content")
+    const popover = await browser.$(".bp6-popover-content")
     await popover.waitForDisplayed()
   }
 

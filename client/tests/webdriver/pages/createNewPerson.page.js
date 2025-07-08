@@ -121,7 +121,7 @@ export class CreatePerson extends Page {
   }
 
   async getEndOfTourToday() {
-    return browser.$(".bp5-datepicker-footer button.bp5-button:first-child")
+    return browser.$(".bp6-datepicker-footer button.bp6-button:first-child")
   }
 
   async getCustomFieldsContainer() {

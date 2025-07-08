@@ -203,7 +203,7 @@ class ShowReport extends Page {
     const row = await td.$("..")
     // wait for conflict loader to disappear
     await (
-      await row.$("td.conflictButton div.bp5-spinner")
+      await row.$("td.conflictButton div.bp6-spinner")
     ).waitForExist({ reverse: true })
 
     return {

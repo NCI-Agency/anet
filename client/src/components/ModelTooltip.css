@@ -1,6 +1,6 @@
 /* set tooltips container style */
 /* make it above header*/
-.bp5-portal {
+.bp6-portal {
   z-index: 1600;
 }
 
@@ -20,7 +20,7 @@
   overflow-x: hidden !important;
 }
 
-.linkto-model-preview-portal > .bp5-overlay > .bp5-popover-transition-container {
+.linkto-model-preview-portal > .bp6-overlay > .bp6-popover-transition-container {
   box-shadow: 0 0 10px rgba(0, 0, 0, .5);
   border-radius: 5px;
   text-align: left;

@@ -1,19 +1,19 @@
-.bp5-popover-transition-container {
+.bp6-popover-transition-container {
 	/* Make sure it is on top of the advanced search popup */
 	z-index: 1070 !important;
 }
-.bp5-transition-container {
+.bp6-transition-container {
 	z-index: 30000 !important;
 }
 
-/* Make bp5 input and right element behave mostly like bootstrap inputs */
-.bp5-input-group {
+/* Make bp6 input and right element behave mostly like bootstrap inputs */
+.bp6-input-group {
 	display: inline-block;
 }
-.bp5-input {
+.bp6-input {
 	height: 38px;
 }
-.bp5-input-action {
+.bp6-input-action {
 	height: 38px;
 	padding: 6px 12px;
 	background-color: #eeeeee;
@@ -23,18 +23,18 @@
 	border-bottom-left-radius: 0;
 }
 /* If no right element, take up no space */
-.bp5-input-action:empty {
+.bp6-input-action:empty {
 	display: none;
 }
 
-.bp5-dark a {
+.bp6-dark a {
 	color: rgb(0, 113, 188);
 }
 
-.bp5-dark a.btn {
+.bp6-dark a.btn {
 	color: unset;
 }
 
-.bp5-dark a.btn:hover {
+.bp6-dark a.btn:hover {
 	color: white;
 }

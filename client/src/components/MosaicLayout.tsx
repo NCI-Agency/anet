@@ -46,7 +46,7 @@ const MosaicLayout = ({
       <div className="mosaic-container">
         {renderNavBar()}
         <Mosaic
-          blueprintNamespace="bp5"
+          blueprintNamespace="bp6"
           value={currentNode}
           onChange={updateCurrentNode}
           renderTile={(id, path) => {

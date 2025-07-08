@@ -297,7 +297,7 @@ a.btn {
 }
 
 .header .logo img,
-.header button:not(.bp5-button) {
+.header button:not(.bp6-button) {
   height: 38px;
   font-weight: bold;
 }
@@ -388,7 +388,7 @@ button.home-tile.btn {
   text-align: center;
 }
 
-form.advanced-search-form ~ div.bp5-overlay.bp5-overlay-open.bp5-overlay-inline div.advanced-search.form-horizontal {
+form.advanced-search-form ~ div.bp6-overlay.bp6-overlay-open.bp6-overlay-inline div.advanced-search.form-horizontal {
   max-height: 70vh;
   overflow: auto;
 }
@@ -941,20 +941,20 @@ header.searchPagination {
   outline: none;
 }
 
-.advanced-select-popover .bp5-popover-content-sizing {
+.advanced-select-popover .bp6-popover-content-sizing {
   width: 100% !important;
 }
 
-.advanced-select-popover .input-group > span.bp5-popover-target {
+.advanced-select-popover .input-group > span.bp6-popover-target {
   display: block;
   width: 100%;
 }
 
-.advanced-select-popover .bp5-popover-transition-container {
+.advanced-select-popover .bp6-popover-transition-container {
   top: 50px !important;
 }
 
-.advanced-select-popover .bp5-popover-content {
+.advanced-select-popover .bp6-popover-content {
   min-width: 400px;
   max-width: 90vw !important;
   max-height: 47vh !important;
@@ -963,7 +963,7 @@ header.searchPagination {
 
 #taskUuid-popover, #parentTaskUuid-popover {
   min-width: 50vw;
-  & .bp5-icon {
+  & .bp6-icon {
     color: #5f6b7c;
   }
 }
@@ -1309,7 +1309,7 @@ table.event-matrix-cell {
     font-size: 12px;
   }
 
-  .search-popover-target ~ .bp5-overlay > .bp5-popover-transition-container {
+  .search-popover-target ~ .bp6-overlay > .bp6-popover-transition-container {
     left: 5vw !important;
     width: 90vw;
   }

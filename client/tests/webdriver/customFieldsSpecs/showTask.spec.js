@@ -114,7 +114,7 @@ describe("Show task page", () => {
 
       const containsStarIcon = await tasks.map(
         async task =>
-          await (await task.$(".bp5-popover-target img")).isExisting()
+          await (await task.$(".bp6-popover-target img")).isExisting()
       )
       // only first task (self) should contain the task icon
       expect(containsStarIcon).to.deep.equal([true, false, false, false])

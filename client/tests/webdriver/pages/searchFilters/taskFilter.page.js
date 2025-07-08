@@ -3,7 +3,7 @@ import Page from "../page"
 class TaskFilter extends Page {
   async openTaskFilter() {
     const searchLink = await browser.$(
-      ".search-popover-target.bp5-popover-target"
+      ".search-popover-target.bp6-popover-target"
     )
     await searchLink.waitForDisplayed()
     await searchLink.click()
@@ -49,14 +49,14 @@ class TaskFilter extends Page {
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
     )
     let expandibleTasks = await browser.$$(
-      "#taskUuid-popover .bp5-icon-chevron-right"
+      "#taskUuid-popover .bp6-icon-chevron-right"
     )
     while (expandibleTasks.length > 0) {
       for (const task of expandibleTasks) {
         await task.click()
       }
       expandibleTasks = await browser.$$(
-        "#taskUuid-popover .bp5-icon-chevron-right"
+        "#taskUuid-popover .bp6-icon-chevron-right"
       )
     }
   }
@@ -74,7 +74,7 @@ class TaskFilter extends Page {
   }
 
   async closeTaskFilter() {
-    const closeButton = await browser.$(".bp5-icon.bp5-icon-cross")
+    const closeButton = await browser.$(".bp6-icon.bp6-icon-cross")
     await closeButton.waitForDisplayed()
     await closeButton.click()
   }

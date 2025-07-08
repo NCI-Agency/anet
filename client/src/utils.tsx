@@ -1,5 +1,3 @@
-import { IconSize } from "@blueprintjs/core"
-import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
 import * as changeCase from "change-case"
 import * as d3 from "d3"
 import parseAddressList from "email-addresses"
@@ -557,31 +555,6 @@ Promise.prototype.log = function () {
     console.log(data)
     return data
   })
-}
-
-export const renderBlueprintIconAsSvg = (
-  iconName,
-  iconSize = IconSize.STANDARD
-) => {
-  // choose which pixel grid is most appropriate for given icon size
-  const pixelGridSize =
-    iconSize >= IconSize.LARGE ? IconSize.LARGE : IconSize.STANDARD
-  const viewBox = `0 0 ${pixelGridSize} ${pixelGridSize}`
-  const svgPathsRecord =
-    pixelGridSize === IconSize.STANDARD ? IconSvgPaths16 : IconSvgPaths20
-  const pathStrings = svgPathsRecord[iconName]
-  const paths =
-    pathStrings === null
-      ? ""
-      : pathStrings.map((d, i) => `<path d="${d}" fillRule="evenodd" />`)
-  return {
-    viewBox,
-    html: `<g>
-        <desc>{iconName}</desc>
-        <rect fill="transparent" width="${pixelGridSize}" height="${pixelGridSize}"/>
-        ${paths.join("")}
-      </g>` // we use a rect to simulate pointer-events: bounding-box
-  }
 }
 
 export const useOutsideClick = (ref, cb) => {

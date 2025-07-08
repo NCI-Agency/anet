@@ -316,7 +316,7 @@ const AdvancedSelect = ({
           <div className={classNames(className, "advanced-select-popover")}>
             <InputGroup>
               <Popover
-                popoverClassName="advanced-select-popover bp5-popover-content-sizing"
+                popoverClassName="advanced-select-popover bp6-popover-content-sizing"
                 content={
                   <div
                     style={{
