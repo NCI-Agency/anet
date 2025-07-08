@@ -650,7 +650,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
                   .bind("personUuid", checkPerson ? uuid : histUuid)
                   .bind("positionUuid", checkPerson ? histUuid : uuid)
-                  .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
+                  .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper()).one()
                   .get("count");
 
           if (count.longValue() > 0) {
