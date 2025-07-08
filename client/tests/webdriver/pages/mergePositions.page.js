@@ -24,7 +24,7 @@ class MergePositions extends Page {
   }
 
   async getAdvancedSelectPopover() {
-    return browser.$(".bp5-popover-content")
+    return browser.$(".bp6-popover-content")
   }
 
   async getPositionHeaderFromPopover() {

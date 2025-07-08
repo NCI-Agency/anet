@@ -19,7 +19,7 @@ class CreateReport extends cr.CreateReport {
   }
 
   async getDatepicker() {
-    return browser.$("#fg-engagementDate .bp5-datepicker")
+    return browser.$("#fg-engagementDate .bp6-datepicker")
   }
 
   async getTodayButton() {
@@ -81,7 +81,7 @@ class CreateReport extends cr.CreateReport {
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="primary-attendee" or @class="conflictButton" or @class="reportPeopleName"]`
     )
     await (
-      await personRow[0].$("div.bp5-spinner")
+      await personRow[0].$("div.bp6-spinner")
     ).waitForExist({ reverse: true })
 
     return {

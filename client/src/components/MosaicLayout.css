@@ -40,7 +40,7 @@
   overflow: hidden;
 }
 
-.bp5-button {
+.bp6-button {
   margin-left: 5px;
 }
 
@@ -48,14 +48,14 @@
 	z-index: 100;
 }
 
-.bp5-navbar {
+.bp6-navbar {
   margin: 8px;
   width: auto;
   height: auto;
   padding: 5px 15px;
 }
 
-.bp5-navbar-group {
+.bp6-navbar-group {
   height: auto !important;
 }
 
@@ -67,7 +67,7 @@
 }
 
 @media print {
-  .bp5-navbar,
+  .bp6-navbar,
   .mosaic-preview {
     display: none;
   }

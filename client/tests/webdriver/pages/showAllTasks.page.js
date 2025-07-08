@@ -12,15 +12,15 @@ class ShowAllTasks extends Page {
   }
 
   async getTree() {
-    return browser.$(".bp5-tree")
+    return browser.$(".bp6-tree")
   }
 
   async getAllTasks() {
-    return (await this.getTree()).$$(".bp5-tree-node-list .bp5-tree-node")
+    return (await this.getTree()).$$(".bp6-tree-node-list .bp6-tree-node")
   }
 
   async getAllDescendants(task, filterVisible = false) {
-    const descendants = await task.$$(".bp5-tree-node-list .bp5-tree-node")
+    const descendants = await task.$$(".bp6-tree-node-list .bp6-tree-node")
     if (!filterVisible) {
       return descendants
     }

@@ -34,7 +34,7 @@ describe("Show My Reports page", () => {
           await MyReports.getReportsTableSpan(
             reportNoAttachments,
             5,
-            ".bp5-icon-paperclip"
+            ".bp6-icon-paperclip"
           )
         ).isExisting()
       ).to.be.false
@@ -46,7 +46,7 @@ describe("Show My Reports page", () => {
           await MyReports.getReportsTableSpan(
             reportAttachments,
             5,
-            ".bp5-icon-paperclip"
+            ".bp6-icon-paperclip"
           )
         ).isExisting()
       ).to.be.true
@@ -133,7 +133,7 @@ describe("Show My Reports page", () => {
         await (
           await (
             await MyReports.getReportsSummarySpan(reportAttachments, 9, 1)
-          ).$("span.bp5-icon-paperclip")
+          ).$("span.bp6-icon-paperclip")
         ).isExisting()
       ).to.be.true
       expect(

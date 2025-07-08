@@ -26,7 +26,7 @@ describe("Show All Tasks Page", () => {
     const firstTaskText = await firstTask.getText()
     expect(firstTaskText).to.equal(FIRST_TASK_NAME)
 
-    const caret = await firstTask.$(".bp5-tree-node-caret")
+    const caret = await firstTask.$(".bp6-tree-node-caret")
     // eslint-disable-next-line no-unused-expressions
     expect(caret).to.exist
     await caret.click()
@@ -44,7 +44,7 @@ describe("Show All Tasks Page", () => {
     const topTasks = await ShowAllTasks.getAllTasks()
     const firstTask = topTasks[1]
 
-    const caret = await firstTask.$(".bp5-tree-node-caret")
+    const caret = await firstTask.$(".bp6-tree-node-caret")
     // eslint-disable-next-line no-unused-expressions
     expect(caret).to.exist
     await caret.click()
@@ -68,7 +68,7 @@ describe("Show All Tasks Page", () => {
     const noDescendantsTaskText = await noDescendantsTask.getText()
     expect(noDescendantsTaskText).to.equal(NO_DESCENDANTS_TASK_NAME)
 
-    const caret = await noDescendantsTask.$(".bp5-tree-node-caret")
+    const caret = await noDescendantsTask.$(".bp6-tree-node-caret")
     const caretExists = await caret.isExisting()
     expect(caretExists).to.equal(false)
 

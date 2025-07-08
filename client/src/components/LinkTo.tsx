@@ -108,7 +108,7 @@ const LinkTo = ({
               <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
             }
             targetProps={tooltipProps}
-            popoverClassName="bp5-dark"
+            popoverClassName="bp6-dark"
             hoverCloseDelay={400}
             hoverOpenDelay={HOVER_OPEN_DELAY}
             portalClassName="linkto-model-preview-portal"
@@ -163,7 +163,7 @@ const LinkTo = ({
             <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
           }
           targetProps={tooltipProps}
-          popoverClassName="bp5-dark"
+          popoverClassName="bp6-dark"
           hoverCloseDelay={400}
           hoverOpenDelay={HOVER_OPEN_DELAY}
           portalClassName="linkto-model-preview-portal"
