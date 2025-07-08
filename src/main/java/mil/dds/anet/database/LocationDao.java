@@ -12,7 +12,6 @@ import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.search.pg.PostgresqlLocationSearcher;
 import mil.dds.anet.utils.DaoUtils;
@@ -177,7 +176,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     // Finally, delete the location
     final int nrDeleted = deleteForMerge(LocationDao.TABLE_NAME, "uuid", loserLocationUuid);
     if (nrDeleted > 0) {
-      ApplicationContextProvider.getBean(AdminDao.class).insertMergedEntity(
+      engine().getAdminDao().insertMergedEntity(
           new MergedEntity(loserLocationUuid, winnerLocationUuid, Instant.now()));
     }
     return nrDeleted;

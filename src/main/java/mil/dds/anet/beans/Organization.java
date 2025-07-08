@@ -17,8 +17,6 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
@@ -321,8 +319,8 @@ public class Organization extends AbstractEmailableAnetBean
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getPlanningApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
+    return engine().getApprovalStepDao().getPlanningApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
@@ -343,8 +341,8 @@ public class Organization extends AbstractEmailableAnetBean
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
+    return engine().getApprovalStepDao().getApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
           approvalSteps = o;
           return o;
         });
