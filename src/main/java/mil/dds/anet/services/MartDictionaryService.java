@@ -196,8 +196,8 @@ public class MartDictionaryService implements IMartDictionaryService {
       throws JsonProcessingException {
     final List<Map<String, Object>> result = new ArrayList<>();
     final List<Location> municipalities =
-        new ArrayList<>(municipalityGroup.loadChildrenLocations(engine.getContext()).join().stream()
-            .filter(m -> m.getStatus() == WithStatus.Status.ACTIVE).toList());
+        new ArrayList<>(municipalityGroup.loadChildrenLocations(engine.getContext(), null).join()
+            .stream().filter(m -> m.getStatus() == WithStatus.Status.ACTIVE).toList());
     municipalities.sort(Comparator.comparing(Location::getName));
     for (final Location m : municipalities) {
       final Map<String, Object> municipality = new LinkedHashMap<>();
@@ -207,7 +207,7 @@ public class MartDictionaryService implements IMartDictionaryService {
       municipality.put("guid", m.getUuid());
       addCustomFields(MART_DICT_MUNICIPALITY_CUSTOM_FIELDS, municipality, m);
       final List<Location> municipalityLocations =
-          new ArrayList<>(m.loadChildrenLocations(engine.getContext()).join().stream()
+          new ArrayList<>(m.loadChildrenLocations(engine.getContext(), null).join().stream()
               .filter(l -> l.getStatus() == WithStatus.Status.ACTIVE).toList());
       municipalityLocations.sort(Comparator.comparing(Location::getName));
       for (final Location l : municipalityLocations) {

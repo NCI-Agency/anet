@@ -637,7 +637,7 @@ type Location {
   approvalSteps: [ApprovalStep]
   assessments: [Assessment]
   attachments: [Attachment]
-  childrenLocations: [Location]
+  childrenLocations(query: LocationSearchQueryInput): [Location]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -649,7 +649,7 @@ type Location {
   lng: Float
   name: String
   notes: [Note]
-  parentLocations: [Location]
+  parentLocations(query: LocationSearchQueryInput): [Location]
   planningApprovalSteps: [ApprovalStep]
   status: Status
   trigram: String

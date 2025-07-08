@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import graphql.GraphQLContext;
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -86,8 +89,6 @@ public class Location extends AbstractCustomizableAnetBean
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
   // annotated below
   List<ApprovalStep> approvalSteps; /* Approval process for this Task */
-  // annotated below
-  List<Location> childrenLocations;
   // annotated below
   List<Location> parentLocations;
 
@@ -213,27 +214,31 @@ public class Location extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "childrenLocations")
   public CompletableFuture<List<Location>> loadChildrenLocations(
-      @GraphQLRootContext GraphQLContext context) {
-    if (childrenLocations != null) {
-      return CompletableFuture.completedFuture(childrenLocations);
+      @GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") LocationSearchQuery query) {
+    if (query == null) {
+      query = new LocationSearchQuery();
     }
-    return engine().getLocationDao().getChildrenLocations(context, uuid).thenApply(o -> {
-      childrenLocations = o;
-      return o;
-    });
-  }
-
-  public List<Location> getChildrenLocations() {
-    return childrenLocations;
+    // Note: no recursion, only direct children!
+    query.setBatchParams(new M2mBatchParams<>("locations", "uuid", "\"locationRelationships\"",
+        "\"childLocationUuid\"", "\"parentLocationUuid\""));
+    return engine().getLocationDao().getLocationsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "parentLocations")
   public CompletableFuture<List<Location>> loadParentLocations(
-      @GraphQLRootContext GraphQLContext context) {
+      @GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") LocationSearchQuery query) {
     if (parentLocations != null) {
       return CompletableFuture.completedFuture(parentLocations);
     }
-    return engine().getLocationDao().getParentLocations(context, uuid).thenApply(o -> {
+    if (query == null) {
+      query = new LocationSearchQuery();
+    }
+    // Note: no recursion, only direct parents!
+    query.setBatchParams(new M2mBatchParams<>("locations", "uuid", "\"locationRelationships\"",
+        "\"parentLocationUuid\"", "\"childLocationUuid\""));
+    return engine().getLocationDao().getLocationsBySearch(context, uuid, query).thenApply(o -> {
       parentLocations = o;
       return o;
     });

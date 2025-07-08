@@ -2,6 +2,7 @@ package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -44,6 +45,10 @@ public abstract class AbstractLocationSearcher
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
+    }
+
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationUuidQuery(query);
     }
@@ -71,6 +76,11 @@ public abstract class AbstractLocationSearcher
     }
 
     addOrderByClauses(qb, query);
+  }
+
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(LocationSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Location, LocationSearchQuery>) query.getBatchParams());
   }
 
   protected void addLocationUuidQuery(LocationSearchQuery query) {
