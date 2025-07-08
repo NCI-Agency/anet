@@ -29,10 +29,10 @@ java {
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String cxfVersion = "4.1.1"
-String jdbi3Version = "3.49.0"
+String cxfVersion = "4.1.2"
+String jdbi3Version = "3.49.5"
 String poiVersion = "5.4.1"
-String simplejavamailVersion = "8.12.5"
+String simplejavamailVersion = "8.12.6"
 String springShellVersion = "3.4.0"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
@@ -112,11 +112,11 @@ dependencyManagement {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.5'
+	implementation 'org.postgresql:postgresql:42.7.7'
 	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
-	implementation 'com.google.guava:guava:33.4.7-jre' // Pick the non-Android version
+	implementation 'com.google.guava:guava:33.4.8-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.10.8') {
@@ -125,7 +125,7 @@ dependencies {
 		}
 	}
 	implementation 'javax.cache:cache-api:1.1.1'
-	implementation 'commons-beanutils:commons-beanutils:1.10.1'
+	implementation 'commons-beanutils:commons-beanutils:1.11.0'
 
 	implementation "org.simplejavamail:simple-java-mail:${simplejavamailVersion}"
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
@@ -135,18 +135,18 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.5.6'
+	implementation 'com.networknt:json-schema-validator:1.5.8'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
 	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:3.1.0'
+	implementation 'org.apache.tika:tika-core:3.2.0'
         // For sanitizing SVG uploads
         implementation 'io.github.borewit:svg-sanitizer:0.3.1'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.19.1'
+	implementation 'org.jsoup:jsoup:1.21.1'
 
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:21.5'
@@ -731,7 +731,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.23.0'
+	toolVersion = '10.26.1'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
@@ -743,7 +743,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.4.7-jre')
+		select('com.google.guava:guava:33.4.8-jre')
 	}
 }
 
