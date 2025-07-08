@@ -1,7 +1,9 @@
 import { Placement } from "@blueprintjs/core"
-import { TimePrecision } from "@blueprintjs/datetime"
-import { DateInput3, DatePickerShortcut } from "@blueprintjs/datetime2"
-import "@blueprintjs/datetime2/lib/css/blueprint-datetime2.css"
+import {
+  DateInput,
+  DatePickerShortcut,
+  TimePrecision
+} from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import moment from "moment"
 import React, { useRef } from "react"
@@ -79,7 +81,7 @@ const CustomDateInput = ({
     }
   const inputValue = value ? moment(value).toISOString() : null
   return (
-    <DateInput3
+    <DateInput
       inputProps={{
         id,
         style,
