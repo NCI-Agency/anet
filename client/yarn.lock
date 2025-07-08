@@ -1637,27 +1637,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime2@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@blueprintjs/datetime2@npm:3.0.0"
-  dependencies:
-    "@blueprintjs/core": "npm:^6.0.0"
-    "@blueprintjs/datetime": "npm:^6.0.0"
-    date-fns: "npm:^2.28.0"
-    react-day-picker: "npm:^8.10.0"
-    tslib: "npm:~2.6.2"
-  peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10c0/3f5caa074fcfbe04eb92273c47f4c789c4ce612d5226e0f74c90fa74cd48b91d37e9d2912c6edd16db296383a239ce4978385d63bd3191ae34a297847f2026ed
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/datetime@npm:^6.0.0":
+"@blueprintjs/datetime@npm:6.0.0":
   version: 6.0.0
   resolution: "@blueprintjs/datetime@npm:6.0.0"
   dependencies:
@@ -6550,7 +6530,7 @@ __metadata:
     "@babel/register": "npm:7.27.1"
     "@babel/runtime": "npm:7.27.6"
     "@blueprintjs/core": "npm:6.0.0"
-    "@blueprintjs/datetime2": "npm:3.0.0"
+    "@blueprintjs/datetime": "npm:6.0.0"
     "@colors/colors": "npm:1.6.0"
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
