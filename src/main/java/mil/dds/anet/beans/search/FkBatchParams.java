@@ -7,8 +7,8 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class FkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends AbstractBatchParams<B, T> {
 
-  private String tableName;
-  private String foreignKey;
+  private final String tableName;
+  private final String foreignKey;
 
   public FkBatchParams(String tableName, String foreignKey) {
     super();
@@ -30,16 +30,8 @@ public class FkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQ
     return tableName;
   }
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
-
   public String getForeignKey() {
     return foreignKey;
-  }
-
-  public void setForeignKey(String foreignKey) {
-    this.foreignKey = foreignKey;
   }
 
   @Override

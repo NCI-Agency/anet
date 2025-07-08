@@ -7,10 +7,10 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class M2mBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends AbstractBatchParams<B, T> {
 
-  private String tableName;
-  private String m2mTableName;
-  private String m2mLeftKey;
-  private String m2mRightKey;
+  private final String tableName;
+  private final String m2mTableName;
+  private final String m2mLeftKey;
+  private final String m2mRightKey;
 
   public M2mBatchParams(String tableName, String m2mTableName, String m2mLeftKey,
       String m2mRightKey) {
@@ -37,32 +37,16 @@ public class M2mBatchParams<B extends AbstractAnetBean, T extends AbstractSearch
     return tableName;
   }
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
-
   public String getM2mTableName() {
     return m2mTableName;
-  }
-
-  public void setM2mTableName(String m2mTableName) {
-    this.m2mTableName = m2mTableName;
   }
 
   public String getM2mLeftKey() {
     return m2mLeftKey;
   }
 
-  public void setM2mLeftKey(String m2mLeftKey) {
-    this.m2mLeftKey = m2mLeftKey;
-  }
-
   public String getM2mRightKey() {
     return m2mRightKey;
-  }
-
-  public void setM2mRightKey(String m2mRightKey) {
-    this.m2mRightKey = m2mRightKey;
   }
 
   @Override
@@ -86,4 +70,5 @@ public class M2mBatchParams<B extends AbstractAnetBean, T extends AbstractSearch
   public M2mBatchParams<B, T> clone() throws CloneNotSupportedException {
     return (M2mBatchParams<B, T>) super.clone();
   }
+
 }
