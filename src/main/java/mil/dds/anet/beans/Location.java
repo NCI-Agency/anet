@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.RecursiveM2mBatchParams;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -251,6 +253,39 @@ public class Location extends AbstractCustomizableAnetBean
   @GraphQLInputField(name = "parentLocations")
   public void setParentLocations(List<Location> parentLocations) {
     this.parentLocations = parentLocations;
+  }
+
+  @GraphQLQuery(name = "descendantLocations")
+  public CompletableFuture<List<Location>> loadDescendantLocations(
+      @GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") LocationSearchQuery query) {
+    if (query == null) {
+      query = new LocationSearchQuery();
+    }
+    // Note: recursion, includes transitive children!
+    query.setBatchParams(
+        new RecursiveM2mBatchParams<>("locations", "uuid", "\"locationRelationships\"",
+            "\"childLocationUuid\"", "\"parentLocationUuid\"", "\"locationRelationships\"",
+            "\"parentLocationUuid\"", ISearchQuery.RecurseStrategy.CHILDREN));
+    return engine().getLocationDao().getLocationsBySearch(context, uuid, query);
+  }
+
+  @GraphQLQuery(name = "ascendantLocations")
+  public CompletableFuture<List<Location>> loadAscendantLocations(
+      @GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") LocationSearchQuery query) {
+    if (parentLocations != null) {
+      return CompletableFuture.completedFuture(parentLocations);
+    }
+    if (query == null) {
+      query = new LocationSearchQuery();
+    }
+    // Note: recursion, includes transitive parents!
+    query.setBatchParams(
+        new RecursiveM2mBatchParams<>("locations", "uuid", "\"locationRelationships\"",
+            "\"childLocationUuid\"", "\"parentLocationUuid\"", "\"locationRelationships\"",
+            "\"parentLocationUuid\"", ISearchQuery.RecurseStrategy.PARENTS));
+    return engine().getLocationDao().getLocationsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "entityAvatar")
