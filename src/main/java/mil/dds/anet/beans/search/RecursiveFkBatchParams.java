@@ -8,9 +8,9 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class RecursiveFkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends FkBatchParams<B, T> {
 
-  private String recursiveTableName;
-  private String recursiveForeignKey;
-  private RecurseStrategy recurseStrategy;
+  private final String recursiveTableName;
+  private final String recursiveForeignKey;
+  private final RecurseStrategy recurseStrategy;
 
   public RecursiveFkBatchParams(String tableName, String foreignKey, String recursiveTableName,
       String recursiveForeignKey, RecurseStrategy recurseStrategy) {
@@ -32,24 +32,12 @@ public class RecursiveFkBatchParams<B extends AbstractAnetBean, T extends Abstra
     return recursiveTableName;
   }
 
-  public void setRecursiveTableName(String recursiveTableName) {
-    this.recursiveTableName = recursiveTableName;
-  }
-
   public String getRecursiveForeignKey() {
     return recursiveForeignKey;
   }
 
-  public void setRecursiveForeignKey(String recursiveForeignKey) {
-    this.recursiveForeignKey = recursiveForeignKey;
-  }
-
   public RecurseStrategy getRecurseStrategy() {
     return recurseStrategy;
-  }
-
-  public void setRecurseStrategy(RecurseStrategy recurseStrategy) {
-    this.recurseStrategy = recurseStrategy;
   }
 
   @Override
