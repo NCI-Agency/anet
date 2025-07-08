@@ -18,11 +18,35 @@ const locationFields = `
   type
   parentLocations {
     uuid
-    name
   }
   childrenLocations {
     uuid
+  }
+  ascendantLocations {
+    uuid
     name
+    parentLocations {
+      uuid
+    }
+    childrenLocations {
+      uuid
+    }
+    ascendantLocations {
+      uuid
+    }
+  }
+  descendantLocations {
+    uuid
+    name
+    parentLocations {
+      uuid
+    }
+    childrenLocations {
+      uuid
+    }
+    ascendantLocations {
+      uuid
+    }
   }
 `
 
@@ -86,7 +110,7 @@ const HierarchicalOverlayTable = ({
         const isAscendantLocationSelected = selectedItems
           ?.filter(item => item.uuid !== location.uuid)
           ?.some(item =>
-            location.parentLocations?.some(child => child.uuid === item.uuid)
+            location.ascendantLocations?.some(child => child.uuid === item.uuid)
           )
         const isCollapsed = !expandedItems.has(location.uuid)
         const isDescendantLocationSelectedAndCollapsed =
@@ -204,25 +228,67 @@ const HierarchicalOverlayTable = ({
       return
     }
 
-    const neededLocations = [...items]
-    const nonTopLevelItems = items.filter(location => location.parentLocations)
-    nonTopLevelItems.forEach(location => {
-      const missingLocations = location.parentLocations.filter(
-        parent => !neededLocations.some(t => t.uuid === parent.uuid)
-      )
-      neededLocations.push(...missingLocations)
-    })
+    const uuidSet = new Set(items.map(item => item.uuid))
+    const neededLocationsMap = new Map(items.map(item => [item.uuid, item]))
 
-    setLocationList(neededLocations)
-    const newExpandedItems = new Set<string>()
-    neededLocations.forEach(location => {
-      if (!items.some(item => item.uuid === location.uuid)) {
-        if (!newExpandedItems.has(location.uuid)) {
-          newExpandedItems.add(location.uuid)
+    // Add all parent locations for non-top-level items
+    const queue = [...items]
+    while (queue.length > 0) {
+      const location = queue.shift()
+      if (location?.ascendantLocations?.length) {
+        for (const ascendant of location.ascendantLocations) {
+          if (!neededLocationsMap.has(ascendant.uuid)) {
+            neededLocationsMap.set(ascendant.uuid, ascendant)
+          }
         }
       }
-    })
+    }
+
+    // Add all descendants for top-level locations
+    for (const location of neededLocationsMap.values()) {
+      if (!location.parentLocations?.length && location.descendantLocations) {
+        for (const descendant of location.descendantLocations) {
+          if (!neededLocationsMap.has(descendant.uuid)) {
+            neededLocationsMap.set(descendant.uuid, descendant)
+          }
+        }
+      }
+    }
+
+    const neededLocations = Array.from(neededLocationsMap.values())
+    // Build the newExpandedItems set
+    // (locations that are not in the original items, but lead to them)
+    const checkAscendants = (
+      location,
+      uuidSet,
+      newExpandedItems,
+      neededLocations
+    ) => {
+      for (const ascendant of location?.ascendantLocations) {
+        if (ascendant.uuid === location.uuid) {
+          continue
+        }
+        const ascedantLocation = neededLocations.find(
+          location => location.uuid === ascendant.uuid
+        )
+        if (!uuidSet.has(ascendant.uuid)) {
+          newExpandedItems.add(ascendant.uuid)
+        }
+        checkAscendants(
+          ascedantLocation,
+          uuidSet,
+          newExpandedItems,
+          neededLocations
+        )
+      }
+    }
+    const newExpandedItems = new Set<string>()
+    for (const item of items) {
+      checkAscendants(item, uuidSet, newExpandedItems, neededLocations)
+    }
+
     setExpandedItems(newExpandedItems)
+    setLocationList(neededLocations)
   }, [items])
 
   useEffect(() => {
@@ -318,6 +384,7 @@ const LocationFilter = ({
       onChange={handleChangeLoc}
       pageSize={0}
       value={value.value}
+      autoComplete="off"
       showDismiss
       renderSelected={
         <LocationTable
