@@ -403,7 +403,7 @@ public class Organization extends AbstractEmailableAnetBean
       return CompletableFuture.completedFuture(tasks);
     }
     final TaskSearchQuery query = new TaskSearchQuery();
-    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks", "uuid",
         "\"taskTaskedOrganizations\"", "\"taskUuid\"", "\"organizationUuid\""));
     return engine().getTaskDao().getTasksBySearch(context, uuid, query).thenApply(o -> {
       tasks = o;
