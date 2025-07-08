@@ -16,10 +16,6 @@ import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.ApprovalStepDao;
-import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -174,8 +170,7 @@ public class Task extends AbstractCustomizableAnetBean
     query.setBatchParams(
         new M2mBatchParams<>("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
-    return ApplicationContextProvider.getBean(ReportDao.class).getReportsBySearch(context, uuid,
-        query);
+    return engine().getReportDao().getReportsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "responsiblePositions")
@@ -184,11 +179,10 @@ public class Task extends AbstractCustomizableAnetBean
     if (responsiblePositions != null) {
       return CompletableFuture.completedFuture(responsiblePositions);
     }
-    return ApplicationContextProvider.getBean(TaskDao.class)
-        .getResponsiblePositionsForTask(context, uuid).thenApply(o -> {
-          responsiblePositions = o;
-          return o;
-        });
+    return engine().getTaskDao().getResponsiblePositionsForTask(context, uuid).thenApply(o -> {
+      responsiblePositions = o;
+      return o;
+    });
   }
 
   public List<Position> getResponsiblePositions() {
@@ -206,11 +200,10 @@ public class Task extends AbstractCustomizableAnetBean
     if (taskedOrganizations != null) {
       return CompletableFuture.completedFuture(taskedOrganizations);
     }
-    return ApplicationContextProvider.getBean(TaskDao.class)
-        .getTaskedOrganizationsForTask(context, uuid).thenApply(o -> {
-          taskedOrganizations = o;
-          return o;
-        });
+    return engine().getTaskDao().getTaskedOrganizationsForTask(context, uuid).thenApply(o -> {
+      taskedOrganizations = o;
+      return o;
+    });
   }
 
   public List<Organization> getTaskedOrganizations() {
@@ -228,8 +221,8 @@ public class Task extends AbstractCustomizableAnetBean
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getPlanningApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
+    return engine().getApprovalStepDao().getPlanningApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
@@ -250,8 +243,8 @@ public class Task extends AbstractCustomizableAnetBean
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
+    return engine().getApprovalStepDao().getApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
           approvalSteps = o;
           return o;
         });
@@ -274,7 +267,7 @@ public class Task extends AbstractCustomizableAnetBean
     }
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<>("tasks", "\"parentTaskUuid\""));
-    return ApplicationContextProvider.getBean(TaskDao.class).getTasksBySearch(context, uuid, query);
+    return engine().getTaskDao().getTasksBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "descendantTasks")
@@ -287,7 +280,7 @@ public class Task extends AbstractCustomizableAnetBean
     // Note: recursion, includes transitive children!
     query.setBatchParams(new RecursiveFkBatchParams<>("tasks", "\"parentTaskUuid\"", "tasks",
         "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.CHILDREN));
-    return ApplicationContextProvider.getBean(TaskDao.class).getTasksBySearch(context, uuid, query);
+    return engine().getTaskDao().getTasksBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "ascendantTasks")
@@ -300,7 +293,7 @@ public class Task extends AbstractCustomizableAnetBean
     // Note: recursion, includes transitive parents!
     query.setBatchParams(new RecursiveFkBatchParams<>("tasks", "uuid", "tasks",
         "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.PARENTS));
-    return ApplicationContextProvider.getBean(TaskDao.class).getTasksBySearch(context, uuid, query);
+    return engine().getTaskDao().getTasksBySearch(context, uuid, query);
   }
 
   @Override

@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.ApprovalStepDao;
-import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -176,8 +173,8 @@ public class Location extends AbstractCustomizableAnetBean
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getPlanningApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
+    return engine().getApprovalStepDao().getPlanningApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
@@ -198,8 +195,8 @@ public class Location extends AbstractCustomizableAnetBean
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
+    return engine().getApprovalStepDao().getApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
           approvalSteps = o;
           return o;
         });
@@ -220,11 +217,10 @@ public class Location extends AbstractCustomizableAnetBean
     if (childrenLocations != null) {
       return CompletableFuture.completedFuture(childrenLocations);
     }
-    return ApplicationContextProvider.getBean(LocationDao.class).getChildrenLocations(context, uuid)
-        .thenApply(o -> {
-          childrenLocations = o;
-          return o;
-        });
+    return engine().getLocationDao().getChildrenLocations(context, uuid).thenApply(o -> {
+      childrenLocations = o;
+      return o;
+    });
   }
 
   public List<Location> getChildrenLocations() {
@@ -237,11 +233,10 @@ public class Location extends AbstractCustomizableAnetBean
     if (parentLocations != null) {
       return CompletableFuture.completedFuture(parentLocations);
     }
-    return ApplicationContextProvider.getBean(LocationDao.class).getParentLocations(context, uuid)
-        .thenApply(o -> {
-          parentLocations = o;
-          return o;
-        });
+    return engine().getLocationDao().getParentLocations(context, uuid).thenApply(o -> {
+      parentLocations = o;
+      return o;
+    });
   }
 
   public List<Location> getParentLocations() {
