@@ -6,7 +6,7 @@ plugins {
 	// https://github.com/bmuschko/gradle-docker-plugin
 	id "com.bmuschko.docker-remote-api" version "9.4.0"
 	id "com.github.node-gradle.node" version "7.1.0"
-	id "com.diffplug.spotless" version "7.0.3"
+	id "com.diffplug.spotless" version "7.1.0"
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.9"
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "11.11.2"
