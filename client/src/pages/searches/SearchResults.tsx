@@ -10,7 +10,7 @@ import PeopleSearchResults from "components/search/PeopleSearchResults"
 import PositionSearchResults from "components/search/PositionSearchResults"
 import TaskSearchResults from "components/search/TaskSearchResults"
 import React, { useEffect, useMemo, useState } from "react"
-import { Alert, Badge } from "react-bootstrap"
+import { Badge } from "react-bootstrap"
 import utils from "utils"
 
 const DEFAULT_PAGESIZE = 10
