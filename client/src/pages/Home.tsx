@@ -56,7 +56,7 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
 
 const GQL_GET_HOMEPAGE_SAVED_SEARCHES = gql`
   query {
-    savedSearches: myHomepageSearches {
+    savedSearches: mySearches(forHomepage: true) {
       uuid
       name
       objectType
