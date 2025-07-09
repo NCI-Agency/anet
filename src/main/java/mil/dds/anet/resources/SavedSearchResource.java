@@ -80,6 +80,7 @@ public class SavedSearchResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process saved search delete");
     }
+    AnetAuditLogger.log("SavedSearch {} deleted by {}", savedSearchUuid, user);
     return numDeleted;
   }
 
