@@ -30,15 +30,8 @@ public class SavedSearchResource {
   @GraphQLMutation(name = "createSavedSearch")
   public SavedSearch createSavedSearch(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "savedSearch") SavedSearch savedSearch) {
-    Person user = DaoUtils.getUserFromContext(context);
-    savedSearch.setOwnerUuid(user.getUuid());
-    Double maxPriority = dao.getMaxPriorityForOwner(user.getUuid());
-    savedSearch.setPriority(maxPriority == null ? 0.0 : maxPriority + 1.0);
-    if (savedSearch.getDisplayInHomepage()) {
-      Double maxHomepagePriority = dao.getMaxHomepagePriorityForOwner(user.getUuid());
-      savedSearch
-          .setHomepagePriority(maxHomepagePriority == null ? 0.0 : maxHomepagePriority + 1.0);
-    }
+    final Person user = DaoUtils.getUserFromContext(context);
+    savedSearch.setOwnerUuid(DaoUtils.getUuid(user));
     final SavedSearch created = dao.insert(savedSearch);
     AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
     return created;
