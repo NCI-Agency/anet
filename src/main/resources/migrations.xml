@@ -6521,7 +6521,7 @@
 
 	<changeSet id="add-displayInHomepage-and-priority-to-savedSearches" author="jlnat">
 		<addColumn tableName="savedSearches">
-			<column name="displayInHomepage" type="boolean" defaultValueBoolean="false" />
+			<column name="displayInHomepage" type="boolean" defaultValue="false" />
 			<column name="priority" type="double" />
 			<column name="homepagePriority" type="double" />
 		</addColumn>
