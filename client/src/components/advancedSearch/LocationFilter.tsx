@@ -6,7 +6,6 @@ import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LocationTable from "components/LocationTable"
 import { Location } from "models"
 import React, { useCallback, useEffect, useState } from "react"
@@ -333,7 +332,6 @@ interface LocationFilterProps {
   queryRecurseStrategyKey: string
   fixedRecurseStrategy: string
   value?: any
-  multi?: boolean
   onChange?: (...args: unknown[]) => unknown
   locFilterQueryParams?: any
   asFormField?: boolean
@@ -345,17 +343,16 @@ const LocationFilter = ({
   queryRecurseStrategyKey,
   fixedRecurseStrategy,
   value: inputValue,
-  multi,
   onChange,
   locFilterQueryParams,
   ...advancedSelectProps
 }: LocationFilterProps) => {
   const defaultValue = {
-    value: inputValue.value || (multi ? [] : {})
+    value: inputValue.value || []
   }
   const toQuery = val => {
     return {
-      [queryKey]: multi ? val.value?.map(v => v.uuid) : val.value?.uuid,
+      [queryKey]: val.value?.map(v => v.uuid),
       [queryRecurseStrategyKey]: fixedRecurseStrategy
     }
   }
@@ -374,16 +371,10 @@ const LocationFilter = ({
     }
   }
 
-  const AdvancedSelectComponent = multi
-    ? AdvancedMultiSelect
-    : AdvancedSingleSelect
-  const valueKey = multi ? "uuid" : "name"
   return !asFormField ? (
-    <>
-      {multi ? value.value?.map(v => v.name).join(" or ") : value.value?.name}
-    </>
+    <>{value.value?.map(v => v.name).join(" or ")}</>
   ) : (
-    <AdvancedSelectComponent
+    <AdvancedMultiSelect
       {...advancedSelectProps}
       fieldName={queryKey}
       showRemoveButton={false}
@@ -392,7 +383,7 @@ const LocationFilter = ({
       overlayRenderRow={LocationOverlayRow}
       overlayTable={HierarchicalOverlayTable}
       objectType={Location}
-      valueKey={valueKey}
+      valueKey="uuid"
       fields={locationFields}
       placeholder="Filter by location…"
       addon={LOCATIONS_ICON}
@@ -422,31 +413,10 @@ const LocationFilter = ({
 }
 
 export const LocationMultiFilter = ({ ...props }) => (
-  <LocationFilter {...props} multi />
+  <LocationFilter {...props} />
 )
 
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
-    return API.query(GQL_GET_LOCATION, {
-      uuid: query[queryKey]
-    }).then(data => {
-      if (data.location) {
-        return {
-          key,
-          value: {
-            value: data.location,
-            toQuery: { ...query }
-          }
-        }
-      } else {
-        return null
-      }
-    })
-  }
-  return null
-}
-
-export const deserializeMulti = ({ queryKey }, query, key) => {
   if (query[queryKey]) {
     return API.query(GQL_GET_LOCATIONS, {
       uuids: query[queryKey]

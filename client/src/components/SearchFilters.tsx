@@ -14,7 +14,7 @@ import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
 import {
-  deserializeMulti as deserializeLocationMultiFilter,
+  deserialize as deserializeLocationFilter,
   LocationMultiFilter
 } from "components/advancedSearch/LocationFilter"
 import {
@@ -298,7 +298,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       "Within Location": {
         component: LocationMultiFilter,
-        deserializer: deserializeLocationMultiFilter,
+        deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
           queryRecurseStrategyKey: "locationRecurseStrategy",
@@ -399,7 +399,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       "Within Location": {
         component: LocationMultiFilter,
-        deserializer: deserializeLocationMultiFilter,
+        deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
           queryRecurseStrategyKey: "locationRecurseStrategy",
@@ -489,7 +489,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       "Within Location": {
         component: LocationMultiFilter,
-        deserializer: deserializeLocationMultiFilter,
+        deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
           queryRecurseStrategyKey: "locationRecurseStrategy",
@@ -548,7 +548,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       "Within Location": {
         component: LocationMultiFilter,
-        deserializer: deserializeLocationMultiFilter,
+        deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
           queryRecurseStrategyKey: "locationRecurseStrategy",
@@ -597,7 +597,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       "Within Location": {
         component: LocationMultiFilter,
-        deserializer: deserializeLocationMultiFilter,
+        deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
           queryRecurseStrategyKey: "locationRecurseStrategy",
@@ -776,7 +776,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       [`Within ${Settings.fields.event.location.label}`]: {
         component: LocationMultiFilter,
-        deserializer: deserializeLocationMultiFilter,
+        deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid"
         }
