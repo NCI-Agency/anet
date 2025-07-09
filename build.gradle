@@ -141,7 +141,7 @@ dependencies {
 	implementation "org.apache.poi:poi:${poiVersion}"
 	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:3.2.0'
+	implementation 'org.apache.tika:tika-core:3.2.1'
         // For sanitizing SVG uploads
         implementation 'io.github.borewit:svg-sanitizer:0.3.1'
 
