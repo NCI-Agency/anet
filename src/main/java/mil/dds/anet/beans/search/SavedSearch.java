@@ -136,9 +136,8 @@ public class SavedSearch extends AbstractAnetBean {
 
   @Override
   public String toString() {
-    return String.format(
-        "SavedSearch[uuid:%s, name:%s, query:%s, owner:%s, displayInHomepage:%s, priority:%f, homepagePriority:%s]",
-        getUuid(), name, query, getOwnerUuid(), displayInHomepage, priority, homepagePriority);
+    return String.format("SavedSearch[uuid:%s, name:%s, query:%s, owner:%s]", getUuid(), name,
+        query, getOwnerUuid());
   }
 
   @Override
