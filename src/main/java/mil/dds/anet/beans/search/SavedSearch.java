@@ -126,7 +126,8 @@ public class SavedSearch extends AbstractAnetBean {
       return false;
     }
     SavedSearch other = (SavedSearch) o;
-    return Objects.equal(getUuid(), other.getUuid()) && Objects.equal(name, other.getName())
+    return super.equals(o) && Objects.equal(getUuid(), other.getUuid())
+        && Objects.equal(name, other.getName())
         && Objects.equal(getOwnerUuid(), other.getOwnerUuid())
         && Objects.equal(objectType, other.getObjectType())
         && Objects.equal(query, other.getQuery())
@@ -142,7 +143,7 @@ public class SavedSearch extends AbstractAnetBean {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(uuid, name, owner, objectType, query, displayInHomepage, priority,
-        homepagePriority);
+    return Objects.hashCode(super.hashCode(), uuid, name, owner, objectType, query,
+        displayInHomepage, priority, homepagePriority);
   }
 }
