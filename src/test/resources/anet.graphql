@@ -818,6 +818,9 @@ type Mutation {
   updatePositionHistory(position: PositionInput): Int!
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
   updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
+  updateSavedSearchDisplayInHomepage(displayInHomepage: Boolean, uuid: String): Int
+  updateSavedSearchHomepagePriority(homepagePriority: Float, uuid: String): Int
+  updateSavedSearchPriority(priority: Float, uuid: String): Int
   updateTask(task: TaskInput): Int
 }
 
@@ -1174,6 +1177,7 @@ type Query {
   locations(uuids: [String]): [Location]
   martImportedReportList(query: MartImportedReportSearchQueryInput): AnetBeanList_MartImportedReport
   me: Person
+  myHomepageSearches: [SavedSearch]
   mySearches: [SavedSearch]
   mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
   mySubscriptions(query: SubscriptionSearchQueryInput): AnetBeanList_Subscription
@@ -1479,29 +1483,29 @@ enum RollupGraphType {
 """"""
 type SavedSearch {
   createdAt: Instant
+  displayInHomepage: Boolean
+  homepagePriority: Float
   name: String
   objectType: SearchObjectType
   owner: Person
+  priority: Float
   query: String
   updatedAt: Instant
   uuid: String
-  displayInHomepage: Boolean
-  priority: Float
-  homepagePriority: Float
 }
 
 """"""
 input SavedSearchInput {
   createdAt: Instant
+  displayInHomepage: Boolean
+  homepagePriority: Float
   name: String
   objectType: SearchObjectType
   owner: PersonInput
+  priority: Float
   query: String
   updatedAt: Instant
   uuid: String
-  displayInHomepage: Boolean
-  priority: Float
-  homepagePriority: Float
 }
 
 """"""
