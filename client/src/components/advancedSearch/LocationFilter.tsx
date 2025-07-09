@@ -66,6 +66,8 @@ const GQL_GET_LOCATIONS = gql`
   }
 `
 
+const MAX_LOCATIONS_TO_SHOW = 1000
+
 interface HierarchicalOverlayTableProps {
   items: any[]
   selectedItems: any[]
@@ -297,19 +299,32 @@ const HierarchicalOverlayTable = ({
   }, [locationList])
 
   const flattenedItems = React.useMemo(
-    () => buildFlattenedList(rootLocations),
+    // limiting the number of locations to show in the overlay table
+    () => buildFlattenedList(rootLocations.slice(0, MAX_LOCATIONS_TO_SHOW)),
     [rootLocations, buildFlattenedList]
   )
 
   return (
-    <AdvancedMultiSelectOverlayTable
-      {...otherProps}
-      items={flattenedItems}
-      selectedItems={selectedItems}
-      handleAddItem={handleAddItem}
-      handleRemoveItem={handleRemoveItem}
-      renderRow={enhancedRenderRow}
-    />
+    <div>
+      <AdvancedMultiSelectOverlayTable
+        {...otherProps}
+        items={flattenedItems}
+        selectedItems={selectedItems}
+        handleAddItem={handleAddItem}
+        handleRemoveItem={handleRemoveItem}
+        renderRow={enhancedRenderRow}
+      />
+      {(flattenedItems?.length && locationList?.length) > 1000 && (
+        <div className="text-center text-muted small fst-italic">
+          Showing <span className="fw-semibold">{flattenedItems.length}</span>{" "}
+          of <span className="fw-semibold">{locationList.length}</span>{" "}
+          locations.{" "}
+          <span className="d-none d-sm-inline">
+            Refine your search to see more.
+          </span>
+        </div>
+      )}
+    </div>
   )
 }
 
