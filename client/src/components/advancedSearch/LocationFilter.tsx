@@ -83,7 +83,6 @@ const HierarchicalOverlayTable = ({
   const [expandedItems, setExpandedItems] = useState(new Set<string>())
   const [locationList, setLocationList] = useState<any[]>([])
   const [rootLocations, setRootLocations] = useState<any[]>([])
-  const [flattenedItems, setFlattenedItems] = useState([])
 
   const getChildren = useCallback(
     parentLocation => {
@@ -121,10 +120,10 @@ const HierarchicalOverlayTable = ({
             : isDescendantLocationSelectedAndCollapsed
         const disabled = isAscendantLocationSelected
         const locationWithLevel = { ...location, level, isSelected, disabled }
-        const children = expandedItems.has(location.uuid)
-          ? getChildren(location)
+        const childrenWithLevel = expandedItems.has(location.uuid)
+          ? buildFlattenedList(getChildren(location), level + 1)
           : []
-        return [locationWithLevel, ...buildFlattenedList(children, level + 1)]
+        return [locationWithLevel, ...childrenWithLevel]
       })
     },
     [selectedItems, expandedItems, getChildren]
@@ -297,9 +296,10 @@ const HierarchicalOverlayTable = ({
     )
   }, [locationList])
 
-  useEffect(() => {
-    setFlattenedItems(buildFlattenedList(rootLocations))
-  }, [rootLocations, buildFlattenedList])
+  const flattenedItems = React.useMemo(
+    () => buildFlattenedList(rootLocations),
+    [rootLocations, buildFlattenedList]
+  )
 
   return (
     <AdvancedMultiSelectOverlayTable
