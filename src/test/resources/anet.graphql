@@ -1177,8 +1177,7 @@ type Query {
   locations(uuids: [String]): [Location]
   martImportedReportList(query: MartImportedReportSearchQueryInput): AnetBeanList_MartImportedReport
   me: Person
-  myHomepageSearches: [SavedSearch]
-  mySearches: [SavedSearch]
+  mySearches(forHomepage: Boolean = false): [SavedSearch]
   mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
   mySubscriptions(query: SubscriptionSearchQueryInput): AnetBeanList_Subscription
   organization(uuid: String): Organization
