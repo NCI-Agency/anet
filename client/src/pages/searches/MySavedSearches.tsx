@@ -19,6 +19,7 @@ import {
   SearchDescription
 } from "components/SearchFilters"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import _isEmpty from "lodash/isEmpty"
 import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
@@ -33,9 +34,10 @@ const GQL_GET_SAVED_SEARCHES = gql`
       uuid
       name
       objectType
+      query
       displayInHomepage
       priority
-      query
+      homepagePriority
     }
   }
 `
@@ -46,21 +48,9 @@ const GQL_DELETE_SAVED_SEARCH = gql`
   }
 `
 
-const GQL_UPDATE_PRIORITY = gql`
-  mutation updateSavedSearchPriority($uuid: String!, $priority: Float!) {
-    updateSavedSearchPriority(uuid: $uuid, priority: $priority)
-  }
-`
-
-const GQL_UPDATE_DISPLAY_IN_HOMEPAGE = gql`
-  mutation updateSavedSearchDisplayInHomepage(
-    $uuid: String!
-    $displayInHomepage: Boolean!
-  ) {
-    updateSavedSearchDisplayInHomepage(
-      uuid: $uuid
-      displayInHomepage: $displayInHomepage
-    )
+const GQL_UPDATE_SAVED_SEARCH = gql`
+  mutation ($savedSearch: SavedSearchInput!) {
+    updateSavedSearch(savedSearch: $savedSearch)
   }
 `
 
@@ -90,21 +80,21 @@ const MySavedSearches = ({
   const totalCount = useMemo(() => data?.savedSearches?.length || 0, [data])
 
   const updateDisplayInHomepage = search => {
-    API.mutation(GQL_UPDATE_DISPLAY_IN_HOMEPAGE, {
-      uuid: search.uuid,
-      displayInHomepage: !search.displayInHomepage
-    })
-    const updatedSearches = [...searches]
-    const index = updatedSearches.findIndex(s => s.uuid === search.uuid)
-    updatedSearches[index].displayInHomepage = !search.displayInHomepage
-    if (search.displayInHomepage) {
-      updatedSearches[index].homepagePriority = null
+    search.displayInHomepage = !search.displayInHomepage
+    if (!search.displayInHomepage) {
+      search.homepagePriority = null
     } else {
-      updatedSearches[index].homepagePriority = searches.length
-        ? searches[searches.length - 1].priority + 1.0
-        : 0.0
+      const homepagePriorities: number[] = searches
+        .filter(s => utils.isNumeric(s.homepagePriority))
+        .map(s => s.homepagePriority)
+      search.homepagePriority = _isEmpty(homepagePriorities)
+        ? 0.0
+        : Math.max(...homepagePriorities) + 1.0
     }
-    setSearches([...updatedSearches])
+    API.mutation(GQL_UPDATE_SAVED_SEARCH, {
+      savedSearch: search
+    })
+    setSearches([...searches])
   }
 
   useEffect(() => {
@@ -157,7 +147,7 @@ const MySavedSearches = ({
     if (!search) {
       return
     }
-    API.mutation(GQL_UPDATE_PRIORITY, { uuid, priority: search.priority })
+    API.mutation(GQL_UPDATE_SAVED_SEARCH, { savedSearch: search })
   }
 
   return (

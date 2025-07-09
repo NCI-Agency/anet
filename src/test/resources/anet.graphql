@@ -818,9 +818,7 @@ type Mutation {
   updatePositionHistory(position: PositionInput): Int!
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
   updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
-  updateSavedSearchDisplayInHomepage(displayInHomepage: Boolean, uuid: String): Int
-  updateSavedSearchHomepagePriority(homepagePriority: Float, uuid: String): Int
-  updateSavedSearchPriority(priority: Float, uuid: String): Int
+  updateSavedSearch(savedSearch: SavedSearchInput): Int
   updateTask(task: TaskInput): Int
 }
 
