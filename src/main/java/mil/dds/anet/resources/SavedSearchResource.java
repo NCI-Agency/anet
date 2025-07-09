@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,21 @@ public class SavedSearchResource {
 
   public SavedSearchResource(SavedSearchDao dao) {
     this.dao = dao;
+  }
+
+  public static boolean hasPermission(final Person user, final SavedSearch savedSearch) {
+    if (savedSearch == null
+        || !Objects.equals(DaoUtils.getUuid(user), savedSearch.getOwnerUuid())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "You must be the owner of the saved search");
+    }
+    return true;
+  }
+
+  public static void assertPermission(final Person user, final SavedSearch savedSearch) {
+    if (!hasPermission(user, savedSearch)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
   }
 
   @GraphQLMutation(name = "createSavedSearch")
@@ -46,14 +62,9 @@ public class SavedSearchResource {
   @GraphQLMutation(name = "deleteSavedSearch")
   public Integer deleteSavedSearch(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String savedSearchUuid) {
-    final SavedSearch s = dao.getByUuid(savedSearchUuid);
-    if (s == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Saved search not found");
-    }
-    if (!Objects.equals(s.getOwnerUuid(), DaoUtils.getUserFromContext(context).getUuid())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "Saved search can only be deleted by owner");
-    }
+    final Person user = DaoUtils.getUserFromContext(context);
+    final SavedSearch existing = dao.getByUuid(savedSearchUuid);
+    assertPermission(user, existing);
     int numDeleted = dao.delete(savedSearchUuid);
     if (numDeleted == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -63,21 +74,14 @@ public class SavedSearchResource {
     return numDeleted;
   }
 
-  @GraphQLMutation(name = "updateSavedSearchPriority")
-  public Integer updateSavedSearchPriority(@GraphQLArgument(name = "uuid") String uuid,
-      @GraphQLArgument(name = "priority") Double priority) {
-    return dao.updatePriority(uuid, priority);
+  @GraphQLMutation(name = "updateSavedSearch")
+  public Integer updateSavedSearch(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "savedSearch") SavedSearch savedSearch) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final SavedSearch existing = dao.getByUuid(DaoUtils.getUuid(savedSearch));
+    assertPermission(user, existing);
+    AnetAuditLogger.log("SavedSearch {} updated by {}", savedSearch, user);
+    return dao.update(savedSearch);
   }
 
-  @GraphQLMutation(name = "updateSavedSearchHomepagePriority")
-  public Integer updateSavedSearchHomepagePriority(@GraphQLArgument(name = "uuid") String uuid,
-      @GraphQLArgument(name = "homepagePriority") Double homepagePriority) {
-    return dao.updateHomepagePriority(uuid, homepagePriority);
-  }
-
-  @GraphQLMutation(name = "updateSavedSearchDisplayInHomepage")
-  public Integer updateSavedSearchDisplayInHomepage(@GraphQLArgument(name = "uuid") String uuid,
-      @GraphQLArgument(name = "displayInHomepage") Boolean displayInHomepage) {
-    return dao.updateSavedSearchDisplayInHomepage(uuid, displayInHomepage);
-  }
 }

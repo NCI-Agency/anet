@@ -89,9 +89,11 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
   public int updateInternal(SavedSearch obj) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, "
-          + "priority = :priority, \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
+      return handle
+          .createUpdate(
+              "/* updateSavedSearch */ UPDATE \"savedSearches\" SET \"updatedAt\" = :updatedAt,"
+                  + " \"displayInHomepage\" = :displayInHomepage, priority = :priority, "
+                  + "\"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
           .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
     } finally {
       closeDbHandle(handle);
@@ -110,40 +112,4 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     }
   }
 
-  public int updatePriority(String uuid, Double priority) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle
-          .createUpdate("UPDATE \"savedSearches\" SET priority = :priority WHERE uuid = :uuid")
-          .bind("uuid", uuid).bind("priority", priority).execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  public int updateHomepagePriority(String uuid, Double homepagePriority) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle.createUpdate(
-          "UPDATE \"savedSearches\" SET \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
-          .bind("uuid", uuid).bind("homepagePriority", homepagePriority).execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  public int updateSavedSearchDisplayInHomepage(String uuid, Boolean displayInHomepage) {
-    final Handle handle = getDbHandle();
-    try {
-      final String getMaxHomepagePriority = String.format(GET_MAX_FMT, "\"homepagePriority\"",
-          "SELECT \"ownerUuid\" FROM \"savedSearches\" WHERE uuid = :uuid");
-      return handle
-          .createUpdate("UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, "
-              + "\"homepagePriority\" = CASE WHEN :displayInHomepage THEN " + getMaxHomepagePriority
-              + " ELSE NULL END WHERE uuid = :uuid")
-          .bind("uuid", uuid).bind("displayInHomepage", displayInHomepage).execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
 }

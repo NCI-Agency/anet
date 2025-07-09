@@ -60,21 +60,17 @@ const GQL_GET_HOMEPAGE_SAVED_SEARCHES = gql`
       uuid
       name
       objectType
-      homepagePriority
       query
+      displayInHomepage
+      priority
+      homepagePriority
     }
   }
 `
 
-const GQL_UPDATE_HOMEPAGE_PRIORITY = gql`
-  mutation updateSavedSearchHomepagePriority(
-    $uuid: String!
-    $homepagePriority: Float!
-  ) {
-    updateSavedSearchHomepagePriority(
-      uuid: $uuid
-      homepagePriority: $homepagePriority
-    )
+const GQL_UPDATE_SAVED_SEARCH = gql`
+  mutation ($savedSearch: SavedSearchInput!) {
+    updateSavedSearch(savedSearch: $savedSearch)
   }
 `
 
@@ -485,9 +481,8 @@ const MySavedSearches = ({
     if (!search) {
       return
     }
-    API.mutation(GQL_UPDATE_HOMEPAGE_PRIORITY, {
-      uuid,
-      homepagePriority: search.homepagePriority
+    API.mutation(GQL_UPDATE_SAVED_SEARCH, {
+      savedSearch: search
     })
   }
 
