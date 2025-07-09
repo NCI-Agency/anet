@@ -40,12 +40,19 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
   }
 
   @Transactional
-  public List<SavedSearch> getSearchesByOwner(Person owner) {
+  public List<SavedSearch> getSearchesByOwner(Person owner, boolean forHomepage) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createQuery(
-          "/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
-          .bind("ownerUuid", owner.getUuid()).map(new SavedSearchMapper()).list();
+      final StringBuilder sql = new StringBuilder(
+          "/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid");
+      if (forHomepage) {
+        sql.append(" AND \"displayInHomepage\" IS TRUE");
+        sql.append(" ORDER BY \"homepagePriority\" NULLS LAST");
+      } else {
+        sql.append(" ORDER BY priority NULLS LAST");
+      }
+      return handle.createQuery(sql).bind("ownerUuid", owner.getUuid()).map(new SavedSearchMapper())
+          .list();
     } finally {
       closeDbHandle(handle);
     }

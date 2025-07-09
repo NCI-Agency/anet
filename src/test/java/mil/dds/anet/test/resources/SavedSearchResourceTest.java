@@ -34,7 +34,8 @@ class SavedSearchResourceTest extends AbstractResourceTest {
     assertThat(ss.getUuid()).isNotNull();
 
     // Fetch a list of all of my saved searches
-    List<SavedSearch> mine = withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS));
+    List<SavedSearch> mine =
+        withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS, false));
     final Optional<SavedSearch> optional =
         mine.stream().filter(e -> e.getUuid().equals(ss.getUuid())).findFirst();
     assertThat(optional).get().isNotNull();
@@ -52,7 +53,7 @@ class SavedSearchResourceTest extends AbstractResourceTest {
         withCredentials(jackUser, t -> mutationExecutor.deleteSavedSearch("", created.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
 
-    mine = withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS));
+    mine = withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS, false));
     assertThat(mine).doesNotContain(created);
   }
 
@@ -69,7 +70,8 @@ class SavedSearchResourceTest extends AbstractResourceTest {
     assertThat(ss.getUuid()).isNotNull();
 
     // Fetch a list of all of my saved searches
-    List<SavedSearch> mine = withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS));
+    List<SavedSearch> mine =
+        withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS, false));
     final Optional<SavedSearch> optional =
         mine.stream().filter(e -> e.getUuid().equals(ss.getUuid())).findFirst();
     assertThat(optional).get().isNotNull();
@@ -87,7 +89,7 @@ class SavedSearchResourceTest extends AbstractResourceTest {
         withCredentials(jackUser, t -> mutationExecutor.deleteSavedSearch("", created.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
 
-    mine = withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS));
+    mine = withCredentials(jackUser, t -> queryExecutor.mySearches(FIELDS, false));
     assertThat(mine).doesNotContain(created);
   }
 }

@@ -6,7 +6,6 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Person;
@@ -14,8 +13,6 @@ import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.ResponseUtils;
-import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,20 +45,9 @@ public class SavedSearchResource {
   }
 
   @GraphQLQuery(name = "mySearches")
-  public List<SavedSearch> getMySearches(@GraphQLRootContext GraphQLContext context) {
-    return dao.getSearchesByOwner(DaoUtils.getUserFromContext(context)).stream()
-        .sorted(
-            Comparator.comparing(SavedSearch::getPriority, Comparator.nullsLast(Double::compareTo)))
-        .toList();
-  }
-
-  @GraphQLQuery(name = "myHomepageSearches")
-  public List<SavedSearch> getMyHomepageSearches(@GraphQLRootContext GraphQLContext context) {
-    Person user = DaoUtils.getUserFromContext(context);
-    return dao.getSearchesByOwner(user).stream()
-        .filter(s -> Boolean.TRUE.equals(s.getDisplayInHomepage())).sorted(Comparator
-            .comparing(SavedSearch::getHomepagePriority, Comparator.nullsLast(Double::compareTo)))
-        .toList();
+  public List<SavedSearch> getMySearches(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "forHomepage", defaultValue = "false") boolean forHomepage) {
+    return dao.getSearchesByOwner(DaoUtils.getUserFromContext(context), forHomepage);
   }
 
   @GraphQLMutation(name = "deleteSavedSearch")
