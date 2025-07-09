@@ -16,6 +16,9 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
 
   public static final String TABLE_NAME = "savedSearches";
 
+  private static final String GET_MAX_FMT =
+      "(SELECT COALESCE(MAX(%1$s) + 1, 0) FROM \"savedSearches\" WHERE \"ownerUuid\" = (%2$s))";
+
   public SavedSearchDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
   }
@@ -62,13 +65,21 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
   public SavedSearch insertInternal(SavedSearch obj) {
     final Handle handle = getDbHandle();
     try {
-      handle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
-          + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"displayInHomepage\", priority, \"homepagePriority\") "
-          + "VALUES (:uuid, :ownerUuid, :name, :objectType, :query, :displayInHomepage, :priority, :homepagePriority)")
+      final String getMaxPriority = String.format(GET_MAX_FMT, "priority", ":ownerUuid");
+      final String getMaxHomepagePriority =
+          String.format(GET_MAX_FMT, "\"homepagePriority\"", ":ownerUuid");
+      return handle
+          .createQuery("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+              + "(uuid, \"ownerUuid\", name, \"objectType\", query, \"createdAt\", \"updatedAt\", "
+              + "\"displayInHomepage\", priority, \"homepagePriority\") "
+              + "SELECT :uuid, :ownerUuid, :name, :objectType, :query, :createdAt, :updatedAt, "
+              + ":displayInHomepage, " + getMaxPriority + ", "
+              + "CASE WHEN :displayInHomepage THEN " + getMaxHomepagePriority
+              + " ELSE NULL END RETURNING *")
           .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
-          .bind("objectType", DaoUtils.getEnumId(obj.getObjectType())).execute();
-      return obj;
+          .bind("objectType", DaoUtils.getEnumId(obj.getObjectType())).map(new SavedSearchMapper())
+          .first();
     } finally {
       closeDbHandle(handle);
     }
@@ -79,7 +90,8 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     final Handle handle = getDbHandle();
     try {
       return handle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, priority = :priority, \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
+          + "SET name = :name, \"objectType\" = :objectType, query = :query, \"displayInHomepage\" = :displayInHomepage, "
+          + "priority = :priority, \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
           .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
     } finally {
       closeDbHandle(handle);
@@ -93,29 +105,6 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
       return handle
           .createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" WHERE uuid = :uuid")
           .bind("uuid", uuid).execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  public Double getMaxPriorityForOwner(String ownerUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle
-          .createQuery(
-              "SELECT MAX(priority) FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
-          .bind("ownerUuid", ownerUuid).mapTo(Double.class).findOne().orElse(null);
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  public Double getMaxHomepagePriorityForOwner(String ownerUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle.createQuery(
-          "SELECT MAX(\"homepagePriority\") FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
-          .bind("ownerUuid", ownerUuid).mapTo(Double.class).findOne().orElse(null);
     } finally {
       closeDbHandle(handle);
     }
@@ -146,24 +135,13 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
   public int updateSavedSearchDisplayInHomepage(String uuid, Boolean displayInHomepage) {
     final Handle handle = getDbHandle();
     try {
-      if (Boolean.TRUE.equals(displayInHomepage)) {
-        String ownerUuid =
-            handle.createQuery("SELECT \"ownerUuid\" FROM \"savedSearches\" WHERE uuid = :uuid")
-                .bind("uuid", uuid).mapTo(String.class).findOne().orElse(null);
-
-        Double maxHomepagePriority = getMaxHomepagePriorityForOwner(ownerUuid);
-        double newHomepagePriority =
-            (maxHomepagePriority == null) ? 0.0 : maxHomepagePriority + 1.0;
-
-        return handle.createUpdate(
-            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, \"homepagePriority\" = :homepagePriority WHERE uuid = :uuid")
-            .bind("uuid", uuid).bind("displayInHomepage", true)
-            .bind("homepagePriority", newHomepagePriority).execute();
-      } else {
-        return handle.createUpdate(
-            "UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, \"homepagePriority\" = NULL WHERE uuid = :uuid")
-            .bind("uuid", uuid).bind("displayInHomepage", false).execute();
-      }
+      final String getMaxHomepagePriority = String.format(GET_MAX_FMT, "\"homepagePriority\"",
+          "SELECT \"ownerUuid\" FROM \"savedSearches\" WHERE uuid = :uuid");
+      return handle
+          .createUpdate("UPDATE \"savedSearches\" SET \"displayInHomepage\" = :displayInHomepage, "
+              + "\"homepagePriority\" = CASE WHEN :displayInHomepage THEN " + getMaxHomepagePriority
+              + " ELSE NULL END WHERE uuid = :uuid")
+          .bind("uuid", uuid).bind("displayInHomepage", displayInHomepage).execute();
     } finally {
       closeDbHandle(handle);
     }
