@@ -256,7 +256,7 @@ const HierarchicalOverlayTable = ({
       newExpandedItems,
       neededLocations
     ) => {
-      for (const ascendant of location?.ascendantLocations) {
+      for (const ascendant of location?.ascendantLocations || []) {
         if (ascendant.uuid === location.uuid) {
           continue
         }
