@@ -17,13 +17,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.ApprovalStepDao;
-import mil.dds.anet.database.CommentDao;
-import mil.dds.anet.database.ReportActionDao;
-import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -292,11 +285,10 @@ public class Report extends AbstractCustomizableAnetBean
     if (reportPeople != null) {
       return CompletableFuture.completedFuture(reportPeople);
     }
-    return ApplicationContextProvider.getBean(ReportDao.class).getPeopleForReport(context, uuid)
-        .thenApply(o -> {
-          reportPeople = o;
-          return o;
-        });
+    return engine().getReportDao().getPeopleForReport(context, uuid).thenApply(o -> {
+      reportPeople = o;
+      return o;
+    });
   }
 
   public List<ReportPerson> getReportPeople() {
@@ -403,11 +395,10 @@ public class Report extends AbstractCustomizableAnetBean
     if (tasks != null) {
       return CompletableFuture.completedFuture(tasks);
     }
-    return ApplicationContextProvider.getBean(ReportDao.class).getTasksForReport(context, uuid)
-        .thenApply(o -> {
-          tasks = o;
-          return o;
-        });
+    return engine().getReportDao().getTasksForReport(context, uuid).thenApply(o -> {
+      tasks = o;
+      return o;
+    });
   }
 
   @GraphQLInputField(name = "tasks")
@@ -512,7 +503,7 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery(name = "comments")
   public synchronized List<Comment> loadComments() {
     if (comments == null) {
-      comments = ApplicationContextProvider.getBean(CommentDao.class).getCommentsForReport(uuid);
+      comments = engine().getCommentDao().getCommentsForReport(uuid);
     }
     return comments;
   }
@@ -532,8 +523,7 @@ public class Report extends AbstractCustomizableAnetBean
     // First organization workflow
     return getOrganizationWorkflow(context, engine, advisorOrgUuid).thenCompose(steps -> {
       if (Utils.isEmptyOrNull(steps)) {
-        final String defaultOrgUuid =
-            ApplicationContextProvider.getBean(AdminDao.class).getDefaultOrgUuid();
+        final String defaultOrgUuid = engine().getAdminDao().getDefaultOrgUuid();
         if (advisorOrgUuid == null || !Objects.equals(advisorOrgUuid, defaultOrgUuid)) {
           return getDefaultOrganizationWorkflow(context, engine, defaultOrgUuid);
         }
@@ -596,22 +586,21 @@ public class Report extends AbstractCustomizableAnetBean
       return CompletableFuture.completedFuture(workflow);
     }
     final AnetObjectEngine engine = engine();
-    return ApplicationContextProvider.getBean(ReportActionDao.class)
-        .getActionsForReport(context, uuid).thenCompose(actions -> {
-          // For reports which are not approved or published, make sure there
-          // is a report action for each approval step.
-          if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
-            workflow = actions;
-            return CompletableFuture.completedFuture(workflow);
-          } else {
-            return computeApprovalSteps(context, engine).thenCompose(steps -> {
-              final List<ReportAction> actionTail = getActionTail(actions);
-              actionTail.addAll(createApprovalStepsActions(actionTail, steps));
-              workflow = actionTail;
-              return CompletableFuture.completedFuture(workflow);
-            });
-          }
+    return engine().getReportActionDao().getActionsForReport(context, uuid).thenCompose(actions -> {
+      // For reports which are not approved or published, make sure there
+      // is a report action for each approval step.
+      if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
+        workflow = actions;
+        return CompletableFuture.completedFuture(workflow);
+      } else {
+        return computeApprovalSteps(context, engine).thenCompose(steps -> {
+          final List<ReportAction> actionTail = getActionTail(actions);
+          actionTail.addAll(createApprovalStepsActions(actionTail, steps));
+          workflow = actionTail;
+          return CompletableFuture.completedFuture(workflow);
         });
+      }
+    });
   }
 
   private List<ReportAction> getActionTail(List<ReportAction> actions) {
@@ -708,8 +697,8 @@ public class Report extends AbstractCustomizableAnetBean
     if (relatedObjectUuid == null) {
       return CompletableFuture.completedFuture(new ArrayList<>());
     }
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getPlanningApprovalStepsForRelatedObject(context, relatedObjectUuid);
+    return engine().getApprovalStepDao().getPlanningApprovalStepsForRelatedObject(context,
+        relatedObjectUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getWorkflowForRelatedObject(GraphQLContext context,
@@ -718,8 +707,8 @@ public class Report extends AbstractCustomizableAnetBean
       return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
-    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
-        .getApprovalStepsForRelatedObject(context, relatedObjectUuid);
+    return engine().getApprovalStepDao().getApprovalStepsForRelatedObject(context,
+        relatedObjectUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultOrganizationWorkflow(
@@ -758,7 +747,7 @@ public class Report extends AbstractCustomizableAnetBean
     if (reportSensitiveInformation != null) {
       return CompletableFuture.completedFuture(reportSensitiveInformation);
     }
-    return ApplicationContextProvider.getBean(ReportSensitiveInformationDao.class)
+    return engine().getReportSensitiveInformationDao()
         .getForReport(context, this, DaoUtils.getUserFromContext(context)).thenApply(o -> {
           reportSensitiveInformation = o;
           return o;
@@ -778,8 +767,7 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery(name = "authorizationGroups")
   public synchronized List<AuthorizationGroup> loadAuthorizationGroups() {
     if (authorizationGroups == null && uuid != null) {
-      authorizationGroups =
-          ApplicationContextProvider.getBean(ReportDao.class).getAuthorizationGroupsForReport(uuid);
+      authorizationGroups = engine().getReportDao().getAuthorizationGroupsForReport(uuid);
     }
     return authorizationGroups;
   }

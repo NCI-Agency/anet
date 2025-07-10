@@ -1,8 +1,8 @@
 import Model from "components/Model"
 import { Report } from "models"
-import { createLocation } from "../../stories/LocationStories"
+import { createHierarchy as createLocationHierarchy } from "../../stories/LocationStories"
 import { createNote } from "../../stories/NoteStories"
-import { createHierarchy } from "../../stories/OrganizationStories"
+import { createHierarchy as createOrganizationHierarchy } from "../../stories/OrganizationStories"
 import { createPerson } from "../../stories/PersonStories"
 import { createPosition } from "../../stories/PositionStories"
 import { createReport } from "../../stories/ReportStories"
@@ -12,11 +12,14 @@ const TEST_RUN = !!process.env.TEST_RUN
 const buildupLotsOfData = [
   {
     name: "Create location",
-    number: TEST_RUN ? 1 : 500,
-    runnable: createLocation,
+    number: TEST_RUN ? 1 : 100,
+    runnable: createLocationHierarchy,
     preDelay: 0,
     userTypes: ["existingAdmin"],
-    arguments: {}
+    arguments: {
+      status: Model.STATUS.ACTIVE,
+      subLocations: true
+    }
   },
   {
     name: "Create user",
@@ -45,7 +48,7 @@ const buildupLotsOfData = [
   {
     name: "Create organization",
     number: TEST_RUN ? 1 : 100,
-    runnable: createHierarchy,
+    runnable: createOrganizationHierarchy,
     preDelay: 0,
     userTypes: ["existingAdmin"],
     arguments: {

@@ -30,6 +30,7 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.User;
+import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -174,22 +175,16 @@ public final class BatchingUtils {
             (BatchLoader<String, EventSeries>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getEventSeriesDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.LOCATION_CHILDREN_LOCATIONS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<Location>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getLocationDao().getChildrenLocationsForLocation(foreignKeys),
-                dispatcherService),
-            dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.LOCATION_PARENT_LOCATIONS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<Location>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getLocationDao().getParentLocationsForLocation(foreignKeys),
-                dispatcherService),
-            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.LOCATIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, Location>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getLocationDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.LOCATIONS_SEARCH.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, LocationSearchQuery>, List<Location>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getLocationDao().getLocationsBySearch(foreignKeys),
+                    dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(

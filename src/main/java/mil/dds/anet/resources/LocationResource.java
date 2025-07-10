@@ -154,7 +154,7 @@ public class LocationResource {
     // Update parent locations:
     if (l.getParentLocations() != null) {
       final List<Location> existingParentLocations =
-          existing.loadParentLocations(engine.getContext()).join();
+          existing.loadParentLocations(engine.getContext(), null).join();
       Utils.addRemoveElementsByUuid(existingParentLocations, l.getParentLocations(),
           newParentLocation -> dao.addLocationRelationship(newParentLocation, l),
           oldParentLocation -> dao.removeLocationRelationship(oldParentLocation, l));

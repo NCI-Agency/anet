@@ -14,8 +14,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
@@ -249,8 +247,7 @@ public class Event extends EventSeries {
     }
     query.setBatchParams(new FkBatchParams<>("reports", "\"eventUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
-    return ApplicationContextProvider.getBean(ReportDao.class).getReportsBySearch(context, uuid,
-        query);
+    return engine().getReportDao().getReportsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "entityAvatar")

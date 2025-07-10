@@ -674,7 +674,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       // Finally, delete loser
       final int nrDeleted = deleteForMerge(PositionDao.TABLE_NAME, "uuid", loserUuid);
       if (nrDeleted > 0) {
-        ApplicationContextProvider.getBean(AdminDao.class)
+        engine().getAdminDao()
             .insertMergedEntity(new MergedEntity(loserUuid, winnerUuid, Instant.now()));
       }
 

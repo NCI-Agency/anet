@@ -262,10 +262,10 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
 
   public final void addRecursiveBatchClause(AbstractSearchQueryBuilder<B, T> outerQb,
       String tableName, String[] foreignKeys, String withTableName, String recursiveTableName,
-      String recursiveForeignKey, String paramName, List<String> fieldValues,
+      String baseKey, String recursiveForeignKey, String paramName, List<String> fieldValues,
       RecurseStrategy recurseStrategy) {
     final boolean findChildren = RecurseStrategy.CHILDREN.equals(recurseStrategy);
-    addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName, "uuid",
+    addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName, baseKey,
         recursiveForeignKey, paramName, fieldValues, findChildren, false);
     addSelectClause(String.format("%1$s.%2$s AS \"batchUuid\"", withTableName,
         findChildren ? "parent_uuid" : "uuid"));
