@@ -137,7 +137,7 @@
     "file-saver": "2.0.5",
     "formik": "2.4.6",
     "geographiclib-mgrs": "1.0.4",
-    "graphiql": "4.1.2",
+    "graphiql": "5.0.4",
     "graphql": "16.11.0",
     "html-to-image": "1.11.11",
     "jsonpath-plus": "10.3.0",

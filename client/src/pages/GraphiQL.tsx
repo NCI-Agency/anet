@@ -8,6 +8,7 @@ import {
   usePageTitle
 } from "components/Page"
 import { GraphiQL } from "graphiql"
+import "graphiql/setup-workers/webpack"
 import React from "react"
 import { connect } from "react-redux"
 
