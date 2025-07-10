@@ -10,7 +10,7 @@ interface RelatedObjectsTableProps {
   title?: string
   currentObject?: any
   relatedObjects: any
-  setRelatedObjects: (...args: unknown[]) => unknown
+  setRelatedObjects?: (...args: unknown[]) => unknown
   showDelete?: boolean
 }
 
@@ -78,6 +78,7 @@ interface RelatedObjectsTableInputProps {
   relatedObjects: any
   objectType?: string
   entityTypes?: string[]
+  entityFilters?: object[]
   setRelatedObjects: (...args: unknown[]) => unknown
   showDelete?: boolean
 }
@@ -88,6 +89,7 @@ export const RelatedObjectsTableInput = ({
   relatedObjects,
   objectType,
   entityTypes,
+  entityFilters,
   setRelatedObjects,
   showDelete = false
 }: RelatedObjectsTableInputProps) => {
@@ -101,6 +103,7 @@ export const RelatedObjectsTableInput = ({
         value={fieldValue}
         objectType={objectType}
         entityTypes={entityTypes}
+        filters={entityFilters}
         isMultiSelect
         onConfirm={(value, objectType) => {
           if (value.length > fieldValue.length) {

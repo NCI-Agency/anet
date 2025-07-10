@@ -52,10 +52,3 @@ taskList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT,
     customFields
   }
 }
-authorizationGroupList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
-  list {
-    uuid
-    name
-    description
-  }
-}

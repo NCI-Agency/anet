@@ -240,73 +240,22 @@ public class AuthorizationGroupDao
       String relatedObjectUuid) {
     final Handle handle = getDbHandle();
     try {
+      final String relatedTableAlias = "agro";
       final String mainSelectClause = "SELECT ag.uuid FROM \"authorizationGroups\" ag"
-          + " INNER JOIN \"authorizationGroupRelatedObjects\" agro"
-          + " ON ag.uuid = agro.\"authorizationGroupUuid\"";
-      final String mainWhereClause = " WHERE ag.status = :status"; // only active groups
-      final String positionClause = isForPerson(relatedObjectType)
-          ? " AND positions.\"currentPersonUuid\" = :relatedObjectUuid"
-          : " AND positions.uuid = :relatedObjectUuid";
+          + " INNER JOIN \"authorizationGroupRelatedObjects\" " + relatedTableAlias
+          + " ON ag.uuid = " + relatedTableAlias + ".\"authorizationGroupUuid\"";
+      final String statusParam = "status";
+      final String mainWhereClause = " WHERE ag.status = :" + statusParam; // only active groups
+      final String relatedObjectParam = "relatedObjectUuid";
+      final String sql = DaoUtils.getAuthorizationGroupUuidsForRelatedObject(
+          "/* getAuthorizationGroupUuidsForRelatedObject */", relatedObjectParam, relatedObjectType,
+          relatedTableAlias, mainSelectClause, mainWhereClause);
 
-      // Now build the query using UNION ALL, so it can be optimized
-      final StringBuilder sql =
-          new StringBuilder("/* getAuthorizationGroupUuidsForRelatedObject */");
-      sql.append(" WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
-          + " (SELECT uuid, uuid as parent_uuid FROM organizations"
-          + " UNION SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
-          + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
-
-      if (isForPerson(relatedObjectType)) {
-        // Check for person
-        sql.append(mainSelectClause);
-        sql.append(mainWhereClause + " AND \"relatedObjectType\" = '" + PersonDao.TABLE_NAME
-            + "' AND \"relatedObjectUuid\" = :relatedObjectUuid");
-        sql.append(" UNION ALL ");
-      }
-
-      if (isForPersonOrPosition(relatedObjectType)) {
-        // Check for position
-        sql.append(mainSelectClause + ", positions");
-        sql.append(mainWhereClause + positionClause + " AND agro.\"relatedObjectType\" = '"
-            + PositionDao.TABLE_NAME + "' AND agro.\"relatedObjectUuid\" = positions.uuid");
-        sql.append(" UNION ALL ");
-      }
-
-      // Recursively check for organization (and transitive parents thereof)
-      sql.append(mainSelectClause);
-      if (isForPersonOrPosition(relatedObjectType)) {
-        sql.append(", positions");
-      }
-      sql.append(", parent_orgs");
-      sql.append(mainWhereClause);
-      if (isForPersonOrPosition(relatedObjectType)) {
-        sql.append(positionClause);
-      }
-      sql.append(" AND agro.\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME
-          + "' AND agro.\"relatedObjectUuid\" = parent_orgs.parent_uuid");
-      if (isForPersonOrPosition(relatedObjectType)) {
-        sql.append(" AND positions.\"organizationUuid\" = parent_orgs.uuid");
-      } else {
-        sql.append(" AND parent_orgs.uuid = :relatedObjectUuid");
-      }
-
-      return handle.createQuery(sql).bind("status", DaoUtils.getEnumId(Status.ACTIVE))
-          .bind("relatedObjectUuid", relatedObjectUuid).mapTo(String.class).set();
+      return handle.createQuery(sql).bind(statusParam, DaoUtils.getEnumId(Status.ACTIVE))
+          .bind(relatedObjectParam, relatedObjectUuid).mapTo(String.class).set();
     } finally {
       closeDbHandle(handle);
     }
-  }
-
-  private boolean isForPerson(String relatedObjectType) {
-    return PersonDao.TABLE_NAME.equals(relatedObjectType);
-  }
-
-  private boolean isForPosition(String relatedObjectType) {
-    return PositionDao.TABLE_NAME.equals(relatedObjectType);
-  }
-
-  private boolean isForPersonOrPosition(String relatedObjectType) {
-    return isForPerson(relatedObjectType) || isForPosition(relatedObjectType);
   }
 
   @Transactional
