@@ -28,8 +28,8 @@ export const FORMAT_STATISTICS = "statistics"
 interface ReportCollectionProps {
   pageDispatchers?: PageDispatchersPropType
   paginationKey?: string
-  pagination: any
-  setPagination: (...args: unknown[]) => unknown
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
   viewFormats?: string[]
   reportsFilter?: React.ReactNode
   queryParams?: any
@@ -144,7 +144,7 @@ const ReportCollection = ({
           {viewFormat === FORMAT_CALENDAR && (
             <ReportCalendar
               pageDispatchers={pageDispatchers}
-              queryParams={queryParams}
+              queryParams={pagination ? queryParams : null}
               setTotalCount={setTotalCount}
               attendeeType={calendarAttendeeType}
               event={event}
@@ -153,9 +153,9 @@ const ReportCollection = ({
           {viewFormat === FORMAT_TABLE && (
             <ReportTable
               pageDispatchers={pageDispatchers}
-              paginationKey={paginationKey}
-              pagination={pagination}
-              setPagination={setPagination}
+              paginationKey={paginationKey || null}
+              pagination={paginationKey ? pagination : null}
+              setPagination={paginationKey ? setPagination : null}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
             />
@@ -163,9 +163,9 @@ const ReportCollection = ({
           {viewFormat === FORMAT_SUMMARY && (
             <ReportSummary
               pageDispatchers={pageDispatchers}
-              paginationKey={paginationKey}
-              pagination={pagination}
-              setPagination={setPagination}
+              paginationKey={paginationKey || null}
+              pagination={paginationKey ? pagination : null}
+              setPagination={paginationKey ? setPagination : null}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
             />
