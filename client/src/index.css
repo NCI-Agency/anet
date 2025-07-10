@@ -1,6 +1,7 @@
 @import "~bootstrap/dist/css/bootstrap.css";
 @import "~normalize.css";
 @import "~@blueprintjs/core/lib/css/blueprint.css";
+@import "~graphiql/style.css";
 @import "BlueprintOverrides.css";
 @import "bootstrapOverrides.css";
 @import "fullcalendar-vars.css";
