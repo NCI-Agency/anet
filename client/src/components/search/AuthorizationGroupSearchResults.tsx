@@ -1,17 +1,11 @@
 import { gql } from "@apollo/client"
-import API from "api"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import {
-  _isAllSelected,
-  _isSelected,
-  _toggleAll,
-  _toggleSelection,
-  DEFAULT_PAGESIZE,
+  CommonSearchResults,
+  GenericSearchResultsWithEmailProps,
   GQL_EMAIL_ADDRESSES
-} from "components/search/common"
-import _isEqual from "lodash/isEqual"
-import React, { useEffect, useRef, useState } from "react"
+} from "components/search/CommonSearchResults"
+import React from "react"
 
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   query (
@@ -57,136 +51,33 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   }
 `
 
-interface AuthorizationGroupSearchResultsProps {
-  pageDispatchers?: PageDispatchersPropType
-  queryParams?: any
-  setTotalCount?: (...args: unknown[]) => unknown
-  paginationKey?: string
-  pagination?: any
-  setPagination?: (...args: unknown[]) => unknown
-  allowSelection?: boolean
-  updateRecipients?: (...args: unknown[]) => unknown
-}
-
-const AuthorizationGroupSearchResults = ({
-  pageDispatchers,
-  queryParams,
-  setTotalCount,
-  paginationKey,
-  pagination,
-  setPagination,
-  allowSelection,
-  updateRecipients
-}: AuthorizationGroupSearchResultsProps) => {
-  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
-  const latestQueryParams = useRef(queryParams)
-  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
-  const [pageNum, setPageNum] = useState(
-    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
-  )
-  const [selectedEmailAddresses, setSelectedEmailAddresses] = useState(
-    new Map()
-  )
-  useEffect(() => {
-    if (!queryParamsUnchanged) {
-      latestQueryParams.current = queryParams
-      setPagination?.(paginationKey, 0)
-      setPageNum(0)
-      setSelectedEmailAddresses(new Map())
-    }
-  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const authorizationGroupQuery = {
-    ...queryParams,
-    pageNum: queryParamsUnchanged ? pageNum : 0,
-    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  }
-  const { emailNetwork } = queryParams
-  const { loading, error, data } = API.useApiQuery(
-    GQL_GET_AUTHORIZATION_GROUP_LIST,
-    {
-      authorizationGroupQuery,
-      emailNetwork
-    }
-  )
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  // Update the total count
-  const totalCount = done ? null : data?.authorizationGroupList?.totalCount
-  useEffect(() => {
-    setTotalCount?.(totalCount)
-  }, [setTotalCount, totalCount])
-  if (done) {
-    return result
-  }
-
-  const paginatedAuthorizationGroups = data ? data.authorizationGroupList : []
-  const {
-    pageSize,
-    pageNum: curPage,
-    list: authorizationGroups
-  } = paginatedAuthorizationGroups
-
+const AuthorizationGroupSearchResults = (
+  props: GenericSearchResultsWithEmailProps
+) => {
   return (
-    <AuthorizationGroupTable
-      authorizationGroups={authorizationGroups}
-      showMembers
-      showStatus
-      pageSize={setPagination && pageSize}
-      pageNum={setPagination && curPage}
-      totalCount={setPagination && totalCount}
-      goToPage={setPagination && setPage}
-      allowSelection={allowSelection}
-      selection={selectedEmailAddresses}
-      isAllSelected={isAllSelected}
-      toggleAll={toggleAll}
-      isSelected={isSelected}
-      toggleSelection={toggleSelection}
-      id="authorizationGroups-search-results"
+    <CommonSearchResults
+      gqlQuery={GQL_GET_AUTHORIZATION_GROUP_LIST}
+      gqlQueryParamName="authorizationGroupQuery"
+      gqlQueryResultName="authorizationGroupList"
+      tableComponent={AuthorizationGroupTable}
+      tableResultsProp="authorizationGroups"
+      tableId="authorizationGroups-search-results"
+      getListWithEmailAddresses={getListWithEmailAddresses}
+      {...props}
+      extraProps={{
+        showMembers: true,
+        showStatus: true
+      }}
     />
   )
 
-  function setPage(pageNum) {
-    setPagination(paginationKey, pageNum)
-    setPageNum(pageNum)
-  }
-
-  function getListWithEmailAddresses() {
-    return authorizationGroups.map(ag => ({
+  function getListWithEmailAddresses(list) {
+    return list.map(ag => ({
       uuid: ag.uuid,
       emailAddresses: ag.authorizationGroupRelatedObjects
         .flatMap(agro => agro.relatedObject?.emailAddresses)
         .filter(Boolean)
     }))
-  }
-
-  function isAllSelected() {
-    return _isAllSelected(getListWithEmailAddresses(), selectedEmailAddresses)
-  }
-
-  function toggleAll() {
-    _toggleAll(
-      getListWithEmailAddresses(),
-      selectedEmailAddresses,
-      setSelectedEmailAddresses,
-      updateRecipients
-    )
-  }
-
-  function isSelected(uuid) {
-    return _isSelected(uuid, selectedEmailAddresses)
-  }
-
-  function toggleSelection(uuid, emailAddresses) {
-    _toggleSelection(
-      uuid,
-      emailAddresses,
-      selectedEmailAddresses,
-      setSelectedEmailAddresses,
-      updateRecipients
-    )
   }
 }
 
