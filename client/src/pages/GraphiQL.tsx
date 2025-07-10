@@ -7,8 +7,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import GraphiQL from "graphiql"
-import "graphiql/graphiql.css"
+import { GraphiQL } from "graphiql"
 import React from "react"
 import { connect } from "react-redux"
 
@@ -23,14 +22,13 @@ const GraphiQLContainer = ({ pageDispatchers }: GraphiQLContainerProps) => {
     pageDispatchers
   })
   usePageTitle("GraphQL")
-  // TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
   return (
-    <div style={{ height: "600px" }}>
+    <div className="h-100">
       <GraphiQL fetcher={fetch} />
     </div>
   )
 
-  function fetch(params) {
+  async function fetch(params) {
     const { operationName, variables } = params
     const query = gql`
       ${params.query}
