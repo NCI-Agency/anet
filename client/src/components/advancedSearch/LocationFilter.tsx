@@ -49,14 +49,6 @@ const locationFields = `
   }
 `
 
-const GQL_GET_LOCATION = gql`
-  query ($uuid: String!) {
-    location(uuid: $uuid) {
-      ${locationFields}
-    }
-  }
-`
-
 const GQL_GET_LOCATIONS = gql`
   query ($uuids: [String]) {
     locations(uuids: $uuids) {
@@ -65,7 +57,7 @@ const GQL_GET_LOCATIONS = gql`
   }
 `
 
-const MAX_LOCATIONS_TO_SHOW = 1000
+const MAX_LOCATIONS_TO_SHOW = 300
 
 interface HierarchicalOverlayTableProps {
   items: any[]
@@ -299,31 +291,19 @@ const HierarchicalOverlayTable = ({
 
   const flattenedItems = React.useMemo(
     // limiting the number of locations to show in the overlay table
-    () => buildFlattenedList(rootLocations.slice(0, MAX_LOCATIONS_TO_SHOW)),
+    () => buildFlattenedList(rootLocations),
     [rootLocations, buildFlattenedList]
   )
 
   return (
-    <div>
-      <AdvancedMultiSelectOverlayTable
-        {...otherProps}
-        items={flattenedItems}
-        selectedItems={selectedItems}
-        handleAddItem={handleAddItem}
-        handleRemoveItem={handleRemoveItem}
-        renderRow={enhancedRenderRow}
-      />
-      {(flattenedItems?.length && locationList?.length) > 1000 && (
-        <div className="text-center text-muted small fst-italic">
-          Showing <span className="fw-semibold">{flattenedItems.length}</span>{" "}
-          of <span className="fw-semibold">{locationList.length}</span>{" "}
-          locations.{" "}
-          <span className="d-none d-sm-inline">
-            Refine your search to see more.
-          </span>
-        </div>
-      )}
-    </div>
+    <AdvancedMultiSelectOverlayTable
+      {...otherProps}
+      items={flattenedItems}
+      selectedItems={selectedItems}
+      handleAddItem={handleAddItem}
+      handleRemoveItem={handleRemoveItem}
+      renderRow={enhancedRenderRow}
+    />
   )
 }
 
@@ -388,7 +368,8 @@ const LocationFilter = ({
       placeholder="Filter by location…"
       addon={LOCATIONS_ICON}
       onChange={handleChangeLoc}
-      pageSize={0}
+      pageSize={MAX_LOCATIONS_TO_SHOW}
+      pagination={false}
       value={value.value}
       autoComplete="off"
       showDismiss
