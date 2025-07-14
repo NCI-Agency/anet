@@ -13,9 +13,8 @@ import CheckboxFilter, {
 import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
-import {
-  deserialize as deserializeLocationFilter,
-  LocationMultiFilter
+import LocationFilter, {
+  deserialize as deserializeLocationFilter
 } from "components/advancedSearch/LocationFilter"
 import {
   deserializeMulti as deserializeOrganizationMultiFilter,
@@ -297,7 +296,7 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Within Location": {
-        component: LocationMultiFilter,
+        component: LocationFilter,
         deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
@@ -398,7 +397,7 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Within Location": {
-        component: LocationMultiFilter,
+        component: LocationFilter,
         deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
@@ -488,7 +487,7 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Within Location": {
-        component: LocationMultiFilter,
+        component: LocationFilter,
         deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
@@ -547,7 +546,7 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Within Location": {
-        component: LocationMultiFilter,
+        component: LocationFilter,
         deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
@@ -596,7 +595,7 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Within Location": {
-        component: LocationMultiFilter,
+        component: LocationFilter,
         deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid",
@@ -775,7 +774,7 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       [`Within ${Settings.fields.event.location.label}`]: {
-        component: LocationMultiFilter,
+        component: LocationFilter,
         deserializer: deserializeLocationFilter,
         props: {
           queryKey: "locationUuid"

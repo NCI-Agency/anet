@@ -393,10 +393,6 @@ const LocationFilter = ({
   }
 }
 
-export const LocationMultiFilter = ({ ...props }) => (
-  <LocationFilter {...props} />
-)
-
 export const deserialize = ({ queryKey }, query, key) => {
   if (query[queryKey]) {
     return API.query(GQL_GET_LOCATIONS, {
