@@ -496,7 +496,7 @@ const MySavedSearches = ({
       <DndProvider backend={HTML5Backend}>
         {searches.map((search, i) => (
           <Fieldset
-            className="mb-4"
+            className="saved-search-row mb-4"
             title={i === 0 ? "My Saved Searches" : null}
             key={search.uuid}
           >
