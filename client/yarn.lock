@@ -445,14 +445,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-proposal-do-expressions@npm:7.28.0":
-  version: 7.28.0
-  resolution: "@babel/plugin-proposal-do-expressions@npm:7.28.0"
+"@babel/plugin-proposal-do-expressions@npm:7.28.1":
+  version: 7.28.1
+  resolution: "@babel/plugin-proposal-do-expressions@npm:7.28.1"
   dependencies:
     "@babel/helper-plugin-utils": "npm:^7.27.1"
   peerDependencies:
     "@babel/core": ^7.0.0-0
-  checksum: 10c0/77f9f3c571f623acd45c43e376081931eb21b992108e8b4241d0d74a0461f3d37a3a46a55090ac7dcda6f0d20ca6cb5c577b05606e798ebd564658189b0d3089
+  checksum: 10c0/bb4584bc735747acf903bf4bbe54a4f84b18908fa0bf31dcd253bcd21b2ccc3345247bc5255d92535fa10d373dbbf5046a6c02fd8827c2ffd3c6bdc44d73dac0
   languageName: node
   linkType: hard
 
@@ -6543,7 +6543,7 @@ __metadata:
     "@babel/core": "npm:7.28.0"
     "@babel/eslint-parser": "npm:7.28.0"
     "@babel/plugin-proposal-decorators": "npm:7.28.0"
-    "@babel/plugin-proposal-do-expressions": "npm:7.28.0"
+    "@babel/plugin-proposal-do-expressions": "npm:7.28.1"
     "@babel/plugin-proposal-export-default-from": "npm:7.27.1"
     "@babel/plugin-proposal-function-sent": "npm:7.27.1"
     "@babel/plugin-proposal-pipeline-operator": "npm:7.27.1"
