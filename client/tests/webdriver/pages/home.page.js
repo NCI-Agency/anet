@@ -110,6 +110,18 @@ class Home extends Page {
       { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
     )
   }
+
+  async getSavedSearches() {
+    return browser.$$("fieldset.saved-search-row")
+  }
+
+  async getSavedSearchesCount() {
+    return (await this.getSavedSearches()).length
+  }
+
+  async getSavedSearchTitleText(savedSearch) {
+    return await (await savedSearch).$(".asLink").getText()
+  }
 }
 
 export default new Home()
