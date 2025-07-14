@@ -26,7 +26,7 @@ class SavedSearchResourceTest extends AbstractResourceTest {
     final SavedSearchInput ssi =
         SavedSearchInput.builder().withName("Test Saved Search created by SavedSearchResourceTest")
             .withObjectType(SearchObjectType.REPORTS).withQuery("{\"text\" : \"spreadsheets\"}")
-            .withDisplayInHomepage(false).build();
+            .build();
 
     final SavedSearch ss =
         withCredentials(jackUser, t -> mutationExecutor.createSavedSearch(FIELDS, ssi));

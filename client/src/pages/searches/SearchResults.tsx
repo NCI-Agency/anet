@@ -110,7 +110,7 @@ const SearchResults = ({
       0
     )
     setSearchCount(searchCount)
-  }, [objectTypeResultCount])
+  }, [objectTypeResultCount, setSearchCount])
 
   return (
     <div>
