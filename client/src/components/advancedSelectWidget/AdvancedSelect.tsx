@@ -121,7 +121,6 @@ export interface AdvancedSelectProps {
   handleRemoveItem?: (...args: unknown[]) => unknown
   createEntityComponent?: (...args: unknown[]) => React.ReactNode
   autoComplete?: string
-  pagination?: boolean
 }
 
 const AdvancedSelect = ({
@@ -151,8 +150,7 @@ const AdvancedSelect = ({
   handleAddItem,
   handleRemoveItem,
   createEntityComponent,
-  autoComplete,
-  pagination = true
+  autoComplete
 }: AdvancedSelectProps) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
@@ -190,9 +188,7 @@ const AdvancedSelect = ({
       if (!selectedFilter?.list) {
         const resourceName = objectType.resourceName
         const listName = selectedFilter?.listName || objectType.listName
-        const queryVars = pagination
-          ? { pageNum, pageSize }
-          : { pageNum: 0, pageSize }
+        const queryVars = { pageNum, pageSize }
         if (latestQueryParams.current) {
           Object.assign(queryVars, latestQueryParams.current)
         }
@@ -236,7 +232,6 @@ const AdvancedSelect = ({
       objectType.resourceName,
       pageNum,
       pageSize,
-      pagination,
       selectedFilter?.list,
       selectedFilter?.listName,
       selectedFilter?.queryVars
@@ -281,12 +276,14 @@ const AdvancedSelect = ({
       setResults(oldResults => ({
         ...oldResults,
         [filterType]: {
-          list: selectedFilter.list.slice(0, pageSize),
+          list: selectedFilter.list,
+          pageNum,
+          pageSize,
           totalCount: selectedFilter.list.length
         }
       }))
     }
-  }, [filterType, selectedFilter?.list, pageSize])
+  }, [filterType, pageNum, pageSize, selectedFilter?.list])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -393,17 +390,15 @@ const AdvancedSelect = ({
                                 </div>
                               }
                             />
-                            {pagination && (
-                              <UltimatePagination
-                                Component="footer"
-                                componentClassName="searchPagination"
-                                className="float-end"
-                                pageNum={pageNum}
-                                pageSize={pageSize}
-                                totalCount={totalCount}
-                                goToPage={goToPage}
-                              />
-                            )}
+                            <UltimatePagination
+                              Component="footer"
+                              componentClassName="searchPagination"
+                              className="float-end"
+                              pageNum={pageNum}
+                              pageSize={pageSize}
+                              totalCount={totalCount}
+                              goToPage={goToPage}
+                            />
                           </Col>
                         </>
                       )}
@@ -511,10 +506,8 @@ const AdvancedSelect = ({
     setSearchTerms(event.target.value)
     // Reset the results state when the search terms change
     setResults({})
+    setPageNum(0)
     // Make sure we don't do a fetch for each character being typed
-    if (!pagination) {
-      setPageNum(0)
-    }
     setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
@@ -527,7 +520,7 @@ const AdvancedSelect = ({
     const filterResults = results[newFilterType]
     const shouldFetchResults = _isEmpty(filterResults)
     setFilterType(newFilterType)
-    setPageNum(0)
+    setPageNum(results && filterResults ? filterResults.pageNum : 0)
     setIsLoading(shouldFetchResults)
     setFetchType(shouldFetchResults ? FETCH_TYPE.NORMAL : FETCH_TYPE.NONE)
   }

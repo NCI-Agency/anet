@@ -432,7 +432,6 @@ const LocationFilter = ({
       addon={LOCATIONS_ICON}
       onChange={handleChangeLoc}
       pageSize={0}
-      pagination={false}
       value={value.value}
       autoComplete="off"
       showDismiss
