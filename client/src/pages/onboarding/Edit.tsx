@@ -23,7 +23,6 @@ const GQL_GET_SELF = gql`
       status
       phoneNumber
       pendingVerification
-      biography
       obsoleteCountry
       country {
         uuid
