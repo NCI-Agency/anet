@@ -358,15 +358,6 @@ const AdvancedSelect = ({
                             handleOnChange={handleOnChangeSelect}
                           />
                           <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
-                            {!pagination && totalCount > items.length && (
-                              <div className="text-center text-muted small fst-italic">
-                                Showing{" "}
-                                <span className="fw-semibold">
-                                  {items.length}
-                                </span>{" "}
-                                results.
-                              </div>
-                            )}
                             <OverlayTable
                               fieldName={fieldName}
                               items={items}

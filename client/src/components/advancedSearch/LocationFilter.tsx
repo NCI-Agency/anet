@@ -351,14 +351,22 @@ const HierarchicalOverlayTable = ({
   )
 
   return (
-    <AdvancedMultiSelectOverlayTable
-      {...otherProps}
-      items={flattenedItems}
-      selectedItems={selectedItems}
-      handleAddItem={handleAddItem}
-      handleRemoveItem={handleRemoveItem}
-      renderRow={enhancedRenderRow}
-    />
+    <>
+      {rootLocations.length > MAX_LOCATIONS_TO_SHOW && (
+        <div className="text-center text-muted small fst-italic">
+          Showing <span className="fw-semibold">{MAX_LOCATIONS_TO_SHOW}</span>{" "}
+          results.
+        </div>
+      )}
+      <AdvancedMultiSelectOverlayTable
+        {...otherProps}
+        items={flattenedItems}
+        selectedItems={selectedItems}
+        handleAddItem={handleAddItem}
+        handleRemoveItem={handleRemoveItem}
+        renderRow={enhancedRenderRow}
+      />
+    </>
   )
 }
 
@@ -424,7 +432,6 @@ const LocationFilter = ({
       addon={LOCATIONS_ICON}
       onChange={handleChangeLoc}
       pageSize={0}
-      maxShown={MAX_LOCATIONS_TO_SHOW}
       pagination={false}
       value={value.value}
       autoComplete="off"
