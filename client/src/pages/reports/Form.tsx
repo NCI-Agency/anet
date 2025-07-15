@@ -706,7 +706,7 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("location", value, true)
-                    setLocationUuid(value.uuid)
+                    setLocationUuid(value?.uuid)
                   }}
                   disabled={locationDisabled}
                   widget={
