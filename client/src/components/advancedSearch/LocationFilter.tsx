@@ -4,7 +4,6 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import LocationTable from "components/LocationTable"
 import _isEmpty from "lodash/isEmpty"
@@ -423,7 +422,6 @@ const LocationFilter = ({
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}
-      overlayRenderRow={LocationOverlayRow}
       overlayTable={HierarchicalOverlayTable}
       objectType={Location}
       valueKey="uuid"
