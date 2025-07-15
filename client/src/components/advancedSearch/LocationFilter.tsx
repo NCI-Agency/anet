@@ -194,6 +194,16 @@ function buildFlattenedList(
   )
 }
 
+const sortLocations = locations => {
+  locations
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(location => {
+      if (!_isEmpty(location.children)) {
+        sortLocations(location.children)
+      }
+    })
+}
+
 interface HierarchicalOverlayTableProps {
   items: object[]
   selectedItems: object[]
@@ -340,12 +350,14 @@ const HierarchicalOverlayTable = ({
 
   const flattenedItems = React.useMemo(
     // limiting the number of locations to show in the overlay table
-    () =>
-      buildFlattenedList(
+    () => {
+      sortLocations(rootLocations)
+      return buildFlattenedList(
         rootLocations.slice(0, MAX_LOCATIONS_TO_SHOW),
         selectedItems,
         expandedItems
-      ),
+      )
+    },
     [rootLocations, selectedItems, expandedItems]
   )
 
