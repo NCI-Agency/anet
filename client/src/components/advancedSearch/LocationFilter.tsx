@@ -7,6 +7,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import LocationTable from "components/LocationTable"
+import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useCallback, useEffect, useState } from "react"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -15,22 +16,10 @@ const locationFields = `
   uuid
   name
   type
-  parentLocations {
-    uuid
-  }
-  childrenLocations {
-    uuid
-  }
   ascendantLocations {
     uuid
     name
     parentLocations {
-      uuid
-    }
-    childrenLocations {
-      uuid
-    }
-    ascendantLocations {
       uuid
     }
   }
@@ -38,12 +27,6 @@ const locationFields = `
     uuid
     name
     parentLocations {
-      uuid
-    }
-    childrenLocations {
-      uuid
-    }
-    ascendantLocations {
       uuid
     }
   }
@@ -59,9 +42,162 @@ const GQL_GET_LOCATIONS = gql`
 
 const MAX_LOCATIONS_TO_SHOW = 300
 
+function getItemFromMap(treeMap: object, item: object) {
+  treeMap[item.uuid] ??= { uuid: item.uuid, name: item.name }
+  return treeMap[item.uuid]
+}
+
+function addParentsToMapItem(
+  treeMap: object,
+  item: object,
+  parents: object[] = []
+) {
+  return parents.map(parent => {
+    const po = getItemFromMap(treeMap, parent)
+    if (!item.parents) {
+      item.parents = [po]
+    } else if (!item.parents.some(p => p.uuid === po.uuid)) {
+      item.parents.push(po)
+    }
+    return po
+  })
+}
+
+function addChildrenToMapItem(
+  treeMap: object,
+  item: object,
+  children: object[] = []
+) {
+  return children.map(child => {
+    const co = getItemFromMap(treeMap, child)
+    if (!item.children) {
+      item.children = [co]
+    } else if (!item.children.some(c => c.uuid === co.uuid)) {
+      item.children.push(co)
+    }
+    return co
+  })
+}
+
+function getChildren(
+  item: object,
+  descendants: object[],
+  parentsField: string
+) {
+  return (
+    descendants?.filter(d =>
+      d[parentsField]?.map(p => p.uuid)?.includes(item.uuid)
+    ) ?? []
+  )
+}
+
+function setChildren(
+  treeMap: object,
+  item: object,
+  descendants: object[],
+  parentsField: string
+) {
+  const o = getItemFromMap(treeMap, item)
+  const newChildren = getChildren(o, descendants, parentsField)
+  for (const child of addChildrenToMapItem(treeMap, o, newChildren)) {
+    addParentsToMapItem(treeMap, child, [o])
+    setChildren(treeMap, child, descendants, parentsField)
+  }
+}
+
+function getParents(item: object, ascendants: object[], parentsField: string) {
+  const parentsUuids =
+    ascendants
+      ?.filter(a => a.uuid === item.uuid)
+      .flatMap(a => a[parentsField])
+      .map(p => p.uuid) ?? []
+  return ascendants?.filter(a => parentsUuids.includes(a.uuid)) ?? []
+}
+
+function setParents(
+  treeMap: object,
+  item: object,
+  ascendants: object[],
+  parentsField: string
+) {
+  const o = getItemFromMap(treeMap, item)
+  const newParents = getParents(o, ascendants, parentsField)
+  for (const parent of addParentsToMapItem(treeMap, o, newParents)) {
+    addChildrenToMapItem(treeMap, parent, [o])
+    setParents(treeMap, parent, ascendants, parentsField)
+  }
+}
+
+function buildTree(
+  ascendantsField: string,
+  descendantsField: string,
+  parentsField: string,
+  items: object[] = []
+) {
+  const treeMap = {}
+  for (const item of items) {
+    setChildren(treeMap, item, item[descendantsField], parentsField)
+    setParents(treeMap, item, item[ascendantsField], parentsField)
+  }
+  return treeMap
+}
+
+function hasDescendantLocationSelected(item: object, location: object) {
+  return location.children?.some(
+    child =>
+      child.uuid === item.uuid || hasDescendantLocationSelected(item, child)
+  )
+}
+
+function hasAscendantLocationSelected(item: object, location: object) {
+  return location.parents?.some(
+    child =>
+      child.uuid === item.uuid || hasAscendantLocationSelected(item, child)
+  )
+}
+
+function buildFlattenedList(
+  locations: object[],
+  selectedItems: object[],
+  expandedItems: Set<string>,
+  level: number = 0
+) {
+  return (
+    locations?.flatMap(location => {
+      const isLocationSelected = selectedItems?.some(
+        item => item.uuid === location.uuid
+      )
+      const isDescendantLocationSelected = selectedItems?.some(item =>
+        hasDescendantLocationSelected(item, location)
+      )
+      const isAscendantLocationSelected = selectedItems?.some(item =>
+        hasAscendantLocationSelected(item, location)
+      )
+      const isCollapsed = !expandedItems?.has(location.uuid)
+      const isAscendantLocationSelectedAndCollapsed =
+        isDescendantLocationSelected && isCollapsed ? null : false
+      const isSelected =
+        isLocationSelected || isAscendantLocationSelected
+          ? true
+          : isAscendantLocationSelectedAndCollapsed
+      const disabled = isAscendantLocationSelected
+      const locationWithLevel = { ...location, level, isSelected, disabled }
+      const childrenWithLevel = isCollapsed
+        ? []
+        : buildFlattenedList(
+          location.children,
+          selectedItems,
+          expandedItems,
+          level + 1
+        )
+      return [locationWithLevel, ...childrenWithLevel]
+    }) ?? []
+  )
+}
+
 interface HierarchicalOverlayTableProps {
-  items: any[]
-  selectedItems: any[]
+  items: object[]
+  selectedItems: object[]
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
 }
@@ -74,53 +210,7 @@ const HierarchicalOverlayTable = ({
   ...otherProps
 }: HierarchicalOverlayTableProps) => {
   const [expandedItems, setExpandedItems] = useState(new Set<string>())
-  const [locationList, setLocationList] = useState<any[]>([])
-  const [rootLocations, setRootLocations] = useState<any[]>([])
-
-  const getChildren = useCallback(
-    parentLocation => {
-      return (
-        locationList?.filter(location =>
-          location?.parentLocations?.some(
-            parent => parent.uuid === parentLocation.uuid
-          )
-        ) || []
-      )
-    },
-    [locationList]
-  )
-
-  const buildFlattenedList = useCallback(
-    (locations, level = 0) => {
-      return locations.flatMap(location => {
-        const isLocationSelected = selectedItems?.some(
-          item => item.uuid === location.uuid
-        )
-        const isDescendantLocationSelected = selectedItems?.some(item =>
-          location.childrenLocations?.some(child => child.uuid === item.uuid)
-        )
-        const isAscendantLocationSelected = selectedItems
-          ?.filter(item => item.uuid !== location.uuid)
-          ?.some(item =>
-            location.ascendantLocations?.some(child => child.uuid === item.uuid)
-          )
-        const isCollapsed = !expandedItems.has(location.uuid)
-        const isDescendantLocationSelectedAndCollapsed =
-          isDescendantLocationSelected && isCollapsed ? null : false
-        const isSelected =
-          isLocationSelected || isAscendantLocationSelected
-            ? true
-            : isDescendantLocationSelectedAndCollapsed
-        const disabled = isAscendantLocationSelected
-        const locationWithLevel = { ...location, level, isSelected, disabled }
-        const childrenWithLevel = expandedItems.has(location.uuid)
-          ? buildFlattenedList(getChildren(location), level + 1)
-          : []
-        return [locationWithLevel, ...childrenWithLevel]
-      })
-    },
-    [selectedItems, expandedItems, getChildren]
-  )
+  const [rootLocations, setRootLocations] = useState<object[]>([])
 
   const handleExpand = useCallback(
     location => {
@@ -139,7 +229,7 @@ const HierarchicalOverlayTable = ({
 
   const enhancedRenderRow = useCallback(
     location => {
-      const hasChildren = getChildren(location).length > 0
+      const hasChildren = !_isEmpty(location.children)
       const isExpanded = expandedItems.has(location.uuid)
       const isSelected = selectedItems?.some(
         item => item.uuid === location.uuid
@@ -209,90 +299,55 @@ const HierarchicalOverlayTable = ({
       selectedItems,
       handleAddItem,
       handleRemoveItem,
-      getChildren,
       handleExpand
     ]
   )
 
   useEffect(() => {
     if (!items?.length) {
-      setLocationList([])
+      setExpandedItems(new Set())
       return
     }
 
     const uuidSet = new Set(items.map(item => item.uuid))
-    const neededLocationsMap = new Map(items.map(item => [item.uuid, item]))
-
-    // Add all parent locations for non-top-level items
-    const queue = [...items]
-    while (queue.length > 0) {
-      const location = queue.shift()
-      if (location?.ascendantLocations?.length) {
-        for (const ascendant of location.ascendantLocations) {
-          if (!neededLocationsMap.has(ascendant.uuid)) {
-            neededLocationsMap.set(ascendant.uuid, ascendant)
-          }
-        }
-      }
-    }
-
-    // Add all descendants for top-level locations
-    for (const location of neededLocationsMap.values()) {
-      if (!location.parentLocations?.length && location.descendantLocations) {
-        for (const descendant of location.descendantLocations) {
-          if (!neededLocationsMap.has(descendant.uuid)) {
-            neededLocationsMap.set(descendant.uuid, descendant)
-          }
-        }
-      }
-    }
-
-    const neededLocations = Array.from(neededLocationsMap.values())
-    // Build the newExpandedItems set
-    // (locations that are not in the original items, but lead to them)
-    const checkAscendants = (
-      location,
-      uuidSet,
-      newExpandedItems,
-      neededLocations
-    ) => {
-      for (const ascendant of location?.ascendantLocations || []) {
-        if (ascendant.uuid === location.uuid) {
-          continue
-        }
-        const ascedantLocation = neededLocations.find(
-          location => location.uuid === ascendant.uuid
-        )
-        if (!uuidSet.has(ascendant.uuid)) {
-          newExpandedItems.add(ascendant.uuid)
-        }
-        checkAscendants(
-          ascedantLocation,
-          uuidSet,
-          newExpandedItems,
-          neededLocations
-        )
-      }
-    }
-    const newExpandedItems = new Set<string>()
-    for (const item of items) {
-      checkAscendants(item, uuidSet, newExpandedItems, neededLocations)
-    }
-
-    setExpandedItems(newExpandedItems)
-    setLocationList(neededLocations)
+    const ascendantUuidSet = new Set(
+      items.flatMap(location => location.ascendantLocations?.map(l => l.uuid))
+    )
+    setExpandedItems(ascendantUuidSet.difference(uuidSet))
   }, [items])
 
   useEffect(() => {
-    setRootLocations(
-      locationList.filter(location => !location?.parentLocations?.length)
+    const treeMap = buildTree(
+      "ascendantLocations",
+      "descendantLocations",
+      "parentLocations",
+      items
     )
-  }, [locationList])
+    const topLevelLocations = Object.values(treeMap).filter(l =>
+      _isEmpty(l.parents)
+    )
+    const topLevelLocationUuids = new Set<string>(
+      topLevelLocations.map(l => l.uuid)
+    )
+    const allLocationsUuids = new Set<string>(items.map(l => l.uuid))
+    const newRootLocations = items
+      // Add the root locations directly included in the items
+      .filter(l => topLevelLocationUuids.has(l.uuid))
+      // Append the root locations not directly included in the items
+      .concat(topLevelLocations.filter(l => !allLocationsUuids.has(l.uuid)))
+      .map(l => treeMap[l.uuid])
+    setRootLocations(newRootLocations)
+  }, [items])
 
   const flattenedItems = React.useMemo(
     // limiting the number of locations to show in the overlay table
-    () => buildFlattenedList(rootLocations),
-    [rootLocations, buildFlattenedList]
+    () =>
+      buildFlattenedList(
+        rootLocations.slice(0, MAX_LOCATIONS_TO_SHOW),
+        selectedItems,
+        expandedItems
+      ),
+    [rootLocations, selectedItems, expandedItems]
   )
 
   return (
@@ -368,7 +423,8 @@ const LocationFilter = ({
       placeholder="Filter by location…"
       addon={LOCATIONS_ICON}
       onChange={handleChangeLoc}
-      pageSize={MAX_LOCATIONS_TO_SHOW}
+      pageSize={0}
+      maxShown={MAX_LOCATIONS_TO_SHOW}
       pagination={false}
       value={value.value}
       autoComplete="off"
