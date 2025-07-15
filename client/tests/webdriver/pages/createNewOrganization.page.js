@@ -91,13 +91,15 @@ class CreateOrganization extends Page {
   }
 
   async getApp6DropdownValue(field) {
-    const InputButton = await browser.$(`#${field}-dropdown`)
-    return await (await InputButton.$("div:nth-child(2)")).getText()
+    const inputButton = await browser.$(`#${field}-dropdown`)
+    const inputValue = await inputButton.$("div:nth-child(2)")
+    await inputValue.waitForExist()
+    return inputValue.getText()
   }
 
   async setApp6DropdownValue(field, value) {
-    const InputButton = await browser.$(`#${field}-dropdown`)
-    await InputButton.click()
+    const inputButton = await browser.$(`#${field}-dropdown`)
+    await inputButton.click()
 
     const dropdownMenu = await browser.$(".dropdown-menu.show")
     await dropdownMenu.waitForDisplayed()
