@@ -3,6 +3,7 @@ import Home from "../pages/home.page"
 import MergeOrganizations from "../pages/mergeOrganizations.page"
 import Search from "../pages/search.page"
 import ShowOrganization from "../pages/showOrganization.page"
+import ShowTask from "../pages/showTask.page"
 
 const ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
 const ORGANIZATION_WITH_AG_UUID = "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf" // EF 5.1
@@ -60,6 +61,22 @@ describe("Show organization page", () => {
         async at => await at.getText()
       )
       expect(assignedTasksShortNames).to.have.members(EF2_ASSIGNED_TASKS)
+    })
+    it("Should see sync matrix on the Show page", async () => {
+      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      await syncMatrix.waitForExist()
+      await syncMatrix.waitForDisplayed()
+
+      expect(await (await syncMatrix.$(".legend")).getText()).to.contain(
+        "Sync matrix for EF 2"
+      )
+
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(4)
+      const taskPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(taskPaths).to.deep.equal(EF2_ASSIGNED_TASKS)
     })
     it("Should see assigned tasks on the Edit page", async () => {
       await (await ShowOrganization.getEditOrganizationButton()).click()
