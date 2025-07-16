@@ -12,6 +12,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import EventCollection from "components/EventCollection"
+import EventMatrix from "components/EventMatrix"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -39,7 +40,7 @@ import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Attachment, Location, Organization, Report } from "models"
+import { Attachment, Location, Organization, Report, Task } from "models"
 import { PositionRole } from "models/Position"
 import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
@@ -81,6 +82,16 @@ const GQL_ORGANIZATION_FIELDS = `
     ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
+const GQL_TASK_FIELDS = `
+  fragment taskFields on Task {
+    ${Task.autocompleteQuery}
+    selectable
+    descendantTasks {
+      ${Task.autocompleteQuery}
+      selectable
+    }
+  }
+`
 const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
     uuid
@@ -105,6 +116,9 @@ const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
     organization(uuid: $uuid) {
       ...organizationFields
+      tasks {
+        ...taskFields
+      }
       status
       isSubscribed
       profile
@@ -153,6 +167,12 @@ const GQL_GET_ORGANIZATION = gql`
           person {
             ...personFields
           }
+        }
+      }
+      descendantOrgs(query: { status: ACTIVE }) {
+        ...organizationFields
+        tasks {
+          ...taskFields
         }
       }
       positions {
@@ -207,6 +227,7 @@ const GQL_GET_ORGANIZATION = gql`
   ${GQL_ORGANIZATION_FIELDS}
   ${GQL_PERSON_FIELDS}
   ${GQL_POSITION_FIELDS}
+  ${GQL_TASK_FIELDS}
 `
 
 interface OrganizationShowProps {
@@ -252,6 +273,10 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
+
+  const allTasks = organization.tasks.concat(
+    organization.descendantOrgs.flatMap(org => org.tasks)
+  )
 
   const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
@@ -625,6 +650,13 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     }
                   />
                 )}
+              </Fieldset>
+
+              <Fieldset
+                id="syncMatrix"
+                title={`Sync matrix for ${organization.shortName}`}
+              >
+                <EventMatrix tasks={allTasks} />
               </Fieldset>
 
               {Settings.fields.organization.customFields && (
