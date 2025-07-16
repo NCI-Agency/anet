@@ -43,7 +43,7 @@ class TaskFilter extends Page {
     return taskRows.length
   }
 
-  async openAllCollapsedTasks() {
+  async openAllCollapsedTasks(nonRecursive) {
     await browser.waitUntil(
       async() =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
@@ -55,9 +55,9 @@ class TaskFilter extends Page {
       for (const task of expandibleTasks) {
         await task.click()
       }
-      expandibleTasks = await browser.$$(
-        "#taskUuid-popover .bp6-icon-chevron-right"
-      )
+      expandibleTasks = nonRecursive
+        ? []
+        : await browser.$$("#taskUuid-popover .bp6-icon-chevron-right")
     }
   }
 
