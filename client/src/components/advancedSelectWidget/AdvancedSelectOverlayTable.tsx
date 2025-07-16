@@ -52,7 +52,8 @@ const AdvancedSelectOverlayTable = ({
           const isSelected = Object.hasOwn(item, "isSelected")
             ? item.isSelected
             : selectedItemsUuids.includes(item.uuid)
-          const isDisabled = disabledItemsUuids.includes(item.uuid)
+          const isDisabled =
+            disabledItemsUuids.includes(item.uuid) || item.isNotSelectable
           const disableSelection = item.disabled
           const handleClick = isDisabled
             ? null

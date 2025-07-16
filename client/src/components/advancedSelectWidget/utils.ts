@@ -1,14 +1,27 @@
 import _isArray from "lodash/isArray"
 import _isEmpty from "lodash/isEmpty"
+import {
+  AdvancedMultiSelectOverlayTable,
+  AdvancedSingleSelectOverlayTable
+} from "./AdvancedSelectOverlayTable"
+
+export function getAdvancedSelectOverlayTableComponent(
+  multiSelect?: boolean
+): React.ComponentType<unknown> {
+  return multiSelect
+    ? AdvancedMultiSelectOverlayTable
+    : AdvancedSingleSelectOverlayTable
+}
 
 export function getSelectedItemValue(
-  selectedItems: object[],
+  multiSelect: boolean,
+  selectedItems: object | object[],
   item: object,
   getValueCallback: (selectedItem: object, item: object) => any
 ) {
-  return selectedItems?.some(selectedItem =>
-    getValueCallback(selectedItem, item)
-  )
+  return multiSelect
+    ? selectedItems?.some(selectedItem => getValueCallback(selectedItem, item))
+    : getValueCallback(selectedItems, item)
 }
 
 function getEventWithoutExtraFields(event: object) {
@@ -178,23 +191,29 @@ export function compareItems(selectedItem: object, item: object) {
 
 export function buildFlattenedList(
   values: object[],
-  selectedItems: object[],
+  selectableItems: object[],
+  multiSelect: boolean,
+  selectedItems: object | object[],
   expandedItems: Set<string>,
   level: number = 0
 ) {
+  const selectableItemsUuids = new Set(selectableItems?.map(item => item.uuid))
   return (
     values?.flatMap(value => {
       const isValueSelected = getSelectedItemValue(
+        multiSelect,
         selectedItems,
         value,
         compareItems
       )
       const isDescendantValueSelected = getSelectedItemValue(
+        multiSelect,
         selectedItems,
         value,
         hasDescendantValueSelected
       )
       const isAscendantValueSelected = getSelectedItemValue(
+        multiSelect,
         selectedItems,
         value,
         hasAscendantValueSelected
@@ -206,12 +225,22 @@ export function buildFlattenedList(
         isValueSelected || isAscendantValueSelected
           ? true
           : isAscendantValueSelectedAndCollapsed
-      const disabled = isAscendantValueSelected
-      const valueWithLevel = { ...value, level, isSelected, disabled }
+      const disabled = multiSelect && isAscendantValueSelected
+      const isNotSelectable =
+        selectableItems != null && !selectableItemsUuids.has(value.uuid)
+      const valueWithLevel = {
+        ...value,
+        level,
+        isSelected,
+        disabled,
+        isNotSelectable
+      }
       const childrenWithLevel = isCollapsed
         ? []
         : buildFlattenedList(
           value.children,
+          selectableItems,
+          multiSelect,
           selectedItems,
           expandedItems,
           level + 1

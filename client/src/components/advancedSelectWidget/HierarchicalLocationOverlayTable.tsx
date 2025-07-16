@@ -1,10 +1,10 @@
 import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import {
   buildFlattenedList,
   buildTree,
   compareItems,
+  getAdvancedSelectOverlayTableComponent,
   getSelectedItemValue
 } from "components/advancedSelectWidget/utils"
 import LinkTo from "components/LinkTo"
@@ -50,13 +50,17 @@ const sortLocations = locations => {
 
 interface HierarchicalLocationOverlayTableProps {
   items: object[]
-  selectedItems: object[]
+  restrictSelectableItems?: boolean
+  multiSelect?: boolean
+  selectedItems: object | object[]
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
 }
 
 export const HierarchicalLocationOverlayTable = ({
   items,
+  restrictSelectableItems,
+  multiSelect,
   selectedItems,
   handleAddItem,
   handleRemoveItem,
@@ -85,6 +89,7 @@ export const HierarchicalLocationOverlayTable = ({
       const hasChildren = !_isEmpty(location.children)
       const isExpanded = expandedItems.has(location.uuid)
       const isSelected = getSelectedItemValue(
+        multiSelect,
         selectedItems,
         location,
         compareItems
@@ -156,6 +161,7 @@ export const HierarchicalLocationOverlayTable = ({
     },
     [
       expandedItems,
+      multiSelect,
       selectedItems,
       handleAddItem,
       handleRemoveItem,
@@ -205,13 +211,24 @@ export const HierarchicalLocationOverlayTable = ({
       sortLocations(rootLocations)
       return buildFlattenedList(
         rootLocations.slice(0, MAX_LOCATIONS_TO_SHOW),
+        restrictSelectableItems ? items : null,
+        multiSelect,
         selectedItems,
         expandedItems
       )
     },
-    [rootLocations, selectedItems, expandedItems]
+    [
+      rootLocations,
+      items,
+      restrictSelectableItems,
+      multiSelect,
+      selectedItems,
+      expandedItems
+    ]
   )
 
+  const AdvancedSelectOverlayTableComponent =
+    getAdvancedSelectOverlayTableComponent(multiSelect)
   return (
     <>
       {rootLocations.length > MAX_LOCATIONS_TO_SHOW && (
@@ -220,7 +237,7 @@ export const HierarchicalLocationOverlayTable = ({
           results.
         </div>
       )}
-      <AdvancedMultiSelectOverlayTable
+      <AdvancedSelectOverlayTableComponent
         {...otherProps}
         items={flattenedItems}
         selectedItems={selectedItems}

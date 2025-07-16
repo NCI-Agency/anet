@@ -1,10 +1,10 @@
 import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import {
   buildFlattenedList,
   buildTree,
   compareItems,
+  getAdvancedSelectOverlayTableComponent,
   getSelectedItemValue
 } from "components/advancedSelectWidget/utils"
 import LinkTo from "components/LinkTo"
@@ -64,13 +64,17 @@ const sortTasks = tasks => {
 
 interface HierarchicalTaskOverlayTableProps {
   items: object[]
-  selectedItems: object[]
+  restrictSelectableItems?: boolean
+  multiSelect?: boolean
+  selectedItems: object | object[]
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
 }
 
 export const HierarchicalTaskOverlayTable = ({
   items,
+  restrictSelectableItems,
+  multiSelect,
   selectedItems,
   handleAddItem,
   handleRemoveItem,
@@ -98,7 +102,12 @@ export const HierarchicalTaskOverlayTable = ({
     task => {
       const hasChildren = !_isEmpty(task.children)
       const isExpanded = expandedItems.has(task.uuid)
-      const isSelected = getSelectedItemValue(selectedItems, task, compareItems)
+      const isSelected = getSelectedItemValue(
+        multiSelect,
+        selectedItems,
+        task,
+        compareItems
+      )
 
       const handleToggleSelection = e => {
         e.stopPropagation()
@@ -175,6 +184,7 @@ export const HierarchicalTaskOverlayTable = ({
     },
     [
       expandedItems,
+      multiSelect,
       selectedItems,
       handleAddItem,
       handleRemoveItem,
@@ -219,11 +229,26 @@ export const HierarchicalTaskOverlayTable = ({
 
   const flattenedItems = React.useMemo(() => {
     sortTasks(rootTasks)
-    return buildFlattenedList(rootTasks, selectedItems, expandedItems)
-  }, [rootTasks, selectedItems, expandedItems])
+    return buildFlattenedList(
+      rootTasks,
+      restrictSelectableItems ? items : null,
+      multiSelect,
+      selectedItems,
+      expandedItems
+    )
+  }, [
+    rootTasks,
+    items,
+    restrictSelectableItems,
+    multiSelect,
+    selectedItems,
+    expandedItems
+  ])
 
+  const AdvancedSelectOverlayTableComponent =
+    getAdvancedSelectOverlayTableComponent(multiSelect)
   return (
-    <AdvancedMultiSelectOverlayTable
+    <AdvancedSelectOverlayTableComponent
       {...otherProps}
       items={flattenedItems}
       selectedItems={selectedItems}
