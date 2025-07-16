@@ -235,7 +235,10 @@ export default class Location extends Model {
     return LOCATIONS_ICON
   }
 
-  toString() {
+  toString(displayCallback) {
+    if (typeof displayCallback === "function") {
+      return displayCallback(this)
+    }
     if (utils.isNumeric(this.lat) && utils.isNumeric(this.lng)) {
       const coordinate =
         Settings?.fields?.location?.format === "MGRS"
