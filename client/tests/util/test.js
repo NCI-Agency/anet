@@ -379,7 +379,7 @@ test.beforeEach(t => {
       )
       await $nextMonthDate.click()
     },
-    async chooseAdvancedSelectOption(inputSelector, text) {
+    async chooseAdvancedSelectOption(inputSelector, text, rowNumber = 1) {
       const popoverSelector = `${inputSelector}-popover`
       const $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.click()
@@ -387,7 +387,7 @@ test.beforeEach(t => {
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()
       const $advancedSelectSuggestion = await t.context.$(
-        `${popoverSelector} tbody tr:first-child td:first-child input`
+        `${popoverSelector} tbody tr:nth-child(${rowNumber}) td:first-child input`
       )
       // Move element into view
       const actions = t.context.driver.actions({ async: true })

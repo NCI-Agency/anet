@@ -36,7 +36,8 @@ test.serial("Draft and submit a report", async t => {
 
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
-    "ge"
+    "ge",
+    2
   )
 
   t.is(
@@ -136,7 +137,8 @@ test.serial("Draft and submit a report", async t => {
 
   const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
-    "2.B"
+    "2.B",
+    2
   )
 
   const $tasksTitle = await t.context.driver.findElement(
