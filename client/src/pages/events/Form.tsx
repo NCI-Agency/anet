@@ -3,12 +3,18 @@ import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   EventSeriesOverlayRow,
-  LocationOverlayRow,
   OrganizationOverlayRow,
-  PersonSimpleOverlayRow,
-  TaskOverlayRow
+  PersonSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import {
+  HierarchicalLocationOverlayTable,
+  locationFields
+} from "components/advancedSelectWidget/HierarchicalLocationOverlayTable"
+import {
+  HierarchicalTaskOverlayTable,
+  taskFields
+} from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
 import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
@@ -404,12 +410,14 @@ const EventForm = ({
                       placeholder={Settings.fields.event.location.placeholder}
                       value={values.location}
                       overlayColumns={["Name"]}
-                      overlayRenderRow={LocationOverlayRow}
+                      overlayTable={HierarchicalLocationOverlayTable}
+                      restrictSelectableItems
                       filterDefs={locationFilters}
                       objectType={Location}
-                      fields={Location.autocompleteQuery}
+                      fields={locationFields}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
+                      pageSize={0}
                       createEntityComponent={
                         !canCreateLocation
                           ? null
@@ -602,12 +610,14 @@ const EventForm = ({
                           />
                         }
                         overlayColumns={[Settings.fields.task.shortLabel]}
-                        overlayRenderRow={TaskOverlayRow}
+                        overlayTable={HierarchicalTaskOverlayTable}
+                        restrictSelectableItems
                         filterDefs={tasksFilters}
                         objectType={Task}
                         queryParams={{ status: Model.STATUS.ACTIVE }}
-                        fields={Task.autocompleteQuery}
+                        fields={taskFields}
                         addon={TASKS_ICON}
+                        pageSize={0}
                       />
                     }
                   />

@@ -1,12 +1,16 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import {
-  LocationOverlayRow,
-  OrganizationOverlayRow,
-  TaskOverlayRow
-} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import {
+  HierarchicalLocationOverlayTable,
+  locationFields
+} from "components/advancedSelectWidget/HierarchicalLocationOverlayTable"
+import {
+  HierarchicalTaskOverlayTable,
+  taskFields
+} from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
 import App6Symbol, { fieldsList as app6fieldsList } from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
@@ -459,12 +463,14 @@ const OrganizationForm = ({
                           }
                           value={values.location}
                           overlayColumns={["Name"]}
-                          overlayRenderRow={LocationOverlayRow}
+                          overlayTable={HierarchicalLocationOverlayTable}
+                          restrictSelectableItems
                           filterDefs={locationFilters}
                           objectType={Location}
-                          fields={Location.autocompleteQuery}
+                          fields={locationFields}
                           valueKey="name"
                           addon={LOCATIONS_ICON}
+                          pageSize={0}
                         />
                       }
                     />
@@ -588,12 +594,14 @@ const OrganizationForm = ({
                               />
                             }
                             overlayColumns={["Name"]}
-                            overlayRenderRow={TaskOverlayRow}
+                            overlayTable={HierarchicalTaskOverlayTable}
+                            restrictSelectableItems
                             filterDefs={tasksFilters}
                             objectType={Task}
                             queryParams={{ status: Model.STATUS.ACTIVE }}
-                            fields={Task.autocompleteQuery}
+                            fields={taskFields}
                             addon={TASKS_ICON}
+                            pageSize={0}
                           />
                         }
                       />

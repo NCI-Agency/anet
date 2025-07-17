@@ -2,11 +2,12 @@ import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import {
-  LocationOverlayRow,
-  OrganizationOverlayRow
-} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import {
+  HierarchicalLocationOverlayTable,
+  locationFields
+} from "components/advancedSelectWidget/HierarchicalLocationOverlayTable"
 import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
@@ -403,12 +404,14 @@ const PositionForm = ({
                           }
                           value={values.location}
                           overlayColumns={["Name"]}
-                          overlayRenderRow={LocationOverlayRow}
+                          overlayTable={HierarchicalLocationOverlayTable}
+                          restrictSelectableItems
                           filterDefs={locationFilters}
                           objectType={Location}
-                          fields={Location.autocompleteQuery}
+                          fields={locationFields}
                           valueKey="name"
                           addon={LOCATIONS_ICON}
+                          pageSize={0}
                         />
                       }
                     />
