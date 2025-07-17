@@ -5,8 +5,9 @@ import CreateFutureReport from "../pages/createFutureReport.page"
 const INTERLOCUTOR = "Christopf"
 const INTERLOCUTOR_VALUE = `CIV TOPFERNESS, ${INTERLOCUTOR}`
 
-const TASK = "1.2.A"
-const TASK_VALUE = "EF 1 » EF 1.2 » 1.2.A"
+const TASK_SEARCH = "1.2.A first milestone"
+const TASK_POPOVER_VALUE = "1.2.A: Milestone the First in EF 1.2"
+const TASK_SELECTED_VALUE = "1.2.A"
 
 const ENGAGEMENT_DATE_FORMAT = "DD-MM-YYYY HH:mm"
 const SHORT_WAIT_MS = 1000
@@ -60,18 +61,18 @@ describe("Create report form page", () => {
 
       // Select task
       await (await CreateFutureReport.getTasksFieldLabel()).click()
-      await (await CreateFutureReport.getTasksField()).setValue(TASK)
+      await (await CreateFutureReport.getTasksField()).setValue(TASK_SEARCH)
       await CreateFutureReport.waitForAdvancedSelectToChange(
-        CreateFutureReport.getTasksFieldAdvancedSelectFirstItem(),
-        TASK_VALUE
+        CreateFutureReport.getTasksFieldAdvancedSelectItem(3),
+        TASK_POPOVER_VALUE
       )
       expect(
         await (
-          await CreateFutureReport.getTasksFieldAdvancedSelectFirstItem()
+          await CreateFutureReport.getTasksFieldAdvancedSelectItem(3)
         ).getText()
-      ).to.include(TASK_VALUE)
+      ).to.include(TASK_POPOVER_VALUE)
       await (
-        await CreateFutureReport.getTasksFieldAdvancedSelectFirstItem()
+        await CreateFutureReport.getTasksFieldAdvancedSelectItem(3)
       ).click()
       // Click outside the overlay
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
@@ -85,7 +86,7 @@ describe("Create report form page", () => {
       /* eslint-enable no-unused-expressions */
       expect(
         await (await CreateFutureReport.getTasksFieldValueRow(1)).getText()
-      ).to.include(TASK_VALUE)
+      ).to.include(TASK_SELECTED_VALUE)
     })
 
     it("Should not show assessments without engagement date", async() => {
@@ -158,16 +159,18 @@ describe("Create report form page", () => {
         await (await CreateFutureReport.getTasksAssessments()).isExisting()
       ).to.be.true
       expect(
-        await (await CreateFutureReport.getTaskAssessment(TASK)).isExisting()
+        await (
+          await CreateFutureReport.getTaskAssessment(TASK_SELECTED_VALUE)
+        ).isExisting()
       ).to.be.true
       const taskAssessment1Label =
-        await CreateFutureReport.getTaskAssessmentLabel(TASK, 1)
+        await CreateFutureReport.getTaskAssessmentLabel(TASK_SELECTED_VALUE, 1)
       expect(await taskAssessment1Label.isExisting()).to.be.true
       expect(await taskAssessment1Label.getText()).to.equal(
         "Restricted engagement assessment of objective"
       )
       const taskAssessment2Label =
-        await CreateFutureReport.getTaskAssessmentLabel(TASK, 3)
+        await CreateFutureReport.getTaskAssessmentLabel(TASK_SELECTED_VALUE, 3)
       expect(await taskAssessment2Label.isExisting()).to.be.true
       expect(await taskAssessment2Label.getText()).to.equal(
         "Engagement assessment of objective"
@@ -196,7 +199,9 @@ describe("Create report form page", () => {
         await (await CreateFutureReport.getTasksAssessments()).isExisting()
       ).to.be.true
       expect(
-        await (await CreateFutureReport.getTaskAssessment(TASK)).isExisting()
+        await (
+          await CreateFutureReport.getTaskAssessment(TASK_SELECTED_VALUE)
+        ).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
     })

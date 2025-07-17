@@ -69,9 +69,9 @@ class CreateOrganization extends Page {
     return browser.$("#location")
   }
 
-  async getLocationAdvancedSelectFirstItem() {
+  async getLocationAdvancedSelectItem(rowNumber = 2) {
     return browser.$(
-      "#location-popover tbody tr:first-child td:nth-child(2) span"
+      `#location-popover tbody tr:nth-child(${rowNumber}) td:nth-child(2) span`
     )
   }
 
@@ -129,9 +129,9 @@ class CreateOrganization extends Page {
     await (await this.getLocationInput()).setValue(org.location)
     await this.waitForLocationAdvancedSelectToChange(org.location)
     expect(
-      await (await this.getLocationAdvancedSelectFirstItem()).getText()
+      await (await this.getLocationAdvancedSelectItem()).getText()
     ).to.include(org.location)
-    await (await this.getLocationAdvancedSelectFirstItem()).click()
+    await (await this.getLocationAdvancedSelectItem()).click()
     await this.fillOrganizationProfile(org.profile)
     await this.openEditApp6Modal()
     if (org.app6contextInput) {
@@ -180,13 +180,12 @@ class CreateOrganization extends Page {
   }
 
   async waitForLocationAdvancedSelectToChange(value) {
-    await (await this.getLocationAdvancedSelectFirstItem()).waitForExist()
+    await (await this.getLocationAdvancedSelectItem()).waitForExist()
     return browser.waitUntil(
       async() => {
         return (
-          (await (
-            await this.getLocationAdvancedSelectFirstItem()
-          ).getText()) === value
+          (await (await this.getLocationAdvancedSelectItem()).getText()) ===
+          value
         )
       },
       {

@@ -50,9 +50,9 @@ class CreateFutureReport extends CreateReport {
     return (await this.getTasksFieldFormGroup()).$(`input[id="${tskId}"]`)
   }
 
-  async getTasksFieldAdvancedSelectFirstItem() {
+  async getTasksFieldAdvancedSelectItem(rowNumber = 2) {
     return browser.$(
-      `div[id="${tskId}-popover"] tbody tr:first-child td:nth-child(2)`
+      `div[id="${tskId}-popover"] tbody tr:nth-child(${rowNumber}) td:nth-child(2)`
     )
   }
 

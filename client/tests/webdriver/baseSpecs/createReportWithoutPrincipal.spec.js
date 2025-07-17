@@ -13,7 +13,7 @@ const REPORT_FIELDS = {
   location: "Cabot Tower",
   atmosphere: "Positive",
   advisors: ["CIV REPORTGUY, Ima"],
-  tasks: ["2.B"],
+  tasks: [{ name: "2.B" }],
   keyOutcomes: "Primary interlocutor attendee is not required",
   nextSteps: "Test steps",
   reportText: "Test text"

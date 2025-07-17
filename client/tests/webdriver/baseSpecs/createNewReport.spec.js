@@ -17,7 +17,7 @@ const REPORT_FIELDS = {
   atmosphere: "Positive",
   advisors: [ADVISOR],
   interlocutors: [INTERLOCUTOR],
-  tasks: ["2.A"],
+  tasks: [{ name: "2.A" }],
   keyOutcomes: "It works",
   nextSteps: "Run some tests",
   reportText:
