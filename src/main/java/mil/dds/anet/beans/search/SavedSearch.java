@@ -31,6 +31,15 @@ public class SavedSearch extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   String query;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean displayInHomepage = false;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Double priority;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Double homepagePriority;
 
   public String getName() {
     return name;
@@ -38,6 +47,30 @@ public class SavedSearch extends AbstractAnetBean {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Boolean getDisplayInHomepage() {
+    return displayInHomepage;
+  }
+
+  public void setDisplayInHomepage(Boolean displayInHomepage) {
+    this.displayInHomepage = displayInHomepage;
+  }
+
+  public Double getPriority() {
+    return priority;
+  }
+
+  public void setPriority(Double priority) {
+    this.priority = priority;
+  }
+
+  public Double getHomepagePriority() {
+    return homepagePriority;
+  }
+
+  public void setHomepagePriority(Double homepagePriority) {
+    this.homepagePriority = homepagePriority;
   }
 
   @GraphQLQuery(name = "owner")
@@ -93,10 +126,13 @@ public class SavedSearch extends AbstractAnetBean {
       return false;
     }
     SavedSearch other = (SavedSearch) o;
-    return Objects.equal(getUuid(), other.getUuid()) && Objects.equal(name, other.getName())
+    return super.equals(o) && Objects.equal(getUuid(), other.getUuid())
+        && Objects.equal(name, other.getName())
         && Objects.equal(getOwnerUuid(), other.getOwnerUuid())
         && Objects.equal(objectType, other.getObjectType())
-        && Objects.equal(query, other.getQuery());
+        && Objects.equal(query, other.getQuery())
+        && Objects.equal(displayInHomepage, other.getDisplayInHomepage())
+        && Objects.equal(priority, other.getPriority());
   }
 
   @Override
@@ -107,6 +143,7 @@ public class SavedSearch extends AbstractAnetBean {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(uuid, name, owner, objectType, query);
+    return Objects.hashCode(super.hashCode(), uuid, name, owner, objectType, query,
+        displayInHomepage, priority, homepagePriority);
   }
 }
