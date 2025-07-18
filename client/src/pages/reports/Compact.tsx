@@ -428,19 +428,26 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   />
                 )}
                 {optionalFields.assessments.active && (
-                  <CompactReportViewS>
-                    {getAttendeesAndAssessments(
-                      true,
-                      true,
-                      "interlocutors-assessments"
-                    )}
-                    {getAttendeesAndAssessments(
-                      false,
-                      true,
-                      "advisors-assessments"
-                    )}
-                    {getTasksAndAssessments(true, "tasks-assessments")}
-                  </CompactReportViewS>
+                  <CompactRow
+                    id="assessments"
+                    content={
+                      <CompactReportViewS>
+                        {getAttendeesAndAssessments(
+                          true,
+                          true,
+                          "interlocutors-assessments"
+                        )}
+                        {getAttendeesAndAssessments(
+                          false,
+                          true,
+                          "advisors-assessments"
+                        )}
+                        {getTasksAndAssessments(true, "tasks-assessments")}
+                      </CompactReportViewS>
+                    }
+                    className="reportField"
+                    hideIfEmpty
+                  />
                 )}
                 {Settings.fields.report.customFields && (
                   <ReadonlyCustomFields
@@ -611,7 +618,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   }
 }
 
-const CompactReportViewS = styled.table`
+const CompactReportViewS = styled.div`
   .table {
     & span.badge {
       background-color: unset !important;
