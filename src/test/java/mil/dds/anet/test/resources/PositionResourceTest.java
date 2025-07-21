@@ -444,14 +444,17 @@ public class PositionResourceTest extends AbstractResourceTest {
     final List<Position> list = searchResults.getList();
     assertThat(list).isNotEmpty();
     final Set<String> uuids = list.stream().map(Position::getUuid).collect(Collectors.toSet());
-    // EF 1
-    assertThat(uuids).contains(getAndrewAnderson().getPosition().getUuid());
-    // EF 1.1
-    assertThat(uuids).contains(getBobBobtown().getPosition().getUuid());
-    // EF 2.1
-    assertThat(uuids).contains(getJackJackson().getPosition().getUuid());
-    // EF 2.2
-    assertThat(uuids).contains(erin.getPosition().getUuid());
+    assertThat(uuids).contains(
+        // EF 1
+        getAndrewAnderson().getPosition().getUuid(),
+        // EF 1.1
+        getBobBobtown().getPosition().getUuid(), getElizabethElizawell().getPosition().getUuid(),
+        // EF 2.1
+        getHenryHenderson().getPosition().getUuid(),
+        // EF 2.2
+        erin.getPosition().getUuid(),
+        // EF 5.1
+        getCreedBratton().getPosition().getUuid(), getKevinMalone().getPosition().getUuid());
     // Each entry should have associatedPositions or responsibleTasks (or both)
     assertThat(list.stream().filter(p -> !Utils.isEmptyOrNull(p.getAssociatedPositions())
         || !Utils.isEmptyOrNull(p.getResponsibleTasks()))).hasSameSizeAs(list);

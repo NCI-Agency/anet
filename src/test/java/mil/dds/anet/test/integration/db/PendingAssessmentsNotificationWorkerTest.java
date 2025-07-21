@@ -216,8 +216,8 @@ class PendingAssessmentsNotificationWorkerTest {
       jobHistoryDao.update(jobHistory);
     }
 
-    // From our initial data we should get 8 pending assessments
-    final List<AnetEmail> emails = testPendingAssessmentsNotificationWorker(8);
+    // From our initial data we should get 7 pending assessments
+    final List<AnetEmail> emails = testPendingAssessmentsNotificationWorker(7);
     // Check the actual emails
     for (final AnetEmail email : emails) {
       assertThat(email.getToAddresses()).hasSize(1);
@@ -225,21 +225,17 @@ class PendingAssessmentsNotificationWorkerTest {
       final PendingAssessmentsNotificationEmail action =
           (PendingAssessmentsNotificationEmail) email.getAction();
       switch (to.split("@")[0]) {
-        case "jack":
-          // Jack should assess task 2.B
-          assertAssessments(action, Collections.emptySet(), Set.of("2.B"));
-          break;
         case "erin":
           // Erin should assess position Planning Captain
           assertAssessments(action, Set.of("Planning Captain"), Collections.emptySet());
           break;
         case "henry":
-          // Henry should assess task 2.A
-          assertAssessments(action, Collections.emptySet(), Set.of("2.A"));
+          // Henry should assess task 2.A and 2.B
+          assertAssessments(action, Collections.emptySet(), Set.of("2.A", "2.B"));
           break;
         case "liz":
-          // Elizabeth should assess position Cost Adder - MoD and task 1.1.A
-          assertAssessments(action, Set.of("Cost Adder - MoD"), Set.of("1.1.A"));
+          // Elizabeth should assess position Cost Adder - MoD
+          assertAssessments(action, Set.of("Cost Adder - MoD"), Collections.emptySet());
           break;
         case "bob":
           // Bob should assess task 1.1
