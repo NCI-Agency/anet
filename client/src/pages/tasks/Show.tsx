@@ -221,7 +221,13 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
         const action = (
           <>
             {isResponsibleForTask && (
-              <LinkTo modelType="Task" model={task} edit button="primary">
+              <LinkTo
+                modelType="Task"
+                model={task}
+                edit
+                button="primary"
+                id="editButton"
+              >
                 Edit
               </LinkTo>
             )}
