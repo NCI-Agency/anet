@@ -346,43 +346,50 @@ const TaskForm = ({
               <Fieldset
                 title={Settings.fields.task.responsiblePositions?.label}
               >
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.task.responsiblePositions}
-                  name="responsiblePositions"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    value = value.map(position =>
-                      Position.filterClientSideFields(position)
-                    )
-                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("responsiblePositions", value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="responsiblePositions"
-                      value={values.responsiblePositions}
-                      renderSelected={
-                        <PositionTable
-                          positions={values.responsiblePositions}
-                          showLocation
-                          showDelete
-                        />
-                      }
-                      overlayColumns={[
-                        "Position",
-                        "Organization",
-                        "Current Occupant"
-                      ]}
-                      overlayRenderRow={PositionOverlayRow}
-                      filterDefs={positionsFilters}
-                      objectType={Position}
-                      fields={Position.autocompleteQuery}
-                      addon={POSITIONS_ICON}
-                    />
-                  }
-                />
+                {disabled ? (
+                  <PositionTable
+                    positions={values.responsiblePositions}
+                    showLocation
+                  />
+                ) : (
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.task.responsiblePositions}
+                    name="responsiblePositions"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      value = value.map(position =>
+                        Position.filterClientSideFields(position)
+                      )
+                      setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("responsiblePositions", value)
+                    }}
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="responsiblePositions"
+                        value={values.responsiblePositions}
+                        renderSelected={
+                          <PositionTable
+                            positions={values.responsiblePositions}
+                            showLocation
+                            showDelete
+                          />
+                        }
+                        overlayColumns={[
+                          "Position",
+                          "Organization",
+                          "Current Occupant"
+                        ]}
+                        overlayRenderRow={PositionOverlayRow}
+                        filterDefs={positionsFilters}
+                        objectType={Position}
+                        fields={Position.autocompleteQuery}
+                        addon={POSITIONS_ICON}
+                      />
+                    }
+                  />
+                )}
               </Fieldset>
 
               {Settings.fields.task.customFields && !disabled && (

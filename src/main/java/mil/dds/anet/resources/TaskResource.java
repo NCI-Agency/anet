@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,6 +27,8 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +36,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 @GraphQLApi
 public class TaskResource {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
@@ -130,8 +136,10 @@ public class TaskResource {
       if (numRows == 0) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process task update");
       }
+
       // Update positions:
-      if (t.getResponsiblePositions() != null) {
+      if (AuthUtils.isAdmin(user) && t.getResponsiblePositions() != null) {
+        logger.debug("Editing responsible positions for {}", t);
         Utils.addRemoveElementsByUuid(existingResponsiblePositions, t.getResponsiblePositions(),
             newPos -> dao.addPositionToTask(newPos, t),
             oldPos -> dao.removePositionFromTask(DaoUtils.getUuid(oldPos), t.getUuid()));
