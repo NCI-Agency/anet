@@ -188,12 +188,24 @@ public abstract class AbstractResourceTest {
     return findOrPutPersonInDb("bob", Person.builder().build());
   }
 
+  public Person getCreedBratton() {
+    return findOrPutPersonInDb("henry", Person.builder().build());
+  }
+
   public Person getElizabethElizawell() {
     return findOrPutPersonInDb("elizabeth", Person.builder().build());
   }
 
+  public Person getHenryHenderson() {
+    return findOrPutPersonInDb("henry", Person.builder().build());
+  }
+
   public Person getJackJackson() {
     return findOrPutPersonInDb(jackUser, Person.builder().build());
+  }
+
+  public Person getKevinMalone() {
+    return findOrPutPersonInDb("henry", Person.builder().build());
   }
 
   public Person getNickNicholson() {

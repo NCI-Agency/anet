@@ -687,25 +687,16 @@ INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '4.c'), (SELECT uuid from organizations where "shortName"='EF 4')),
   ((SELECT uuid from tasks where "shortName" = 'Gender'), (SELECT uuid from organizations where "shortName"='EF 9'));
 
--- Create a task approval process for some tasks
+-- Assign superusers responsible for tasks
 INSERT INTO "taskResponsiblePositions" ("taskUuid", "positionUuid") VALUES
   ((SELECT uuid FROM tasks WHERE "shortName" = '1.1'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Superuser')),
   ((SELECT uuid FROM tasks WHERE "shortName" = '1.1.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '1.1.A'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor A')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor B')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Interagency Advising')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor C')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Mining')),
   ((SELECT uuid FROM tasks WHERE "shortName" = '1.2.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
   ((SELECT uuid FROM tasks WHERE "shortName" = '1.2.B'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
   ((SELECT uuid FROM tasks WHERE "shortName" = '2.A'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Superuser')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '2.B'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor B')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '2.C'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Accounting')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '2.D'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Kites')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '4.a'), (SELECT uuid FROM positions WHERE name = 'EF 4.1 Advisor A')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '4.b'), (SELECT uuid FROM positions WHERE name = 'EF 4.1 Advisor for Coffee')),
-  ((SELECT uuid FROM tasks WHERE "shortName" = '4.c'), (SELECT uuid FROM positions WHERE name = 'EF 4.1 Advisor on Software Engineering'));
+  ((SELECT uuid FROM tasks WHERE "shortName" = '2.B'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Superuser'));
 
+-- Create a task approval process for some tasks
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
   SELECT uuid_generate_v4(), tasks.uuid, 'Task Owner approval', 1
   FROM tasks

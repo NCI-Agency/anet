@@ -314,7 +314,7 @@ fields:
       label: Tasked organizations
       placeholder: Search for an organization…
     responsiblePositions:
-      label: Responsible positions
+      label: Responsible superusers
       placeholder: Search for a position…
     customFields:
       projectStatus:

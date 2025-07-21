@@ -101,6 +101,7 @@ const TaskForm = ({
       label: "All positions",
       queryVars: {
         status: Model.STATUS.ACTIVE,
+        type: [Position.TYPE.SUPERUSER],
         matchPersonName: true
       }
     }
