@@ -61,6 +61,12 @@ public class TaskResource {
     }
   }
 
+  public static void assertCreateSubTaskPermission(final Person user, final String parentTaskUuid) {
+    if (!AuthUtils.canCreateSubTask(user, parentTaskUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
+  }
+
   @GraphQLQuery(name = "task")
   public Task getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Task p = dao.getByUuid(uuid);
@@ -81,8 +87,15 @@ public class TaskResource {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    // Check if user is authorized to create a sub organization
+    assertCreateSubTaskPermission(user, t.getParentTaskUuid());
+    // If the organization is created by a superuser we need to add their position as an
+    // administrating one
+    if (user.getPosition().getType() == Position.PositionType.SUPERUSER) {
+      t.setResponsiblePositions(List.of(user.getPosition()));
+    }
     final Task created;
     try {
       created = dao.insert(t);
@@ -136,7 +149,8 @@ public class TaskResource {
     // Load the existing task, so we can check for differences.
     final Task existing = dao.getByUuid(t.getUuid());
 
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isAdmin(user)
+        && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
       // Check if user holds a responsible position for the task that will be
       // modified with the parent task update
       if (!Objects.equals(t.getParentTaskUuid(), existing.getParentTaskUuid())) {
