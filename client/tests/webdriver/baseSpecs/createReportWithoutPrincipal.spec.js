@@ -79,7 +79,7 @@ describe("When creating a report without an interlocutor", () => {
     await ShowReport.logout()
   })
   it("Should show missing interlocutor warning to task owner", async () => {
-    await Home.open("/", "jack")
+    await Home.open("/", "henry")
     await (await Home.getReportsPendingMyApproval()).waitForDisplayed()
     await (await Home.getReportsPendingMyApproval()).click()
     await Search.selectReport(REPORT_FIELDS.intent)
