@@ -66,8 +66,6 @@ export const CompactView = ({
   )
 }
 
-// color-adjust forces browsers to keep color values of the node
-// supported in most major browsers' new versions, but not in IE or some older versions
 // TODO: Find a way to calculate background text width after 45deg rotation currently it is hardcoded as 130
 const CompactViewS = styled.div`
   position: relative;
@@ -83,16 +81,12 @@ const CompactViewS = styled.div`
     left: ${props => getBackgroundIndent(props.pageSize.width, 130)};
     font-size: 150px;
     color: rgba(161, 158, 158, 0.3) !important;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact !important;
     transform: rotateZ(-45deg);
   }
   @media print {
     outline: none;
     .banner {
       display: inline-block !important;
-      -webkit-print-color-adjust: exact;
-      color-adjust: exact !important;
     }
     table {
       page-break-inside: auto;
@@ -221,8 +215,6 @@ const HF_COMMON_STYLE = `
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  -webkit-print-color-adjust: exact !important;
-  color-adjust: exact !important;
   @media print {
     position: fixed;
     max-height: 80px;
