@@ -347,6 +347,40 @@ export default class Person extends Model {
     return false
   }
 
+  // Checks if this user is a valid superuser for a particular task
+  // Must be either
+  // - an administrator
+  // - a superuser responsible for this task
+  // - a superuser responsible for this task's (transitive) parent
+  isResponsibleForTask(task) {
+    if (!task) {
+      return false
+    }
+    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
+      return true
+    }
+    if (
+      this.position?.type !== Position.TYPE.SUPERUSER ||
+      !this.position?.organization
+    ) {
+      return false
+    }
+    if (this.position.responsibleTasks) {
+      const responsibleTasksUuids = this.position.responsibleTasks.reduce(
+        (acc, t) => {
+          acc.push(t.uuid)
+          t.descendantTasks.forEach(descTask => {
+            acc.push(descTask.uuid)
+          })
+          return acc
+        },
+        []
+      )
+      return responsibleTasksUuids.includes(task.uuid)
+    }
+    return false
+  }
+
   iconUrl() {
     return PEOPLE_ICON
   }

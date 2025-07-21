@@ -25,7 +25,6 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.utils.UtilsTest;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
@@ -496,7 +495,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failCreateOrganization(getDomainUsername(superuser), childOrgInput);
 
     // Set superuser as responsible for the parent organization
-    parentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    parentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(parentOrg));
 
     final Organization createdChildOrg =
@@ -512,7 +511,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
 
     // Given responsibility now they can edit their organization
-    superuserOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    superuserOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
     succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
 
@@ -615,7 +614,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Set superuser as responsible for the child organization
-    createdChildOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    createdChildOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdChildOrg));
 
     // Cannot set parent as null because they're not responsible for the parent organization
@@ -623,7 +622,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
     // Set superuser as responsible for the parent organization
-    createdParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    createdParentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdParentOrg));
     // Now superuser can set the parent organization as null
     createdChildOrg.setParentOrg(null);
@@ -645,7 +644,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Update responsible position
-    createdNewParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    createdNewParentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdNewParentOrg));
 
     // Now they can assign the new parent

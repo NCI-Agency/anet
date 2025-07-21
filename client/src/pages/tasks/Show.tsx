@@ -211,15 +211,8 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
 
   // Admins can edit tasks or users in positions related to the task
   const isAdmin = currentUser && currentUser.isAdmin()
-  const canEdit =
-    isAdmin ||
-    (currentUser.position &&
-      !_isEmpty(
-        task.responsiblePositions.filter(
-          position => currentUser.position.uuid === position.uuid
-        )
-      ))
-  const canAddPeriodicAssessment = canEdit
+  const isResponsibleForTask = currentUser?.isResponsibleForTask(task)
+  const canAddPeriodicAssessment = isResponsibleForTask
   const canAddOndemandAssessment = isAdmin
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -227,7 +220,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
         const searchText = [task.shortName, task.longName].join(" ")
         const action = (
           <>
-            {canEdit && (
+            {isResponsibleForTask && (
               <LinkTo modelType="Task" model={task} edit button="primary">
                 Edit
               </LinkTo>
@@ -426,7 +419,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
               restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
               relatedObject={task}
               objectType="Task"
-              canEdit={canEdit}
+              canEdit={isResponsibleForTask}
               refetch={refetch}
             />
 
