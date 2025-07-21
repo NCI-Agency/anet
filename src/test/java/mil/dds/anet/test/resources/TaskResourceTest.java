@@ -180,8 +180,8 @@ class TaskResourceTest extends AbstractResourceTest {
     assertThat(searchResults3).isNotEmpty();
 
     // Search by responsible position
-    final Position jackPosition = getJackJackson().getPosition();
-    query1.setResponsiblePositionUuid(jackPosition.getUuid());
+    final Position andrewPosition = getAndrewAnderson().getPosition();
+    query1.setResponsiblePositionUuid(andrewPosition.getUuid());
     query1.setText("");
     final AnetBeanList_Task searchObjects4 =
         withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), query1));
