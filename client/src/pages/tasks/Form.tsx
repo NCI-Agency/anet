@@ -28,6 +28,7 @@ import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Organization, Position, Task } from "models"
 import React, { useContext, useState } from "react"
@@ -36,6 +37,7 @@ import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
@@ -141,9 +143,22 @@ const TaskForm = ({
         validateForm,
         submitForm
       }) => {
-        const isAdmin = currentUser && currentUser.isAdmin()
-        const disabled = !isAdmin
-        const action = (
+        const isAdmin = currentUser?.isAdmin()
+        const isResponsibleForParentTask =
+          _isEmpty(values.parentTask) ||
+          currentUser?.isResponsibleForTask(values.parentTask)
+        const isResponsibleForTask = edit
+          ? currentUser?.isResponsibleForTask(values)
+          : isResponsibleForParentTask
+        const taskSearchQuery = { status: Model.STATUS.ACTIVE }
+        // Superusers can select parent organizations among the ones their position is administrating
+        if (!isAdmin) {
+          const responsibleTasksUuids =
+            currentUser.position.responsibleTasks.map(t => t.uuid)
+          taskSearchQuery.parentTaskUuid = [...responsibleTasksUuids]
+          taskSearchQuery.parentTaskRecurseStrategy = RECURSE_STRATEGY.CHILDREN
+        }
+        const action = isResponsibleForTask && (
           <>
             <Button
               key="submit"
@@ -220,6 +235,7 @@ const TaskForm = ({
                       setFieldTouched("parentTask", true, false) // onBlur doesn't work when selecting an option
                       setFieldValue("parentTask", value)
                     }}
+                    disabled={!isResponsibleForParentTask}
                     widget={
                       <AdvancedSingleSelect
                         fieldName="parentTask"
@@ -234,13 +250,12 @@ const TaskForm = ({
                         objectType={Task}
                         fields={taskFields}
                         valueKey="shortName"
-                        queryParams={{}}
+                        queryParams={taskSearchQuery}
                         addon={TASKS_ICON}
-                        showRemoveButton={!disabled}
+                        showRemoveButton={isResponsibleForParentTask}
                         pageSize={0}
                       />
                     }
-                    disabled={disabled}
                   />
                 )}
 

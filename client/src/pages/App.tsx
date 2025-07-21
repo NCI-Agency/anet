@@ -135,6 +135,9 @@ const GQL_GET_APP_DATA = gql`
               uuid
             }
           }
+          descendantTasks {
+            uuid
+          }
           ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
         }
         organizationsAdministrated {
