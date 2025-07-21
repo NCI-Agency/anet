@@ -15,6 +15,7 @@ import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
 import mil.dds.anet.test.client.AssessmentSearchQueryInput;
 import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
@@ -315,14 +316,14 @@ class TaskResourceTest extends AbstractResourceTest {
     final Person superuser = getBobBobtown();
     final Position superuserPosition = superuser.getPosition();
 
-    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task")
-        .withLongName("Task for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 1")
+        .withLongName("Task 1 for Testing Superusers").withStatus(Status.ACTIVE).build();
     failCreateTask(getDomainUsername(superuser), taskInput);
     final Task parentTask = succeedCreateTask(adminUser, taskInput);
 
-    final TaskInput childTaskInput =
-        TaskInput.builder().withShortName("Child Task").withLongName("Child Task of Test Task")
-            .withStatus(Status.ACTIVE).withParentTask(getTaskInput(parentTask)).build();
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 1")
+        .withLongName("Child Task of Parent Task 1").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(parentTask)).build();
     failCreateTask(getDomainUsername(superuser), childTaskInput);
 
     // Set superuser as responsible for the parent task
@@ -332,8 +333,62 @@ class TaskResourceTest extends AbstractResourceTest {
     final Task createdChildTask = succeedCreateTask(getDomainUsername(superuser), childTaskInput);
 
     // Can edit the child of their responsible task
-    createdChildTask.setShortName("Updated Child Task");
+    createdChildTask.setShortName("Updated Child Task 1");
     succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+  }
+
+  @Test
+  void taskCanCreateTopLevelTasksSuperuserPermissionTest() {
+    // Jim is a superuser that can create top level tasks
+
+    // Can create top level task
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 2")
+        .withLongName("Task 2 for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final Task newTopLevelTask = succeedCreateTask("jim", taskInput);
+    // and edit it and created sub-tasks of the top level task he created
+    succeedUpdateTask("jim", getTaskInput(newTopLevelTask));
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 2")
+        .withLongName("Child Task of Parent Task 2").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(newTopLevelTask)).build();
+    succeedCreateTask("jim", childTaskInput);
+
+    // Can NOT edit and create sub-tasks of an existing task: EF 1
+    final Task ef1 = withCredentials(jackUser,
+        t -> queryExecutor.task("{ uuid }", "1145e584-4485-4ce0-89c4-2fa2e1fe846a"));
+    // Can NOT edit EF 1
+    failUpdateTask("jim", getTaskInput(ef1));
+    // Can NOT create a sub task of EF 1
+    final TaskInput childTaskInput2 =
+        TaskInput.builder().withShortName("EF 1 new child").withLongName("New Child Task of EF 1")
+            .withStatus(Status.ACTIVE).withParentTask(getTaskInput(ef1)).build();
+    failCreateTask("jim", childTaskInput2);
+  }
+
+  @Test
+  void taskCanCreateEditAnyTaskSuperuserPermissionTest() {
+    // Billie is a superuser that can create or edit any task
+
+    // Can create top level task
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 3")
+        .withLongName("Task 3 for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final Task newTopLevelTask = succeedCreateTask("billie", taskInput);
+    // and edit it and created sub-tasks of the top level task he created
+    succeedUpdateTask("billie", getTaskInput(newTopLevelTask));
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 3")
+        .withLongName("Child Task of Parent Task 3").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(newTopLevelTask)).build();
+    succeedCreateTask("billie", childTaskInput);
+
+    // Can edit and create sub-tasks of an existing task: EF 1
+    final Task ef1 = withCredentials(jackUser,
+        t -> queryExecutor.task(FIELDS, "1145e584-4485-4ce0-89c4-2fa2e1fe846a"));
+    // Can edit EF 1
+    succeedUpdateTask("billie", getTaskInput(ef1));
+    // Can create a sub task of EF 1
+    final TaskInput childTaskInput2 =
+        TaskInput.builder().withShortName("EF 1 new child").withLongName("New Child Task of EF 1")
+            .withStatus(Status.ACTIVE).withParentTask(getTaskInput(ef1)).build();
+    succeedCreateTask("billie", childTaskInput2);
   }
 
   @Test
@@ -341,13 +396,13 @@ class TaskResourceTest extends AbstractResourceTest {
     final Person superuser = getBobBobtown();
     final Position superuserPosition = superuser.getPosition();
 
-    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 2")
-        .withLongName("Task for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 4")
+        .withLongName("Task 4 for Testing Superusers").withStatus(Status.ACTIVE).build();
     final Task createdParentTask = succeedCreateTask(adminUser, taskInput);
 
-    final TaskInput childTaskInput =
-        TaskInput.builder().withShortName("Child Task 2").withLongName("Child Task of Test Task")
-            .withStatus(Status.ACTIVE).withParentTask(getTaskInput(createdParentTask)).build();
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 4")
+        .withLongName("Child Task of Parent Task 4").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(createdParentTask)).build();
     final Task createdChildTask = succeedCreateTask(adminUser, childTaskInput);
 
     createdChildTask.setParentTask(null);
@@ -369,8 +424,8 @@ class TaskResourceTest extends AbstractResourceTest {
     createdChildTask.setParentTask(null);
     succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
 
-    final TaskInput newParentTask = TaskInput.builder().withShortName("New Parent Task")
-        .withLongName("New Parent Task for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final TaskInput newParentTask = TaskInput.builder().withShortName("New Parent Task 4")
+        .withLongName("New Parent Task 4 for Testing Superusers").withStatus(Status.ACTIVE).build();
 
     final Task createdNewParentTask = succeedCreateTask(adminUser, newParentTask);
 
