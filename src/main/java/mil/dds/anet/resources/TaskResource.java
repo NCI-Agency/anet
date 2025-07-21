@@ -50,6 +50,17 @@ public class TaskResource {
     this.dao = dao;
   }
 
+
+  public static boolean hasPermission(final Person user, final String taskUuid) {
+    return AuthUtils.isResponsibleForTask(user, taskUuid);
+  }
+
+  public static void assertPermission(final Person user, final String taskUuid) {
+    if (!hasPermission(user, taskUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
+  }
+
   @GraphQLQuery(name = "task")
   public Task getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Task p = dao.getByUuid(uuid);
@@ -108,18 +119,9 @@ public class TaskResource {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
-    final List<Position> existingResponsiblePositions =
-        dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
-    // User has to be admin or responsible for the task
-    if (!AuthUtils.isAdmin(user)) {
-      final Position userPosition = DaoUtils.getPosition(user);
-      final boolean canUpdate = existingResponsiblePositions.stream()
-          .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
-      if (!canUpdate) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
-      }
-    }
+    assertPermission(user, DaoUtils.getUuid(t));
 
     // Check for loops in the hierarchy
     if (t.getParentTaskUuid() != null) {
@@ -128,6 +130,22 @@ public class TaskResource {
       if (children.containsKey(t.getParentTaskUuid())) {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             "Task can not be its own (grand…)parent");
+      }
+    }
+
+    // Load the existing task, so we can check for differences.
+    final Task existing = dao.getByUuid(t.getUuid());
+
+    if (!AuthUtils.isAdmin(user)) {
+      // Check if user holds a responsible position for the task that will be
+      // modified with the parent task update
+      if (!Objects.equals(t.getParentTaskUuid(), existing.getParentTaskUuid())) {
+        if (t.getParentTaskUuid() != null) {
+          assertPermission(user, t.getParentTaskUuid());
+        }
+        if (existing.getParentTaskUuid() != null) {
+          assertPermission(user, existing.getParentTaskUuid());
+        }
       }
     }
 
@@ -140,6 +158,8 @@ public class TaskResource {
       // Update positions:
       if (AuthUtils.isAdmin(user) && t.getResponsiblePositions() != null) {
         logger.debug("Editing responsible positions for {}", t);
+        final List<Position> existingResponsiblePositions =
+            dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
         Utils.addRemoveElementsByUuid(existingResponsiblePositions, t.getResponsiblePositions(),
             newPos -> dao.addPositionToTask(newPos, t),
             oldPos -> dao.removePositionFromTask(DaoUtils.getUuid(oldPos), t.getUuid()));
@@ -154,8 +174,6 @@ public class TaskResource {
             oldOrg -> dao.removeTaskedOrganizationsFromTask(DaoUtils.getUuid(oldOrg), t.getUuid()));
       }
 
-      // Load the existing task, so we can check for differences.
-      final Task existing = dao.getByUuid(t.getUuid());
       final List<ApprovalStep> existingPlanningApprovalSteps =
           existing.loadPlanningApprovalSteps(engine.getContext()).join();
       final List<ApprovalStep> existingApprovalSteps =
