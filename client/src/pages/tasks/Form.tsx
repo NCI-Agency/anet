@@ -185,7 +185,6 @@ const TaskForm = ({
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
                   component={FieldHelper.InputField}
-                  disabled={disabled}
                 />
 
                 <DictionaryField
@@ -269,7 +268,6 @@ const TaskForm = ({
                   onChange={value => setFieldValue("plannedCompletion", value)}
                   onBlur={() => setFieldTouched("plannedCompletion")}
                   widget={<CustomDateInput id="plannedCompletion" />}
-                  disabled={disabled}
                 />
 
                 <DictionaryField
@@ -282,57 +280,36 @@ const TaskForm = ({
                   }
                   onBlur={() => setFieldTouched("projectedCompletion")}
                   widget={<CustomDateInput id="projectedCompletion" />}
-                  disabled={disabled}
                 />
 
-                {disabled ? (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.status}
-                    name="status"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Position.humanNameOfStatus}
-                  />
-                ) : (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.status}
-                    name="status"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={statusButtons}
-                    onChange={value => setFieldValue("status", value)}
-                  />
-                )}
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.task.status}
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
 
-                {disabled ? (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.selectable}
-                    name="selectable"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={utils.formatBoolean}
-                  />
-                ) : (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.selectable}
-                    name="selectable"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={[
-                      {
-                        id: "isSelectable",
-                        value: true,
-                        label: "Yes"
-                      },
-                      {
-                        id: "isNotSelectable",
-                        value: false,
-                        label: "No"
-                      }
-                    ]}
-                    onChange={value => setFieldValue("selectable", value)}
-                  />
-                )}
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.task.selectable}
+                  name="selectable"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={[
+                    {
+                      id: "isSelectable",
+                      value: true,
+                      label: "Yes"
+                    },
+                    {
+                      id: "isNotSelectable",
+                      value: false,
+                      label: "No"
+                    }
+                  ]}
+                  onChange={value => setFieldValue("selectable", value)}
+                />
 
                 <DictionaryField
                   wrappedComponent={FastField}
@@ -363,7 +340,7 @@ const TaskForm = ({
               <Fieldset
                 title={Settings.fields.task.responsiblePositions?.label}
               >
-                {disabled ? (
+                {!isAdmin ? (
                   <PositionTable
                     positions={values.responsiblePositions}
                     showLocation
@@ -409,7 +386,7 @@ const TaskForm = ({
                 )}
               </Fieldset>
 
-              {Settings.fields.task.customFields && !disabled && (
+              {Settings.fields.task.customFields && (
                 <Fieldset
                   title={`${Settings.fields.task.shortLabel} information`}
                   id="custom-fields"
