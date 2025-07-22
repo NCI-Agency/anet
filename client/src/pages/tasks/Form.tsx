@@ -67,7 +67,7 @@ const TaskForm = ({
   initialValues,
   notesComponent
 }: TaskFormProps) => {
-  const { currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -471,6 +471,7 @@ const TaskForm = ({
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
+    loadAppData()
     if (!edit) {
       navigate(Task.pathForEdit(task), { replace: true })
     }
