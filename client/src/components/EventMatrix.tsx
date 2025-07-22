@@ -177,9 +177,7 @@ const EventMatrix = ({
   const eventSeries = data.eventSeriesList?.list
   const topLevelTask = data.task
   const allTasks = (
-    includeTask
-      ? [topLevelTask].concat(topLevelTask?.descendantTasks)
-      : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
+    includeTask ? [topLevelTask].concat(topLevelTask?.descendantTasks) : tasks
   ).filter(t => t.selectable)
   // if topLevelTask task is not in allTasks, add it at the top
   if (includeTask && !allTasks.find(t => t.uuid === topLevelTask?.uuid)) {
