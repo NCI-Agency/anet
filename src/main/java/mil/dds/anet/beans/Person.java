@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
@@ -410,6 +411,11 @@ public class Person extends AbstractEmailableAnetBean
       return CompletableFuture.completedFuture(preferences);
     }
     return engine().getPersonDao().getPreferences(context, uuid).thenApply(o -> {
+      // Load generic preference
+      CompletableFuture.allOf(
+          o.stream().map(a -> a.loadPreference(ApplicationContextProvider.getEngine().getContext()))
+              .toArray(CompletableFuture<?>[]::new))
+          .join();
       preferences = o;
       return o;
     });

@@ -1833,13 +1833,15 @@ INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query",
 
 -- Create some preferences
 INSERT INTO "preferences" ("uuid", "name", "description","type", "defaultValue", "createdAt", "updatedAt") VALUES
-    ('4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'SUBSCRIPTION_EMAILS', 'Whether or not to receive an email on a subscription change', 'BOOLEAN', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'SUBSCRIPTIONS_EMAILS', 'Whether or not to receive emails related to subscriptions', 'BOOLEAN', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "preferences" ("uuid", "name", "description","type", "defaultValue", "createdAt", "updatedAt") VALUES
-    ('0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'REPORT_PUBLISHED_EMAIL', 'Whether or not to receive an email when your report is published', 'BOOLEAN', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'REPORTS_EMAILS', 'Whether or not to receive emails related to reports', 'BOOLEAN', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Specific preferences values for Arthur
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
-    ((SELECT uuid from people where "domainUsername" = 'arthur'), '4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ((SELECT uuid from people where "name" = 'Dmin, Arthur'), '4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
+    ((SELECT uuid from people where "name" = 'Dmin, Arthur'), '0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
