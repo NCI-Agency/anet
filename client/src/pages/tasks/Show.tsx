@@ -248,6 +248,17 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
             {isResponsibleForTask && (
               <LinkTo
                 modelType="Task"
+                model={Task.pathForNew({
+                  parentTaskUuid: task.uuid
+                })}
+                button
+              >
+                {`Create sub-${Settings.fields.task.shortLabel.toLowerCase()}`}
+              </LinkTo>
+            )}
+            {isResponsibleForTask && (
+              <LinkTo
+                modelType="Task"
                 model={task}
                 edit
                 button="primary"

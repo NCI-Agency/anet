@@ -29,6 +29,16 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
+const GQL_GET_TASK = gql`
+  query ($uuid: String!) {
+    task(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+    }
+  }
+`
+
 interface TaskNewProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -42,6 +52,14 @@ const TaskNew = ({ pageDispatchers }: TaskNewProps) => {
     return (
       <TaskNewFetchTaskedOrg
         taskedOrgUuid={qs.get("taskedOrgUuid")}
+        pageDispatchers={pageDispatchers}
+      />
+    )
+  }
+  if (qs.get("parentTaskUuid")) {
+    return (
+      <TaskNewFetchParentTask
+        parentTaskUuid={qs.get("parentTaskUuid")}
         pageDispatchers={pageDispatchers}
       />
     )
@@ -62,11 +80,24 @@ const TaskNewFetchTaskedOrg = ({
     uuid: taskedOrgUuid
   })
   return (
-    <TaskNewConditional
-      pageDispatchers={pageDispatchers}
-      {...queryResult}
-      orgUuid={taskedOrgUuid}
-    />
+    <TaskNewConditional pageDispatchers={pageDispatchers} {...queryResult} />
+  )
+}
+
+interface TaskNewFetchParentTaskProps {
+  parentTaskUuid: string
+  pageDispatchers?: PageDispatchersPropType
+}
+
+const TaskNewFetchParentTask = ({
+  parentTaskUuid,
+  pageDispatchers
+}: TaskNewFetchParentTaskProps) => {
+  const queryResult = API.useApiQuery(GQL_GET_TASK, {
+    uuid: parentTaskUuid
+  })
+  return (
+    <TaskNewConditional pageDispatchers={pageDispatchers} {...queryResult} />
   )
 }
 
@@ -74,7 +105,6 @@ interface TaskNewConditionalProps {
   loading?: boolean
   error?: any
   data?: any
-  orgUuid?: string
   pageDispatchers?: PageDispatchersPropType
 }
 
@@ -82,14 +112,11 @@ const TaskNewConditional = ({
   loading,
   error,
   data,
-  orgUuid,
   pageDispatchers
 }: TaskNewConditionalProps) => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    modelName: "Organization",
-    uuid: orgUuid,
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
@@ -99,8 +126,11 @@ const TaskNewConditional = ({
   }
 
   const task = new Task()
-  if (data) {
+  if (data?.organization) {
     task.taskedOrganizations = [new Organization(data.organization)]
+  }
+  if (data?.task) {
+    task.parentTask = new Task(data.task)
   }
   // mutates the object
   initInvisibleFields(task, Settings.fields.task.customFields)
