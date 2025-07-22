@@ -499,8 +499,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   private Instant getRollupEngagmentStart(Instant start) {
-    String maxReportAgeStr = ApplicationContextProvider.getBean(AdminDao.class)
-        .getSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
+    String maxReportAgeStr =
+        engine().getAdminDao().getSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     if (maxReportAgeStr == null) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
@@ -933,8 +933,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       } else {
         // No approval workflow has been defined, and approval is not optional!
         final String msg;
-        final String defaultOrgUuid =
-            ApplicationContextProvider.getBean(AdminDao.class).getDefaultOrgUuid();
+        final String defaultOrgUuid = engine().getAdminDao().getDefaultOrgUuid();
         if (Utils.isEmptyOrNull(defaultOrgUuid)) {
           msg = "The default approval organization is undefined";
         } else {

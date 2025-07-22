@@ -157,7 +157,10 @@ export default class Task extends Model {
     return TASKS_ICON
   }
 
-  toString() {
+  toString(displayCallback) {
+    if (typeof displayCallback === "function") {
+      return displayCallback(this)
+    }
     return `${this.shortName}`
   }
 

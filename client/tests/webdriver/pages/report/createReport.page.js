@@ -145,7 +145,7 @@ class CreateReport extends cr.CreateReport {
     )
   }
 
-  async selectTaskByName(name) {
+  async selectTaskByName(name, rowNumber = 2) {
     await (await this.getTasks()).click()
     // wait for tasks table loader to disappear
     await (await this.getTasksTable()).waitForDisplayed()
@@ -153,7 +153,7 @@ class CreateReport extends cr.CreateReport {
     await (await this.getTasksTable()).waitForDisplayed()
     const checkBox = await (
       await this.getTasksTable()
-    ).$("tbody tr:first-child td:first-child input.checkbox")
+    ).$(`tbody tr:nth-child(${rowNumber}) td:first-child input.checkbox`)
     if (!(await checkBox.isSelected())) {
       await checkBox.click()
     }
@@ -163,13 +163,15 @@ class CreateReport extends cr.CreateReport {
     ).waitForExist({ reverse: true, timeout: 3000 })
   }
 
-  async selectLocation(location) {
+  async selectLocation(location, rowNumber = 2) {
     await (await this.getLocation()).click()
     await browser.keys(location)
     await (await this.getLocationTable()).waitForDisplayed()
     const checkBox = await (
       await this.getLocationTable()
-    ).$("tbody tr:first-child td:first-child input.form-check-input")
+    ).$(
+      `tbody tr:nth-child(${rowNumber}) td:first-child input.form-check-input`
+    )
     if (!(await checkBox.isSelected())) {
       await checkBox.click()
     }
@@ -244,7 +246,7 @@ class CreateReport extends cr.CreateReport {
 
     if (Array.isArray(fields.tasks) && fields.tasks.length) {
       for (const t of fields.tasks) {
-        await this.selectTaskByName(t)
+        await this.selectTaskByName(t.name, t.rowNumber)
       }
     }
 

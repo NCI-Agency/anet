@@ -6,11 +6,17 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   AuthorizationGroupOverlayRow,
   EventOverlayRow,
-  LocationOverlayRow,
-  PersonDetailedOverlayRow,
-  TaskOverlayRow
+  PersonDetailedOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import {
+  HierarchicalLocationOverlayTable,
+  locationFields
+} from "components/advancedSelectWidget/HierarchicalLocationOverlayTable"
+import {
+  HierarchicalTaskOverlayTable,
+  taskFields
+} from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -715,12 +721,14 @@ const ReportForm = ({
                       placeholder={Settings.fields.report.location.placeholder}
                       value={values.location}
                       overlayColumns={["Name"]}
-                      overlayRenderRow={LocationOverlayRow}
+                      overlayTable={HierarchicalLocationOverlayTable}
+                      restrictSelectableItems
                       filterDefs={locationFilters}
                       objectType={Location}
-                      fields={Location.autocompleteQuery}
+                      fields={locationFields}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
+                      pageSize={0}
                       showRemoveButton={!locationDisabled}
                       createEntityComponent={
                         !canCreateLocation
@@ -936,12 +944,14 @@ const ReportForm = ({
                           />
                         }
                         overlayColumns={[Settings.fields.task.shortLabel]}
-                        overlayRenderRow={TaskOverlayRow}
+                        overlayTable={HierarchicalTaskOverlayTable}
+                        restrictSelectableItems
                         filterDefs={tasksFilters}
                         objectType={Task}
                         queryParams={{ status: Model.STATUS.ACTIVE }}
-                        fields={Task.autocompleteQuery}
+                        fields={taskFields}
                         addon={TASKS_ICON}
+                        pageSize={0}
                       />
                     }
                     extraColElem={

@@ -45,7 +45,7 @@ class CreateTask extends Page {
     )
   }
 
-  async selectParentTaskByText(name) {
+  async selectParentTaskByText(name, rowNumber = 2) {
     await (await this.getParentTaskInput()).click()
     // wait for parentTask table loader to disappear
     await (await this.getParentTasksTable()).waitForDisplayed()
@@ -53,7 +53,9 @@ class CreateTask extends Page {
     await (await this.getParentTasksTable()).waitForDisplayed()
     const radioButton = await (
       await this.getParentTasksTable()
-    ).$("tbody tr:first-child td:first-child input.form-check-input")
+    ).$(
+      `tbody tr:nth-child(${rowNumber}) td:first-child input.form-check-input`
+    )
     if (!(await radioButton.isSelected())) {
       await radioButton.click()
     }

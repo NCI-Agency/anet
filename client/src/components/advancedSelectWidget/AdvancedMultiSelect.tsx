@@ -17,6 +17,7 @@ const AdvancedMultiSelect = ({
   return (
     <AdvancedSelect
       value={value}
+      multiSelect
       overlayTable={overlayTable}
       {...props}
       handleAddItem={handleAddItem}

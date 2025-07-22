@@ -3,10 +3,13 @@ import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
-  PositionOverlayRow,
-  TaskOverlayRow
+  PositionOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import {
+  HierarchicalTaskOverlayTable,
+  taskFields
+} from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import CustomDateInput from "components/CustomDateInput"
@@ -226,14 +229,16 @@ const TaskForm = ({
                         }
                         value={values.parentTask}
                         overlayColumns={["Name"]}
-                        overlayRenderRow={TaskOverlayRow}
+                        overlayTable={HierarchicalTaskOverlayTable}
+                        restrictSelectableItems
                         filterDefs={tasksFilters}
                         objectType={Task}
-                        fields={Task.autocompleteQuery}
+                        fields={taskFields}
                         valueKey="shortName"
                         queryParams={{}}
                         addon={TASKS_ICON}
                         showRemoveButton={!disabled}
+                        pageSize={0}
                       />
                     }
                     disabled={disabled}

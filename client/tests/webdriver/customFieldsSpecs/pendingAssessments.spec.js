@@ -260,7 +260,7 @@ describe("In new report page", () => {
     })
     it("Should be able to add instant assessments for tasks", async() => {
       const report = {
-        tasks: ["1.2.A"]
+        tasks: [{ name: "1.2.A first milestone", rowNumber: 3 }]
       }
       await CreateReport.fillForm(report)
       await browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
@@ -277,7 +277,8 @@ describe("In new report page", () => {
             ? "Restricted engagement assessment of objective"
             : "Engagement assessment of objective"
         )
-        switch (await task.getText()) {
+        const taskText = await task.getText()
+        switch (taskText) {
           case "EF 1 » EF 1.2 » 1.2.A":
             expect(questions).to.have.length(3)
             expect(await questions[0].getAttribute("id")).to.match(
@@ -291,7 +292,7 @@ describe("In new report page", () => {
             )
             break
           default:
-            expect.fail("unexpected task")
+            expect.fail(`unexpected task: ${taskText}`)
             break
         }
       }

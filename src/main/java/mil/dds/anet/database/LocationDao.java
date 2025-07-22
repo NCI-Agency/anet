@@ -12,13 +12,13 @@ import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.search.pg.PostgresqlLocationSearcher;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.Handle;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -160,7 +160,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     // - delete locationRelationships where loser was the child
     deleteForMerge("locationRelationships", "childLocationUuid", loserLocationUuid);
     // - update the winner's parents from the input
-    Utils.addRemoveElementsByUuid(existingWinnerLoc.loadParentLocations(context).join(),
+    Utils.addRemoveElementsByUuid(existingWinnerLoc.loadParentLocations(context, null).join(),
         Utils.orIfNull(winnerLocation.getParentLocations(), List.of()),
         newOrg -> addLocationRelationship(newOrg, winnerLocation),
         oldOrg -> removeLocationRelationship(oldOrg, winnerLocation));
@@ -177,7 +177,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     // Finally, delete the location
     final int nrDeleted = deleteForMerge(LocationDao.TABLE_NAME, "uuid", loserLocationUuid);
     if (nrDeleted > 0) {
-      ApplicationContextProvider.getBean(AdminDao.class).insertMergedEntity(
+      engine().getAdminDao().insertMergedEntity(
           new MergedEntity(loserLocationUuid, winnerLocationUuid, Instant.now()));
     }
     return nrDeleted;
@@ -190,52 +190,21 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "locations.uuid");
   }
 
-  public CompletableFuture<List<Location>> getChildrenLocations(GraphQLContext context,
-      String parentLocationUuid) {
-    return new ForeignKeyFetcher<Location>().load(context,
-        FkDataLoaderKey.LOCATION_CHILDREN_LOCATIONS, parentLocationUuid);
-  }
-
-  class ChildrenLocationsBatcher extends ForeignKeyBatcher<Location> {
-    private static final String SQL = "/* batch.getChildrenLocationsForLocation */ SELECT "
-        + LOCATION_FIELDS + ", \"locationRelationships\".\"parentLocationUuid\" "
-        + "FROM locations, \"locationRelationships\" "
-        + "WHERE locations.uuid = \"locationRelationships\".\"childLocationUuid\" "
-        + "  AND \"locationRelationships\".\"parentLocationUuid\" IN ( <foreignKeys> ) "
-        + "ORDER BY locations.name, locations.uuid";
-
-    public ChildrenLocationsBatcher() {
-      super(LocationDao.this.databaseHandler, SQL, "foreignKeys", new LocationMapper(),
-          "parentLocationUuid");
+  class LocationSearchBatcher extends SearchQueryBatcher<Location, LocationSearchQuery> {
+    public LocationSearchBatcher() {
+      super(LocationDao.this);
     }
   }
 
-  public List<List<Location>> getChildrenLocationsForLocation(List<String> foreignKeys) {
-    return new ChildrenLocationsBatcher().getByForeignKeys(foreignKeys);
+  public List<List<Location>> getLocationsBySearch(
+      List<ImmutablePair<String, LocationSearchQuery>> foreignKeys) {
+    return new LocationDao.LocationSearchBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<Location>> getParentLocations(GraphQLContext context,
-      String parentLocationUuid) {
-    return new ForeignKeyFetcher<Location>().load(context,
-        FkDataLoaderKey.LOCATION_PARENT_LOCATIONS, parentLocationUuid);
-  }
-
-  class ParentLocationsBatcher extends ForeignKeyBatcher<Location> {
-    private static final String SQL = "/* batch.getParentLocationsForLocation */ SELECT "
-        + LOCATION_FIELDS + ", \"locationRelationships\".\"childLocationUuid\" "
-        + "FROM locations, \"locationRelationships\" "
-        + "WHERE locations.uuid = \"locationRelationships\".\"parentLocationUuid\" "
-        + "  AND \"locationRelationships\".\"childLocationUuid\" IN ( <foreignKeys> ) "
-        + "ORDER BY locations.name, locations.uuid";
-
-    public ParentLocationsBatcher() {
-      super(LocationDao.this.databaseHandler, SQL, "foreignKeys", new LocationMapper(),
-          "childLocationUuid");
-    }
-  }
-
-  public List<List<Location>> getParentLocationsForLocation(List<String> foreignKeys) {
-    return new ParentLocationsBatcher().getByForeignKeys(foreignKeys);
+  public CompletableFuture<List<Location>> getLocationsBySearch(GraphQLContext context, String uuid,
+      LocationSearchQuery query) {
+    return new SearchQueryFetcher<Location, LocationSearchQuery>().load(context,
+        SqDataLoaderKey.LOCATIONS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   @Transactional

@@ -635,12 +635,14 @@ scalar Instant
 """"""
 type Location {
   approvalSteps: [ApprovalStep]
+  ascendantLocations(query: LocationSearchQueryInput): [Location]
   assessments: [Assessment]
   attachments: [Attachment]
-  childrenLocations: [Location]
+  childrenLocations(query: LocationSearchQueryInput): [Location]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  descendantLocations(query: LocationSearchQueryInput): [Location]
   description: String
   digram: String
   entityAvatar: EntityAvatar
@@ -649,7 +651,7 @@ type Location {
   lng: Float
   name: String
   notes: [Note]
-  parentLocations: [Location]
+  parentLocations(query: LocationSearchQueryInput): [Location]
   planningApprovalSteps: [ApprovalStep]
   status: Status
   trigram: String

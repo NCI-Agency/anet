@@ -319,7 +319,7 @@ public class Position extends AbstractEmailableAnetBean
     if (query == null) {
       query = new TaskSearchQuery();
     }
-    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks", "uuid",
         "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
     return engine().getTaskDao().getTasksBySearch(context, uuid, query).thenApply(o -> {
       responsibleTasks = o;
@@ -334,8 +334,9 @@ public class Position extends AbstractEmailableAnetBean
       return CompletableFuture.completedFuture(organizationsAdministrated);
     }
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setBatchParams(new M2mBatchParams<Organization, OrganizationSearchQuery>("organizations",
-        "\"organizationAdministrativePositions\"", "\"organizationUuid\"", "\"positionUuid\""));
+    query.setBatchParams(
+        new M2mBatchParams<Organization, OrganizationSearchQuery>("organizations", "uuid",
+            "\"organizationAdministrativePositions\"", "\"organizationUuid\"", "\"positionUuid\""));
     return engine().getOrganizationDao().getOrganizationsBySearch(context, uuid, query)
         .thenApply(o -> {
           organizationsAdministrated = o;

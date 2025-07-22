@@ -15,8 +15,10 @@ describe("When creating a report with tasks", () => {
     expect(await allUnassignedButton.isExisting()).to.be.true
   })
   it("should return one option 1.3.C", async() => {
+    const testTask = "1.3.C"
     await CreateReport.open()
     await (await CreateReport.getTasks()).click()
+    await (await CreateReport.getTasks()).setValue(testTask)
     await (await CreateReport.getTaskSearchPopover()).waitForExist()
     await (await CreateReport.getTaskSearchPopover()).waitForDisplayed()
     await (await CreateReport.getTaskSearchFilters()).waitForExist()
@@ -29,7 +31,7 @@ describe("When creating a report with tasks", () => {
     ).waitForDisplayed()
     await (await CreateReport.getAllUnassignedTasksFilterButton()).click()
     const task13C = (await CreateReport.getTasksTable()).$(
-      ".bp6-popover-target=1.3.C"
+      `//span[contains(text(),"${testTask}")]`
     )
     // eslint-disable-next-line no-unused-expressions
     expect(await task13C.isExisting()).to.be.true

@@ -104,6 +104,8 @@ export interface AdvancedSelectProps {
   valueKey?: string
   disabledValue?: any | any[]
   renderSelected?: React.ReactElement
+  restrictSelectableItems?: boolean
+  multiSelect?: boolean
   overlayTable?: React.ReactElement // how to render the selected items
   overlayColumns: string[] // search results component for in the overlay
   overlayRenderRow?: (...args: unknown[]) => unknown
@@ -137,6 +139,8 @@ const AdvancedSelect = ({
   valueKey = "uuid",
   disabledValue,
   renderSelected,
+  restrictSelectableItems,
+  multiSelect,
   overlayTable: OverlayTable,
   overlayColumns,
   overlayRenderRow,
@@ -359,6 +363,8 @@ const AdvancedSelect = ({
                               fieldName={fieldName}
                               items={items}
                               pageNum={pageNum}
+                              restrictSelectableItems={restrictSelectableItems}
+                              multiSelect={multiSelect}
                               selectedItems={value}
                               disabledItems={disabledValue}
                               valueKey={valueKey}

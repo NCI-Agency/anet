@@ -1,7 +1,7 @@
 import Page from "../page"
 
-class TaskFilter extends Page {
-  async openTaskFilter() {
+class LocationFilter extends Page {
+  async openLocationFilter() {
     const searchLink = await browser.$(
       ".search-popover-target.bp6-popover-target"
     )
@@ -26,58 +26,58 @@ class TaskFilter extends Page {
     await addFilterButton.waitForDisplayed()
     await addFilterButton.click()
 
-    const withinObjectiveButton = await browser.$("a*=Within Objective")
-    await withinObjectiveButton.click()
+    const withinLocationButton = await browser.$("a*=Within Location")
+    await withinLocationButton.click()
   }
 
-  async getTaskCount() {
-    const openFilterButton = await browser.$("input[name='taskUuid']")
+  async getLocationCount() {
+    const openFilterButton = await browser.$("input[name='locationUuid']")
     await openFilterButton.waitForDisplayed()
     await openFilterButton.click()
 
     await browser.waitUntil(
       async() =>
-        await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
+        await (await browser.$("#locationUuid-popover tbody")).isDisplayed()
     )
-    const taskRows = await browser.$$("#taskUuid-popover tbody > tr")
-    return taskRows.length
+    const locationRows = await browser.$$("#locationUuid-popover tbody > tr")
+    return locationRows.length
   }
 
-  async openAllCollapsedTasks(nonRecursive) {
+  async openAllCollapsedLocations() {
     await browser.waitUntil(
       async() =>
-        await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
+        await (await browser.$("#locationUuid-popover tbody")).isDisplayed()
     )
-    let expandibleTasks = await browser.$$(
-      "#taskUuid-popover .bp6-icon-chevron-right"
+    let expandibleLocations = await browser.$$(
+      "#locationUuid-popover .bp6-icon-chevron-right"
     )
-    while (expandibleTasks.length > 0) {
-      for (const task of expandibleTasks) {
-        await task.click()
+    while (expandibleLocations.length > 0) {
+      for (const location of expandibleLocations) {
+        await location.click()
       }
-      expandibleTasks = nonRecursive
-        ? []
-        : await browser.$$("#taskUuid-popover .bp6-icon-chevron-right")
+      expandibleLocations = await browser.$$(
+        "#locationUuid-popover .bp6-icon-chevron-right"
+      )
     }
   }
 
-  async searchTasks(searchText) {
-    const openFilterButton = await browser.$("input[name='taskUuid']")
+  async searchLocations(searchText) {
+    const openFilterButton = await browser.$("input[name='locationUuid']")
     await openFilterButton.waitForDisplayed()
     await openFilterButton.click()
     await browser.keys(searchText)
     await browser.pause(1000) // wait for the searchText to be processed
     await browser.waitUntil(
       async() =>
-        await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
+        await (await browser.$("#locationUuid-popover tbody")).isDisplayed()
     )
   }
 
-  async closeTaskFilter() {
+  async closeLocationFilter() {
     const closeButton = await browser.$(".bp6-icon.bp6-icon-cross")
     await closeButton.waitForDisplayed()
     await closeButton.click()
   }
 }
 
-export default new TaskFilter()
+export default new LocationFilter()
