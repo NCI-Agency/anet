@@ -23,13 +23,10 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
         uuid
         shortName
         longName
-        selectable
         parentTask {
           uuid
-        }
-        ascendantTasks {
-          uuid
           shortName
+          longName
           parentTask {
             uuid
           }
@@ -38,16 +35,8 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
           uuid
           shortName
           longName
-          selectable
           parentTask {
             uuid
-          }
-          ascendantTasks {
-            uuid
-            shortName
-            parentTask {
-              uuid
-            }
           }
         }
       }
@@ -75,13 +64,11 @@ const TopTasks = ({ pageDispatchers }: TopTasksProps) => {
   }
 
   return (
-    <>
-      <Fieldset title={Settings.fields.task.allTasksLabel}>
-        {(!data?.taskList?.list?.length && (
-          <div>No {Settings.fields.task.allTasksLabel}</div>
-        )) || <TaskTree tasks={data.taskList.list} />}
-      </Fieldset>
-    </>
+    <Fieldset title={Settings.fields.task.allTasksLabel}>
+      {(!data?.taskList?.list?.length && (
+        <div>No {Settings.fields.task.allTasksLabel}</div>
+      )) || <TaskTree tasks={data.taskList.list} />}
+    </Fieldset>
   )
 }
 
