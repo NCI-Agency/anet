@@ -99,6 +99,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   private static final String weekFormat = "EXTRACT(WEEK FROM %s)";
 
+  private static final String REPORT_EMAILS_PREFERENCE = "REPORTS_EMAILS";
+
   public ReportDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
   }
@@ -975,17 +977,29 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   public static void sendEmailToReportPeople(AnetEmailAction action,
       List<? extends Person> people) {
-    // Make sure all email addresses are loaded
+    // Load people preferences
     CompletableFuture.allOf(people.stream()
+        .map(a -> a.loadPreferences(ApplicationContextProvider.getEngine().getContext()))
+        .toArray(CompletableFuture<?>[]::new)).join();
+
+    // Load email addresses only of people who did not opt out of report emails
+    CompletableFuture.allOf(people.stream()
+        .filter(person -> person.getPreferences().stream()
+            .noneMatch(pref -> pref.getPreference().getName().equals(REPORT_EMAILS_PREFERENCE)
+                && pref.getValue().equals("FALSE")))
         .map(a -> a.loadEmailAddresses(ApplicationContextProvider.getEngine().getContext(), null))
         .toArray(CompletableFuture<?>[]::new)).join();
-    AnetEmail email = new AnetEmail();
-    email.setAction(action);
+
     final List<String> addresses = people.stream()
         .map(p -> p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null))
         .filter(ea -> !Utils.isEmptyOrNull(ea)).toList();
-    email.setToAddresses(addresses);
-    AnetEmailWorker.sendEmailAsync(email);
+
+    if (!addresses.isEmpty()) {
+      AnetEmail email = new AnetEmail();
+      email.setAction(action);
+      email.setToAddresses(addresses);
+      AnetEmailWorker.sendEmailAsync(email);
+    }
   }
 
   public int submit(final Report r, final Person user) {
