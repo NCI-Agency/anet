@@ -40,7 +40,7 @@ import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Attachment, Location, Organization, Report, Task } from "models"
+import { Attachment, Location, Organization, Report } from "models"
 import { PositionRole } from "models/Position"
 import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
@@ -82,16 +82,6 @@ const GQL_ORGANIZATION_FIELDS = `
     ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
-const GQL_TASK_FIELDS = `
-  fragment taskFields on Task {
-    ${Task.autocompleteQuery}
-    selectable
-    descendantTasks {
-      ${Task.autocompleteQuery}
-      selectable
-    }
-  }
-`
 const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
     uuid
@@ -116,9 +106,6 @@ const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
     organization(uuid: $uuid) {
       ...organizationFields
-      tasks {
-        ...taskFields
-      }
       status
       isSubscribed
       profile
@@ -169,12 +156,6 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
-      descendantOrgs(query: { status: ACTIVE }) {
-        ...organizationFields
-        tasks {
-          ...taskFields
-        }
-      }
       positions {
         ...positionFields
         person {
@@ -221,13 +202,42 @@ const GQL_GET_ORGANIZATION = gql`
       ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
+
+    taskList(query: { taskedOrgUuid: [$uuid], orgRecurseStrategy: ${RECURSE_STRATEGY.CHILDREN}, pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        selectable
+        ascendantTasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
+        descendantTasks {
+          uuid
+          shortName
+          selectable
+          ascendantTasks {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
+          }
+        }
+      }
+    }
   }
 
   ${GQL_LOCATION_FIELDS}
   ${GQL_ORGANIZATION_FIELDS}
   ${GQL_PERSON_FIELDS}
   ${GQL_POSITION_FIELDS}
-  ${GQL_TASK_FIELDS}
 `
 
 interface OrganizationShowProps {
@@ -273,10 +283,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
-
-  const allTasks = organization.tasks.concat(
-    organization.descendantOrgs.flatMap(org => org.tasks)
-  )
+  const allTasks = data?.taskList?.list ?? []
 
   const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
