@@ -60,6 +60,10 @@ public class PersonPreference extends AbstractAnetBean {
     return person.getForeignObject();
   }
 
+  public Preference getPreference() {
+    return preference.getForeignObject();
+  }
+
   @GraphQLQuery(name = "preference")
   public CompletableFuture<Preference> loadPreference(@GraphQLRootContext GraphQLContext context) {
     if (preference.hasForeignObject()) {
