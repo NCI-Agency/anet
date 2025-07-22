@@ -111,6 +111,9 @@ export const HierarchicalTaskOverlayTable = ({
 
       const handleToggleSelection = e => {
         e.stopPropagation()
+        if (task.isNotSelectable) {
+          return
+        }
         if (isSelected) {
           handleRemoveItem(task)
         } else {

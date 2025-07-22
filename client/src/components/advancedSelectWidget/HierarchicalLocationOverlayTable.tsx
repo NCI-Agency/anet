@@ -97,6 +97,9 @@ export const HierarchicalLocationOverlayTable = ({
 
       const handleToggleSelection = e => {
         e.stopPropagation()
+        if (location.isNotSelectable) {
+          return
+        }
         if (isSelected) {
           handleRemoveItem(location)
         } else {
