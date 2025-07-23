@@ -102,19 +102,23 @@ const UsersPendingVerification = ({
               {list.map(person => (
                 <tr key={person.uuid}>
                   <td>
-                    <LinkTo modelType="Person" model={person} />
+                    <LinkTo
+                      modelType="Person"
+                      model={person}
+                      showAvatar={false}
+                    />
                   </td>
                   <td>
                     <Button
                       variant="primary"
-                      onClick={() => updateAccess(person.uuid, true)}
+                      onClick={() => updateAccess(person, true)}
                     >
                       Allow Access
                     </Button>
                     <Button
                       variant="outline-danger"
                       className="ms-2"
-                      onClick={() => updateAccess(person.uuid, false)}
+                      onClick={() => updateAccess(person, false)}
                     >
                       Deny Access
                     </Button>
@@ -128,14 +132,25 @@ const UsersPendingVerification = ({
     </Fieldset>
   )
 
-  function updateAccess(uuid, isApproved) {
+  function updateAccess(person, isApproved) {
     return API.mutation(isApproved ? GQL_APPROVE_USER : GQL_DELETE_USER, {
-      uuid
+      uuid: person.uuid
     })
       .then(data => {
-        setStateSuccess(
-          `Pending user was successfully ${isApproved ? "approved" : "deleted"}`
+        const msg = (
+          <>
+            Pending user{" "}
+            <LinkTo
+              modelType="Person"
+              model={person}
+              showAvatar={false}
+              isLink={isApproved}
+              showPreview={isApproved}
+            />{" "}
+            was successfully {isApproved ? "approved" : "deleted"}.
+          </>
         )
+        setStateSuccess(msg)
         setStateError(null)
         refetch()
       })

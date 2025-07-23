@@ -509,7 +509,7 @@ li#search-nav .nav > li a {
 }
 
 .onboarding-new {
-  width: 40%;
+  width: fit-content;
   margin-left: auto;
   margin-right: auto;
 }
