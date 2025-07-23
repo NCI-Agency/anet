@@ -1811,6 +1811,18 @@ INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "
 INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "state", "submittedAt", "receivedAt", "errors") VALUES
   (1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
+-- Create some preferences
+INSERT INTO "preferences" ("uuid", "name", "description","type", "defaultValue", "createdAt", "updatedAt") VALUES
+    ('4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'SUBSCRIPTIONS_EMAILS', 'Receive emails related to subscriptions', 'BOOLEAN', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "preferences" ("uuid", "name", "description","type", "defaultValue", "createdAt", "updatedAt") VALUES
+    ('0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'REPORTS_EMAILS', 'Receive emails related to reports', 'BOOLEAN', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Specific preferences values for Arthur
+INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
+    ((SELECT uuid from people where "name" = 'Dmin, Arthur'), '4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
+    ((SELECT uuid from people where "name" = 'Dmin, Arthur'), '0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
 -- authorizationGroups currently have no links

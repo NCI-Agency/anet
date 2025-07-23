@@ -94,6 +94,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   private static final String weekFormat = "EXTRACT(WEEK FROM %s)";
 
+  private static final String REPORT_EMAILS_PREFERENCE = "REPORTS_EMAILS";
+
   public ReportDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
   }
@@ -890,17 +892,15 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   public static void sendEmailToReportPeople(AnetEmailAction action,
       List<? extends Person> people) {
-    // Make sure all email addresses are loaded
-    CompletableFuture.allOf(people.stream()
-        .map(a -> a.loadEmailAddresses(ApplicationContextProvider.getEngine().getContext(), null))
-        .toArray(CompletableFuture<?>[]::new)).join();
-    AnetEmail email = new AnetEmail();
-    email.setAction(action);
-    final List<String> addresses = people.stream()
-        .map(p -> p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null))
-        .filter(ea -> !Utils.isEmptyOrNull(ea)).toList();
-    email.setToAddresses(addresses);
-    AnetEmailWorker.sendEmailAsync(email);
+    final List<String> addresses =
+        DaoUtils.getEmailAddressesBasedOnPreferences(people, REPORT_EMAILS_PREFERENCE);
+
+    if (!addresses.isEmpty()) {
+      AnetEmail email = new AnetEmail();
+      email.setAction(action);
+      email.setToAddresses(addresses);
+      AnetEmailWorker.sendEmailAsync(email);
+    }
   }
 
   public int submit(final Report r, final Person user) {
