@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -334,4 +336,25 @@ public class DaoUtils {
     final ZonedDateTime bom = now.truncatedTo(ChronoUnit.MINUTES);
     return bom.toInstant();
   }
+
+  public static List<String> getEmailAddressesBasedOnPreferences(List<? extends Person> people,
+      String preference) {
+    // Load people preferences
+    CompletableFuture.allOf(people.stream()
+        .map(a -> a.loadPreferences(ApplicationContextProvider.getEngine().getContext()))
+        .toArray(CompletableFuture<?>[]::new)).join();
+
+    // Load email addresses only of people who did not opt out of report emails
+    CompletableFuture.allOf(people.stream()
+        .filter(person -> person.getPreferences().stream()
+            .noneMatch(pref -> pref.getPreference().getName().equals(preference)
+                && pref.getValue().equalsIgnoreCase("FALSE")))
+        .map(a -> a.loadEmailAddresses(ApplicationContextProvider.getEngine().getContext(), null))
+        .toArray(CompletableFuture<?>[]::new)).join();
+
+    return people.stream()
+        .map(p -> p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null))
+        .filter(ea -> !Utils.isEmptyOrNull(ea)).toList();
+  }
+
 }

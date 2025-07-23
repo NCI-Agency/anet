@@ -6,21 +6,30 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
+import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
+import mil.dds.anet.emails.SubscriptionUpdateEmail;
 import mil.dds.anet.search.pg.PostgresqlSubscriptionSearcher;
+import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQuery<?>> {
+
+  private static final String REPORT_SUBSCRIPTIONS_PREFERENCE = "SUBSCRIPTIONS_EMAILS";
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -45,6 +56,31 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
   @Override
   public Subscription getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
+  }
+
+  public List<Person> getSubscribedPeople(String subscribedObjectType,
+      String subscribedObjectUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      if (Utils.isEmptyOrNull(subscribedObjectType) || Utils.isEmptyOrNull(subscribedObjectUuid)) {
+        return Collections.emptyList();
+      }
+      return handle.attach(SubscriptionDao.SubscriptionListQueries.class)
+          .getSubscribedPeople(subscribedObjectType, subscribedObjectUuid);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public interface SubscriptionListQueries {
+    @RegisterRowMapper(PersonMapper.class)
+    @SqlQuery("SELECT p.uuid AS people_uuid, p.name AS people_name " + " FROM subscriptions s "
+        + " INNER JOIN positions pos ON s.\"subscriberUuid\" = pos.uuid "
+        + " INNER JOIN people p ON pos.\"currentPersonUuid\" = p.uuid "
+        + " WHERE \"subscribedObjectType\" = :subscribedObjectType AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
+    List<Person> getSubscribedPeople(
+        @Bind(value = "subscribedObjectType") String subscribedObjectType,
+        @Bind(value = "subscribedObjectUuid") String subscribedObjectUuid);
   }
 
   @Transactional
@@ -188,15 +224,34 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
           "Inserting subscription updates: sql={}, createdAt={}, updatedObjectType={}, updatedObjectUuid={}, isNote={}, params={}",
           sqlSuf, subscriptionUpdate.updatedAt, subscriptionUpdate.objectType,
           subscriptionUpdate.objectUuid, subscriptionUpdate.isNote, params);
-      return handle.createUpdate(sqlPre + sqlSuf)
+
+      final int rowNum = handle.createUpdate(sqlPre + sqlSuf)
           .bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
           .bind("updatedObjectType", subscriptionUpdate.objectType)
           .bind("updatedObjectUuid", subscriptionUpdate.objectUuid)
           .bind("isNote", subscriptionUpdate.isNote).bindMap(params).execute();
+      sendEmailToSubscribers(subscriptionUpdate);
+      return rowNum;
     } finally {
       closeDbHandle(handle);
     }
   }
+
+  private void sendEmailToSubscribers(SubscriptionUpdateGroup subscriptionUpdate) {
+    final List<Person> subscribers =
+        getSubscribedPeople(subscriptionUpdate.getObjectType(), subscriptionUpdate.getObjectUuid());
+    final List<String> addresses =
+        DaoUtils.getEmailAddressesBasedOnPreferences(subscribers, REPORT_SUBSCRIPTIONS_PREFERENCE);
+
+    if (!addresses.isEmpty()) {
+      final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
+      final AnetEmail email = new AnetEmail();
+      email.setAction(action);
+      email.setToAddresses(addresses);
+      AnetEmailWorker.sendEmailAsync(email);
+    }
+  }
+
 
   @Transactional
   public boolean isSubscribedObject(GraphQLContext context, String subscribedObjectUuid) {
