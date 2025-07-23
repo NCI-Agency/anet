@@ -1577,25 +1577,33 @@ INSERT INTO "reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee
   (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '17c518f6-4444-48d9-b63b-7da7e2023ecc', true, true, false);
 
 -- Report actions for task assessments
+-- (note: as separate inserts per step, so they have slightly different timestamps)
+-- submit
 INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '764a393a-a292-40c5-8f96-28263dc906c0', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
-  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false);
+-- approve by Default Approvers
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '764a393a-a292-40c5-8f96-28263dc906c0', false),
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false);
+-- approve for tasks
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '87fdbc6a-3109-4e11-9702-a894d6ca31ef'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '7fdef880-1bf3-4e56-8476-79166324023f'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '7fdef880-1bf3-4e56-8476-79166324023f'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '764a393a-a292-40c5-8f96-28263dc906c0', false),
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '0701a964-5d79-4090-8f35-a40856556675'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '1b5eb36b-456c-46b7-ae9e-1c89e9075292'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '42afd501-1a2c-4758-9da5-f996b2c97156'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '42afd501-1a2c-4758-9da5-f996b2c97156'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false);
+-- publish
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '764a393a-a292-40c5-8f96-28263dc906c0', false),
@@ -1701,38 +1709,46 @@ INSERT INTO "reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee
   (true, '0c5a8ba7-7436-47fd-bead-b8393246a300', '9db10db0-794a-488d-a636-55e7195e9167', true, false, true);
 
 -- Report actions for person assessments
+-- (note: as separate inserts per step, so they have slightly different timestamps)
+-- submit
 INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
-  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
-  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
-  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
-  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
-  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
-  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
   (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '76afbaef-821c-4d13-942e-a53a3b556a90', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '9db10db0-794a-488d-a636-55e7195e9167', false);
+-- approve by Default Approvers
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
   (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '76afbaef-821c-4d13-942e-a53a3b556a90', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false);
+-- approve for tasks
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
   (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '76afbaef-821c-4d13-942e-a53a3b556a90', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false);
+-- publish
+INSERT INTO "reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cfbf2fd1-6bbb-4570-a5c4-8ad7b8635486', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'dcafe728-4017-4854-9212-dc87b4d19cb7', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '216afd92-ba73-479d-ac59-ade83ab38b36', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'afad83a1-85d9-4a3d-a090-351b11a9edce', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b6555ac2-5385-449c-bc03-d790d7c5ac3a', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'bec3af82-dbe9-4d49-8185-49b8c725d4ef', false),
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '76afbaef-821c-4d13-942e-a53a3b556a90', false),
-  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '9db10db0-794a-488d-a636-55e7195e9167', false),
-  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false),
-  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '076793eb-9950-4ea6-bbd5-2d8b8827828c'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false),
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false);
 
 -- Notes for person assessments
