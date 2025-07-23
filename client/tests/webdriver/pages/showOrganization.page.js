@@ -264,6 +264,10 @@ class ShowOrganization extends Page {
   async getModalCloseButton() {
     return (await this.getModalContent()).$(".btn-close")
   }
+
+  async getSyncMatrix() {
+    return browser.$('div[id="syncMatrix"]')
+  }
 }
 
 export default new ShowOrganization()
