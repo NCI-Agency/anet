@@ -21,6 +21,11 @@ body {
   overflow: hidden;
   margin: 0;
   box-sizing: border-box;
+  @media print {
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 .anet {
