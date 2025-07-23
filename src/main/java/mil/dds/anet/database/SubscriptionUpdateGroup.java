@@ -41,4 +41,44 @@ public class SubscriptionUpdateGroup {
     return this.objectType != null && this.objectUuid != null && this.updatedAt != null
         && this.stmts != null;
   }
+
+  public String getObjectType() {
+    return objectType;
+  }
+
+  public void setObjectType(String objectType) {
+    this.objectType = objectType;
+  }
+
+  public String getObjectUuid() {
+    return objectUuid;
+  }
+
+  public void setObjectUuid(String objectUuid) {
+    this.objectUuid = objectUuid;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public List<SubscriptionUpdateStatement> getStmts() {
+    return stmts;
+  }
+
+  public void setStmts(List<SubscriptionUpdateStatement> stmts) {
+    this.stmts = stmts;
+  }
+
+  public boolean isNote() {
+    return isNote;
+  }
+
+  public void setNote(boolean note) {
+    isNote = note;
+  }
 }
