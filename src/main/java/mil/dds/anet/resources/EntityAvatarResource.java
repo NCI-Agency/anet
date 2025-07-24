@@ -84,7 +84,7 @@ public class EntityAvatarResource {
     return numRows;
   }
 
-  public static void assertPermission(final Person user, final String relatedObjectType,
+  public void assertPermission(final Person user, final String relatedObjectType,
       final String relatedObjectUuid) {
     if (!hasPermission(user, relatedObjectType, relatedObjectUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
