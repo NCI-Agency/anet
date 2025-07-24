@@ -4,7 +4,6 @@ import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
 import graphql.GraphQLContext;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -656,12 +655,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           loserUuid);
 
       // Update organizationAdministrativePositions
-      deleteForMerge("organizationAdministrativePositions", "positionUuid", loserUuid);
-
-      Utils.addRemoveElementsByUuid(existingPos.loadOrganizationsAdministrated(context).join(),
-          Utils.orIfNull(winner.getOrganizationsAdministrated(), new ArrayList<>()),
-          newOrg -> addOrganizationToPosition(winner, newOrg),
-          oldOrg -> removeOrganizationFromPosition(DaoUtils.getUuid(oldOrg), winner));
+      updateM2mForMerge("organizationAdministrativePositions", "organizationUuid", "positionUuid",
+          winnerUuid, loserUuid);
 
       // Update emailAddresses
       final EmailAddressDao emailAddressDao = engine().getEmailAddressDao();
