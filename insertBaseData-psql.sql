@@ -785,9 +785,9 @@ INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Approvers', 1);
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
-  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Planning Approvers', 2);
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Planning Approvers', 0);
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
-  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Planning Approvers', 2);
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Planning Approvers', 0);
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
     ((SELECT uuid from "approvalSteps" WHERE name='Merge Org 1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
