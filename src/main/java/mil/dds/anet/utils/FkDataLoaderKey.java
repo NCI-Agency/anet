@@ -27,6 +27,7 @@ public enum FkDataLoaderKey {
   RELATED_OBJECT_PLANNING_APPROVAL_STEPS, // <relatedObject>.planningApprovalSteps
   REPORT_PEOPLE, // report.reportPeople
   REPORT_REPORT_ACTIONS, // report.reportActions
+  REPORT_REPORT_AUTHORIZED_MEMBERS, // report.reportAuthorizedMembers
   REPORT_REPORT_SENSITIVE_INFORMATION, // report.reportSensitiveInformation
   REPORT_TASKS, // report.tasks
   TASK_RESPONSIBLE_POSITIONS, // task.responsiblePositions

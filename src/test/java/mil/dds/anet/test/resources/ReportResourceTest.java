@@ -41,6 +41,7 @@ import mil.dds.anet.test.client.AuthorizationGroupSearchQueryInput;
 import mil.dds.anet.test.client.Comment;
 import mil.dds.anet.test.client.EmailAddress;
 import mil.dds.anet.test.client.EmailAddressInput;
+import mil.dds.anet.test.client.GenericRelatedObject;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationSearchQueryInput;
@@ -115,15 +116,16 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       String.format("{ %1$s parentTask { %1$s } }", _TASK_FIELDS);
   public static final String AUTHORIZATION_GROUP_FIELDS = "{ uuid name }";
+  public static final String AUTHORIZED_MEMBERS_FIELDS = "{ relatedObjectType relatedObjectUuid }";
   public static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s interlocutorOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
-          + " comments %6$s notes %7$s authorizationGroups %8$s"
+          + " comments %6$s notes %7$s authorizedMembers %8$s"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
           + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } "
           + " attachments %9$s }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
-      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AUTHORIZATION_GROUP_FIELDS,
+      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AUTHORIZED_MEMBERS_FIELDS,
       AttachmentResourceTest.ATTACHMENT_FIELDS);
 
   @Test
@@ -1426,7 +1428,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getIntent().contains("Hospital usage of Drugs")).count()).isPositive();
 
-    /// find EF 2.2
+    // find EF 2.2
     final OrganizationSearchQueryInput queryOrgs4 =
         OrganizationSearchQueryInput.builder().withText("ef 2.2").build();
     orgs = withCredentials(jackUser,
@@ -1578,10 +1580,10 @@ public class ReportResourceTest extends AbstractResourceTest {
             .getList();
 
     for (final Report report : reportList) {
-      assertThat(report.getAuthorizationGroups()).isNotNull();
-      assertThat(report.getAuthorizationGroups()).isNotEmpty();
-      final Set<String> collect = report.getAuthorizationGroups().stream()
-          .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+      assertThat(report.getAuthorizedMembers()).isNotNull();
+      assertThat(report.getAuthorizedMembers()).isNotEmpty();
+      final Set<String> collect = report.getAuthorizedMembers().stream()
+          .map(GenericRelatedObject::getRelatedObjectUuid).collect(Collectors.toSet());
       collect.retainAll(agUuidSet);
       assertThat(collect).isNotEmpty();
     }
@@ -1683,8 +1685,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Attach attachment to test report
     @SuppressWarnings("unchecked")
     final var allowedFileTypes = (List<Map<String, ?>>) attachmentSettings.get("fileTypes");
-    final var allowedMimeTypes = (List<String>) allowedFileTypes.stream()
-        .map(element -> (String) element.get("mimeType")).toList();
+    final var allowedMimeTypes =
+        allowedFileTypes.stream().map(element -> (String) element.get("mimeType")).toList();
     final String mimeType = allowedMimeTypes.get(0);
 
     final GenericRelatedObjectInput testAroInput = GenericRelatedObjectInput.builder()
@@ -2001,71 +2003,66 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testSensitiveInformationByAuthorizationGroup() {
-    final PersonSearchQueryInput erinQuery =
-        PersonSearchQueryInput.builder().withText("erin").build();
-    final AnetBeanList_Person erinSearchResults = withCredentials(adminUser,
-        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), erinQuery));
-    assertThat(erinSearchResults.getTotalCount()).isPositive();
-    final Optional<Person> erinResult = erinSearchResults.getList().stream()
-        .filter(p -> p.getName().equals("Erinson, Erin")).findFirst();
-    assertThat(erinResult).isNotEmpty();
-
+  void testSensitiveInformationByAuthorizedMembers() {
     final ReportSearchQueryInput reportQuery =
-        ReportSearchQueryInput.builder().withText("Test Cases are good")
-            // otherwise test-case-created data can crowd the actual report we want out of the first
-            // page
-            .withSortOrder(SortOrder.ASC).build();
-    final AnetBeanList_Report reportSearchResults =
-        withCredentials("erin", t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
+        ReportSearchQueryInput.builder().withText("Test Cases are good").withPageSize(0).build();
+    assertSensitiveInformationAccess(reportQuery, true);
+  }
+
+  @Test
+  void testSensitiveInformationSearch() {
+    final ReportSearchQueryInput reportQuery = ReportSearchQueryInput.builder()
+        .withText("Test Cases are good").withSensitiveInfo(true).withPageSize(0).build();
+    assertSensitiveInformationAccess(reportQuery, false);
+  }
+
+  private void assertSensitiveInformationAccess(ReportSearchQueryInput reportQuery,
+      boolean shouldHaveResults) {
+    // erin is the author
+    assertCanSeeSensitiveInformation("erin", reportQuery);
+    // jack is in the EF 2.1 community
+    assertCanSeeSensitiveInformation("jack", reportQuery);
+    // elizabeth has direct access
+    assertCanSeeSensitiveInformation("elizabeth", reportQuery);
+    // bob holds the EF 1.1 Superuser position
+    assertCanSeeSensitiveInformation("elizabeth", reportQuery);
+    // michael is in the EF 5 organization
+    assertCanSeeSensitiveInformation("michael", reportQuery);
+    // kevin is in the EF 5.1 organization
+    assertCanSeeSensitiveInformation("kevin", reportQuery);
+
+    // unauthorized members should not be able to see the sensitive information
+    assertCanNotSeeSensitiveInformation("reina", reportQuery, shouldHaveResults);
+    assertCanNotSeeSensitiveInformation(adminUser, reportQuery, shouldHaveResults);
+  }
+
+  private void assertCanSeeSensitiveInformation(String domainUsername,
+      ReportSearchQueryInput reportQuery) {
+    final AnetBeanList_Report reportSearchResults = withCredentials(domainUsername,
+        t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
     assertThat(reportSearchResults.getTotalCount()).isPositive();
     final Optional<Report> reportResult = reportSearchResults.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult).isNotEmpty();
     final Report report = reportResult.get();
-    // erin is the author, so should be able to see the sensitive information
     assertThat(report.getReportSensitiveInformation()).isNotNull();
     assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
+  }
 
-    final PersonSearchQueryInput reinaQuery =
-        PersonSearchQueryInput.builder().withText("reina").build();
-    final AnetBeanList_Person searchResults = withCredentials(adminUser,
-        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), reinaQuery));
-    assertThat(searchResults.getTotalCount()).isPositive();
-    final Optional<Person> reinaResult = searchResults.getList().stream()
-        .filter(p -> p.getName().equals("Reinton, Reina")).findFirst();
-    assertThat(reinaResult).isNotEmpty();
-
-    final AnetBeanList_Report reportSearchResults2 =
-        withCredentials("reina", t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
-    assertThat(reportSearchResults2.getTotalCount()).isPositive();
-    final Optional<Report> reportResult2 = reportSearchResults2.getList().stream()
-        .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
-    assertThat(reportResult2).isNotEmpty();
-    final Report report2 = reportResult2.get();
-    // reina is in the community, so should be able to see the sensitive information
-    assertThat(report2.getReportSensitiveInformation()).isNotNull();
-    assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
-
-    final PersonSearchQueryInput elizabethQuery =
-        PersonSearchQueryInput.builder().withText("elizabeth").build();
-    final AnetBeanList_Person searchResults3 = withCredentials(adminUser,
-        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), elizabethQuery));
-    assertThat(searchResults3.getTotalCount()).isPositive();
-    final Optional<Person> elizabethResult3 = searchResults3.getList().stream()
-        .filter(p -> p.getName().equals("Elizawell, Elizabeth")).findFirst();
-    assertThat(elizabethResult3).isNotEmpty();
-
-    final AnetBeanList_Report reportSearchResults3 = withCredentials("elizabeth",
+  private void assertCanNotSeeSensitiveInformation(String domainUsername,
+      ReportSearchQueryInput reportQuery, boolean shouldHaveResults) {
+    final AnetBeanList_Report reportSearchResults = withCredentials(domainUsername,
         t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
-    assertThat(reportSearchResults3.getTotalCount()).isPositive();
-    final Optional<Report> reportResult3 = reportSearchResults3.getList().stream()
-        .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
-    assertThat(reportResult3).isNotEmpty();
-    final Report report3 = reportResult3.get();
-    // elizabeth is not in the community, so should not be able to see the sensitive
-    // information
-    assertThat(report3.getReportSensitiveInformation()).isNull();
+    if (!shouldHaveResults) {
+      assertThat(reportSearchResults.getTotalCount()).isZero();
+    } else {
+      assertThat(reportSearchResults.getTotalCount()).isPositive();
+      final Optional<Report> reportResult = reportSearchResults.getList().stream()
+          .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
+      assertThat(reportResult).isNotEmpty();
+      final Report report = reportResult.get();
+      assertThat(report.getReportSensitiveInformation()).isNull();
+    }
   }
 
   private ReportSearchQueryInput.Builder setupQueryEngagementDayOfWeek() {

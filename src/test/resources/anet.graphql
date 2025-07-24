@@ -1228,7 +1228,7 @@ type Report {
   atmosphereDetails: String
   attachments: [Attachment]
   attendees: [ReportPerson]
-  authorizationGroups: [AuthorizationGroup]
+  authorizedMembers: [GenericRelatedObject]
   authors: [ReportPerson]
   cancelledReason: ReportCancelledReason
   classification: String
@@ -1292,7 +1292,7 @@ input ReportInput {
   approvalStep: ApprovalStepInput
   atmosphere: Atmosphere
   atmosphereDetails: String
-  authorizationGroups: [AuthorizationGroupInput]
+  authorizedMembers: [GenericRelatedObjectInput]
   cancelledReason: ReportCancelledReason
   classification: String
   comments: [CommentInput]

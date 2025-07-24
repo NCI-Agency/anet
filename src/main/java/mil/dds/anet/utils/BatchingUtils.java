@@ -300,6 +300,12 @@ public final class BatchingUtils {
             (BatchLoader<String, List<ReportAction>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getReportActionDao().getReportActions(foreignKeys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.REPORT_REPORT_AUTHORIZED_MEMBERS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getReportDao().getReportAuthorizedMembers(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_PEOPLE.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<ReportPerson>>) foreignKeys -> CompletableFuture.supplyAsync(

@@ -182,13 +182,16 @@ test.serial("Draft and submit a report", async t => {
     "sensitive info",
     shortWaitMs // wait for Slate to save the editor contents
   )
-  const $addAuthGroupShortcutButtons = await $$(
-    "#authorizationGroups-shortcut-list button"
+  const $communitiesButton = await $('button[value="AuthorizationGroup"]')
+  await $communitiesButton.click()
+  const $communitiesInput = await $("input#authorizedMembers")
+  await $communitiesInput.click()
+  // Add all communities
+  const $allCommunities = await $$(
+    "#entitySelect-popover input[type='checkbox']"
   )
-  // Add all recent communities
-  const nrAuthGroups = $addAuthGroupShortcutButtons.length
-  for (let i = 0; i < nrAuthGroups; i++) {
-    await (await $("#authorizationGroups-shortcut-list button")).click()
+  for (const $community of $allCommunities) {
+    await $community.click()
   }
 
   const $formButtonSubmit = await $("#formBottomSubmit")

@@ -115,7 +115,7 @@ public class Report extends AbstractCustomizableAnetBean
   // annotated below
   private ReportSensitiveInformation reportSensitiveInformation;
   // annotated below
-  private List<AuthorizationGroup> authorizationGroups;
+  private List<GenericRelatedObject> authorizedMembers;
   // annotated below
   private List<ReportAction> workflow;
   // annotated below
@@ -763,22 +763,25 @@ public class Report extends AbstractCustomizableAnetBean
     this.reportSensitiveInformation = reportSensitiveInformation;
   }
 
-  // TODO: batch load? (used in reports/{Edit,Show}.js)
-  @GraphQLQuery(name = "authorizationGroups")
-  public synchronized List<AuthorizationGroup> loadAuthorizationGroups() {
-    if (authorizationGroups == null && uuid != null) {
-      authorizationGroups = engine().getReportDao().getAuthorizationGroupsForReport(uuid);
+  @GraphQLQuery(name = "authorizedMembers")
+  public CompletableFuture<List<GenericRelatedObject>> loadAuthorizedMembers(
+      @GraphQLRootContext GraphQLContext context) {
+    if (authorizedMembers != null) {
+      return CompletableFuture.completedFuture(authorizedMembers);
     }
-    return authorizationGroups;
+    return engine().getReportDao().getAuthorizedMembers(context, this).thenApply(o -> {
+      authorizedMembers = o;
+      return o;
+    });
   }
 
-  @GraphQLInputField(name = "authorizationGroups")
-  public void setAuthorizationGroups(List<AuthorizationGroup> authorizationGroups) {
-    this.authorizationGroups = authorizationGroups;
+  @GraphQLInputField(name = "authorizedMembers")
+  public void setAuthorizedMembers(List<GenericRelatedObject> authorizedMembers) {
+    this.authorizedMembers = authorizedMembers;
   }
 
-  public List<AuthorizationGroup> getAuthorizationGroups() {
-    return authorizationGroups;
+  public List<GenericRelatedObject> getAuthorizedMembers() {
+    return authorizedMembers;
   }
 
   @JsonIgnore
@@ -854,16 +857,16 @@ public class Report extends AbstractCustomizableAnetBean
         && Objects.equals(r.getReportText(), reportText)
         && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
-        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups)
-        && Objects.equals(r.getEvent(), event);
+        && Objects.equals(r.getAuthorizedMembers(), authorizedMembers)
+        && Objects.equals(r.getEvent(), getEvent());
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, state, approvalStep, createdAt, updatedAt, location,
         intent, exsum, reportPeople, tasks, reportText, nextSteps, comments, atmosphere,
-        atmosphereDetails, engagementDate, duration, reportSensitiveInformation,
-        authorizationGroups, event);
+        atmosphereDetails, engagementDate, duration, reportSensitiveInformation, authorizedMembers,
+        event);
   }
 
   public static Report createWithUuid(String uuid) {

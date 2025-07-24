@@ -7,7 +7,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,20 +55,6 @@ public abstract class AbstractAuthorizationGroupSearcher
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
           engine().getAuthorizationGroupDao().getSubscriptionUpdate(null)));
-    }
-
-    if (Boolean.TRUE.equals(query.isInMyReports())) {
-      qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
-      qb.addFromClause("JOIN ("
-          + "  SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
-          + "  FROM reports"
-          + "  JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\""
-          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
-          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
-          + "  GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\""
-          + ") \"inMyReports\" ON \"authorizationGroups\".uuid = \"inMyReports\".uuid");
-      qb.addSqlArg("isAuthor", true);
-      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
     if (query.getEmailNetwork() != null) {

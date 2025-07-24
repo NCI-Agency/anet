@@ -525,6 +525,14 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         entityAvatarDao.upsert(winnerEntityAvatar);
       }
 
+      // Update authorizationGroupRelatedObjects
+      updateM2mForMerge("authorizationGroupRelatedObjects", "authorizationGroupUuid",
+          "relatedObjectUuid", winnerUuid, loserUuid);
+
+      // Update reportAuthorizedMembers
+      updateM2mForMerge("reportAuthorizedMembers", "reportUuid", "relatedObjectUuid", winnerUuid,
+          loserUuid);
+
       // Update emailAddresses
       final EmailAddressDao emailAddressDao = engine().getEmailAddressDao();
       emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, loserUuid, null);
