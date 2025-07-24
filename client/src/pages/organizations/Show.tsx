@@ -190,6 +190,22 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      tasks {
+        uuid
+        shortName
+        longName
+        parentTask {
+          uuid
+          shortName
+        }
+        ascendantTasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
+      }
       authorizationGroups {
         uuid
         name
