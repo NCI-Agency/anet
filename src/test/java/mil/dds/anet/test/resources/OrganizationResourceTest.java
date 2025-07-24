@@ -25,7 +25,6 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.utils.UtilsTest;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
@@ -481,29 +480,30 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final Position superuserPosition = superuser.getPosition();
 
     final OrganizationInput orgInput =
-        OrganizationInput.builder().withShortName("Parent Organization")
-            .withLongName("Advisor Organization for Testing Superusers").withStatus(Status.ACTIVE)
+        OrganizationInput.builder().withShortName("Parent Organization 1")
+            .withLongName("Advisor Organization 1 for Testing Superusers").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization(getDomainUsername(superuser), orgInput);
     final Organization parentOrg = succeedCreateOrganization(adminUser, orgInput);
 
-    final OrganizationInput childOrgInput = OrganizationInput.builder()
-        .withShortName("Child Organization").withLongName("Child Organization of Test Organization")
-        .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
-        .withParentOrg(getOrganizationInput(parentOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).build();
+    final OrganizationInput childOrgInput =
+        OrganizationInput.builder().withShortName("Child Organization 1")
+            .withLongName("Child Organization of Parent Organization 1").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withParentOrg(getOrganizationInput(parentOrg))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization(getDomainUsername(superuser), childOrgInput);
 
     // Set superuser as responsible for the parent organization
-    parentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    parentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(parentOrg));
 
     final Organization createdChildOrg =
         succeedCreateOrganization(getDomainUsername(superuser), childOrgInput);
 
     // Can edit the child of their responsible organization
-    createdChildOrg.setShortName("Updated Child Organization");
+    createdChildOrg.setShortName("Updated Child Organization 1");
     succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
 
     // Superusers cannot update their own organizations if they're not responsible
@@ -512,7 +512,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
 
     // Given responsibility now they can edit their organization
-    superuserOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    superuserOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
     succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
 
@@ -535,8 +535,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // and edit it and created sub-organizations of the top level organization he created
     succeedUpdateOrganization("jim", getOrganizationInput(newTopLevelOrganization));
     final OrganizationInput childOrgInput =
-        OrganizationInput.builder().withShortName("Parent Organization 2 child")
-            .withLongName("Child Organization of Parent Organization 3").withStatus(Status.ACTIVE)
+        OrganizationInput.builder().withShortName("Child Organization 2")
+            .withLongName("Child Organization f Parent Organization 2").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withParentOrg(getOrganizationInput(newTopLevelOrganization))
             .withLocation(getLocationInput(getGeneralHospital())).build();
@@ -545,9 +545,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Can NOT edit and create sub-organizations of an existing organization: EF 1
     final Organization ef1 = withCredentials(jackUser,
         t -> queryExecutor.organization("{ uuid }", "9a35caa7-a095-4963-ac7b-b784fde4d583"));
-    // Can NOT edit EF 5.1
+    // Can NOT edit EF 1
     failUpdateOrganization("jim", getOrganizationInput(ef1));
-    // Can NOT create a sub organization of EF 5.1
+    // Can NOT create a sub organization of EF 1
     final OrganizationInput childOrgInput2 = OrganizationInput.builder()
         .withShortName("EF 1 new child").withLongName("New Child Organization of EF 1")
         .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
@@ -557,7 +557,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void organizationCanCreateEditAnyOrganizatonSuperuserPermissionTest() {
+  void organizationCanCreateEditAnyOrganizationSuperuserPermissionTest() {
     // Billie is a superuser that can create or edit any organization
 
     // Can create top level organization
@@ -570,8 +570,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // and edit it and created sub-organizations of the top level organization he created
     succeedUpdateOrganization("billie", getOrganizationInput(newTopLevelOrganization));
     final OrganizationInput childOrgInput =
-        OrganizationInput.builder().withShortName("Parent Organization 2 child")
-            .withLongName("Child Organization of Parent Organization 2").withStatus(Status.ACTIVE)
+        OrganizationInput.builder().withShortName("Child Organization 3")
+            .withLongName("Child Organization of Parent Organization 3").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withParentOrg(getOrganizationInput(newTopLevelOrganization))
             .withLocation(getLocationInput(getGeneralHospital())).build();
@@ -580,7 +580,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Can edit and create sub-organizations of an existing organization: EF 1
     final Organization ef1 = withCredentials(jackUser,
         t -> queryExecutor.organization(FIELDS, "9a35caa7-a095-4963-ac7b-b784fde4d583"));
-    // Can edit EF 5.1
+    // Can edit EF 1
     succeedUpdateOrganization("billie", getOrganizationInput(ef1));
     // Can create a sub organization of EF 1
     final OrganizationInput childOrgInput2 = OrganizationInput.builder()
@@ -597,17 +597,18 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final Position superuserPosition = superuser.getPosition();
 
     final OrganizationInput orgInput =
-        OrganizationInput.builder().withShortName("Parent Organization")
-            .withLongName("Advisor Organization for Testing Superusers").withStatus(Status.ACTIVE)
+        OrganizationInput.builder().withShortName("Parent Organization 4")
+            .withLongName("Advisor Organization 4 for Testing Superusers").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
     final Organization createdParentOrg = succeedCreateOrganization(adminUser, orgInput);
 
-    final OrganizationInput childOrgInput = OrganizationInput.builder()
-        .withShortName("Child Organization").withLongName("Child Organization of Test Organization")
-        .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
-        .withParentOrg(getOrganizationInput(createdParentOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).build();
+    final OrganizationInput childOrgInput =
+        OrganizationInput.builder().withShortName("Child Organization 4")
+            .withLongName("Child Organization of Parent Organization 4").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withParentOrg(getOrganizationInput(createdParentOrg))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
     final Organization createdChildOrg = succeedCreateOrganization(adminUser, childOrgInput);
 
     createdChildOrg.setParentOrg(null);
@@ -615,7 +616,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Set superuser as responsible for the child organization
-    createdChildOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    createdChildOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdChildOrg));
 
     // Cannot set parent as null because they're not responsible for the parent organization
@@ -623,15 +624,15 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
     // Set superuser as responsible for the parent organization
-    createdParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    createdParentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdParentOrg));
     // Now superuser can set the parent organization as null
     createdChildOrg.setParentOrg(null);
     succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
 
     final OrganizationInput newParentOrg =
-        OrganizationInput.builder().withShortName("New Parent Organization")
-            .withLongName("New Parent Organization for Testing Superusers")
+        OrganizationInput.builder().withShortName("New Parent Organization 4")
+            .withLongName("New Parent Organization 4 for Testing Superusers")
             .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
 
@@ -645,7 +646,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Update responsible position
-    createdNewParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    createdNewParentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdNewParentOrg));
 
     // Now they can assign the new parent
