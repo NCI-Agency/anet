@@ -1360,9 +1360,8 @@ export const ReadonlyCustomFields = ({
         ) {
           return null
         }
-        return ReadonlyFieldComponent ? (
+        const content = ReadonlyFieldComponent ? (
           <ReadonlyFieldComponent
-            key={key}
             name={fieldName}
             values={values}
             vertical={vertical}
@@ -1374,7 +1373,6 @@ export const ReadonlyCustomFields = ({
           />
         ) : (
           <FastField
-            key={key}
             name={fieldName}
             isCompact={isCompact}
             component={FieldHelper.ReadonlyField}
@@ -1383,6 +1381,18 @@ export const ReadonlyCustomFields = ({
             labelColumnWidth={labelColumnWidth}
             {...fieldProps}
           />
+        )
+
+        return (
+          <div key={key}>
+            {isCompact ? (
+              <table>
+                <tbody>{content}</tbody>
+              </table>
+            ) : (
+              content
+            )}
+          </div>
         )
       })}
     </>
