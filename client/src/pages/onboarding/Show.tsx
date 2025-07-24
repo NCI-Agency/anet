@@ -34,7 +34,6 @@ const GQL_GET_SELF = gql`
       status
       phoneNumber
       pendingVerification
-      biography
       obsoleteCountry
       country {
         uuid
@@ -171,13 +170,8 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
   }
 
   function mapNonCustomFields() {
-    const classNameExceptions = {
-      biography: "biography"
-    }
-
     // map fields that have specific human value
     const humanValuesExceptions = {
-      biography: <RichTextEditor readOnly value={person.biography} />,
       emailAddresses: (
         <EmailAddressTable
           label={Settings.fields.person.emailAddresses.label}
@@ -206,7 +200,6 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
           name={key}
           component={FieldHelper.ReadonlyField}
           humanValue={humanValuesExceptions[key]}
-          className={classNameExceptions[key]}
         />
       )
 
