@@ -325,8 +325,7 @@ public class OrganizationDao
       update(winnerOrganization);
 
       // Update approvalSteps (note that this may fail if reports are currently pending at one of
-      // the
-      // approvalSteps that are going to be deleted):
+      // the approvalSteps that are going to be deleted):
       // - delete approvalSteps of loser
       final List<ApprovalStep> existingLoserPlanningApprovalSteps =
           existingLoserOrg.loadPlanningApprovalSteps(context).join();
@@ -344,14 +343,14 @@ public class OrganizationDao
           existingWinnerApprovalSteps);
 
       // Assign tasks to the winner
-      updateForMerge("taskTaskedOrganizations", "organizationUuid", winnerOrganizationUuid,
-          loserOrganizationUuid);
+      updateM2mForMerge("taskTaskedOrganizations", "taskUuid", "organizationUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
       // Move positions to the winner
       updateForMerge(PositionDao.TABLE_NAME, "organizationUuid", winnerOrganizationUuid,
           loserOrganizationUuid);
       // Move authorizationGroups to the winner
-      updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid",
-          winnerOrganizationUuid, loserOrganizationUuid);
+      updateM2mForMerge("authorizationGroupRelatedObjects", "authorizationGroupUuid",
+          "relatedObjectUuid", winnerOrganizationUuid, loserOrganizationUuid);
       // Update parentOrg (of all sub-organizations) to the winner
       updateForMerge(OrganizationDao.TABLE_NAME, "parentOrgUuid", winnerOrganizationUuid,
           loserOrganizationUuid);
