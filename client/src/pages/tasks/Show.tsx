@@ -41,7 +41,7 @@ import moment from "moment"
 import React, { useContext, useState } from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -245,6 +245,16 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
         const searchText = [task.shortName, task.longName].join(" ")
         const action = (
           <>
+            {isAdmin && (
+              <Link
+                id="mergeWithOther"
+                to="/admin/merge/tasks"
+                state={{ initialLeftUuid: task.uuid }}
+                className="btn btn-outline-secondary"
+              >
+                {`Merge with other ${Settings.fields.task.shortLabel.toLowerCase()}`}
+              </Link>
+            )}
             {isResponsibleForTask && (
               <LinkTo
                 modelType="Task"

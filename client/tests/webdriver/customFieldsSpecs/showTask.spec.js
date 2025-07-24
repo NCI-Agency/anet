@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import MergeTasks from "../pages/mergeTasks.page"
 import ShowTask from "../pages/showTask.page"
 
 const TASK_12B_UUID = "9d3da7f4-8266-47af-b518-995f587250c9"
@@ -68,6 +69,19 @@ describe("Show task page", () => {
     })
   })
   describe("When in the show page as an admin", () => {
+    it("We can select to merge it with another task", async () => {
+      await ShowTask.openAsAdminUser(TASK_12B_UUID)
+      await (await ShowTask.getMergeButton()).click()
+      await browser.pause(500) // wait for the merge page to render and load data
+      // eslint-disable-next-line no-unused-expressions
+      expect(await MergeTasks.getTitle()).to.exist
+      expect(await (await MergeTasks.getLeftTaskField()).getValue()).to.contain(
+        "1.2.B"
+      )
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await MergeTasks.getLeftTaskField()).isEnabled()).to.be
+        .false
+    })
     it("Should open and close the Edit Engagement planning approvals modal correctly", async () => {
       const editButton =
         await ShowTask.getEditEngagementPlanningApprovalsButton()

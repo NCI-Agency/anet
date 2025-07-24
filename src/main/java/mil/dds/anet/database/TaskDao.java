@@ -1,10 +1,14 @@
 package mil.dds.anet.database;
 
 import graphql.GraphQLContext;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -17,6 +21,7 @@ import mil.dds.anet.search.pg.PostgresqlTaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -36,8 +41,11 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   public static final String TABLE_NAME = "tasks";
   public static final String TASK_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
-  public TaskDao(DatabaseHandler databaseHandler) {
+  private final AdminDao adminDao;
+
+  public TaskDao(DatabaseHandler databaseHandler, AdminDao adminDao) {
     super(databaseHandler);
+    this.adminDao = adminDao;
   }
 
   @Override
@@ -242,6 +250,83 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Task obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "tasks.uuid");
+  }
+
+  @Transactional
+  public int mergeTasks(final Task loserTask, final Task winnerTask) {
+    final Handle handle = getDbHandle();
+    try {
+      final var loserTaskUuid = loserTask.getUuid();
+      final var winnerTaskUuid = winnerTask.getUuid();
+      final var existingLoserTask = getByUuid(loserTaskUuid);
+      final var existingWinnerTask = getByUuid(winnerTaskUuid);
+      final var context = engine().getContext();
+
+      // Clear loser's shortName and parentTaskUuid to prevent update conflicts (together they must
+      // be unique)
+      handle
+          .createUpdate("/* clearTaskShortNameAndParentUuid */ UPDATE tasks"
+              + " SET \"shortName\" = NULL, \"parentTaskUuid\" = NULL WHERE uuid = :loserTaskUuid")
+          .bind("loserTaskUuid", loserTaskUuid).execute();
+
+      // Update the winner's fields
+      update(winnerTask);
+
+      // Update approvalSteps (note that this may fail if reports are currently pending at one of
+      // the approvalSteps that are going to be deleted):
+      // - delete approvalSteps of loser
+      final List<ApprovalStep> existingLoserPlanningApprovalSteps =
+          existingLoserTask.loadPlanningApprovalSteps(context).join();
+      final List<ApprovalStep> existingLoserApprovalSteps =
+          existingLoserTask.loadApprovalSteps(context).join();
+      Utils.updateApprovalSteps(loserTask, List.of(), existingLoserPlanningApprovalSteps, List.of(),
+          existingLoserApprovalSteps);
+      // - update approvalSteps of winner
+      final List<ApprovalStep> existingWinnerPlanningApprovalSteps =
+          existingWinnerTask.loadPlanningApprovalSteps(context).join();
+      final List<ApprovalStep> existingWinnerApprovalSteps =
+          existingWinnerTask.loadApprovalSteps(context).join();
+      Utils.updateApprovalSteps(winnerTask, winnerTask.getPlanningApprovalSteps(),
+          existingWinnerPlanningApprovalSteps, winnerTask.getApprovalSteps(),
+          existingWinnerApprovalSteps);
+
+      // Assign organizations to the winner
+      updateM2mForMerge("taskTaskedOrganizations", "organizationUuid", "taskUuid", winnerTaskUuid,
+          loserTaskUuid);
+      // Move reports to the winner
+      updateM2mForMerge("reportTasks", "reportUuid", "taskUuid", winnerTaskUuid, loserTaskUuid);
+      // Move events to the winner
+      updateM2mForMerge("eventTasks", "eventUuid", "taskUuid", winnerTaskUuid, loserTaskUuid);
+      // Move assessments to the winner
+      updateM2mForMerge("assessmentRelatedObjects", "assessmentUuid", "relatedObjectUuid",
+          winnerTaskUuid, loserTaskUuid);
+      // Move notes to the winner
+      updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerTaskUuid,
+          loserTaskUuid);
+
+      // Update taskResponsiblePositions
+      updateM2mForMerge("taskResponsiblePositions", "positionUuid", "taskUuid", winnerTaskUuid,
+          loserTaskUuid);
+
+      // Update parentTask (of all sub-tasks) to the winner
+      updateForMerge(TaskDao.TABLE_NAME, "parentTaskUuid", winnerTaskUuid, loserTaskUuid);
+
+      // Update customSensitiveInformation for winner
+      DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, TaskDao.TABLE_NAME,
+          winnerTaskUuid, winnerTask.customSensitiveInformationKey(),
+          winnerTask.getCustomSensitiveInformation());
+      // Delete customSensitiveInformation for loser
+      deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserTaskUuid);
+
+      // Finally, delete loser
+      final int nrDeleted = deleteForMerge(TaskDao.TABLE_NAME, "uuid", loserTaskUuid);
+      if (nrDeleted > 0) {
+        adminDao.insertMergedEntity(new MergedEntity(loserTaskUuid, winnerTaskUuid, Instant.now()));
+      }
+      return nrDeleted;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
 }

@@ -21,11 +21,17 @@ import { bindActionCreators } from "redux"
 import Settings from "settings"
 import utils from "utils"
 
+const tasksShortLabel = pluralize(Settings.fields.task.shortLabel)
+
 const MERGE_OPTIONS = [
   { key: "people", label: "Merge people" },
   { key: "positions", label: "Merge positions" },
   { key: "locations", label: "Merge locations" },
-  { key: "organizations", label: "Merge organizations" }
+  { key: "organizations", label: "Merge organizations" },
+  {
+    key: "tasks",
+    label: `Merge ${tasksShortLabel.toLowerCase()}`
+  }
 ]
 
 const USER_ACTIVITY_OPTIONS = [
@@ -229,8 +235,6 @@ const Navigation = ({
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
   const allOrgsSorted = allOrganizations.toSorted(compareByApp6StandardIdentity)
 
-  const taskShortLabel = Settings.fields.task.shortLabel
-
   useEffect(() => {
     if (
       inMyOrg ||
@@ -308,7 +312,7 @@ const Navigation = ({
                 linkTo={{ pathname: "/tasks/mine" }}
                 handleOnClick={resetPages}
               >
-                {`My ${pluralize(taskShortLabel)}`}
+                {`My ${tasksShortLabel}`}
                 {!!notifications?.tasksWithPendingAssessments?.length && (
                   <NotificationBadge>
                     {notifications.tasksWithPendingAssessments.length}
