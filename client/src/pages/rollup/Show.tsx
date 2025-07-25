@@ -9,11 +9,14 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
+import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
@@ -35,13 +38,14 @@ import {
 } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Report, RollupGraph } from "models"
+import { Person, Report, RollupGraph } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
+import PEOPLE_ICON from "resources/people.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
@@ -511,7 +515,7 @@ const RollupShow = ({
       <Formik
         enableReinitialize
         onSubmit={onSubmitEmailRollup}
-        initialValues={{ to: "", comment: "" }}
+        initialValues={{ to: "", comment: "", toAnetUsers: null }}
       >
         {formikProps => renderEmailModal(formikProps)}
       </Formik>
@@ -663,7 +667,20 @@ const RollupShow = ({
   }
 
   function renderEmailModal(formikProps) {
-    const { isSubmitting, submitForm } = formikProps
+    const { isSubmitting, submitForm, setFieldValue } = formikProps
+    const [toAnetUsers, setToAnetUsers] = useState([])
+
+    const peopleFilters = {
+      allPeople: {
+        label: "All people",
+        queryVars: {
+          status: Model.STATUS.ACTIVE,
+          emailNetwork: "NS"
+        }
+      }
+    }
+
+    const personFields = `${Person.autocompleteQuery} emailAddresses { network address }`
     return (
       <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Form>
@@ -672,7 +689,56 @@ const RollupShow = ({
           </Modal.Header>
           <Modal.Body>
             <Field
+              name="toAnetUsers"
+              label="To ANET Users"
+              component={FieldHelper.SpecialField}
+              vertical
+              onChange={value => {
+                setToAnetUsers([...toAnetUsers, value])
+                setFieldValue("toAnetUsers", [...toAnetUsers, value])
+              }}
+              widget={
+                <AdvancedSingleSelect
+                  fieldName="author"
+                  placeholder="Select ANET users"
+                  value={null}
+                  overlayColumns={[
+                    "Name",
+                    "Position",
+                    "Location",
+                    "Organization"
+                  ]}
+                  overlayRenderRow={PersonDetailedOverlayRow}
+                  filterDefs={peopleFilters}
+                  autoComplete="off"
+                  objectType={Person}
+                  valueKey="name"
+                  fields={personFields}
+                  addon={PEOPLE_ICON}
+                />
+              }
+            />
+            <div className="d-flex flex-wrap gap-2 mb-2 mt-2">
+              {toAnetUsers.map(user => (
+                <div
+                  className="d-flex align-items-center p-2 gap-2 border border-secondary rounded"
+                  key={user.uuid}
+                >
+                  {user.name}
+                  <Icon
+                    icon={IconNames.CROSS}
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      setToAnetUsers(
+                        toAnetUsers.filter(u => u.uuid !== user.uuid)
+                      )}
+                  />
+                </div>
+              ))}
+            </div>
+            <Field
               name="to"
+              label="To Emails"
               component={FieldHelper.InputField}
               validate={email => handleEmailValidation(email)}
               vertical
