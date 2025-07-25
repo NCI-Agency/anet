@@ -514,7 +514,7 @@ const RollupShow = ({
       <Formik
         enableReinitialize
         onSubmit={onSubmitEmailRollup}
-        initialValues={{ to: "", comment: "", toAnetUsers: null }}
+        initialValues={{ to: "", comment: "", toAnetUsers: [] }}
       >
         {formikProps => renderEmailModal(formikProps)}
       </Formik>
@@ -665,7 +665,7 @@ const RollupShow = ({
 
   function renderEmailModal(formikProps) {
     const { isSubmitting, submitForm, setFieldValue } = formikProps
-    const [toAnetUsers, setToAnetUsers] = useState([])
+    const toAnetUsers = formikProps.values.toAnetUsers || []
 
     const peopleFilters = {
       allPeople: {
@@ -691,7 +691,6 @@ const RollupShow = ({
               component={FieldHelper.SpecialField}
               vertical
               onChange={value => {
-                setToAnetUsers([...toAnetUsers, value])
                 setFieldValue("toAnetUsers", [...toAnetUsers, value])
               }}
               widget={
@@ -726,9 +725,11 @@ const RollupShow = ({
                     icon={IconNames.CROSS}
                     style={{ cursor: "pointer" }}
                     onClick={() =>
-                      setToAnetUsers(
+                      setFieldValue(
+                        "toAnetUsers",
                         toAnetUsers.filter(u => u.uuid !== user.uuid)
-                      )}
+                      )
+                    }
                   />
                 </div>
               ))}
@@ -737,7 +738,7 @@ const RollupShow = ({
               name="to"
               label="To Emails"
               component={FieldHelper.InputField}
-              validate={email => handleEmailValidation(email)}
+              validate={email => handleEmailValidation(email, toAnetUsers)}
               vertical
             >
               <FormText>
@@ -780,9 +781,9 @@ const RollupShow = ({
     )
   }
 
-  function handleEmailValidation(value) {
+  function handleEmailValidation(value, toAnetUsers) {
     const r = utils.parseEmailAddresses(value)
-    return r.isValid ? null : r.message
+    return r.isValid || toAnetUsers.length ? null : r.message
   }
 
   function toggleEmailModal() {
@@ -832,12 +833,17 @@ const RollupShow = ({
   }
 
   function emailRollup(values, form) {
-    const r = utils.parseEmailAddresses(values.to)
-    if (!r.isValid) {
+    const toEmails = utils.parseEmailAddresses(values.to)
+    const anetUsersEmails = values.toAnetUsers?.map(
+      ({ emailAddresses }) =>
+        emailAddresses.find(({ network }) => network === "NS").address
+    )
+    if (!toEmails.isValid && !anetUsersEmails.length) {
       return
     }
+    const emails = [...(toEmails.to || []), ...anetUsersEmails]
     const emailDelivery = {
-      toAddresses: r.to,
+      toAddresses: emails,
       comment: values.comment
     }
     const variables = {
