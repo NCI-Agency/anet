@@ -4563,18 +4563,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:6.6.3":
-  version: 6.6.3
-  resolution: "@testing-library/jest-dom@npm:6.6.3"
+"@testing-library/jest-dom@npm:6.6.4":
+  version: 6.6.4
+  resolution: "@testing-library/jest-dom@npm:6.6.4"
   dependencies:
     "@adobe/css-tools": "npm:^4.4.0"
     aria-query: "npm:^5.0.0"
-    chalk: "npm:^3.0.0"
     css.escape: "npm:^1.5.1"
     dom-accessibility-api: "npm:^0.6.3"
     lodash: "npm:^4.17.21"
+    picocolors: "npm:^1.1.1"
     redent: "npm:^3.0.0"
-  checksum: 10c0/5566b6c0b7b0709bc244aec3aa3dc9e5f4663e8fb2b99d8cd456fc07279e59db6076cbf798f9d3099a98fca7ef4cd50e4e1f4c4dec5a60a8fad8d24a638a5bf6
+  checksum: 10c0/cb73adf4910f654f6cc61cfb9a551efdffa04ef423bc7fbfd67a6d8aa31c6c6dc6363fe9db23a35fc7cb32ff1390e6e1c77575c2fa70d8b028a943af32bc214c
   languageName: node
   linkType: hard
 
@@ -6621,7 +6621,7 @@ __metadata:
     "@graphql-codegen/schema-ast": "npm:4.1.0"
     "@graphql-codegen/visitor-plugin-common": "npm:5.8.0"
     "@testing-library/dom": "npm:10.4.0"
-    "@testing-library/jest-dom": "npm:6.6.3"
+    "@testing-library/jest-dom": "npm:6.6.4"
     "@testing-library/react": "npm:16.3.0"
     "@trivago/prettier-plugin-sort-imports": "npm:5.2.2"
     "@types/lodash": "npm:4.17.20"
@@ -6649,7 +6649,7 @@ __metadata:
     circular-dependency-plugin: "npm:5.2.2"
     classnames: "npm:2.5.1"
     clean-webpack-plugin: "npm:4.0.0"
-    config: "npm:4.0.1"
+    config: "npm:4.1.0"
     copy-webpack-plugin: "npm:13.0.0"
     core-js: "npm:3.44.0"
     countries-list: "npm:3.1.1"
@@ -6657,7 +6657,7 @@ __metadata:
     cross-spawn: "npm:7.0.6"
     css-loader: "npm:7.1.2"
     d3: "npm:7.9.0"
-    dotenv: "npm:17.2.0"
+    dotenv: "npm:17.2.1"
     email-addresses: "npm:5.0.0"
     encoding: "npm:0.1.13"
     escape-html: "npm:1.0.3"
@@ -8010,16 +8010,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "chalk@npm:3.0.0"
-  dependencies:
-    ansi-styles: "npm:^4.1.0"
-    supports-color: "npm:^7.1.0"
-  checksum: 10c0/ee650b0a065b3d7a6fda258e75d3a86fc8e4effa55871da730a9e42ccb035bf5fd203525e5a1ef45ec2582ecc4f65b47eb11357c526b84dd29a14fb162c414d2
-  languageName: node
-  linkType: hard
-
 "chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.1, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -8532,12 +8522,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"config@npm:4.0.1":
-  version: 4.0.1
-  resolution: "config@npm:4.0.1"
+"config@npm:4.1.0":
+  version: 4.1.0
+  resolution: "config@npm:4.1.0"
   dependencies:
     json5: "npm:^2.2.3"
-  checksum: 10c0/2a33ab615015e83d282ec71c32d2abe9bee0350491f3f916262c7c787bb9d7ed0d6d050146c30a3cc025bc3e1b286f6d5c99fb3c172febfde4e38afecc9d70bd
+  checksum: 10c0/46475d6b11244118f6e906dc94aef6108a9c1180e9025a2f2027d3925f1a36327e2a2b4e9abc2aef7de7e7f34eb10ec82109c3be1d4290dd7011a3139a154a99
   languageName: node
   linkType: hard
 
@@ -9837,10 +9827,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:17.2.0":
-  version: 17.2.0
-  resolution: "dotenv@npm:17.2.0"
-  checksum: 10c0/d4cb5c2a09c288c921ef47a78f51c765a763266e23e84465cde6a87b28b9f7fc5a9d1fe349ed3c880b4c7297f82dd736dba5b08fe95ce53833ce4a7258d0fc43
+"dotenv@npm:17.2.1":
+  version: 17.2.1
+  resolution: "dotenv@npm:17.2.1"
+  checksum: 10c0/918dd2f9d8b8f86b0afabad9534793d51de3718c437f9e7b6525628cf68c1d4ae768cc37a5afff38c066f58a8ecf549f4ac6cd5617485bd328e826112cc2650a
   languageName: node
   linkType: hard
 
