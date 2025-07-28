@@ -355,7 +355,6 @@ describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input does not get empty, the selected element shown below the input
-      // eslint-disable-next-line no-unused-expressions
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(PERSON)
@@ -436,7 +435,6 @@ describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input does not get empty, the selected element shown below the input
-      // eslint-disable-next-line no-unused-expressions
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(POSITION)

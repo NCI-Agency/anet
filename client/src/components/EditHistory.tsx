@@ -169,7 +169,6 @@ function EditHistory({
                 hasCurrent &&
                 currentlyOccupyingEntity?.uuid ===
                   lastItem?.[historyEntityType]?.uuid &&
-                // eslint-disable-next-line eqeqeq
                 lastItem?.endTime == null
               const validLastItem = validWhenNoOccupant || validWhenOccupant
 

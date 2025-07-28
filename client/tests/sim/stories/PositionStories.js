@@ -21,7 +21,6 @@ import {
  * @param {*} user The user to retrieve the information
  * @param {*} uuid The uuid of the position to retrieve
  */
-/* eslint-disable no-unused-vars */
 async function getPosition(user, uuid) {
   return (
     await runGQL(user, {
@@ -49,7 +48,6 @@ async function getPosition(user, uuid) {
     })
   ).data.position
 }
-/* eslint-enable no-unused-vars */
 
 async function listOrganizations(user) {
   const totalCount = (

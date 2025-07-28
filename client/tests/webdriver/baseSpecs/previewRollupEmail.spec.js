@@ -29,7 +29,7 @@ describe("Preview rollup page", () => {
       // "The order in which the window handles are returned is arbitrary."
       let switchHandle
       while ((switchHandle = handles.pop()) === currentHandle) {
-        // eslint-disable-line no-empty
+        // empty
       }
       await browser.switchToWindow(switchHandle)
 
