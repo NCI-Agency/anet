@@ -12,7 +12,7 @@ import {
   runGQL
 } from "../simutils"
 
-const getRandomPerson = async function() {
+const getRandomPerson = async function () {
   return await getRandomObject(
     "people",
     { positionType: Object.values(Position.TYPE) },
@@ -144,13 +144,13 @@ async function populateReport(report, args) {
     state !== Report.STATE.CANCELLED
       ? null
       : faker.helpers.arrayElement([
-        "CANCELLED_BY_ADVISOR",
-        "CANCELLED_BY_INTERLOCUTOR",
-        "CANCELLED_DUE_TO_TRANSPORTATION",
-        "CANCELLED_DUE_TO_FORCE_PROTECTION",
-        "CANCELLED_DUE_TO_ROUTES",
-        "CANCELLED_DUE_TO_THREAT"
-      ])
+          "CANCELLED_BY_ADVISOR",
+          "CANCELLED_BY_INTERLOCUTOR",
+          "CANCELLED_DUE_TO_TRANSPORTATION",
+          "CANCELLED_DUE_TO_FORCE_PROTECTION",
+          "CANCELLED_DUE_TO_ROUTES",
+          "CANCELLED_DUE_TO_THREAT"
+        ])
 
   const template = {
     intent: () => faker.lorem.paragraph(),
@@ -163,13 +163,13 @@ async function populateReport(report, args) {
     location,
     reportPeople,
     tasks,
-    reportText: async() => await createHtmlParagraphs(),
+    reportText: async () => await createHtmlParagraphs(),
     nextSteps: () => faker.lorem.sentence(),
     keyOutcomes: () => faker.lorem.sentence(),
-    reportSensitiveInformation: async() => ({
+    reportSensitiveInformation: async () => ({
       text: await createHtmlParagraphs()
     }),
-    authorizedMembers: async() => await getAuthorizedMembers(),
+    authorizedMembers: async () => await getAuthorizedMembers(),
     state,
     releasedAt: () => {
       // Set the releasedAt value on a random date between 1 and 7 days after the engagement
@@ -204,7 +204,7 @@ async function populateReport(report, args) {
   return report
 }
 
-const createReport = async function(user, grow, args) {
+const createReport = async function (user, grow, args) {
   const report = Report.filterClientSideFields(new Report())
   if (await populateReport(report, args)) {
     console.debug(`Creating report ${report.intent.green}`)
@@ -220,7 +220,7 @@ const createReport = async function(user, grow, args) {
   }
 }
 
-const updateDraftReport = async function(user) {
+const updateDraftReport = async function (user) {
   const totalCount = (
     await runGQL(user, {
       query: `
@@ -292,7 +292,7 @@ const updateDraftReport = async function(user) {
   }
 }
 
-const submitDraftReport = async function(user) {
+const submitDraftReport = async function (user) {
   const totalCount = (
     await runGQL(user, {
       query: `
@@ -346,7 +346,7 @@ const submitDraftReport = async function(user) {
   ).data.submitReport
 }
 
-const approveReport = async function(user) {
+const approveReport = async function (user) {
   const totalCount = (
     await runGQL(user, {
       query: `

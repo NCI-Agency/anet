@@ -347,7 +347,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
                           </ListGroup>
                         }
                       />
-                  )}
+                    )}
                   {Settings.fields.task.plannedCompletion && (
                     <DictionaryField
                       wrappedComponent={Field}

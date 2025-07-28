@@ -5,7 +5,7 @@ import Insights, {
 } from "../pages/insights.page"
 
 describe("Insights pages", () => {
-  it("Should open each insights page for admin user", async() => {
+  it("Should open each insights page for admin user", async () => {
     await Insights.openAsAdminUser()
     for (const insight of INSIGHTS) {
       await (await Insights.getInsightsMenu()).waitForExist()
@@ -22,7 +22,7 @@ describe("Insights pages", () => {
     await Insights.logout()
   })
 
-  it("Should open each insights page for super user", async() => {
+  it("Should open each insights page for super user", async () => {
     await Insights.openAsSuperuser()
     for (const insight of INSIGHTS) {
       await (await Insights.getInsightsMenu()).waitForExist()
@@ -39,7 +39,7 @@ describe("Insights pages", () => {
     await Insights.logout()
   })
 
-  it("Should open each insights page except pending assessments for regular user", async() => {
+  it("Should open each insights page except pending assessments for regular user", async () => {
     await Insights.openAsPositionlessUser()
     for (const insight of INSIGHTS.filter(
       ins => ins !== PENDING_ASSESSMENTS_BY_POSITION

@@ -4,7 +4,7 @@ import MyAttachments from "../pages/myAttachments.page"
 
 describe("Home page", () => {
   describe("When checking the navigation items", () => {
-    it("Should see a link to my attachments page", async() => {
+    it("Should see a link to my attachments page", async () => {
       await Home.open()
       await (await Home.getLinksMenuButton()).click()
       await (await Home.getMyAttachmentsLink()).waitForDisplayed()
@@ -17,7 +17,7 @@ describe("Home page", () => {
 
 describe("My Attachments page", () => {
   describe("When checking the content of the page", () => {
-    it("Should see a table of arthur's attachments", async() => {
+    it("Should see a table of arthur's attachments", async () => {
       await MyAttachments.openAsAdminUser()
       await (await MyAttachments.getMyAttachments()).waitForDisplayed()
       const myAttachments = await (

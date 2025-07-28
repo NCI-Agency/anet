@@ -182,7 +182,7 @@ class CreateOrganization extends Page {
   async waitForLocationAdvancedSelectToChange(value) {
     await (await this.getLocationAdvancedSelectItem()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getLocationAdvancedSelectItem()).getText()) ===
           value

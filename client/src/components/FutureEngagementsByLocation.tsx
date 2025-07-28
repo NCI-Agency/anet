@@ -105,7 +105,7 @@ const Chart = ({
       return d
     })
     // add days without data as we want to display them in the chart
-    const allCategories = getEngagementDateRangeArray().map(function(d) {
+    const allCategories = getEngagementDateRangeArray().map(function (d) {
       return {
         key: d.valueOf(),
         values: [{}]
@@ -132,13 +132,13 @@ const Chart = ({
       })
       return Object.assign({}, d, categData)
     })
-    const categoryLabels = allCategories.reduce(function(prev, curr) {
+    const categoryLabels = allCategories.reduce(function (prev, curr) {
       prev[curr.key] = moment(curr.key).format(
         Settings.dateFormats.forms.displayShort.date
       )
       return prev
     }, {})
-    const leavesLabels = reportsList.reduce(function(prev, curr) {
+    const leavesLabels = reportsList.reduce(function (prev, curr) {
       prev[curr.location.uuid] = curr.location.name
       return prev
     }, {})
@@ -158,8 +158,8 @@ const Chart = ({
         tooltip={d => `
               <h4>${_escape(graphData.categoryLabels[d.parentKey])}</h4>
               <p>${_escape(graphData.leavesLabels[d.key])}: ${_escape(
-          d.value
-        )}</p>
+                d.value
+              )}</p>
             `}
         selectedBarClass={selectedBarClass}
         selectedBar={

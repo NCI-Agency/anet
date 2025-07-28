@@ -61,17 +61,17 @@ const AdvancedSelectOverlayTable = ({
           const style = isDisabled
             ? null
             : {
-              cursor: disableSelection ? "auto" : "pointer",
-              pointerEvents: disableSelection ? "none" : "all"
-            }
+                cursor: disableSelection ? "auto" : "pointer",
+                pointerEvents: disableSelection ? "none" : "all"
+              }
           const renderSelectComponent = isDisabled
             ? null
             : React.cloneElement(selectItemComponent, {
-              name: fieldName,
-              checked: isSelected,
-              disabled: disableSelection,
-              onChange: () => null
-            })
+                name: fieldName,
+                checked: isSelected,
+                disabled: disableSelection,
+                onChange: () => null
+              })
           return (
             <tr
               key={`${item.uuid}-${pageNum}-${i}`}

@@ -54,13 +54,15 @@ const EmailAddressInputTable = ({
                       id={`clear-${fieldName}`}
                       title="Clear address"
                       onClick={() =>
-                        clearEmailAddress(fieldName, form, replace, i)}
+                        clearEmailAddress(fieldName, form, replace, i)
+                      }
                     />
                     {getHelpBlock(fieldName, form)}
                   </td>
                 </tr>
               )
-            })}
+            })
+          }
         </FieldArray>
       </tbody>
     </Table>

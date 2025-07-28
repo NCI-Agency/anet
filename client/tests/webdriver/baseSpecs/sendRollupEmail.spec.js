@@ -2,18 +2,18 @@ import { expect } from "chai"
 import Rollup from "../pages/rollup.page"
 
 describe("Preview rollup page", () => {
-  beforeEach("Open the rollup page", async() => {
+  beforeEach("Open the rollup page", async () => {
     await Rollup.open()
     await (await Rollup.getRollup()).waitForExist()
     await (await Rollup.getRollup()).waitForDisplayed()
   })
 
-  afterEach("On the rollup page…", async() => {
+  afterEach("On the rollup page…", async () => {
     await Rollup.logout()
   })
 
   describe("When attempting to send the rollup email", () => {
-    it("to an email with the correct domain it should send them successfully", async() => {
+    it("to an email with the correct domain it should send them successfully", async () => {
       await (await Rollup.getEmailButton()).waitForDisplayed()
       await (await Rollup.getEmailButton()).click()
 
@@ -33,7 +33,7 @@ describe("Preview rollup page", () => {
       )
     })
 
-    it("to an email with an incorrect domain it should not send", async() => {
+    it("to an email with an incorrect domain it should not send", async () => {
       await (await Rollup.getEmailButton()).waitForDisplayed()
       await (await Rollup.getEmailButton()).click()
 

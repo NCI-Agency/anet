@@ -584,7 +584,8 @@ const CompactPersonViewHeader = ({
         <Dropdown.Item
           key={preset.name}
           onClick={() =>
-            onPresetSelect(preset.fields, optionalFields, setOptionalFields)}
+            onPresetSelect(preset.fields, optionalFields, setOptionalFields)
+          }
           style={{ minWidth: "185px" }}
         >
           {preset.label}

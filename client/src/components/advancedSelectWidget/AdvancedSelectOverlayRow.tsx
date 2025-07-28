@@ -224,10 +224,10 @@ export const ReportDetailedOverlayRow = (item: any) => (
       <span>
         {item.authors
           ? item.authors.map(a => (
-            <div key={a.uuid} style={{ whiteSpace: "nowrap" }}>
-              <AsLink modelType="Person" model={a} />
-            </div>
-          ))
+              <div key={a.uuid} style={{ whiteSpace: "nowrap" }}>
+                <AsLink modelType="Person" model={a} />
+              </div>
+            ))
           : "Unknown"}
       </span>
     </td>

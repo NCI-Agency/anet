@@ -73,7 +73,8 @@ const PendingEmailsShow = ({ pageDispatchers }: PendingEmailsShowProps) => {
           <FormSelect
             defaultValue={pageSize}
             onChange={e =>
-              changePageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
+              changePageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)
+            }
           >
             {PAGESIZES.map(size => (
               <option key={size} value={size}>

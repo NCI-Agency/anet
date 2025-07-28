@@ -231,7 +231,8 @@ const MartImportedReportTable = ({
                 onChange={e =>
                   handlePageSizeChange(
                     parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
-                  )}
+                  )
+                }
               >
                 {PAGESIZES.map(size => (
                   <option key={size} value={size}>
@@ -341,7 +342,8 @@ const MartImportedReportTable = ({
                                     onClick={() =>
                                       handleAuthorChange(
                                         martImportedReport.person
-                                      )}
+                                      )
+                                    }
                                   />
                                 </OverlayTrigger>
                               )}
@@ -367,7 +369,8 @@ const MartImportedReportTable = ({
                                     icon={IconNames.HISTORY}
                                     style={{ cursor: "pointer" }}
                                     onClick={() =>
-                                      onSelectReport?.(martImportedReport)}
+                                      onSelectReport?.(martImportedReport)
+                                    }
                                   />
                                 </OverlayTrigger>
                               )}

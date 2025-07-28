@@ -209,7 +209,8 @@ const BasePositionTable = ({
                           <Checkbox
                             checked={isSelected(pos.uuid)}
                             onChange={() =>
-                              toggleSelection(pos.uuid, pos.emailAddresses)}
+                              toggleSelection(pos.uuid, pos.emailAddresses)
+                            }
                           />
                         )}
                       </td>

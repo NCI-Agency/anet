@@ -3,7 +3,7 @@ import Home from "../pages/home.page"
 import MyOrg from "../pages/myOrg.page"
 
 describe("My Organization page", () => {
-  beforeEach("Open the My Organization page", async() => {
+  beforeEach("Open the My Organization page", async () => {
     await Home.openAsAdminUser()
     await (await Home.getLinksMenuButton()).click()
     await (await Home.getMyOrgLink()).waitForExist()
@@ -13,12 +13,12 @@ describe("My Organization page", () => {
     await MyOrg.openAsAdminUser(myOrgUrl)
   })
 
-  afterEach("On the My Organization page…", async() => {
+  afterEach("On the My Organization page…", async () => {
     await MyOrg.logout()
   })
 
   describe("When checking the report statistics part of the page", () => {
-    it("Should see different types of fields statistics", async() => {
+    it("Should see different types of fields statistics", async () => {
       await (await MyOrg.getReportStatisticsButton()).click()
       // Note: checks like length.above are being made because the wdio tests
       // might also be run after the jacocoTestReport, without resetting the

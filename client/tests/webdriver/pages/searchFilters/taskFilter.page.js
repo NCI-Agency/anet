@@ -36,7 +36,7 @@ class TaskFilter extends Page {
     await openFilterButton.click()
 
     await browser.waitUntil(
-      async() =>
+      async () =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
     )
     const taskRows = await browser.$$("#taskUuid-popover tbody > tr")
@@ -45,7 +45,7 @@ class TaskFilter extends Page {
 
   async openAllCollapsedTasks(nonRecursive) {
     await browser.waitUntil(
-      async() =>
+      async () =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
     )
     let expandibleTasks = await browser.$$(
@@ -68,7 +68,7 @@ class TaskFilter extends Page {
     await browser.keys(searchText)
     await browser.pause(1000) // wait for the searchText to be processed
     await browser.waitUntil(
-      async() =>
+      async () =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
     )
   }

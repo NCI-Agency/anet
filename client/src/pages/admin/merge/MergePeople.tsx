@@ -247,7 +247,8 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                       setHistory={history =>
                         dispatchMergeActions(
                           setAMergedField("previousPositions", history, "mid")
-                        )}
+                        )
+                      }
                     />
                   </>
                 }
@@ -808,7 +809,8 @@ const PersonColumn = ({
                           fieldValue,
                           align
                         )
-                      )}
+                      )
+                    }
                     mergeState={mergeState}
                     autoMerge
                     dispatchMergeActions={dispatchMergeActions}
@@ -849,7 +851,8 @@ const PersonColumn = ({
                         fieldValue,
                         align
                       )
-                    )}
+                    )
+                  }
                   mergeState={mergeState}
                   autoMerge
                   dispatchMergeActions={dispatchMergeActions}

@@ -435,7 +435,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                       className="reportField"
                       isCompact
                     />
-                )}
+                  )}
                 {report.reportText && (
                   <DictionaryField
                     wrappedComponent={CompactRow}
@@ -482,7 +482,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                         label="Authorized Members"
                       />
                     </>
-                )}
+                  )}
                 {optionalFields.assessments.active && (
                   <CompactRow
                     id="assessments"

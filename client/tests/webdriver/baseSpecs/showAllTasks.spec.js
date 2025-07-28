@@ -6,13 +6,13 @@ const FIRST_TASK_DESCENDANT_NAME = "1.1 | Budgeting in the MoD"
 const NO_DESCENDANTS_TASK_NAME = "EF 5 | Force Sustainment (Logistics)"
 
 describe("Show All Tasks Page", () => {
-  beforeEach(async() => {
+  beforeEach(async () => {
     await ShowAllTasks.open()
     await (await ShowAllTasks.getTitle()).waitForDisplayed()
     await (await ShowAllTasks.getTree()).waitForDisplayed()
   })
 
-  it("Should display all top tasks", async() => {
+  it("Should display all top tasks", async () => {
     const topTasks = await ShowAllTasks.getAllTasks()
     expect(topTasks).to.have.lengthOf(13)
     for (const task of topTasks) {
@@ -20,7 +20,7 @@ describe("Show All Tasks Page", () => {
     }
   })
 
-  it("Should expand a task to show its descendants", async() => {
+  it("Should expand a task to show its descendants", async () => {
     const topTasks = await ShowAllTasks.getAllTasks()
     const firstTask = topTasks[1]
     const firstTaskText = await firstTask.getText()
@@ -40,7 +40,7 @@ describe("Show All Tasks Page", () => {
     expect(firstDescendantText).to.equal(FIRST_TASK_DESCENDANT_NAME)
   })
 
-  it("Should collapse a task to hide its descendants", async() => {
+  it("Should collapse a task to hide its descendants", async () => {
     const topTasks = await ShowAllTasks.getAllTasks()
     const firstTask = topTasks[1]
 
@@ -61,7 +61,7 @@ describe("Show All Tasks Page", () => {
     expect(collapsedDescendants).to.have.lengthOf(0)
   })
 
-  it("Should not show a caret for tasks without descendants", async() => {
+  it("Should not show a caret for tasks without descendants", async () => {
     const topTasks = await ShowAllTasks.getAllTasks()
     const noDescendantsTask = topTasks[5]
 
@@ -79,7 +79,7 @@ describe("Show All Tasks Page", () => {
     )
   })
 
-  it("Should show the event matrix for all tasks", async() => {
+  it("Should show the event matrix for all tasks", async () => {
     const eventMatrix = await ShowAllTasks.getEventMatrix()
     await eventMatrix.waitForExist()
     await eventMatrix.waitForDisplayed()

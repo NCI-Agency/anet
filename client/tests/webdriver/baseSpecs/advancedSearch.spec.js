@@ -41,7 +41,7 @@ const PERSON_INDEX = 1
 const ADD_FILTER_BUTTON_TEXT = "+ Add another filter"
 
 describe("When using advanced search", () => {
-  it("Should show a link like button with correct text under search bar that opens a popover", async() => {
+  it("Should show a link like button with correct text under search bar that opens a popover", async () => {
     await Home.open()
     await (await AdvancedSearch.getAdvancedSearchForm()).waitForExist()
     await (await AdvancedSearch.getAdvancedSearchForm()).waitForDisplayed()
@@ -57,23 +57,23 @@ describe("When using advanced search", () => {
       await (await AdvancedSearch.getAdvancedSearchPopoverTrigger()).getText()
     ).to.equal("Everything filtered on Status: Active")
   })
-  it("Should open the popover when clicked to the text", async() => {
+  it("Should open the popover when clicked to the text", async () => {
     await (await AdvancedSearch.getAdvancedSearchPopoverTrigger()).click()
     await (await AdvancedSearch.getAdvancedSearchPopover()).waitForExist()
     await (await AdvancedSearch.getAdvancedSearchPopover()).waitForDisplayed()
   })
-  it("Should show a list of anet object types on toggle buttons in the popover", async() => {
+  it("Should show a list of anet object types on toggle buttons in the popover", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       expect(await button.getText()).to.equal(await getObjectType(i))
     }
   })
-  it("Should show the common filter even when no object type selected", async() => {
+  it("Should show the common filter even when no object type selected", async () => {
     expect(
       await (await AdvancedSearch.getCommonSearchFilter()).getText()
     ).to.equal(COMMON_FILTER_TEXT)
   })
-  it("Should show the additional common filters when no object type selected", async() => {
+  it("Should show the additional common filters when no object type selected", async () => {
     expect(
       await (await AdvancedSearch.getAddFilterButtonText()).getText()
     ).to.equal(ADD_FILTER_BUTTON_TEXT)
@@ -90,7 +90,7 @@ describe("When using advanced search", () => {
       }
     }
   })
-  it("Should show the common filter and default filters for each anet object type", async() => {
+  it("Should show the common filter and default filters for each anet object type", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()
@@ -110,7 +110,7 @@ describe("When using advanced search", () => {
       }
     }
   })
-  it("Should show add another filter button with correct text", async() => {
+  it("Should show add another filter button with correct text", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()
@@ -126,7 +126,7 @@ describe("When using advanced search", () => {
     }
   })
 
-  it("Should show correct sample filters in the additional filters popover", async() => {
+  it("Should show correct sample filters in the additional filters popover", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()

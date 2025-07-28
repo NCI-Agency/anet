@@ -149,11 +149,11 @@ const InsightsShow = ({
   const orgQuery = currentUser.isAdmin()
     ? {}
     : {
-      organizationUuid: currentUser?.position?.organization?.uuid,
-      orgRecurseStrategy: currentUser.isSuperuser()
-        ? RECURSE_STRATEGY.CHILDREN
-        : RECURSE_STRATEGY.NONE
-    }
+        organizationUuid: currentUser?.position?.organization?.uuid,
+        orgRecurseStrategy: currentUser.isSuperuser()
+          ? RECURSE_STRATEGY.CHILDREN
+          : RECURSE_STRATEGY.NONE
+      }
   const insightDefaultQueryParams = {
     [NOT_APPROVED_REPORTS]: {
       state: [Report.STATE.PENDING_APPROVAL],

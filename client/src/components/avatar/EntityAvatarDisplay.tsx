@@ -75,7 +75,7 @@ export const EntityAvatarDisplay = ({
       const context = canvas.getContext("2d", { desynchronized: true })
       context.clearRect(0, 0, canvas.width, canvas.height)
       const image = new Image()
-      image.onload = function() {
+      image.onload = function () {
         context.drawImage(
           image,
           avatar.cropLeft,

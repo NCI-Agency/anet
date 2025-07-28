@@ -183,7 +183,7 @@ class Page {
     })
     // wait until details to change, can take some time to update show page
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await getAssessmentDetails())[detailIndex].getText()) ===
           detailToWaitFor

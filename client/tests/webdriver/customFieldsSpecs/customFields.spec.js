@@ -16,13 +16,13 @@ const REQUIRED_PERSON_FIELDS = {
 describe("When working with custom fields for different anet objects", () => {
   // ------------------------------ REPORT CUSTOM FIELDS -----------------------------------------
   describe("For report's custom fields", () => {
-    it("Should be able load a new report form", async() => {
+    it("Should be able load a new report form", async () => {
       await CreateReport.openAsAdminUser()
       await (await CreateReport.getForm()).waitForExist()
       await (await CreateReport.getForm()).waitForDisplayed()
     })
 
-    it("When the engagement type is not defined, it should not display fields only visible when a certain engagement type is selected", async() => {
+    it("When the engagement type is not defined, it should not display fields only visible when a certain engagement type is selected", async () => {
       const toggleFields =
         await CreateReport.getFieldsToggledVisibilityByTrainButton()
       for (const invisField of toggleFields) {
@@ -36,7 +36,7 @@ describe("When working with custom fields for different anet objects", () => {
       }
     })
 
-    it("Selecting the train engagement type should toggle the correct invisible fields", async() => {
+    it("Selecting the train engagement type should toggle the correct invisible fields", async () => {
       const trainButton = await CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
       )
@@ -59,7 +59,7 @@ describe("When working with custom fields for different anet objects", () => {
       }
     })
 
-    it("Should persist previous valid data when toggling field's visibility", async() => {
+    it("Should persist previous valid data when toggling field's visibility", async () => {
       await (
         await CreateReport.getNumberTrainedField()
       ).setValue(VALID_NUMBER_INPUT)
@@ -80,7 +80,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.equal(VALID_NUMBER_INPUT)
     })
 
-    it("Should persist previous invalid data when toggling field's visibility", async() => {
+    it("Should persist previous invalid data when toggling field's visibility", async () => {
       await CreateReport.deleteInput(CreateReport.getNumberTrainedField())
       await (
         await CreateReport.getNumberTrainedField()
@@ -107,7 +107,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.equal(INVALID_NUMBER_INPUT)
     })
 
-    it("Should validate visible field", async() => {
+    it("Should validate visible field", async () => {
       await CreateReport.deleteInput(CreateReport.getNumberTrainedField())
       await (
         await CreateReport.getNumberTrainedField()
@@ -124,7 +124,7 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should not validate invisible field", async() => {
+    it("Should not validate invisible field", async () => {
       await (await CreateReport.getEditButton()).click()
       await (await CreateReport.getForm()).waitForExist()
       await (await CreateReport.getForm()).waitForDisplayed()
@@ -144,7 +144,7 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should show valid visible field after saving", async() => {
+    it("Should show valid visible field after saving", async () => {
       // we are on show page after submitting
       await (await CreateReport.getEditButton()).click()
       await (await CreateReport.getForm()).waitForExist()
@@ -169,7 +169,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.include(VALID_NUMBER_INPUT.toString())
     })
 
-    it("Should discard invisible fields after saving even if it is valid", async() => {
+    it("Should discard invisible fields after saving even if it is valid", async () => {
       await (await CreateReport.getEditButton()).click()
       await (await CreateReport.getForm()).waitForExist()
       await (await CreateReport.getForm()).waitForDisplayed()
@@ -192,13 +192,13 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.not.include(VALID_NUMBER_INPUT.toString())
     })
 
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await CreateReport.logout()
     })
   })
   // ------------------------------ PERSON CUSTOM FIELDS -----------------------------------------
   describe("For person's custom fields", () => {
-    it("Should be able load a new person form and fill normal required fields", async() => {
+    it("Should be able load a new person form and fill normal required fields", async () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
@@ -229,7 +229,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).waitForExist({ reverse: true })
     })
 
-    it("Should not show default invisible fields", async() => {
+    it("Should not show default invisible fields", async () => {
       const fields = await CreatePerson.getDefaultInvisibleCustomFields()
       for (const field of fields) {
         expect(await field.isExisting()).to.eq(false)
@@ -241,7 +241,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).waitForExist({ reverse: true })
     })
 
-    it("Should toggle correct invisible fields", async() => {
+    it("Should toggle correct invisible fields", async () => {
       // green toggles every invisible field to visible
       await (await CreatePerson.getGreenButton()).click()
       const fields = await CreatePerson.getDefaultInvisibleCustomFields()
@@ -252,7 +252,7 @@ describe("When working with custom fields for different anet objects", () => {
       await (await CreatePerson.getObjectDateField()).waitForExist()
     })
 
-    it("Should persist previous valid data when toggling field's visibility", async() => {
+    it("Should persist previous valid data when toggling field's visibility", async () => {
       await (
         await CreatePerson.getNumberCustomField()
       ).setValue(VALID_NUMBER_INPUT)
@@ -272,7 +272,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).be.equal(VALID_NUMBER_INPUT)
     })
 
-    it("Should persist previous invalid data when toggling field's visibility", async() => {
+    it("Should persist previous invalid data when toggling field's visibility", async () => {
       await CreatePerson.deleteInput(CreatePerson.getNumberCustomField())
       await (
         await CreatePerson.getNumberCustomField()
@@ -295,7 +295,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.equal(INVALID_NUMBER_INPUT)
     })
 
-    it("Should validate visible field", async() => {
+    it("Should validate visible field", async () => {
       await CreatePerson.deleteInput(CreatePerson.getNumberCustomField())
       await (
         await CreatePerson.getNumberCustomField()
@@ -306,7 +306,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.include("greater than")
     })
 
-    it("Should not validate invisible field so we can submit the form", async() => {
+    it("Should not validate invisible field so we can submit the form", async () => {
       // make invisible
       await (await CreatePerson.getAmberButton()).click()
       await (
@@ -319,7 +319,7 @@ describe("When working with custom fields for different anet objects", () => {
       await CreatePerson.waitForAlertSuccessToLoad()
     })
 
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await CreatePerson.logout()
     })
   })

@@ -99,7 +99,7 @@ class MergePeople extends Page {
     await (await this.getPersonHeaderFromPopover()).waitForDisplayed()
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
           compareStr
@@ -116,7 +116,7 @@ class MergePeople extends Page {
     const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (await field.getText()) === compareStr
       },
       {
@@ -128,7 +128,7 @@ class MergePeople extends Page {
 
   async waitForSuccessAlert() {
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await browser.$(".alert-success")).getText()) ===
           "People merged. Displaying merged Person below."

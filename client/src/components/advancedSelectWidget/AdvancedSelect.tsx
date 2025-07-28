@@ -387,7 +387,8 @@ const AdvancedSelect = ({
                                       <Button
                                         id="createEntityLink"
                                         onClick={() =>
-                                          setShowCreateEntityComponent(true)}
+                                          setShowCreateEntityComponent(true)
+                                        }
                                       >
                                         Create a new {fieldName}
                                       </Button>

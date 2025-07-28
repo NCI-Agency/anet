@@ -44,7 +44,7 @@ const testOrgs = {
 }
 
 describe("When creating an organization", () => {
-  it("Should show name to be required when submitting empty form", async() => {
+  it("Should show name to be required when submitting empty form", async () => {
     await CreateOrganization.openAsAdmin()
     await (await CreateOrganization.getForm()).waitForExist()
     await (await CreateOrganization.getForm()).waitForDisplayed()
@@ -57,7 +57,7 @@ describe("When creating an organization", () => {
     ).waitForDisplayed()
   })
 
-  it("Should be able to create a top-level organization", async() => {
+  it("Should be able to create a top-level organization", async () => {
     await CreateOrganization.fillOrganization(testOrgs.topLevel)
     await CreateOrganization.submitForm()
     await ShowOrganization.waitForAlertSuccessToLoad()
@@ -65,7 +65,7 @@ describe("When creating an organization", () => {
       "Organization saved"
     )
   })
-  it("Should display the newly created top-level organization", async() => {
+  it("Should display the newly created top-level organization", async () => {
     const testOrg = testOrgs.topLevel
     expect(await (await ShowOrganization.getLongName()).getText()).to.equal(
       testOrg.description
@@ -98,7 +98,7 @@ describe("When creating an organization", () => {
       await (await ShowOrganization.getApp6Value("app6entity")).getText()
     ).to.equal(testOrg.app6entity)
   })
-  it("Should be able to create a sub-organization for the newly created top-level organization", async() => {
+  it("Should be able to create a sub-organization for the newly created top-level organization", async () => {
     await (
       await ShowOrganization.getCreateSubOrganizationButton()
     ).waitForExist()
@@ -131,7 +131,7 @@ describe("When creating an organization", () => {
       "Organization saved"
     )
   })
-  it("Should display the newly created second-level organization", async() => {
+  it("Should display the newly created second-level organization", async () => {
     const testOrg = testOrgs.secondLevel
     expect(await (await ShowOrganization.getLongName()).getText()).to.equal(
       testOrg.description
@@ -162,7 +162,7 @@ describe("When creating an organization", () => {
       await (await ShowOrganization.getApp6Value("app6amplifier")).getText()
     ).to.equal(testOrg.app6amplifier)
   })
-  it("Should be able to create a sub-organization for the newly created second-level organization", async() => {
+  it("Should be able to create a sub-organization for the newly created second-level organization", async () => {
     await (
       await ShowOrganization.getCreateSubOrganizationButton()
     ).waitForExist()
@@ -227,7 +227,7 @@ describe("When creating an organization", () => {
       "Organization saved"
     )
   })
-  it("Should display the newly created third-level organization", async() => {
+  it("Should display the newly created third-level organization", async () => {
     const testOrg = testOrgs.thirdLevel
     expect(await (await ShowOrganization.getLongName()).getText()).to.equal(
       testOrg.description

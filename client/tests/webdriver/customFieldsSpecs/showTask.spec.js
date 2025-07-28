@@ -6,12 +6,12 @@ const TASK_EF1_UUID = "1145e584-4485-4ce0-89c4-2fa2e1fe846a"
 const TASK_EF1_2_UUID = "fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0"
 
 describe("Show task page", () => {
-  beforeEach("Open the show task page", async() => {
+  beforeEach("Open the show task page", async () => {
     await ShowTask.openAsAdminUser(TASK_12B_UUID)
   })
 
   describe("When on the show page of a task with assessments", () => {
-    it("We should see a table of assessments related to the current task", async() => {
+    it("We should see a table of assessments related to the current task", async () => {
       await (
         await ShowTask.getAssessmentResults("taskOnceReport", "monthly")
       ).waitForDisplayed()
@@ -24,7 +24,7 @@ describe("Show task page", () => {
   })
 
   describe("When in the show page of a task with a parent task", () => {
-    it("We should see a parent task that related to the current task", async() => {
+    it("We should see a parent task that related to the current task", async () => {
       await (await ShowTask.getParentTaskField()).waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(await (await ShowTask.getParentTaskField()).isExisting()).to.be
@@ -36,7 +36,7 @@ describe("Show task page", () => {
   })
 
   describe("When in the show page of a task without children tasks", () => {
-    it("We should not see list of children tasks", async() => {
+    it("We should not see list of children tasks", async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await (await ShowTask.getChildrenTasksField()).isExisting()).to.be
         .false
@@ -45,19 +45,19 @@ describe("Show task page", () => {
 })
 
 describe("Show task page", () => {
-  beforeEach("Open the show task page", async() => {
+  beforeEach("Open the show task page", async () => {
     await ShowTask.openAsAdminUser(TASK_EF1_UUID)
   })
 
   describe("When in the show page of a task without a parent task", () => {
-    it("We should not see a parent task", async() => {
+    it("We should not see a parent task", async () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await (await ShowTask.getParentTaskField()).isExisting()).to.be
         .false
     })
   })
   describe("When in the show page of a task with children tasks", () => {
-    it("We should see list of children tasks that related to the current task", async() => {
+    it("We should see list of children tasks that related to the current task", async () => {
       await (await ShowTask.getChildrenTasks()).waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(await (await ShowTask.getChildrenTasksField()).isExisting()).to.be
@@ -68,7 +68,7 @@ describe("Show task page", () => {
     })
   })
   describe("When in the show page as an admin", () => {
-    it("Should open and close the Edit Engagement planning approvals modal correctly", async() => {
+    it("Should open and close the Edit Engagement planning approvals modal correctly", async () => {
       const editButton =
         await ShowTask.getEditEngagementPlanningApprovalsButton()
       await editButton.waitForExist()
@@ -85,7 +85,7 @@ describe("Show task page", () => {
       await closeButton.click()
       await modal.waitForExist({ reverse: true })
     })
-    it("Should open and close the Edit Report publication approvals modal correctly", async() => {
+    it("Should open and close the Edit Report publication approvals modal correctly", async () => {
       const editButton =
         await ShowTask.getEditReportPublicationApprovalsButton()
       await editButton.waitForExist()
@@ -107,7 +107,7 @@ describe("Show task page", () => {
 
 describe("Show task page", () => {
   describe("When in the show page of a task with children tasks", () => {
-    it("the task's full path should be displayed in the event matrix", async() => {
+    it("the task's full path should be displayed in the event matrix", async () => {
       await ShowTask.openAsAdminUser(TASK_EF1_2_UUID)
       const tasks = await ShowTask.getEventMatrixTasks()
       expect(tasks.length).to.equal(4)

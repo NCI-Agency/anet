@@ -377,7 +377,8 @@ const HiddenSearchResultsCounters = React.memo(
               setSearchCount(prev => ({
                 ...prev,
                 [search.uuid]: count
-              }))}
+              }))
+            }
             pageSize={1}
           />
         ))}
@@ -517,7 +518,8 @@ const MySavedSearches = ({
                       setCollapsed(prev => ({
                         ...prev,
                         [search.uuid]: !prev[search.uuid]
-                      }))}
+                      }))
+                    }
                   >
                     <span className="flex-grow-1">
                       <SearchDescription
@@ -633,7 +635,7 @@ const Home = ({
             If you are unsure, you can also contact the support team{" "}
             {supportEmailMessage}.
           </div>
-      )}
+        )}
 
       <Messages success={stateSuccess} />
 

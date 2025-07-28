@@ -1,4 +1,4 @@
-export const getRichTextContent = async(
+export const getRichTextContent = async (
   richTextEditor,
   selector,
   multipleElements,

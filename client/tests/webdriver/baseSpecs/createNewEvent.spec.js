@@ -6,7 +6,7 @@ const ORG_COMPLETE = "ANET Administrators"
 
 describe("Create event page", () => {
   describe("When creating an event as admin", () => {
-    it("Should show required data warnings when submitting empty form", async() => {
+    it("Should show required data warnings when submitting empty form", async () => {
       await CreateEvent.openAsAdminUser()
       await (await CreateEvent.getForm()).waitForExist()
       await (await CreateEvent.getForm()).waitForDisplayed()
@@ -31,7 +31,7 @@ describe("Create event page", () => {
       ).to.equal("endDate is a required field")
     })
 
-    it("Should successfully create an event when required fields are filled", async() => {
+    it("Should successfully create an event when required fields are filled", async () => {
       await (await CreateEvent.getNameInput()).waitForDisplayed()
       await (await CreateEvent.getNameInput()).setValue("Test Event Series")
 
@@ -77,7 +77,7 @@ describe("Create event page", () => {
   })
 
   describe("When creating an event as superuser", () => {
-    it("Should warn when adminOrg is not correctly filled in", async() => {
+    it("Should warn when adminOrg is not correctly filled in", async () => {
       await CreateEvent.open()
       await (await CreateEvent.getForm()).waitForExist()
       await (await CreateEvent.getForm()).waitForDisplayed()

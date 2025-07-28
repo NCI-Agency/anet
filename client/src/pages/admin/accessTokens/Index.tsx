@@ -383,7 +383,8 @@ const AccessTokenModal = ({
                               onClick={() =>
                                 navigator.clipboard.writeText(
                                   accessToken.tokenValue
-                                )}
+                                )
+                              }
                             >
                               <Icon icon={IconNames.DUPLICATE} />
                             </Button>

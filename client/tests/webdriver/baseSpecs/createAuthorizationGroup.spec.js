@@ -24,12 +24,12 @@ const SHORT_WAIT_MS = 200
 
 describe("When creating/editing a community", () => {
   describe("When creating a community as admin", () => {
-    it("Should navigate to the create community page", async() => {
+    it("Should navigate to the create community page", async () => {
       await CreateAuthorizationGroup.open()
       await (await CreateAuthorizationGroup.getForm()).waitForExist()
       await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
     })
-    it("Should save a community with only a name and description", async() => {
+    it("Should save a community with only a name and description", async () => {
       authorizationGroupName = `${AUTHORIZATION_GROUP_NAME_PREFIX} ${uuidv4()}`
       authorizationGroupDescription = `${AUTHORIZATION_GROUP_DESCRIPTION_PREFIX} ${authorizationGroupName}`
       await (await CreateAuthorizationGroup.getName()).waitForDisplayed()
@@ -73,7 +73,7 @@ describe("When creating/editing a community", () => {
       ).getText()
       expect(alertMessage).to.equal("Community saved")
     })
-    it("Should save the community with distributionList and forSensitiveInformation", async() => {
+    it("Should save the community with distributionList and forSensitiveInformation", async () => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -98,7 +98,7 @@ describe("When creating/editing a community", () => {
         ).getText()
       ).to.equal("Yes")
     })
-    it("Should save the community with some members", async() => {
+    it("Should save the community with some members", async () => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -235,7 +235,7 @@ describe("When creating/editing a community", () => {
       ).to.be.true
       /* eslint-enable no-unused-expressions */
     })
-    it("Should save the community with assigned superusers", async() => {
+    it("Should save the community with assigned superusers", async () => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -327,13 +327,13 @@ describe("When creating/editing a community", () => {
       ).to.be.true
       /* eslint-enable no-unused-expressions */
     })
-    it("Should logout again", async() => {
+    it("Should logout again", async () => {
       await CreateAuthorizationGroup.logout()
     })
   })
 
   describe("When editing a community as assigned superuser", () => {
-    it("Should navigate to the my communities page", async() => {
+    it("Should navigate to the my communities page", async () => {
       await CreateAuthorizationGroup.openAsSuperuser("/communities/mine")
       await (
         await CreateAuthorizationGroup.getMyAuthorizationGroups()
@@ -347,7 +347,7 @@ describe("When creating/editing a community", () => {
         )
       ).click()
     })
-    it("Should be able to save the community with a changed name and description", async() => {
+    it("Should be able to save the community with a changed name and description", async () => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -370,7 +370,7 @@ describe("When creating/editing a community", () => {
         await (await CreateAuthorizationGroup.getDescription()).getText()
       ).to.equal(`${authorizationGroupDescription}-edited`)
     })
-    it("Should be able to change the community's distributionList", async() => {
+    it("Should be able to change the community's distributionList", async () => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -387,7 +387,7 @@ describe("When creating/editing a community", () => {
         await (await CreateAuthorizationGroup.getDistributionList()).getText()
       ).to.equal("No")
     })
-    it("Should not be able to change the community's forSensitiveInformation", async() => {
+    it("Should not be able to change the community's forSensitiveInformation", async () => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
@@ -400,7 +400,7 @@ describe("When creating/editing a community", () => {
         ).isClickable()
       ).to.be.false
     })
-    it("Should not be able to change the community's assigned superusers", async() => {
+    it("Should not be able to change the community's assigned superusers", async () => {
       // Should not be able to add administrative positions
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -418,7 +418,7 @@ describe("When creating/editing a community", () => {
         ).isExisting()
       ).to.be.false
     })
-    it("Should be able to save the community with changed members", async() => {
+    it("Should be able to save the community with changed members", async () => {
       // Add a position
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
@@ -483,7 +483,7 @@ describe("When creating/editing a community", () => {
       ).to.be.false
       /* eslint-enable no-unused-expressions */
     })
-    it("Should logout again", async() => {
+    it("Should logout again", async () => {
       await CreateAuthorizationGroup.logout()
     })
   })

@@ -55,12 +55,12 @@ const DailyRollupChart = ({
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
     const tmpSVG = d3.select("#tmp_svg").data([1]).enter().append("svg")
-    const xLabelWidth = function() {
+    const xLabelWidth = function () {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
       }
     }
-    const yLabelWidth = function(d) {
+    const yLabelWidth = function (d) {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -106,7 +106,7 @@ const DailyRollupChart = ({
     const yAxis = d3
       .axisLeft()
       .scale(yScale)
-      .tickFormat(function(d) {
+      .tickFormat(function (d) {
         return yLabels[d]
       })
 
@@ -134,7 +134,7 @@ const DailyRollupChart = ({
           `translate(1, ${i * (BAR_HEIGHT + BAR_PADDING) + BAR_PADDING / 2})`
       )
       .classed("bar", true)
-      .attr("id", function(d, i) {
+      .attr("id", function (d, i) {
         return `bar_${d.org.uuid}`
       })
     addD3Tooltip(bar, tooltip, !!onBarClick)

@@ -43,7 +43,7 @@ const RICH_TEXT_CONTENT = [
 ]
 
 describe("When reports have rich text content", () => {
-  it("Show report page should display content with correct tags", async() => {
+  it("Show report page should display content with correct tags", async () => {
     await MyReports.open("arthur")
     await MyReports.selectReport(
       "Test report with rich text",
@@ -68,7 +68,7 @@ describe("When reports have rich text content", () => {
       ).to.contain(content)
     }
   })
-  it("Edit report page should display content with correct tags", async() => {
+  it("Edit report page should display content with correct tags", async () => {
     await (await ShowReport.getEditReportButton()).click()
     for (const {
       selector,

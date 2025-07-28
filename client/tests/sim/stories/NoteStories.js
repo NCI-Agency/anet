@@ -13,7 +13,7 @@ async function populateNote(note, relatedObjectType) {
   const template = {
     author: () => author,
     noteRelatedObjects: () => [relatedObject],
-    text: async() => await createHtmlParagraphs()
+    text: async () => await createHtmlParagraphs()
   }
   const noteGenerator = await populate(note, template)
   await noteGenerator.author.always()
@@ -22,7 +22,7 @@ async function populateNote(note, relatedObjectType) {
   return note
 }
 
-const _createNote = async function(user, relatedObjectType) {
+const _createNote = async function (user, relatedObjectType) {
   const note = {}
   if (await populateNote(note, relatedObjectType)) {
     console.debug(`Creating ${relatedObjectType} note`)
@@ -37,7 +37,7 @@ const _createNote = async function(user, relatedObjectType) {
   }
 }
 
-const createNote = async function(user, grow, args) {
+const createNote = async function (user, grow, args) {
   return _createNote(user, args && args.relatedObjectType)
 }
 

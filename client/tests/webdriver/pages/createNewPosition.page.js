@@ -99,7 +99,7 @@ class CreatePosition extends Page {
   async waitForOrgAdvancedSelectToChange(value) {
     await (await this.getOrgAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getOrgAdvancedSelectFirstItem()).getText()) ===
           value

@@ -95,10 +95,10 @@ export default {
   fnRequiredWhenNot,
   ellipsize,
   ellipsizeOnWords,
-  resourceize: function(string) {
+  resourceize: function (string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
-  _handleEmailValidation: function(
+  _handleEmailValidation: function (
     value,
     validDomains,
     validWildcardDomains,
@@ -120,7 +120,7 @@ export default {
     }
   },
 
-  handleEmailValidation: function(value, shouldValidate) {
+  handleEmailValidation: function (value, shouldValidate) {
     return this._handleEmailValidation(
       value,
       domainNames,
@@ -129,7 +129,7 @@ export default {
     )
   },
 
-  handleDialogEmailValidation: function(value, shouldValidate) {
+  handleDialogEmailValidation: function (value, shouldValidate) {
     return this._handleEmailValidation(
       value,
       activeDomainNames,
@@ -138,7 +138,7 @@ export default {
     )
   },
 
-  validateEmail: function(emailValue, domainNames, wildcardDomains) {
+  validateEmail: function (emailValue, domainNames, wildcardDomains) {
     if (!emailValue) {
       return true
     }
@@ -154,11 +154,11 @@ export default {
     )
   },
 
-  validateAgainstAllowedDomains: function(from, domain, allowedDomains) {
+  validateAgainstAllowedDomains: function (from, domain, allowedDomains) {
     return from.length > 0 && allowedDomains.includes(domain)
   },
 
-  validateWithWildcard: function(domain, wildcardDomains) {
+  validateWithWildcard: function (domain, wildcardDomains) {
     let isValid = false
     if (domain) {
       isValid = wildcardDomains.some(wildcard => {
@@ -168,7 +168,7 @@ export default {
     return isValid
   },
 
-  emailErrorMessage: function(validDomainNames) {
+  emailErrorMessage: function (validDomainNames) {
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const emailMessage = supportEmail ? ` at ${supportEmail}` : ""
     const errorMessage = `Only the following email domain names are allowed. If your email domain name is not in the list, please contact the support team${emailMessage}.`
@@ -183,7 +183,7 @@ export default {
     )
   },
 
-  parseEmailAddresses: function(addressees) {
+  parseEmailAddresses: function (addressees) {
     const addrs = parseAddressList(addressees)
     if (!addrs) {
       return {
@@ -201,44 +201,44 @@ export default {
     return { isValid: true, to: toAddresses }
   },
 
-  createMailtoLink: function(emailAddress) {
+  createMailtoLink: function (emailAddress) {
     return (
       <a href={`mailto:${encodeURIComponent(emailAddress)}`}>{emailAddress}</a>
     )
   },
 
-  parseQueryString: function(queryString) {
+  parseQueryString: function (queryString) {
     if (!queryString) {
       return new URLSearchParams()
     }
     return new URLSearchParams(queryString.slice(1))
   },
 
-  formatQueryString: function(queryParams) {
+  formatQueryString: function (queryParams) {
     if (!queryParams) {
       return ""
     }
     return `?${new URLSearchParams(queryParams).toString()}`
   },
 
-  formatBoolean: function(b, emptyForNullOrUndefined) {
+  formatBoolean: function (b, emptyForNullOrUndefined) {
     if (emptyForNullOrUndefined && b == null) {
       return ""
     }
     return b ? "Yes" : "No"
   },
 
-  treatFunctionsAsEqual: function(value1, value2) {
+  treatFunctionsAsEqual: function (value1, value2) {
     if (typeof value1 === "function" && typeof value2 === "function") {
       return true
     }
   },
 
-  getReference: function(obj) {
+  getReference: function (obj) {
     return obj && obj.uuid ? { uuid: obj.uuid } : {}
   },
 
-  isEmptyHtml: function(html) {
+  isEmptyHtml: function (html) {
     let text
     if (document && typeof document.createElement === "function") {
       const tmpDiv = document.createElement("div")
@@ -250,11 +250,11 @@ export default {
     return _isEmpty(text)
   },
 
-  isNumeric: function(value) {
+  isNumeric: function (value) {
     return typeof value === "number" && !isNaN(value)
   },
 
-  pushHash: function(hash) {
+  pushHash: function (hash) {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""
     if (history.replaceState) {
@@ -269,7 +269,7 @@ export default {
     }
   },
 
-  parseJsonSafe: function(jsonString, throwError) {
+  parseJsonSafe: function (jsonString, throwError) {
     // TODO: Improve error handling so that consuming widgets can display an error w/o crashing
     let result
     try {
@@ -284,7 +284,7 @@ export default {
     return typeof result === "object" ? result || {} : {}
   },
 
-  parseSensitiveFields: function(customSensitiveInformation) {
+  parseSensitiveFields: function (customSensitiveInformation) {
     const sensitiveInformationObjects = customSensitiveInformation.map(
       sensitiveInfo => this.parseJsonSafe(sensitiveInfo.customFieldValue)
     )
@@ -298,14 +298,14 @@ export default {
     return allSensitiveFields
   },
 
-  arrayOfNumbers: function(arr) {
+  arrayOfNumbers: function (arr) {
     return (
       arr &&
       arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
     )
   },
 
-  preventNegativeAndLongDigits: function(valueStr, maxLen) {
+  preventNegativeAndLongDigits: function (valueStr, maxLen) {
     let safeVal
     const dangerVal = Number(valueStr)
     if (!isNaN(dangerVal) && dangerVal < 0) {
@@ -318,14 +318,14 @@ export default {
     return safeVal
   },
 
-  getMaxTextFieldLength: function(
+  getMaxTextFieldLength: function (
     field,
     defaultLength = Settings.maxTextFieldLength
   ) {
     return field?.maxLength || defaultLength
   },
 
-  pluralizeWord: function(count, word) {
+  pluralizeWord: function (count, word) {
     return count > 1 ? pluralize.plural(word) : word
   },
 
@@ -336,7 +336,7 @@ export default {
    * @param {string} defaultColor Optional default color, defaults to "white" if not specified
    * @returns Text color
    */
-  getContrastYIQ: function(color, defaultColor: string = "white") {
+  getContrastYIQ: function (color, defaultColor: string = "white") {
     if (!color) {
       return defaultColor
     }
@@ -359,11 +359,11 @@ export default {
     return yiq >= 128 ? "black" : "white"
   },
 
-  readNestedObjectWithStringPath: function(obj, path) {
+  readNestedObjectWithStringPath: function (obj, path) {
     return path.split(".").reduce((value, el) => value[el], obj)
   },
 
-  humanReadableFileSize: function(number) {
+  humanReadableFileSize: function (number) {
     if (number < 1024) {
       return `${number} bytes`
     } else if (number >= 1024 && number < 1048576) {
@@ -373,7 +373,7 @@ export default {
     }
   },
 
-  getAttachmentIconDetails: function(attachment, small) {
+  getAttachmentIconDetails: function (attachment, small) {
     const iconSize = small ? "50px" : "200px"
     let iconImage = binaryIcon
     const contentMissing =
@@ -393,12 +393,12 @@ export default {
     return { iconSize, iconImage, contentMissing }
   },
 
-  stripExtension: function(fileName) {
+  stripExtension: function (fileName) {
     const index = fileName.lastIndexOf(".")
     return index === -1 ? fileName : fileName.substring(0, index)
   },
 
-  getAscendantObjectsAsMap: function(ascendantObjects) {
+  getAscendantObjectsAsMap: function (ascendantObjects) {
     return (
       ascendantObjects?.reduce((acc, val) => {
         acc[val.uuid] = val
@@ -407,7 +407,7 @@ export default {
     )
   },
 
-  getAscendantObjectsAsList: function(
+  getAscendantObjectsAsList: function (
     leaf,
     ascendantObjects = [],
     parentField
@@ -438,7 +438,7 @@ export default {
     return trail
   },
 
-  determineApp6field: function(ascendantOrgs, app6field, defaultValue) {
+  determineApp6field: function (ascendantOrgs, app6field, defaultValue) {
     for (const ascendantOrg of ascendantOrgs) {
       if (ascendantOrg?.[app6field]) {
         return ascendantOrg[app6field]
@@ -447,7 +447,7 @@ export default {
     return defaultValue
   },
 
-  findPositionAtDate: function(person, date) {
+  findPositionAtDate: function (person, date) {
     if (!date) {
       return person.position
     }
@@ -457,18 +457,18 @@ export default {
     })?.position
   },
 
-  getButtonsFromChoices: function(choices) {
+  getButtonsFromChoices: function (choices) {
     return Object.entries(choices).map(([value, label]) => ({
       value,
       label
     }))
   },
 
-  getColorForChoice: function(choice) {
+  getColorForChoice: function (choice) {
     return Settings.confidentialityLabel.choices[choice]?.color
   },
 
-  getPolicyAndClassificationForChoice: function(choice) {
+  getPolicyAndClassificationForChoice: function (choice) {
     let label
     const props = Settings.confidentialityLabel.choices[choice]
     if (props) {
@@ -480,7 +480,7 @@ export default {
     return label
   },
 
-  getReleasableToForChoice: function(choice) {
+  getReleasableToForChoice: function (choice) {
     const props = Settings.confidentialityLabel.choices[choice]
     if (props?.releasableTo) {
       return `Releasable to ${props.releasableTo.join(", ")}`
@@ -488,7 +488,7 @@ export default {
     return undefined
   },
 
-  getConfidentialityLabelForChoice: function(choice) {
+  getConfidentialityLabelForChoice: function (choice) {
     let label
     const policyAndClassification =
       this.getPolicyAndClassificationForChoice(choice)
@@ -502,7 +502,7 @@ export default {
     return label
   },
 
-  getConfidentialityLabelChoices: function() {
+  getConfidentialityLabelChoices: function () {
     return Object.entries(Settings.confidentialityLabel.choices).map(
       ([choice, props]) => ({
         value: choice,
@@ -513,20 +513,20 @@ export default {
   }
 }
 
-Object.forEach = function(source, func) {
+Object.forEach = function (source, func) {
   return Object.keys(source).forEach(key => {
     func(key, source[key])
   })
 }
 
-Object.map = function(source, func) {
+Object.map = function (source, func) {
   return Object.keys(source).map(key => {
     const value = source[key]
     return func(key, value)
   })
 }
 
-Object.get = function(source, keypath) {
+Object.get = function (source, keypath) {
   const keys = keypath.split(".")
   while (keys[0]) {
     const key = keys.shift()
@@ -538,7 +538,7 @@ Object.get = function(source, keypath) {
   return source
 }
 
-Object.without = function(source, ...keys) {
+Object.without = function (source, ...keys) {
   const copy = Object.assign({}, source)
   let i = keys.length
   while (i--) {
@@ -551,7 +551,7 @@ Object.without = function(source, ...keys) {
 
 // eslint-disable-next-line
 Promise.prototype.log = function () {
-  return this.then(function(data) {
+  return this.then(function (data) {
     console.log(data)
     return data
   })

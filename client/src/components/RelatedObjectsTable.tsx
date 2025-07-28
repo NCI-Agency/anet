@@ -47,20 +47,20 @@ export const RelatedObjectsTable = ({
                   (currentObject?.relatedObjectType === nro.relatedObjectType &&
                   currentObject?.relatedObjectUuid === nro.relatedObjectUuid ? (
                     <td />
-                    ) : (
-                      <td id={"relatedObjectsDelete_" + nro.relatedObjectUuid}>
-                        <RemoveButton
-                          title="Unlink object"
-                          onClick={() => {
-                            const newRelatedObjects = relatedObjects.filter(
-                              item =>
-                                item.relatedObjectUuid !== nro.relatedObjectUuid
-                            )
-                            setRelatedObjects(newRelatedObjects)
-                          }}
-                        />
-                      </td>
-                    ))}
+                  ) : (
+                    <td id={"relatedObjectsDelete_" + nro.relatedObjectUuid}>
+                      <RemoveButton
+                        title="Unlink object"
+                        onClick={() => {
+                          const newRelatedObjects = relatedObjects.filter(
+                            item =>
+                              item.relatedObjectUuid !== nro.relatedObjectUuid
+                          )
+                          setRelatedObjects(newRelatedObjects)
+                        }}
+                      />
+                    </td>
+                  ))}
               </tr>
             ))}
           </tbody>

@@ -21,7 +21,7 @@ const DEPUTY_PERSON_TEXT = "CIV JACOBSON, Jacob"
 
 describe("Show organization page", () => {
   describe("As an admin", () => {
-    it("Should first search, find and open the organization page", async() => {
+    it("Should first search, find and open the organization page", async () => {
       await Home.openAsAdminUser()
       await (await Home.getSearchBar()).setValue(ORGANIZATION_EF2_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -33,7 +33,7 @@ describe("Show organization page", () => {
         await Search.linkOfOrganizationFound(ORGANIZATION_EF2_SEARCH_STRING)
       ).click()
     })
-    it("Should see leader&deputy fields are not listed", async() => {
+    it("Should see leader&deputy fields are not listed", async () => {
       // Organization longName should be there
       const longNameField = await ShowOrganization.getLongName()
       await longNameField.waitForExist()
@@ -51,7 +51,7 @@ describe("Show organization page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await deputyField.isExisting()).to.be.false
     })
-    it("Should see assigned tasks on the Show page", async() => {
+    it("Should see assigned tasks on the Show page", async () => {
       const tasks = await ShowOrganization.getTasks()
       await tasks.waitForExist()
       await tasks.waitForDisplayed()
@@ -61,7 +61,7 @@ describe("Show organization page", () => {
       )
       expect(assignedTasksShortNames).to.have.members(EF2_ASSIGNED_TASKS)
     })
-    it("Should see assigned tasks on the Edit page", async() => {
+    it("Should see assigned tasks on the Edit page", async () => {
       await (await ShowOrganization.getEditOrganizationButton()).click()
       const editableTasks = await ShowOrganization.getEditableTasks()
       await editableTasks.waitForExist()
@@ -81,7 +81,7 @@ describe("Show organization page", () => {
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the organization page", async() => {
+    it("Should first search, find and open the organization page", async () => {
       await Home.openAsAdminUser()
       await (
         await Home.getSearchBar()
@@ -95,7 +95,7 @@ describe("Show organization page", () => {
         await Search.linkOfOrganizationFound(ORGANIZATION_EF22_SEARCH_STRING)
       ).click()
     })
-    it("Should see leader&deputy fields are listed", async() => {
+    it("Should see leader&deputy fields are listed", async () => {
       // Organization longName should be there
       const longNameField = await ShowOrganization.getLongName()
       await longNameField.waitForExist()
@@ -135,7 +135,7 @@ describe("Show organization page", () => {
   })
 
   describe("When on the show page of an organization with communities", () => {
-    it("We should see a table with communities", async() => {
+    it("We should see a table with communities", async () => {
       await ShowOrganization.openAsAdminUser(ORGANIZATION_WITH_AG_UUID)
       await (
         await ShowOrganization.getAuthorizationGroupsTable()
@@ -147,7 +147,7 @@ describe("Show organization page", () => {
         await (await ShowOrganization.getAuthorizationGroupsTable()).getText()
       ).to.contain("EF 5")
     })
-    it("We can go to the show page of a community", async() => {
+    it("We can go to the show page of a community", async () => {
       await (await ShowOrganization.getAuthorizationGroup(1)).click()
       await expect(await browser.getUrl()).to.include(
         "/communities/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
@@ -156,17 +156,17 @@ describe("Show organization page", () => {
   })
 
   describe("When on the show page of an organization with attachment(s)", () => {
-    it("We should see a container for Attachment List", async() => {
+    it("We should see a container for Attachment List", async () => {
       await ShowOrganization.open(ORGANIZATION_UUID)
       await (await ShowOrganization.getAttachments()).waitForExist()
       await (await ShowOrganization.getAttachments()).waitForDisplayed()
     })
-    it("We should see a card of Attachment", async() => {
+    it("We should see a card of Attachment", async () => {
       await (await ShowOrganization.getCard()).waitForExist()
       await (await ShowOrganization.getCard()).waitForDisplayed()
       expect(await ShowOrganization.getCaption()).to.be.equal("EF 2.2")
     })
-    it("We should be able to edit the attachments", async() => {
+    it("We should be able to edit the attachments", async () => {
       const editAttachmentsButton =
         await ShowOrganization.getEditAttachmentsButton()
       expect(await editAttachmentsButton.getText()).to.be.equal(
@@ -183,7 +183,7 @@ describe("Show organization page", () => {
       )
       await editAttachmentsButton.click()
     })
-    it("We can go to the show page of Attachment", async() => {
+    it("We can go to the show page of Attachment", async () => {
       await (await ShowOrganization.getImageClick()).click()
       await expect(await browser.getUrl()).to.include(
         "/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f"
@@ -194,7 +194,7 @@ describe("Show organization page", () => {
   })
 
   describe("When on the show page of an organization as admin", () => {
-    it("We can select to merge it with another organization", async() => {
+    it("We can select to merge it with another organization", async () => {
       await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
       await (await ShowOrganization.getMergeButton()).click()
       await browser.pause(500) // wait for the merge page to render and load data
@@ -208,7 +208,7 @@ describe("Show organization page", () => {
         await (await MergeOrganizations.getLeftOrganizationField()).isEnabled()
       ).to.be.false
     })
-    it("Should open and close the Edit Engagement planning approvals modal correctly", async() => {
+    it("Should open and close the Edit Engagement planning approvals modal correctly", async () => {
       await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
       const editButton =
         await ShowOrganization.getEditEngagementPlanningApprovalsButton()
@@ -226,7 +226,7 @@ describe("Show organization page", () => {
       await closeButton.click()
       await modal.waitForExist({ reverse: true })
     })
-    it("Should open and close the Edit Report publication approvals modal correctly", async() => {
+    it("Should open and close the Edit Report publication approvals modal correctly", async () => {
       await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
       const editButton =
         await ShowOrganization.getEditReportPublicationApprovalsButton()
@@ -247,7 +247,7 @@ describe("Show organization page", () => {
   })
 
   describe("When on the show page of an organization with entity avatar", () => {
-    it("We should see the avatar", async() => {
+    it("We should see the avatar", async () => {
       await ShowOrganization.open(ORGANIZATION_UUID)
       await (await ShowOrganization.getEntityAvatar()).waitForExist()
       await (await ShowOrganization.getEntityAvatar()).waitForDisplayed()
@@ -255,7 +255,7 @@ describe("Show organization page", () => {
   })
 
   describe("When on the show page of an organization with events", () => {
-    it("We should see a table with events", async() => {
+    it("We should see a table with events", async () => {
       await ShowOrganization.open(ORGANIZATION_UUID)
       await (await ShowOrganization.getEventsTable()).waitForExist()
       await (await ShowOrganization.getEventsTable()).waitForDisplayed()
@@ -263,7 +263,7 @@ describe("Show organization page", () => {
         await (await ShowOrganization.getEventsTable()).getText()
       ).to.contain("NMI PDT 2024-01")
     })
-    it("We can go to the show page of event", async() => {
+    it("We can go to the show page of event", async () => {
       await (await ShowOrganization.getEvent(1)).click()
       await expect(await browser.getUrl()).to.include(
         "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"

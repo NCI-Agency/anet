@@ -23,7 +23,7 @@ const NO_INTERLOCUTOR_WARNING =
   "No primary interlocutor has been provided for the Engagement"
 
 describe("When creating a report without an interlocutor", () => {
-  it("Should save draft report without primary interlocutor attendee", async() => {
+  it("Should save draft report without primary interlocutor attendee", async () => {
     await CreateReport.open()
     await browser.pause(500) // wait for the page transition and rendering of custom fields
     await CreateReport.fillForm(REPORT_FIELDS)
@@ -33,21 +33,21 @@ describe("When creating a report without an interlocutor", () => {
       NO_INTERLOCUTOR_WARNING
     )
   })
-  it("Should warn user about missing primary interlocutor", async() => {
+  it("Should warn user about missing primary interlocutor", async () => {
     await (await ShowReport.getSubmitButton()).click()
     await (await ShowReport.getReportModal()).waitForDisplayed()
     expect(await (await ShowReport.getModalWarning()).getText()).to.include(
       NO_INTERLOCUTOR_WARNING
     )
   })
-  it("Should submit report without primary interlocutor attendee", async() => {
+  it("Should submit report without primary interlocutor attendee", async () => {
     await (await ShowReport.getConfirmSubmitButton()).click()
     await browser.pause(1000) // Wait for status text to be updated
     expect(await ShowReport.getReportStatusText()).to.equal(
       ShowReport.REPORT_IS_PENDING_APPROVALS
     )
   })
-  it("Should show missing interlocutor warning to initial approver", async() => {
+  it("Should show missing interlocutor warning to initial approver", async () => {
     await MyReports.open("erin")
     await MyReports.selectReport(
       REPORT_FIELDS.intent,
@@ -63,7 +63,7 @@ describe("When creating a report without an interlocutor", () => {
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
     await ShowReport.logout()
   })
-  it("Should show missing interlocutor warning to secondary reviewer", async() => {
+  it("Should show missing interlocutor warning to secondary reviewer", async () => {
     await Home.open("/", "rebecca")
     await (await Home.getReportsPendingMyApproval()).waitForDisplayed()
     await (await Home.getReportsPendingMyApproval()).click()
@@ -78,7 +78,7 @@ describe("When creating a report without an interlocutor", () => {
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
     await ShowReport.logout()
   })
-  it("Should show missing interlocutor warning to task owner", async() => {
+  it("Should show missing interlocutor warning to task owner", async () => {
     await Home.open("/", "jack")
     await (await Home.getReportsPendingMyApproval()).waitForDisplayed()
     await (await Home.getReportsPendingMyApproval()).click()
@@ -93,7 +93,7 @@ describe("When creating a report without an interlocutor", () => {
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
     await ShowReport.logout(true)
   })
-  it("Should complete the approval chain", async() => {
+  it("Should complete the approval chain", async () => {
     await MyReports.open("erin")
     await MyReports.selectReport(REPORT_FIELDS.intent, REPORT_STATES.APPROVED)
     expect(await ShowReport.getReportStatusText()).to.equal(

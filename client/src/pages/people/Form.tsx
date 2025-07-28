@@ -331,7 +331,7 @@ const PersonForm = ({
                         {!forOnboarding && edit && (
                           <Col>
                             <TriggerableConfirm
-                              onConfirm={async() => {
+                              onConfirm={async () => {
                                 // Have to wait until field value is updated before we can submit the form
                                 await setFieldValue(
                                   "status",
@@ -363,7 +363,8 @@ const PersonForm = ({
                               showModal={showWrongPersonModal}
                               onCancel={() => hideWrongPersonModal(null)}
                               onSuccess={optionValue =>
-                                hideWrongPersonModal(optionValue)}
+                                hideWrongPersonModal(optionValue)
+                              }
                             >
                               {(isSelf && (
                                 <div>

@@ -40,14 +40,14 @@ const SHORT_WAIT_MS = 1000
 
 describe("Create report form page", () => {
   describe("When creating a report", () => {
-    it("Should be able to load the form", async() => {
+    it("Should be able to load the form", async () => {
       await CreateReport.open()
       await browser.pause(500) // wait for the page transition and rendering of custom fields
       await (await CreateReport.getForm()).waitForExist()
       await (await CreateReport.getForm()).waitForDisplayed()
     })
 
-    it("Should be able to set the grid location", async() => {
+    it("Should be able to set the grid location", async () => {
       await (
         await CreateReport.getGridLocationLatField()
       ).setValue(GRID_LOCATION.lat)
@@ -77,12 +77,12 @@ describe("Create report form page", () => {
       ).to.equal(GRID_LOCATION.lng)
     })
 
-    it("Should be able to prevent invalid duration values", async() => {
+    it("Should be able to prevent invalid duration values", async () => {
       await (
         await CreateReport.getDuration()
       ).setValue(INVALID_ENGAGEMENT_DURATION_1)
       await browser.waitUntil(
-        async() => {
+        async () => {
           return (
             (await (await CreateReport.getDuration()).getValue()) ===
             VALID_ENGAGEMENT_DURATION_1
@@ -97,7 +97,7 @@ describe("Create report form page", () => {
         await CreateReport.getDuration()
       ).setValue(INVALID_ENGAGEMENT_DURATION_2)
       await browser.waitUntil(
-        async() => {
+        async () => {
           return (
             (await (await CreateReport.getDuration()).getValue()) ===
             VALID_ENGAGEMENT_DURATION_2
@@ -110,7 +110,7 @@ describe("Create report form page", () => {
       )
     })
 
-    it("Should be able to select an ANET object reference", async() => {
+    it("Should be able to select an ANET object reference", async () => {
       await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
       await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
       expect(
@@ -184,7 +184,7 @@ describe("Create report form page", () => {
       ).click()
     })
 
-    it("Should be able to select multiple ANET object references", async() => {
+    it("Should be able to select multiple ANET object references", async () => {
       await (
         await CreateReport.getTestMultiReferenceFieldLabel()
       ).waitForExist()
@@ -485,7 +485,7 @@ describe("Create report form page", () => {
       ).to.include(POSITION_VALUE_2)
     })
 
-    it("Should be able to save a report with ANET object references", async() => {
+    it("Should be able to save a report with ANET object references", async () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
@@ -532,7 +532,7 @@ describe("Create report form page", () => {
       ).to.include(POSITION_VALUE_3)
     })
 
-    it("Should be able to edit a report with ANET object references", async() => {
+    it("Should be able to edit a report with ANET object references", async () => {
       // Edit the report
       await (await CreateReport.getEditButton()).click()
 
@@ -602,7 +602,7 @@ describe("Create report form page", () => {
       }
     })
 
-    it("Should be able to save a report without any ANET object references", async() => {
+    it("Should be able to save a report without any ANET object references", async () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
@@ -632,7 +632,7 @@ describe("Create report form page", () => {
       ).to.be.false
     })
 
-    it("Should be able to delete the report", async() => {
+    it("Should be able to delete the report", async () => {
       // Edit the report
       await (await CreateReport.getEditButton()).click()
 

@@ -67,7 +67,7 @@ class CreateEventSeries extends Page {
   async waitForOwnerOrgAdvancedSelectToChange(value) {
     await (await this.getOwnerOrgAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (
             await this.getOwnerOrgAdvancedSelectFirstItem()
@@ -87,7 +87,7 @@ class CreateEventSeries extends Page {
   async waitForHostOrgAdvancedSelectToChange(value) {
     await (await this.getHostOrgAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getHostOrgAdvancedSelectFirstItem()).getText()) ===
           value
@@ -106,7 +106,7 @@ class CreateEventSeries extends Page {
   async waitForAdminOrgAdvancedSelectToChange(value) {
     await (await this.getAdminOrgAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (
             await this.getAdminOrgAdvancedSelectFirstItem()

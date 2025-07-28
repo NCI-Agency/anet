@@ -16,7 +16,7 @@ import configureStore from "./store/configureStore"
 const store = configureStore()
 const persistor = persistStore(store)
 
-window.onerror = function(message, url, lineNumber, columnNumber) {
+window.onerror = function (message, url, lineNumber, columnNumber) {
   API.logOnServer("ERROR", url, lineNumber + ":" + columnNumber, message)
   return false
 }

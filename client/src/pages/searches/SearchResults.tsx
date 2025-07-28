@@ -122,7 +122,8 @@ const SearchResults = ({
           searchQuery={searchQuery}
           isOnlySearchResult={!!objectType?.length}
           setObjectTypeResultCount={(objType: string, count: number) =>
-            setObjectTypeResultCount(prev => ({ ...prev, [objType]: count }))}
+            setObjectTypeResultCount(prev => ({ ...prev, [objType]: count }))
+          }
           pageSize={pageSize}
         />
       ))}

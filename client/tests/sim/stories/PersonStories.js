@@ -107,7 +107,7 @@ async function randomPerson(isUser, status) {
     gender: () => gender,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
-    biography: async() => await createHtmlParagraphs(),
+    biography: async () => await createHtmlParagraphs(),
     user: () => isUser,
     users: () => createUsers(domainUsername),
     emailAddresses: () => createEmailAddresses(isUser, email)
@@ -123,7 +123,7 @@ function modifiedPerson() {
     gender: identity,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
-    biography: async() => await createHtmlParagraphs(),
+    biography: async () => await createHtmlParagraphs(),
     user: identity,
     users: identity,
     emailAddresses: (value, instance) => {
@@ -137,7 +137,7 @@ function modifiedPerson() {
   }
 }
 
-const _createPerson = async function(user, isUser, status) {
+const _createPerson = async function (user, isUser, status) {
   const person = Person.filterClientSideFields(new Person())
   const personGenerator = await populate(
     person,
@@ -170,7 +170,7 @@ const _createPerson = async function(user, isUser, status) {
   ).data.createPerson
 }
 
-const updatePerson = async function(user) {
+const updatePerson = async function (user) {
   const totalCount = (
     await runGQL(user, {
       query: `
@@ -248,7 +248,7 @@ const updatePerson = async function(user) {
   ).data.updatePerson
 }
 
-const _deletePerson = async function(user) {
+const _deletePerson = async function (user) {
   const totalCount = (
     await runGQL(user, {
       query: `
@@ -343,7 +343,7 @@ async function countPersons(user) {
   ).data.personList.totalCount
 }
 
-const createPerson = async function(user, grow, args) {
+const createPerson = async function (user, grow, args) {
   if (grow) {
     const count = await countPersons(user)
     if (!grow(count)) {
@@ -354,7 +354,7 @@ const createPerson = async function(user, grow, args) {
   return _createPerson(user, args?.user, args?.status)
 }
 
-const deletePerson = async function(user, grow) {
+const deletePerson = async function (user, grow) {
   if (grow) {
     const count = await countPersons(user)
     if (grow(count)) {

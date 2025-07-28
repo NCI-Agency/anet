@@ -414,7 +414,8 @@ const Search = ({
                       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                       exportMaxResults,
                       setError
-                    )}
+                    )
+                  }
                 >
                   Excel (xlsx)
                 </Dropdown.Item>
@@ -427,7 +428,8 @@ const Search = ({
                       "application/xml",
                       exportMaxResults,
                       setError
-                    )}
+                    )
+                  }
                 >
                   Google Earth (kml)
                 </Dropdown.Item>
@@ -450,7 +452,8 @@ const Search = ({
             <FormSelect
               defaultValue={pageSize}
               onChange={e =>
-                setPageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
+                setPageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)
+              }
             >
               {PAGESIZES.map(size => (
                 <option key={size} value={size}>
@@ -495,7 +498,8 @@ const Search = ({
             setPagination={setPagination}
             allowSelection={withEmail}
             updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.ORGANIZATIONS, r)}
+              updateRecipients(SEARCH_OBJECT_TYPES.ORGANIZATIONS, r)
+            }
           />
         </Fieldset>
       )}
@@ -522,7 +526,8 @@ const Search = ({
             setPagination={setPagination}
             allowSelection={withEmail}
             updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.PEOPLE, r)}
+              updateRecipients(SEARCH_OBJECT_TYPES.PEOPLE, r)
+            }
           />
         </Fieldset>
       )}
@@ -549,7 +554,8 @@ const Search = ({
             setPagination={setPagination}
             allowSelection={withEmail}
             updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.POSITIONS, r)}
+              updateRecipients(SEARCH_OBJECT_TYPES.POSITIONS, r)
+            }
           />
         </Fieldset>
       )}
@@ -645,7 +651,8 @@ const Search = ({
             setPagination={setPagination}
             allowSelection={withEmail}
             updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS, r)}
+              updateRecipients(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS, r)
+            }
           />
         </Fieldset>
       )}

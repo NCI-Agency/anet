@@ -134,7 +134,7 @@ const ASSESSED_TASKS = [
 ]
 
 describe("As an admin", () => {
-  it("Should see the proper assessment sections for each task", async() => {
+  it("Should see the proper assessment sections for each task", async () => {
     await Home.openAsAdminUser()
     for (const t of ASSESSED_TASKS) {
       await (await Home.getSearchBar()).setValue(t.shortName)
@@ -164,7 +164,7 @@ describe("As an admin", () => {
     }
   })
 
-  it("Should not see not-applicable assessment sections for each task", async() => {
+  it("Should not see not-applicable assessment sections for each task", async () => {
     await Home.openAsAdminUser()
     for (const t of ASSESSED_TASKS) {
       await (await Home.getSearchBar()).setValue(t.shortName)
@@ -187,7 +187,7 @@ describe("As an admin", () => {
 
 describe("For the periodic task assessments", () => {
   describe("As an advisor who has tasks he is responsible for", () => {
-    it("Should first search, find and open the task page", async() => {
+    it("Should first search, find and open the task page", async () => {
       await Home.open("/", ADVISOR1_CREDENTIALS)
       await (await Home.getSearchBar()).setValue(TASK_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -196,7 +196,7 @@ describe("For the periodic task assessments", () => {
       await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
 
-    it("Should allow advisor to successfully add an assessment", async() => {
+    it("Should allow advisor to successfully add an assessment", async () => {
       await (
         await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForExist()
@@ -217,7 +217,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just created", async() => {
+    it("Should show the same assessment details with the details just created", async () => {
       await assertAssessmentDetails(
         "taskMonthly",
         "monthly",
@@ -225,7 +225,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should allow the author of the assessment to successfully edit it", async() => {
+    it("Should allow the author of the assessment to successfully edit it", async () => {
       await (
         await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).waitForExist()
@@ -248,7 +248,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "taskMonthly",
         "monthly",
@@ -256,7 +256,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should see an add button for taskMonthly assessments in the future", async() => {
+    it("Should see an add button for taskMonthly assessments in the future", async () => {
       await (
         await ShowTask.getNextPeriodButton("taskMonthly", "monthly")
       ).waitForExist()
@@ -270,7 +270,7 @@ describe("For the periodic task assessments", () => {
       ).waitForExist()
     })
 
-    it("Should not see an add button for taskWeekly assessments in the future", async() => {
+    it("Should not see an add button for taskWeekly assessments in the future", async () => {
       await (
         await ShowTask.getNextPeriodButton("taskWeekly", "weekly")
       ).waitForExist()
@@ -288,7 +288,7 @@ describe("For the periodic task assessments", () => {
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the task's page", async() => {
+    it("Should first search, find and open the task's page", async () => {
       await Home.openAsAdminUser()
       await (await Home.getSearchBar()).setValue(TASK_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -297,7 +297,7 @@ describe("For the periodic task assessments", () => {
       await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", async() => {
+    it("Should not show make assessment button when there is an assessment on that period", async () => {
       expect(
         await (
           await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
@@ -305,7 +305,7 @@ describe("For the periodic task assessments", () => {
       ).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assessment", async() => {
+    it("Should allow admins to successfully edit existing assessment", async () => {
       await (
         await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForExist()
@@ -329,7 +329,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "taskMonthly",
         "monthly",
@@ -340,7 +340,7 @@ describe("For the periodic task assessments", () => {
   })
 
   describe("As a different advisor responsible from same task", () => {
-    it("Should first search, find and open the task's page", async() => {
+    it("Should first search, find and open the task's page", async () => {
       await Home.open("/", ADVISOR2_CREDENTIALS)
       await (await Home.getSearchBar()).setValue(TASK_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -349,7 +349,7 @@ describe("For the periodic task assessments", () => {
       await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", async() => {
+    it("Should not show make assessment button when there is an assessment on that period", async () => {
       expect(
         await (
           await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
@@ -357,7 +357,7 @@ describe("For the periodic task assessments", () => {
       ).to.equal(false)
     })
 
-    it("Should allow the other advisor to successfully edit existing assessment", async() => {
+    it("Should allow the other advisor to successfully edit existing assessment", async () => {
       await (
         await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForExist()
@@ -381,7 +381,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "taskMonthly",
         "monthly",
@@ -389,7 +389,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should allow the other advisor to delete the assessment", async() => {
+    it("Should allow the other advisor to delete the assessment", async () => {
       await (await ShowTask.getDeleteAssessmentButton()).click()
       await ShowTask.confirmDelete()
       await ShowTask.waitForDeletedAssessmentToDisappear(
@@ -401,7 +401,7 @@ describe("For the periodic task assessments", () => {
   })
 })
 
-const assertAssessmentDetails = async(
+const assertAssessmentDetails = async (
   assessmentKey,
   recurrence,
   assessmentDetails,

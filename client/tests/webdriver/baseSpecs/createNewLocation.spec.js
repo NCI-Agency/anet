@@ -13,7 +13,7 @@ import {
 const SHORT_WAIT_MS = 1000
 
 describe("When creating a new Location", () => {
-  it("Should not create a location without name & type input", async() => {
+  it("Should not create a location without name & type input", async () => {
     await CreateNewLocation.open()
     await (await CreateNewLocation.getCreateButton()).click()
     await (await CreateNewLocation.getNameRequiredError()).waitForExist()
@@ -22,7 +22,7 @@ describe("When creating a new Location", () => {
     await (await CreateNewLocation.getTypeRequiredError()).waitForDisplayed()
   })
 
-  it("Should display possible duplicates with similar names", async() => {
+  it("Should display possible duplicates with similar names", async () => {
     await (
       await CreateNewLocation.getNameField()
     ).setValue(SIMILAR_LOCATION.name)
@@ -45,7 +45,7 @@ describe("When creating a new Location", () => {
     expect(similar).to.equal("Kabul Hospital")
   })
 
-  it("Should not accept invalid latitude-longitude inputs", async() => {
+  it("Should not accept invalid latitude-longitude inputs", async () => {
     await (await CreateNewLocation.getNameField()).setValue(LOCATION_NAME)
     await (await CreateNewLocation.getLatField()).setValue(BAD_LAT_LNG_VAL)
     await (await CreateNewLocation.getLngField()).setValue(BAD_LAT_LNG_VAL)
@@ -55,7 +55,7 @@ describe("When creating a new Location", () => {
     await CreateNewLocation.latLngErrorsDisplayed()
   })
 
-  it("Should have a location with correct MGRS in popover", async() => {
+  it("Should have a location with correct MGRS in popover", async () => {
     await CreateNewLocation.deleteInput(CreateNewLocation.getLatField())
     await (await CreateNewLocation.getLatField()).setValue(LOCATION_COORDS.lat)
     await CreateNewLocation.deleteInput(CreateNewLocation.getLngField())
@@ -79,13 +79,13 @@ describe("When creating a new Location", () => {
     ).to.equal(LOCATION_COORDS.mgrs)
   })
 
-  it("Should create a location successfully", async() => {
+  it("Should create a location successfully", async () => {
     await (await CreateNewLocation.getCreateButton()).click()
     await (await CreateNewLocation.getSuccessMsg()).waitForExist()
     await (await CreateNewLocation.getSuccessMsg()).waitForDisplayed()
   })
 
-  it("Should not display possible duplicates button", async() => {
+  it("Should not display possible duplicates button", async () => {
     await CreateNewLocation.open()
     await (await CreateNewLocation.getForm()).waitForExist()
     await (await CreateNewLocation.getForm()).waitForDisplayed()
@@ -97,7 +97,7 @@ describe("When creating a new Location", () => {
       .to.be.false
   })
 
-  it("Should allow map maximisation", async() => {
+  it("Should allow map maximisation", async () => {
     expect(
       await (
         await CreateNewLocation.getMaximiseLeafletButton()

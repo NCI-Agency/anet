@@ -422,13 +422,13 @@ const EventForm = ({
                         !canCreateLocation
                           ? null
                           : (searchTerms, setDoReset) => (
-                            <CreateNewLocation
-                              name={searchTerms}
-                              setFieldTouched={setFieldTouched}
-                              setFieldValue={setFieldValue}
-                              setDoReset={setDoReset}
-                            />
-                          )
+                              <CreateNewLocation
+                                name={searchTerms}
+                                setFieldTouched={setFieldTouched}
+                                setFieldValue={setFieldValue}
+                                setDoReset={setDoReset}
+                              />
+                            )
                       }
                     />
                   }

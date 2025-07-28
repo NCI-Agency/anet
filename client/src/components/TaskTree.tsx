@@ -1,5 +1,5 @@
 import { MaybeElement, Tree, TreeNodeInfo } from "@blueprintjs/core"
-import { type IconName, IconNames } from "@blueprintjs/icons"
+import { IconNames, type IconName } from "@blueprintjs/icons"
 import LinkTo from "components/LinkTo"
 import cloneDeep from "lodash/cloneDeep"
 import React, { useCallback, useReducer } from "react"

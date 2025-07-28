@@ -33,7 +33,7 @@ const NEW_PERSON_FIELDS_2 = {
 
 describe("Visibility of custom sensitive information", () => {
   describe("Users", () => {
-    it("Should be able to find the non counterpart interlocutor with sensitive information", async() => {
+    it("Should be able to find the non counterpart interlocutor with sensitive information", async () => {
       await Home.open("/", DEFAULT_USERNAME)
       await (
         await Home.getSearchBar()
@@ -47,7 +47,7 @@ describe("Visibility of custom sensitive information", () => {
         await Search.linkOfPersonFound(NON_COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
-    it("Should not be able to see political position field if not authorized", async() => {
+    it("Should not be able to see political position field if not authorized", async () => {
       await (
         await ShowPerson.getPoliticalPosition()
       ).waitForDisplayed({
@@ -55,13 +55,13 @@ describe("Visibility of custom sensitive information", () => {
         reverse: true
       })
     })
-    it("Should be able to see birthday field with the correct value if authorized", async() => {
+    it("Should be able to see birthday field with the correct value if authorized", async () => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_INTERLOCUTOR.birthday
       )
     })
-    it("Should be able to find the counterpart interlocutor with sensitive information", async() => {
+    it("Should be able to find the counterpart interlocutor with sensitive information", async () => {
       await Home.open("/", DEFAULT_USERNAME)
       await (await Home.getSearchBar()).setValue(COUNTERPART_INTERLOCUTOR.name)
       await (await Home.getSubmitSearch()).click()
@@ -73,25 +73,25 @@ describe("Visibility of custom sensitive information", () => {
         await Search.linkOfPersonFound(COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
-    it("Should be able to see political position field with the correct value if counterpart", async() => {
+    it("Should be able to see political position field with the correct value if counterpart", async () => {
       await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
       expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal(COUNTERPART_INTERLOCUTOR.politicalPosition)
     })
-    it("Should be able to see birthday field with the correct value if counterpart", async() => {
+    it("Should be able to see birthday field with the correct value if counterpart", async () => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         COUNTERPART_INTERLOCUTOR.birthday
       )
     })
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await ShowPerson.logout()
     })
   })
 
   describe("Superusers", () => {
-    it("Should be able to find the interlocutor with sensitive information", async() => {
+    it("Should be able to find the interlocutor with sensitive information", async () => {
       await Home.openAsSuperuser()
       await (
         await Home.getSearchBar()
@@ -105,7 +105,7 @@ describe("Visibility of custom sensitive information", () => {
         await Search.linkOfPersonFound(NON_COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
-    it("Should not be able to see political position field if not authorized", async() => {
+    it("Should not be able to see political position field if not authorized", async () => {
       await (
         await ShowPerson.getPoliticalPosition()
       ).waitForDisplayed({
@@ -113,19 +113,19 @@ describe("Visibility of custom sensitive information", () => {
         reverse: true
       })
     })
-    it("Should be able to see birthday field with the correct value if authorized", async() => {
+    it("Should be able to see birthday field with the correct value if authorized", async () => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_INTERLOCUTOR.birthday
       )
     })
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await ShowPerson.logout()
     })
   })
 
   describe("Admins", () => {
-    it("Should be able to find the interlocutor with sensitive information", async() => {
+    it("Should be able to find the interlocutor with sensitive information", async () => {
       await Home.openAsAdminUser()
       await (
         await Home.getSearchBar()
@@ -139,19 +139,19 @@ describe("Visibility of custom sensitive information", () => {
         await Search.linkOfPersonFound(NON_COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
-    it("Should be able to see political position field with the correct value", async() => {
+    it("Should be able to see political position field with the correct value", async () => {
       await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
       expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal(NON_COUNTERPART_INTERLOCUTOR.politicalPosition)
     })
-    it("Should be able to see birthday field with the correct value", async() => {
+    it("Should be able to see birthday field with the correct value", async () => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_INTERLOCUTOR.birthday
       )
     })
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await ShowPerson.logout()
     })
   })
@@ -159,7 +159,7 @@ describe("Visibility of custom sensitive information", () => {
 
 describe("Creating and editing custom sensitive information", () => {
   describe("Superusers", () => {
-    it("Should be able load a new person form and fill normal required fields", async() => {
+    it("Should be able load a new person form and fill normal required fields", async () => {
       await CreatePerson.openAsSuperuser()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
@@ -189,7 +189,7 @@ describe("Creating and editing custom sensitive information", () => {
         await CreatePerson.getCountryHelpBlock()
       ).waitForExist({ reverse: true })
     })
-    it("Should not be able to edit sensitive fields if not authorized", async() => {
+    it("Should not be able to edit sensitive fields if not authorized", async () => {
       await (
         await CreatePerson.getPoliticalPositionSensitiveFieldContainer()
       ).waitForDisplayed({
@@ -197,7 +197,7 @@ describe("Creating and editing custom sensitive information", () => {
         reverse: true
       })
     })
-    it("Should be able to create a new person with sensitive information", async() => {
+    it("Should be able to create a new person with sensitive information", async () => {
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).setValue("08-06-1963")
       await (await CreatePerson.getLastName()).click()
@@ -207,7 +207,7 @@ describe("Creating and editing custom sensitive information", () => {
         "8 June 1963"
       )
     })
-    it("Should be able to edit sensitive information if authorized", async() => {
+    it("Should be able to edit sensitive information if authorized", async () => {
       await (await ShowPerson.getEditButton()).click()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
@@ -220,13 +220,13 @@ describe("Creating and editing custom sensitive information", () => {
         "1 January 1956"
       )
     })
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await CreatePerson.logout()
     })
   })
 
   describe("Admins", () => {
-    it("Should be able load a new person form and fill normal required fields", async() => {
+    it("Should be able load a new person form and fill normal required fields", async () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
@@ -256,7 +256,7 @@ describe("Creating and editing custom sensitive information", () => {
         await CreatePerson.getCountryHelpBlock()
       ).waitForExist({ reverse: true })
     })
-    it("Should be able to create a new person with sensitive information", async() => {
+    it("Should be able to create a new person with sensitive information", async () => {
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).setValue("01-01-1956")
       await (await CreatePerson.getLastName()).click()
@@ -270,7 +270,7 @@ describe("Creating and editing custom sensitive information", () => {
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal("Middle")
     })
-    it("Should be able to edit sensitive information", async() => {
+    it("Should be able to edit sensitive information", async () => {
       await (await ShowPerson.getEditButton()).click()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
@@ -287,7 +287,7 @@ describe("Creating and editing custom sensitive information", () => {
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal("Left")
     })
-    it("Should logout", async() => {
+    it("Should logout", async () => {
       await CreatePerson.logout()
     })
   })

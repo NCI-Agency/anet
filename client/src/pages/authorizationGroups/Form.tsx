@@ -126,7 +126,8 @@ const AuthorizationGroupForm = ({
                       "descriptionCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )}
+                    )
+                  }
                   extraColElem={
                     <>
                       <span id="descriptionCharsLeft">
@@ -155,7 +156,8 @@ const AuthorizationGroupForm = ({
                   name="distributionList"
                   component={FieldHelper.SpecialField}
                   onChange={value =>
-                    setFieldValue("distributionList", value?.target?.checked)}
+                    setFieldValue("distributionList", value?.target?.checked)
+                  }
                   widget={
                     <FormCheck
                       type="checkbox"
@@ -176,7 +178,8 @@ const AuthorizationGroupForm = ({
                     setFieldValue(
                       "forSensitiveInformation",
                       value?.target?.checked
-                    )}
+                    )
+                  }
                   widget={
                     <FormCheck
                       type="checkbox"
@@ -194,7 +197,7 @@ const AuthorizationGroupForm = ({
                         with sensitive information; disabling this flag will NOT
                         revoke access to them!
                       </Alert>
-                  )}
+                    )}
                 </DictionaryField>
 
                 <DictionaryField
@@ -260,7 +263,8 @@ const AuthorizationGroupForm = ({
                         ENTITY_TYPES.PEOPLE
                       ]}
                       setRelatedObjects={value =>
-                        setFieldValue("authorizationGroupRelatedObjects", value)}
+                        setFieldValue("authorizationGroupRelatedObjects", value)
+                      }
                       showDelete
                     />
                   }

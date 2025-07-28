@@ -447,7 +447,7 @@ async function validateUserCanEditUserForCurrentPage(t, canChangeName) {
     shortWaitMs // wait for Slate to save the editor contents
   )
   await t.context.driver.wait(
-    async() => {
+    async () => {
       const originalBioText = await $bioTextArea.getText()
       return originalBioText !== ""
     },

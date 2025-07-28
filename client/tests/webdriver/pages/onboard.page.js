@@ -15,7 +15,7 @@ class Onboard extends CreatePerson {
       await (await this.getWelcomeText()).waitForDisplayed()
     }
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (await (await this.getWelcomeText()).getText()) === value
       },
       { timeout: 5000, timeoutMsg: "Expected different welcome text after 5s" }

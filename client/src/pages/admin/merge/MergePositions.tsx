@@ -282,7 +282,8 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
                             mergedAssociatedPositions,
                             "mid"
                           )
-                        )}
+                        )
+                      }
                       initialMergedAssociatedPositions={
                         mergedPosition.associatedPositions
                       }
@@ -315,7 +316,8 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
                       setHistory={history =>
                         dispatchMergeActions(
                           setAMergedField("previousPeople", history, "mid")
-                        )}
+                        )
+                      }
                     />
                   </>
                 }
@@ -600,7 +602,8 @@ const PositionColumn = ({
             action={() =>
               dispatchMergeActions(
                 setAMergedField("role", position.role, align)
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -614,7 +617,8 @@ const PositionColumn = ({
             action={() =>
               dispatchMergeActions(
                 setAMergedField("code", position.code, align)
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -643,7 +647,8 @@ const PositionColumn = ({
             action={() =>
               dispatchMergeActions(
                 setAMergedField("status", position.status, align)
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -688,7 +693,8 @@ const PositionColumn = ({
                   position.associatedPositions,
                   align
                 )
-              )}
+              )
+            }
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -704,7 +710,8 @@ const PositionColumn = ({
                   position.previousPeople,
                   align
                 )
-              )}
+              )
+            }
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -743,7 +750,8 @@ const PositionColumn = ({
                     position.organizationsAdministrated,
                     align
                   )
-                )}
+                )
+              }
               mergeState={mergeState}
               autoMerge
               dispatchMergeActions={dispatchMergeActions}
@@ -770,7 +778,8 @@ const PositionColumn = ({
                           fieldValue,
                           align
                         )
-                      )}
+                      )
+                    }
                     mergeState={mergeState}
                     autoMerge
                     dispatchMergeActions={dispatchMergeActions}
@@ -796,7 +805,8 @@ const PositionColumn = ({
             action={() =>
               dispatchMergeActions(
                 setAMergedField("location", position.location, align)
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}

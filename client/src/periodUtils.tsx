@@ -103,19 +103,19 @@ export const PERIOD_FACTORIES = {
 
     return isTargetPeriodFirstHalf
       ? {
-        start: targetPeriodMonth.clone().startOf("month"),
-        end: targetPeriodMonth
-          .clone()
-          .date(startDateOfSecondHalf - 1)
-          .endOf("day")
-      }
+          start: targetPeriodMonth.clone().startOf("month"),
+          end: targetPeriodMonth
+            .clone()
+            .date(startDateOfSecondHalf - 1)
+            .endOf("day")
+        }
       : {
-        start: targetPeriodMonth
-          .clone()
-          .date(startDateOfSecondHalf)
-          .startOf("day"),
-        end: targetPeriodMonth.clone().endOf("month")
-      }
+          start: targetPeriodMonth
+            .clone()
+            .date(startDateOfSecondHalf)
+            .startOf("day"),
+          end: targetPeriodMonth.clone().endOf("month")
+        }
   },
   [RECURRENCE_TYPE.MONTHLY]: (date, offset) => ({
     start: date.clone().subtract(offset, "months").startOf("month"),
@@ -139,19 +139,19 @@ export const PERIOD_FACTORIES = {
 
     return isTargetPeriodFirstHalfOfTheYear
       ? {
-        start: aDateInTargetPeriod.clone().startOf("year"), // 1 Jan
-        end: aDateInTargetPeriod
-          .clone()
-          .month(monthsInHalfYear - 1)
-          .endOf("month") // 30 June
-      }
+          start: aDateInTargetPeriod.clone().startOf("year"), // 1 Jan
+          end: aDateInTargetPeriod
+            .clone()
+            .month(monthsInHalfYear - 1)
+            .endOf("month") // 30 June
+        }
       : {
-        start: aDateInTargetPeriod
-          .clone()
-          .month(monthsInHalfYear)
-          .startOf("month"), // 1 July
-        end: aDateInTargetPeriod.clone().endOf("year") // 31 December
-      }
+          start: aDateInTargetPeriod
+            .clone()
+            .month(monthsInHalfYear)
+            .startOf("month"), // 1 July
+          end: aDateInTargetPeriod.clone().endOf("year") // 31 December
+        }
   },
   [RECURRENCE_TYPE.ANNUALLY]: (date, offset) => ({
     start: date.clone().subtract(offset, "years").startOf("year"),

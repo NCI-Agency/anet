@@ -141,7 +141,8 @@ const AttachmentForm = ({
                         buttons={classificationButtons}
                         enableClear
                         onChange={value =>
-                          setFieldValue("classification", value)}
+                          setFieldValue("classification", value)
+                        }
                       />
                     ) : (
                       <DictionaryField
@@ -172,7 +173,8 @@ const AttachmentForm = ({
                               ENTITY_TYPES.REPORTS
                             ]}
                             setRelatedObjects={value =>
-                              setFieldValue("attachmentRelatedObjects", value)}
+                              setFieldValue("attachmentRelatedObjects", value)
+                            }
                             showDelete
                           />
                         }

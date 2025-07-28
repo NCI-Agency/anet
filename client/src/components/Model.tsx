@@ -230,7 +230,7 @@ export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
 }
 
-export const yupDate = yup.date().transform(function(value, originalValue) {
+export const yupDate = yup.date().transform(function (value, originalValue) {
   if (
     this.isType(value) &&
     (this.isType(originalValue)
@@ -274,7 +274,7 @@ export const yupCoordinateSchema = yup.object().shape({
     .typeError(LATITUDE_ERROR)
     .min(-90, LATITUDE_ERROR)
     .max(90, LATITUDE_ERROR)
-    .test("lat", "Please enter latitude", function(lat) {
+    .test("lat", "Please enter latitude", function (lat) {
       const { lng } = this.parent
       if (utils.isNumeric(lng)) {
         return utils.isNumeric(lat)
@@ -288,7 +288,7 @@ export const yupCoordinateSchema = yup.object().shape({
     .typeError(LONGITUDE_ERROR)
     .min(-180, LONGITUDE_ERROR)
     .max(180, LONGITUDE_ERROR)
-    .test("lng", "Please enter longitude", function(lng) {
+    .test("lng", "Please enter longitude", function (lng) {
       const { lat } = this.parent
       if (utils.isNumeric(lat)) {
         return utils.isNumeric(lng)
@@ -303,7 +303,7 @@ export const yupCoordinateSchema = yup.object().shape({
     .test(
       "displayedCoordinate",
       "Please enter a valid MGRS coordinate",
-      function(displayedCoordinate) {
+      function (displayedCoordinate) {
         if (_isEmpty(displayedCoordinate)) {
           return true
         }
@@ -423,11 +423,11 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
         fieldTypeYupSchema = fieldTypeYupSchema.test(
           "rte-required",
           "rte-required-error",
-          function(htmlString) {
+          function (htmlString) {
             return utils.isEmptyHtml(htmlString)
               ? this.createError({
-                message: params?.[0] || ""
-              })
+                  message: params?.[0] || ""
+                })
               : true
           }
         )

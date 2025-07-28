@@ -263,12 +263,12 @@ const AdvancedSearch = ({
     setObjectType(objectType)
     const defaultFiltersForObjectType = objectType
       ? Object.entries(ALL_FILTERS[objectType].filters)
-        .filter(([, filter]) => filter.isDefault)
-        .map(([k]) => ({
-          key: k,
-          // Keep any previous value for the default filters
-          value: filters.find(f => f.key === k)?.value
-        }))
+          .filter(([, filter]) => filter.isDefault)
+          .map(([k]) => ({
+            key: k,
+            // Keep any previous value for the default filters
+            value: filters.find(f => f.key === k)?.value
+          }))
       : []
 
     setFilters(

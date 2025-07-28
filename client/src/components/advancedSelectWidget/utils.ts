@@ -238,13 +238,13 @@ export function buildFlattenedList(
       const childrenWithLevel = isCollapsed
         ? []
         : buildFlattenedList(
-          value.children,
-          selectableItems,
-          multiSelect,
-          selectedItems,
-          expandedItems,
-          level + 1
-        )
+            value.children,
+            selectableItems,
+            multiSelect,
+            selectedItems,
+            expandedItems,
+            level + 1
+          )
       return [valueWithLevel, ...childrenWithLevel]
     }) ?? []
   )

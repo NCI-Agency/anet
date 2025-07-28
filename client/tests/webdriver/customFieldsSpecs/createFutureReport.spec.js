@@ -14,13 +14,13 @@ const SHORT_WAIT_MS = 1000
 
 describe("Create report form page", () => {
   describe("When creating a report", () => {
-    it("Should be able to load the form", async() => {
+    it("Should be able to load the form", async () => {
       await CreateFutureReport.open()
       await (await CreateFutureReport.getForm()).waitForExist()
       await (await CreateFutureReport.getForm()).waitForDisplayed()
     })
 
-    it("Should be able to select interlocutor and task", async() => {
+    it("Should be able to select interlocutor and task", async () => {
       await (await CreateFutureReport.getAttendeesFieldLabel()).waitForExist()
       await (
         await CreateFutureReport.getAttendeesFieldLabel()
@@ -89,7 +89,7 @@ describe("Create report form page", () => {
       ).to.include(TASK_SELECTED_VALUE)
     })
 
-    it("Should not show assessments without engagement date", async() => {
+    it("Should not show assessments without engagement date", async () => {
       /* eslint-disable no-unused-expressions */
       // Attendee assessments should not be shown in the form
       expect(
@@ -120,7 +120,7 @@ describe("Create report form page", () => {
       /* eslint-enable no-unused-expressions */
     })
 
-    it("Should show assessments with past engagement date", async() => {
+    it("Should show assessments with past engagement date", async () => {
       // Edit the report
       await (await CreateFutureReport.getEditButton()).click()
       await (await CreateFutureReport.getAttendeesFieldLabel()).waitForExist()
@@ -206,7 +206,7 @@ describe("Create report form page", () => {
       /* eslint-enable no-unused-expressions */
     })
 
-    it("Should not show assessments with future engagement date", async() => {
+    it("Should not show assessments with future engagement date", async () => {
       // Edit the report
       await (await CreateFutureReport.getEditButton()).click()
       await (await CreateFutureReport.getAttendeesFieldLabel()).waitForExist()
@@ -254,7 +254,7 @@ describe("Create report form page", () => {
       /* eslint-enable no-unused-expressions */
     })
 
-    it("Should be able to delete the report", async() => {
+    it("Should be able to delete the report", async () => {
       // Edit the report
       await (await CreateFutureReport.getEditButton()).click()
       await (await CreateFutureReport.getAttendeesFieldLabel()).waitForExist()

@@ -215,7 +215,8 @@ function EditHistory({
                             }
                             filterDefs={singleSelectParameters.filterDefs}
                             onChange={value =>
-                              singleSelectParameters.onChange(value, addItem)}
+                              singleSelectParameters.onChange(value, addItem)
+                            }
                             objectType={singleSelectParameters.objectType}
                             valueKey="name"
                             fields={singleSelectParameters.fields}
@@ -287,9 +288,9 @@ function EditHistory({
                                           values.history.map((item, index) =>
                                             index === idx
                                               ? {
-                                                ...item,
-                                                startTime
-                                              }
+                                                  ...item,
+                                                  startTime
+                                                }
                                               : item
                                           ),
                                           hasCurrent
@@ -316,7 +317,8 @@ function EditHistory({
                                         setFieldValue(
                                           endTimeFieldName,
                                           value && moment(value).valueOf()
-                                        )}
+                                        )
+                                      }
                                       component={FieldHelper.SpecialField}
                                       widget={
                                         <CustomDateInput

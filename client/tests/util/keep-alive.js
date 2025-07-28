@@ -29,7 +29,7 @@ if (
   const httpRequest = http.request
   const httpsRequest = https.request
 
-  http.request = function(options, callback) {
+  http.request = function (options, callback) {
     if (options.protocol === "https:") {
       options.agent = secureAgent
       return httpsRequest(options, callback)

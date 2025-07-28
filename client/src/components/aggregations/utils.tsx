@@ -132,7 +132,7 @@ export const getReportsByTasks = reportsList => {
       d.uuid === noTask.uuid
         ? simplifiedValues.filter(item => _isEmpty(item.tasks)).length
         : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
-          .length
+            .length
   }))
 }
 
