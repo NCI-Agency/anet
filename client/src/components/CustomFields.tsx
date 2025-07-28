@@ -1384,7 +1384,7 @@ export const ReadonlyCustomFields = ({
         )
 
         return (
-          <div key={key}>
+          <React.Fragment key={key}>
             {isCompact ? (
               <table>
                 <tbody>{content}</tbody>
@@ -1392,7 +1392,7 @@ export const ReadonlyCustomFields = ({
             ) : (
               content
             )}
-          </div>
+          </React.Fragment>
         )
       })}
     </>
