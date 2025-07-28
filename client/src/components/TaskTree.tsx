@@ -1,6 +1,8 @@
 import { MaybeElement, Tree, TreeNodeInfo } from "@blueprintjs/core"
 import { IconNames, type IconName } from "@blueprintjs/icons"
+import classNames from "classnames"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import cloneDeep from "lodash/cloneDeep"
 import React, { useCallback, useReducer } from "react"
 import utils from "utils"
@@ -40,7 +42,13 @@ function createTreeNode(task, taskMap, nodeMap) {
   const node: TreeNodeInfo = {
     id: task.uuid,
     label: (
-      <LinkTo modelType="Task" model={task}>
+      <LinkTo
+        modelType="Task"
+        model={task}
+        className={classNames({
+          "inactive-task": task.status === Model.STATUS.INACTIVE
+        })}
+      >
         {[task.shortName, task.longName].filter(Boolean).join(" | ")}
       </LinkTo>
     ),
