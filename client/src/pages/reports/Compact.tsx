@@ -450,8 +450,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   />
                 )}
                 {Settings.fields.report.customFields && (
-                  <tr>
-                    <td>
+                  <CompactRow
+                    id="customFields"
+                    content={
                       <ReadonlyCustomFields
                         fieldsConfig={Settings.fields.report.customFields}
                         values={report}
@@ -459,8 +460,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                         isCompact
                         hideIfEmpty
                       />
-                    </td>
-                  </tr>
+                    }
+                    className="reportField"
+                    hideIfEmpty
+                  />
                 )}
               </FullColumn>
             </CompactTable>
