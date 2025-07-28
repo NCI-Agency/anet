@@ -35,6 +35,9 @@ import mil.dds.anet.test.client.Subscription;
 import mil.dds.anet.test.client.SubscriptionUpdate;
 import mil.dds.anet.test.client.SubscriptionUpdateSearchQueryInput;
 import mil.dds.anet.test.client.Task;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -57,6 +60,18 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       TaskDao.TABLE_NAME, this::updateTask, //
       AuthorizationGroupDao.TABLE_NAME, this::updateAuthorizationGroup, //
       EventDao.TABLE_NAME, this::updateEvent);
+
+  @BeforeAll
+  void beforeAll() throws Exception {
+    setUpEmailServer();
+  }
+
+  @BeforeEach
+  @AfterEach
+  void clearEmailServer() {
+    // Clear the email server before and after each test
+    clearEmailsOnServer();
+  }
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
@@ -87,6 +102,12 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
         checkOtherSubscriptionUpdates(subscriptions, beforeUpdate, subscription.getUuid());
       }
     }
+
+    // Jack opted to receive subscriptions by email, so he gets 16 emails for each updated
+    // subscription, Arthur also got an approval needed email, so we need to pass him to
+    // assertEmails as well
+    sendEmailsToServer();
+    assertEmails(17, getJackJackson(), getAdminUser());
 
     // Delete jack's subscriptions
     subscriptions.values()
