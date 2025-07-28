@@ -23,6 +23,8 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
         uuid
         shortName
         longName
+        status
+        selectable
         parentTask {
           uuid
           shortName
@@ -35,6 +37,8 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
           uuid
           shortName
           longName
+          status
+          selectable
           parentTask {
             uuid
           }
