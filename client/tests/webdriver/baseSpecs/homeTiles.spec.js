@@ -4,6 +4,11 @@ import Search from "../pages/search.page"
 
 const ARTHURS_DRAFT_REPORT = "Test report with rich text"
 const ERINS_DRAFT_REPORT = "Erin's Draft report, ready for submission"
+const SEARCH_TITLE_TEXTS = [
+  "Search for People filtered on Holding Position As: Administrator, Status: Active",
+  "Search for Reports filtered on State: Approved or Published, Status: Active, Within Location: Kabul Hospital",
+  "Search for Objectives filtered on Status: Active, Within Organization: EF 1"
+]
 
 describe("When checking the home page tiles", () => {
   afterEach("Should logout", async() => {
@@ -51,6 +56,22 @@ describe("When checking the home page tiles", () => {
       expect(
         await (await Search.linkOfReportFound(ERINS_DRAFT_REPORT)).isExisting()
       ).to.be.false
+    })
+    it("should see the correct number of saved searches when logged in as admin", async() => {
+      await Home.openAsAdminUser()
+      await (await Home.getHomeTilesContainer()).waitForExist()
+      await (await Home.getHomeTilesContainer()).waitForDisplayed()
+      const savedSearches = await Home.getSavedSearches()
+      expect(savedSearches.length).to.eq(3)
+      expect(await Home.getSavedSearchTitleText(savedSearches[0])).to.eq(
+        SEARCH_TITLE_TEXTS[0]
+      )
+      expect(await Home.getSavedSearchTitleText(savedSearches[1])).to.eq(
+        SEARCH_TITLE_TEXTS[1]
+      )
+      expect(await Home.getSavedSearchTitleText(savedSearches[2])).to.eq(
+        SEARCH_TITLE_TEXTS[2]
+      )
     })
   })
 

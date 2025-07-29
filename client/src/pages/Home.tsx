@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import {
   clearSearchQuery,
   DEFAULT_PAGE_PROPS,
@@ -8,6 +10,7 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import DraggableRow from "components/DraggableRow"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
@@ -18,16 +21,23 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { deserializeQueryParams } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  SearchDescription
+} from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import { Report } from "models"
 import { superuserTour, userTour } from "pages/GuidedTour"
-import React, { useContext } from "react"
-import { Button, Col, Container, Row } from "react-bootstrap"
+import SearchResults from "pages/searches/SearchResults"
+import React, { useContext, useEffect, useState } from "react"
+import { Badge, Button, Col, Container, Row } from "react-bootstrap"
+import { DndProvider } from "react-dnd"
+import { HTML5Backend } from "react-dnd-html5-backend"
 import { connect } from "react-redux"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_REPORT_COUNT = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -41,6 +51,26 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
     personList(query: $personQuery) {
       totalCount
     }
+  }
+`
+
+const GQL_GET_HOMEPAGE_SAVED_SEARCHES = gql`
+  query {
+    savedSearches: mySearches(forHomepage: true) {
+      uuid
+      name
+      objectType
+      query
+      displayInHomepage
+      priority
+      homepagePriority
+    }
+  }
+`
+
+const GQL_UPDATE_SAVED_SEARCH = gql`
+  mutation ($savedSearch: SavedSearchInput!) {
+    updateSavedSearch(savedSearch: $savedSearch)
   }
 `
 
@@ -323,6 +353,227 @@ const UsersPendingVerification = ({
   )
 }
 
+interface HiddenSearchResultsCountersProps {
+  searches: any[]
+  pageDispatchers: PageDispatchersPropType
+  setSearchCount: (...args: unknown[]) => unknown
+}
+
+const HiddenSearchResultsCounters = React.memo(
+  function HiddenSearchResultsCounters({
+    searches,
+    pageDispatchers,
+    setSearchCount
+  }: HiddenSearchResultsCountersProps) {
+    return (
+      <div style={{ display: "none" }}>
+        {searches.map(search => (
+          <SearchResults
+            key={search.uuid}
+            pageDispatchers={pageDispatchers}
+            searchQuery={search.query}
+            objectType={search.objectType}
+            setSearchCount={count =>
+              setSearchCount(prev => ({
+                ...prev,
+                [search.uuid]: count
+              }))}
+            pageSize={1}
+          />
+        ))}
+      </div>
+    )
+  }
+)
+
+interface MySavedSearchesProps {
+  pageDispatchers?: PageDispatchersPropType
+  setSearchQuery: (...args: unknown[]) => unknown
+}
+
+const MySavedSearches = ({
+  pageDispatchers,
+  setSearchQuery
+}: MySavedSearchesProps) => {
+  const navigate = useNavigate()
+  const [savedQueries, setSavedQueries] = useState({})
+  const [searchCount, setSearchCount] = useState({})
+  const [collapsed, setCollapsed] = useState({})
+  const [searches, setSearches] = useState([])
+
+  const { data, loading, error } = API.useApiQuery(
+    GQL_GET_HOMEPAGE_SAVED_SEARCHES
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+
+  useEffect(() => {
+    if (data?.savedSearches) {
+      Promise.all(
+        data.savedSearches.map(
+          search =>
+            new Promise(resolve => {
+              const objType = SEARCH_OBJECT_TYPES[search.objectType]
+              const queryParams = utils.parseJsonSafe(search.query)
+              deserializeQueryParams(
+                objType,
+                queryParams,
+                (objectType, filters, text) => {
+                  resolve({
+                    uuid: search.uuid,
+                    value: { objectType, filters, text }
+                  })
+                }
+              )
+            })
+        )
+      ).then(results => {
+        const newSavedQueries = {}
+        results.forEach(({ uuid, value }) => {
+          newSavedQueries[uuid] = value
+        })
+        setSavedQueries(newSavedQueries)
+        setSearches(data.savedSearches)
+        setCollapsed(
+          results.reduce((acc, { uuid }) => ({ ...acc, [uuid]: true }), {})
+        )
+        setSearchCount(
+          results.reduce((acc, { uuid }) => ({ ...acc, [uuid]: 0 }), {})
+        )
+      })
+    }
+  }, [data, setSavedQueries, setSearches, setCollapsed, setSearchCount])
+
+  if (done) {
+    return result
+  }
+  if (!searches.length) {
+    return null
+  }
+
+  const moveRow = (from, to) => {
+    setSearches(prevSearches => {
+      const updated = [...prevSearches]
+      const [removed] = updated.splice(from, 1)
+      updated.splice(to, 0, removed)
+
+      let newHomepagePriority
+      if (to === 0) {
+        newHomepagePriority = updated[0].homepagePriority - 1
+      } else if (to === updated.length - 1) {
+        newHomepagePriority = updated[updated.length - 1].homepagePriority + 1.0
+      } else {
+        const above = updated[to - 1].homepagePriority
+        const below = updated[to + 1].homepagePriority
+        newHomepagePriority = (above + below) / 2
+      }
+
+      updated[to].homepagePriority = newHomepagePriority
+      return updated
+    })
+  }
+
+  const onDropRow = (uuid, toIndex) => {
+    const search = searches.find(s => s.uuid === uuid)
+    if (!search) {
+      return
+    }
+    API.mutation(GQL_UPDATE_SAVED_SEARCH, {
+      savedSearch: search
+    })
+  }
+
+  const showSearch = uuid => {
+    setSearchQuery(savedQueries[uuid])
+    navigate("/search")
+  }
+
+  return (
+    <>
+      <DndProvider backend={HTML5Backend}>
+        {searches.map((search, i) => (
+          <Fieldset
+            className="saved-search-row mb-4"
+            title={i === 0 ? "My Saved Searches" : null}
+            key={search.uuid}
+          >
+            <DraggableRow
+              itemType="SAVED_SEARCH_ROW"
+              row={search}
+              index={i}
+              moveRow={moveRow}
+              onDropRow={onDropRow}
+              dragHandleProps={{}}
+            >
+              <div className="d-flex flex-column gap-3">
+                <div className="d-flex align-items-center">
+                  <Button
+                    className="d-flex align-items-center w-100 text-start text-decoration-none p-0"
+                    variant="link"
+                    onClick={() =>
+                      setCollapsed(prev => ({
+                        ...prev,
+                        [search.uuid]: !prev[search.uuid]
+                      }))}
+                  >
+                    <span className="flex-grow-1">
+                      <SearchDescription
+                        searchQuery={savedQueries[search.uuid]}
+                        showText
+                        style={{ fontSize: 20, pointerEvents: "none" }}
+                      />
+                      <Badge bg="primary" className="fs-6 px-2 py-1 ms-2">
+                        {searchCount[search.uuid]}
+                      </Badge>
+                    </span>
+                    <span className="ms-2">
+                      <Icon
+                        className="align-middle"
+                        icon={
+                          collapsed[search.uuid]
+                            ? IconNames.CHEVRON_DOWN
+                            : IconNames.CHEVRON_UP
+                        }
+                        size={20}
+                        style={{ fontSize: 22, color: "initial" }}
+                      />
+                    </span>
+                  </Button>
+                </div>
+                {!collapsed[search.uuid] && (
+                  <>
+                    <SearchResults
+                      pageDispatchers={pageDispatchers}
+                      searchQuery={search.query}
+                      objectType={search.objectType}
+                      setSearchCount={() => {}}
+                    />
+                    <Button
+                      className="text-start p-0"
+                      variant="link"
+                      onClick={() => showSearch(search.uuid)}
+                    >
+                      Show full search results
+                    </Button>
+                  </>
+                )}
+              </div>
+            </DraggableRow>
+          </Fieldset>
+        ))}
+      </DndProvider>
+      <HiddenSearchResultsCounters
+        searches={data.savedSearches}
+        pageDispatchers={pageDispatchers}
+        setSearchCount={setSearchCount}
+      />
+    </>
+  )
+}
+
 interface HomeProps {
   setSearchQuery: (...args: unknown[]) => unknown
   pageDispatchers?: PageDispatchersPropType
@@ -402,6 +653,11 @@ const Home = ({
       )}
 
       <MySubscriptionUpdates />
+
+      <MySavedSearches
+        pageDispatchers={pageDispatchers}
+        setSearchQuery={setSearchQuery}
+      />
     </div>
   )
 }
