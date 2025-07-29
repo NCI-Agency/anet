@@ -424,7 +424,7 @@ const OrganizationForm = ({
                           placeholder={
                             Settings.fields.organization.parentOrg.placeholder
                           }
-                          showRemoveButton={isAdmin}
+                          showRemoveButton={canAdministrateParentOrg}
                           value={values.parentOrg}
                           overlayColumns={["Name"]}
                           overlayRenderRow={OrganizationOverlayRow}

@@ -81,7 +81,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       }
     }
 
-    if (query.getParentTaskUuid() != null) {
+    if (!Utils.isEmptyOrNull(query.getParentTaskUuid())) {
       addParentTaskUuidQuery(query);
     }
 

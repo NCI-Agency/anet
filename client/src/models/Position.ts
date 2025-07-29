@@ -4,6 +4,7 @@ import Model, {
   GRAPHQL_NOTES_FIELDS,
   yupEmailAddresses
 } from "components/Model"
+import pluralize from "pluralize"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
@@ -45,8 +46,10 @@ export default class Position extends Model {
 
   static SUPERUSER_TYPE = {
     REGULAR: "REGULAR",
-    CAN_CREATE_TOP_LEVEL_ORGANIZATIONS: "CAN_CREATE_TOP_LEVEL_ORGANIZATIONS",
-    CAN_CREATE_OR_EDIT_ANY_ORGANIZATION: "CAN_CREATE_OR_EDIT_ANY_ORGANIZATION"
+    CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS:
+      "CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS",
+    CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK:
+      "CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK"
   }
 
   // create yup schema for the customFields, based on the customFields config
@@ -212,14 +215,14 @@ export default class Position extends Model {
       return "Regular"
     } else if (
       superuserType ===
-      Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS
+      Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS
     ) {
-      return "Can Create top-level Organizations"
+      return `Can Create top-level Organizations or ${pluralize(Settings.fields.task.shortLabel)}`
     } else if (
       superuserType ===
-      Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+      Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK
     ) {
-      return "Can Create or Edit any Organization"
+      return `Can Create or Edit any Organization or ${Settings.fields.task.shortLabel}`
     }
   }
 
