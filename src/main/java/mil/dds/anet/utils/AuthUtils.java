@@ -20,6 +20,8 @@ public class AuthUtils {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static final String UNAUTH_MESSAGE = "You do not have permissions to do this";
+  public static final String UNAUTH_ORG_MESSAGE = "You must be a superuser of the %s";
+  public static final String MISSING_ORG_MESSAGE = "You must fill in the %s";
 
   private AuthUtils() {}
 

@@ -11,6 +11,7 @@ import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSeriesSearchQuery;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -25,9 +26,11 @@ import org.springframework.web.server.ResponseStatusException;
 @GraphQLApi
 public class EventSeriesResource {
 
+  private final AnetDictionary dict;
   private final EventSeriesDao dao;
 
-  public EventSeriesResource(AnetObjectEngine engine) {
+  public EventSeriesResource(AnetDictionary dict, AnetObjectEngine engine) {
+    this.dict = dict;
     this.dao = engine.getEventSeriesDao();
   }
 
@@ -37,7 +40,10 @@ public class EventSeriesResource {
 
   public void assertPermission(final Person user, final String orgUuid) {
     if (!hasPermission(user, orgUuid)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(
+              orgUuid == null ? AuthUtils.MISSING_ORG_MESSAGE : AuthUtils.UNAUTH_ORG_MESSAGE,
+              dict.getDictionaryEntry("fields.eventSeries.adminOrg.label")));
     }
   }
 
