@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,6 +67,10 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
         Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(testCase.getKey(),
             testCase.getValue(), reportUuid)));
 
+    // AuthorizationGroup does not get notified when report is updated
+    final HashMap<String, Subscription> reportSubscriptions = new HashMap<>(subscriptions);
+    reportSubscriptions.remove(AuthorizationGroupDao.TABLE_NAME);
+
     // Check jack's subscription updates
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates =
         getAllSubscriptionUpdates(jackUser);
@@ -80,7 +85,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       UPDATERS.get(subscribedObjectType).accept(subscription.getSubscribedObjectUuid());
       // Check jack's subscription updates
       if (ReportDao.TABLE_NAME.equals(subscribedObjectType)) {
-        checkReportSubscriptionUpdates(subscriptions, beforeUpdate);
+        checkReportSubscriptionUpdates(reportSubscriptions, beforeUpdate);
       } else {
         checkOtherSubscriptionUpdates(subscriptions, beforeUpdate, subscription.getUuid());
       }
@@ -218,8 +223,6 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
                 false),
             personToReportPerson(getChristopfTopferness(), true))))
         .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
-        .withAuthorizationGroups(List.of(getAuthorizationGroupInput(
-            getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
         .withEvent(getEventInput(getEvent(getSubscribedObjectUuid(EventDao.TABLE_NAME))))
         .withNextSteps("<p>Test report next steps for subscription updates</p>")
         .withReportText("<p>Test report intent for subscription updates</p>").build();

@@ -381,6 +381,14 @@ public class OrganizationDao
         entityAvatarDao.upsert(winnerEntityAvatar);
       }
 
+      // Update authorizationGroupRelatedObjects
+      updateM2mForMerge("authorizationGroupRelatedObjects", "authorizationGroupUuid",
+          "relatedObjectUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update reportAuthorizedMembers
+      updateM2mForMerge("reportAuthorizedMembers", "reportUuid", "relatedObjectUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
+
       // Update organizationAdministrativePositions
       deleteForMerge("organizationAdministrativePositions", "organizationUuid",
           loserOrganizationUuid);

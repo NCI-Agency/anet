@@ -273,10 +273,11 @@ const MultiTypeAdvancedSelectComponent = ({
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
   const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
+  const filterElement = filters?.find(f => f?.[entityType])?.[entityType] ?? {}
   const filterDefs =
     typeof advancedSelectProps.filterDefs === "function"
-      ? advancedSelectProps.filterDefs(filters[0]?.[entityType], currentUser)
-      : advancedSelectProps.filterDefs
+      ? advancedSelectProps.filterDefs(filterElement, currentUser)
+      : { ...advancedSelectProps.filterDefs, ...filterElement }
 
   return (
     <>

@@ -36,6 +36,7 @@ import {
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
+import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
@@ -54,7 +55,6 @@ import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
-import AuthorizationGroupTable from "./AuthorizationGroupTable"
 import ReportPeople from "./ReportPeople"
 
 const GQL_GET_REPORT = gql`
@@ -259,10 +259,34 @@ const GQL_GET_REPORT = gql`
         uuid
         text
       }
-      authorizationGroups {
-        uuid
-        name
-        description
+      authorizedMembers {
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on AuthorizationGroup {
+            uuid
+            name
+          }
+          ... on Organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Person {
+            uuid
+            name
+            rank
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Position {
+            uuid
+            type
+            name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+        }
       }
       attachments {
         ${Attachment.basicFieldsQuery}
@@ -440,8 +464,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   // Anybody can email a report as long as it's not in draft.
   const canEmail = !report.isDraft()
-  const hasAuthorizationGroups =
-    report.authorizationGroups && report.authorizationGroups.length > 0
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   return (
@@ -806,18 +828,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     readOnly
                     value={report.reportSensitiveInformation.text}
                   />
-                  {(hasAuthorizationGroups && (
-                    <div>
-                      <h5>Authorized communities:</h5>
-                      <AuthorizationGroupTable
-                        authorizationGroups={values.authorizationGroups}
-                      />
-                    </div>
-                  )) || (
-                    <h5 className="alert alert-warning">
-                      No communities are authorized!
-                    </h5>
-                  )}
+                  <RelatedObjectsTable
+                    title="Authorized Members"
+                    relatedObjects={report.authorizedMembers}
+                  />
                 </Fieldset>
               )}
               {showCustomFields && (

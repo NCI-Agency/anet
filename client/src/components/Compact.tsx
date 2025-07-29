@@ -340,12 +340,14 @@ const EmptySpaceTdS = styled.td`
 
 interface CompactRowProps {
   label?: React.ReactNode
+  labelAlignment?: string
   content?: React.ReactNode
   hideIfEmpty?: boolean
 }
 
 export const CompactRow = ({
   label,
+  labelAlignment,
   content,
   hideIfEmpty,
   ...otherProps
@@ -361,7 +363,7 @@ export const CompactRow = ({
   }
   return (
     <CustomStyled id={id} className={className}>
-      {label && <RowLabelS>{label}</RowLabelS>}
+      {label && <RowLabelS labelAlignment={labelAlignment}>{label}</RowLabelS>}
       <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
     </CustomStyled>
   )
@@ -384,6 +386,7 @@ const RowLabelS = styled.th`
   font-weight: bold;
   color: #445566;
   width: 20%;
+  vertical-align: ${props => props.labelAlignment};
 `
 
 export const CompactRowContentS = styled.td`

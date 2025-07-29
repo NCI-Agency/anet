@@ -34,6 +34,7 @@ import {
   usePageTitle
 } from "components/Page"
 import "components/RelatedObjectNotes"
+import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
@@ -227,10 +228,34 @@ const GQL_GET_REPORT = gql`
         uuid
         text
       }
-      authorizationGroups {
-        uuid
-        name
-        description
+      authorizedMembers {
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on AuthorizationGroup {
+            uuid
+            name
+          }
+          ... on Organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Person {
+            uuid
+            name
+            rank
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Position {
+            uuid
+            type
+            name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+        }
       }
       customFields
       ${GRAPHQL_ASSESSMENTS_FIELDS}
@@ -426,6 +451,37 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     hideIfEmpty
                     label={null}
                   />
+                )}
+                {optionalFields.reportSensitiveInformation.active &&
+                  report.reportSensitiveInformation?.text && (
+                    <>
+                      <CompactRow
+                        id="reportSensitiveInformation"
+                        content={
+                          <RichTextEditor
+                            readOnly
+                            showAvatar={false}
+                            value={report.reportSensitiveInformation.text}
+                          />
+                        }
+                        className="reportField"
+                        hideIfEmpty
+                        label="Sensitive information"
+                        labelAlignment="top"
+                      />
+                      <CompactRow
+                        id="authorizedMembers"
+                        content={
+                          <RelatedObjectsTable
+                            title="Authorized Members"
+                            relatedObjects={report.authorizedMembers}
+                          />
+                        }
+                        className="reportField"
+                        hideIfEmpty
+                        label="Authorized Members"
+                      />
+                    </>
                 )}
                 {optionalFields.assessments.active && (
                   <CompactRow
@@ -664,6 +720,10 @@ const CompactReportViewS = styled.div`
 const OPTIONAL_FIELDS_INIT = {
   assessments: {
     text: "Assessments",
+    active: false
+  },
+  reportSensitiveInformation: {
+    text: "Sensitive Information",
     active: false
   },
   workflow: {

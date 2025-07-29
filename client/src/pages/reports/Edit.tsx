@@ -140,10 +140,34 @@ const GQL_GET_REPORT = gql`
         uuid
         text
       }
-      authorizationGroups {
-        uuid
-        name
-        description
+      authorizedMembers {
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on AuthorizationGroup {
+            uuid
+            name
+          }
+          ... on Organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Person {
+            uuid
+            name
+            rank
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on Position {
+            uuid
+            type
+            name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+        }
       }
       attachments {
         ${Attachment.basicFieldsQuery}
