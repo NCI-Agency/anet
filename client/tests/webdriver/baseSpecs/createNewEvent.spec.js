@@ -5,7 +5,7 @@ const ORG = "ANET Admin"
 const ORG_COMPLETE = "ANET Administrators"
 
 describe("Create event page", () => {
-  describe("When creating an event", () => {
+  describe("When creating an event as admin", () => {
     it("Should show required data warnings when submitting empty form", async() => {
       await CreateEvent.openAsAdminUser()
       await (await CreateEvent.getForm()).waitForExist()
@@ -71,6 +71,49 @@ describe("Create event page", () => {
 
       await CreateEvent.submitForm()
       await CreateEvent.waitForAlertSuccessToLoad()
+
+      await CreateEvent.logout()
+    })
+  })
+
+  describe("When creating an event as superuser", () => {
+    it("Should warn when adminOrg is not correctly filled in", async() => {
+      await CreateEvent.open()
+      await (await CreateEvent.getForm()).waitForExist()
+      await (await CreateEvent.getForm()).waitForDisplayed()
+
+      await (await CreateEvent.getNameInput()).waitForDisplayed()
+      await (await CreateEvent.getNameInput()).setValue("Test Event Series")
+
+      await (
+        await CreateEvent.getTypeInput()
+      ).selectByAttribute("value", "CONFERENCE")
+
+      await (await CreateEvent.getStartDateInput()).waitForDisplayed()
+      await (await CreateEvent.getStartDateInput()).setValue("01-01-2025 00:00")
+
+      await (await CreateEvent.getEndDateInput()).waitForDisplayed()
+      await (await CreateEvent.getEndDateInput()).setValue("02-01-2025 23:59")
+
+      await CreateEvent.submitForm()
+      expect(await (await CreateEvent.getAlertDanger()).getText()).to.eq(
+        "You must fill in the Admin Organization"
+      )
+
+      const adminOrg = "EF 2.2"
+
+      await (await CreateEvent.getAdminOrganizationInput()).click()
+      await (await CreateEvent.getAdminOrganizationInput()).setValue(adminOrg)
+      await CreateEvent.waitForAdminOrgAdvancedSelectToChange(adminOrg)
+      expect(
+        await (await CreateEvent.getAdminOrgAdvancedSelectFirstItem()).getText()
+      ).to.include(adminOrg)
+      await (await CreateEvent.getAdminOrgAdvancedSelectFirstItem()).click()
+
+      await CreateEvent.submitForm()
+      await CreateEvent.waitForAlertSuccessToLoad()
+
+      await CreateEvent.logout()
     })
   })
 })
