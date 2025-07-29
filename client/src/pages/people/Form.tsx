@@ -696,31 +696,33 @@ const PersonForm = ({
                     </Alert>
                   )}
                 </DictionaryField>
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.biography}
-                  name="biography"
-                  component={FieldHelper.SpecialField}
-                  value={values.biography}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(value, values.biography)) {
-                      setFieldValue("biography", value)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("biography", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="biography"
-                      placeholder={
-                        Settings.fields.person.biography?.placeholder
+                {!forOnboarding && (
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.person.biography}
+                    name="biography"
+                    component={FieldHelper.SpecialField}
+                    value={values.biography}
+                    onChange={value => {
+                      // prevent initial unnecessary render of RichTextEditor
+                      if (!_isEqual(value, values.biography)) {
+                        setFieldValue("biography", value)
                       }
-                    />
-                  }
-                />
+                    }}
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("biography", true, false)
+                    }}
+                    widget={
+                      <RichTextEditor
+                        className="biography"
+                        placeholder={
+                          Settings.fields.person.biography?.placeholder
+                        }
+                      />
+                    }
+                  />
+                )}
 
                 {edit && attachmentEditEnabled && (
                   <Field

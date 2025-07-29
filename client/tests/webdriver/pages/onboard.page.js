@@ -21,6 +21,10 @@ class Onboard extends CreatePerson {
       { timeout: 5000, timeoutMsg: "Expected different welcome text after 5s" }
     )
   }
+
+  async getBiography() {
+    return browser.$("#biography")
+  }
 }
 
 export default new Onboard()

@@ -49,6 +49,9 @@ describe("Onboard new user login", () => {
         await (await OnboardPage.getEmailAddress(index)).getValue()
       ).to.equal(address)
     }
+
+    // Check that biography does not exist
+    await (await OnboardPage.getBiography()).waitForExist({ reverse: true })
   })
 
   it("Should not save if endOfTourDate is not in the future", async() => {
