@@ -10,7 +10,7 @@ const SHORT_WAIT_MS = 1000
 // Note: number of assessments are based on the base data, if that changes, change this test as well
 describe("In my counterparts page", () => {
   describe("When Erin is checking the contents of the page", () => {
-    it("Should see 1 counterpart in the table of pending my counterparts that has pending assessments", async() => {
+    it("Should see 1 counterpart in the table of pending my counterparts that has pending assessments", async () => {
       await MyCounterparts.open()
       await (await MyCounterparts.getMyPendingCounterparts()).waitForDisplayed()
       const myPendingCounterpartsItems = await (
@@ -18,7 +18,7 @@ describe("In my counterparts page", () => {
       ).$$("tr")
       expect(myPendingCounterpartsItems).to.have.length(1)
     })
-    it("Should be able to add a quarterly assessment with 4 questions for the counterpart", async() => {
+    it("Should be able to add a quarterly assessment with 4 questions for the counterpart", async () => {
       await (
         await MyCounterparts.getMyPendingCounterpart(
           "CIV TOPFERNESS, Christopf"
@@ -79,14 +79,14 @@ describe("In my counterparts page", () => {
   })
 
   describe("When Jack is checking the contents of the page", () => {
-    it("Should see an empty table of my counterparts that have pending assessments", async() => {
+    it("Should see an empty table of my counterparts that have pending assessments", async () => {
       await MyCounterparts.openAs("jack")
       await (await MyCounterparts.getMyPendingCounterparts()).waitForDisplayed()
       expect(
         await (await MyCounterparts.getMyPendingCounterpartsContent()).getText()
       ).to.equal("No positions found")
     })
-    it("Should be able to add a quarterly assessment with 1 question for the counterpart", async() => {
+    it("Should be able to add a quarterly assessment with 1 question for the counterpart", async () => {
       await (
         await MyCounterparts.getMyCounterpart("OF-3 ROGWELL, Roger")
       ).click()
@@ -147,7 +147,7 @@ describe("In my counterparts page", () => {
 
 describe("In my tasks page", () => {
   describe("When Erin is checking the contents of the page", () => {
-    it("Should see an empty table of my tasks that have pending assessments", async() => {
+    it("Should see an empty table of my tasks that have pending assessments", async () => {
       await MyTasks.open()
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
       expect(
@@ -158,7 +158,7 @@ describe("In my tasks page", () => {
   })
 
   describe("When Jack is checking the contents of the page", () => {
-    it("Should see 1 task in the table of my tasks that has pending assessments", async() => {
+    it("Should see 1 task in the table of my tasks that has pending assessments", async () => {
       await MyTasks.openAs("jack")
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
       const myPendingTasks = await (
@@ -166,7 +166,7 @@ describe("In my tasks page", () => {
       ).$$("tr")
       expect(myPendingTasks).to.have.length(1)
     })
-    it("Should be able to add a monthly assessment with 2 questions for the task", async() => {
+    it("Should be able to add a monthly assessment with 2 questions for the task", async () => {
       await (await MyTasks.getMyPendingTask("2.B")).click()
       await (
         await AssessmentsSection.getAssessmentsSection("taskMonthly", "monthly")
@@ -202,7 +202,7 @@ describe("In my tasks page", () => {
         timeout: SHORT_WAIT_MS
       })
     })
-    it("Should be able to add a weekly assessment with 1 question for the task", async() => {
+    it("Should be able to add a weekly assessment with 1 question for the task", async () => {
       await (
         await AssessmentsSection.getAssessmentsSection("taskWeekly", "weekly")
       ).waitForDisplayed()
@@ -240,7 +240,7 @@ describe("In my tasks page", () => {
 
 describe("In new report page", () => {
   describe("When Selena is creating a new report", () => {
-    it("Should not show assessments without an engagement date", async() => {
+    it("Should not show assessments without an engagement date", async () => {
       const report = {
         intent: "instant assessment test",
         engagementDate: moment().startOf("day")
@@ -258,7 +258,7 @@ describe("In new report page", () => {
         .be.true
       /* eslint-enable no-unused-expressions */
     })
-    it("Should be able to add instant assessments for tasks", async() => {
+    it("Should be able to add instant assessments for tasks", async () => {
       const report = {
         tasks: [{ name: "1.2.A first milestone", rowNumber: 3 }]
       }
@@ -297,7 +297,7 @@ describe("In new report page", () => {
         }
       }
     })
-    it("Should be able to add instant assessments for attendees", async() => {
+    it("Should be able to add instant assessments for attendees", async () => {
       const report = {
         interlocutors: [
           "OF-3 ROGWELL, Roger",
@@ -342,7 +342,7 @@ describe("In new report page", () => {
         expect(await questions[0].getAttribute("id")).to.match(/\.question1$/)
       }
     })
-    it("Should have an additional question for positive atmosphere", async() => {
+    it("Should have an additional question for positive atmosphere", async () => {
       await (await CreateReport.getPositiveAtmosphere()).click()
       await browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
       await (await CreateReport.getAttendeesAssessments()).scrollIntoView()
@@ -376,7 +376,7 @@ describe("In new report page", () => {
         ).to.match(/\.question4$/)
       }
     })
-    it("Should be able to cancel/delete the report", async() => {
+    it("Should be able to cancel/delete the report", async () => {
       if (!(await (await CreateReport.getDeleteButton()).isExisting())) {
         // Cancel the report
         await (await CreateReport.getCancelButton()).click()

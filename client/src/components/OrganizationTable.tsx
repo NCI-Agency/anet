@@ -181,7 +181,8 @@ const BaseOrganizationTable = ({
                         <Checkbox
                           checked={isSelected(org.uuid)}
                           onChange={() =>
-                            toggleSelection(org.uuid, org.emailAddresses)}
+                            toggleSelection(org.uuid, org.emailAddresses)
+                          }
                         />
                       )}
                     </td>

@@ -34,7 +34,7 @@ const EXAMPLE_ORGANIZATIONS = {
 }
 
 describe("Merge organizations error", () => {
-  it("Should show an error when merging organizations would create a loop", async() => {
+  it("Should show an error when merging organizations would create a loop", async () => {
     await MergeOrganizations.openPage()
     await (await MergeOrganizations.getTitle()).waitForExist()
     await (await MergeOrganizations.getTitle()).waitForDisplayed()
@@ -80,7 +80,7 @@ describe("Merge organizations error", () => {
 })
 
 describe("Merge organizations page", () => {
-  it("Should display a warning when leaving the page with unsaved changes", async() => {
+  it("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergeOrganizations.openPage()
     await (await MergeOrganizations.getTitle()).waitForExist()
     await (await MergeOrganizations.getTitle()).waitForDisplayed()
@@ -123,7 +123,7 @@ describe("Merge organizations page", () => {
     expect(await modalDialog.isExisting()).to.be.true
     await $(".btn-danger").click()
   })
-  it("Should display field values of the left organization", async() => {
+  it("Should display field values of the left organization", async () => {
     await MergeOrganizations.openPage()
     await (await MergeOrganizations.getTitle()).waitForExist()
     await (await MergeOrganizations.getTitle()).waitForDisplayed()
@@ -160,7 +160,7 @@ describe("Merge organizations page", () => {
     ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.parentOrg)
   })
 
-  it("Should not allow to select the same organizations", async() => {
+  it("Should not allow to select the same organizations", async () => {
     await (
       await MergeOrganizations.getRightOrganizationField()
     ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
@@ -175,7 +175,7 @@ describe("Merge organizations page", () => {
     ).to.be.false
   })
 
-  it("Should display field values of the right organization", async() => {
+  it("Should display field values of the right organization", async () => {
     await (await MergeOrganizations.getRightOrganizationField()).click()
     await (
       await MergeOrganizations.getRightOrganizationField()
@@ -211,7 +211,7 @@ describe("Merge organizations page", () => {
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.parentOrg)
   })
 
-  it("Should autoMerge some identical fields from both organizations", async() => {
+  it("Should autoMerge some identical fields from both organizations", async () => {
     expect(
       await (
         await MergeOrganizations.getColumnContent("mid", "Parent Organization")
@@ -235,7 +235,7 @@ describe("Merge organizations page", () => {
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.status)
   })
 
-  it("Should be able to select all fields from left organization", async() => {
+  it("Should be able to select all fields from left organization", async () => {
     await (await MergeOrganizations.getUseAllButton("left")).click()
     await browser.pause(500)
 
@@ -255,7 +255,7 @@ describe("Merge organizations page", () => {
     )
   })
 
-  it("Should be able to select all fields from right organization", async() => {
+  it("Should be able to select all fields from right organization", async () => {
     await (await MergeOrganizations.getUseAllButton("right")).click()
     await browser.pause(500)
 
@@ -275,7 +275,7 @@ describe("Merge organizations page", () => {
     )
   })
 
-  it("Should be able to select from both left and right side", async() => {
+  it("Should be able to select from both left and right side", async () => {
     await (await MergeOrganizations.getLeftOrganizationField()).click()
     await (
       await MergeOrganizations.getLeftOrganizationField()
@@ -319,7 +319,7 @@ describe("Merge organizations page", () => {
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.longName)
   })
 
-  it("Should not be able to click merge button when some fields are empty", async() => {
+  it("Should not be able to click merge button when some fields are empty", async () => {
     // eslint-disable-next-line no-unused-expressions
     expect(
       await (
@@ -328,7 +328,7 @@ describe("Merge organizations page", () => {
     ).to.be.false
   })
 
-  it("Should be able to merge both organizations when winner is left organization", async() => {
+  it("Should be able to merge both organizations when winner is left organization", async () => {
     await (await MergeOrganizations.getUseAllButton("left")).click()
     await browser.pause(500)
     await (await MergeOrganizations.getMergeOrganizationsButton()).click()

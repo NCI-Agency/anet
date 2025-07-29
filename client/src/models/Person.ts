@@ -56,8 +56,8 @@ export default class Person extends Model {
           !user
             ? schema
             : schema.required(
-              `You must provide the ${Settings.fields.person.firstName?.label}`
-            )
+                `You must provide the ${Settings.fields.person.firstName?.label}`
+              )
         )
         .default("")
         .label(Settings.fields.person.firstName?.label),
@@ -86,7 +86,7 @@ export default class Person extends Model {
       emailAddresses: yupEmailAddressesWithValidation(
         "emailAddress",
         "emailAddress error",
-        function(address, testContext) {
+        function (address, testContext) {
           const { from } = this
           const user = from[1].value.user
           const r = utils.handleEmailValidation(address, user)
@@ -102,8 +102,8 @@ export default class Person extends Model {
           Settings.fields.person.country?.optional
             ? schema
             : schema.required(
-              `You must provide the ${Settings.fields.person.country?.label}`
-            )
+                `You must provide the ${Settings.fields.person.country?.label}`
+              )
         )
         .default(null)
         .label(Settings.fields.person.country?.label),
@@ -123,8 +123,8 @@ export default class Person extends Model {
           Settings.fields.person.gender?.optional
             ? schema
             : schema.required(
-              `You must provide the ${Settings.fields.person.gender?.label}`
-            )
+                `You must provide the ${Settings.fields.person.gender?.label}`
+              )
         )
         .default("")
         .label(Settings.fields.person.gender?.label),
@@ -145,10 +145,10 @@ export default class Person extends Model {
             !Person.isPendingVerification({ pendingVerification })
               ? schema
               : schema.test(
-                "end-of-tour-date",
-                `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
-                endOfTourDate => endOfTourDate > Date.now()
-              )
+                  "end-of-tour-date",
+                  `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
+                  endOfTourDate => endOfTourDate > Date.now()
+                )
         )
         .default(null)
         .label(Settings.fields.person.endOfTourDate?.label),

@@ -32,7 +32,7 @@ describe("When creating a Report with conflicts", () => {
     interlocutors: ["CIV KYLESON, Kyle", "OF-3 CHRISVILLE, Chris"]
   }
 
-  it("Should create first draft report without any conflicts", async() => {
+  it("Should create first draft report without any conflicts", async () => {
     await CreateReport.open()
     await browser.pause(500) // wait for the page transition and rendering of custom fields
     await CreateReport.fillForm(report01)
@@ -72,7 +72,7 @@ describe("When creating a Report with conflicts", () => {
     expect(firstReportUUID.length).to.equal(36)
   })
 
-  it("Should create second draft report with conflicts", async() => {
+  it("Should create second draft report with conflicts", async () => {
     await CreateReport.open()
     await browser.pause(500) // wait for the page transition and rendering of custom fields
     await CreateReport.fillForm(report02)
@@ -122,7 +122,7 @@ describe("When creating a Report with conflicts", () => {
     expect(secondReportUUID.length).to.equal(36)
   })
 
-  it("Should display first report with conflicts", async() => {
+  it("Should display first report with conflicts", async () => {
     await ShowReport.open(firstReportUUID)
     await ShowReport.waitForShowReportToLoad()
 
@@ -165,7 +165,7 @@ describe("When creating a Report with conflicts", () => {
     expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
   })
 
-  it("Should display second report with conflicts", async() => {
+  it("Should display second report with conflicts", async () => {
     await ShowReport.open(secondReportUUID)
     await ShowReport.waitForShowReportToLoad()
 
@@ -214,7 +214,7 @@ describe("When creating a Report with conflicts", () => {
     expect(await interlocutor02.conflictButton.isExisting()).to.equal(false)
   })
 
-  it("Should delete the first report", async() => {
+  it("Should delete the first report", async () => {
     await EditReport.open(firstReportUUID)
     await EditReport.deleteReport(firstReportUUID, true)
 
@@ -223,7 +223,7 @@ describe("When creating a Report with conflicts", () => {
     )
   })
 
-  it("Should delete the second report", async() => {
+  it("Should delete the second report", async () => {
     await EditReport.open(secondReportUUID)
     await EditReport.deleteReport(secondReportUUID, true)
 

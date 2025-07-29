@@ -17,7 +17,7 @@ const personDetails = {
 }
 
 describe("Onboard new user login", () => {
-  it("Should show onboard welcome", async() => {
+  it("Should show onboard welcome", async () => {
     await OnboardPage.openAsOnboardUser()
     const welcomeText = "Welcome to ANET"
     await OnboardPage.waitForWelcomeMessage(welcomeText)
@@ -26,7 +26,7 @@ describe("Onboard new user login", () => {
     expect(securityText).to.equal(welcomeText)
   })
 
-  it("Should click on create your account", async() => {
+  it("Should click on create your account", async () => {
     await (await OnboardPage.getCreateYourAccountBtn()).scrollIntoView()
     await (await OnboardPage.getCreateYourAccountBtn()).click()
     await browser.pause(500) // wait for the page transition and rendering of custom fields
@@ -54,7 +54,7 @@ describe("Onboard new user login", () => {
     await (await OnboardPage.getBiography()).waitForExist({ reverse: true })
   })
 
-  it("Should not save if endOfTourDate is not in the future", async() => {
+  it("Should not save if endOfTourDate is not in the future", async () => {
     await (await OnboardPage.getEndOfTourDate()).waitForExist()
     await (await OnboardPage.getEndOfTourDate()).waitForDisplayed()
 
@@ -76,7 +76,7 @@ describe("Onboard new user login", () => {
     )
   })
 
-  it("Should save if all fields properly filled", async() => {
+  it("Should save if all fields properly filled", async () => {
     await (
       await OnboardPage.getRank()
     ).selectByAttribute("value", personDetails.rank)

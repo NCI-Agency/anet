@@ -137,8 +137,8 @@ export default class Report extends Model {
             Report.isFuture(engagementDate)
               ? schema
               : schema.required(
-                `You must provide the overall ${Settings.fields.report.atmosphere?.label} of the engagement`
-              )
+                  `You must provide the overall ${Settings.fields.report.atmosphere?.label} of the engagement`
+                )
         )
         .default(null)
         .label(Settings.fields.report.atmosphere?.label),
@@ -153,8 +153,8 @@ export default class Report extends Model {
         .test("location", "location error", (location, testContext) =>
           _isEmpty(location)
             ? testContext.createError({
-              message: "You must provide the Location"
-            })
+                message: "You must provide the Location"
+              })
             : true
         )
         .default({}),
@@ -166,30 +166,30 @@ export default class Report extends Model {
           cancelled
             ? schema
             : Report.testPrimaryAttendees(schema, true)
-              .test(
-                "no-author",
-                "no author error",
-                (reportPeople, testContext) => {
-                  const message = Report.checkAnyAuthor(reportPeople)
-                  return message ? testContext.createError({ message }) : true
-                }
-              )
-              .test(
-                "attending-author",
-                "no attending author error",
-                (reportPeople, testContext) => {
-                  const message = Report.checkAttendingAuthor(reportPeople)
-                  return message ? testContext.createError({ message }) : true
-                }
-              )
-              .test(
-                "purposeless-people",
-                "purposeless people error",
-                (reportPeople, testContext) => {
-                  const message = Report.checkUnInvolvedPeople(reportPeople)
-                  return message ? testContext.createError({ message }) : true
-                }
-              )
+                .test(
+                  "no-author",
+                  "no author error",
+                  (reportPeople, testContext) => {
+                    const message = Report.checkAnyAuthor(reportPeople)
+                    return message ? testContext.createError({ message }) : true
+                  }
+                )
+                .test(
+                  "attending-author",
+                  "no attending author error",
+                  (reportPeople, testContext) => {
+                    const message = Report.checkAttendingAuthor(reportPeople)
+                    return message ? testContext.createError({ message }) : true
+                  }
+                )
+                .test(
+                  "purposeless-people",
+                  "purposeless people error",
+                  (reportPeople, testContext) => {
+                    const message = Report.checkUnInvolvedPeople(reportPeople)
+                    return message ? testContext.createError({ message }) : true
+                  }
+                )
         )
         .default([]),
       interlocutorOrg: yup.object().nullable().default({}),
@@ -200,8 +200,8 @@ export default class Report extends Model {
         .test("tasks", "tasks error", (tasks, testContext) =>
           _isEmpty(tasks)
             ? testContext.createError({
-              message: `You must provide at least one ${Settings.fields.task.shortLabel}`
-            })
+                message: `You must provide at least one ${Settings.fields.task.shortLabel}`
+              })
             : true
         )
         .default([]),
@@ -213,15 +213,15 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.test(
-              "reportText",
-              "reportText error",
-              (reportText, testContext) =>
-                utils.isEmptyHtml(reportText)
-                  ? testContext.createError({
-                    message: `You must provide the ${Settings.fields.report.reportText?.label}`
-                  })
-                  : true
-            )
+                "reportText",
+                "reportText error",
+                (reportText, testContext) =>
+                  utils.isEmptyHtml(reportText)
+                    ? testContext.createError({
+                        message: `You must provide the ${Settings.fields.report.reportText?.label}`
+                      })
+                    : true
+              )
         )
         .default("")
         .label(Settings.fields.report.reportText?.label),
@@ -234,8 +234,8 @@ export default class Report extends Model {
           Report.isFuture(engagementDate)
             ? schema
             : schema.required(
-              `You must provide a brief summary of the ${Settings.fields.report.nextSteps?.label}`
-            )
+                `You must provide a brief summary of the ${Settings.fields.report.nextSteps?.label}`
+              )
         )
         .default("")
         .label(Settings.fields.report.nextSteps?.label),
@@ -251,8 +251,8 @@ export default class Report extends Model {
             Report.isFuture(engagementDate)
               ? schema
               : schema.required(
-                `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes?.label}`
-              )
+                  `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes?.label}`
+                )
         )
         .default("")
         .label(Settings.fields.report.keyOutcomes?.label),
@@ -291,10 +291,10 @@ export default class Report extends Model {
           _isEmpty(reportSensitiveInformationText)
             ? schema.nullable()
             : schema.required().min(
-              1,
-              `You should provide authorized members who can access the sensitive information.
+                1,
+                `You should provide authorized members who can access the sensitive information.
                If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`
-            )
+              )
       )
   })
 

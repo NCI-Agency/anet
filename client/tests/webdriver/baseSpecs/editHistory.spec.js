@@ -10,7 +10,7 @@ let origStartDate
 let origEndDate
 
 describe("As admin we should be able to edit position history", () => {
-  it("We should be able to edit position history for a person", async() => {
+  it("We should be able to edit position history for a person", async () => {
     await ShowPerson.openAsAdminUser(PERSON_UUID)
     await (await ShowPerson.getEditHistoryButton()).click()
     await (await ShowPerson.getEditHistoryDialog()).waitForExist()
@@ -52,7 +52,7 @@ describe("As admin we should be able to edit position history", () => {
     // eslint-disable-next-line no-unused-expressions
     expect(await (await ShowPerson.getAlertDanger()).isExisting()).to.be.false
   })
-  it("We should be able to edit position history for a position", async() => {
+  it("We should be able to edit position history for a position", async () => {
     await (await ShowPerson.getPreviousPositionLink(HISTORY_INDEX)).click()
     await (await ShowPosition.getEditHistoryButton()).waitForExist()
     await (await ShowPosition.getEditHistoryButton()).waitForDisplayed()

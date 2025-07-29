@@ -1,10 +1,9 @@
 module.exports = {
   arrowParens: "avoid",
   importOrder: ["@fullcalendar/react", "^[^.]", "^[./]"],
-  importOrderCaseInsensitive: true,
+  importOrderCaseSensitive: false,
   importOrderParserPlugins: ["exportDefaultFrom", "typescript", "jsx"],
-  importOrderSortSpecifiers: true,
-  plugins: ["@trivago/prettier-plugin-sort-imports"],
+  plugins: ["@ianvs/prettier-plugin-sort-imports"],
   semi: false,
   trailingComma: "none"
 }

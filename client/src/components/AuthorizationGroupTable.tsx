@@ -138,7 +138,8 @@ const AuthorizationGroupTable = ({
                       <Checkbox
                         checked={isSelected(ag.uuid)}
                         onChange={() =>
-                          toggleSelection(ag.uuid, agEmailAddresses)}
+                          toggleSelection(ag.uuid, agEmailAddresses)
+                        }
                       />
                     )}
                   </td>

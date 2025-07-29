@@ -2,7 +2,7 @@ import { expect } from "chai"
 import TaskFilter from "../../pages/searchFilters/taskFilter.page"
 
 describe("When using the task filter on the reports search", () => {
-  it("Should show all the tasks", async() => {
+  it("Should show all the tasks", async () => {
     await TaskFilter.open()
     await TaskFilter.openTaskFilter()
 
@@ -13,7 +13,7 @@ describe("When using the task filter on the reports search", () => {
     expect(await TaskFilter.getTaskCount()).to.be.oneOf([50, 51])
   })
 
-  it("Should show only the filtered tasks", async() => {
+  it("Should show only the filtered tasks", async () => {
     await TaskFilter.searchTasks("Milestone the First in EF 1.1")
     expect(await TaskFilter.getTaskCount()).to.equal(3)
     // the tasks should already load expanded, so it should yield the same result

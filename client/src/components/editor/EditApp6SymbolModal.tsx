@@ -244,7 +244,8 @@ const EditApp6SymbolModal = ({
             key={key}
             data-key={key}
             onClick={() =>
-              handleFieldUpdate(fieldName, key, setFieldValue, currentValues)}
+              handleFieldUpdate(fieldName, key, setFieldValue, currentValues)
+            }
             className="d-flex align-items-center gap-2"
             style={{
               minHeight: 40

@@ -420,7 +420,8 @@ const LocationForm = ({
                   <Leaflet
                     markers={[marker]}
                     onMapClick={(event, map) =>
-                      updateCoordinateFields(map.wrapLatLng(event.latlng))}
+                      updateCoordinateFields(map.wrapLatLng(event.latlng))
+                    }
                   />
                 </>
               )}

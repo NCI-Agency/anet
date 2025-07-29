@@ -11,12 +11,12 @@ const SEARCH_TITLE_TEXTS = [
 ]
 
 describe("When checking the home page tiles", () => {
-  afterEach("Should logout", async() => {
+  afterEach("Should logout", async () => {
     await Home.logout()
   })
 
-  describe("As admin", async() => {
-    it("Should see correct number of pending reports when logged in as Arthur", async() => {
+  describe("As admin", async () => {
+    it("Should see correct number of pending reports when logged in as Arthur", async () => {
       await Home.openAsAdminUser()
       await (await Home.getHomeTilesContainer()).waitForExist()
       await (await Home.getHomeTilesContainer()).waitForDisplayed()
@@ -28,8 +28,8 @@ describe("When checking the home page tiles", () => {
     })
   })
 
-  describe("As admin", async() => {
-    it("Should see correct number of draft reports when logged in as Arthur", async() => {
+  describe("As admin", async () => {
+    it("Should see correct number of draft reports when logged in as Arthur", async () => {
       await Home.openAsAdminUser()
       await (await Home.getHomeTilesContainer()).waitForExist()
       await (await Home.getHomeTilesContainer()).waitForDisplayed()
@@ -57,7 +57,7 @@ describe("When checking the home page tiles", () => {
         await (await Search.linkOfReportFound(ERINS_DRAFT_REPORT)).isExisting()
       ).to.be.false
     })
-    it("should see the correct number of saved searches when logged in as admin", async() => {
+    it("should see the correct number of saved searches when logged in as admin", async () => {
       await Home.openAsAdminUser()
       await (await Home.getHomeTilesContainer()).waitForExist()
       await (await Home.getHomeTilesContainer()).waitForDisplayed()
@@ -75,8 +75,8 @@ describe("When checking the home page tiles", () => {
     })
   })
 
-  describe("As normal user", async() => {
-    it("Should see correct number of draft reports when logged in as Erin", async() => {
+  describe("As normal user", async () => {
+    it("Should see correct number of draft reports when logged in as Erin", async () => {
       await Home.open()
       await (await Home.getHomeTilesContainer()).waitForExist()
       await (await Home.getHomeTilesContainer()).waitForDisplayed()

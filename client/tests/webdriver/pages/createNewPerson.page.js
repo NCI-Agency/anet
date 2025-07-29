@@ -88,7 +88,7 @@ export class CreatePerson extends Page {
   async waitForCountryAdvancedSelectToChange(value) {
     await (await this.getCountryAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getCountryAdvancedSelectFirstItem()).getText()) ===
           value

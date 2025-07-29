@@ -227,7 +227,8 @@ const ReadonlyDateField = fieldProps => {
           withTime
             ? Settings.dateFormats.forms.displayShort.withTime
             : Settings.dateFormats.forms.displayShort.date
-        )}
+        )
+      }
       className={className}
     />
   )
@@ -640,7 +641,8 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
         name={name}
         /* div cannot be parent or child in print table, tbody, tr */
         render={arrayHelpers =>
-          isCompact ? <>{arrayOfObjects}</> : <div>{arrayOfObjects}</div>}
+          isCompact ? <>{arrayOfObjects}</> : <div>{arrayOfObjects}</div>
+        }
       />
     </Fieldset>
   )
@@ -714,7 +716,8 @@ const AnetObjectField = ({
             setFieldValue(name, {
               type: entityType,
               uuid: value?.uuid
-            })}
+            })
+          }
         />
       }
       {...otherFieldProps}

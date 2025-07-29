@@ -71,7 +71,8 @@ const SimpleMultiCheckboxDropdown = ({
                   const newer = { ...prev }
                   Object.keys(newer).forEach(key => (newer[key].active = true))
                   return newer
-                })}
+                })
+              }
             >
               Select All
             </Button>
@@ -82,7 +83,8 @@ const SimpleMultiCheckboxDropdown = ({
                   const newer = { ...prev }
                   Object.keys(newer).forEach(key => (newer[key].active = false))
                   return newer
-                })}
+                })
+              }
             >
               Clear All
             </Button>

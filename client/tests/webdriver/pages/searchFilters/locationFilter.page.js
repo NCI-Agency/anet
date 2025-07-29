@@ -36,7 +36,7 @@ class LocationFilter extends Page {
     await openFilterButton.click()
 
     await browser.waitUntil(
-      async() =>
+      async () =>
         await (await browser.$("#locationUuid-popover tbody")).isDisplayed()
     )
     const locationRows = await browser.$$("#locationUuid-popover tbody > tr")
@@ -45,7 +45,7 @@ class LocationFilter extends Page {
 
   async openAllCollapsedLocations() {
     await browser.waitUntil(
-      async() =>
+      async () =>
         await (await browser.$("#locationUuid-popover tbody")).isDisplayed()
     )
     let expandibleLocations = await browser.$$(
@@ -68,7 +68,7 @@ class LocationFilter extends Page {
     await browser.keys(searchText)
     await browser.pause(1000) // wait for the searchText to be processed
     await browser.waitUntil(
-      async() =>
+      async () =>
         await (await browser.$("#locationUuid-popover tbody")).isDisplayed()
     )
   }

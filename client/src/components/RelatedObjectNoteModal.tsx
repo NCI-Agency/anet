@@ -35,8 +35,8 @@ const RelatedObjectNoteModal = ({
       .test("text", "text error", (text, testContext) =>
         utils.isEmptyHtml(text)
           ? testContext.createError({
-            message: "You must provide the text"
-          })
+              message: "You must provide the text"
+            })
           : true
       )
       .default("")

@@ -165,7 +165,7 @@ export const SubscriptionIcon = ({
         type="button"
         tagName="button"
         disabled={disabled}
-        onClick={async() => {
+        onClick={async () => {
           persistent && setDisabled(true)
           await toggleSubscription(
             subscribedObjectType,
@@ -194,12 +194,12 @@ const toggleSubscription = (
   const variables = isSubscribed
     ? { subscribedObjectUuid }
     : {
-      subscription: {
-        subscribedObjectType,
-        subscribedObjectUuid,
-        updatedAt
+        subscription: {
+          subscribedObjectType,
+          subscribedObjectUuid,
+          updatedAt
+        }
       }
-    }
   return API.mutation(
     isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
     variables

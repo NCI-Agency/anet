@@ -34,7 +34,7 @@ const userTypes = [
   {
     name: "newUser",
     frequency: 1,
-    userFunction: async function(value) {
+    userFunction: async function (value) {
       const username = faker.internet.username()
       return { name: username, password: username }
     }
@@ -42,7 +42,7 @@ const userTypes = [
   {
     name: "existingAdvisor",
     frequency: 1,
-    userFunction: async function(value) {
+    userFunction: async function (value) {
       const username = faker.helpers.arrayElement(advisors)
       return { name: username, password: username }
     }
@@ -50,7 +50,7 @@ const userTypes = [
   {
     name: "existingSuperuser",
     frequency: 1,
-    userFunction: async function(value) {
+    userFunction: async function (value) {
       const username = faker.helpers.arrayElement(superusers)
       return { name: username, password: username }
     }
@@ -58,7 +58,7 @@ const userTypes = [
   {
     name: "existingAdmin",
     frequency: 1,
-    userFunction: async function(value) {
+    userFunction: async function (value) {
       const username = faker.helpers.arrayElement(admins)
       return { name: username, password: username }
     }

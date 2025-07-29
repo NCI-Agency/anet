@@ -139,7 +139,7 @@ class MergePositions extends Page {
     await (await this.getPositionHeaderFromPopover()).waitForDisplayed()
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
           compareStr
@@ -156,7 +156,7 @@ class MergePositions extends Page {
     const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (await field.getText()) === compareStr
       },
       {
@@ -168,7 +168,7 @@ class MergePositions extends Page {
 
   async waitForSuccessAlert() {
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await browser.$(".alert-success")).getText()) ===
           "Positions merged. Displaying merged Position below."

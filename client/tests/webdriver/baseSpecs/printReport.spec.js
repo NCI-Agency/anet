@@ -19,7 +19,7 @@ const TASKS_WITH_ASSESSMENTS = TASKS
 const DEFAULT_REPORT_CLASSIFICATION = "DEMO USE ONLY"
 
 describe("Show print report page", () => {
-  beforeEach("Open the show report page", async() => {
+  beforeEach("Open the show report page", async () => {
     await MyReports.open("arthur")
     await MyReports.selectReport(
       "A test report from Arthur",
@@ -30,7 +30,7 @@ describe("Show print report page", () => {
     await (await ShowReport.getCompactView()).waitForDisplayed()
   })
   describe("When on the print report page", () => {
-    it("Detailed View button should remove compact view to detailed view", async() => {
+    it("Detailed View button should remove compact view to detailed view", async () => {
       const detailedViewButton = await ShowReport.getDetailedViewButton()
       await detailedViewButton.click()
       await (await ShowReport.getDefaultReportView()).waitForExist()
@@ -42,7 +42,7 @@ describe("Show print report page", () => {
         await (await ShowReport.getCompactViewButton()).isDisplayed()
       ).to.equal(true)
     })
-    it("We should see the correct report fields", async() => {
+    it("We should see the correct report fields", async () => {
       const mustHaveFieldTexts = [
         "Engagement purpose",
         "Key outcomes",
@@ -58,11 +58,11 @@ describe("Show print report page", () => {
         expect(fieldTexts).to.contain(mustHave)
       }
     })
-    it("We should see a title with the correct text", async() => {
+    it("We should see a title with the correct text", async () => {
       const title = await (await ShowReport.getCompactTitle()).getText()
       expect(title).to.equal("Summary / Print")
     })
-    it("We should see buttons with the correct text", async() => {
+    it("We should see buttons with the correct text", async () => {
       const printButtonText = await (
         await ShowReport.getPrintButton()
       ).getText()
@@ -72,7 +72,7 @@ describe("Show print report page", () => {
       expect(printButtonText).to.equal("Print")
       expect(detailedViewButtonText).to.equal("Detailed View")
     })
-    it("Printable report banner should be the same as security banner", async() => {
+    it("Printable report banner should be the same as security banner", async () => {
       const compactBannerText = await (
         await ShowReport.getCompactBanner()
       ).getText()
@@ -82,7 +82,7 @@ describe("Show print report page", () => {
       ).getText()
       expect(compactBannerText.replace(/\n/g, "")).to.equal(bannerSecurityText)
     })
-    it("Should display all attendees", async() => {
+    it("Should display all attendees", async () => {
       const displayedInterlocutors =
         await ShowReport.getCompactViewElements("interlocutors")
       const displayedAdvisors =
@@ -94,7 +94,7 @@ describe("Show print report page", () => {
         expect(displayedAdvisors).to.contain(advisor)
       }
     })
-    it("Should display all attendees when assessments are shown", async() => {
+    it("Should display all attendees when assessments are shown", async () => {
       await ShowReport.selectOptionalField("assessments")
       const displayedInterlocutors = await ShowReport.getCompactViewElements(
         "interlocutors-assessments",
@@ -147,13 +147,13 @@ describe("Show print report page", () => {
         )
       }
     })
-    it("Should display all tasks", async() => {
+    it("Should display all tasks", async () => {
       const displayedTasks = await ShowReport.getCompactViewElements("tasks")
       for (const task of TASKS) {
         expect(displayedTasks).to.contain(task)
       }
     })
-    it("Should display all tasks when assessments are shown", async() => {
+    it("Should display all tasks when assessments are shown", async () => {
       await ShowReport.selectOptionalField("assessments")
       const displayedTasks = await ShowReport.getCompactViewElements(
         "tasks-assessments",
@@ -190,7 +190,7 @@ describe("Show print report page", () => {
     })
   })
   describe("When on the print page of a report without classification", () => {
-    it("We should see the default text for classification in the header and footer banners", async() => {
+    it("We should see the default text for classification in the header and footer banners", async () => {
       await (await ShowReport.getClassificationHeader()).waitForExist()
       await (await ShowReport.getClassificationHeader()).waitForDisplayed()
       expect(
@@ -207,7 +207,7 @@ describe("Show print report page", () => {
 
 const REPORT_CLASSIFICATION = "NATO UNCLASSIFIED"
 describe("Show print report page with classification", () => {
-  beforeEach("Open the show report page", async() => {
+  beforeEach("Open the show report page", async () => {
     await MyReports.open("arthur")
     await MyReports.selectReport(
       "A classified report from Arthur",
@@ -218,7 +218,7 @@ describe("Show print report page with classification", () => {
     await (await ShowReport.getCompactView()).waitForDisplayed()
   })
   describe("When on the print page of a report with classification", () => {
-    it("We should see the classification in the header and footer banners", async() => {
+    it("We should see the classification in the header and footer banners", async () => {
       await (await ShowReport.getClassificationHeader()).waitForExist()
       await (await ShowReport.getClassificationHeader()).waitForDisplayed()
       expect(

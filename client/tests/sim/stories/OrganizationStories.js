@@ -47,7 +47,7 @@ function randomOrganization() {
     identificationCode: () => faker.helpers.replaceSymbols("??????"),
     parentOrg: identity,
     status: () => faker.helpers.objectValue(Organization.STATUS),
-    profile: async() => await createHtmlParagraphs()
+    profile: async () => await createHtmlParagraphs()
   }
 
   // approvalSteps: [],
@@ -234,7 +234,7 @@ async function gqlCreateOrganization(user, org) {
   }
 }
 
-const createOrganization = async function(user, parentOrg, path) {
+const createOrganization = async function (user, parentOrg, path) {
   const randomOrg = randomOrganization()
   const org = Organization.filterClientSideFields(new Organization())
   randomOrg.parentOrg = utils.getReference(parentOrg)
@@ -278,7 +278,7 @@ const createOrganization = async function(user, parentOrg, path) {
   //   })).data.createOrganization
 }
 
-const organizationsBuildup = async function(user, number) {
+const organizationsBuildup = async function (user, number) {
   async function count() {
     return (
       await runGQL(user, {

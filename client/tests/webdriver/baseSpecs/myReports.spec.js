@@ -2,11 +2,11 @@ import { expect } from "chai"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 
 describe("Show My Reports page", () => {
-  beforeEach("Open the My Reports page", async() => {
+  beforeEach("Open the My Reports page", async () => {
     await MyReports.open("arthur")
   })
   describe("When on the My Reports page", () => {
-    it("We should see a table with all reports", async() => {
+    it("We should see a table with all reports", async () => {
       await MyReports.selectReportsTable(REPORT_STATES.PUBLISHED)
       // Report 1 does not have attachments, report 2 has
       const reportNoAttachments = 1
@@ -57,7 +57,7 @@ describe("Show My Reports page", () => {
       ).to.equal("The report has 1 attachment(s)")
     })
 
-    it("We should see a summary with all reports", async() => {
+    it("We should see a summary with all reports", async () => {
       await MyReports.selectReportsSummary(REPORT_STATES.PUBLISHED)
       // Summary 1 does not have attachments, summary 2 has
       const reportNoAttachments = 1

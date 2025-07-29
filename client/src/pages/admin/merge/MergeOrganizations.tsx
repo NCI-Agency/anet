@@ -870,7 +870,8 @@ const OrganizationColumn = ({
                   organization.planningApprovalSteps,
                   align
                 )
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -887,7 +888,8 @@ const OrganizationColumn = ({
                   organization.approvalSteps,
                   align
                 )
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -912,7 +914,8 @@ const OrganizationColumn = ({
                           fieldValue,
                           align
                         )
-                      )}
+                      )
+                    }
                     mergeState={mergeState}
                     autoMerge
                     dispatchMergeActions={dispatchMergeActions}

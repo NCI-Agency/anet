@@ -8,7 +8,7 @@ const ERIN_ADMINS = ["CIV DMIN, Arthur", "CIV SCOTT, Michael"]
 const HELP_TEXT = "This is a help text"
 
 describe("When checking the help page", () => {
-  it("Should see of the user superusers and administrators", async() => {
+  it("Should see of the user superusers and administrators", async () => {
     await Help.open()
 
     const superusers = await Help.getSuperusers()
@@ -17,7 +17,7 @@ describe("When checking the help page", () => {
     expect(administrators).to.include.members(ERIN_ADMINS)
   })
 
-  it("Should have no help text", async() => {
+  it("Should have no help text", async () => {
     await Help.open()
 
     // eslint-disable-next-line no-unused-expressions
@@ -26,7 +26,7 @@ describe("When checking the help page", () => {
     await Help.logout()
   })
 
-  it("Should have text in the help text field", async() => {
+  it("Should have text in the help text field", async () => {
     await Admin.openAsAdminUser()
     await Admin.updateHelpText(HELP_TEXT)
 

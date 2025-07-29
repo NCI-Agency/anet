@@ -4,11 +4,11 @@ import Home from "../pages/home.page"
 
 describe("Home page", () => {
   describe("When checking the notification numbers", () => {
-    afterEach("Should logout…", async() => {
+    afterEach("Should logout…", async () => {
       await Home.logout()
     })
 
-    it("Should see that Erin has 1 counterpart and no tasks with pending assessments", async() => {
+    it("Should see that Erin has 1 counterpart and no tasks with pending assessments", async () => {
       await Home.open()
       await (await Home.getLinksMenuButton()).click()
       await (await Home.getMyCounterpartsLink()).waitForDisplayed()
@@ -21,7 +21,7 @@ describe("Home page", () => {
       expect(await (await Home.getMyTasksNotifications()).isExisting()).to.be
         .false
     })
-    it("Should see that Bob has no counterparts and 1 task with pending assessments", async() => {
+    it("Should see that Bob has no counterparts and 1 task with pending assessments", async () => {
       await Home.open("/", "bob")
       await (await Home.getLinksMenuButton()).click()
       await (await Home.getMyCounterpartsLink()).waitForDisplayed()
@@ -34,7 +34,7 @@ describe("Home page", () => {
         "1"
       )
     })
-    it("Should see that Jack has no counterpart and 1 task with pending assessments", async() => {
+    it("Should see that Jack has no counterpart and 1 task with pending assessments", async () => {
       await Home.open("/", "jack")
       await (await Home.getLinksMenuButton()).click()
       await (await Home.getMyCounterpartsLink()).waitForDisplayed()
@@ -47,7 +47,7 @@ describe("Home page", () => {
         "1"
       )
     })
-    it("Should see that Nick has no counterparts and no tasks with pending assessments", async() => {
+    it("Should see that Nick has no counterparts and no tasks with pending assessments", async () => {
       await Home.open("/", "nick")
       await (await Home.getLinksMenuButton()).click()
       await (await Home.getMyCounterpartsLink()).waitForDisplayed()

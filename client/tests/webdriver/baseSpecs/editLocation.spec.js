@@ -10,7 +10,7 @@ import {
 } from "./locationUtils"
 
 describe("When editing a location", () => {
-  beforeEach("Should create a new location first", async() => {
+  beforeEach("Should create a new location first", async () => {
     await CreateNewLocation.open()
     await (await CreateNewLocation.getNameField()).setValue(LOCATION_NAME)
     await (
@@ -31,7 +31,7 @@ describe("When editing a location", () => {
   })
 
   describe("When on the edit page of a location", () => {
-    it("Should see the correct location type value of the created location", async() => {
+    it("Should see the correct location type value of the created location", async () => {
       await (await EditLocation.getLocationTypeLabel()).waitForExist()
       await (await EditLocation.getLocationTypeLabel()).waitForDisplayed()
 
@@ -40,7 +40,7 @@ describe("When editing a location", () => {
       ).to.equal(LOCATION_TYPE.type)
     })
 
-    it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", async() => {
+    it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", async () => {
       await (await EditLocation.getLatLngLabel()).waitForExist()
       await (await EditLocation.getLatLngLabel()).waitForDisplayed()
 
@@ -52,7 +52,7 @@ describe("When editing a location", () => {
       )
     })
 
-    it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", async() => {
+    it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", async () => {
       await editLatLngFields()
       await (await EditLocation.getAllFormatsPopover()).click()
       await (await EditLocation.getAllFormatsPopoverLat()).waitForExist()

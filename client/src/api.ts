@@ -157,7 +157,7 @@ const API = {
     return results
   },
 
-  _getAuthHeader: function() {
+  _getAuthHeader: function () {
     if (keycloak.token) {
       return ["Authorization", `Bearer ${keycloak.token}`]
     }

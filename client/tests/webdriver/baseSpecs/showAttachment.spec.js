@@ -42,11 +42,11 @@ async function checkDownloadedFile(attachmentName, attachmentSize) {
 }
 
 describe("Show attachment page", () => {
-  beforeEach("Open the show attachment page", async() => {
+  beforeEach("Open the show attachment page", async () => {
     await ShowAttachment.open(ATTACHMENT_UUID)
   })
   describe("When on the show page of a attachment", () => {
-    it("We should see attachment's Download action button", async() => {
+    it("We should see attachment's Download action button", async () => {
       const downloadButton = await ShowAttachment.getDownloadAttachmentButton()
       await downloadButton.waitForExist()
       await downloadButton.waitForDisplayed()
@@ -59,11 +59,11 @@ describe("Show attachment page", () => {
       // file should be downloaded by now
       await checkDownloadedFile(ATTACHMENT_NAME, ATTACHMENT_SIZE)
     })
-    it("We should see image of attachment", async() => {
+    it("We should see image of attachment", async () => {
       await (await ShowAttachment.getImage()).waitForExist()
       await (await ShowAttachment.getImage()).waitForDisplayed()
     })
-    it("We should see details of attachment", async() => {
+    it("We should see details of attachment", async () => {
       await (await ShowAttachment.getFilename()).waitForExist()
       await (await ShowAttachment.getFilename()).waitForDisplayed()
       expect(await (await ShowAttachment.getFilename()).getText()).to.equal(
@@ -107,11 +107,11 @@ describe("Show attachment page", () => {
 })
 
 describe("Edit attachment page", () => {
-  beforeEach("Open the edit attachment page", async() => {
+  beforeEach("Open the edit attachment page", async () => {
     await ShowAttachment.openEdit(ATTACHMENT_UUID)
   })
   describe("When on the edit page of attachment", () => {
-    it("We should see the input areas for details of attachment", async() => {
+    it("We should see the input areas for details of attachment", async () => {
       await (await ShowAttachment.getFilename()).waitForExist()
       await (await ShowAttachment.getFilename()).waitForDisplayed()
       expect(await (await ShowAttachment.getFilename()).getText()).to.equal(

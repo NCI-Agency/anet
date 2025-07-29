@@ -69,7 +69,7 @@ class MergeOrganizations extends Page {
     await (await this.getOrganizationHeaderFromPopover()).waitForDisplayed()
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
           compareStr
@@ -86,7 +86,7 @@ class MergeOrganizations extends Page {
     const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (await field.getText()) === compareStr
       },
       {
@@ -98,7 +98,7 @@ class MergeOrganizations extends Page {
 
   async waitForSuccessAlert() {
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await browser.$(".alert-success")).getText()) ===
           "Organizations merged. Displaying merged Organization below."

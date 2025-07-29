@@ -94,7 +94,7 @@ function identity(input) {
 }
 
 const chance = probability => {
-  return function(func) {
+  return function (func) {
     const result = Math.random() < probability
     if (arguments.length) {
       if (result) {
@@ -147,7 +147,7 @@ function randnBm() {
  */
 function normalPDF(mean, stddev) {
   const variance = stddev * stddev
-  return function(x) {
+  return function (x) {
     return (
       (1 / Math.sqrt(2 * Math.PI * variance)) *
       Math.exp(((-(x - mean) * (x - mean)) / 2) * variance)
@@ -171,7 +171,7 @@ function normalPDF(mean, stddev) {
  */
 function normalCDF(mean, stddev) {
   const variance = stddev * stddev
-  return function(x) {
+  return function (x) {
     return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * variance)))
   }
 
@@ -216,7 +216,7 @@ function normalCDF(mean, stddev) {
  * x such that X will take a value less than or equal to x with probability p
  */
 function normalPPF(mean, stddev) {
-  return function(p) {
+  return function (p) {
     return mean + Math.abs(stddev) * Math.sqrt(2) * erfinv(2 * p - 1)
   }
 
@@ -260,7 +260,7 @@ async function populate(instance, scheme, context) {
   // for each property in the scheme create an object with probability functions to execute the
   // scheme property function
   Object.keys(scheme).forEach(key => {
-    const applyWithProbability = async function(probability) {
+    const applyWithProbability = async function (probability) {
       if (fuzzy.withProbability(probability)) {
         populator.__queue.push(key)
         for await (const key of populator.__queue) {
@@ -284,7 +284,7 @@ async function populate(instance, scheme, context) {
       rarely: applyWithProbability.bind(null, 0.01),
       never: applyWithProbability.bind(null, 0),
       withProbability: applyWithProbability,
-      and: function() {
+      and: function () {
         populator.__queue.push(key)
         return populator
       }

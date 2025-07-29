@@ -63,7 +63,7 @@ const BarChart = ({
     const xLabels = {} // dict containing x-value and corresponding tick label
 
     const xScale = d3.scaleBand().domain(
-      data.map(function(d) {
+      data.map(function (d) {
         xLabels[getPropValue(d, xProp)] = utils.ellipsize(
           // TODO: Make responsive
           getPropValue(d, label),
@@ -72,7 +72,7 @@ const BarChart = ({
         return getPropValue(d, xProp)
       })
     )
-    const yMax = d3.max(data, function(d) {
+    const yMax = d3.max(data, function (d) {
       return getPropValue(d, yProp)
     })
     const yScale = d3.scaleLinear().domain([0, yMax])
@@ -81,18 +81,18 @@ const BarChart = ({
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
     const tmpSVG = d3.select("#tmp_svg").data([1]).enter().append("svg")
-    const xText = function(d) {
+    const xText = function (d) {
       return xLabels[getPropValue(d, xProp)]
     }
-    const yText = function(d) {
+    const yText = function (d) {
       return getPropValue(d, yProp)
     }
-    const xLabelWidth = function() {
+    const xLabelWidth = function () {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
       }
     }
-    const yLabelWidth = function(d) {
+    const yLabelWidth = function (d) {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -134,7 +134,7 @@ const BarChart = ({
     xScale.rangeRound([0, xWidth]).padding(0.1)
     yScale.range([yHeight, 0])
 
-    const xAxis = d3.axisBottom(xScale).tickFormat(function(d) {
+    const xAxis = d3.axisBottom(xScale).tickFormat(function (d) {
       return xLabels[d]
     })
 
@@ -166,20 +166,20 @@ const BarChart = ({
       .append("g")
       .classed(barClass, true)
       .append("rect")
-      .attr("id", function(d, i) {
+      .attr("id", function (d, i) {
         return `bar_${getPropValue(d, xProp)}`
       })
-      .classed(selectedBarClass, function(d, i) {
+      .classed(selectedBarClass, function (d, i) {
         return this.id === selectedBar
       })
-      .attr("x", function(d) {
+      .attr("x", function (d) {
         return xScale(getPropValue(d, xProp))
       })
-      .attr("y", function(d) {
+      .attr("y", function (d) {
         return yScale(getPropValue(d, yProp))
       })
       .attr("width", xScale.bandwidth())
-      .attr("height", function(d) {
+      .attr("height", function (d) {
         return yHeight - yScale(getPropValue(d, yProp))
       })
     addD3Tooltip(bar, tooltip, !!onBarClick)

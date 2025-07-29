@@ -24,17 +24,17 @@ const SIMILAR_PERSON_ADVISOR = {
 
 describe("Create new Person form page", () => {
   describe("When creating a non-user", () => {
-    beforeEach("On the create person page…", async() => {
+    beforeEach("On the create person page…", async () => {
       await CreatePerson.openAsSuperuser()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
     })
 
-    afterEach("On the create person page…", async() => {
+    afterEach("On the create person page…", async () => {
       await CreatePerson.logout()
     })
 
-    it("Should not save a person without gender being filled in", async() => {
+    it("Should not save a person without gender being filled in", async () => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
       await (
         await CreatePerson.getLastName()
@@ -85,7 +85,7 @@ describe("Create new Person form page", () => {
       ).getText()
       expect(alertMessage).to.equal("Person saved")
     })
-    it("Should save a person without first name", async() => {
+    it("Should save a person without first name", async () => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
       await (
         await CreatePerson.getLastName()
@@ -125,7 +125,7 @@ describe("Create new Person form page", () => {
       ).getText()
       expect(alertMessage).to.equal("Person saved")
     })
-    it("Should not save a person without a valid email address", async() => {
+    it("Should not save a person without a valid email address", async () => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
       await (
         await CreatePerson.getLastName()
@@ -181,7 +181,7 @@ describe("Create new Person form page", () => {
   })
 
   describe("When creating a user", () => {
-    it("Should display possible duplicates with similar names", async() => {
+    it("Should display possible duplicates with similar names", async () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
@@ -205,7 +205,7 @@ describe("Create new Person form page", () => {
       ).waitForDisplayed({ reverse: true })
       expect(similar).to.equal("CIV ERINSON, Erin")
     })
-    it("Should display a warning message specific for duplicate accounts", async() => {
+    it("Should display a warning message specific for duplicate accounts", async () => {
       // Only admin users can create an advisor user
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
@@ -220,7 +220,7 @@ describe("Create new Person form page", () => {
       )
       // Don't logout, next test continues…
     })
-    it("Should save even if endOfTourDate is not filled in", async() => {
+    it("Should save even if endOfTourDate is not filled in", async () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (
         await CreatePerson.getLastName()
@@ -275,7 +275,7 @@ describe("Create new Person form page", () => {
       // Don't logout, next test continues…
     })
 
-    it("Should save with a valid email address in uppercase", async() => {
+    it("Should save with a valid email address in uppercase", async () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       for (const [
         index,
@@ -304,7 +304,7 @@ describe("Create new Person form page", () => {
       await CreatePerson.logout()
     })
 
-    it("Should not display possible duplicates button", async() => {
+    it("Should not display possible duplicates button", async () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()

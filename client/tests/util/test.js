@@ -135,12 +135,12 @@ test.beforeEach(t => {
   // Work-around for bug in chromedriver; basically a copy of Selenium's until.stalenessOf(elem),
   // but with an extra check for NoSuchElementError
   t.context.untilStalenessOf = element => {
-    return new webdriver.Condition("element to become stale", function() {
+    return new webdriver.Condition("element to become stale", function () {
       return element.getTagName().then(
-        function() {
+        function () {
           return false
         },
-        function(e) {
+        function (e) {
           if (e instanceof error.StaleElementReferenceError) {
             return true
           }
@@ -158,7 +158,7 @@ test.beforeEach(t => {
   }
 
   // This method is a helper so we don't have to keep repeating the hostname.
-  t.context.get = async(pathname, userPw) => {
+  t.context.get = async (pathname, userPw) => {
     const credentials = userPw || "erin"
     const urlToGet = `${process.env.SERVER_URL}${pathname}`
     debugLog("Getting URL", urlToGet, "as", credentials)
@@ -199,7 +199,7 @@ test.beforeEach(t => {
     }
   }
 
-  t.context.waitForLoadingFinished = async() => {
+  t.context.waitForLoadingFinished = async () => {
     await t.context.assertElementNotPresent(
       t,
       "div.loader",
@@ -208,7 +208,7 @@ test.beforeEach(t => {
     )
   }
 
-  t.context.logout = async() => {
+  t.context.logout = async () => {
     const urlToGet = `${process.env.SERVER_URL}/api/logout`
     debugLog("Logging out via URL", urlToGet)
     await t.context.driver.get(urlToGet)
@@ -218,12 +218,12 @@ test.beforeEach(t => {
   }
 
   // For debugging purposes.
-  t.context.waitForever = async() => {
+  t.context.waitForever = async () => {
     console.log("Waiting forever so you can debug…")
     await t.context.driver.wait(() => {})
   }
 
-  t.context.$ = async(cssSelector, timeoutMs) => {
+  t.context.$ = async (cssSelector, timeoutMs) => {
     debugLog(`Find element: $('${cssSelector}')`)
     const waitTimeoutMs = timeoutMs || longWaitMs
     const locator = By.css(cssSelector)
@@ -234,7 +234,7 @@ test.beforeEach(t => {
     )
     return t.context.driver.findElement(locator)
   }
-  t.context.$$ = async(cssSelector, timeoutMs) => {
+  t.context.$$ = async (cssSelector, timeoutMs) => {
     debugLog(`Find elements: $$('${cssSelector}')`)
     const waitTimeoutMs = timeoutMs || longWaitMs
     const locator = By.css(cssSelector)
@@ -247,7 +247,7 @@ test.beforeEach(t => {
   }
 
   // A helper method to combine waiting for an element to have rendered and then asserting on its contents.
-  t.context.assertElementText = async(t, $elem, expectedText, message) => {
+  t.context.assertElementText = async (t, $elem, expectedText, message) => {
     try {
       const untilCondition = _isRegExp(expectedText)
         ? until.elementTextMatches($elem, expectedText)
@@ -272,7 +272,7 @@ test.beforeEach(t => {
   t.context.assertElementTextIsInt = (t, $elem, message) =>
     t.context.assertElementText(t, $elem, /^\d+$/)
 
-  t.context.assertElementNotPresent = async(
+  t.context.assertElementNotPresent = async (
     t,
     cssSelector,
     message,
@@ -281,7 +281,7 @@ test.beforeEach(t => {
     const waitTimeoutMs = timeoutMs || longWaitMs
     try {
       await t.context.driver.wait(
-        async() => {
+        async () => {
           const loopDelay = 250
           try {
             return !(await t.context.$(cssSelector, loopDelay))
@@ -310,7 +310,7 @@ test.beforeEach(t => {
   }
 
   // A helper method to combine waiting for an element to have rendered and then asserting on its enabled status
-  t.context.assertElementEnabled = async(
+  t.context.assertElementEnabled = async (
     t,
     cssSelector,
     message,
@@ -331,7 +331,7 @@ test.beforeEach(t => {
   }
 
   // A helper method to combine waiting for an element to have rendered and then asserting it's disabled status
-  t.context.assertElementDisabled = async(
+  t.context.assertElementDisabled = async (
     t,
     cssSelector,
     message,
@@ -351,7 +351,7 @@ test.beforeEach(t => {
     t.is(await elem.isEnabled(), false, message)
   }
 
-  t.context.getCurrentPathname = async() => {
+  t.context.getCurrentPathname = async () => {
     const currentUrl = await t.context.driver.getCurrentUrl()
     return new URL(currentUrl).pathname
   }

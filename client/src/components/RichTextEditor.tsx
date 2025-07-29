@@ -213,7 +213,8 @@ const RichTextEditor = ({
                 setShowExternalLinksModal,
                 handleFullSizeMode,
                 disableFullSize
-              )}
+              )
+            }
             className={classNames("editable", {
               "editable-fullsize": showFullSize
             })}

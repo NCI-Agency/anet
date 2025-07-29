@@ -192,7 +192,7 @@ async function runStories(scenario, cycle, runningTime) {
               // a 'deletePerson' story would pass in the number of persons, it should
               // only execute if grow returns false (i.e. not grow is shrink).
               const cdf = normalCDF(story.mean, story.stddev)
-              const grow = function(x) {
+              const grow = function (x) {
                 const p = cdf(x)
                 return !fuzzy.withProbability(p)
               }
@@ -230,7 +230,7 @@ async function runStories(scenario, cycle, runningTime) {
   )
 }
 
-(async() => {
+;(async () => {
   try {
     await simulate(process.argv.slice(3))
   } catch (e) {

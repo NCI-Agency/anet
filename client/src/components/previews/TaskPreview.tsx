@@ -195,7 +195,7 @@ const TaskPreview = ({ className, uuid }: TaskPreviewProps) => {
                 </ListGroup>
               }
             />
-        )}
+          )}
 
         {Settings.fields.task.plannedCompletion && (
           <DictionaryField

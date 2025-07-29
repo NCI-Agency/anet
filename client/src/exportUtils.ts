@@ -371,59 +371,59 @@ export const exportResults = (
   const organizationQuery = !includeOrganizations
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      })
   const personQuery = !includePeople
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      })
   const positionQuery = !includePositions
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      })
   const taskQuery = !includeTasks
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      })
   const locationQuery = !includeLocations
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      })
   const reportQuery = !includeReports
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "ENGAGEMENT_DATE",
+        sortOrder: "DESC"
+      })
   const authorizationGroupQuery = !includeAuthorizationGroups
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "DESC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "DESC"
+      })
   const eventQuery = !includeEvents
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: maxNumberResults,
-      sortBy: "NAME",
-      sortOrder: "DESC"
-    })
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "DESC"
+      })
   const { emailNetwork } = searchQueryParams
   const variables = {
     includeOrganizations,

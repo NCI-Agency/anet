@@ -110,12 +110,12 @@ const HorizontalBarChart = ({
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
     const tmpSVG = d3.select("#tmp_svg").data([1]).enter().append("svg")
-    const xLabelWidth = function() {
+    const xLabelWidth = function () {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
       }
     }
-    const yLabelWidth = function(d) {
+    const yLabelWidth = function (d) {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -148,11 +148,11 @@ const HorizontalBarChart = ({
 
     const categoryDomain = []
     let cumulative = 0
-    chartData.forEach(function(val, i) {
+    chartData.forEach(function (val, i) {
       // per category, how many elements, including the elements of the previous categories
       val.cumulative = cumulative
       cumulative += val.values.length
-      val.values.forEach(function(values) {
+      val.values.forEach(function (values) {
         values.parentKey = val.key
         categoryDomain.push(i)
       })
@@ -203,10 +203,10 @@ const HorizontalBarChart = ({
       .data(chartData)
       .enter()
       .append("g")
-      .attr("class", function(d, i) {
+      .attr("class", function (d, i) {
         return `category-${i % 2}`
       })
-      .attr("transform", function(d) {
+      .attr("transform", function (d) {
         return `translate(1, ${yCategoryScale(
           d.cumulative * yScale.bandwidth()
         )})`
@@ -214,13 +214,13 @@ const HorizontalBarChart = ({
 
     categoryGroup
       .selectAll(".category-label")
-      .data(function(d) {
+      .data(function (d) {
         return [d]
       })
       .enter()
       .append("text")
       .attr("class", "category-label")
-      .attr("transform", function(d) {
+      .attr("transform", function (d) {
         const x = -2
         const y = yCategoryScale(
           (d.values.length * yScale.bandwidth()) / 2 + BAR_PADDING
@@ -236,23 +236,23 @@ const HorizontalBarChart = ({
       .enter()
       .append("g")
       .attr("class", "category-bars-group")
-      .attr("transform", function(d, i) {
+      .attr("transform", function (d, i) {
         return `translate(0, ${yCategoryScale(i * yScale.bandwidth())})`
       })
 
     barsGroup
       .selectAll(".bar")
-      .data(function(d) {
+      .data(function (d) {
         return [d]
       })
       .enter()
       .filter(d => d.value !== undefined)
       .append("rect")
       .attr("class", "bar")
-      .attr("id", function(d, i) {
+      .attr("id", function (d, i) {
         return `bar_${d.key}${d.parentKey}`
       })
-      .classed(selectedBarClass, function(d, i) {
+      .classed(selectedBarClass, function (d, i) {
         return this.id === selectedBar
       })
       .attr("x", 0)
@@ -263,13 +263,13 @@ const HorizontalBarChart = ({
 
     barsGroup
       .selectAll(".bar-label")
-      .data(function(d) {
+      .data(function (d) {
         return [d]
       })
       .enter()
       .append("text")
       .attr("class", "bar-label")
-      .attr("transform", function(d) {
+      .attr("transform", function (d) {
         const x = 3
         const y = yCategoryScale(yScale.bandwidth() / 2 + BAR_PADDING)
         return `translate(${x}, ${y})`

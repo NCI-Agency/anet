@@ -40,8 +40,8 @@ export default class Event extends Model {
         schema.test("endDate", "endDate error", (endDate, testContext) =>
           startDate && endDate && moment(endDate).isBefore(startDate)
             ? testContext.createError({
-              message: `${Settings.fields.event.endDate?.label} must be after ${Settings.fields.event.startDate?.label}`
-            })
+                message: `${Settings.fields.event.endDate?.label} must be after ${Settings.fields.event.startDate?.label}`
+              })
             : true
         )
       )

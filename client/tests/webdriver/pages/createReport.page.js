@@ -323,7 +323,7 @@ export class CreateReport extends Page {
   async waitForAdvancedSelectToChange(item, value) {
     await (await item).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (await (await item).getText()) === value
       },
       {

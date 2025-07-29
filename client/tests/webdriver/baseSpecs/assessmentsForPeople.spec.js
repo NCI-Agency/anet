@@ -126,7 +126,7 @@ const ASSESSED_PEOPLE = [
 ]
 
 describe("As an admin", () => {
-  it("Should see the proper assessment sections for each person", async() => {
+  it("Should see the proper assessment sections for each person", async () => {
     await Home.openAsAdminUser()
     for (const p of ASSESSED_PEOPLE) {
       await (await Home.getSearchBar()).setValue(p.name)
@@ -151,7 +151,7 @@ describe("As an admin", () => {
     }
   })
 
-  it("Should not see not-applicable assessment sections for each person", async() => {
+  it("Should not see not-applicable assessment sections for each person", async () => {
     await Home.openAsAdminUser()
     for (const p of ASSESSED_PEOPLE) {
       await (await Home.getSearchBar()).setValue(p.name)
@@ -176,7 +176,7 @@ describe("As an admin", () => {
 
 describe("For the periodic person assessments", () => {
   describe("As an advisor who has a counterpart who needs to be assessed", () => {
-    it("Should first search, find and open the person page", async() => {
+    it("Should first search, find and open the person page", async () => {
       await Home.open("/", ADVISOR1_CREDENTIALS)
       await (await Home.getSearchBar()).setValue(PERSON_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -187,7 +187,7 @@ describe("For the periodic person assessments", () => {
       await (await Search.linkOfPersonFound(PERSON_SEARCH_STRING)).click()
     })
 
-    it("Should display nested question sets", async() => {
+    it("Should display nested question sets", async () => {
       await (
         await ShowPerson.getAssessmentsTable(
           "interlocutorQuarterly",
@@ -214,14 +214,14 @@ describe("For the periodic person assessments", () => {
       ).waitForDisplayed()
     })
 
-    it("Should display validation error messages on every level", async() => {
+    it("Should display validation error messages on every level", async () => {
       await (await ShowPerson.getSaveAssessmentButton()).click()
       expect(await ShowPerson.getValidationErrorMessages()).to.eql(
         ERROR_MESSAGES
       )
     })
 
-    it("Should allow advisor to successfully add an assessment", async() => {
+    it("Should allow advisor to successfully add an assessment", async () => {
       // NOTE: assuming assessment question content here, may change in future
       await ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
       await ShowPerson.saveAssessmentAndWaitForModalClose(
@@ -231,7 +231,7 @@ describe("For the periodic person assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just created", async() => {
+    it("Should show the same assessment details with the details just created", async () => {
       await assertAssessmentDetails(
         "interlocutorQuarterly",
         "quarterly",
@@ -239,7 +239,7 @@ describe("For the periodic person assessments", () => {
       )
     })
 
-    it("Should allow the author of the assessment to successfully edit it", async() => {
+    it("Should allow the author of the assessment to successfully edit it", async () => {
       await (await ShowPerson.getEditAssessmentButton()).waitForExist()
       await (await ShowPerson.getEditAssessmentButton()).waitForDisplayed()
 
@@ -257,7 +257,7 @@ describe("For the periodic person assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "interlocutorQuarterly",
         "quarterly",
@@ -268,7 +268,7 @@ describe("For the periodic person assessments", () => {
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the person's page", async() => {
+    it("Should first search, find and open the person's page", async () => {
       await Home.openAsAdminUser()
       await (await Home.getSearchBar()).setValue(PERSON_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -279,7 +279,7 @@ describe("For the periodic person assessments", () => {
       await (await Search.linkOfPersonFound(PERSON_SEARCH_STRING)).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", async() => {
+    it("Should not show make assessment button when there is an assessment on that period", async () => {
       expect(
         await (
           await ShowPerson.getAddAssessmentButton(
@@ -290,7 +290,7 @@ describe("For the periodic person assessments", () => {
       ).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assessment", async() => {
+    it("Should allow admins to successfully edit existing assessment", async () => {
       await (await ShowPerson.getEditAssessmentButton()).waitForExist()
       await (await ShowPerson.getEditAssessmentButton()).waitForDisplayed()
 
@@ -308,7 +308,7 @@ describe("For the periodic person assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "interlocutorQuarterly",
         "quarterly",
@@ -316,7 +316,7 @@ describe("For the periodic person assessments", () => {
       )
     })
 
-    it("Should allow an admin to delete the assessment", async() => {
+    it("Should allow an admin to delete the assessment", async () => {
       await (await ShowPerson.getDeleteAssessmentButton()).click()
       await ShowPerson.confirmDelete()
       await ShowPerson.waitForDeletedAssessmentToDisappear(
@@ -328,7 +328,7 @@ describe("For the periodic person assessments", () => {
   })
 })
 
-const assertAssessmentDetails = async(
+const assertAssessmentDetails = async (
   assessmentKey,
   recurrence,
   assessmentDetails,

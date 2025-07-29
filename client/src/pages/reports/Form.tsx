@@ -587,7 +587,8 @@ const ReportForm = ({
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )}
+                    )
+                  }
                   extraColElem={
                     <>
                       <span id="intentCharsLeft">
@@ -711,13 +712,13 @@ const ReportForm = ({
                         !canCreateLocation
                           ? null
                           : (searchTerms, setDoReset) => (
-                            <CreateNewLocation
-                              name={searchTerms}
-                              setFieldTouched={setFieldTouched}
-                              setFieldValue={setFieldValue}
-                              setDoReset={setDoReset}
-                            />
-                          )
+                              <CreateNewLocation
+                                name={searchTerms}
+                                setFieldTouched={setFieldTouched}
+                                setFieldValue={setFieldValue}
+                                setDoReset={setDoReset}
+                              />
+                            )
                       }
                     />
                   }
@@ -777,7 +778,8 @@ const ReportForm = ({
                             "cancelledReason",
                             cancelledReasonOptions[0].value,
                             true
-                          )}
+                          )
+                        }
                       />
                     }
                   />
@@ -841,7 +843,8 @@ const ReportForm = ({
                             })
                           }
                           onChange={value =>
-                            setFieldValue("reportPeople", value, true)}
+                            setFieldValue("reportPeople", value, true)
+                          }
                           showDelete
                         />
                       }
@@ -852,7 +855,8 @@ const ReportForm = ({
                         "Organization"
                       ]}
                       overlayRenderRow={item =>
-                        PersonDetailedOverlayRow(item, values.engagementDate)}
+                        PersonDetailedOverlayRow(item, values.engagementDate)
+                      }
                       filterDefs={reportPeopleFilters}
                       objectType={Person}
                       queryParams={{
@@ -967,7 +971,8 @@ const ReportForm = ({
                       enableClear={Settings.fields.report.atmosphere?.optional}
                       buttons={atmosphereButtons}
                       onChange={value =>
-                        setFieldValue("atmosphere", value, true)}
+                        setFieldValue("atmosphere", value, true)
+                      }
                       className="atmosphere-form-group"
                     />
                     <DictionaryField
@@ -1009,7 +1014,8 @@ const ReportForm = ({
                           "keyOutcomesCharsLeft",
                           Settings.maxTextFieldLength,
                           event
-                        )}
+                        )
+                      }
                       extraColElem={
                         <>
                           <span id="keyOutcomesCharsLeft">
@@ -1020,7 +1026,7 @@ const ReportForm = ({
                         </>
                       }
                     />
-                )}
+                  )}
 
                 {!isFutureEngagement && (
                   <DictionaryField
@@ -1044,7 +1050,8 @@ const ReportForm = ({
                           Settings.fields.report.nextSteps
                         ),
                         event
-                      )}
+                      )
+                    }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
@@ -1100,7 +1107,8 @@ const ReportForm = ({
                             touched,
                             resetForm,
                             setFieldTouched
-                          )}
+                          )
+                        }
                       />
                     }
                     onHandleBlur={() => {
@@ -1180,7 +1188,8 @@ const ReportForm = ({
                               }
                             ]}
                             setRelatedObjects={value =>
-                              setFieldValue("authorizedMembers", value)}
+                              setFieldValue("authorizedMembers", value)
+                            }
                             showDelete
                           />
                         }
@@ -1281,7 +1290,8 @@ const ReportForm = ({
                     id="formBottomSubmit"
                     variant="primary"
                     onClick={() =>
-                      onSubmit(values, { resetForm, setSubmitting })}
+                      onSubmit(values, { resetForm, setSubmitting })
+                    }
                     disabled={isSubmitting}
                   >
                     {submitText}

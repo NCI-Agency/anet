@@ -170,7 +170,8 @@ export const HierarchicalTaskOverlayTable = ({
               model={task}
               isLink={false}
               displayCallback={t =>
-                t.longName ? `${t.shortName}: ${t.longName}` : t.shortName}
+                t.longName ? `${t.shortName}: ${t.longName}` : t.shortName
+              }
               style={cursorStyle}
             />
           </span>

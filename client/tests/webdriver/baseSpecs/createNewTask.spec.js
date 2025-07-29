@@ -8,7 +8,7 @@ const PARENT_TASK = "TAAC Air"
 const DESCRIPTION = "Test Task 1"
 
 describe("When creating an task", () => {
-  it("Should show name to be required when submitting empty form", async() => {
+  it("Should show name to be required when submitting empty form", async () => {
     await CreateTask.openAsAdmin()
     await (await CreateTask.getForm()).waitForExist()
     await (await CreateTask.getForm()).waitForDisplayed()
@@ -17,7 +17,7 @@ describe("When creating an task", () => {
     await (await CreateTask.getShortName()).waitForDisplayed()
   })
 
-  it("Should successfully create a task", async() => {
+  it("Should successfully create a task", async () => {
     await (await CreateTask.getShortNameInput()).setValue(SHORT_NAME)
     await (await CreateTask.getLongNameInput()).setValue(LONG_NAME)
     await CreateTask.selectParentTaskByText(PARENT_TASK)
@@ -29,7 +29,7 @@ describe("When creating an task", () => {
     )
   })
 
-  it("Should display the newly created task", async() => {
+  it("Should display the newly created task", async () => {
     expect(await (await ShowTask.getShortName()).getText()).to.equal(
       `Objective ${SHORT_NAME}`
     )

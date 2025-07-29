@@ -225,7 +225,7 @@ class ShowReport extends Page {
   }
 
   async waitForShowReportToLoad() {
-    await browser.waitUntil(async() =>
+    await browser.waitUntil(async () =>
       /^.*\/reports\/[a-z0-9-]{36}/.test(await browser.getUrl())
     )
     await (await this.getReportStatus()).waitForExist()

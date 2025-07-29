@@ -24,7 +24,7 @@ const Pie = ({
   const pie = useRef(d3.pie())
 
   useEffect(() => {
-    pie.current.value(function(d) {
+    pie.current.value(function (d) {
       return d.value
     })
   }, [])

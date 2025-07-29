@@ -595,7 +595,8 @@ const LocationColumn = ({
                   location.parentLocations,
                   align
                 )
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -663,7 +664,8 @@ const LocationColumn = ({
                   location.planningApprovalSteps,
                   align
                 )
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -676,7 +678,8 @@ const LocationColumn = ({
             action={() =>
               dispatchMergeActions(
                 setAMergedField("approvalSteps", location.approvalSteps, align)
-              )}
+              )
+            }
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -701,7 +704,8 @@ const LocationColumn = ({
                           fieldValue,
                           align
                         )
-                      )}
+                      )
+                    }
                     mergeState={mergeState}
                     autoMerge
                     dispatchMergeActions={dispatchMergeActions}

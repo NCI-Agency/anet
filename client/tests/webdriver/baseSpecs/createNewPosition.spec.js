@@ -10,7 +10,7 @@ const SIMILAR_ADVISOR_POSITION_NAME = "EF 1.1 Advisor for Agriculture"
 
 describe("Create position page", () => {
   describe("When creating a position", () => {
-    it("Should show name and organization to be required when submitting empty form", async() => {
+    it("Should show name and organization to be required when submitting empty form", async () => {
       await CreatePosition.openAsAdminUser()
       await (await CreatePosition.getForm()).waitForExist()
       await (await CreatePosition.getForm()).waitForDisplayed()
@@ -29,7 +29,7 @@ describe("Create position page", () => {
       ).to.equal("Organization is required")
     })
 
-    it("Should display possible duplicates with similar names", async() => {
+    it("Should display possible duplicates with similar names", async () => {
       await (
         await CreatePosition.getPositionNameInput()
       ).setValue(SIMILAR_ADVISOR_POSITION_NAME)
@@ -47,7 +47,7 @@ describe("Create position page", () => {
       expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
     })
 
-    it("Should successfully create a position in an advisor organization when required fields are filled", async() => {
+    it("Should successfully create a position in an advisor organization when required fields are filled", async () => {
       await (
         await CreatePosition.getPositionNameInput()
       ).setValue("Test Position")
@@ -90,7 +90,7 @@ describe("Create position page", () => {
       await CreatePosition.waitForAlertSuccessToLoad()
     })
 
-    it("Should successfully create a position in an interlocutor organization when required fields are filled", async() => {
+    it("Should successfully create a position in an interlocutor organization when required fields are filled", async () => {
       await CreatePosition.openAsAdminUser()
       await (await CreatePosition.getForm()).waitForExist()
       await (await CreatePosition.getForm()).waitForDisplayed()
@@ -139,7 +139,7 @@ describe("Create position page", () => {
       await CreatePosition.logout()
     })
 
-    it("Should not display possible duplicates button", async() => {
+    it("Should not display possible duplicates button", async () => {
       await CreatePosition.openAsAdminUser()
       await (await CreatePosition.getForm()).waitForExist()
       await (await CreatePosition.getForm()).waitForDisplayed()

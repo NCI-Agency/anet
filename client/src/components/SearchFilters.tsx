@@ -151,7 +151,7 @@ const advancedSelectFilterEventSeriesProps = {
   addon: EVENT_SERIES_ICON
 }
 
-export const searchFilters = function(includeAdminFilters) {
+export const searchFilters = function (includeAdminFilters) {
   const filters = {}
 
   const authorWidgetFilters = {
@@ -800,7 +800,7 @@ export const searchFilters = function(includeAdminFilters) {
 }
 
 // filters not being displayed in the advanced search but being used in the search
-const extraFilters = function() {
+const extraFilters = function () {
   const filters = {}
   filters[SEARCH_OBJECT_TYPES.REPORTS] = [
     "includeEngagementDayOfWeek",
@@ -866,9 +866,9 @@ export const SearchDescription = ({
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters
       : findCommonFiltersForAllObjectTypes(
-        Object.keys(SEARCH_OBJECT_TYPES),
-        ALL_FILTERS
-      )
+          Object.keys(SEARCH_OBJECT_TYPES),
+          ALL_FILTERS
+        )
   const filters = searchQuery.filters
   return (
     <span className="asLink" style={style}>
@@ -944,9 +944,9 @@ export const deserializeQueryParams = (
     objType && SEARCH_OBJECT_TYPES[objType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[objType]].filters
       : findCommonFiltersForAllObjectTypes(
-        Object.keys(SEARCH_OBJECT_TYPES),
-        ALL_FILTERS
-      )
+          Object.keys(SEARCH_OBJECT_TYPES),
+          ALL_FILTERS
+        )
   Object.entries(filterDefs).map(([filterKey, filterDef]) => {
     const deser = filterDef.deserializer(
       filterDef.props,

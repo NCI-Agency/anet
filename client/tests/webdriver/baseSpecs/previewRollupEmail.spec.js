@@ -1,18 +1,18 @@
 import Rollup from "../pages/rollup.page"
 
 describe("Preview rollup page", () => {
-  beforeEach("Open the rollup page", async() => {
+  beforeEach("Open the rollup page", async () => {
     await Rollup.open()
     await (await Rollup.getRollup()).waitForExist()
     await (await Rollup.getRollup()).waitForDisplayed()
   })
 
-  afterEach("On the rollup page…", async() => {
+  afterEach("On the rollup page…", async () => {
     await Rollup.logout()
   })
 
   describe("When clicking the email preview button, the daily rollup should be generated", () => {
-    it("Should show the correct header for the rollup", async() => {
+    it("Should show the correct header for the rollup", async () => {
       await (await Rollup.getEmailButton()).waitForDisplayed()
       await (await Rollup.getEmailButton()).click()
 
@@ -29,12 +29,12 @@ describe("Preview rollup page", () => {
       // "The order in which the window handles are returned is arbitrary."
       let switchHandle
       while ((switchHandle = handles.pop()) === currentHandle) {
-        // eslint-disable-line no-empty
+        // empty
       }
       await browser.switchToWindow(switchHandle)
 
       await browser.waitUntil(
-        async() => {
+        async () => {
           return (
             (await $("p:nth-of-type(1) i").getText()) ===
             "Classification: DEMO USE ONLY Releasable to DEMO MISSION"

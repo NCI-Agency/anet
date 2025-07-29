@@ -108,9 +108,9 @@ const ReportCalendar = ({
           const results = data.map(d =>
             d.extendedProps.engagementDate
               ? createCalendarEventFromReport(
-                d.extendedProps,
-                attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
-              )
+                  d.extendedProps,
+                  attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+                )
               : d
           )
           hideLoading()

@@ -119,7 +119,7 @@ class CreateAuthorizationGroup extends Page {
   async waitForAdvancedSelectToChange(value, getFirstItemCallback) {
     await (await getFirstItemCallback()).waitForExist()
     return browser.waitUntil(
-      async() => {
+      async () => {
         return (await (await getFirstItemCallback()).getText()) === value
       },
       {

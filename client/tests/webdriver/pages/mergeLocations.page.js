@@ -63,7 +63,7 @@ class MergeLocations extends Page {
     await (await this.getLocationHeaderFromPopover()).waitForDisplayed()
 
     await browser.waitUntil(
-      async() =>
+      async () =>
         (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
         compareStr,
       {
@@ -83,7 +83,7 @@ class MergeLocations extends Page {
     const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
-      async() => {
+      async () => {
         const fieldText = await field.getText()
         return checkStartsWithOnly
           ? fieldText?.startsWith(compareStr)
@@ -98,7 +98,7 @@ class MergeLocations extends Page {
 
   async waitForSuccessAlert() {
     await browser.waitUntil(
-      async() => {
+      async () => {
         return (
           (await (await browser.$(".alert-success")).getText()) ===
           "Locations merged. Displaying merged Location below."

@@ -230,7 +230,7 @@ const OrganizationFlowChart = ({
   const lowestDepth = useRef(0)
   useReactFlow()
 
-  const downloadImage = async() => {
+  const downloadImage = async () => {
     if (!chartRef.current) {
       return
     }
@@ -526,7 +526,8 @@ const OrganizationFlowChart = ({
         <select
           value={positionsFilter}
           onChange={e =>
-            setPositionsFilter(e.target.value as PositionFilterOption)}
+            setPositionsFilter(e.target.value as PositionFilterOption)
+          }
         >
           <option value={PositionFilterOption.none}>No positions</option>
           <option value={PositionFilterOption.leaders}>Leaders Only</option>

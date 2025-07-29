@@ -21,7 +21,6 @@ import {
  * @param {*} user The user to retrieve the information
  * @param {*} uuid The uuid of the position to retrieve
  */
-/* eslint-disable no-unused-vars */
 async function getPosition(user, uuid) {
   return (
     await runGQL(user, {
@@ -49,7 +48,6 @@ async function getPosition(user, uuid) {
     })
   ).data.position
 }
-/* eslint-enable no-unused-vars */
 
 async function listOrganizations(user) {
   const totalCount = (
@@ -114,7 +112,7 @@ function randomPositionTemplate(organizations) {
     location: identity,
     role: () => getPositionRole(),
     code: identity,
-    description: async() => await createHtmlParagraphs(),
+    description: async () => await createHtmlParagraphs(),
     associatedPositions: identity
   }
 }
@@ -140,7 +138,7 @@ function getPositionRole() {
  *
  * @param {*} user The user that creates the position
  */
-const _createPosition = async function(user) {
+const _createPosition = async function (user) {
   const position = Position.filterClientSideFields(new Position())
   const code = faker.lorem.slug()
   const organization = await getRandomObject(
@@ -180,7 +178,7 @@ const _createPosition = async function(user) {
     person,
     location,
     role: () => getPositionRole(),
-    description: async() => await createHtmlParagraphs(),
+    description: async () => await createHtmlParagraphs(),
     emailAddresses
   }
 
@@ -241,7 +239,7 @@ const _createPosition = async function(user) {
  * @param {*} user
  */
 /* eslint-disable no-unused-vars */
-const _deletePosition = async function(user) {
+const _deletePosition = async function (user) {
   const type = Position.TYPE.REGULAR
   const position = await getRandomPosition(user, {
     isFilled: false,
@@ -275,7 +273,7 @@ const _deletePosition = async function(user) {
  *
  * @param {*} user
  */
-const _deactivatePosition = async function(user) {
+const _deactivatePosition = async function (user) {
   const type = Position.TYPE.REGULAR
   let position = await getRandomPosition(user, {
     isFilled: false,
@@ -339,7 +337,7 @@ const _deactivatePosition = async function(user) {
   }
 }
 
-const updatePosition = async function(user) {
+const updatePosition = async function (user) {
   const type = Position.TYPE.REGULAR
   let position = await getRandomPosition(user, {
     isFilled: false,
@@ -418,7 +416,7 @@ const updatePosition = async function(user) {
  *
  * @param {*} user  The user to do the assignment
  */
-const putPersonInPosition = async function(user) {
+const putPersonInPosition = async function (user) {
   const persons = (
     await runGQL(user, {
       query: `
@@ -476,7 +474,7 @@ const putPersonInPosition = async function(user) {
   }
 }
 
-const deletePersonFromPosition = async function(user) {
+const deletePersonFromPosition = async function (user) {
   const positions = (
     await runGQL(user, {
       query: `
@@ -543,7 +541,7 @@ const deletePersonFromPosition = async function(user) {
  *
  * @param {*} user The user to do the association
  */
-const updateAssociatedPosition = async function(user) {
+const updateAssociatedPosition = async function (user) {
   async function listPositions(type) {
     return (
       await runGQL(user, {
@@ -630,7 +628,7 @@ const updateAssociatedPosition = async function(user) {
  *
  * @param {*} user The user to do the association
  */
-const removeAssociatedPosition = async function(user) {
+const removeAssociatedPosition = async function (user) {
   const type = Position.TYPE.REGULAR
   const query = `
     query ($positionsQuery: PositionSearchQueryInput) {
@@ -728,7 +726,7 @@ async function countPositions(user) {
   ).data.positionList.totalCount
 }
 
-const createPosition = async function(user, grow) {
+const createPosition = async function (user, grow) {
   if (grow) {
     const count = await countPositions(user)
     if (!grow(count)) {
@@ -741,7 +739,7 @@ const createPosition = async function(user, grow) {
   return _createPosition(user)
 }
 
-const deletePosition = async function(user, grow) {
+const deletePosition = async function (user, grow) {
   if (grow) {
     const count = await countPositions(user)
     if (grow(count)) {

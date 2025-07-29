@@ -54,7 +54,7 @@ const EXAMPLE_LOCATIONS = {
 }
 
 describe("Merge locations error", () => {
-  it("Should show an error when merging locations would create a loop", async() => {
+  it("Should show an error when merging locations would create a loop", async () => {
     await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
     await (await MergeLocations.getTitle()).waitForDisplayed()
@@ -100,7 +100,7 @@ describe("Merge locations error", () => {
 })
 
 describe("Merge locations page", () => {
-  it("Should display a warning when leaving the page with unsaved changes", async() => {
+  it("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
     await (await MergeLocations.getTitle()).waitForDisplayed()
@@ -140,7 +140,7 @@ describe("Merge locations page", () => {
     expect(await modalDialog.isExisting()).to.be.true
     await $(".btn-danger").click()
   })
-  it("Should display fields values of the left location", async() => {
+  it("Should display fields values of the left location", async () => {
     await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
     await (await MergeLocations.getTitle()).waitForDisplayed()
@@ -167,7 +167,7 @@ describe("Merge locations page", () => {
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.type)
   })
 
-  it("Should not allow to select the same location", async() => {
+  it("Should not allow to select the same location", async () => {
     await (
       await MergeLocations.getRightLocationField()
     ).setValue(EXAMPLE_LOCATIONS.leftCountry.search)
@@ -182,7 +182,7 @@ describe("Merge locations page", () => {
     ).to.be.false
   })
 
-  it("Should be able to select to incompatible locations to merge", async() => {
+  it("Should be able to select to incompatible locations to merge", async () => {
     await (
       await MergeLocations.getRightLocationField()
     ).setValue(EXAMPLE_LOCATIONS.right.search)
@@ -211,7 +211,7 @@ describe("Merge locations page", () => {
     )
   })
 
-  it("Should autoMerge some identical fields from both locations", async() => {
+  it("Should autoMerge some identical fields from both locations", async () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.left.status)
@@ -222,7 +222,7 @@ describe("Merge locations page", () => {
     ).to.eq(EXAMPLE_LOCATIONS.right.status)
   })
 
-  it("Should be able to select all fields from left location", async() => {
+  it("Should be able to select all fields from left location", async () => {
     await (await MergeLocations.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
     await MergeLocations.waitForColumnToChange(
@@ -288,7 +288,7 @@ describe("Merge locations page", () => {
     ).to.eq("")
   })
 
-  it("Should be able to select all fields from right location", async() => {
+  it("Should be able to select all fields from right location", async () => {
     await (await MergeLocations.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
     await MergeLocations.waitForColumnToChange(
@@ -338,7 +338,7 @@ describe("Merge locations page", () => {
     /* eslint-enable no-unused-expressions */
   })
 
-  it("Should be able to select to compatible locations to merge", async() => {
+  it("Should be able to select to compatible locations to merge", async () => {
     await (
       await MergeLocations.getLeftLocationField()
     ).setValue(EXAMPLE_LOCATIONS.left.search)
@@ -365,7 +365,7 @@ describe("Merge locations page", () => {
       .false
   })
 
-  it("Should autoMerge some identical fields from both locations", async() => {
+  it("Should autoMerge some identical fields from both locations", async () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Type")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.left.type)
@@ -383,7 +383,7 @@ describe("Merge locations page", () => {
     ).to.eq(EXAMPLE_LOCATIONS.right.status)
   })
 
-  it("Should be able to select from both left and right side", async() => {
+  it("Should be able to select from both left and right side", async () => {
     await (await MergeLocations.getSelectButton("left", "Name")).click()
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.left.name,
@@ -452,7 +452,7 @@ describe("Merge locations page", () => {
     ).to.equal(EXAMPLE_LOCATIONS.left.approvalSteps)
   })
 
-  it("Should be able to merge both locations", async() => {
+  it("Should be able to merge both locations", async () => {
     await (await MergeLocations.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
     await MergeLocations.waitForColumnToChange(

@@ -42,7 +42,7 @@ const VALUE_TO_TEXT_FOR_INTERACTION = {
 
 describe("For the annual organization assessments", () => {
   describe("As a superuser assigned to the organization", () => {
-    it("Should first search, find and open the organization's page", async() => {
+    it("Should first search, find and open the organization's page", async () => {
       await Home.openAsSuperuser()
       await (await Home.getSearchBar()).setValue(ORGANIZATION_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -55,7 +55,7 @@ describe("For the annual organization assessments", () => {
       ).click()
     })
 
-    it("Should allow superuser to successfully add an assessment", async() => {
+    it("Should allow superuser to successfully add an assessment", async () => {
       await (
         await ShowOrganization.getAssessmentsTable(
           "organizationAnnually",
@@ -87,7 +87,7 @@ describe("For the annual organization assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just created", async() => {
+    it("Should show the same assessment details with the details just created", async () => {
       await assertAssessmentDetails(
         "organizationAnnually",
         "annually",
@@ -95,7 +95,7 @@ describe("For the annual organization assessments", () => {
       )
     })
 
-    it("Should allow the author of the assessment to successfully edit it", async() => {
+    it("Should allow the author of the assessment to successfully edit it", async () => {
       await (await ShowOrganization.getEditAssessmentButton()).waitForExist()
       await (
         await ShowOrganization.getEditAssessmentButton()
@@ -118,7 +118,7 @@ describe("For the annual organization assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "organizationAnnually",
         "annually",
@@ -129,7 +129,7 @@ describe("For the annual organization assessments", () => {
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the organization's page", async() => {
+    it("Should first search, find and open the organization's page", async () => {
       await Home.openAsAdminUser()
       await (await Home.getSearchBar()).setValue(ORGANIZATION_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -142,7 +142,7 @@ describe("For the annual organization assessments", () => {
       ).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", async() => {
+    it("Should not show make assessment button when there is an assessment on that period", async () => {
       expect(
         await (
           await ShowOrganization.getAddAssessmentButton(
@@ -153,7 +153,7 @@ describe("For the annual organization assessments", () => {
       ).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assessment", async() => {
+    it("Should allow admins to successfully edit existing assessment", async () => {
       await (await ShowOrganization.getEditAssessmentButton()).waitForExist()
       await (
         await ShowOrganization.getEditAssessmentButton()
@@ -176,7 +176,7 @@ describe("For the annual organization assessments", () => {
       )
     })
 
-    it("Should show the same assessment details with the details just edited", async() => {
+    it("Should show the same assessment details with the details just edited", async () => {
       await assertAssessmentDetails(
         "organizationAnnually",
         "annually",
@@ -184,7 +184,7 @@ describe("For the annual organization assessments", () => {
       )
     })
 
-    it("Should allow an admin to delete the assessment", async() => {
+    it("Should allow an admin to delete the assessment", async () => {
       await (await ShowOrganization.getDeleteAssessmentButton()).click()
       await ShowOrganization.confirmDelete()
       await ShowOrganization.waitForDeletedAssessmentToDisappear(
@@ -197,7 +197,7 @@ describe("For the annual organization assessments", () => {
 })
 
 // @assertionMethod
-const assertAssessmentDetails = async(
+const assertAssessmentDetails = async (
   assessmentKey,
   recurrence,
   assessmentDetails

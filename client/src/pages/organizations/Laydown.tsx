@@ -182,8 +182,8 @@ const OrganizationLaydown = ({
           {Position.map(positions, position =>
             position.associatedPositions.length
               ? Position.map(position.associatedPositions, (other, idx) =>
-                renderPositionRow(position, other, idx)
-              )
+                  renderPositionRow(position, other, idx)
+                )
               : renderPositionRow(position, null, 0)
           )}
         </tbody>

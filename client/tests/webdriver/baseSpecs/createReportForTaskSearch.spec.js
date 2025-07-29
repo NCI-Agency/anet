@@ -2,7 +2,7 @@ import { expect } from "chai"
 import CreateReport from "../pages/report/createReport.page"
 
 describe("When creating a report with tasks", () => {
-  it("should offer option to search for all unassigned tasks", async() => {
+  it("should offer option to search for all unassigned tasks", async () => {
     await CreateReport.open()
     await (await CreateReport.getTasks()).click()
     await (await CreateReport.getTaskSearchPopover()).waitForExist()
@@ -14,7 +14,7 @@ describe("When creating a report with tasks", () => {
     // eslint-disable-next-line no-unused-expressions
     expect(await allUnassignedButton.isExisting()).to.be.true
   })
-  it("should return one option 1.3.C", async() => {
+  it("should return one option 1.3.C", async () => {
     const testTask = "1.3.C"
     await CreateReport.open()
     await (await CreateReport.getTasks()).click()

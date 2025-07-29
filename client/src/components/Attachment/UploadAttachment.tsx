@@ -19,7 +19,7 @@ const GQL_CREATE_ATTACHMENT = gql`
   }
 `
 
-export const attachmentSave = async(
+export const attachmentSave = async (
   fileName,
   mimeType,
   contentLength,

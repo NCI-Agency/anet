@@ -947,7 +947,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   <Button
                     variant="primary"
                     onClick={() =>
-                      submitComment(values.newComment, setFieldValue)}
+                      submitComment(values.newComment, setFieldValue)
+                    }
                   >
                     Save comment
                   </Button>
@@ -983,7 +984,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                         buttonClassName="float-start"
                       />
                     </div>
-                )}
+                  )}
                 <div>
                   <ConfirmDestructive
                     onConfirm={onConfirmDelete}

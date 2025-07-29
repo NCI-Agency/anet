@@ -134,13 +134,13 @@ const useMergeObjects = mergeableType => {
     heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
     selectedMap: {}, // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
     // callbacks to handle selectedMap
-    getSelectedSide: function(fieldName) {
+    getSelectedSide: function (fieldName) {
       if (!Object.hasOwn(this.selectedMap, fieldName)) {
         this.selectedMap[fieldName] = null
       }
       return this.selectedMap[fieldName]
     },
-    notAllSet: function() {
+    notAllSet: function () {
       return (
         !areAllSet(
           this.merged,

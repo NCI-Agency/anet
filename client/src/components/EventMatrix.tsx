@@ -253,10 +253,10 @@ const EventMatrix = ({
     const dateToCheck = weekDays[dayOfWeek]
     const taskReports = task
       ? reports?.filter(
-        r =>
-          isReportIncluded(r, dateToCheck, task, r.event) &&
+          r =>
+            isReportIncluded(r, dateToCheck, task, r.event) &&
             r.tasks?.find(t => t.uuid === task.uuid)
-      )
+        )
       : []
     return (
       <Table
@@ -270,10 +270,10 @@ const EventMatrix = ({
           {events.map(event => {
             const eventReports = task
               ? reports?.filter(
-                r =>
-                  isReportIncluded(r, dateToCheck, task) &&
+                  r =>
+                    isReportIncluded(r, dateToCheck, task) &&
                     r.event?.uuid === event.uuid
-              )
+                )
               : []
             const eventHeight = getEventHeight(event, task)
             return (

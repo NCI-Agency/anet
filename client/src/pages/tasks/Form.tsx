@@ -262,7 +262,8 @@ const TaskForm = ({
                   name="projectedCompletion"
                   component={FieldHelper.SpecialField}
                   onChange={value =>
-                    setFieldValue("projectedCompletion", value)}
+                    setFieldValue("projectedCompletion", value)
+                  }
                   onBlur={() => setFieldTouched("projectedCompletion")}
                   widget={<CustomDateInput id="projectedCompletion" />}
                   disabled={disabled}

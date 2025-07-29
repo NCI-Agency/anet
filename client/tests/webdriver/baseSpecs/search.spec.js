@@ -3,7 +3,7 @@ import Home from "../pages/home.page"
 import Search from "../pages/search.page"
 
 describe("When using search", () => {
-  it("Should show results counter and table when searching in all entities and results found", async() => {
+  it("Should show results counter and table when searching in all entities and results found", async () => {
     await Home.openAsSuperuser()
     await (await Home.getSearchBar()).setValue("")
     await (await Home.getSubmitSearch()).click()
@@ -66,7 +66,7 @@ describe("When using search", () => {
       true
     )
   })
-  it("Should not show results counters when searching in all entities and no results found", async() => {
+  it("Should not show results counters when searching in all entities and no results found", async () => {
     await Home.openAsSuperuser()
     await (await Home.getSearchBar()).setValue("·$%&")
     await (await Home.getSubmitSearch()).click()
