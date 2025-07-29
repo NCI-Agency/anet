@@ -49,6 +49,7 @@ import PositionEdit from "pages/positions/Edit"
 import MyCounterparts from "pages/positions/MyCounterparts"
 import PositionNew from "pages/positions/New"
 import PositionShow from "pages/positions/Show"
+import MyPreferences from "pages/preferences/MyPreferences"
 import ReportCompact from "pages/reports/Compact"
 import ReportEdit from "pages/reports/Edit"
 import MyReports from "pages/reports/MyReports"
@@ -235,6 +236,7 @@ const Routing = () => {
           <Route path="edit" element={<EventEdit />} />
         </Route>
       </Route>
+      <Route path={PAGE_URLS.PREFERENCES} element={<MyPreferences />} />
     </Routes>
   )
 }

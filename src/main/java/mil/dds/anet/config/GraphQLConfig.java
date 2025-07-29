@@ -44,6 +44,7 @@ import mil.dds.anet.resources.NoteResource;
 import mil.dds.anet.resources.OrganizationResource;
 import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.PositionResource;
+import mil.dds.anet.resources.PreferencesResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
 import mil.dds.anet.resources.SubscriptionResource;
@@ -79,6 +80,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
   private final OrganizationResource organizationResource;
   private final PersonResource personResource;
   private final PositionResource positionResource;
+  private final PreferencesResource preferencesResource;
   private final ReportResource reportResource;
   private final SavedSearchResource savedSearchResource;
   private final SubscriptionResource subscriptionResource;
@@ -93,8 +95,9 @@ public class GraphQLConfig implements WebMvcConfigurer {
       EventSeriesResource eventSeriesResource, LocationResource locationResource,
       MartImportedReportsResource martImportedReportsResource, NoteResource noteResource,
       OrganizationResource organizationResource, PersonResource personResource,
-      PositionResource positionResource, ReportResource reportResource,
-      SavedSearchResource savedSearchResource, SubscriptionResource subscriptionResource,
+      PositionResource positionResource, PreferencesResource preferencesResource,
+      ReportResource reportResource, SavedSearchResource savedSearchResource,
+      SubscriptionResource subscriptionResource,
       SubscriptionUpdateResource subscriptionUpdateResource, TaskResource taskResource) {
     this.accessTokenResource = accessTokenResource;
     this.adminResource = adminResource;
@@ -112,6 +115,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
     this.organizationResource = organizationResource;
     this.personResource = personResource;
     this.positionResource = positionResource;
+    this.preferencesResource = preferencesResource;
     this.reportResource = reportResource;
     this.savedSearchResource = savedSearchResource;
     this.subscriptionResource = subscriptionResource;
@@ -192,8 +196,9 @@ public class GraphQLConfig implements WebMvcConfigurer {
     return List.of(accessTokenResource, adminResource, anetEmailResource, approvalStepResource,
         assessmentResource, attachmentResource, authorizationGroupResource, entityAvatarResource,
         eventResource, eventSeriesResource, locationResource, martImportedReportsResource,
-        noteResource, organizationResource, personResource, positionResource, reportResource,
-        savedSearchResource, subscriptionResource, subscriptionUpdateResource, taskResource);
+        noteResource, organizationResource, personResource, positionResource, preferencesResource,
+        reportResource, savedSearchResource, subscriptionResource, subscriptionUpdateResource,
+        taskResource);
   }
 
   public static class AuthorizationInterceptor implements ResolverInterceptor {
