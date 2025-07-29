@@ -14,6 +14,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -28,10 +29,12 @@ import org.springframework.web.server.ResponseStatusException;
 @GraphQLApi
 public class EventResource {
 
+  private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final EventDao dao;
 
-  public EventResource(AnetObjectEngine engine) {
+  public EventResource(AnetDictionary dict, AnetObjectEngine engine) {
+    this.dict = dict;
     this.engine = engine;
     this.dao = engine.getEventDao();
   }
@@ -40,9 +43,12 @@ public class EventResource {
     return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
   }
 
-  public static void assertPermission(final Person user, final String orgUuid) {
+  public void assertPermission(final Person user, final String orgUuid) {
     if (!hasPermission(user, orgUuid)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(
+              orgUuid == null ? AuthUtils.MISSING_ORG_MESSAGE : AuthUtils.UNAUTH_ORG_MESSAGE,
+              dict.getDictionaryEntry("fields.event.adminOrg.label")));
     }
   }
 

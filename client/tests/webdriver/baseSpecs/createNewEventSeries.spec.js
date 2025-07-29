@@ -5,7 +5,7 @@ const ORG = "ANET Admin"
 const ORG_COMPLETE = "ANET Administrators"
 
 describe("Create event series page", () => {
-  describe("When creating an event series", () => {
+  describe("When creating an event series as admin", () => {
     it("Should show required data warnings when submitting empty form", async() => {
       await CreateEventSeries.openAsAdminUser()
       await (await CreateEventSeries.getForm()).waitForExist()
@@ -75,6 +75,49 @@ describe("Create event series page", () => {
 
       await CreateEventSeries.submitForm()
       await CreateEventSeries.waitForAlertSuccessToLoad()
+
+      await CreateEventSeries.logout()
+    })
+  })
+
+  describe("When creating an event series as superuser", () => {
+    it("Should warn when adminOrg is not correctly filled in", async() => {
+      await CreateEventSeries.open()
+      await (await CreateEventSeries.getForm()).waitForExist()
+      await (await CreateEventSeries.getForm()).waitForDisplayed()
+
+      await (await CreateEventSeries.getNameInput()).waitForDisplayed()
+      await (
+        await CreateEventSeries.getNameInput()
+      ).setValue("Test Event Series")
+
+      await CreateEventSeries.submitForm()
+      expect(await (await CreateEventSeries.getAlertDanger()).getText()).to.eq(
+        "You must fill in the Admin Organization"
+      )
+
+      const adminOrg = "EF 2.2"
+      await (
+        await CreateEventSeries.getAdminOrganizationInput()
+      ).waitForDisplayed()
+      await (await CreateEventSeries.getAdminOrganizationInput()).click()
+      await (
+        await CreateEventSeries.getAdminOrganizationInput()
+      ).setValue(adminOrg)
+      await CreateEventSeries.waitForAdminOrgAdvancedSelectToChange(adminOrg)
+      expect(
+        await (
+          await CreateEventSeries.getAdminOrgAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(adminOrg)
+      await (
+        await CreateEventSeries.getAdminOrgAdvancedSelectFirstItem()
+      ).click()
+
+      await CreateEventSeries.submitForm()
+      await CreateEventSeries.waitForAlertSuccessToLoad()
+
+      await CreateEventSeries.logout()
     })
   })
 })
