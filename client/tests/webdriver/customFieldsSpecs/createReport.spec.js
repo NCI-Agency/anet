@@ -242,6 +242,8 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Organizations")
       ).click()
+      // Wait for the filters to change
+      await browser.pause(500)
       expect(
         await (
           await CreateReport.getTestMultiReferenceField()
@@ -271,6 +273,8 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
+      // Wait for the filters to change
+      await browser.pause(500)
       expect(
         await (
           await CreateReport.getTestMultiReferenceField()
@@ -304,6 +308,8 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldButton("People")
       ).click()
+      // Wait for the filters to change
+      await browser.pause(500)
       await (await CreateReport.getTestMultiReferenceField()).click()
       // After preserving search query, setValue does not work consistently
       // input field values are sometimes concatenated
@@ -385,6 +391,8 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
+      // Wait for the filters to change
+      await browser.pause(500)
       expect(
         await (
           await CreateReport.getTestMultiReferenceField()
