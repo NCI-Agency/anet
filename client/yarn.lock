@@ -6642,7 +6642,7 @@ __metadata:
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.34.0"
-    slate: "npm:0.117.2"
+    slate: "npm:0.118.0"
     slate-dom: "npm:0.117.4"
     slate-history: "npm:0.113.1"
     slate-hyperscript: "npm:0.100.0"
@@ -18182,13 +18182,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate@npm:0.117.2":
-  version: 0.117.2
-  resolution: "slate@npm:0.117.2"
+"slate@npm:0.118.0":
+  version: 0.118.0
+  resolution: "slate@npm:0.118.0"
   dependencies:
     immer: "npm:^10.0.3"
     tiny-warning: "npm:^1.0.3"
-  checksum: 10c0/bf9a58322160b0f458f918ff98ad64a31c9365c74b155eb3cef723a1a67c27fe66f5d73b7a57c235946ce00f90d2d3834a92ae04729f5b6bd09365232fa549cf
+  checksum: 10c0/760e4a14ad8bf965433b2865c542d45c45360674f615b034651b4485c6f7be4d620ff30f693eaf97089b35526a3f6155fda812fe832ac4f19505936535aed853
   languageName: node
   linkType: hard
 
