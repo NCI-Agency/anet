@@ -128,7 +128,7 @@ dependencies {
 	implementation 'commons-beanutils:commons-beanutils:1.11.0'
 
 	implementation "org.simplejavamail:simple-java-mail:${simplejavamailVersion}"
-	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
+	implementation 'org.eclipse.angus:jakarta.mail:2.0.4'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 
