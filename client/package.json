@@ -115,7 +115,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.13.8",
+    "@apollo/client": "3.13.9",
     "@blueprintjs/core": "6.1.0",
     "@blueprintjs/datetime": "6.0.1",
     "@emotion/react": "11.14.0",
@@ -150,7 +150,7 @@
     "leaflet.markercluster": "1.5.3",
     "locale-compare-polyfill": "0.0.2",
     "lodash": "4.17.21",
-    "milsymbol": "3.0.2",
+    "milsymbol": "3.0.3",
     "ml-matrix": "6.12.1",
     "moment": "2.30.1",
     "pluralize": "8.0.0",
@@ -184,7 +184,7 @@
     "title-case": "4.3.2",
     "use-debounce": "10.0.5",
     "uuid": "11.1.0",
-    "yup": "1.6.1"
+    "yup": "1.7.0"
   },
   "resolutions": {
     "chromedriver": "link:./node_modules/.cache/null"
