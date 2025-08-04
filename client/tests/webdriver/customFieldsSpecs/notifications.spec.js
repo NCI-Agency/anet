@@ -34,8 +34,8 @@ describe("Home page", () => {
         "1"
       )
     })
-    it("Should see that Jack has no counterpart and 1 task with pending assessments", async () => {
-      await Home.open("/", "jack")
+    it("Should see that Henry has no counterpart and 2 tasks with pending assessments", async () => {
+      await Home.open("/", "henry")
       await (await Home.getLinksMenuButton()).click()
       await (await Home.getMyCounterpartsLink()).waitForDisplayed()
       await (await Home.getMyTasksLink()).waitForDisplayed()
@@ -44,7 +44,7 @@ describe("Home page", () => {
       expect(await (await Home.getMyCounterpartsNotifications()).isExisting())
         .to.be.false
       expect(await (await Home.getMyTasksNotifications()).getText()).to.equal(
-        "1"
+        "2"
       )
     })
     it("Should see that Nick has no counterparts and no tasks with pending assessments", async () => {
