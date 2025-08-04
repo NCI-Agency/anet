@@ -184,8 +184,12 @@ test.serial("Draft and submit a report", async t => {
   )
   const $communitiesButton = await $('button[value="AuthorizationGroup"]')
   await $communitiesButton.click()
+  // Wait for the filters to change
+  await t.context.driver.sleep(shortWaitMs)
   const $communitiesInput = await $("input#authorizedMembers")
   await $communitiesInput.click()
+  // Wait for the pop-up to fill
+  await t.context.driver.sleep(shortWaitMs)
   // Add all communities
   const $allCommunities = await $$(
     "#entitySelect-popover input[type='checkbox']"
