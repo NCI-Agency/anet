@@ -33,7 +33,7 @@ String cxfVersion = "4.1.2"
 String jdbi3Version = "3.49.5"
 String poiVersion = "5.4.1"
 String simplejavamailVersion = "8.12.6"
-String springShellVersion = "3.4.0"
+String springShellVersion = "3.4.1"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -128,7 +128,7 @@ dependencies {
 	implementation 'commons-beanutils:commons-beanutils:1.11.0'
 
 	implementation "org.simplejavamail:simple-java-mail:${simplejavamailVersion}"
-	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
+	implementation 'org.eclipse.angus:jakarta.mail:2.0.4'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 
