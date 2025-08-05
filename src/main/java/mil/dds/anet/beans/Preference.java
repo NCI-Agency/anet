@@ -12,12 +12,17 @@ public class Preference extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private String type;
+  @GraphQLInputField
+  private String category;
   @GraphQLQuery
   @GraphQLInputField
   private String description;
   @GraphQLQuery
   @GraphQLInputField
   private String defaultValue;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String allowedValues;
 
   public String getName() {
     return name;
@@ -49,5 +54,21 @@ public class Preference extends AbstractAnetBean {
 
   public void setDefaultValue(String defaultValue) {
     this.defaultValue = defaultValue;
+  }
+
+  public String getAllowedValues() {
+    return allowedValues;
+  }
+
+  public void setAllowedValues(String allowedValues) {
+    this.allowedValues = allowedValues;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
   }
 }

@@ -9,6 +9,7 @@ import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
 import MergeTasks from "pages/admin/merge/MergeTasks"
 import PendingEmailsShow from "pages/admin/pendingEmails/Show"
+import Preferences from "pages/admin/preferences/Preferences"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
@@ -188,6 +189,7 @@ const Routing = () => {
             <Route path="martImporter" element={<MartImporterShow />} />
           )}
           <Route path="graphiql" element={<GraphiQL />} />
+          <Route path="preferences" element={<Preferences />} />
         </Route>
       )}
       <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />
