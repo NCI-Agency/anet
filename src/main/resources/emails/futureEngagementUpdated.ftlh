@@ -27,14 +27,16 @@ a {
   ${reportAuthor.name},
 </#list></p><br><br>
 
-<p>The date of your upcoming engagement, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is today. We've changed this upcoming engagement 
-into a draft engagement report. You can find and edit it by going to the "My drafts" on the "My reports" page, 
+<p>The date of your upcoming engagement, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is today. We've changed this upcoming engagement
+into a draft engagement report. You can find and edit it by going to the "My drafts" on the "My reports" page,
 or by <a href="${serverUrl}/reports/${report.uuid}">clicking here</a>.</p>
 
 <p>ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>
   <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
 </#if></p>
+
+<p>The email is automatically sent by ANET. If you no longer wish to receive these emails you can adjust your <a href="${serverUrl}/preferences"><em><strong>notification preferences</strong></em></a></p>
 
 </body>
 </html>
