@@ -6588,6 +6588,8 @@
 			<column name="name" type="varchar(255)" />
 			<column name="description" type="varchar(255)" />
 			<column name="type" type="varchar(255)" />
+			<column name="category" type="varchar(255)" />
+			<column name="allowedValues" type="text" />
 			<column name="defaultValue" type="varchar(255)" />
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />
