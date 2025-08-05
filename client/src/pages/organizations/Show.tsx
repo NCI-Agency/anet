@@ -659,12 +659,14 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 )}
               </Fieldset>
 
-              <Fieldset
-                id="syncMatrix"
-                title={`Sync matrix for ${organization.shortName}`}
-              >
-                <EventMatrix tasks={allTasks} />
-              </Fieldset>
+              {!!Object.keys(allTasks).length && (
+                <Fieldset
+                  id="syncMatrix"
+                  title={`Sync matrix for ${organization.shortName}`}
+                >
+                  <EventMatrix tasks={allTasks} />
+                </Fieldset>
+              )}
 
               {Settings.fields.organization.customFields && (
                 <Fieldset title="Organization information" id="custom-fields">
