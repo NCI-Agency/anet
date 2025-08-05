@@ -226,11 +226,25 @@ td {
 <body>
 <p style="font-size: 12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
-<p>Hi,</p><br><br>
+<#if sender??>
+  <div>
+    <h3 style="color: #981B1E;">This email was sent by:</h3>
+    <a href="${serverUrl}/people/${sender.uuid}" >
+      ${sender.name}
+    </a>
+  </div>
+</#if>
 
-${sender.name} sent you a report from ANET:
+<br>
 
-<p><b>${sender.name} wrote:</b> ${comment!}</p>
+<#if comment?has_content>
+  <div>
+    <h3 style="color: #981B1E;">${sender.name} wrote:</h3>
+    <p>${comment}</p>
+  </div>
+</#if>
+
+<br>
 
 <div class="form-horizontal">
 
