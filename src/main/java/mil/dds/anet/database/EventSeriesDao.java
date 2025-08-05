@@ -95,4 +95,24 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   public SubscriptionUpdateGroup getSubscriptionUpdate(EventSeries obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "eventSeries.uuid");
   }
+
+  public List<EventSeries> findByOrganizationUuid(String orgUuid) {
+    return getDbHandle().createQuery(
+    "/* findByOrganizationUuid */ " +
+    "SELECT " +
+    "  uuid AS \"eventSeries_uuid\", " +
+    "  name AS \"eventSeries_name\", " +
+    "  description AS \"eventSeries_description\", " +
+    "  status AS \"eventSeries_status\", " +
+    "  \"ownerOrgUuid\" AS \"eventSeries_ownerOrgUuid\", " +
+    "  \"hostOrgUuid\" AS \"eventSeries_hostOrgUuid\", " +
+    "  \"adminOrgUuid\" AS \"eventSeries_adminOrgUuid\" " +
+    "FROM \"eventSeries\" " +
+    "WHERE \"ownerOrgUuid\" = :orgUuid " +
+    "   OR \"hostOrgUuid\" = :orgUuid " +
+    "   OR \"adminOrgUuid\" = :orgUuid")
+    .bind("orgUuid", orgUuid)
+    .map(new EventSeriesMapper())
+    .list();
+    }
 }
