@@ -8,7 +8,10 @@ import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/Advanced
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
-import { customFieldsJSONString } from "components/CustomFields"
+import {
+  customFieldsJSONString,
+  mapReadonlyCustomFieldToComp
+} from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditHistory from "components/EditHistory"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -355,57 +358,48 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               {Settings.fields.person.customFields &&
                 Object.entries(Settings.fields.person.customFields).map(
-                  ([fieldName, fieldConfig]) => {
-                    const fieldValue =
-                      mergedPerson?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
-                    return (
-                      <MergeField
-                        key={fieldName}
-                        label={fieldConfig.label || fieldName}
-                        value={JSON.stringify(fieldValue)}
-                        align={ALIGN_OPTIONS.CENTER}
-                        fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
-                        mergeState={mergeState}
-                        dispatchMergeActions={dispatchMergeActions}
-                      />
-                    )
-                  }
-                )}
-              {Settings.fields.person.customSensitiveInformation &&
-                Object.entries(
-                  Settings.fields.person.customSensitiveInformation
-                ).map(([fieldName, fieldConfig]) => {
-                  const fieldValue =
-                    mergedPerson?.[SENSITIVE_CUSTOM_FIELDS_PARENT]?.[fieldName]
-                  return (
+                  ([fieldName, fieldConfig]: [string, object]) => (
                     <MergeField
                       key={fieldName}
                       label={fieldConfig.label || fieldName}
-                      value={
-                        <>
-                          {JSON.stringify(fieldValue)}
-                          {mergeState.selectedMap?.[
-                            `${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`
-                          ] && (
-                            <Tooltip
-                              content={fieldConfig.tooltipText}
-                              intent={Intent.WARNING}
-                            >
-                              <Icon
-                                icon={IconNames.INFO_SIGN}
-                                intent={Intent.PRIMARY}
-                              />
-                            </Tooltip>
-                          )}
-                        </>
-                      }
+                      value={mapReadonlyCustomFieldToComp({
+                        fieldConfig,
+                        parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
+                        key: fieldName,
+                        values: mergedPerson,
+                        hideLabel: true
+                      })}
                       align={ALIGN_OPTIONS.CENTER}
-                      fieldName={`${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                      fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                       mergeState={mergeState}
                       dispatchMergeActions={dispatchMergeActions}
                     />
                   )
-                })}
+                )}
+              {Settings.fields.person.customSensitiveInformation &&
+                Object.entries(
+                  Settings.fields.person.customSensitiveInformation
+                ).map(([fieldName, fieldConfig]: [string, object]) => (
+                  <MergeField
+                    key={fieldName}
+                    label={fieldConfig.label || fieldName}
+                    value={mapReadonlyCustomFieldToComp({
+                      fieldConfig,
+                      parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
+                      key: fieldName,
+                      values: mergedPerson,
+                      hideLabel: true,
+                      hideTooltip:
+                        !mergeState.selectedMap?.[
+                          `${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`
+                        ]
+                    })}
+                    align={ALIGN_OPTIONS.CENTER}
+                    fieldName={`${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
+                  />
+                ))}
             </fieldset>
           )}
         </Col>
@@ -791,64 +785,24 @@ const PersonColumn = ({
           />
           {Settings.fields.person.customFields &&
             Object.entries(Settings.fields.person.customFields).map(
-              ([fieldName, fieldConfig]) => {
-                const fieldValue =
-                  person?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
-                return (
-                  <MergeField
-                    key={fieldName}
-                    fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
-                    label={fieldConfig.label || fieldName}
-                    // To be able to see arrays and objects
-                    value={JSON.stringify(fieldValue)}
-                    align={align}
-                    action={() =>
-                      dispatchMergeActions(
-                        setAMergedField(
-                          `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                          fieldValue,
-                          align
-                        )
-                      )
-                    }
-                    mergeState={mergeState}
-                    autoMerge
-                    dispatchMergeActions={dispatchMergeActions}
-                  />
-                )
-              }
-            )}
-          {Settings.fields.person.customSensitiveInformation &&
-            Object.entries(
-              Settings.fields.person.customSensitiveInformation
-            ).map(([fieldName, fieldConfig]) => {
-              const fieldValue =
-                person?.[SENSITIVE_CUSTOM_FIELDS_PARENT]?.[fieldName]
-              return (
+              ([fieldName, fieldConfig]: [string, object]) => (
                 <MergeField
                   key={fieldName}
-                  fieldName={`${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                  fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                   label={fieldConfig.label || fieldName}
-                  value={
-                    <>
-                      {JSON.stringify(fieldValue)}
-                      <Tooltip
-                        content={fieldConfig.tooltipText}
-                        intent={Intent.WARNING}
-                      >
-                        <Icon
-                          icon={IconNames.INFO_SIGN}
-                          intent={Intent.PRIMARY}
-                        />
-                      </Tooltip>
-                    </>
-                  }
+                  value={mapReadonlyCustomFieldToComp({
+                    fieldConfig,
+                    parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
+                    key: fieldName,
+                    values: person,
+                    hideLabel: true
+                  })}
                   align={align}
                   action={() =>
                     dispatchMergeActions(
                       setAMergedField(
-                        `${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                        fieldValue,
+                        `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                        person?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName],
                         align
                       )
                     )
@@ -858,7 +812,37 @@ const PersonColumn = ({
                   dispatchMergeActions={dispatchMergeActions}
                 />
               )
-            })}
+            )}
+          {Settings.fields.person.customSensitiveInformation &&
+            Object.entries(
+              Settings.fields.person.customSensitiveInformation
+            ).map(([fieldName, fieldConfig]: [string, object]) => (
+              <MergeField
+                key={fieldName}
+                fieldName={`${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                label={fieldConfig.label || fieldName}
+                value={mapReadonlyCustomFieldToComp({
+                  fieldConfig,
+                  parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
+                  key: fieldName,
+                  values: person,
+                  hideLabel: true
+                })}
+                align={align}
+                action={() =>
+                  dispatchMergeActions(
+                    setAMergedField(
+                      `${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                      person?.[SENSITIVE_CUSTOM_FIELDS_PARENT]?.[fieldName],
+                      align
+                    )
+                  )
+                }
+                mergeState={mergeState}
+                autoMerge
+                dispatchMergeActions={dispatchMergeActions}
+              />
+            ))}
         </fieldset>
       )}
     </PersonCol>

@@ -639,7 +639,11 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
   ))
 
   return (
-    <Fieldset title={fieldsetTitle} isCompact={isCompact}>
+    <Fieldset
+      title={fieldsetTitle}
+      isCompact={isCompact}
+      className="custom-array-field"
+    >
       {arrayOfObjects}
     </Fieldset>
   )
@@ -1398,7 +1402,9 @@ export function mapReadonlyCustomFieldToComp({
   values,
   vertical,
   labelColumnWidth,
-  isCompact
+  isCompact,
+  hideLabel,
+  hideTooltip
 }: {
   key: string
   fieldConfig: object
@@ -1407,11 +1413,16 @@ export function mapReadonlyCustomFieldToComp({
   vertical?: boolean
   labelColumnWidth?: number
   isCompact?: boolean
+  hideLabel?: boolean
+  hideTooltip?: boolean
 }) {
   const fieldName = `${parentFieldName}.${key}`
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+  if (hideLabel) {
+    fieldProps.label = null
+  }
   let extraColElem = null
-  if (fieldConfig.authorizationGroupUuids) {
+  if (fieldConfig.authorizationGroupUuids && !hideTooltip) {
     fieldProps.className = "sensitive-information"
     extraColElem = (
       <div>
@@ -1429,7 +1440,9 @@ export function mapReadonlyCustomFieldToComp({
   let extraProps = {}
   if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
     extraProps = {
-      fieldConfig
+      fieldConfig: hideLabel
+        ? Object.without(fieldConfig, "label")
+        : fieldConfig
     }
   }
   const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
