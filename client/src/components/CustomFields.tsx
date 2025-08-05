@@ -97,13 +97,14 @@ const ReadonlySpecialField = ({
   isCompact,
   ...otherFieldProps
 }: ReadonlySpecialFieldProps) => {
+  const value = Object.get(values, name) || null
+  const field = { name, value }
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
     const fieldValue = Object.get(values, name) || "" // name might be a path for a nested prop
     return (
-      <FastField
-        name={name}
+      <FieldHelper.ReadonlyField
+        field={field}
         isCompact={isCompact}
-        component={FieldHelper.ReadonlyField}
         humanValue={<RichTextEditor readOnly value={fieldValue} />}
         {...Object.without(otherFieldProps, "style")}
       />
@@ -111,10 +112,9 @@ const ReadonlySpecialField = ({
   }
   if (widget === SPECIAL_WIDGET_TYPES.LIKERT_SCALE && isCompact) {
     return (
-      <FastField
-        name={name}
+      <FieldHelper.ReadonlyField
+        field={field}
         isCompact={isCompact}
-        component={FieldHelper.ReadonlyField}
         humanValue={
           <CompactLikertScale
             name={name}
@@ -128,10 +128,9 @@ const ReadonlySpecialField = ({
   }
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
   return (
-    <FastField
-      name={name}
+    <FieldHelper.SpecialField
+      field={field}
       isCompact={isCompact}
-      component={FieldHelper.SpecialField}
       widget={<WidgetComponent />}
       readonly
       {...otherFieldProps}
@@ -167,21 +166,23 @@ const ReadonlyTextField = fieldProps => {
   const {
     name,
     label,
+    values,
     vertical,
     isCompact,
     extraColElem,
     labelColumnWidth,
     className
   } = fieldProps
+  const value = Object.get(values, name) || null
+  const field = { name, value }
   return (
-    <FastField
-      name={name}
+    <FieldHelper.ReadonlyField
+      field={field}
       label={label}
       vertical={vertical}
       isCompact={isCompact}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
-      component={FieldHelper.ReadonlyField}
       className={className}
     />
   )
@@ -205,6 +206,7 @@ const ReadonlyDateField = fieldProps => {
   const {
     name,
     label,
+    values,
     vertical,
     isCompact,
     withTime,
@@ -212,15 +214,16 @@ const ReadonlyDateField = fieldProps => {
     labelColumnWidth,
     className
   } = fieldProps
+  const value = Object.get(values, name) || null
+  const field = { name, value }
   return (
-    <FastField
-      name={name}
+    <FieldHelper.ReadonlyField
+      field={field}
       label={label}
       vertical={vertical}
       isCompact={isCompact}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
-      component={FieldHelper.ReadonlyField}
       humanValue={fieldVal =>
         fieldVal &&
         moment(fieldVal).format(
@@ -286,11 +289,11 @@ const ReadonlyJsonField = ({
   className
 }: ReadonlyJsonFieldProps) => {
   const value = Object.get(values, name) || {}
+  const field = { name, value }
   return (
-    <FastField
-      name={name}
+    <FieldHelper.ReadonlyField
+      field={field}
       label={label}
-      component={FieldHelper.ReadonlyField}
       humanValue={JSON.stringify(value)}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
@@ -476,14 +479,14 @@ const ReadonlyEnumField = fieldProps => {
     labelColumnWidth,
     className
   } = fieldProps
+  const value = Object.get(values, name) || null
+  const field = { name, value }
   return (
-    <FastField
-      name={name}
+    <FieldHelper.ReadonlyField
+      field={field}
       label={label}
       vertical={vertical}
-      values={values}
       isCompact={isCompact}
-      component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
@@ -637,13 +640,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
 
   return (
     <Fieldset title={fieldsetTitle} isCompact={isCompact}>
-      <FieldArray
-        name={name}
-        /* div cannot be parent or child in print table, tbody, tr */
-        render={arrayHelpers =>
-          isCompact ? <>{arrayOfObjects}</> : <div>{arrayOfObjects}</div>
-        }
-      />
+      {arrayOfObjects}
     </Fieldset>
   )
 }
@@ -768,11 +765,11 @@ const ReadonlyAnetObjectField = ({
   className
 }: ReadonlyAnetObjectFieldProps) => {
   const { type, uuid } = Object.get(values, name) || {}
+  const field = { name }
   return (
-    <FastField
-      name={name}
+    <FieldHelper.ReadonlyField
+      field={field}
       label={label}
-      component={FieldHelper.ReadonlyField}
       isCompact={isCompact}
       humanValue={
         type &&
@@ -902,11 +899,12 @@ const ReadonlyArrayOfAnetObjectsField = ({
   className
 }: ReadonlyArrayOfAnetObjectsFieldProps) => {
   const fieldValue = Object.get(values, name) || []
+  const value = Object.get(values, name) || null
+  const field = { name, value }
   return (
-    <FastField
-      name={name}
+    <FieldHelper.ReadonlyField
+      field={field}
       label={label}
-      component={FieldHelper.ReadonlyField}
       isCompact={isCompact}
       humanValue={
         !_isEmpty(fieldValue) && (
@@ -1355,6 +1353,7 @@ export const ReadonlyCustomFields = ({
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
         const value = Object.get(values, fieldName) || null
+        const field = { name: fieldName, value }
         if (
           hideIfEmpty &&
           (value == null ||
@@ -1375,10 +1374,9 @@ export const ReadonlyCustomFields = ({
             {...extraProps}
           />
         ) : (
-          <FastField
-            name={fieldName}
+          <FieldHelper.ReadonlyField
+            field={field}
             isCompact={isCompact}
-            component={FieldHelper.ReadonlyField}
             humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
             extraColElem={extraColElem}
             labelColumnWidth={labelColumnWidth}
@@ -1386,17 +1384,7 @@ export const ReadonlyCustomFields = ({
           />
         )
 
-        return (
-          <React.Fragment key={key}>
-            {isCompact ? (
-              <table>
-                <tbody>{content}</tbody>
-              </table>
-            ) : (
-              content
-            )}
-          </React.Fragment>
-        )
+        return <React.Fragment key={key}>{content}</React.Fragment>
       })}
     </>
   )
@@ -1439,6 +1427,8 @@ export const mapReadonlyCustomFieldsToComps = ({
       }
     }
     const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+    const value = Object.get(values, fieldName) || null
+    const field = { name: fieldName, value }
     accum[key] = ReadonlyFieldComponent ? (
       <ReadonlyFieldComponent
         key={key}
@@ -1452,10 +1442,9 @@ export const mapReadonlyCustomFieldsToComps = ({
         {...extraProps}
       />
     ) : (
-      <FastField
+      <FieldHelper.ReadonlyField
         key={key}
-        name={fieldName}
-        component={FieldHelper.ReadonlyField}
+        field={field}
         humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
         extraColElem={extraColElem}
         labelColumnWidth={labelColumnWidth}
