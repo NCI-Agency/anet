@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.RollupGraph.RollupGraphType;
@@ -32,6 +33,7 @@ public class DailyRollupEmail implements AnetEmailAction {
   private RollupGraphType chartOrgType = RollupGraphType.INTERLOCUTOR;
   private String orgUuid;
   private String comment;
+  private Person sender;
 
   @Override
   public String getTemplateName() {
@@ -85,6 +87,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     templateContext.put("cancelledReasons", ReportCancelledReason.values());
     templateContext.put("title", getSubject(context));
     templateContext.put("comment", comment);
+    templateContext.put("sender", sender);
 
     final List<ReportGrouping> outerGrouping =
         (orgUuid == null) ? allReports.getByGrouping(chartOrgType)
@@ -225,5 +228,13 @@ public class DailyRollupEmail implements AnetEmailAction {
 
   public void setComment(String comment) {
     this.comment = comment;
+  }
+
+  public Person getSender() {
+    return sender;
+  }
+
+  public void setSender(Person sender) {
+    this.sender = sender;
   }
 }
