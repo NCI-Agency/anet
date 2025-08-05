@@ -1390,68 +1390,102 @@ export const ReadonlyCustomFields = ({
   )
 }
 
+// To map a single custom field to a component
+export function mapReadonlyCustomFieldToComp({
+  key,
+  fieldConfig,
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of the field given by the fieldConfig
+  values,
+  vertical,
+  labelColumnWidth,
+  isCompact
+}: {
+  key: string
+  fieldConfig: object
+  parentFieldName?: string
+  values?: any[]
+  vertical?: boolean
+  labelColumnWidth?: number
+  isCompact?: boolean
+}) {
+  const fieldName = `${parentFieldName}.${key}`
+  const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+  let extraColElem = null
+  if (fieldConfig.authorizationGroupUuids) {
+    fieldProps.className = "sensitive-information"
+    extraColElem = (
+      <div>
+        <Tooltip content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+          <Icon
+            icon={IconNames.INFO_SIGN}
+            intent={Intent.PRIMARY}
+            className="sensitive-information-icon"
+          />
+        </Tooltip>
+      </div>
+    )
+  }
+  const { type } = fieldConfig
+  let extraProps = {}
+  if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+    extraProps = {
+      fieldConfig
+    }
+  }
+  const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+  const value = Object.get(values, fieldName) || null
+  const field = { name: fieldName, value }
+  return ReadonlyFieldComponent ? (
+    <ReadonlyFieldComponent
+      key={key}
+      name={fieldName}
+      values={values}
+      vertical={vertical}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
+      isCompact={isCompact}
+      {...fieldProps}
+      {...extraProps}
+    />
+  ) : (
+    <FieldHelper.ReadonlyField
+      key={key}
+      field={field}
+      humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
+      isCompact={isCompact}
+      {...fieldProps}
+    />
+  )
+}
+
 // To access ordered custom fields when showing in a page
-export const mapReadonlyCustomFieldsToComps = ({
+export function mapReadonlyCustomFieldsToComps({
   fieldsConfig,
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
   labelColumnWidth,
   isCompact
-}) => {
+}: {
+  fieldsConfig: object
+  parentFieldName?: string
+  values?: any[]
+  vertical?: boolean
+  labelColumnWidth?: number
+  isCompact?: boolean
+}) {
   return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
-    let extraColElem = null
-    if (fieldConfig.authorizationGroupUuids) {
-      extraColElem = (
-        <div>
-          <Tooltip content={fieldConfig.tooltipText} intent={Intent.WARNING}>
-            <Icon
-              icon={IconNames.INFO_SIGN}
-              intent={Intent.PRIMARY}
-              className="sensitive-information-icon"
-            />
-          </Tooltip>
-        </div>
-      )
-    }
-    const fieldName = `${parentFieldName}.${key}`
-    const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
-    if (fieldConfig.authorizationGroupUuids) {
-      fieldProps.className = "sensitive-information"
-    }
-    const { type } = fieldConfig
-    let extraProps = {}
-    if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-      extraProps = {
-        fieldConfig
-      }
-    }
-    const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
-    const value = Object.get(values, fieldName) || null
-    const field = { name: fieldName, value }
-    accum[key] = ReadonlyFieldComponent ? (
-      <ReadonlyFieldComponent
-        key={key}
-        name={fieldName}
-        values={values}
-        vertical={vertical}
-        extraColElem={extraColElem}
-        labelColumnWidth={labelColumnWidth}
-        isCompact={isCompact}
-        {...fieldProps}
-        {...extraProps}
-      />
-    ) : (
-      <FieldHelper.ReadonlyField
-        key={key}
-        field={field}
-        humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
-        extraColElem={extraColElem}
-        labelColumnWidth={labelColumnWidth}
-        isCompact={isCompact}
-        {...fieldProps}
-      />
-    )
+    accum[key] = mapReadonlyCustomFieldToComp({
+      key,
+      fieldConfig,
+      parentFieldName,
+      values,
+      vertical,
+      labelColumnWidth,
+      isCompact
+    })
 
     return accum
   }, {})
