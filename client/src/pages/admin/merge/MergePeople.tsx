@@ -337,9 +337,12 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.endOfTourDate}
-                value={moment(mergedPerson.endOfTourDate).format(
-                  Settings.dateFormats.forms.displayShort.date
-                )}
+                value={
+                  mergedPerson.endOfTourDate &&
+                  moment(mergedPerson.endOfTourDate).format(
+                    Settings.dateFormats.forms.displayShort.date
+                  )
+                }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="endOfTourDate"
                 mergeState={mergeState}
@@ -755,9 +758,12 @@ const PersonColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.endOfTourDate}
             fieldName="endOfTourDate"
-            value={moment(person.endOfTourDate).format(
-              Settings.dateFormats.forms.displayShort.date
-            )}
+            value={
+              person.endOfTourDate &&
+              moment(person.endOfTourDate).format(
+                Settings.dateFormats.forms.displayShort.date
+              )
+            }
             align={align}
             action={() => {
               dispatchMergeActions(
