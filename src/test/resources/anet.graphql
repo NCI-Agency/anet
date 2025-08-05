@@ -160,6 +160,14 @@ type AnetBeanList_Position {
 }
 
 """"""
+type AnetBeanList_Preference {
+  list: [Preference]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_Report {
   list: [Report]
   pageNum: Int
@@ -1195,6 +1203,7 @@ enum PositionType {
 
 """"""
 type Preference {
+  allowedValues: String
   createdAt: Instant
   defaultValue: String
   description: String
@@ -1206,6 +1215,8 @@ type Preference {
 
 """"""
 input PreferenceInput {
+  allowedValues: String
+  category: String
   createdAt: Instant
   defaultValue: String
   description: String
@@ -1213,6 +1224,25 @@ input PreferenceInput {
   type: String
   updatedAt: Instant
   uuid: String
+}
+
+""""""
+input PreferenceSearchQueryInput {
+  category: String
+  emailNetwork: String
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: PreferenceSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+}
+
+""""""
+enum PreferenceSearchSortBy {
+  CATEGORY
 }
 
 """Query root"""
@@ -1245,7 +1275,7 @@ type Query {
   personList(query: PersonSearchQueryInput): AnetBeanList_Person
   position(uuid: String): Position
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
-  preference(uuid: String): Preference
+  preferenceList(query: PreferenceSearchQueryInput): AnetBeanList_Preference
   preferences: [Preference]
   projectVersion: String
   recentActivities: RecentActivities
