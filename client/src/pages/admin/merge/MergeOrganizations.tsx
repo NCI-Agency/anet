@@ -9,7 +9,10 @@ import { fieldsList as app6fieldsList } from "components/App6Symbol"
 import App6SymbolPreview from "components/App6SymbolPreview"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
-import { customFieldsJSONString } from "components/CustomFields"
+import {
+  customFieldsJSONString,
+  mapReadonlyCustomFieldToComp
+} from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import LinkTo from "components/LinkTo"
@@ -465,23 +468,23 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
               />
               {Settings.fields.organization.customFields &&
                 Object.entries(Settings.fields.organization.customFields).map(
-                  ([fieldName, fieldConfig]) => {
-                    const fieldValue =
-                      mergedOrganization?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[
-                        fieldName
-                      ]
-                    return (
-                      <MergeField
-                        key={fieldName}
-                        label={fieldConfig.label || fieldName}
-                        value={JSON.stringify(fieldValue)}
-                        align={ALIGN_OPTIONS.CENTER}
-                        fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
-                        mergeState={mergeState}
-                        dispatchMergeActions={dispatchMergeActions}
-                      />
-                    )
-                  }
+                  ([fieldName, fieldConfig]: [string, object]) => (
+                    <MergeField
+                      key={fieldName}
+                      label={fieldConfig.label || fieldName}
+                      value={mapReadonlyCustomFieldToComp({
+                        fieldConfig,
+                        parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
+                        key: fieldName,
+                        values: mergedOrganization,
+                        hideLabel: true
+                      })}
+                      align={ALIGN_OPTIONS.CENTER}
+                      fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                      mergeState={mergeState}
+                      dispatchMergeActions={dispatchMergeActions}
+                    />
+                  )
                 )}
             </fieldset>
           )}
@@ -896,32 +899,35 @@ const OrganizationColumn = ({
           />
           {Settings.fields.organization.customFields &&
             Object.entries(Settings.fields.organization.customFields).map(
-              ([fieldName, fieldConfig]) => {
-                const fieldValue =
-                  organization?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
-                return (
-                  <MergeField
-                    key={fieldName}
-                    fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
-                    label={fieldConfig.label || fieldName}
-                    // To be able to see arrays and objects
-                    value={JSON.stringify(fieldValue)}
-                    align={align}
-                    action={() =>
-                      dispatchMergeActions(
-                        setAMergedField(
-                          `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                          fieldValue,
-                          align
-                        )
+              ([fieldName, fieldConfig]: [string, object]) => (
+                <MergeField
+                  key={fieldName}
+                  fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                  label={fieldConfig.label || fieldName}
+                  value={mapReadonlyCustomFieldToComp({
+                    fieldConfig,
+                    parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
+                    key: fieldName,
+                    values: organization,
+                    hideLabel: true
+                  })}
+                  align={align}
+                  action={() =>
+                    dispatchMergeActions(
+                      setAMergedField(
+                        `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                        organization?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[
+                          fieldName
+                        ],
+                        align
                       )
-                    }
-                    mergeState={mergeState}
-                    autoMerge
-                    dispatchMergeActions={dispatchMergeActions}
-                  />
-                )
-              }
+                    )
+                  }
+                  mergeState={mergeState}
+                  autoMerge
+                  dispatchMergeActions={dispatchMergeActions}
+                />
+              )
             )}
         </fieldset>
       )}
