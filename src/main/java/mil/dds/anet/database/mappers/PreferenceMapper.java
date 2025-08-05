@@ -13,8 +13,10 @@ public class PreferenceMapper implements RowMapper<Preference> {
     p.setUuid(rs.getString("preferences_uuid"));
     p.setName(rs.getString("preferences_name"));
     p.setType(rs.getString("preferences_type"));
+    p.setCategory(rs.getString("preferences_category"));
     p.setDescription(rs.getString("preferences_description"));
     p.setDefaultValue(rs.getString("preferences_defaultValue"));
+    p.setAllowedValues(rs.getString("preferences_allowedValues"));
     return p;
   }
 }
