@@ -38,12 +38,25 @@ a {
 
 <h1 style="color: #000000;">${title}</h1>
 
-<#if comment??>
+<#if sender??>
 	<div>
-		<h3 style="color: #981B1E;">Rollup Notes:</h3>
+		<h3 style="color: #981B1E;">This email was sent by:</h3>
+		<a href="${serverUrl}/people/${sender.uuid}" >
+			${sender.name}
+		</a>
+	</div>
+</#if>
+
+<br>
+
+<#if comment?has_content>
+	<div>
+		<h3 style="color: #981B1E;">${sender.name} wrote:</h3>
 		<p>${comment}</p>
 	</div>
 </#if>
+
+<br>
 
 <table class="tallyTable" cellspacing=0 >
 	<tr>

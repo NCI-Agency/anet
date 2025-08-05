@@ -791,19 +791,20 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "emailRollup")
-  public Integer emailRollup(@GraphQLArgument(name = "startDate") Instant start,
+  public Integer emailRollup(@GraphQLRootContext GraphQLContext context, @GraphQLArgument(name = "startDate") Instant start,
       @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") RollupGraphType orgType,
       @GraphQLArgument(name = "orgUuid") String orgUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
+
     DailyRollupEmail action = new DailyRollupEmail();
     action.setStartDate(start);
     action.setEndDate(end);
     action.setComment(email.getComment());
     action.setOrgUuid(orgUuid);
     action.setChartOrgType(orgType);
-
     email.setAction(action);
+    action.setSender(DaoUtils.getUserFromContext(context));
     AnetEmailWorker.sendEmailAsync(email);
     // GraphQL mutations *have* to return something, we return an integer
     return 1;
