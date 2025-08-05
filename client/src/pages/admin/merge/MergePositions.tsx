@@ -7,7 +7,10 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AssociatedPositions from "components/AssociatedPositions"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
-import { customFieldsJSONString } from "components/CustomFields"
+import {
+  customFieldsJSONString,
+  mapReadonlyCustomFieldToComp
+} from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositions from "components/EditAssociatedPositions"
 import EditHistory from "components/EditHistory"
@@ -354,23 +357,23 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
               )}
               {Settings.fields.position.customFields &&
                 Object.entries(Settings.fields.position.customFields).map(
-                  ([fieldName, fieldConfig]) => {
-                    const fieldValue =
-                      mergedPosition?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[
-                        fieldName
-                      ]
-                    return (
-                      <MergeField
-                        key={fieldName}
-                        label={fieldConfig.label || fieldName}
-                        value={JSON.stringify(fieldValue)}
-                        align={ALIGN_OPTIONS.CENTER}
-                        fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
-                        mergeState={mergeState}
-                        dispatchMergeActions={dispatchMergeActions}
-                      />
-                    )
-                  }
+                  ([fieldName, fieldConfig]: [string, object]) => (
+                    <MergeField
+                      key={fieldName}
+                      label={fieldConfig.label || fieldName}
+                      value={mapReadonlyCustomFieldToComp({
+                        fieldConfig,
+                        parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
+                        key: fieldName,
+                        values: mergedPosition,
+                        hideLabel: true
+                      })}
+                      align={ALIGN_OPTIONS.CENTER}
+                      fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                      mergeState={mergeState}
+                      dispatchMergeActions={dispatchMergeActions}
+                    />
+                  )
                 )}
               <DictionaryField
                 wrappedComponent={MergeField}
@@ -759,33 +762,33 @@ const PositionColumn = ({
           )}
           {Settings.fields.position.customFields &&
             Object.entries(Settings.fields.position.customFields).map(
-              ([fieldName, fieldConfig]) => {
-                const fieldValue =
-                  position?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
-
-                return (
-                  <MergeField
-                    key={fieldName}
-                    fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
-                    label={fieldConfig.label || fieldName}
-                    // To be able to see arrays and objects
-                    value={JSON.stringify(fieldValue)}
-                    align={align}
-                    action={() =>
-                      dispatchMergeActions(
-                        setAMergedField(
-                          `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                          fieldValue,
-                          align
-                        )
+              ([fieldName, fieldConfig]: [string, object]) => (
+                <MergeField
+                  key={fieldName}
+                  fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                  label={fieldConfig.label || fieldName}
+                  value={mapReadonlyCustomFieldToComp({
+                    fieldConfig,
+                    parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
+                    key: fieldName,
+                    values: position,
+                    hideLabel: true
+                  })}
+                  align={align}
+                  action={() =>
+                    dispatchMergeActions(
+                      setAMergedField(
+                        `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                        position?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName],
+                        align
                       )
-                    }
-                    mergeState={mergeState}
-                    autoMerge
-                    dispatchMergeActions={dispatchMergeActions}
-                  />
-                )
-              }
+                    )
+                  }
+                  mergeState={mergeState}
+                  autoMerge
+                  dispatchMergeActions={dispatchMergeActions}
+                />
+              )
             )}
           <DictionaryField
             wrappedComponent={MergeField}
