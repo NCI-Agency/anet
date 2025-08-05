@@ -232,6 +232,25 @@ const GQL_GET_ORGANIZATION = gql`
         }
       }
     }
+
+    eventSeriesByOrganization(orgUuid: $uuid) {
+      uuid
+      name
+      status
+      description
+      ownerOrg {
+        uuid
+        shortName
+      }
+      hostOrg {
+        uuid
+        shortName
+      }
+      adminOrg {
+        uuid
+        shortName
+      }
+    }
   }
 
   ${GQL_LOCATION_FIELDS}
@@ -284,6 +303,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   }
   const organization = new Organization(data ? data.organization : {})
   const allTasks = data?.taskList?.list ?? []
+  const allEventSeries = data?.eventSeriesByOrganization ?? []
 
   const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
@@ -659,12 +679,12 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 )}
               </Fieldset>
 
-              {!!Object.keys(allTasks).length && (
+              {(allTasks.length > 0 || allEventSeries.length > 0) && (
                 <Fieldset
                   id="syncMatrix"
                   title={`Sync matrix for ${organization.shortName}`}
                 >
-                  <EventMatrix tasks={allTasks} />
+                  <EventMatrix tasks={allTasks} eventSeries={allEventSeries} />
                 </Fieldset>
               )}
 

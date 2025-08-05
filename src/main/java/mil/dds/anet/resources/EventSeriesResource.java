@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.Person;
@@ -101,6 +102,15 @@ public class EventSeriesResource {
     AnetAuditLogger.log("EventSeries {} updated by {}", eventSeries, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
+  }
+
+  @GraphQLQuery(name = "eventSeriesByOrganization")
+  public List<EventSeries> getEventSeriesByOrganization(@GraphQLArgument(name = "orgUuid") String orgUuid) {
+    if (orgUuid == null || orgUuid.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Organization UUID must be provided");
+    }
+
+    return dao.findByOrganizationUuid(orgUuid);
   }
 
   private void validateEventSeries(final Person user, final EventSeries eventSeries) {
