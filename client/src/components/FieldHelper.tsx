@@ -288,8 +288,8 @@ interface ReadonlyFieldProps {
 }
 
 export const ReadonlyField = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  field = {}, // { name, value, onChange, onBlur }
+  form = {}, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
   asA,
   children,
@@ -342,8 +342,8 @@ interface SpecialFieldProps {
 }
 
 export const SpecialField = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  field = {}, // { name, value, onChange, onBlur }
+  form = {}, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
   children,
   extraColElem,

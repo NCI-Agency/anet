@@ -232,7 +232,7 @@ const LikertScale = ({
       )}
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
 
-      {onChange && (editable || (value && value >= scale.domain()[0])) && (
+      {((onChange && editable) || (value && value >= scale.domain()[0])) && (
         <g ref={cursorRef}>
           <polygon
             points="0,0 13,13 13,30 -13,30 -13,13"
