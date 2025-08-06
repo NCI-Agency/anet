@@ -113,6 +113,16 @@ public class EventSeriesResource {
     return dao.findByOrganizationUuid(orgUuid);
   }
 
+  @GraphQLQuery(name = "eventSeriesByTask")
+  public List<EventSeries> getEventSeriesByTask(
+      @GraphQLArgument(name = "taskUuid") String taskUuid) {
+    if (taskUuid == null || taskUuid.trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task UUID must be provided");
+    }
+
+    return dao.findByTaskUuid(taskUuid);
+  }
+
   private void validateEventSeries(final Person user, final EventSeries eventSeries) {
     if (eventSeries.getStatus() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

@@ -115,4 +115,25 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
     .map(new EventSeriesMapper())
     .list();
     }
+
+  public List<EventSeries> findByTaskUuid(String taskUuid) {
+  return getDbHandle().createQuery(
+    "/* findByTaskUuid */ SELECT " +
+    "  es.\"uuid\" AS \"eventSeries_uuid\", " +
+    "  es.\"status\" AS \"eventSeries_status\", " +
+    "  es.\"name\" AS \"eventSeries_name\", " +
+    "  es.\"description\" AS \"eventSeries_description\", " +
+    "  es.\"ownerOrgUuid\" AS \"eventSeries_ownerOrgUuid\", " +
+    "  es.\"hostOrgUuid\" AS \"eventSeries_hostOrgUuid\", " +
+    "  es.\"adminOrgUuid\" AS \"eventSeries_adminOrgUuid\", " +
+    "  es.\"createdAt\" AS \"eventSeries_createdAt\", " +
+    "  es.\"updatedAt\" AS \"eventSeries_updatedAt\" " +
+    "FROM \"eventSeries\" es " +
+    "JOIN \"events\" e ON e.\"eventSeriesUuid\" = es.uuid " +
+    "JOIN \"eventTasks\" et ON et.\"eventUuid\" = e.uuid " +
+    "WHERE et.\"taskUuid\" = :taskUuid")
+    .bind("taskUuid", taskUuid)
+    .map(new EventSeriesMapper())
+    .list();
+  }
 }
