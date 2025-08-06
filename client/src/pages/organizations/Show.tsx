@@ -679,7 +679,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 )}
               </Fieldset>
 
-              {(allTasks.length > 0 || allEventSeries.length > 0) && (
+              {(allTasks.length || allEventSeries.length) && (
                 <Fieldset
                   id="syncMatrix"
                   title={`Sync matrix for ${organization.shortName}`}

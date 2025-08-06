@@ -105,9 +105,11 @@ public class EventSeriesResource {
   }
 
   @GraphQLQuery(name = "eventSeriesByOrganization")
-  public List<EventSeries> getEventSeriesByOrganization(@GraphQLArgument(name = "orgUuid") String orgUuid) {
+  public List<EventSeries> getEventSeriesByOrganization(
+      @GraphQLArgument(name = "orgUuid") String orgUuid) {
     if (orgUuid == null || orgUuid.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Organization UUID must be provided");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Organization UUID must be provided");
     }
 
     return dao.findByOrganizationUuid(orgUuid);
