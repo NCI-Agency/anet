@@ -28,10 +28,10 @@ const EXAMPLE_PEOPLE = {
     notes: ["Merge one person note", "A really nice person to work with"],
     perUuid: "3cb2076c-5317-47fe-86ad-76f298993917",
     posUuid: "885dd6bf-4647-4ef7-9bc4-4dd2826064bb",
-    colourOptions: '"RED"',
-    numberFieldName: '"5"',
-    birthday: '"2003-01-31T23:00:00.000Z"',
-    politicalPosition: '"MIDDLE"'
+    colourOptions: "Red",
+    numberField: "5",
+    birthday: `${moment("2003-01-31T23:00:00.000Z").format("D MMMM YYYY")}`,
+    politicalPosition: "Middle"
   },
   validRight: {
     search: "loser",
@@ -55,10 +55,10 @@ const EXAMPLE_PEOPLE = {
     notes: ["Merge two person note"],
     perUuid: "c725aef3-cdd1-4baf-ac72-f28219b234e9",
     posUuid: "4dc40a27-19ae-4e03-a4f3-55b2c768725f",
-    colourOptions: '"RED"',
-    numberFieldName: '"6"',
-    birthday: '"2010-11-11T23:00:00.000Z"',
-    politicalPosition: '"MIDDLE"'
+    colourOptions: "Red",
+    numberField: "6",
+    birthday: `${moment("2010-11-11T23:00:00.000Z").format("D MMMM YYYY")}`,
+    politicalPosition: "Middle"
   },
   userRight: {
     search: "andrew",
@@ -80,8 +80,8 @@ const EXAMPLE_PEOPLE = {
     ],
     biography: "Andrew is the EF 1 Manager",
     notes: ["A really nice person to work with"],
-    colourOptions: '""',
-    numberFieldName: "null",
+    colourOptions: "",
+    numberField: "",
     birthday: "",
     politicalPosition: ""
   }
@@ -368,7 +368,7 @@ describe("Merge people who are both non-users", () => {
         await (
           await MergePeople.getColumnContent("mid", "Number field")
         ).getText()
-      ).to.eq(EXAMPLE_PEOPLE.validLeft.numberFieldName)
+      ).to.eq(EXAMPLE_PEOPLE.validLeft.numberField)
     }
     expect(
       await (
@@ -428,7 +428,7 @@ describe("Merge people who are both non-users", () => {
         await (
           await MergePeople.getColumnContent("mid", "Number field")
         ).getText()
-      ).to.eq(EXAMPLE_PEOPLE.validRight.numberFieldName)
+      ).to.eq(EXAMPLE_PEOPLE.validRight.numberField)
     }
     expect(
       await (
@@ -536,7 +536,7 @@ describe("Merge people who are both non-users", () => {
     if (hasCustomFields) {
       await (await MergePeople.getSelectButton("left", "Number field")).click()
       await MergePeople.waitForColumnToChange(
-        EXAMPLE_PEOPLE.validLeft.numberFieldName,
+        EXAMPLE_PEOPLE.validLeft.numberField,
         "mid",
         "Number field"
       )
@@ -544,7 +544,7 @@ describe("Merge people who are both non-users", () => {
         await (
           await MergePeople.getColumnContent("mid", "Number field")
         ).getText()
-      ).to.equal(EXAMPLE_PEOPLE.validLeft.numberFieldName)
+      ).to.equal(EXAMPLE_PEOPLE.validLeft.numberField)
     }
 
     await (await MergePeople.getSelectButton("left", "Date of birth")).click()
@@ -711,7 +711,7 @@ describe("Merge user with non-user", () => {
         await (
           await MergePeople.getColumnContent("mid", "Number field")
         ).getText()
-      ).to.eq(EXAMPLE_PEOPLE.validLeft.numberFieldName)
+      ).to.eq(EXAMPLE_PEOPLE.validLeft.numberField)
     }
     expect(
       await (
@@ -783,7 +783,7 @@ describe("Merge user with non-user", () => {
         await (
           await MergePeople.getColumnContent("mid", "Number field")
         ).getText()
-      ).to.eq(EXAMPLE_PEOPLE.userRight.numberFieldName)
+      ).to.eq(EXAMPLE_PEOPLE.userRight.numberField)
     }
     expect(
       await (
