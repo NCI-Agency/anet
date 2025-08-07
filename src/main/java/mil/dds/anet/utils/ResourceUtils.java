@@ -113,7 +113,8 @@ public class ResourceUtils {
     }
 
     try {
-      a.setAssessmentValues(Utils.sanitizeJson(a.getAssessmentValues()));
+      a.setAssessmentValues(
+          Utils.sanitizeJson(a.getAssessmentKey(), a.getAssessmentValues(), true));
     } catch (JsonProcessingException e) {
       a.setAssessmentValues(null);
       logger.error("Unable to process Json, payload discarded", e);

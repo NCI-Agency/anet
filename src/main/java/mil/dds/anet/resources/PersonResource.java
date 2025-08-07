@@ -109,7 +109,7 @@ public class PersonResource {
         p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
-        p.getCustomSensitiveInformation());
+        p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Person {} created by {}", created, user);
     return created;
@@ -222,7 +222,7 @@ public class PersonResource {
         p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
-        p.getCustomSensitiveInformation());
+        p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows

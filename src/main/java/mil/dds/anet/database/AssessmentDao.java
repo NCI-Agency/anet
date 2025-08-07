@@ -475,7 +475,8 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
   private void checkAssessmentRecurrence(final Assessment assessment,
       final String recurrenceString) {
     try {
-      final JsonNode jsonNode = Utils.parseJsonSafe(assessment.getAssessmentValues());
+      final JsonNode jsonNode = Utils.parseJsonSafe(assessment.getAssessmentKey(),
+          assessment.getAssessmentValues(), true);
       if (jsonNode == null || !jsonNode.isObject() || !jsonNode.has(JSON_ASSESSMENT_RECURRENCE)) {
         throw new IllegalArgumentException("Invalid assessment contents");
       }

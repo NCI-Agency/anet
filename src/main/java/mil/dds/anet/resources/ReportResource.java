@@ -191,7 +191,7 @@ public class ReportResource {
     final Report created = reportDao.insert(r, author);
 
     DaoUtils.saveCustomSensitiveInformation(author, ReportDao.TABLE_NAME, created.getUuid(),
-        r.getCustomSensitiveInformation());
+        r.customSensitiveInformationKey(), r.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Report {} created by author {} ", created, author);
     return created;
@@ -353,7 +353,7 @@ public class ReportResource {
     }
 
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
-        r.getCustomSensitiveInformation());
+        r.customSensitiveInformationKey(), r.getCustomSensitiveInformation());
 
     // Return the report in the response; used in autoSave by the client form
     return existing;

@@ -460,7 +460,8 @@ public class PendingAssessmentsHelper {
         final Map<Recurrence, Instant> assessmentsByRecurrence = new EnumMap<>(Recurrence.class);
         assessments.stream().forEach(assessment -> {
           try {
-            final JsonNode assessmentJson = Utils.parseJsonSafe(assessment.getAssessmentValues());
+            final JsonNode assessmentJson = Utils.parseJsonSafe(assessment.getAssessmentKey(),
+                assessment.getAssessmentValues(), true);
             final JsonNode recurrence = assessmentJson.get(JSON_ASSESSMENT_RECURRENCE);
             final JsonNode periodStart = assessmentJson.get(JSON_ASSESSMENT_PERIOD_START);
             if (periodStart != null && recurrence != null && shouldAddRecurrence(recurrenceSet,

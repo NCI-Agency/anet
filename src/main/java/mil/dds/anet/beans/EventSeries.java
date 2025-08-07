@@ -176,6 +176,16 @@ public class EventSeries extends AbstractCustomizableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.eventSeries.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.eventSeries.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o)
       return true;

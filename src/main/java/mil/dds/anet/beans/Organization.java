@@ -468,6 +468,16 @@ public class Organization extends AbstractEmailableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.organization.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.organization.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof Organization)) {
       return false;
