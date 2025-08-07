@@ -40,6 +40,7 @@ import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
+import InactiveTaskModal from "./InactiveTaskModal"
 
 const GQL_CREATE_TASK = gql`
   mutation ($task: TaskInput!) {
@@ -70,6 +71,8 @@ const TaskForm = ({
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [inactiveTaskModalVisible, setInactiveTaskModalVisible] =
+    useState(false)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -127,6 +130,10 @@ const TaskForm = ({
     }
   }
 
+  const inactiveDescendantTasks = initialValues.descendantTasks.filter(
+    ({ status }) => status === Model.STATUS.ACTIVE
+  )
+
   return (
     <Formik
       enableReinitialize
@@ -175,6 +182,18 @@ const TaskForm = ({
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
+            <InactiveTaskModal
+              showModal={inactiveTaskModalVisible}
+              tasks={inactiveDescendantTasks}
+              currentTask={initialValues}
+              onSuccess={() => {
+                setFieldValue("status", Model.STATUS.INACTIVE)
+                setInactiveTaskModalVisible(false)
+              }}
+              onCancel={() => {
+                setInactiveTaskModalVisible(false)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -286,7 +305,16 @@ const TaskForm = ({
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
+                  onChange={value => {
+                    if (
+                      value === Model.STATUS.INACTIVE &&
+                      inactiveDescendantTasks.length
+                    ) {
+                      setInactiveTaskModalVisible(true)
+                    } else {
+                      setFieldValue("status", value)
+                    }
+                  }}
                 />
 
                 <DictionaryField
