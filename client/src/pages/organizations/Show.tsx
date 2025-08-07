@@ -12,6 +12,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import EventCollection from "components/EventCollection"
+import EventMatrix from "components/EventMatrix"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -201,6 +202,60 @@ const GQL_GET_ORGANIZATION = gql`
       ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
+
+    taskList(query: { taskedOrgUuid: [$uuid], orgRecurseStrategy: ${RECURSE_STRATEGY.CHILDREN}, pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        selectable
+        ascendantTasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
+        descendantTasks {
+          uuid
+          shortName
+          selectable
+          ascendantTasks {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
+          }
+        }
+      }
+    }
+
+    eventSeriesList(query: { anyOrgUuid: [$uuid], pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        status
+        description
+        ownerOrg {
+          uuid
+          shortName
+        }
+        hostOrg {
+          uuid
+          shortName
+        }
+        adminOrg {
+          uuid
+          shortName
+        }
+      }
+    }
   }
 
   ${GQL_LOCATION_FIELDS}
@@ -252,6 +307,8 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
+  const allTasks = data?.taskList?.list ?? []
+  const allEventSeries = data?.eventSeriesList?.list ?? []
 
   const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
@@ -626,6 +683,15 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                   />
                 )}
               </Fieldset>
+
+              {(allTasks.length || allEventSeries.length) && (
+                <Fieldset
+                  id="syncMatrix"
+                  title={`Sync matrix for ${organization.shortName}`}
+                >
+                  <EventMatrix tasks={allTasks} eventSeries={allEventSeries} />
+                </Fieldset>
+              )}
 
               {Settings.fields.organization.customFields && (
                 <Fieldset title="Organization information" id="custom-fields">

@@ -17,19 +17,8 @@ import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
 
-const GET_EVENTSERIES_AND_TASKS = gql`
+const GET_TASKS = gql`
   query ($taskUuid: String, $includeTask: Boolean!) {
-    eventSeriesList(query: { pageSize: 0 }) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        uuid
-        name
-        description
-      }
-    }
-
     task(uuid: $taskUuid) @include(if: $includeTask) {
       uuid
       shortName
@@ -104,12 +93,14 @@ interface EventMatrixProps {
   pageDispatchers?: PageDispatchersPropType
   taskUuid: string
   tasks: any[]
+  eventSeries?: any[]
 }
 
 const EventMatrix = ({
   pageDispatchers,
   taskUuid,
-  tasks
+  tasks,
+  eventSeries
 }: EventMatrixProps) => {
   const [weekNumber, setWeekNumber] = useState(null)
   const [startDay, setStartDay] = useState(moment().startOf("week"))
@@ -157,12 +148,14 @@ const EventMatrix = ({
       engagementDateEnd: weekDays[6].endOf("day").toISOString()
     }
     fetchEventsAndReports(eventQuery, reportQuery).then(response => {
-      setEvents(response?.eventList?.list)
+      if (eventSeries !== null) {
+        setEvents(response?.eventList?.list)
+      }
       setReports(response?.reportList?.list)
     })
-  }, [weekDays, taskUuid, tasks])
+  }, [weekDays, taskUuid, tasks, eventSeries])
 
-  const { loading, error, data } = API.useApiQuery(GET_EVENTSERIES_AND_TASKS, {
+  const { loading, error, data } = API.useApiQuery(GET_TASKS, {
     taskUuid,
     includeTask
   })
@@ -174,12 +167,9 @@ const EventMatrix = ({
   if (done) {
     return result
   }
-  const eventSeries = data.eventSeriesList?.list
   const topLevelTask = data.task
   const allTasks = (
-    includeTask
-      ? [topLevelTask].concat(topLevelTask?.descendantTasks)
-      : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
+    includeTask ? [topLevelTask].concat(topLevelTask?.descendantTasks) : tasks
   ).filter(t => t.selectable)
   // if topLevelTask task is not in allTasks, add it at the top
   if (includeTask && !allTasks.find(t => t.uuid === topLevelTask?.uuid)) {
