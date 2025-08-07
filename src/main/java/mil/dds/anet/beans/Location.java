@@ -311,6 +311,16 @@ public class Location extends AbstractCustomizableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.location.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.location.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof Location other)) {
       return false;

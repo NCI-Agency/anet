@@ -25,6 +25,7 @@ import mil.dds.anet.test.client.ReportPerson;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
+import mil.dds.anet.test.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -1590,6 +1591,21 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
     assertThat(nrDeleted).isOne();
+  }
+
+  @Test
+  void testAssessmentSanitize() {
+    final String assessmentKey = "fields.regular.person.assessments.interlocutorQuarterly";
+    final String recurrence = "quarterly";
+    final GenericRelatedObjectInput testPersonNroInput =
+        createAssessmentRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
+    final UtilsTest.InOut combinedHtmlTestCase = UtilsTest.getCombinedHtmlTestCase();
+    final AssessmentInput testAssessmentInput = createAssessment(assessmentKey,
+        combinedHtmlTestCase.getInput().replaceAll("\"", "\\\\\""), recurrence, testPersonNroInput);
+    final Assessment createdAssessment =
+        succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
+    assertThat(createdAssessment.getAssessmentValues()).isEqualTo(createAssessmentValues(
+        combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""), recurrence));
   }
 
   private AssessmentInput createAssessment(final String assessmentKey, final String text,

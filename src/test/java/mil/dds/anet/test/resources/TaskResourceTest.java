@@ -42,8 +42,11 @@ class TaskResourceTest extends AbstractResourceTest {
                 UtilsTest.getCombinedJsonTestCase().getInput())));
     assertThat(taskA).isNotNull();
     assertThat(taskA.getUuid()).isNotNull();
-    // check that JSON of customFields is sanitized after create
-    assertThat(taskA.getCustomFields()).isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.task.customFields") != null) {
+      // check that JSON of customFields is sanitized after create
+      assertThat(taskA.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
 
     final TaskInput taskAInput = getTaskInput(taskA);
 
@@ -82,9 +85,11 @@ class TaskResourceTest extends AbstractResourceTest {
     final Task returnedA =
         withCredentials(adminUser, t -> queryExecutor.task(FIELDS, taskA.getUuid()));
     assertThat(returnedA.getLongName()).isEqualTo(taskAInput.getLongName());
-    // check that JSON of customFields is sanitized after update
-    assertThat(returnedA.getCustomFields())
-        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.task.customFields") != null) {
+      // check that JSON of customFields is sanitized after update
+      assertThat(returnedA.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
 
     // update description
     taskAInput.setDescription(UtilsTest.getCombinedHtmlTestCase().getInput());

@@ -541,7 +541,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
       // Update customSensitiveInformation for winner
       DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, PersonDao.TABLE_NAME, winnerUuid,
-          winner.getCustomSensitiveInformation());
+          winner.customSensitiveInformationKey(), winner.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 

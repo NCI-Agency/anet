@@ -402,6 +402,16 @@ public class Position extends AbstractEmailableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.position.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.position.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof Position)) {
       return false;

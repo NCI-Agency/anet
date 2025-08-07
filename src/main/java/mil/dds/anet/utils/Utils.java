@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,6 +52,16 @@ public class Utils {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
+
+  private static final String DICT_KEY_TYPE = "type";
+  private static final String DICT_VALUE_TYPE_SPECIAL_FIELD = "special_field";
+  private static final String DICT_VALUE_TYPE_ARRAY_OF_OBJECTS = "array_of_objects";
+  private static final String DICT_KEY_OBJECT_FIELDS = "objectFields";
+  private static final String DICT_KEY_WIDGET = "widget";
+  private static final String DICT_VALUE_WIDGET_RICH_TEXT_EDITOR = "richTextEditor";
+  private static final String DICT_KEY_QUESTIONS = "questions";
+  private static final String DICT_KEY_QUESTION_SETS = "questionSets";
+  private static final String TYPE_RICH_TEXT = "rich_text";
 
   /**
    * Crude method to check whether a uuid is purely integer, in which case it is probably a legacy
@@ -301,7 +310,19 @@ public class Utils {
     return HTML_POLICY_DEFINITION.sanitize(input);
   }
 
-  public static String sanitizeJson(String inputJson) throws JsonProcessingException {
+  public static String sanitizeJson(String dictKey, String inputJson, boolean isAssessment)
+      throws JsonProcessingException {
+    @SuppressWarnings("unchecked")
+    final Map<String, Map<String, Object>> fieldsDefinition =
+        (Map<String, Map<String, Object>>) ApplicationContextProvider.getDictionary()
+            .getDictionaryEntry(dictKey);
+    final Map<String, String> typeDefs =
+        extractCustomFieldsTypeDefinitions(fieldsDefinition, isAssessment);
+    return sanitizeJson(typeDefs, inputJson);
+  }
+
+  public static String sanitizeJson(Map<String, String> typeDefs, String inputJson)
+      throws JsonProcessingException {
     if (inputJson == null) {
       // `JsonSanitizer.sanitize(null)` would return `"null"` in this case,
       // but we prefer plain `null`
@@ -309,40 +330,117 @@ public class Utils {
     }
     final String sanitizedJson = JsonSanitizer.sanitize(inputJson);
     final JsonNode jsonTree = mapper.readTree(sanitizedJson);
-    internalSanitizeJsonForHtml(jsonTree);
+    internalSanitizeJsonForHtml(typeDefs, null, jsonTree);
     return mapper.writeValueAsString(jsonTree);
   }
 
-  private static void internalSanitizeJsonForHtml(JsonNode jsonNode) {
+  private static Map<String, String> extractCustomFieldsTypeDefinitions(
+      Map<String, Map<String, Object>> fieldsDefinition, boolean isAssessment) {
+    if (fieldsDefinition == null) {
+      return Map.of();
+    }
+    return isAssessment ? extractAssessmentTypeDefinitions(fieldsDefinition, null)
+        : extractCustomFieldsTypeDefinitions(fieldsDefinition, null);
+  }
+
+  private static String formatKey(String parentKey, String key) {
+    if (parentKey == null) {
+      return key;
+    }
+    return String.format("%s.%s", parentKey, key);
+  }
+
+  private static String getType(Map<String, Object> def) {
+    final String type = (String) def.get(DICT_KEY_TYPE);
+    final String widget = (String) def.get(DICT_KEY_WIDGET);
+    if (DICT_VALUE_TYPE_SPECIAL_FIELD.equals(type)
+        && DICT_VALUE_WIDGET_RICH_TEXT_EDITOR.equals(widget)) {
+      return TYPE_RICH_TEXT;
+    } else {
+      return type;
+    }
+  }
+
+  private static Map<String, String> extractCustomFieldsTypeDefinitions(
+      Map<String, Map<String, Object>> fieldsDefinition, String parentKey) {
+    final Map<String, String> typeDefinitions = new HashMap<>();
+    fieldsDefinition.forEach((k, v) -> {
+      final String k2 = formatKey(parentKey, k);
+      typeDefinitions.put(k2, getType(v));
+      if (DICT_VALUE_TYPE_ARRAY_OF_OBJECTS.equals(v.get(DICT_KEY_TYPE))) {
+        @SuppressWarnings("unchecked")
+        final Map<String, Map<String, Object>> objectFieldsDefinition =
+            (Map<String, Map<String, Object>>) v.get(DICT_KEY_OBJECT_FIELDS);
+        typeDefinitions.putAll(extractCustomFieldsTypeDefinitions(objectFieldsDefinition, k2));
+      }
+    });
+    return typeDefinitions;
+  }
+
+  private static Map<String, String> extractAssessmentTypeDefinitions(
+      Map<String, Map<String, Object>> fieldsDefinition, String parentKey) {
+    final Map<String, String> typeDefinitions = new HashMap<>();
+    final Map<String, Object> questions = fieldsDefinition.get(DICT_KEY_QUESTIONS);
+    if (questions != null) {
+      questions.forEach((k, v) -> {
+        final String key = parentKey == null ? formatKey(parentKey, k)
+            : formatKey(formatKey(parentKey, DICT_KEY_QUESTIONS), k);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> value = (Map<String, Object>) v;
+        typeDefinitions.put(key, getType(value));
+        if (DICT_VALUE_TYPE_ARRAY_OF_OBJECTS.equals(value.get(DICT_KEY_TYPE))) {
+          @SuppressWarnings("unchecked")
+          final Map<String, Map<String, Object>> objectFieldsDefinition =
+              (Map<String, Map<String, Object>>) value.get(DICT_KEY_OBJECT_FIELDS);
+          typeDefinitions.putAll(extractAssessmentTypeDefinitions(objectFieldsDefinition, key));
+        }
+      });
+    }
+    final Map<String, Object> questionSets = fieldsDefinition.get(DICT_KEY_QUESTION_SETS);
+    if (questionSets != null) {
+      questionSets.forEach((k, v) -> {
+        final String key = formatKey(formatKey(parentKey, DICT_KEY_QUESTION_SETS), k);
+        @SuppressWarnings("unchecked")
+        final Map<String, Map<String, Object>> value = (Map<String, Map<String, Object>>) v;
+        typeDefinitions.putAll(extractAssessmentTypeDefinitions(value, key));
+      });
+    }
+    return typeDefinitions;
+  }
+
+  private static void internalSanitizeJsonForHtml(Map<String, String> typeDefs, String parentKey,
+      JsonNode jsonNode) {
     if (jsonNode.isObject()) {
       final ObjectNode objectNode = (ObjectNode) jsonNode;
-      for (final Iterator<Map.Entry<String, JsonNode>> entryIter = objectNode.fields(); entryIter
-          .hasNext();) {
-        final Map.Entry<String, JsonNode> entry = entryIter.next();
-        final JsonNode newValue = entry.getValue().isTextual()
-            ? objectNode.textNode(sanitizeHtml(entry.getValue().asText()))
-            : entry.getValue();
+      for (final Map.Entry<String, JsonNode> entry : objectNode.properties()) {
         final String sanitizedKey = sanitizeHtml(entry.getKey());
         if (!entry.getKey().equals(sanitizedKey)) {
           objectNode.remove(entry.getKey());
         }
+        final String k = formatKey(parentKey, sanitizedKey);
+        final String typeDef = typeDefs.get(k);
+        final JsonNode newValue = TYPE_RICH_TEXT.equals(typeDef)
+            ? objectNode.textNode(sanitizeHtml(entry.getValue().asText()))
+            : entry.getValue();
         objectNode.set(sanitizedKey, newValue);
-        internalSanitizeJsonForHtml(entry.getValue());
+        internalSanitizeJsonForHtml(typeDefs, k, entry.getValue());
       }
     } else if (jsonNode.isArray()) {
       final ArrayNode arrayNode = (ArrayNode) jsonNode;
       for (int i = 0; i < arrayNode.size(); i++) {
-        if (arrayNode.get(i).isTextual()) {
-          arrayNode.set(i, arrayNode.textNode(sanitizeHtml(arrayNode.get(i).asText())));
+        final JsonNode arrayElement = arrayNode.get(i);
+        if (arrayElement.isTextual()) {
+          arrayNode.set(i, arrayNode.textNode(sanitizeHtml(arrayElement.asText())));
         } else {
-          internalSanitizeJsonForHtml(arrayNode.get(i));
+          internalSanitizeJsonForHtml(typeDefs, parentKey, arrayElement);
         }
       }
     }
   }
 
-  public static JsonNode parseJsonSafe(String inputJson) throws JsonProcessingException {
-    final String sanitizedJson = Utils.sanitizeJson(inputJson);
+  public static JsonNode parseJsonSafe(String dictKey, String inputJson, boolean isAssessment)
+      throws JsonProcessingException {
+    final String sanitizedJson = Utils.sanitizeJson(dictKey, inputJson, isAssessment);
     return sanitizedJson == null ? null : mapper.readTree(sanitizedJson);
   }
 

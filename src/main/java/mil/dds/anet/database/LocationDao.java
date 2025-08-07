@@ -170,7 +170,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
 
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, LocationDao.TABLE_NAME,
-        winnerLocationUuid, winnerLocation.getCustomSensitiveInformation());
+        winnerLocationUuid, winnerLocation.customSensitiveInformationKey(),
+        winnerLocation.getCustomSensitiveInformation());
     // Delete customSensitiveInformation for loser
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserLocationUuid);
 

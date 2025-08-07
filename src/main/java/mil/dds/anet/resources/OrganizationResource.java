@@ -130,7 +130,7 @@ public class OrganizationResource {
         org.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
-        org.getCustomSensitiveInformation());
+        org.customSensitiveInformationKey(), org.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Organization {} created by {}", created, user);
     return created;
@@ -169,7 +169,7 @@ public class OrganizationResource {
     final int numRows = update(user, org, existing);
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, org.getUuid(),
-        org.getCustomSensitiveInformation());
+        org.customSensitiveInformationKey(), org.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Organization {} updated by {}", org, user);
 

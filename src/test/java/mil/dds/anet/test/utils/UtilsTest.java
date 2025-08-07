@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 
@@ -144,11 +145,58 @@ public class UtilsTest {
   }
 
   @Test
-  public void testSanitizeJson() throws JsonProcessingException {
+  void testSanitizeJson() throws JsonProcessingException {
     final List<InOut> testCases = getJsonTestCases();
+    final Map<String, String> typeDefs = Map.of("bool", "boolean", "html", "rich_text");
+    // With the proper typeDefs, the HTML in the JSON should be sanitized
     for (final InOut testCase : testCases) {
-      assertThat(Utils.sanitizeJson(testCase.getInput())).isEqualTo(testCase.getOutput());
+      assertThat(Utils.sanitizeJson(typeDefs, testCase.getInput())).isEqualTo(testCase.getOutput());
     }
+  }
+
+  private static InOut getCombinedJsonTestCaseNoSanitize() {
+    final InOut combinedHtmlTestCase = getCombinedHtmlTestCase();
+    final String input = String.format("{\"html\":\"%s\"}",
+        combinedHtmlTestCase.getInput().replaceAll("\"", "\\\\\""));
+    return new InOut(input, input);
+  }
+
+  @Test
+  void testNoSanitizeJson() throws JsonProcessingException {
+    final InOut testCase = getCombinedJsonTestCaseNoSanitize();
+    final Map<String, String> typeDefs = Map.of();
+    // Without typeDefs, the HTML in the JSON should *not* be sanitized
+    assertThat(Utils.sanitizeJson(typeDefs, testCase.getInput())).isEqualTo(testCase.getOutput());
+  }
+
+  @Test
+  void testSanitizeJsonWithNestedFields() throws JsonProcessingException {
+    final Map<String, String> typeDefs = Map.of("html", "rich_text", "arrayField.html", "rich_text",
+        "arrayField.subArrayField.html", "rich_text");
+    final String jsonFormat = "{%1$s,\"arrayField\":[{%1$s,\"subArrayField\":[{%1$s}]}]}";
+    testSanitizeJsonWithNesting(typeDefs, jsonFormat);
+  }
+
+  @Test
+  void testSanitizeJsonWithNestedQuestions() throws JsonProcessingException {
+    final Map<String, String> typeDefs =
+        Map.of("html", "rich_text", "questionSets.topLevel.questions.html", "rich_text",
+            "questionSets.topLevel.questionSets.nestedLevel.questions.html", "rich_text");
+    final String jsonFormat = "{%1$s,\"questionSets\":{\"topLevel\":{\"questions\":{%1$s},"
+        + "\"questionSets\":{\"nestedLevel\":{\"questions\":{%1$s}}}}}}";
+    testSanitizeJsonWithNesting(typeDefs, jsonFormat);
+  }
+
+  private void testSanitizeJsonWithNesting(Map<String, String> typeDefs,
+      String jsonFormatWithHtmlFields) throws JsonProcessingException {
+    final String htmlFieldFormat = "\"html\":\"%1$s\"";
+    final String jsonFormat = String.format(jsonFormatWithHtmlFields, htmlFieldFormat);
+    final InOut combinedHtmlTestCase = getCombinedHtmlTestCase();
+    final String input =
+        String.format(jsonFormat, combinedHtmlTestCase.getInput().replaceAll("\"", "\\\\\""));
+    final String output =
+        String.format(jsonFormat, combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""));
+    assertThat(Utils.sanitizeJson(typeDefs, input)).isEqualTo(output);
   }
 
   @Test
