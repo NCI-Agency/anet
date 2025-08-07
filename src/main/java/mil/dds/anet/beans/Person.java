@@ -408,6 +408,16 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.person.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.person.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof Person)) {
       return false;
