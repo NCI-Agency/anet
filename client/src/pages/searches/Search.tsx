@@ -39,6 +39,7 @@ import SubNav from "components/SubNav"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
+import MyPreferences from "pages/preferences/MyPreferences"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -72,6 +73,17 @@ import Settings from "settings"
 const MAX_NR_OF_EXPORTS = 1000
 export const UNLIMITED_EXPORTS_COMMUNITY = "UNLIMITED_EXPORTS_COMMUNITY"
 
+const GQL_GET_PREFERENCES = gql`
+  query {
+    preferences {
+      uuid
+      name
+      type
+      description
+      defaultValue
+    }
+  }
+`
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {
     createSavedSearch(savedSearch: $savedSearch) {
@@ -112,6 +124,7 @@ const Search = ({
   const [error, setError] = useState(null)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
+  const [showExportResults, setShowExportResults] = useState(false)
   const [numOrganizations, setNumOrganizations] = useState(null)
   const [numPeople, setNumPeople] = useState(null)
   const [numPositions, setNumPositions] = useState(null)
@@ -407,29 +420,16 @@ const Search = ({
               <Dropdown.Menu className="super-colors">
                 <Dropdown.Item
                   onClick={() =>
-                    exportResults(
-                      searchQueryParams,
-                      queryTypes,
+                    exportSearchResults(
                       "xlsx",
-                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                      exportMaxResults,
-                      setError
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                   }
                 >
                   Excel (xlsx)
                 </Dropdown.Item>
                 <Dropdown.Item
-                  onClick={() =>
-                    exportResults(
-                      searchQueryParams,
-                      queryTypes,
-                      "kml",
-                      "application/xml",
-                      exportMaxResults,
-                      setError
-                    )
-                  }
+                  onClick={() => exportSearchResults("kml", "application/xml")}
                 >
                   Google Earth (kml)
                 </Dropdown.Item>
@@ -437,6 +437,15 @@ const Search = ({
             </Dropdown>
           </>
         )}
+        <span className="ms-2">
+          <Button
+            onClick={openExportResultsModal}
+            id="openExportResultsButton"
+            variant="outline-secondary"
+          >
+            Export preferences
+          </Button>
+        </span>
         <span className="ms-2">
           <Button
             onClick={openSaveModal}
@@ -705,6 +714,7 @@ const Search = ({
         </Fieldset>
       )}
       {renderSaveModal()}
+      {renderExportModal()}
     </div>
   )
 
@@ -758,6 +768,27 @@ const Search = ({
               </Form>
             )}
           </Formik>
+        </Modal.Body>
+      </Modal>
+    )
+  }
+
+  function renderExportModal() {
+    return (
+      <Modal
+        centered
+        show={showExportResults}
+        onHide={closeExportResultsModal}
+        size="xl"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Export preferences</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <MyPreferences
+            category="export"
+            actionOnSubmit={closeExportResultsModal}
+          />
         </Modal.Body>
       </Modal>
     )
@@ -840,6 +871,29 @@ const Search = ({
 
   function closeSaveModal() {
     setShowSaveSearch(false)
+  }
+
+  function openExportResultsModal() {
+    setShowExportResults(true)
+  }
+
+  function closeExportResultsModal() {
+    setShowExportResults(false)
+  }
+
+  async function exportSearchResults(exportType, contentType) {
+    // Get generic preferences that exportResults needs to decide on which columns to include
+    const genericPreferences = await API.query(GQL_GET_PREFERENCES, {})
+    await exportResults(
+      genericPreferences.preferences,
+      currentUser.preferences,
+      searchQueryParams,
+      queryTypes,
+      exportType,
+      contentType,
+      exportMaxResults,
+      setError
+    )
   }
 }
 
