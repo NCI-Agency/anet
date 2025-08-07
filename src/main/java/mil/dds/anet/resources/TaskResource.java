@@ -16,6 +16,8 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery;
+import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -126,9 +128,17 @@ public class TaskResource {
     }
 
     try {
+      // Load the existing task, so we can check for differences.
+      final Task existing = dao.getByUuid(t.getUuid());
       final int numRows = dao.update(t);
       if (numRows == 0) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process task update");
+      }
+
+      if (t.getStatus() == Task.Status.INACTIVE && existing.getStatus() != Task.Status.INACTIVE) {
+        int updatedDescendants = dao.setStatusForDescendantTasks(t.getUuid(), Task.Status.INACTIVE);
+        AnetAuditLogger.log("Task {} set to INACTIVE, updated {} descendants", t,
+            updatedDescendants);
       }
       // Update positions:
       if (t.getResponsiblePositions() != null) {
@@ -146,8 +156,6 @@ public class TaskResource {
             oldOrg -> dao.removeTaskedOrganizationsFromTask(DaoUtils.getUuid(oldOrg), t.getUuid()));
       }
 
-      // Load the existing task, so we can check for differences.
-      final Task existing = dao.getByUuid(t.getUuid());
       final List<ApprovalStep> existingPlanningApprovalSteps =
           existing.loadPlanningApprovalSteps(engine.getContext()).join();
       final List<ApprovalStep> existingApprovalSteps =
