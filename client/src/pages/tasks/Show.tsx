@@ -163,22 +163,28 @@ const GQL_GET_TASK = gql`
       ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
-    eventSeriesByTask(taskUuid: $uuid) {
-      uuid
-      name
-      status
-      description
-      ownerOrg {
+
+    eventSeriesList(query: { eventTaskUuid: [$uuid], pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
         uuid
-        shortName
-      }
-      hostOrg {
-        uuid
-        shortName
-      }
-      adminOrg {
-        uuid
-        shortName
+        name
+        status
+        description
+        ownerOrg {
+          uuid
+          shortName
+        }
+        hostOrg {
+          uuid
+          shortName
+        }
+        adminOrg {
+          uuid
+          shortName
+        }
       }
     }
   }
@@ -219,7 +225,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
     Model.populateCustomFields(data.task)
   }
   const task = new Task(data ? data.task : {})
-  const eventSeries = data?.eventSeriesByTask || []
+  const eventSeries = data?.eventSeriesList?.list || []
 
   Model.populateEntitiesAssessmentsCustomFields(task.descendantTasks)
 
