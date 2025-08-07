@@ -233,22 +233,27 @@ const GQL_GET_ORGANIZATION = gql`
       }
     }
 
-    eventSeriesByOrganization(orgUuid: $uuid) {
-      uuid
-      name
-      status
-      description
-      ownerOrg {
+    eventSeriesList(query: { anyOrgUuid: [$uuid], pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
         uuid
-        shortName
-      }
-      hostOrg {
-        uuid
-        shortName
-      }
-      adminOrg {
-        uuid
-        shortName
+        name
+        status
+        description
+        ownerOrg {
+          uuid
+          shortName
+        }
+        hostOrg {
+          uuid
+          shortName
+        }
+        adminOrg {
+          uuid
+          shortName
+        }
       }
     }
   }
@@ -303,7 +308,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   }
   const organization = new Organization(data ? data.organization : {})
   const allTasks = data?.taskList?.list ?? []
-  const allEventSeries = data?.eventSeriesByOrganization ?? []
+  const allEventSeries = data?.eventSeriesList?.list ?? []
 
   const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =

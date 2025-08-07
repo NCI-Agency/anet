@@ -17,6 +17,12 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
   @GraphQLQuery
   @GraphQLInputField
   private List<String> adminOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> anyOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> eventTaskUuid;
 
   public EventSeriesSearchQuery() {
     super(EventSeriesSearchSortBy.NAME);
@@ -46,9 +52,26 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
     this.adminOrgUuid = adminOrgUuid;
   }
 
+  public List<String> getAnyOrgUuid() {
+    return anyOrgUuid;
+  }
+
+  public void setAnyOrgUuid(List<String> anyOrgUuid) {
+    this.anyOrgUuid = anyOrgUuid;
+  }
+
+  public List<String> getEventTaskUuid() {
+    return eventTaskUuid;
+  }
+
+  public void setEventTaskUuid(List<String> eventTaskUuid) {
+    this.eventTaskUuid = eventTaskUuid;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), ownerOrgUuid, hostOrgUuid, adminOrgUuid);
+    return Objects.hash(super.hashCode(), ownerOrgUuid, hostOrgUuid, adminOrgUuid, anyOrgUuid,
+        eventTaskUuid);
   }
 
   @Override
@@ -58,7 +81,9 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
     }
     return super.equals(obj) && Objects.equals(getOwnerOrgUuid(), other.getOwnerOrgUuid())
         && Objects.equals(getHostOrgUuid(), other.getHostOrgUuid())
-        && Objects.equals(getAdminOrgUuid(), other.getAdminOrgUuid());
+        && Objects.equals(getAdminOrgUuid(), other.getAdminOrgUuid())
+        && Objects.equals(getAnyOrgUuid(), other.getAnyOrgUuid())
+        && Objects.equals(getEventTaskUuid(), other.getEventTaskUuid());
   }
 
   @Override
@@ -72,6 +97,12 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
     }
     if (adminOrgUuid != null) {
       clone.setAdminOrgUuid(new ArrayList<>(adminOrgUuid));
+    }
+    if (anyOrgUuid != null) {
+      clone.setAnyOrgUuid(new ArrayList<>(anyOrgUuid));
+    }
+    if (eventTaskUuid != null) {
+      clone.setEventTaskUuid(new ArrayList<>(eventTaskUuid));
     }
     return clone;
   }

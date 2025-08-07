@@ -85,7 +85,6 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
     }
   }
 
-
   @Override
   public AnetBeanList<EventSeries> search(EventSeriesSearchQuery query) {
     return new PostgresqlEventSeriesSearcher(databaseHandler).runSearch(query);
@@ -94,42 +93,5 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(EventSeries obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "eventSeries.uuid");
-  }
-
-  public List<EventSeries> findByOrganizationUuid(String orgUuid) {
-    return getDbHandle()
-        .createQuery("/* findByOrganizationUuid */ " + "SELECT DISTINCT "
-            + "  es.\"uuid\" AS \"eventSeries_uuid\", " + "  es.\"name\" AS \"eventSeries_name\", "
-            + "  es.\"description\" AS \"eventSeries_description\", "
-            + "  es.\"status\" AS \"eventSeries_status\", "
-            + "  es.\"ownerOrgUuid\" AS \"eventSeries_ownerOrgUuid\", "
-            + "  es.\"hostOrgUuid\" AS \"eventSeries_hostOrgUuid\", "
-            + "  es.\"adminOrgUuid\" AS \"eventSeries_adminOrgUuid\", "
-            + "  es.\"createdAt\" AS \"eventSeries_createdAt\", "
-            + "  es.\"updatedAt\" AS \"eventSeries_updatedAt\" " + "FROM \"eventSeries\" es "
-            + "LEFT JOIN \"events\" e ON e.\"eventSeriesUuid\" = es.\"uuid\" "
-            + "LEFT JOIN \"eventOrganizations\" eo ON eo.\"eventUuid\" = e.\"uuid\" " + "WHERE "
-            + "  es.\"ownerOrgUuid\" = :orgUuid " + "  OR es.\"hostOrgUuid\" = :orgUuid "
-            + "  OR es.\"adminOrgUuid\" = :orgUuid " + "  OR e.\"ownerOrgUuid\" = :orgUuid "
-            + "  OR e.\"hostOrgUuid\" = :orgUuid " + "  OR e.\"adminOrgUuid\" = :orgUuid "
-            + "  OR eo.\"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", orgUuid).map(new EventSeriesMapper()).list();
-  }
-
-  public List<EventSeries> findByTaskUuid(String taskUuid) {
-    return getDbHandle()
-        .createQuery("/* findByTaskUuid */ SELECT " + "  es.\"uuid\" AS \"eventSeries_uuid\", "
-            + "  es.\"status\" AS \"eventSeries_status\", "
-            + "  es.\"name\" AS \"eventSeries_name\", "
-            + "  es.\"description\" AS \"eventSeries_description\", "
-            + "  es.\"ownerOrgUuid\" AS \"eventSeries_ownerOrgUuid\", "
-            + "  es.\"hostOrgUuid\" AS \"eventSeries_hostOrgUuid\", "
-            + "  es.\"adminOrgUuid\" AS \"eventSeries_adminOrgUuid\", "
-            + "  es.\"createdAt\" AS \"eventSeries_createdAt\", "
-            + "  es.\"updatedAt\" AS \"eventSeries_updatedAt\" " + "FROM \"eventSeries\" es "
-            + "JOIN \"events\" e ON e.\"eventSeriesUuid\" = es.uuid "
-            + "JOIN \"eventTasks\" et ON et.\"eventUuid\" = e.uuid "
-            + "WHERE et.\"taskUuid\" = :taskUuid")
-        .bind("taskUuid", taskUuid).map(new EventSeriesMapper()).list();
   }
 }
