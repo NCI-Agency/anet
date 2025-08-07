@@ -404,7 +404,8 @@ public class OrganizationDao
 
       // Update customSensitiveInformation for winner
       DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, OrganizationDao.TABLE_NAME,
-          winnerOrganizationUuid, winnerOrganization.getCustomSensitiveInformation());
+          winnerOrganizationUuid, winnerOrganization.customSensitiveInformationKey(),
+          winnerOrganization.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);
 

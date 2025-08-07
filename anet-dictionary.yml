@@ -331,6 +331,10 @@ fields:
           RED:
             label: Red
             color: '#ff8279'
+      html:
+        type: special_field
+        label: Rich-text
+        widget: richTextEditor
 
   attachment:
     featureDisabled: false
@@ -635,6 +639,10 @@ fields:
             typeError: Qty must be a number
             label: Qty
         visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+      html:
+        type: special_field
+        label: Rich-text
+        widget: richTextEditor
 
   person:
     status:
@@ -842,6 +850,10 @@ fields:
             label: Object date
             helpText: Help text for object date field
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
+      html:
+        type: special_field
+        label: Rich-text
+        widget: richTextEditor
     customSensitiveInformation:
       birthday:
         type: date

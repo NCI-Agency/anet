@@ -104,9 +104,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(getDomainUsername(newPerson)).isEqualTo("testCreatePerson");
     // check that HTML of biography is sanitized after create
     assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
-    // check that JSON of customFields is sanitized after create
-    assertThat(newPerson.getCustomFields())
-        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.person.customFields") != null) {
+      // check that JSON of customFields is sanitized after create
+      assertThat(newPerson.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
 
     final PersonInput updatedNewPersonInput = getPersonInput(newPerson);
     updatedNewPersonInput.setName("testCreatePerson updated name");
@@ -131,9 +133,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(getDomainUsername(retPerson)).isEqualTo(getDomainUsername(updatedNewPersonInput));
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
-    // check that JSON of customFields is sanitized after update
-    assertThat(retPerson.getCustomFields())
-        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.person.customFields") != null) {
+      // check that JSON of customFields is sanitized after update
+      assertThat(retPerson.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
 
     // Test creating a person with a position already set.
     final OrganizationSearchQueryInput query =
