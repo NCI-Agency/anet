@@ -127,15 +127,27 @@ public class TaskResource {
       }
     }
 
+    // Load the existing task, so we can check for differences.
+    final Task existing = dao.getByUuid(t.getUuid());
+    boolean parentChangedToInactive = false;
+    if (t.getParentTaskUuid() != null && (existing.getParentTaskUuid() == null
+        || !t.getParentTaskUuid().equals(existing.getParentTaskUuid()))) {
+      Task newParent = dao.getByUuid(t.getParentTaskUuid());
+      if (newParent != null && newParent.getStatus() == Task.Status.INACTIVE) {
+        // Force current task to INACTIVE if parent is INACTIVE
+        t.setStatus(Task.Status.INACTIVE);
+        parentChangedToInactive = true;
+      }
+    }
+
     try {
-      // Load the existing task, so we can check for differences.
-      final Task existing = dao.getByUuid(t.getUuid());
       final int numRows = dao.update(t);
       if (numRows == 0) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process task update");
       }
 
-      if (t.getStatus() == Task.Status.INACTIVE && existing.getStatus() != Task.Status.INACTIVE) {
+      if ((t.getStatus() == Task.Status.INACTIVE && existing.getStatus() != Task.Status.INACTIVE)
+          || parentChangedToInactive) {
         int updatedDescendants = dao.setStatusForDescendantTasks(t.getUuid(), Task.Status.INACTIVE);
         AnetAuditLogger.log("Task {} set to INACTIVE, updated {} descendants", t,
             updatedDescendants);

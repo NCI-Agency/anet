@@ -127,7 +127,7 @@ const TaskForm = ({
     }
   }
 
-  const inactiveDescendantTasks = initialValues.descendantTasks.filter(
+  const inactiveDescendantTasks = initialValues.descendantTasks?.filter(
     ({ status }) => status === Model.STATUS.ACTIVE
   )
 
@@ -168,18 +168,20 @@ const TaskForm = ({
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
-            <InactiveTaskModal
-              showModal={inactiveTaskModalVisible}
-              tasks={inactiveDescendantTasks}
-              currentTask={initialValues}
-              onSuccess={() => {
-                setFieldValue("status", Model.STATUS.INACTIVE)
-                setInactiveTaskModalVisible(false)
-              }}
-              onCancel={() => {
-                setInactiveTaskModalVisible(false)
-              }}
-            />
+            {inactiveDescendantTasks?.length && (
+              <InactiveTaskModal
+                showModal={inactiveTaskModalVisible}
+                tasks={inactiveDescendantTasks}
+                currentTask={initialValues}
+                onSuccess={() => {
+                  setFieldValue("status", Model.STATUS.INACTIVE)
+                  setInactiveTaskModalVisible(false)
+                }}
+                onCancel={() => {
+                  setInactiveTaskModalVisible(false)
+                }}
+              />
+            )}
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -306,7 +308,7 @@ const TaskForm = ({
                     onChange={value => {
                       if (
                         value === Model.STATUS.INACTIVE &&
-                        inactiveDescendantTasks.length
+                        inactiveDescendantTasks?.length
                       ) {
                         setInactiveTaskModalVisible(true)
                       } else {
