@@ -300,8 +300,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(check.getInterlocutorOrg().getUuid()).isEqualTo(interlocutorOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(check.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
-    // check that JSON of customFields is sanitized after create
-    assertThat(check.getCustomFields()).isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.report.customFields") != null) {
+      // check that JSON of customFields is sanitized after create
+      assertThat(check.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
     assertThat(check.getReportPeople()).hasSameSizeAs(reportPeople);
     assertThat(check.getReportPeople())
         .allMatch(crp -> reportPeople.stream().anyMatch(rp -> isSameReportPerson(crp, rp)));
@@ -712,9 +715,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(created.getInterlocutorOrg().getUuid()).isEqualTo(reportAttendeeOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
-    // check that JSON of customFields is sanitized after create
-    assertThat(created.getCustomFields())
-        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.report.customFields") != null) {
+      // check that JSON of customFields is sanitized after create
+      assertThat(created.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
 
     // Have another regular user try to submit the report
     try {
@@ -1164,9 +1169,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     // check that HTML of report text is sanitized after update
     assertThat(returned2.getReportText())
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
-    // check that JSON of customFields is sanitized after update
-    assertThat(returned2.getCustomFields())
-        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    if (dict.getDictionaryEntry("fields.report.customFields") != null) {
+      // check that JSON of customFields is sanitized after update
+      assertThat(returned2.getCustomFields())
+          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    }
 
     // Elizabeth submits the report
     int numRows = withCredentials(getDomainUsername(elizabeth),

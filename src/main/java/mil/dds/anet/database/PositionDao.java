@@ -671,7 +671,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
       // Update customSensitiveInformation for winner
       DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, PositionDao.TABLE_NAME,
-          winnerUuid, winner.getCustomSensitiveInformation());
+          winnerUuid, winner.customSensitiveInformationKey(),
+          winner.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 

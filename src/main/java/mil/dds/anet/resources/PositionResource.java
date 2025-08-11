@@ -101,7 +101,7 @@ public class PositionResource {
         pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, created.getUuid(),
-        pos.getCustomSensitiveInformation());
+        pos.customSensitiveInformationKey(), pos.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Position {} created by {}", created, user);
     return created;
@@ -163,7 +163,7 @@ public class PositionResource {
         pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
-        pos.getCustomSensitiveInformation());
+        pos.customSensitiveInformationKey(), pos.getCustomSensitiveInformation());
 
     if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
       if (existing != null) {

@@ -90,7 +90,7 @@ public class TaskResource {
     }
 
     DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, created.getUuid(),
-        t.getCustomSensitiveInformation());
+        t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Task {} created by {}", created, user);
     return created;
@@ -156,7 +156,7 @@ public class TaskResource {
           t.getApprovalSteps(), existingApprovalSteps);
 
       DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, t.getUuid(),
-          t.getCustomSensitiveInformation());
+          t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
       AnetAuditLogger.log("Task {} updated by {}", t, user);
 

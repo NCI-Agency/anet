@@ -131,13 +131,14 @@ public class CustomSensitiveInformationDao
 
   public void insertOrUpdateCustomSensitiveInformation(final Person user,
       final Set<String> userAuthorizationGroupUuids, final String relatedObjectType,
-      final String relatedObjectUuid,
+      final String relatedObjectUuid, String customSensitiveInformationDictKey,
       final List<CustomSensitiveInformation> customSensitiveInformation) {
     if (!Utils.isEmptyOrNull(customSensitiveInformation)) {
       for (final CustomSensitiveInformation csi : customSensitiveInformation) {
         try {
           // Sanitize JSON
-          csi.setCustomFieldValue(Utils.sanitizeJson(csi.getCustomFieldValue()));
+          csi.setCustomFieldValue(Utils.sanitizeJson(customSensitiveInformationDictKey,
+              csi.getCustomFieldValue(), false));
           // Set relatedObject ourselves (ignore what was passed by the client)
           csi.setRelatedObjectType(relatedObjectType);
           csi.setRelatedObjectUuid(relatedObjectUuid);
