@@ -64,6 +64,11 @@ fieldset {
   width: 100%;
 }
 
+fieldset.custom-array-field {
+  background: unset;
+  box-shadow: unset;
+}
+
 .modal-body fieldset {
   box-shadow: none;
   padding-bottom: 0;
