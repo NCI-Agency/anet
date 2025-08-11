@@ -9,8 +9,13 @@ on:
   schedule:
     - cron: '0 3 * * 3'
 
+permissions:
+  contents: read
+
 jobs:
   analyse:
+    permissions:
+      security-events: write
     name: Analyse
     runs-on: ubuntu-latest
 
