@@ -45,7 +45,7 @@ export function convertLatLngToMGRS(lat, lng) {
     if (utils.isNumeric(parsedLat) && utils.isNumeric(parsedLng)) {
       mgrs = MGRS.forward([parsedLng, parsedLat])
     }
-  } catch (e) {
+  } catch {
     mgrs = ""
   }
   return mgrs
@@ -56,7 +56,7 @@ export function convertMGRSToLatLng(mgrs) {
   try {
     // toPoint returns an array of [lon, lat]
     latLng = mgrs ? MGRS.toPoint(mgrs) : ["", ""]
-  } catch (e) {
+  } catch {
     latLng = ["", ""]
   }
   return [parseCoordinate(latLng[1]), parseCoordinate(latLng[0])]

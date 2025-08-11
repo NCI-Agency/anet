@@ -117,7 +117,7 @@ const FilterableAdvisorReportsTable = ({
     result += lineDelimiter
 
     const csvCols = ["Organization name"]
-    weekColumns.forEach(column => {
+    weekColumns.forEach(() => {
       csvCols.push("Reports submitted")
       csvCols.push("Engagements attended")
     })

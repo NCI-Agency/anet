@@ -569,7 +569,7 @@ const Navigation = ({
   )
 }
 
-const mapDispatchToProps = (dispatch, ownProps) =>
+const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
       clearSearchQuery: () => clearSearchQuery(),

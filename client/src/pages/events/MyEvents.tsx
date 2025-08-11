@@ -88,7 +88,7 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery
 })
 

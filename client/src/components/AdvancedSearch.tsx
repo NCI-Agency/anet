@@ -322,7 +322,7 @@ const AdvancedSearch = ({
   }
 }
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = state => {
   return {
     searchQuery: _cloneDeep(state.searchQuery),
     onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
@@ -330,7 +330,7 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   setSearchQuery: advancedSearchQuery =>
     dispatch(setSearchQuery(advancedSearchQuery)),
   resetPagination: () => dispatch(resetPagination())

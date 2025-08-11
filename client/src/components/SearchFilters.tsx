@@ -964,7 +964,7 @@ export const deserializeQueryParams = (
   })
 
   Promise.all(promises).then(dataList => {
-    dataList.forEach((filterData, index) => {
+    dataList.forEach(filterData => {
       // update filters
       usedFilters.push(filterData)
     })

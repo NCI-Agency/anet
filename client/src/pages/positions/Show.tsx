@@ -567,7 +567,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
   function onConfirmDelete() {
     const { uuid } = position
     API.mutation(GQL_DELETE_POSITION, { uuid })
-      .then(data => {
+      .then(() => {
         navigate("/", { state: { success: "Position deleted" } })
       })
       .catch(error => {
@@ -580,7 +580,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
     const newPosition = position.filterClientSideFields()
     newPosition.previousPeople = history
     API.mutation(GQL_UPDATE_PREVIOUS_PEOPLE, { position: newPosition })
-      .then(data => refetch())
+      .then(refetch)
       .catch(error => {
         setStateError(error)
         jumpToTop()

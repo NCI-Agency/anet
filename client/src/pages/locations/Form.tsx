@@ -176,7 +176,6 @@ const LocationForm = ({
         dirty,
         setFieldTouched,
         setFieldValue,
-        setValues,
         values,
         validateForm,
         submitForm

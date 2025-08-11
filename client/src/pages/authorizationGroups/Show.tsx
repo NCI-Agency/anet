@@ -144,7 +144,7 @@ const AuthorizationGroupShow = ({
 
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>
-      {({ values }) => {
+      {() => {
         const searchText = authorizationGroup.name
         const action = (
           <>

@@ -274,8 +274,9 @@ const MySubscriptionUpdates = ({
                           updatedAt={null}
                           refetch={() => {
                             refetch()
-                            typeof refetchCallback === "function" &&
+                            if (typeof refetchCallback === "function") {
                               refetchCallback()
+                            }
                           }}
                           setError={error => setSaveError(error)}
                         />

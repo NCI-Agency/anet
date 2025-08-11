@@ -721,7 +721,7 @@ const Search = ({
             onSubmit={onSubmitSaveSearch}
             initialValues={{ name: "", displayInHomepage: false }}
           >
-            {({ values, submitForm }) => (
+            {({ submitForm }) => (
               <Form className="d-flex flex-column gap-3">
                 <Field
                   name="name"
@@ -814,6 +814,7 @@ const Search = ({
       })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function onSubmitSaveSearchSuccess(response, values, form) {
     if (response.createSavedSearch.uuid) {
       toast.success("Search saved")
@@ -822,6 +823,7 @@ const Search = ({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function saveSearch(values, form) {
     const savedSearch = {
       name: values.name,
@@ -852,7 +854,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery,
   pagination: state.pagination
 })

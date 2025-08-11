@@ -419,6 +419,7 @@ function getLocationFilters() {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const locationFormats: string[] = Object.keys(Location.LOCATION_FORMATS)
 interface LocationColumnProps {
   align: "left" | "right"

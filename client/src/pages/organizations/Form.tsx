@@ -682,6 +682,7 @@ const OrganizationForm = ({
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const organization = Organization.filterClientSideFields(
       new Organization(values)

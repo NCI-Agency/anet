@@ -27,7 +27,7 @@ const CreateButton = () => {
   if (modelClasses.length > 1) {
     return (
       <DropdownButton id="createButton" title="Create" align="end">
-        {modelClasses.map((modelClass, i) => {
+        {modelClasses.map(modelClass => {
           const name = modelClass.displayName() || modelClass.resourceName
           return (
             <Dropdown.Item

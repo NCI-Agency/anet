@@ -14,7 +14,7 @@ const PieWidget = ({
   entitiesCount,
   legend,
   showLegend = true,
-  ...otherWidgetProps
+  ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: PieWidgetProps) => {
   return (
     <>

@@ -151,13 +151,13 @@ const SearchBar = ({
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery,
   onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
   searchObjectTypes: state.searchProps.searchObjectTypes
 })
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   setSearchQuery: searchTerms => dispatch(setSearchQuery(searchTerms)),
   resetPagination: () => dispatch(resetPagination())
 })

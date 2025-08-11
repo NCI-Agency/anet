@@ -291,7 +291,7 @@ export const ReadonlyField = ({
   field = {}, // { name, value, onChange, onBlur }
   form = {}, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
-  asA,
+  asA, // eslint-disable-line @typescript-eslint/no-unused-vars
   children,
   extraColElem,
   labelColumnWidth,
@@ -439,7 +439,7 @@ const ButtonToggleGroupField = ({
           {...otherProps}
           className={className}
         >
-          {buttons.map((button, index) => {
+          {buttons.map(button => {
             if (!button) {
               return null
             }
@@ -718,6 +718,7 @@ export function handleMultiSelectRemoveItem(oldItem, onChange, curValue) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 export function handleSingleSelectAddItem(newItem, onChange, curValue) {
   if (!newItem || !newItem.uuid) {
     return
@@ -725,6 +726,7 @@ export function handleSingleSelectAddItem(newItem, onChange, curValue) {
   onChange(newItem)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
 }
@@ -757,7 +759,7 @@ export const FieldShortcuts = ({
       <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
         <h5>{title}</h5>
         <ListGroup>
-          {objectType.map(shortcuts, (shortcut, idx) => (
+          {objectType.map(shortcuts, shortcut => (
             <ListGroup.Item key={shortcut.uuid}>
               <Button
                 onClick={() => handleAddItem(shortcut, onChange, curValue)}

@@ -58,6 +58,7 @@ export interface CoordinatesPropType {
   displayedCoordinate?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const locationFormats: string[] = Object.keys(Location.LOCATION_FORMATS)
 interface BaseGeoLocationProps {
   labels?: any

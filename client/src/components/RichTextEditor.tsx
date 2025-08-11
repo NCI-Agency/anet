@@ -5,10 +5,9 @@ import "components/editor/RichTextEditor.css"
 import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import escapeHtml from "escape-html"
-import { debounce } from "lodash"
+import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
-import moment from "moment/moment"
 import React, {
   useCallback,
   useContext,
@@ -140,7 +139,7 @@ const RichTextEditor = ({
 
   const handleFullSizeMode = isFullSize => setShowFullSize(isFullSize)
 
-  const makeToolbarAccessible = debounce(node => {
+  const makeToolbarAccessible = _debounce(() => {
     if (showFullSize || readOnly) {
       return
     }
@@ -311,7 +310,7 @@ const serialize = node => {
   }
 }
 
-const serializeDebounced = debounce((node, onChange) => {
+const serializeDebounced = _debounce((node, onChange) => {
   const serialized = serialize(node)
   onChange?.(serialized)
   return serialized

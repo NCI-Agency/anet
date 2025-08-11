@@ -15,7 +15,6 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Person } from "models"
 import moment from "moment"

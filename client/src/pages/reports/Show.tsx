@@ -1040,7 +1040,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   }
   function onConfirmUnpublish() {
     API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
-      .then(data => {
+      .then(() => {
         navigate("/", {
           state: { success: `${reportTypeUpperFirst} unpublished` }
         })
@@ -1054,7 +1054,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   function onConfirmDelete() {
     API.mutation(GQL_DELETE_REPORT, { uuid })
-      .then(data => {
+      .then(() => {
         navigate("/", {
           state: { success: `${reportTypeUpperFirst} deleted` }
         })
@@ -1189,7 +1189,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       uuid,
       email: emailDelivery
     })
-      .then(data => {
+      .then(() => {
         setFieldValue("to", "")
         setFieldValue("comment", "")
         setSaveSuccess("Email successfully sent")
@@ -1204,7 +1204,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   function submitDraft() {
     API.mutation(GQL_SUBMIT_REPORT, { uuid })
-      .then(data => {
+      .then(() => {
         updateReport()
         setSaveSuccess(`${reportTypeUpperFirst} submitted`)
         setSaveError(null)
@@ -1216,7 +1216,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   function publishReport() {
     API.mutation(GQL_PUBLISH_REPORT, { uuid })
-      .then(data => {
+      .then(() => {
         updateReport()
         setSaveSuccess("Report published")
         setSaveSuccess(`${reportTypeUpperFirst} published`)
@@ -1235,7 +1235,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       uuid,
       comment: new Comment({ text })
     })
-      .then(data => {
+      .then(() => {
         setFieldValue("newComment", "")
         updateReport()
         setSaveSuccess("Comment saved")
@@ -1259,7 +1259,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       uuid,
       comment: new Comment({ text })
     })
-      .then(data => {
+      .then(() => {
         const queryDetails = pendingMyApproval(currentUser)
         const message = "Successfully requested changes."
         deserializeQueryParams(
@@ -1296,7 +1296,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       uuid,
       comment: new Comment({ text })
     })
-      .then(data => {
+      .then(() => {
         const queryDetails = pendingMyApproval(currentUser)
         const lastApproval = report.approvalStep.nextStepId === null
         const message =
