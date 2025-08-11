@@ -721,7 +721,7 @@ const Search = ({
             onSubmit={onSubmitSaveSearch}
             initialValues={{ name: "", displayInHomepage: false }}
           >
-            {({ values, submitForm }) => (
+            {({ submitForm }) => (
               <Form className="d-flex flex-column gap-3">
                 <Field
                   name="name"
@@ -852,7 +852,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery,
   pagination: state.pagination
 })

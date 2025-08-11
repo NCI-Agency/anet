@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
-import { Callout, Icon, Intent, Tooltip } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { Callout } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"

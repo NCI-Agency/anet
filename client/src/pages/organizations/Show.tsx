@@ -733,7 +733,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   pagination: state.pagination
 })
 

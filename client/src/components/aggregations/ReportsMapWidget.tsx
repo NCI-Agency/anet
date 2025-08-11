@@ -5,7 +5,6 @@ import _isEmpty from "lodash/isEmpty"
 import { Location, Report } from "models"
 import moment from "moment"
 import React, { useMemo } from "react"
-import Settings from "settings"
 
 const getIcon = report => {
   if (report.state === Report.STATE.CANCELLED) {

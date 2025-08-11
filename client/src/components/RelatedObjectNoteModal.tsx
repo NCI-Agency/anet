@@ -66,7 +66,6 @@ const RelatedObjectNoteModal = ({
           isValid,
           setFieldValue,
           setFieldTouched,
-          values,
           submitForm
         }) => {
           return (

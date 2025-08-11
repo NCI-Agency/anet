@@ -123,8 +123,9 @@ const EditAssociatedPositions = ({
   }
 
   function addItem(item) {
-    !isInMerged(item) &&
+    if (!isInMerged(item)) {
       setFinalAssociatedPositions([...finalAssociatedPositions, item])
+    }
   }
 
   function onSave() {

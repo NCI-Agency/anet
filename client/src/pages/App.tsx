@@ -281,7 +281,7 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   pageProps: state.pageProps
 })
 

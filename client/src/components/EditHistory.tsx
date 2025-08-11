@@ -179,7 +179,7 @@ function EditHistory({
                       <Col md={4}>
                         <HistoryComp
                           history={history1}
-                          action={(item, index) => (
+                          action={item => (
                             <Button
                               variant="outline-secondary"
                               onClick={() => addItem(item)}
@@ -367,7 +367,7 @@ function EditHistory({
                       <Col md={4}>
                         <HistoryComp
                           history={history2}
-                          action={(item, index) => (
+                          action={item => (
                             <Button
                               variant="outline-secondary"
                               onClick={() => addItem(item)}
@@ -583,7 +583,9 @@ function getOccupiedEntityIndexes(
       { startTime: currStartTime, endTime: currEndTime },
       ...selfHistoryFiltered
     ])
-    !_isEmpty(overlappingDateIndexes) && invalidIndexes.push(index)
+    if (!_isEmpty(overlappingDateIndexes)) {
+      invalidIndexes.push(index)
+    }
   })
   return invalidIndexes
 }
@@ -613,10 +615,7 @@ function getStyle(
 }
 
 function giveEachItemUuid(history) {
-  return history.map(item => {
-    const newItem = { ...item, uuid: uuidv4() }
-    return newItem
-  })
+  return history.map(item => ({ ...item, uuid: uuidv4() }))
 }
 
 function getSingleSelectParameters(historyEntityType) {

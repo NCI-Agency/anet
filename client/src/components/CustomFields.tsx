@@ -260,7 +260,7 @@ const JsonField = fieldProps => {
         let newValue
         try {
           newValue = utils.parseJsonSafe(value.target.value, true)
-        } catch (error) {
+        } catch {
           // Invalid JSON, use the string value; yup schema validation will show an error
           newValue = value.target.value
         }
@@ -1053,17 +1053,16 @@ const filterDeprecatedFields = (fieldsConfig, values, parentFieldName) => {
         const hasNoValue = isFieldValueNotSet(
           values[parentFieldName][fieldName]
         )
-        hasNoValue && accum.push(fieldName)
+        if (hasNoValue) {
+          accum.push(fieldName)
+        }
       }
       return accum
     },
     []
   )
-  const deprecatedFieldsFiltered = Object.without(
-    fieldsConfig,
-    ...deprecatedFields
-  )
-  return deprecatedFieldsFiltered
+
+  return Object.without(fieldsConfig, ...deprecatedFields)
 }
 
 const isFieldValueNotSet = value => {
@@ -1138,6 +1137,7 @@ export const CustomFieldsContainer = ({
 }
 
 export const getFieldPropsFromFieldConfig = fieldConfig => {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const {
     aggregations,
     type,
@@ -1153,6 +1153,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     deprecated,
     ...fieldProps
   } = fieldConfig
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   return fieldProps
 }
 

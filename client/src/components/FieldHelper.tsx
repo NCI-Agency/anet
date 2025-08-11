@@ -439,7 +439,7 @@ const ButtonToggleGroupField = ({
           {...otherProps}
           className={className}
         >
-          {buttons.map((button, index) => {
+          {buttons.map(button => {
             if (!button) {
               return null
             }
@@ -757,7 +757,7 @@ export const FieldShortcuts = ({
       <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
         <h5>{title}</h5>
         <ListGroup>
-          {objectType.map(shortcuts, (shortcut, idx) => (
+          {objectType.map(shortcuts, shortcut => (
             <ListGroup.Item key={shortcut.uuid}>
               <Button
                 onClick={() => handleAddItem(shortcut, onChange, curValue)}

@@ -779,9 +779,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     const newPerson = person.filterClientSideFields()
     newPerson.previousPositions = history
     API.mutation(GQL_UPDATE_PREVIOUS_POSITIONS, { person: newPerson })
-      .then(data => {
-        refetch()
-      })
+      .then(refetch)
       .catch(error => {
         setStateError(error)
         jumpToTop()

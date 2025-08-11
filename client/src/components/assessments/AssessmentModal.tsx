@@ -73,7 +73,6 @@ const AssessmentModal = ({
       >
         {({
           isSubmitting,
-          isValid,
           setFieldValue,
           setFieldTouched,
           validateForm,

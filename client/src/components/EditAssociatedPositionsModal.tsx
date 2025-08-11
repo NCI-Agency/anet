@@ -178,7 +178,7 @@ const EditAssociatedPositionsModal = ({
 
   function onSubmit(values, form) {
     return save(values, form)
-      .then(response => onSuccess())
+      .then(onSuccess)
       .catch(error => {
         form.setSubmitting(false)
         setError(error)

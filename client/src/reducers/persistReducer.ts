@@ -13,7 +13,7 @@ const resolveToQuery = value => {
 
 const SearchQueryTransform = createTransform(
   // transform state on its way to being serialized and persisted
-  (inboundState, key) => {
+  inboundState => {
     const filters = inboundState.filters
       ? _cloneDeepWith(inboundState.filters, resolveToQuery)
       : undefined
@@ -21,7 +21,7 @@ const SearchQueryTransform = createTransform(
   },
 
   // transform state being rehydrated
-  (outboundState, key) => {
+  outboundState => {
     return { ...outboundState }
   },
 

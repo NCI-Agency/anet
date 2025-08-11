@@ -14,7 +14,7 @@ const ButtonToggleGroup = ({
   ...otherProps
 }: ButtonToggleGroupProps) => (
   <ButtonGroup value={value} onChange={onChange} {...otherProps}>
-    {children.map((child, index) => {
+    {children.map(child => {
       if (!child) {
         return null
       }

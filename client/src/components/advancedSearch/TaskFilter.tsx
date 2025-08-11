@@ -88,7 +88,7 @@ const TaskFilter = ({
       overlayTable={HierarchicalTaskOverlayTable}
       objectType={Task}
       valueKey={valueKey}
-      valueFunc={(v, k) => v.shortName}
+      valueFunc={v => v.shortName}
       fields={taskFields}
       placeholder={`Filter by ${Settings.fields.task.shortLabel}…`}
       addon={TASKS_ICON}

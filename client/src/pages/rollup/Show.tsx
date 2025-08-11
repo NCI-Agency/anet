@@ -785,7 +785,7 @@ const RollupShow = ({
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery
 })
 
