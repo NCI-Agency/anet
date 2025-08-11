@@ -6,7 +6,7 @@ import React from "react"
 const ReportsByTaskWidget = ({
   widgetId,
   values,
-  ...otherWidgetProps
+  ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: AggregationWidgetPropType) => (
   <div className="non-scrollable">
     <BarChart

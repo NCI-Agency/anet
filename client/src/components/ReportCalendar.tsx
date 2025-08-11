@@ -92,6 +92,7 @@ const ReportCalendar = ({
     />
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function getEvents(fetchInfo, successCallback, failureCallback) {
     const reportQuery = Object.assign({}, queryParams, {
       pageSize: 0,

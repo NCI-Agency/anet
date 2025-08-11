@@ -27,6 +27,7 @@ const DraggableRow = ({
   const ref = useRef(null)
   const [, drop] = useDrop({
     accept: itemType,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     hover(item, monitor) {
       if (!ref.current) {
         return
@@ -45,6 +46,7 @@ const DraggableRow = ({
       item.index = hoverIndex
     }
   })
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [{ isDragging: dragActive }, drag, preview] = useDrag({
     type: itemType,
     item: { uuid: row.uuid, index },

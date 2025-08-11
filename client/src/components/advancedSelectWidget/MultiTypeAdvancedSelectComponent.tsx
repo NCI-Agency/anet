@@ -89,6 +89,7 @@ const widgetPropsPosition = {
   addon: POSITIONS_ICON
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 const generateLocationFilters = (filter, _) => {
   if (!filter?.typeFilter) {
     return entityFilters

@@ -467,6 +467,7 @@ export const createYupObjectShape = (
     objShape = Object.fromEntries(
       Object.entries(config)
         .map(([k, v]) => [k, createFieldYupSchema(k, v, parentFieldName)])
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .filter(([_, v]) => v !== null)
     )
     // only the top level config objects keep hold of the invisible fields info
@@ -755,6 +756,7 @@ export default class Model {
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
     return Object.entries(this.getAssessmentsConfig()).filter(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ([_, ac]) =>
         ac.relatedObjectType === relatedObjectType &&
         ac.recurrence === RECURRENCE_TYPE.ONCE
@@ -894,6 +896,7 @@ export default class Model {
   static hasPendingAssessments(entity) {
     const entityAssessments = Object.entries(entity.getAssessmentsConfig())
     const periodicAssessments = entityAssessments.filter(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ([_, ac]) => PERIOD_FACTORIES[ac.recurrence]
     )
     if (_isEmpty(periodicAssessments)) {
@@ -940,6 +943,7 @@ export default class Model {
     if (!_isEmpty(assessmentConfig?.questions)) {
       Object.entries(assessmentConfig.questions)
         .filter(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ([_, question]) =>
             !question.test ||
             !_isEmpty(JSONPath({ path: question.test, json: testValue }))
@@ -951,6 +955,7 @@ export default class Model {
     if (!_isEmpty(assessmentConfig?.questionSets)) {
       Object.entries(assessmentConfig.questionSets)
         .filter(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ([_, questionSet]) =>
             !questionSet.test ||
             !_isEmpty(JSONPath({ path: questionSet.test, json: testValue }))

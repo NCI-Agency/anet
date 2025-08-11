@@ -10,6 +10,7 @@ import {
 } from "mergeUtils"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const alignOptions: string[] = Object.values(ALIGN_OPTIONS)
 interface MergeFieldProps {
   label: string

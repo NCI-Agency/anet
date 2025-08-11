@@ -73,6 +73,7 @@ const LinkSourceAnet = ({
           <ExternalLinkForm
             url={value?.url}
             text={value?.text}
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
             onConfirm={(values, form) => {
               const externalLinkNode = createExternalLinkNode(
                 values.url,

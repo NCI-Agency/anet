@@ -479,6 +479,7 @@ const TaskForm = ({
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const task = Task.filterClientSideFields(new Task(values))
     task.parentTask = utils.getReference(task.parentTask)

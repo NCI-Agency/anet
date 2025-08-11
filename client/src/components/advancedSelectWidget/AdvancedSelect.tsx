@@ -146,7 +146,7 @@ const AdvancedSelect = ({
   overlayRenderRow,
   closeOverlayOnAdd = false,
   filterDefs = {},
-  onChange,
+  onChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   objectType,
   queryParams,
   fields,

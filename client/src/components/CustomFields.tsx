@@ -139,6 +139,7 @@ const ReadonlySpecialField = ({
 }
 
 const TextField = fieldProps => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
   return (
     <FastField
@@ -150,6 +151,7 @@ const TextField = fieldProps => {
 }
 
 const NumberField = fieldProps => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
   return (
     <FastField

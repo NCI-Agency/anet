@@ -157,11 +157,13 @@ const AssessmentModal = ({
       })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function onSubmitSuccess(response, values, form) {
     const operation = edit ? "updateAssessment" : "createAssessment"
     onSuccess(response[operation])
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function saveAssessment(values, form) {
     const assessmentRelatedObjects = assessment.assessmentRelatedObjects.map(
       o => ({

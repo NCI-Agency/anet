@@ -108,7 +108,7 @@ interface PendingAssessmentsByPositionProps {
 const PendingAssessmentsByPosition = ({
   pageDispatchers,
   queryParams,
-  style
+  style // eslint-disable-line @typescript-eslint/no-unused-vars
 }: PendingAssessmentsByPositionProps) => {
   const [pageNum, setPageNum] = useState(0)
   const positionQuery = Object.assign({}, queryParams, { pageNum })

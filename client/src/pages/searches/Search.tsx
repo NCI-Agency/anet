@@ -814,6 +814,7 @@ const Search = ({
       })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function onSubmitSaveSearchSuccess(response, values, form) {
     if (response.createSavedSearch.uuid) {
       toast.success("Search saved")
@@ -822,6 +823,7 @@ const Search = ({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function saveSearch(values, form) {
     const savedSearch = {
       name: values.name,

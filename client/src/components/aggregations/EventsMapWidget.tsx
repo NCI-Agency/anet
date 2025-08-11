@@ -16,7 +16,7 @@ const EventsMapWidget = ({
   width,
   height,
   whenUnspecified = null,
-  ...otherWidgetProps
+  ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: EventsMapWidgetProps) => {
   const markers = useMemo(() => {
     if (!values.length) {

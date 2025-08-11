@@ -101,6 +101,7 @@ const EventCalendar = ({
     />
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function getEvents(fetchInfo, successCallback, failureCallback) {
     const eventQuery = {
       ...queryParams,

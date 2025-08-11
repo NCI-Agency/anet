@@ -291,7 +291,7 @@ export const ReadonlyField = ({
   field = {}, // { name, value, onChange, onBlur }
   form = {}, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
-  asA,
+  asA, // eslint-disable-line @typescript-eslint/no-unused-vars
   children,
   extraColElem,
   labelColumnWidth,
@@ -718,6 +718,7 @@ export function handleMultiSelectRemoveItem(oldItem, onChange, curValue) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 export function handleSingleSelectAddItem(newItem, onChange, curValue) {
   if (!newItem || !newItem.uuid) {
     return
@@ -725,6 +726,7 @@ export function handleSingleSelectAddItem(newItem, onChange, curValue) {
   onChange(newItem)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
 }

@@ -864,6 +864,7 @@ const PersonForm = ({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const person = Person.filterClientSideFields(new Person(values))
     if (values.pendingVerification && Settings.automaticallyAllowAllNewUsers) {

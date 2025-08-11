@@ -8,6 +8,7 @@ const ACTION_SIDES = {
   RIGHT: "right"
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const actionSides: string[] = Object.values(ACTION_SIDES)
 interface AssociatedPositionsProps {
   associatedPositions?: any[]

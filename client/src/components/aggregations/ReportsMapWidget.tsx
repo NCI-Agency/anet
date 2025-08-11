@@ -27,7 +27,7 @@ const ReportsMapWidget = ({
   width,
   height,
   whenUnspecified = null,
-  ...otherWidgetProps
+  ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ReportsMapWidgetProps) => {
   const markers = useMemo(() => {
     if (!values.length) {
