@@ -80,6 +80,20 @@ const GQL_CREATE_SAVED_SEARCH = gql`
   }
 `
 
+const GQL_GET_SAVED_SEARCHES = gql`
+  query {
+    savedSearches: mySearches {
+      uuid
+      name
+      objectType
+      query
+      displayInHomepage
+      priority
+      homepagePriority
+    }
+  }
+`
+
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 10
 
@@ -122,6 +136,16 @@ const Search = ({
   const [numAttachments, setNumAttachments] = useState(null)
   const [numEvents, setNumEvents] = useState(null)
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
+  const [searches, setSearches] = useState([])
+  const { loading, err, data, refetch } = API.useApiQuery(
+    GQL_GET_SAVED_SEARCHES
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error: err,
+    pageDispatchers
+  })
+
   usePageTitle("Search")
   const numResultsThatCanBeEmailed = sum(
     numOrganizations,
@@ -253,6 +277,23 @@ const Search = ({
     pageDispatchers
   })
   const prepareEmailButtonProps = getPrepareEmailButtonProps()
+
+  useEffect(() => {
+    if (data?.savedSearches) {
+      setSearches(
+        data.savedSearches.map(({ query, objectType }) => {
+          return {
+            objectType,
+            query: JSON.stringify(canonicalize(JSON.parse(query)))
+          }
+        })
+      )
+    }
+  }, [data?.savedSearches])
+
+  if (done) {
+    return result
+  }
 
   return (
     <div>
@@ -837,11 +878,41 @@ const Search = ({
   }
 
   function openSaveModal() {
-    setShowSaveSearch(true)
+    const query = JSON.stringify(canonicalize(getSearchQuery(searchQuery)))
+    const objectType = searchQuery?.objectType
+      ? SEARCH_OBJECT_TYPES[searchQuery.objectType]
+      : null
+    const isDuplicate = searches.some(
+      s => s.query === query && s.objectType === objectType
+    )
+    if (!isDuplicate) {
+      setShowSaveSearch(true)
+    }
   }
 
   function closeSaveModal() {
     setShowSaveSearch(false)
+  }
+
+  function canonicalize(value) {
+    if (Array.isArray(value)) {
+      const arr = value.map(v => canonicalize(v))
+      return arr.sort((a, b) =>
+        JSON.stringify(a).localeCompare(JSON.stringify(b))
+      )
+    } else if (
+      value &&
+      typeof value === "object" &&
+      value.constructor === Object
+    ) {
+      const sortedKeys = Object.keys(value).sort()
+      const result = {}
+      for (const key of sortedKeys) {
+        result[key] = canonicalize(value[key])
+      }
+      return result
+    }
+    return value
   }
 }
 
