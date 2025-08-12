@@ -861,6 +861,13 @@ const Search = ({
       toast.success("Search saved")
       setError(null)
       setShowSaveSearch(false)
+      setSearches([
+        ...searches,
+        {
+          objectType: searchQuery.objectType || null,
+          query: JSON.stringify(canonicalize(getSearchQuery(searchQuery)))
+        }
+      ])
     }
   }
 
