@@ -450,7 +450,13 @@ describe("When creating/editing a community", () => {
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION_COMPLETE
         )
-      await (await adminPosition.$("../../../td/button")).click()
+      await (
+        await adminPosition
+          .parentElement()
+          .parentElement()
+          .parentElement()
+          .$("./td/button")
+      ).click()
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (
