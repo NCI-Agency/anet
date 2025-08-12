@@ -76,6 +76,13 @@ describe("Merge organizations error", () => {
     expect(await (await MergeOrganizations.getAlertDanger()).getText()).to.eq(
       "Organization can not be its own (grand…)parent"
     )
+    // attempt to leave when both locations are selected, should show warning
+    await (await browser.$("#anet-logo")).click()
+    const modalDialog = await browser.$(".modal-dialog")
+    // eslint-disable-next-line no-unused-expressions
+    expect(await modalDialog.isExisting()).to.be.true
+    await (await browser.$(".btn-danger")).click()
+    await MergeOrganizations.logout()
   })
 })
 
@@ -93,9 +100,9 @@ describe("Merge organizations page", () => {
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one org is selected, should allow to leave
-    await (await $("#anet-logo")).click()
+    await (await browser.$("#anet-logo")).click()
     // eslint-disable-next-line no-unused-expressions
-    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+    expect(await (await browser.$(".modal-dialog")).isExisting()).to.be.false
 
     await MergeOrganizations.openPage()
     await (await MergeOrganizations.getTitle()).waitForExist()
@@ -117,11 +124,12 @@ describe("Merge organizations page", () => {
     )
     // attempt to leave when both orgs are selected, should show warning
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
-    await (await $("#anet-logo")).click()
-    const modalDialog = await $(".modal-dialog")
+    await (await browser.$("#anet-logo")).click()
+    const modalDialog = await browser.$(".modal-dialog")
     // eslint-disable-next-line no-unused-expressions
     expect(await modalDialog.isExisting()).to.be.true
-    await $(".btn-danger").click()
+    await (await browser.$(".btn-danger")).click()
+    await MergeOrganizations.logout()
   })
   it("Should display field values of the left organization", async () => {
     await MergeOrganizations.openPage()
