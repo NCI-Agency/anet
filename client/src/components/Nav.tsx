@@ -522,7 +522,7 @@ const Navigation = ({
                   linkTo="/admin/preferences"
                   handleOnClick={resetPages}
                 >
-                  Preferences
+                  Default Application Preferences
                 </SidebarLink>
               </span>
             </Nav>
