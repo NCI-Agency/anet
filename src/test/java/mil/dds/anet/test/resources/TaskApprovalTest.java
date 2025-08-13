@@ -99,9 +99,24 @@ class TaskApprovalTest extends AbstractResourceTest {
   @Autowired
   protected AnetDictionary dict;
 
+  @Autowired
+  private JobHistoryDao jobHistoryDao;
+
+  @Autowired
+  private EmailDao emailDao;
+
   @BeforeAll
-  void beforeAll() throws Exception {
-    setUpEmailServer();
+  void setUpEmailServer() throws Exception {
+    if (config.getSmtp().isDisabled()) {
+      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
+    }
+    final Map<String, Object> newDict = new HashMap<>(dict.getDictionary());
+    @SuppressWarnings("unchecked")
+    final List<String> activeDomainNames = (List<String>) newDict.get("activeDomainNames");
+    activeDomainNames.add("example.com");
+    dict.setDictionary(newDict);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailServer = new FakeSmtpServer(config.getSmtp());
   }
 
   @BeforeEach
@@ -703,6 +718,48 @@ class TaskApprovalTest extends AbstractResourceTest {
         .filteredOn(
             wfs -> wfs.getStep() != null && taskUuid.equals(wfs.getStep().getRelatedObjectUuid()))
         .hasSize(expectedSize);
+  }
+
+  private void assertEmails(int expectedNrOfEmails, Person... expectedRecipients) {
+    final List<EmailResponse> emails = getEmailsFromServer();
+    // Check the number of email messages
+    assertThat(emails).hasSize(expectedNrOfEmails);
+    // Check that each message has one of the intended recipients
+    emails.forEach(e -> assertThat(expectedRecipients)
+        .anyMatch(r -> emailMatchesRecipient(e, r.getEmailAddresses())));
+    // Check that each recipient received a message
+    Arrays.asList(expectedRecipients).forEach(
+        r -> assertThat(emails).anyMatch(e -> emailMatchesRecipient(e, r.getEmailAddresses())));
+    // Clean up
+    clearEmailsOnServer();
+  }
+
+  private boolean emailMatchesRecipient(EmailResponse email,
+      List<EmailAddress> expectedRecipientAddresses) {
+    return email.to.values.stream().anyMatch(
+        v -> expectedRecipientAddresses.stream().anyMatch(ea -> v.address.equals(ea.getAddress())));
+  }
+
+  private void sendEmailsToServer() {
+    // Make sure all messages have been (asynchronously) sent
+    emailWorker.run();
+  }
+
+  private List<EmailResponse> getEmailsFromServer() {
+    try {
+      return emailServer.requestAllEmailsFromServer();
+    } catch (Exception e) {
+      fail("Error checking emails", e);
+    }
+    return null;
+  }
+
+  private void clearEmailsOnServer() {
+    try {
+      emailServer.clearEmailServer();
+    } catch (Exception e) {
+      fail("Error clearing emails", e);
+    }
   }
 
   private Person getPersonFromDb(String name) {
