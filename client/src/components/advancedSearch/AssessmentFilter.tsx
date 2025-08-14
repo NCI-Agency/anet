@@ -43,8 +43,8 @@ const AssessmentFilter = ({
   }
   const toQuery = val => ({
     [queryKey]: {
-      [KEY]: val[KEY],
-      [FILTERS]: val[FILTERS]
+      [KEY]: val[KEY] ?? "",
+      [FILTERS]: val[FILTERS] ?? {}
     }
   })
   const [value, setValue] = useSearchFilter(
@@ -168,7 +168,7 @@ const AssessmentFilter = ({
 }
 
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
     const value = {
       [KEY]: query[queryKey][KEY],
       [FILTERS]: { ...query[queryKey][FILTERS] }

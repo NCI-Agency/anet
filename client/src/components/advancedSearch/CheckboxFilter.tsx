@@ -17,9 +17,7 @@ const CheckboxFilter = ({
   onChange
 }: CheckboxFilterProps) => {
   const defaultValue = { value: true }
-  const toQuery = val => {
-    return { [queryKey]: val.value }
-  }
+  const toQuery = val => ({ [queryKey]: !!val.value })
   const value = useSearchFilter(
     asFormField,
     onChange,

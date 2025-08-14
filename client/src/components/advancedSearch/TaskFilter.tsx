@@ -47,10 +47,13 @@ const TaskFilter = ({
     value: inputValue.value || []
   }
   const toQuery = val => {
-    return {
-      [queryKey]: val.value?.map(v => v.uuid),
-      [queryRecurseStrategyKey]: fixedRecurseStrategy
+    const query = {
+      [queryKey]: val.value?.map(v => v?.uuid) ?? []
     }
+    if (queryRecurseStrategyKey) {
+      query[queryRecurseStrategyKey] = fixedRecurseStrategy
+    }
+    return query
   }
   const [value, setValue] = useSearchFilter(
     asFormField,
@@ -109,22 +112,22 @@ const TaskFilter = ({
 }
 
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
+    const emptyResult = { key, value: { toQuery: { [queryKey]: null } } }
+    if (query[queryKey] == null) {
+      return emptyResult
+    }
     return API.query(GQL_GET_TASKS, {
       uuids: query[queryKey]
-    }).then(data => {
-      if (data.tasks) {
-        return {
-          key,
-          value: {
-            value: data.tasks,
-            toQuery: { ...query }
-          }
-        }
-      } else {
-        return null
-      }
     })
+      .then(data => ({
+        key,
+        value: {
+          value: data.tasks?.filter(v => v != null) ?? [],
+          toQuery: { ...query }
+        }
+      }))
+      .catch(() => emptyResult)
   }
   return null
 }

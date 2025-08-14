@@ -6,7 +6,7 @@ export const RECURSE_STRATEGY = {
 
 export const deserializeSearchFilter = (queryKey, query, key) => {
   // general deserialization from query to a search filter
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
     const toQueryValue = { [queryKey]: query[queryKey] }
     return {
       key,

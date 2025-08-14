@@ -67,6 +67,7 @@ import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+import utils from "utils"
 
 // By default limit exports to the first 1000 results
 const MAX_NR_OF_EXPORTS = 1000
@@ -76,6 +77,15 @@ const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {
     createSavedSearch(savedSearch: $savedSearch) {
       uuid
+    }
+  }
+`
+
+const GQL_GET_SAVED_SEARCHES = gql`
+  query {
+    savedSearches: mySearches {
+      objectType
+      query
     }
   }
 `
@@ -122,6 +132,17 @@ const Search = ({
   const [numAttachments, setNumAttachments] = useState(null)
   const [numEvents, setNumEvents] = useState(null)
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
+  const {
+    loading,
+    error: err,
+    data,
+    refetch
+  } = API.useApiQuery(GQL_GET_SAVED_SEARCHES)
+  const { done, result } = useBoilerplate({
+    loading,
+    error: err,
+    pageDispatchers
+  })
   usePageTitle("Search")
   const numResultsThatCanBeEmailed = sum(
     numOrganizations,
@@ -253,6 +274,15 @@ const Search = ({
     pageDispatchers
   })
   const prepareEmailButtonProps = getPrepareEmailButtonProps()
+
+  if (done) {
+    return result
+  }
+
+  const savedSearches = (data?.savedSearches ?? []).map(s => ({
+    objectType: s.objectType,
+    query: utils.parseJsonSafe(s.query)
+  }))
 
   return (
     <div>
@@ -820,6 +850,7 @@ const Search = ({
       toast.success("Search saved")
       setError(null)
       setShowSaveSearch(false)
+      refetch()
     }
   }
 
@@ -837,7 +868,18 @@ const Search = ({
   }
 
   function openSaveModal() {
-    setShowSaveSearch(true)
+    const parsedSearch = {
+      objectType: SEARCH_OBJECT_TYPES[searchQuery.objectType] ?? null,
+      query: getSearchQuery(searchQuery)
+    }
+    const isDuplicate = savedSearches.some(s =>
+      utils.isDeeplyEqual(s, parsedSearch)
+    )
+    if (isDuplicate) {
+      toast.info("There's already an identical saved search")
+    } else {
+      setShowSaveSearch(true)
+    }
   }
 
   function closeSaveModal() {
