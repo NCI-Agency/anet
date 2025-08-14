@@ -15,7 +15,6 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { Field, Form, Formik } from "formik"
 import { Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
@@ -104,31 +103,27 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
 
   return (
-    <Formik enableReinitialize initialValues={person}>
-      <div>
-        <Alert variant="warning">Your account is pending approval</Alert>
-        <Messages error={stateError} success={stateSuccess} />
-        <Form className="form-horizontal" method="post">
-          <Fieldset title={`${person.rank} ${person.name}`} action={action} />
-          <Fieldset>
-            <Container fluid>
-              <Row>
-                <Col md={6}>
-                  <EntityAvatarDisplay
-                    defaultAvatar={Person.relatedObjectType}
-                  />
-                  {leftColumnUnderAvatar}
-                </Col>
-                <Col md={6}>{rightColumn}</Col>
-              </Row>
-              <Row>
-                <Col md={12}>{fullWidthFields}</Col>
-              </Row>
-            </Container>
-          </Fieldset>
-        </Form>
+    <div>
+      <Alert variant="warning">Your account is pending approval</Alert>
+      <Messages error={stateError} success={stateSuccess} />
+      <div className="form-horizontal">
+        <Fieldset title={`${person.rank} ${person.name}`} action={action} />
+        <Fieldset>
+          <Container fluid>
+            <Row>
+              <Col md={6}>
+                <EntityAvatarDisplay defaultAvatar={Person.relatedObjectType} />
+                {leftColumnUnderAvatar}
+              </Col>
+              <Col md={6}>{rightColumn}</Col>
+            </Row>
+            <Row>
+              <Col md={12}>{fullWidthFields}</Col>
+            </Row>
+          </Container>
+        </Fieldset>
       </div>
-    </Formik>
+    </div>
   )
 
   function orderPersonFields() {
@@ -194,10 +189,9 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
         <DictionaryField
-          wrappedComponent={Field}
+          wrappedComponent={FieldHelper.ReadonlyField}
           dictProps={Settings.fields.person[key]}
-          name={key}
-          component={FieldHelper.ReadonlyField}
+          field={{ name: key, value: person[key] }}
           humanValue={humanValuesExceptions[key]}
         />
       )
