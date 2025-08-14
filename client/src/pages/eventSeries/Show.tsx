@@ -18,7 +18,6 @@ import {
   usePageTitle
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
-import { Field, Form, Formik } from "formik"
 import { Event, EventSeries } from "models"
 import React, { useContext, useEffect, useState } from "react"
 import { Col, FormGroup, Row } from "react-bootstrap"
@@ -76,183 +75,163 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
     eventSeriesUuid: uuid
   }
 
+  const action = (
+    <>
+      {canAdministrateOrg && (
+        <LinkTo
+          modelType="EventSeries"
+          model={eventSeries}
+          edit
+          button="primary"
+          id="editButton"
+        >
+          Edit
+        </LinkTo>
+      )}
+    </>
+  )
+
   return (
-    <Formik enableReinitialize initialValues={eventSeries}>
-      {({ values }) => {
-        const action = (
-          <>
-            {canAdministrateOrg && (
-              <LinkTo
-                modelType="EventSeries"
-                model={eventSeries}
-                edit
-                button="primary"
-                id="editButton"
-              >
-                Edit
-              </LinkTo>
-            )}
-          </>
-        )
-        return (
-          <div>
-            <Messages success={stateSuccess} error={stateError} />
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={
-                  <>
-                    {
-                      <SubscriptionIcon
-                        subscribedObjectType="eventSeries"
-                        subscribedObjectUuid={eventSeries.uuid}
-                        isSubscribed={eventSeries.isSubscribed}
-                        updatedAt={eventSeries.updatedAt}
-                        refetch={refetch}
-                        setError={error => {
-                          setStateError(error)
-                          jumpToTop()
-                        }}
-                        persistent
-                      />
-                    }{" "}
-                    Event Series {eventSeries.name}
-                  </>
-                }
-                action={action}
+    <div>
+      <Messages success={stateSuccess} error={stateError} />
+      <div className="form-horizontal">
+        <Fieldset
+          title={
+            <>
+              {
+                <SubscriptionIcon
+                  subscribedObjectType="eventSeries"
+                  subscribedObjectUuid={eventSeries.uuid}
+                  isSubscribed={eventSeries.isSubscribed}
+                  updatedAt={eventSeries.updatedAt}
+                  refetch={refetch}
+                  setError={error => {
+                    setStateError(error)
+                    jumpToTop()
+                  }}
+                  persistent
+                />
+              }{" "}
+              Event Series {eventSeries.name}
+            </>
+          }
+          action={action}
+        />
+        <Fieldset>
+          <Row>
+            <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+              <EntityAvatarDisplay
+                avatar={avatar}
+                defaultAvatar={EventSeries.relatedObjectType}
               />
-              <Fieldset>
-                <Row>
-                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
-                    <EntityAvatarDisplay
-                      avatar={avatar}
-                      defaultAvatar={EventSeries.relatedObjectType}
-                    />
-                  </Col>
-                  <Col
-                    lg={8}
-                    xl={9}
-                    className="d-flex flex-column justify-content-center"
-                  >
-                    <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
-                        <Col sm={7}>
-                          <Row>
-                            <Col>
-                              <DictionaryField
-                                wrappedComponent={Field}
-                                dictProps={Settings.fields.eventSeries.name}
-                                name="name"
-                                component={FieldHelper.ReadonlyField}
-                              />
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    </FormGroup>
+            </Col>
+            <Col
+              lg={8}
+              xl={9}
+              className="d-flex flex-column justify-content-center"
+            >
+              <FormGroup>
+                <Row style={{ marginBottom: "1rem" }}>
+                  <Col sm={7}>
+                    <Row>
+                      <Col>
+                        <DictionaryField
+                          wrappedComponent={FieldHelper.ReadonlyField}
+                          dictProps={Settings.fields.eventSeries.name}
+                          field={{ name: "name", value: eventSeries.name }}
+                        />
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
-              </Fieldset>
-              <Fieldset id="info" title="Info">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.ownerOrg}
-                  name="ownerOrg"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    eventSeries.ownerOrg && (
-                      <LinkTo
-                        modelType="Organization"
-                        model={eventSeries.ownerOrg}
-                      />
-                    )
-                  }
+              </FormGroup>
+            </Col>
+          </Row>
+        </Fieldset>
+        <Fieldset id="info" title="Info">
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.eventSeries.ownerOrg}
+            field={{ name: "ownerOrg" }}
+            humanValue={
+              eventSeries.ownerOrg && (
+                <LinkTo modelType="Organization" model={eventSeries.ownerOrg} />
+              )
+            }
+          />
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.eventSeries.hostOrg}
+            field={{ name: "hostOrg" }}
+            humanValue={
+              eventSeries.hostOrg && (
+                <LinkTo modelType="Organization" model={eventSeries.hostOrg} />
+              )
+            }
+          />
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.eventSeries.adminOrg}
+            field={{ name: "adminOrg" }}
+            humanValue={
+              eventSeries.adminOrg && (
+                <LinkTo modelType="Organization" model={eventSeries.adminOrg} />
+              )
+            }
+          />
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.eventSeries.status}
+            field={{ name: "status" }}
+            humanValue={EventSeries.humanNameOfStatus(eventSeries.status)}
+          />
+          {attachmentsEnabled && (
+            <FieldHelper.ReadonlyField
+              field={{ name: "attachments" }}
+              label="Attachments"
+              humanValue={
+                <AttachmentsDetailView
+                  attachments={attachments}
+                  updateAttachments={setAttachments}
+                  relatedObjectType={EventSeries.relatedObjectType}
+                  relatedObjectUuid={eventSeries.uuid}
+                  allowEdit={canAdministrateOrg}
                 />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.hostOrg}
-                  name="hostOrg"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    eventSeries.hostOrg && (
-                      <LinkTo
-                        modelType="Organization"
-                        model={eventSeries.hostOrg}
-                      />
-                    )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.adminOrg}
-                  name="adminOrg"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    eventSeries.adminOrg && (
-                      <LinkTo
-                        modelType="Organization"
-                        model={eventSeries.adminOrg}
-                      />
-                    )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.status}
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={EventSeries.humanNameOfStatus}
-                />
-                {attachmentsEnabled && (
-                  <Field
-                    name="attachments"
-                    label="Attachments"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <AttachmentsDetailView
-                        attachments={attachments}
-                        updateAttachments={setAttachments}
-                        relatedObjectType={EventSeries.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
-                        allowEdit={canAdministrateOrg}
-                      />
-                    }
-                  />
-                )}
-              </Fieldset>
-              <Fieldset
-                title={Settings.fields.eventSeries.description?.label}
-                id="description"
+              }
+            />
+          )}
+        </Fieldset>
+        <Fieldset
+          title={Settings.fields.eventSeries.description?.label}
+          id="description"
+        >
+          <RichTextEditor readOnly value={eventSeries.description} />
+        </Fieldset>
+        <Fieldset
+          id="events"
+          title={`Events for ${eventSeries.name}`}
+          action={
+            canAdministrateOrg && (
+              <LinkTo
+                modelType="Event"
+                model={Event.pathForNew({
+                  eventSeriesUuid: eventSeries.uuid
+                })}
+                button
               >
-                <RichTextEditor readOnly value={eventSeries.description} />
-              </Fieldset>
-              <Fieldset
-                id="events"
-                title={`Events for ${eventSeries.name}`}
-                action={
-                  canAdministrateOrg && (
-                    <LinkTo
-                      modelType="Event"
-                      model={Event.pathForNew({
-                        eventSeriesUuid: eventSeries.uuid
-                      })}
-                      button
-                    >
-                      Create event
-                    </LinkTo>
-                  )
-                }
-              >
-                <EventCollection
-                  paginationKey={`e_${uuid}`}
-                  queryParams={eventQueryParams}
-                  mapId="events"
-                />
-              </Fieldset>
-            </Form>
-          </div>
-        )
-      }}
-    </Formik>
+                Create event
+              </LinkTo>
+            )
+          }
+        >
+          <EventCollection
+            paginationKey={`e_${uuid}`}
+            queryParams={eventQueryParams}
+            mapId="events"
+          />
+        </Fieldset>
+      </div>
+    </div>
   )
 }
 
