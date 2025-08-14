@@ -114,10 +114,9 @@ export const BaseGeoLocation = ({
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
-        <Field
-          name={name || "location"}
+        <FieldHelper.ReadonlyField
+          field={{ name: name || "location" }}
           label={label}
-          component={FieldHelper.ReadonlyField}
           humanValue={humanValue}
           style={{ paddingTop: "2px" }}
         />
