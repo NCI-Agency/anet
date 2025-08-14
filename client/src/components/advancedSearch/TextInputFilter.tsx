@@ -24,7 +24,7 @@ const TextInputFilter = ({
 }: TextInputFilterProps) => {
   const defaultValue = inputValue || { value: "" }
   const toQuery = val => {
-    return { [queryKey]: val.value }
+    return { [queryKey]: val.value ?? null }
   }
   const [value, setValue] = useSearchFilter(
     asFormField,

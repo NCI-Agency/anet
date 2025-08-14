@@ -31,9 +31,7 @@ const RadioButtonFilter = ({
   const defaultValue = {
     value: inputValue.value ?? defaultOption ?? options[0]
   }
-  const toQuery = val => {
-    return { [queryKey]: val.value }
-  }
+  const toQuery = val => ({ [queryKey]: val.value ?? null })
   const [value, setValue] = useSearchFilter(
     asFormField,
     onChange,

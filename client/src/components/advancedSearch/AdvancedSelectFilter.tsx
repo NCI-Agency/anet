@@ -30,9 +30,7 @@ const AdvancedSelectFilter = ({
   ...advancedSelectProps
 }: AdvancedSelectFilterProps) => {
   const defaultValue = inputValue || {}
-  const toQuery = val => {
-    return { [queryKey]: val && val.uuid }
-  }
+  const toQuery = val => ({ [queryKey]: val?.uuid ?? null })
   const [value, setValue] = useSearchFilter(
     asFormField,
     onChange,
@@ -65,7 +63,11 @@ const AdvancedSelectFilter = ({
 }
 
 export const deserialize = ({ queryKey, objectType, fields }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
+    const emptyResult = { key, value: { toQuery: { [queryKey]: null } } }
+    if (query[queryKey] == null) {
+      return emptyResult
+    }
     const getInstanceName = objectType.getInstanceName
     return API.query(
       gql`
@@ -76,22 +78,17 @@ export const deserialize = ({ queryKey, objectType, fields }, query, key) => {
         }
       `,
       { uuid: query[queryKey] }
-    ).then(data => {
-      if (data[getInstanceName]) {
-        const toQueryValue = {
-          [queryKey]: query[queryKey]
-        }
-        return {
-          key,
-          value: {
-            ...data[getInstanceName],
-            toQuery: toQueryValue
+    )
+      .then(data => ({
+        key,
+        value: {
+          ...(data[getInstanceName] ?? {}),
+          toQuery: {
+            [queryKey]: query[queryKey]
           }
         }
-      } else {
-        return null
-      }
-    })
+      }))
+      .catch(() => emptyResult)
   }
   return null
 }

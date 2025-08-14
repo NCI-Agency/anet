@@ -29,7 +29,7 @@ const SelectFilter = ({
   const defaultValue = {
     value: inputValue.value || options[0] || ""
   }
-  const toQuery = val => ({ [queryKey]: val.value })
+  const toQuery = val => ({ [queryKey]: val.value ?? null })
   const [value, setValue] = useSearchFilter(
     asFormField,
     onChange,

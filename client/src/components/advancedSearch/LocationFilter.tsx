@@ -44,10 +44,13 @@ const LocationFilter = ({
     value: inputValue.value || []
   }
   const toQuery = val => {
-    return {
-      [queryKey]: val.value?.map(v => v.uuid),
-      [queryRecurseStrategyKey]: fixedRecurseStrategy
+    const query = {
+      [queryKey]: val.value?.map(v => v?.uuid) ?? []
     }
+    if (queryRecurseStrategyKey) {
+      query[queryRecurseStrategyKey] = fixedRecurseStrategy
+    }
+    return query
   }
   const [value, setValue] = useSearchFilter(
     asFormField,
@@ -96,22 +99,22 @@ const LocationFilter = ({
 }
 
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
+    const emptyResult = { key, value: { toQuery: { [queryKey]: null } } }
+    if (query[queryKey] == null) {
+      return emptyResult
+    }
     return API.query(GQL_GET_LOCATIONS, {
       uuids: query[queryKey]
-    }).then(data => {
-      if (data.locations) {
-        return {
-          key,
-          value: {
-            value: data.locations,
-            toQuery: { ...query }
-          }
-        }
-      } else {
-        return null
-      }
     })
+      .then(data => ({
+        key,
+        value: {
+          value: data.locations?.filter(v => v != null) ?? [],
+          toQuery: { ...query }
+        }
+      }))
+      .catch(() => emptyResult)
   }
   return null
 }
