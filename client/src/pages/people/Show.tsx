@@ -42,7 +42,6 @@ import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import UserTable from "components/UserTable"
-import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
 import moment from "moment"
@@ -314,165 +313,158 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
 
   return (
-    <Formik enableReinitialize initialValues={person}>
-      {() => {
-        return (
-          <div>
-            <div className="float-end">
-              <GuidedTour
-                title="Take a guided tour of this person's page."
-                tour={personTour}
-                autostart={
-                  localStorage.newUser === "true" &&
-                  localStorage.hasSeenPersonTour !== "true"
-                }
-                onEnd={() => (localStorage.hasSeenPersonTour = "true")}
-              />
-            </div>
-            <Messages error={stateError} success={stateSuccess} />
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                id="info"
-                title={
-                  <>
-                    {
-                      <SubscriptionIcon
-                        subscribedObjectType="people"
-                        subscribedObjectUuid={person.uuid}
-                        isSubscribed={person.isSubscribed}
-                        updatedAt={person.updatedAt}
-                        refetch={refetch}
-                        setError={error => {
-                          setStateError(error)
-                          jumpToTop()
-                        }}
-                        persistent
-                      />
-                    }{" "}
-                    {person.rank} {Person.militaryName(person.name)}
-                  </>
-                }
-                action={action}
-              />
-              <Fieldset>
-                <Container fluid>
-                  <Row>
-                    <Col md={6} className="text-center">
-                      <EntityAvatarDisplay
-                        avatar={avatar}
-                        defaultAvatar={Person.relatedObjectType}
-                      />
-                      {leftColumnUnderAvatar}
-                    </Col>
-                    <Col md={6}>{rightColumn}</Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>{fullWidthFields}</Col>
-                    {attachmentsEnabled && (
-                      <Col md={12}>
-                        <Field
-                          name="attachments"
-                          label="Attachments"
-                          component={FieldHelper.ReadonlyField}
-                          humanValue={
-                            <AttachmentsDetailView
-                              attachments={attachments}
-                              updateAttachments={setAttachments}
-                              relatedObjectType={Person.relatedObjectType}
-                              relatedObjectUuid={person.uuid}
-                              allowEdit={canEdit}
-                            />
-                          }
-                        />
-                      </Col>
-                    )}
-                  </Row>
-                </Container>
-              </Fieldset>
-
-              {canEdit && (
-                <AssignPositionModal
-                  showModal={showAssignPositionModal}
-                  person={person}
-                  onCancel={() => hideAssignPositionModal(false)}
-                  onSuccess={() => hideAssignPositionModal(true)}
+    <div>
+      <div className="float-end">
+        <GuidedTour
+          title="Take a guided tour of this person's page."
+          tour={personTour}
+          autostart={
+            localStorage.newUser === "true" &&
+            localStorage.hasSeenPersonTour !== "true"
+          }
+          onEnd={() => (localStorage.hasSeenPersonTour = "true")}
+        />
+      </div>
+      <Messages error={stateError} success={stateSuccess} />
+      <div className="form-horizontal">
+        <Fieldset
+          id="info"
+          title={
+            <>
+              {
+                <SubscriptionIcon
+                  subscribedObjectType="people"
+                  subscribedObjectUuid={person.uuid}
+                  isSubscribed={person.isSubscribed}
+                  updatedAt={person.updatedAt}
+                  refetch={refetch}
+                  setError={error => {
+                    setStateError(error)
+                    jumpToTop()
+                  }}
+                  persistent
                 />
+              }{" "}
+              {person.rank} {Person.militaryName(person.name)}
+            </>
+          }
+          action={action}
+        />
+        <Fieldset>
+          <Container fluid>
+            <Row>
+              <Col md={6} className="text-center">
+                <EntityAvatarDisplay
+                  avatar={avatar}
+                  defaultAvatar={Person.relatedObjectType}
+                />
+                {leftColumnUnderAvatar}
+              </Col>
+              <Col md={6}>{rightColumn}</Col>
+            </Row>
+            <Row>
+              <Col md={12}>{fullWidthFields}</Col>
+              {attachmentsEnabled && (
+                <Col md={12}>
+                  <FieldHelper.ReadonlyField
+                    field={{ name: "attachments" }}
+                    label="Attachments"
+                    humanValue={
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={setAttachments}
+                        relatedObjectType={Person.relatedObjectType}
+                        relatedObjectUuid={person.uuid}
+                        allowEdit={canEdit}
+                      />
+                    }
+                  />
+                </Col>
               )}
+            </Row>
+          </Container>
+        </Fieldset>
 
-              {hasPosition && (
-                <Fieldset
-                  title={`Assigned ${assignedRole}`}
-                  action={
-                    canEdit && (
-                      <Button
-                        onClick={() => setShowAssociatedPositionsModal(true)}
-                        variant="outline-secondary"
-                      >
-                        Change assigned {assignedRole}
-                      </Button>
-                    )
-                  }
+        {canEdit && (
+          <AssignPositionModal
+            showModal={showAssignPositionModal}
+            person={person}
+            onCancel={() => hideAssignPositionModal(false)}
+            onSuccess={() => hideAssignPositionModal(true)}
+          />
+        )}
+
+        {hasPosition && (
+          <Fieldset
+            title={`Assigned ${assignedRole}`}
+            action={
+              canEdit && (
+                <Button
+                  onClick={() => setShowAssociatedPositionsModal(true)}
+                  variant="outline-secondary"
                 >
-                  {renderCounterparts(position)}
-                  {canEdit && (
-                    <EditAssociatedPositionsModal
-                      position={position}
-                      showModal={showAssociatedPositionsModal}
-                      onCancel={() => hideAssociatedPositionsModal(false)}
-                      onSuccess={() => hideAssociatedPositionsModal(true)}
-                    />
-                  )}
-                </Fieldset>
-              )}
-              {isAdmin && (
-                <EditHistory
-                  mainTitle="Edit position history"
-                  history1={person.previousPositions}
-                  initialHistory={person.previousPositions}
-                  currentlyOccupyingEntity={person.position}
-                  historyEntityType="position"
-                  parentEntityUuid1={person.uuid}
-                  showModal={showHistoryModal}
-                  setShowModal={setShowHistoryModal}
-                  setHistory={history => onSavePreviousPositions(history)}
-                />
-              )}
-              <Fieldset title="Reports authored" id="reports-authored">
-                <ReportCollection
-                  paginationKey={`r_authored_${uuid}`}
-                  queryParams={{
-                    authorUuid: uuid
-                  }}
-                  mapId="reports-authored"
-                />
-              </Fieldset>
-              <Fieldset
-                title={`Reports attended by ${person.name}`}
-                id="reports-attended"
-              >
-                <ReportCollection
-                  paginationKey={`r_attended_${uuid}`}
-                  queryParams={{
-                    attendeeUuid: uuid
-                  }}
-                  mapId="reports-attended"
-                />
-              </Fieldset>
-            </Form>
-            <AssessmentResultsContainer
-              entity={person}
-              entityType={Person}
-              canAddPeriodicAssessment={canAddPeriodicAssessment}
-              canAddOndemandAssessment={canAddOndemandAssessment}
-              onUpdateAssessment={() => {
-                loadAppData()
-                refetch()
-              }}
-            />
-          </div>
-        )
-      }}
-    </Formik>
+                  Change assigned {assignedRole}
+                </Button>
+              )
+            }
+          >
+            {renderCounterparts(position)}
+            {canEdit && (
+              <EditAssociatedPositionsModal
+                position={position}
+                showModal={showAssociatedPositionsModal}
+                onCancel={() => hideAssociatedPositionsModal(false)}
+                onSuccess={() => hideAssociatedPositionsModal(true)}
+              />
+            )}
+          </Fieldset>
+        )}
+        {isAdmin && (
+          <EditHistory
+            mainTitle="Edit position history"
+            history1={person.previousPositions}
+            initialHistory={person.previousPositions}
+            currentlyOccupyingEntity={person.position}
+            historyEntityType="position"
+            parentEntityUuid1={person.uuid}
+            showModal={showHistoryModal}
+            setShowModal={setShowHistoryModal}
+            setHistory={history => onSavePreviousPositions(history)}
+          />
+        )}
+        <Fieldset title="Reports authored" id="reports-authored">
+          <ReportCollection
+            paginationKey={`r_authored_${uuid}`}
+            queryParams={{
+              authorUuid: uuid
+            }}
+            mapId="reports-authored"
+          />
+        </Fieldset>
+        <Fieldset
+          title={`Reports attended by ${person.name}`}
+          id="reports-attended"
+        >
+          <ReportCollection
+            paginationKey={`r_attended_${uuid}`}
+            queryParams={{
+              attendeeUuid: uuid
+            }}
+            mapId="reports-attended"
+          />
+        </Fieldset>
+      </div>
+      <AssessmentResultsContainer
+        entity={person}
+        entityType={Person}
+        canAddPeriodicAssessment={canAddPeriodicAssessment}
+        canAddOndemandAssessment={canAddOndemandAssessment}
+        onUpdateAssessment={() => {
+          loadAppData()
+          refetch()
+        }}
+      />
+    </div>
   )
 
   function orderPersonFields() {
@@ -589,10 +581,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
         <DictionaryField
-          wrappedComponent={Field}
+          wrappedComponent={FieldHelper.ReadonlyField}
           dictProps={Settings.fields.person[key]}
-          name={key}
-          component={FieldHelper.ReadonlyField}
+          field={{ name: key, value: person[key] }}
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}
         />
