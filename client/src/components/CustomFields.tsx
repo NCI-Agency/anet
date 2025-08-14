@@ -970,7 +970,10 @@ interface CompactGeoLocationProps {
 }
 
 const CompactGeoLocation = ({ coordinates }: CompactGeoLocationProps) => {
-  const coords = `${coordinates.lat}, ${coordinates.lng} - ${coordinates.displayedCoordinate}`
+  const coords =
+    `${utils.isNumeric(coordinates.lat) ? coordinates.lat : "?"}, ` +
+    `${utils.isNumeric(coordinates.lng) ? coordinates.lng : "?"} - ` +
+    `${coordinates.displayedCoordinate || "?"}`
   return <>{coords}</>
 }
 
