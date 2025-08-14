@@ -269,7 +269,7 @@ test.serial("Publish report chain", async t => {
   await approveReport(t, "jacob")
   await approveReport(t, "rebecca")
   // Then the task owner can approve the report
-  await approveReport(t, "jack")
+  await approveReport(t, "henry")
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")

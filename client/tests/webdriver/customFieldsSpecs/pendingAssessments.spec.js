@@ -157,14 +157,14 @@ describe("In my tasks page", () => {
     })
   })
 
-  describe("When Jack is checking the contents of the page", () => {
-    it("Should see 1 task in the table of my tasks that has pending assessments", async () => {
-      await MyTasks.openAs("jack")
+  describe("When Henry is checking the contents of the page", () => {
+    it("Should see 2 tasks in the table of my tasks that have pending assessments", async () => {
+      await MyTasks.openAs("henry")
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
       const myPendingTasks = await (
         await MyTasks.getMyPendingTasksBody()
       ).$$("tr")
-      expect(myPendingTasks).to.have.length(1)
+      expect(myPendingTasks).to.have.length(2)
     })
     it("Should be able to add a monthly assessment with 2 questions for the task", async () => {
       await (await MyTasks.getMyPendingTask("2.B")).click()

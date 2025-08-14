@@ -163,16 +163,18 @@ const PositionForm = ({
     },
     {
       id: "permsSuperuserRegularButton",
-      value: Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS,
+      value:
+        Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS,
       label: Position.humanNameOfSuperuserType(
-        Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS
+        Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS
       )
     },
     {
       id: "permsSuperuserRegularButton",
-      value: Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION,
+      value:
+        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK,
       label: Position.humanNameOfSuperuserType(
-        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK
       )
     }
   ]

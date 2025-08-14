@@ -14,9 +14,9 @@ const SUPERUSER_ACTIONS = [
   Models.EventSeries
 ]
 
-const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization]
+const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization, Models.Task]
 
-const ADMIN_ACTIONS = [Models.Task, Models.AuthorizationGroup]
+const ADMIN_ACTIONS = [Models.AuthorizationGroup]
 
 const CreateButton = () => {
   const { currentUser } = useContext(AppContext)

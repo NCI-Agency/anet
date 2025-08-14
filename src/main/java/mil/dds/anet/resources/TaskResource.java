@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,6 +27,8 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +36,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 @GraphQLApi
 public class TaskResource {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
@@ -42,6 +48,23 @@ public class TaskResource {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.dao = dao;
+  }
+
+
+  public static boolean hasPermission(final Person user, final String taskUuid) {
+    return AuthUtils.isResponsibleForTask(user, taskUuid);
+  }
+
+  public static void assertPermission(final Person user, final String taskUuid) {
+    if (!hasPermission(user, taskUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
+  }
+
+  public static void assertCreateSubTaskPermission(final Person user, final String parentTaskUuid) {
+    if (!AuthUtils.canCreateSubTask(user, parentTaskUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
   }
 
   @GraphQLQuery(name = "task")
@@ -64,8 +87,15 @@ public class TaskResource {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    // Check if user is authorized to create a sub organization
+    assertCreateSubTaskPermission(user, t.getParentTaskUuid());
+    // If the organization is created by a superuser we need to add their position as an
+    // administrating one
+    if (user.getPosition().getType() == Position.PositionType.SUPERUSER) {
+      t.setResponsiblePositions(List.of(user.getPosition()));
+    }
     final Task created;
     try {
       created = dao.insert(t);
@@ -102,18 +132,9 @@ public class TaskResource {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
-    final List<Position> existingResponsiblePositions =
-        dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
-    // User has to be admin or responsible for the task
-    if (!AuthUtils.isAdmin(user)) {
-      final Position userPosition = DaoUtils.getPosition(user);
-      final boolean canUpdate = existingResponsiblePositions.stream()
-          .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
-      if (!canUpdate) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
-      }
-    }
+    assertPermission(user, DaoUtils.getUuid(t));
 
     // Check for loops in the hierarchy
     if (t.getParentTaskUuid() != null) {
@@ -125,13 +146,34 @@ public class TaskResource {
       }
     }
 
+    // Load the existing task, so we can check for differences.
+    final Task existing = dao.getByUuid(t.getUuid());
+
+    if (!AuthUtils.isAdmin(user)
+        && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
+      // Check if user holds a responsible position for the task that will be
+      // modified with the parent task update
+      if (!Objects.equals(t.getParentTaskUuid(), existing.getParentTaskUuid())) {
+        if (t.getParentTaskUuid() != null) {
+          assertPermission(user, t.getParentTaskUuid());
+        }
+        if (existing.getParentTaskUuid() != null) {
+          assertPermission(user, existing.getParentTaskUuid());
+        }
+      }
+    }
+
     try {
       final int numRows = dao.update(t);
       if (numRows == 0) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process task update");
       }
+
       // Update positions:
-      if (t.getResponsiblePositions() != null) {
+      if (AuthUtils.isAdmin(user) && t.getResponsiblePositions() != null) {
+        logger.debug("Editing responsible positions for {}", t);
+        final List<Position> existingResponsiblePositions =
+            dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
         Utils.addRemoveElementsByUuid(existingResponsiblePositions, t.getResponsiblePositions(),
             newPos -> dao.addPositionToTask(newPos, t),
             oldPos -> dao.removePositionFromTask(DaoUtils.getUuid(oldPos), t.getUuid()));
@@ -146,8 +188,6 @@ public class TaskResource {
             oldOrg -> dao.removeTaskedOrganizationsFromTask(DaoUtils.getUuid(oldOrg), t.getUuid()));
       }
 
-      // Load the existing task, so we can check for differences.
-      final Task existing = dao.getByUuid(t.getUuid());
       final List<ApprovalStep> existingPlanningApprovalSteps =
           existing.loadPlanningApprovalSteps(engine.getContext()).join();
       final List<ApprovalStep> existingApprovalSteps =

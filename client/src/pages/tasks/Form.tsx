@@ -28,6 +28,7 @@ import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Organization, Position, Task } from "models"
 import React, { useContext, useState } from "react"
@@ -36,6 +37,7 @@ import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
@@ -65,7 +67,7 @@ const TaskForm = ({
   initialValues,
   notesComponent
 }: TaskFormProps) => {
-  const { currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -101,6 +103,7 @@ const TaskForm = ({
       label: "All positions",
       queryVars: {
         status: Model.STATUS.ACTIVE,
+        type: [Position.TYPE.SUPERUSER],
         matchPersonName: true
       }
     }
@@ -140,9 +143,22 @@ const TaskForm = ({
         validateForm,
         submitForm
       }) => {
-        const isAdmin = currentUser && currentUser.isAdmin()
-        const disabled = !isAdmin
-        const action = (
+        const isAdmin = currentUser?.isAdmin()
+        const isResponsibleForParentTask =
+          _isEmpty(values.parentTask) ||
+          currentUser?.isResponsibleForTask(values.parentTask)
+        const isResponsibleForTask = edit
+          ? currentUser?.isResponsibleForTask(values)
+          : isResponsibleForParentTask
+        const taskSearchQuery = { status: Model.STATUS.ACTIVE }
+        // Superusers can select parent organizations among the ones their position is administrating
+        if (!isAdmin) {
+          const responsibleTasksUuids =
+            currentUser.position.responsibleTasks.map(t => t.uuid)
+          taskSearchQuery.parentTaskUuid = [...responsibleTasksUuids]
+          taskSearchQuery.parentTaskRecurseStrategy = RECURSE_STRATEGY.CHILDREN
+        }
+        const action = isResponsibleForTask && (
           <>
             <Button
               key="submit"
@@ -167,7 +183,6 @@ const TaskForm = ({
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
                   component={FieldHelper.InputField}
-                  disabled={disabled}
                 />
 
                 <DictionaryField
@@ -219,6 +234,7 @@ const TaskForm = ({
                       setFieldTouched("parentTask", true, false) // onBlur doesn't work when selecting an option
                       setFieldValue("parentTask", value)
                     }}
+                    disabled={!isResponsibleForParentTask}
                     widget={
                       <AdvancedSingleSelect
                         fieldName="parentTask"
@@ -233,13 +249,12 @@ const TaskForm = ({
                         objectType={Task}
                         fields={taskFields}
                         valueKey="shortName"
-                        queryParams={{}}
+                        queryParams={taskSearchQuery}
                         addon={TASKS_ICON}
-                        showRemoveButton={!disabled}
+                        showRemoveButton={isResponsibleForParentTask}
                         pageSize={0}
                       />
                     }
-                    disabled={disabled}
                   />
                 )}
 
@@ -251,7 +266,6 @@ const TaskForm = ({
                   onChange={value => setFieldValue("plannedCompletion", value)}
                   onBlur={() => setFieldTouched("plannedCompletion")}
                   widget={<CustomDateInput id="plannedCompletion" />}
-                  disabled={disabled}
                 />
 
                 <DictionaryField
@@ -264,57 +278,36 @@ const TaskForm = ({
                   }
                   onBlur={() => setFieldTouched("projectedCompletion")}
                   widget={<CustomDateInput id="projectedCompletion" />}
-                  disabled={disabled}
                 />
 
-                {disabled ? (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.status}
-                    name="status"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Position.humanNameOfStatus}
-                  />
-                ) : (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.status}
-                    name="status"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={statusButtons}
-                    onChange={value => setFieldValue("status", value)}
-                  />
-                )}
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.task.status}
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
 
-                {disabled ? (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.selectable}
-                    name="selectable"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={utils.formatBoolean}
-                  />
-                ) : (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.task.selectable}
-                    name="selectable"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={[
-                      {
-                        id: "isSelectable",
-                        value: true,
-                        label: "Yes"
-                      },
-                      {
-                        id: "isNotSelectable",
-                        value: false,
-                        label: "No"
-                      }
-                    ]}
-                    onChange={value => setFieldValue("selectable", value)}
-                  />
-                )}
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.task.selectable}
+                  name="selectable"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={[
+                    {
+                      id: "isSelectable",
+                      value: true,
+                      label: "Yes"
+                    },
+                    {
+                      id: "isNotSelectable",
+                      value: false,
+                      label: "No"
+                    }
+                  ]}
+                  onChange={value => setFieldValue("selectable", value)}
+                />
 
                 <DictionaryField
                   wrappedComponent={FastField}
@@ -345,46 +338,53 @@ const TaskForm = ({
               <Fieldset
                 title={Settings.fields.task.responsiblePositions?.label}
               >
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.task.responsiblePositions}
-                  name="responsiblePositions"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    value = value.map(position =>
-                      Position.filterClientSideFields(position)
-                    )
-                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("responsiblePositions", value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="responsiblePositions"
-                      value={values.responsiblePositions}
-                      renderSelected={
-                        <PositionTable
-                          positions={values.responsiblePositions}
-                          showLocation
-                          showDelete
-                        />
-                      }
-                      overlayColumns={[
-                        "Position",
-                        "Organization",
-                        "Current Occupant"
-                      ]}
-                      overlayRenderRow={PositionOverlayRow}
-                      filterDefs={positionsFilters}
-                      objectType={Position}
-                      fields={Position.autocompleteQuery}
-                      addon={POSITIONS_ICON}
-                    />
-                  }
-                />
+                {!isAdmin ? (
+                  <PositionTable
+                    positions={values.responsiblePositions}
+                    showLocation
+                  />
+                ) : (
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.task.responsiblePositions}
+                    name="responsiblePositions"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      value = value.map(position =>
+                        Position.filterClientSideFields(position)
+                      )
+                      setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("responsiblePositions", value)
+                    }}
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="responsiblePositions"
+                        value={values.responsiblePositions}
+                        renderSelected={
+                          <PositionTable
+                            positions={values.responsiblePositions}
+                            showLocation
+                            showDelete
+                          />
+                        }
+                        overlayColumns={[
+                          "Position",
+                          "Organization",
+                          "Current Occupant"
+                        ]}
+                        overlayRenderRow={PositionOverlayRow}
+                        filterDefs={positionsFilters}
+                        objectType={Position}
+                        fields={Position.autocompleteQuery}
+                        addon={POSITIONS_ICON}
+                      />
+                    }
+                  />
+                )}
               </Fieldset>
 
-              {Settings.fields.task.customFields && !disabled && (
+              {Settings.fields.task.customFields && (
                 <Fieldset
                   title={`${Settings.fields.task.shortLabel} information`}
                   id="custom-fields"
@@ -471,6 +471,7 @@ const TaskForm = ({
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
+    loadAppData()
     if (!edit) {
       navigate(Task.pathForEdit(task), { replace: true })
     }
