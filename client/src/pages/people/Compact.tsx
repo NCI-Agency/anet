@@ -34,7 +34,6 @@ import {
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import UserTable from "components/UserTable"
-import { Field, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
@@ -285,43 +284,35 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
   ]
 
   return (
-    <Formik
-      validationSchema={Person.yupSchema}
-      validateOnMount
-      initialValues={person}
-    >
-      {() => (
-        <>
-          <HeaderTitle value="title">Summary / Print</HeaderTitle>
-          <CompactPersonViewHeader
-            onPrintClick={printPerson}
-            returnToDefaultPage={returnToDefaultPage}
-            optionalFields={optionalFields}
-            setOptionalFields={setOptionalFields}
-            setPageSize={setPageSize}
-            leftColumnFields={leftColumnFields}
-            setLeftColumnFields={setLeftColumnFields}
-          />
-          <CompactView className="compact-view" pageSize={pageSize}>
-            <CompactHeaderContent
-              sensitiveInformation={containsSensitiveInformation}
-            />
-            <CompactFooterContent object={person} />
-            <CompactTable>
-              {(_isEmpty(rightColumn) && (
-                <FullColumn className="full-table">{leftColumn}</FullColumn>
-              )) || (
-                <>
-                  <HalfColumn className="left-table">{leftColumn}</HalfColumn>
-                  <HalfColumn className="right-table">{rightColumn}</HalfColumn>
-                </>
-              )}
-              <FullColumn>{twoColumnFields}</FullColumn>
-            </CompactTable>
-          </CompactView>
-        </>
-      )}
-    </Formik>
+    <>
+      <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <CompactPersonViewHeader
+        onPrintClick={printPerson}
+        returnToDefaultPage={returnToDefaultPage}
+        optionalFields={optionalFields}
+        setOptionalFields={setOptionalFields}
+        setPageSize={setPageSize}
+        leftColumnFields={leftColumnFields}
+        setLeftColumnFields={setLeftColumnFields}
+      />
+      <CompactView className="compact-view" pageSize={pageSize}>
+        <CompactHeaderContent
+          sensitiveInformation={containsSensitiveInformation}
+        />
+        <CompactFooterContent object={person} />
+        <CompactTable>
+          {(_isEmpty(rightColumn) && (
+            <FullColumn className="full-table">{leftColumn}</FullColumn>
+          )) || (
+            <>
+              <HalfColumn className="left-table">{leftColumn}</HalfColumn>
+              <HalfColumn className="right-table">{rightColumn}</HalfColumn>
+            </>
+          )}
+          <FullColumn>{twoColumnFields}</FullColumn>
+        </CompactTable>
+      </CompactView>
+    </>
   )
 
   function returnToDefaultPage() {
@@ -437,10 +428,9 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
         <DictionaryField
-          wrappedComponent={Field}
+          wrappedComponent={FieldHelper.ReadonlyField}
           dictProps={Settings.fields.person[key]}
-          name={key}
-          component={FieldHelper.ReadonlyField}
+          field={{ name: key, value: person[key] }}
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}
           id={idExceptions[key]}
