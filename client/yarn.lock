@@ -5797,9 +5797,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/browserstack-service@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/browserstack-service@npm:8.45.0"
+"@wdio/browserstack-service@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/browserstack-service@npm:8.46.0"
   dependencies:
     "@browserstack/ai-sdk-node": "npm:1.5.17"
     "@percy/appium-app": "npm:^2.0.1"
@@ -5816,27 +5816,27 @@ __metadata:
     gitconfiglocal: "npm:^2.1.0"
     got: "npm:^12.6.1"
     uuid: "npm:^10.0.0"
-    webdriverio: "npm:8.45.0"
+    webdriverio: "npm:8.46.0"
     winston-transport: "npm:^4.5.0"
     yauzl: "npm:^3.0.0"
   peerDependencies:
     "@wdio/cli": ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
-  checksum: 10c0/b1945f903366a582b24f23e53e70bab367e2fc896768ff370262c2f70c9609eb072134c789649b2d24fb4f2596848729d9f6413eb476c8b52cf2ebfbcf84c02a
+  checksum: 10c0/e5cfd9ece804105bcb7632fb2a80daf74d5ab0d0143cc02310979ddc369d5924116c179da767f67b73e6d352d609c8e7f104728e5eefc67f5224369ff5222f0c
   languageName: node
   linkType: hard
 
-"@wdio/cli@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/cli@npm:8.45.0"
+"@wdio/cli@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/cli@npm:8.46.0"
   dependencies:
     "@types/node": "npm:^22.2.0"
     "@vitest/snapshot": "npm:^2.0.4"
-    "@wdio/config": "npm:8.45.0"
-    "@wdio/globals": "npm:8.45.0"
+    "@wdio/config": "npm:8.46.0"
+    "@wdio/globals": "npm:8.46.0"
     "@wdio/logger": "npm:8.38.0"
     "@wdio/protocols": "npm:8.44.0"
     "@wdio/types": "npm:8.41.0"
-    "@wdio/utils": "npm:8.45.0"
+    "@wdio/utils": "npm:8.46.0"
     async-exit-hook: "npm:^2.0.1"
     chalk: "npm:^5.2.0"
     chokidar: "npm:^4.0.0"
@@ -5851,41 +5851,41 @@ __metadata:
     lodash.union: "npm:^4.6.0"
     read-pkg-up: "npm:10.0.0"
     recursive-readdir: "npm:^2.2.3"
-    webdriverio: "npm:8.45.0"
+    webdriverio: "npm:8.46.0"
     yargs: "npm:^17.7.2"
   bin:
-    wdio: ./bin/wdio.js
-  checksum: 10c0/e7e01c162b32d215a0593981d393fadc0bd541097133c09aba499ea5e3ced0776ef2e18d4a9b5155cd0fb03a2b236c79c7cba77913eafb72cedf500671a9736b
+    wdio: bin/wdio.js
+  checksum: 10c0/6cf5fd78c4a00d84bbab7d1d03158e6ac3d1455fd8f35b28de9f649f7f351a90d70e784fafd56ea09b5aa26a62f8af13816fae6ec9fd43bff1900a10668c16c2
   languageName: node
   linkType: hard
 
-"@wdio/config@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/config@npm:8.45.0"
+"@wdio/config@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/config@npm:8.46.0"
   dependencies:
     "@wdio/logger": "npm:8.38.0"
     "@wdio/types": "npm:8.41.0"
-    "@wdio/utils": "npm:8.45.0"
+    "@wdio/utils": "npm:8.46.0"
     decamelize: "npm:^6.0.0"
     deepmerge-ts: "npm:^5.0.0"
     glob: "npm:^10.2.2"
     import-meta-resolve: "npm:^4.0.0"
-  checksum: 10c0/575913ac95b264abde7255d6a0235fa553caeaf87db0a7efca41be2a590dad8672f81898035884bab0b3a2251a2f9853ef68f03e2e82bd44a673b567deedf392
+  checksum: 10c0/1b72b0852ac8eddafd87c240dccd152823e24db3642247ce920d1c4184cd7a8b94fd8943d1385e7fb3d526fbd1f46bfc1580e5947eb7dcf540b95170486d99e0
   languageName: node
   linkType: hard
 
-"@wdio/globals@npm:8.45.0, @wdio/globals@npm:^8.29.3":
-  version: 8.45.0
-  resolution: "@wdio/globals@npm:8.45.0"
+"@wdio/globals@npm:8.46.0, @wdio/globals@npm:^8.29.3":
+  version: 8.46.0
+  resolution: "@wdio/globals@npm:8.46.0"
   dependencies:
     expect-webdriverio: "npm:^4.11.2"
-    webdriverio: "npm:8.45.0"
+    webdriverio: "npm:8.46.0"
   dependenciesMeta:
     expect-webdriverio:
       optional: true
     webdriverio:
       optional: true
-  checksum: 10c0/b07ae9c538a65aec67abae9be053071efe1a56afa92ca5ea1b369dae4ae6e35c53ac576c924ff9190c6933f5ca09c4236581dd788b0895eefae1beb84492a40c
+  checksum: 10c0/6c050b4d86b389ec2dc9c9112314f867e6608a71bcc2c035cbdc2092ba974663264deb679ae507ca8136384297dc77ce0419859092ecb732900cb3dc27e74d1b
   languageName: node
   linkType: hard
 
@@ -5901,19 +5901,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/local-runner@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/local-runner@npm:8.45.0"
+"@wdio/local-runner@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/local-runner@npm:8.46.0"
   dependencies:
     "@types/node": "npm:^22.2.0"
     "@wdio/logger": "npm:8.38.0"
     "@wdio/repl": "npm:8.40.3"
-    "@wdio/runner": "npm:8.45.0"
+    "@wdio/runner": "npm:8.46.0"
     "@wdio/types": "npm:8.41.0"
     async-exit-hook: "npm:^2.0.1"
     split2: "npm:^4.1.0"
     stream-buffers: "npm:^3.0.2"
-  checksum: 10c0/b6b57faa6024315aebcc0e02caf8f3f0539a626526ff1e72294a477fafd23396403f2fe5f801fdf028cd35a4c309a2067f067ac0f10c0063c695ef25a89fb23a
+  checksum: 10c0/e181c95598b4e402506723b1637a99004de74a724d7c7b8ee63fee4f0b645940c9fd659eb205c6bd68b04ca33d775a87031a2a8c32d7fffc109f12579ad43f17
   languageName: node
   linkType: hard
 
@@ -5929,17 +5929,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/mocha-framework@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/mocha-framework@npm:8.45.0"
+"@wdio/mocha-framework@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/mocha-framework@npm:8.46.0"
   dependencies:
     "@types/mocha": "npm:^10.0.0"
     "@types/node": "npm:^22.2.0"
     "@wdio/logger": "npm:8.38.0"
     "@wdio/types": "npm:8.41.0"
-    "@wdio/utils": "npm:8.45.0"
+    "@wdio/utils": "npm:8.46.0"
     mocha: "npm:^10.0.0"
-  checksum: 10c0/2218e9045e16cc65d5089b9f4ab46ad72a86156f13ec47da555c3b9d3ef44f3c692c2a9b35230eb0c69657066cc44da2ecca73d4e71d85165047d06652b6f280
+  checksum: 10c0/f32733677afb474fcfbd994b42389e4010bc5e151cafe9d30b68ea9bcebb90e42dda0340a0cc34879f4f281b9c2acf67e06566c14ff7efe5b80365d79562064a
   languageName: node
   linkType: hard
 
@@ -5972,22 +5972,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/runner@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/runner@npm:8.45.0"
+"@wdio/runner@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/runner@npm:8.46.0"
   dependencies:
     "@types/node": "npm:^22.2.0"
-    "@wdio/config": "npm:8.45.0"
-    "@wdio/globals": "npm:8.45.0"
+    "@wdio/config": "npm:8.46.0"
+    "@wdio/globals": "npm:8.46.0"
     "@wdio/logger": "npm:8.38.0"
     "@wdio/types": "npm:8.41.0"
-    "@wdio/utils": "npm:8.45.0"
+    "@wdio/utils": "npm:8.46.0"
     deepmerge-ts: "npm:^5.1.0"
     expect-webdriverio: "npm:^4.12.0"
     gaze: "npm:^1.1.3"
-    webdriver: "npm:8.45.0"
-    webdriverio: "npm:8.45.0"
-  checksum: 10c0/43f5dc816b9b8820d9f0f242b4db707fda4c5e96e10ebb210f6766a2e5c0a46914716fe5a92c386628aa1fc9d278fdbdde08edd5a0fa6be4a852e99edc802e72
+    webdriver: "npm:8.46.0"
+    webdriverio: "npm:8.46.0"
+  checksum: 10c0/77b562e0bef9f1490858dbb4cf232d8198e400eddfdd52fea5dd02eed4297d3c74ed863f001c723a85cd5542fc2b2479f0877d400e8f6b04e7ce8a4f16a71e57
   languageName: node
   linkType: hard
 
@@ -6013,9 +6013,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/utils@npm:8.45.0":
-  version: 8.45.0
-  resolution: "@wdio/utils@npm:8.45.0"
+"@wdio/utils@npm:8.46.0":
+  version: 8.46.0
+  resolution: "@wdio/utils@npm:8.46.0"
   dependencies:
     "@puppeteer/browsers": "npm:^1.6.0"
     "@wdio/logger": "npm:8.38.0"
@@ -6030,7 +6030,7 @@ __metadata:
     safaridriver: "npm:^0.1.0"
     split2: "npm:^4.2.0"
     wait-port: "npm:^1.0.4"
-  checksum: 10c0/f108d848d34ad96e83b903bc71028c4588083988e2bb1f69f5868761d3169996c7b0c777d3505d48bde8ff98ac5bb8849fb670e7a42aa7e9412d8e7d7d5c8971
+  checksum: 10c0/360138a034fc0ffb71e96f2c7c9947a2a23e4b59caacfcc2fa6cd932101c501451b0d23aa12746f771e28d2055d01fb3ad2871da54b050b3f8265f739e8a0562
   languageName: node
   linkType: hard
 
@@ -6540,11 +6540,11 @@ __metadata:
     "@types/react-dom": "npm:18.3.7"
     "@typescript-eslint/eslint-plugin": "npm:8.39.1"
     "@typescript-eslint/parser": "npm:8.39.1"
-    "@wdio/browserstack-service": "npm:8.45.0"
-    "@wdio/cli": "npm:8.45.0"
+    "@wdio/browserstack-service": "npm:8.46.0"
+    "@wdio/cli": "npm:8.46.0"
     "@wdio/junit-reporter": "npm:8.43.0"
-    "@wdio/local-runner": "npm:8.45.0"
-    "@wdio/mocha-framework": "npm:8.45.0"
+    "@wdio/local-runner": "npm:8.46.0"
+    "@wdio/mocha-framework": "npm:8.46.0"
     "@wdio/spec-reporter": "npm:8.43.0"
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.4.21"
@@ -6663,7 +6663,7 @@ __metadata:
     typescript: "npm:5.9.2"
     use-debounce: "npm:10.0.5"
     uuid: "npm:11.1.0"
-    webdriverio: "npm:8.45.0"
+    webdriverio: "npm:8.46.0"
     webpack: "npm:5.101.1"
     webpack-cli: "npm:6.0.1"
     webpack-dev-server: "npm:5.2.2"
@@ -20104,36 +20104,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webdriver@npm:8.45.0":
-  version: 8.45.0
-  resolution: "webdriver@npm:8.45.0"
+"webdriver@npm:8.46.0":
+  version: 8.46.0
+  resolution: "webdriver@npm:8.46.0"
   dependencies:
     "@types/node": "npm:^22.2.0"
     "@types/ws": "npm:^8.5.3"
-    "@wdio/config": "npm:8.45.0"
+    "@wdio/config": "npm:8.46.0"
     "@wdio/logger": "npm:8.38.0"
     "@wdio/protocols": "npm:8.44.0"
     "@wdio/types": "npm:8.41.0"
-    "@wdio/utils": "npm:8.45.0"
+    "@wdio/utils": "npm:8.46.0"
     deepmerge-ts: "npm:^5.1.0"
     got: "npm:^12.6.1"
     ky: "npm:^0.33.0"
     ws: "npm:^8.8.0"
-  checksum: 10c0/4c0dfd5bc2752200be92adb657992d043f4602679b1f2eb7339b6d561c6bde485e3072cc19be5ba60967127b52f106d2f44e15bc27b0279bd61a9d900ddf7427
+  checksum: 10c0/37e599a73c14eb5220652606e0c76060bf2e13cda3134c622ed735cec9e1773b106006625dbcf66fdb5f7a7792f3d42949a2fa75c833ebc36ca917a7fb8672ef
   languageName: node
   linkType: hard
 
-"webdriverio@npm:8.45.0, webdriverio@npm:^8.29.3":
-  version: 8.45.0
-  resolution: "webdriverio@npm:8.45.0"
+"webdriverio@npm:8.46.0, webdriverio@npm:^8.29.3":
+  version: 8.46.0
+  resolution: "webdriverio@npm:8.46.0"
   dependencies:
     "@types/node": "npm:^22.2.0"
-    "@wdio/config": "npm:8.45.0"
+    "@wdio/config": "npm:8.46.0"
     "@wdio/logger": "npm:8.38.0"
     "@wdio/protocols": "npm:8.44.0"
     "@wdio/repl": "npm:8.40.3"
     "@wdio/types": "npm:8.41.0"
-    "@wdio/utils": "npm:8.45.0"
+    "@wdio/utils": "npm:8.46.0"
     archiver: "npm:^7.0.0"
     aria-query: "npm:^5.0.0"
     css-shorthand-properties: "npm:^1.1.1"
@@ -20151,13 +20151,13 @@ __metadata:
     resq: "npm:^1.9.1"
     rgb2hex: "npm:0.2.5"
     serialize-error: "npm:^11.0.1"
-    webdriver: "npm:8.45.0"
+    webdriver: "npm:8.46.0"
   peerDependencies:
     devtools: ^8.14.0
   peerDependenciesMeta:
     devtools:
       optional: true
-  checksum: 10c0/2bf023f09450ff16018159a69d9fd1d7dfb7d227ee2599963e8fd599b465855d68a6ec0d45f11b84496d974377d777276faabc42d86d9687bb7269ff06f360de
+  checksum: 10c0/bebd7b1e21066f1caf699b52cf3205f77b77c789df0ed5a3ffef000c4026ca1d2147b82d4b7cc671d0c9e66f4005cf6815166d6dd9690ea9ebd4b551f33f6ece
   languageName: node
   linkType: hard
 
