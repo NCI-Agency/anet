@@ -51,6 +51,22 @@ const GQL_GET_TASK = gql`
           uuid
         }
       }
+      descendantTasks {
+        uuid
+        status
+        shortName
+        longName
+        ascendantTasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
+        parentTask {
+          uuid
+        }
+      }
       responsiblePositions {
         uuid
         name
