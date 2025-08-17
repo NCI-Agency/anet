@@ -17,7 +17,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
 import { gql } from "@apollo/client"
 import API from "api"
-import { get } from "lodash"
+import _, { get } from "lodash"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
@@ -204,7 +204,9 @@ const Leaflet = ({
           id: m.id
         })
         if (m.name) {
-          marker.bindPopup(m.name)
+          marker.bindPopup(
+            `<a href="/locations/${m.id}">${_.escape(m.name ?? "Open")}</a>`
+          )
         }
         if (m.onMove) {
           marker.on("moveend", event => m.onMove(event, map))
@@ -338,7 +340,10 @@ const Leaflet = ({
         icon: ICON_TYPES.GREEN,
         id: loc.uuid
       })
-      if (loc?.name) m.bindPopup(loc.name)
+      if (loc?.name)
+        m.bindPopup(
+          `<a href="/locations/${loc.uuid}">${_.escape(loc.name ?? "Open")}</a>`
+        )
       layer.addLayer(m)
     })
   }, [data, loading, error, nearbyEnabled])
