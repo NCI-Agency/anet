@@ -205,6 +205,21 @@ public class LocationResource {
     return numRows;
   }
 
+  @GraphQLQuery(name = "nearbyLocations")
+  public List<Location> nearbyLocations(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "lat") double lat, @GraphQLArgument(name = "lng") double lng,
+      @GraphQLArgument(name = "radiusKm") double radiusKm,
+      @GraphQLArgument(name = "limit", defaultValue = "100") int limit) {
+
+    final Person user = DaoUtils.getUserFromContext(context);
+
+    if (Boolean.TRUE.equals(user.getPendingVerification())) {
+      return dao.findNearbyByType(lat, lng, radiusKm, limit, Location.LocationType.COUNTRY);
+    }
+
+    return dao.findNearby(lat, lng, radiusKm, limit);
+  }
+
   private void validateLocation(Location winnerLocation) {
     if (winnerLocation.getName() == null || winnerLocation.getName().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location Name must not be empty");
