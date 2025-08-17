@@ -237,4 +237,47 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
       closeDbHandle(handle);
     }
   }
+
+  public List<Location> findNearby(double lat, double lng, double radiusKm, int limit) {
+    final Handle handle = getDbHandle();
+    try {
+      final String sql = "/* findNearbyLocations */ " + "SELECT " + LOCATION_FIELDS + ", "
+          + "  (6371 * acos(least(1, "
+          + "    cos(radians(:lat)) * cos(radians(lat)) * cos(radians(lng) - radians(:lng)) + "
+          + "    sin(radians(:lat)) * sin(radians(lat))" + "  ))) AS distance_km "
+          + "FROM locations " + "WHERE lat IS NOT NULL AND lng IS NOT NULL "
+          + "  AND type IS NOT NULL AND status IS NOT NULL "
+          + "  AND (6371 * acos(least(1, "
+          + "    cos(radians(:lat)) * cos(radians(lat)) * cos(radians(lng) - radians(:lng)) + "
+          + "    sin(radians(:lat)) * sin(radians(lat))" + "  ))) <= :radiusKm "
+          + "ORDER BY distance_km ASC " + "LIMIT :limit";
+
+      return handle.createQuery(sql).bind("lat", lat).bind("lng", lng).bind("radiusKm", radiusKm)
+          .bind("limit", Math.max(1, limit)).map(new LocationMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public List<Location> findNearbyByType(double lat, double lng, double radiusKm, int limit,
+      Location.LocationType type) {
+    final Handle handle = getDbHandle();
+    try {
+      final String sql = "/* findNearbyLocationsByType */ " + "SELECT " + LOCATION_FIELDS + ", "
+          + "  (6371 * acos(least(1, "
+          + "    cos(radians(:lat)) * cos(radians(lat)) * cos(radians(lng) - radians(:lng)) + "
+          + "    sin(radians(:lat)) * sin(radians(lat))" + "  ))) AS distance_km "
+          + "FROM locations " + "WHERE lat IS NOT NULL AND lng IS NOT NULL " + "  AND type = :type "
+          + "  AND (6371 * acos(least(1, "
+          + "    cos(radians(:lat)) * cos(radians(lat)) * cos(radians(lng) - radians(:lng)) + "
+          + "    sin(radians(:lat)) * sin(radians(lat))" + "  ))) <= :radiusKm "
+          + "ORDER BY distance_km ASC " + "LIMIT :limit";
+
+      return handle.createQuery(sql).bind("lat", lat).bind("lng", lng).bind("radiusKm", radiusKm)
+          .bind("type", DaoUtils.getEnumString(type)).bind("limit", Math.max(1, limit))
+          .map(new LocationMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
 }
