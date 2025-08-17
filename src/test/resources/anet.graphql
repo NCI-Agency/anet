@@ -799,6 +799,7 @@ type Mutation {
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
   mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
+  nearbyLocations(lat: Float, lng: Float, radius: Float, limit: Int): [Location]
   publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
