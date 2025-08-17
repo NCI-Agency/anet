@@ -15,6 +15,9 @@ import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
+import { gql } from "@apollo/client"
+import API from "api"
+import { get } from "lodash"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
@@ -34,6 +37,8 @@ export const DEFAULT_MAP_STYLE = {
   height: "500px",
   marginBottom: "18px"
 }
+
+const LOCATIONS_LIMIT = 250
 
 const css = {
   zIndex: 1
@@ -134,6 +139,22 @@ interface LeafletProps {
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
 }
 
+const NEARBY_LOCATIONS_GQL = gql`
+  query nearbyLocations(
+    $lat: Float!
+    $lng: Float!
+    $radiusKm: Float!
+    $limit: Int
+  ) {
+    nearbyLocations(lat: $lat, lng: $lng, radiusKm: $radiusKm, limit: $limit) {
+      uuid
+      name
+      lat
+      lng
+    }
+  }
+`
+
 const Leaflet = ({
   width = DEFAULT_MAP_STYLE.width,
   height = DEFAULT_MAP_STYLE.height,
@@ -158,7 +179,17 @@ const Leaflet = ({
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
-  const prevMarkersRef = useRef()
+  const prevMarkersRef = useRef(null)
+
+  const nearbyLayerRef = useRef(null)
+  const [nearbyEnabled, setNearbyEnabled] = useState(false)
+  const [nearbyVars, setNearbyVars] = useState({})
+
+  const { data, error, loading } = API.useApiQuery(
+    NEARBY_LOCATIONS_GQL,
+    nearbyVars,
+    { skip: !(nearbyEnabled && !!nearbyVars) }
+  )
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -232,11 +263,73 @@ const Leaflet = ({
     const newMarkerLayer = new MarkerClusterGroup().addTo(newMap)
     setMarkerLayer(newMarkerLayer)
 
+    // nearby layer
+    const nearbyLayer = new MarkerClusterGroup()
+    nearbyLayerRef.current = nearbyLayer
+    layerControl.addOverlay(nearbyLayer, "Nearby locations")
+
+    const updateNearbyVarsFromMap = () => {
+      const c = newMap.getCenter()
+      const ne = newMap.getBounds().getNorthEast()
+      const meters = newMap.distance(c, ne)
+      const radiusKm = Math.max(0.5, meters / 1000)
+      if (
+        Number.isFinite(c?.lat) &&
+        Number.isFinite(c?.lng) &&
+        Number.isFinite(radiusKm)
+      ) {
+        setNearbyVars({
+          lat: c.lat,
+          lng: c.lng,
+          radiusKm,
+          limit: LOCATIONS_LIMIT
+        })
+      }
+    }
+
+    newMap.on("overlayadd", e => {
+      if (e.layer === nearbyLayer) {
+        setNearbyEnabled(true)
+        updateNearbyVarsFromMap()
+      }
+    })
+    newMap.on("overlayremove", e => {
+      if (e.layer === nearbyLayer) {
+        setNearbyEnabled(false)
+        nearbyLayer.clearLayers()
+      }
+    })
+    newMap.on("moveend", () => {
+      if (newMap.hasLayer(nearbyLayer)) {
+        updateNearbyVarsFromMap()
+      }
+    })
+
     setDoInitializeMarkerLayer(true)
 
     // Destroy map when done
     return () => newMap.remove()
   }, [mapId])
+
+  useEffect(() => {
+    if (!nearbyEnabled || loading || !nearbyLayerRef.current || error) return
+
+    const rows = data?.nearbyLocations || []
+    const layer = nearbyLayerRef.current
+
+    layer.clearLayers()
+    rows.forEach((loc: any) => {
+      if (loc?.lat == null || loc?.lng == null) {
+        return
+      }
+      const m = new Marker([loc.lat, loc.lng], {
+        icon: ICON_TYPES.GREEN,
+        id: loc.uuid
+      })
+      if (loc?.name) m.bindPopup(loc.name)
+      layer.addLayer(m)
+    })
+  }, [data, loading, error, nearbyEnabled])
 
   useEffect(() => {
     /*
