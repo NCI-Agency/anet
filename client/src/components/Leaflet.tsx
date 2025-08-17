@@ -311,15 +311,27 @@ const Leaflet = ({
     return () => newMap.remove()
   }, [mapId])
 
+  function getExistingIds(layerGroup) {
+    const ids = new Set<string>()
+    layerGroup?.eachLayer((layer: any) => {
+      if (layer?.options?.id) {
+        ids.add(String(layer.options.id))
+      }
+    })
+    return ids
+  }
+
   useEffect(() => {
     if (!nearbyEnabled || loading || !nearbyLayerRef.current || error) return
 
     const rows = data?.nearbyLocations || []
     const layer = nearbyLayerRef.current
 
+    const existingIds = getExistingIds(markerLayer)
+
     layer.clearLayers()
     rows.forEach((loc: any) => {
-      if (loc?.lat == null || loc?.lng == null) {
+      if (loc?.lat == null || loc?.lng == null || existingIds.has(loc.uuid)) {
         return
       }
       const m = new Marker([loc.lat, loc.lng], {
