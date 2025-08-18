@@ -2,6 +2,7 @@ import * as changeCase from "change-case"
 import * as d3 from "d3"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
+import _isMatchWith from "lodash/isMatchWith"
 import moment from "moment/moment"
 import pluralize from "pluralize"
 import React, { useCallback, useEffect } from "react"
@@ -85,6 +86,28 @@ const ellipsizeOnWords = (value, maxLength) => {
   }
 
   return trimmedStr + "\u2026"
+}
+
+const isMatchWithCustomizer = (objValue, srcValue, key, object, source) => {
+  if (objValue == null || srcValue == null) {
+    return objValue === srcValue
+  }
+
+  if (Object.keys(object).length !== Object.keys(source).length) {
+    return false
+  }
+
+  if (typeof objValue === "object" && typeof srcValue === "object") {
+    if (Object.keys(objValue).length !== Object.keys(srcValue).length) {
+      return false
+    }
+  }
+
+  if (Array.isArray(objValue) && Array.isArray(srcValue)) {
+    if (objValue.length !== srcValue.length) {
+      return false
+    }
+  }
 }
 
 export default {
@@ -252,6 +275,10 @@ export default {
 
   isNumeric: function (value) {
     return typeof value === "number" && !isNaN(value)
+  },
+
+  isDeeplyEqual: function (value1, value2) {
+    return _isMatchWith(value1, value2, isMatchWithCustomizer)
   },
 
   pushHash: function (hash) {
