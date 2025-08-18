@@ -3,10 +3,27 @@ import Home from "../pages/home.page"
 import MergeOrganizations from "../pages/mergeOrganizations.page"
 import Search from "../pages/search.page"
 import ShowOrganization from "../pages/showOrganization.page"
+import ShowTask from "../pages/showTask.page"
 
-const ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
+const EF1_ORGANIZATION_UUID = "9a35caa7-a095-4963-ac7b-b784fde4d583" // EF 1
+const EF1_1_ORGANIZATION_UUID = "04614b0f-7e8e-4bf1-8bc5-13abaffeab8a" // EF 1.1
+const EF2_2_ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
 const ORGANIZATION_WITH_AG_UUID = "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf" // EF 5.1
 const ORGANIZATION_EF2_SEARCH_STRING = "EF 2"
+const EF1_ASSIGNED_TASKS = [
+  "EF 1 » 1.1 » 1.1.A",
+  "EF 1 » 1.1 » 1.1.B",
+  "EF 1 » 1.1 » 1.1.C",
+  "EF 1 » EF 1.2 » 1.2.A",
+  "EF 1 » EF 1.2 » 1.2.B",
+  "EF 1 » EF 1.2 » 1.2.C",
+  "EF 1 » EF 1.2"
+]
+const EF1_1_ASSIGNED_TASKS = [
+  "EF 1 » 1.1 » 1.1.A",
+  "EF 1 » 1.1 » 1.1.B",
+  "EF 1 » 1.1 » 1.1.C"
+]
 const EF2_ASSIGNED_TASKS = [
   "EF 2 » 2.A",
   "EF 2 » 2.B",
@@ -61,6 +78,22 @@ describe("Show organization page", () => {
       )
       expect(assignedTasksShortNames).to.have.members(EF2_ASSIGNED_TASKS)
     })
+    it("Should see sync matrix on the EF2 Show page", async () => {
+      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      await syncMatrix.waitForExist()
+      await syncMatrix.waitForDisplayed()
+
+      expect(await (await syncMatrix.$(".legend")).getText()).to.contain(
+        "Sync matrix for EF 2"
+      )
+
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(4)
+      const taskPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(taskPaths).to.deep.equal(EF2_ASSIGNED_TASKS)
+    })
     it("Should see assigned tasks on the Edit page", async () => {
       await (await ShowOrganization.getEditOrganizationButton()).click()
       const editableTasks = await ShowOrganization.getEditableTasks()
@@ -77,6 +110,41 @@ describe("Show organization page", () => {
 
       // Log out
       await ShowOrganization.logout()
+    })
+
+    it("Should see sync matrix on the EF1 Show page", async () => {
+      await ShowOrganization.openAsAdminUser(EF1_ORGANIZATION_UUID)
+      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      await syncMatrix.waitForExist()
+      await syncMatrix.waitForDisplayed()
+
+      expect(await (await syncMatrix.$(".legend")).getText()).to.contain(
+        "Sync matrix for EF 1"
+      )
+
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(7)
+      const taskPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(taskPaths).to.deep.equal(EF1_ASSIGNED_TASKS)
+    })
+    it("Should see sync matrix on the EF1.1 Show page", async () => {
+      await ShowOrganization.openAsAdminUser(EF1_1_ORGANIZATION_UUID)
+      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      await syncMatrix.waitForExist()
+      await syncMatrix.waitForDisplayed()
+
+      expect(await (await syncMatrix.$(".legend")).getText()).to.contain(
+        "Sync matrix for EF 1.1"
+      )
+
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(3)
+      const taskPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(taskPaths).to.deep.equal(EF1_1_ASSIGNED_TASKS)
     })
   })
 
@@ -157,7 +225,7 @@ describe("Show organization page", () => {
 
   describe("When on the show page of an organization with attachment(s)", () => {
     it("We should see a container for Attachment List", async () => {
-      await ShowOrganization.open(ORGANIZATION_UUID)
+      await ShowOrganization.open(EF2_2_ORGANIZATION_UUID)
       await (await ShowOrganization.getAttachments()).waitForExist()
       await (await ShowOrganization.getAttachments()).waitForDisplayed()
     })
@@ -195,7 +263,7 @@ describe("Show organization page", () => {
 
   describe("When on the show page of an organization as admin", () => {
     it("We can select to merge it with another organization", async () => {
-      await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
+      await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       await (await ShowOrganization.getMergeButton()).click()
       await browser.pause(500) // wait for the merge page to render and load data
       // eslint-disable-next-line no-unused-expressions
@@ -209,7 +277,7 @@ describe("Show organization page", () => {
       ).to.be.false
     })
     it("Should open and close the Edit Engagement planning approvals modal correctly", async () => {
-      await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
+      await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       const editButton =
         await ShowOrganization.getEditEngagementPlanningApprovalsButton()
       await editButton.waitForExist()
@@ -227,7 +295,7 @@ describe("Show organization page", () => {
       await modal.waitForExist({ reverse: true })
     })
     it("Should open and close the Edit Report publication approvals modal correctly", async () => {
-      await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
+      await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       const editButton =
         await ShowOrganization.getEditReportPublicationApprovalsButton()
       await editButton.waitForExist()
@@ -248,7 +316,7 @@ describe("Show organization page", () => {
 
   describe("When on the show page of an organization with entity avatar", () => {
     it("We should see the avatar", async () => {
-      await ShowOrganization.open(ORGANIZATION_UUID)
+      await ShowOrganization.open(EF2_2_ORGANIZATION_UUID)
       await (await ShowOrganization.getEntityAvatar()).waitForExist()
       await (await ShowOrganization.getEntityAvatar()).waitForDisplayed()
     })
@@ -256,7 +324,7 @@ describe("Show organization page", () => {
 
   describe("When on the show page of an organization with events", () => {
     it("We should see a table with events", async () => {
-      await ShowOrganization.open(ORGANIZATION_UUID)
+      await ShowOrganization.open(EF2_2_ORGANIZATION_UUID)
       await (await ShowOrganization.getEventsTable()).waitForExist()
       await (await ShowOrganization.getEventsTable()).waitForDisplayed()
       expect(

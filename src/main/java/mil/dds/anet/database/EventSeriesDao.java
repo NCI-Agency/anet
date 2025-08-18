@@ -85,7 +85,6 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
     }
   }
 
-
   @Override
   public AnetBeanList<EventSeries> search(EventSeriesSearchQuery query) {
     return new PostgresqlEventSeriesSearcher(databaseHandler).runSearch(query);

@@ -163,6 +163,30 @@ const GQL_GET_TASK = gql`
       ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
+
+    eventSeriesList(query: { eventTaskUuid: [$uuid], pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        status
+        description
+        ownerOrg {
+          uuid
+          shortName
+        }
+        hostOrg {
+          uuid
+          shortName
+        }
+        adminOrg {
+          uuid
+          shortName
+        }
+      }
+    }
   }
 `
 
@@ -201,6 +225,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
     Model.populateCustomFields(data.task)
   }
   const task = new Task(data ? data.task : {})
+  const eventSeries = data?.eventSeriesList?.list || []
 
   Model.populateEntitiesAssessmentsCustomFields(task.descendantTasks)
 
@@ -430,12 +455,14 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
               refetch={refetch}
             />
 
-            <Fieldset
-              id="syncMatrix"
-              title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
-            >
-              <EventMatrix taskUuid={task?.uuid} />
-            </Fieldset>
+            {(task?.uuid || eventSeries.length) && (
+              <Fieldset
+                id="syncMatrix"
+                title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
+              >
+                <EventMatrix taskUuid={task?.uuid} eventSeries={eventSeries} />
+              </Fieldset>
+            )}
 
             <Fieldset
               id="events"

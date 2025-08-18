@@ -529,9 +529,11 @@ input EventInput {
 """"""
 input EventSearchQueryInput {
   adminOrgUuid: [String]
+  anyOrgUuid: [String]
   emailNetwork: String
   endDate: Instant
   eventSeriesUuid: String
+  eventTaskUuid: [String]
   hostOrgUuid: [String]
   inMyReports: Boolean
   includeDate: Instant
@@ -588,7 +590,9 @@ input EventSeriesInput {
 """"""
 input EventSeriesSearchQueryInput {
   adminOrgUuid: [String]
+  anyOrgUuid: [String]
   emailNetwork: String
+  eventTaskUuid: [String]
   hostOrgUuid: [String]
   inMyReports: Boolean
   ownerOrgUuid: [String]
