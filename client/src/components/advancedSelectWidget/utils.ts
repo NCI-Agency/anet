@@ -17,11 +17,17 @@ export function getSelectedItemValue(
   multiSelect: boolean,
   selectedItems: object | object[],
   item: object,
-  getValueCallback: (selectedItem: object, item: object) => any
+  getValueCallback: (
+    selectedItem: object,
+    item: object,
+    multiSelect: boolean
+  ) => any
 ) {
   return multiSelect
-    ? selectedItems?.some(selectedItem => getValueCallback(selectedItem, item))
-    : getValueCallback(selectedItems, item)
+    ? selectedItems?.some(selectedItem =>
+        getValueCallback(selectedItem, item, multiSelect)
+      )
+    : getValueCallback(selectedItems, item, multiSelect)
 }
 
 function getEventWithoutExtraFields(event: object) {
@@ -172,16 +178,30 @@ export function buildTree(
   return treeMap
 }
 
-function hasDescendantValueSelected(item: object, value: object) {
+function hasDescendantValueSelected(
+  item: object,
+  value: object,
+  multiSelect: boolean
+) {
   return value.children?.some(
     child =>
-      child.uuid === item?.uuid || hasDescendantValueSelected(item, child)
+      child.uuid === item?.uuid ||
+      hasDescendantValueSelected(item, child, multiSelect)
   )
 }
 
-function hasAscendantValueSelected(item: object, value: object) {
-  return value.parents?.some(
-    child => child.uuid === item?.uuid || hasAscendantValueSelected(item, child)
+function hasAscendantValueSelected(
+  item: object,
+  value: object,
+  multiSelect: boolean
+) {
+  return (
+    multiSelect &&
+    value.parents?.some(
+      parent =>
+        parent.uuid === item?.uuid ||
+        hasAscendantValueSelected(item, parent, multiSelect)
+    )
   )
 }
 

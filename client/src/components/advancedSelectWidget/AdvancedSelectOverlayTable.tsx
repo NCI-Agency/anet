@@ -1,9 +1,10 @@
 import Checkbox from "components/Checkbox"
 import Model from "components/Model"
+import RadioButton from "components/RadioButton"
 import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
 import React from "react"
-import { Form, Table } from "react-bootstrap"
+import { Table } from "react-bootstrap"
 
 interface AdvancedSelectOverlayTableProps {
   fieldName: string
@@ -102,7 +103,7 @@ const AdvancedSingleSelectOverlayTableBase = ({
     {...otherProps}
     selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
     disabledItems={_isEmpty(disabledItems) ? [] : [disabledItems]}
-    selectItemComponent={<Form.Check type="radio" />}
+    selectItemComponent={<RadioButton />}
   />
 )
 
