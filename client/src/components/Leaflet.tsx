@@ -17,9 +17,10 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
 import { gql } from "@apollo/client"
 import API from "api"
-import _, { get } from "lodash"
+import LinkTo from "components/LinkTo"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
 import MARKER_ICON_AMBER from "resources/leaflet/marker-icon-amber.png"
@@ -185,6 +186,8 @@ const Leaflet = ({
 
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
+  const [locationMarkerPopup, setLocationMarkerPopup] =
+    useState<MarkerPopupProps>({})
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef(null)
 
@@ -211,9 +214,7 @@ const Leaflet = ({
           id: m.id
         })
         if (m.name) {
-          marker.bindPopup(
-            `<a href="/locations/${m.id}">${_.escape(m.name ?? "Open")}</a>`
-          )
+          marker.bindPopup(m.name)
         } else if (m.contents) {
           const popupDiv = Object.assign(document.createElement("div"), {
             id: m.id,
@@ -340,7 +341,9 @@ const Leaflet = ({
   }
 
   useEffect(() => {
-    if (!nearbyEnabled || loading || !nearbyLayerRef.current || error) return
+    if (!nearbyEnabled || loading || !nearbyLayerRef.current || error) {
+      return
+    }
 
     const rows = data?.nearbyLocations || []
     const layer = nearbyLayerRef.current
@@ -356,13 +359,17 @@ const Leaflet = ({
         icon: ICON_TYPES.GREEN,
         id: loc.uuid
       })
-      if (loc?.name)
-        m.bindPopup(
-          `<a href="/locations/${loc.uuid}">${_.escape(loc.name ?? "Open")}</a>`
-        )
+      const popupDiv = Object.assign(document.createElement("div"), {
+        id: m.id,
+        style: "width: 300px;"
+      })
+      m.bindPopup(() => {
+        setLocationMarkerPopup?.({ container: popupDiv, contents: loc })
+        return popupDiv
+      })
       layer.addLayer(m)
     })
-  }, [data, loading, error, nearbyEnabled])
+  }, [data, loading, error, nearbyEnabled, markerLayer])
 
   useEffect(() => {
     /*
@@ -427,7 +434,25 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
-  return <div id={mapId} style={style} />
+  return (
+    <>
+      <div id={mapId} style={style} />
+      {locationMarkerPopup.container &&
+        createPortal(
+          renderLocationMarkerPopupContents(locationMarkerPopup.contents),
+          locationMarkerPopup.container
+        )}
+    </>
+  )
+
+  function renderLocationMarkerPopupContents(location) {
+    return (
+      <LinkTo
+        modelType="Location"
+        model={{ uuid: location?.uuid, name: location?.name }}
+      />
+    )
+  }
 }
 
 export default Leaflet
