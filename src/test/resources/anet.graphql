@@ -386,6 +386,14 @@ enum AuthorizationGroupSearchSortBy {
 }
 
 """"""
+input BoundingBoxInput {
+  maxLat: Float!
+  maxLng: Float!
+  minLat: Float!
+  minLng: Float!
+}
+
+""""""
 type Comment {
   author: Person
   createdAt: Instant
@@ -687,6 +695,7 @@ input LocationInput {
 
 """"""
 input LocationSearchQueryInput {
+  boundingBox: BoundingBoxInput
   emailNetwork: String
   inMyReports: Boolean
   locationRecurseStrategy: RecurseStrategy
@@ -798,7 +807,6 @@ type Mutation {
   mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
-  mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
   nearbyLocations(lat: Float, lng: Float, radius: Float, limit: Int): [Location]
   publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, uuid: String): Int!

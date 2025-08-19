@@ -39,8 +39,6 @@ export const DEFAULT_MAP_STYLE = {
   marginBottom: "18px"
 }
 
-const LOCATIONS_LIMIT = 250
-
 const css = {
   zIndex: 1
 }
@@ -147,17 +145,17 @@ interface LeafletProps {
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
-  query nearbyLocations(
-    $lat: Float!
-    $lng: Float!
-    $radiusKm: Float!
-    $limit: Int
-  ) {
-    nearbyLocations(lat: $lat, lng: $lng, radiusKm: $radiusKm, limit: $limit) {
-      uuid
-      name
-      lat
-      lng
+  query ($bounds: BoundingBoxInput!) {
+    locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        lat
+        lng
+      }
     }
   }
 `
@@ -288,21 +286,16 @@ const Leaflet = ({
     layerControl.addOverlay(nearbyLayer, "Nearby locations")
 
     const updateNearbyVarsFromMap = () => {
-      const c = newMap.getCenter()
-      const ne = newMap.getBounds().getNorthEast()
-      const meters = newMap.distance(c, ne)
-      const radiusKm = Math.max(0.5, meters / 1000)
-      if (
-        Number.isFinite(c?.lat) &&
-        Number.isFinite(c?.lng) &&
-        Number.isFinite(radiusKm)
-      ) {
-        setNearbyVars({
-          lat: c.lat,
-          lng: c.lng,
-          radiusKm,
-          limit: LOCATIONS_LIMIT
-        })
+      const mapBounds = newMap.getBounds()
+      const bounds = {
+        minLng: mapBounds._southWest.lng,
+        minLat: mapBounds._southWest.lat,
+        maxLng: mapBounds._northEast.lng,
+        maxLat: mapBounds._northEast.lat
+      }
+      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
+      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
+        setNearbyVars({ bounds })
       }
     }
 
@@ -345,7 +338,7 @@ const Leaflet = ({
       return
     }
 
-    const rows = data?.nearbyLocations || []
+    const rows = data?.locationList?.list || []
     const layer = nearbyLayerRef.current
 
     const existingIds = getExistingIds(markerLayer)
