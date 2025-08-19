@@ -152,7 +152,8 @@ public class OrganizationResource {
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
 
-    if (!AuthUtils.isAdmin(user) && !AuthUtils.isSuperUserThatCanEditAllOrganizations(user)) {
+    if (!AuthUtils.isAdmin(user)
+        && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
       // Check if user has administrative permission for the organizations that will be
       // modified with the parent organization update
       if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {

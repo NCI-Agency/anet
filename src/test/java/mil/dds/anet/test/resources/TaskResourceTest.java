@@ -3,6 +3,7 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
 import mil.dds.anet.test.client.AssessmentSearchQueryInput;
 import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
@@ -180,8 +182,8 @@ class TaskResourceTest extends AbstractResourceTest {
     assertThat(searchResults3).isNotEmpty();
 
     // Search by responsible position
-    final Position jackPosition = getJackJackson().getPosition();
-    query1.setResponsiblePositionUuid(jackPosition.getUuid());
+    final Position andrewPosition = getAndrewAnderson().getPosition();
+    query1.setResponsiblePositionUuid(andrewPosition.getUuid());
     query1.setText("");
     final AnetBeanList_Task searchObjects4 =
         withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), query1));
@@ -306,6 +308,141 @@ class TaskResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.createTask(FIELDS, topLevelTaskInput));
     assertThat(created4).isNotNull();
     assertThat(created4.getUuid()).isNotNull();
+  }
+
+  @Test
+  void taskSuperuserPermissionTest() {
+    // Bob is a regular superuser
+    final Person superuser = getBobBobtown();
+    final Position superuserPosition = superuser.getPosition();
+
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 1")
+        .withLongName("Task 1 for Testing Superusers").withStatus(Status.ACTIVE).build();
+    failCreateTask(getDomainUsername(superuser), taskInput);
+    final Task parentTask = succeedCreateTask(adminUser, taskInput);
+
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 1")
+        .withLongName("Child Task of Parent Task 1").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(parentTask)).build();
+    failCreateTask(getDomainUsername(superuser), childTaskInput);
+
+    // Set superuser as responsible for the parent task
+    parentTask.setResponsiblePositions(List.of(superuserPosition));
+    succeedUpdateTask(adminUser, getTaskInput(parentTask));
+
+    final Task createdChildTask = succeedCreateTask(getDomainUsername(superuser), childTaskInput);
+
+    // Can edit the child of their responsible task
+    createdChildTask.setShortName("Updated Child Task 1");
+    succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+  }
+
+  @Test
+  void taskCanCreateTopLevelTasksSuperuserPermissionTest() {
+    // Jim is a superuser that can create top level tasks
+
+    // Can create top level task
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 2")
+        .withLongName("Task 2 for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final Task newTopLevelTask = succeedCreateTask("jim", taskInput);
+    // and edit it and created sub-tasks of the top level task he created
+    succeedUpdateTask("jim", getTaskInput(newTopLevelTask));
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 2")
+        .withLongName("Child Task of Parent Task 2").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(newTopLevelTask)).build();
+    succeedCreateTask("jim", childTaskInput);
+
+    // Can NOT edit and create sub-tasks of an existing task: EF 1
+    final Task ef1 = withCredentials(jackUser,
+        t -> queryExecutor.task("{ uuid }", "1145e584-4485-4ce0-89c4-2fa2e1fe846a"));
+    // Can NOT edit EF 1
+    failUpdateTask("jim", getTaskInput(ef1));
+    // Can NOT create a sub task of EF 1
+    final TaskInput childTaskInput2 =
+        TaskInput.builder().withShortName("EF 1 new child").withLongName("New Child Task of EF 1")
+            .withStatus(Status.ACTIVE).withParentTask(getTaskInput(ef1)).build();
+    failCreateTask("jim", childTaskInput2);
+  }
+
+  @Test
+  void taskCanCreateEditAnyTaskSuperuserPermissionTest() {
+    // Billie is a superuser that can create or edit any task
+
+    // Can create top level task
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 3")
+        .withLongName("Task 3 for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final Task newTopLevelTask = succeedCreateTask("billie", taskInput);
+    // and edit it and created sub-tasks of the top level task he created
+    succeedUpdateTask("billie", getTaskInput(newTopLevelTask));
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 3")
+        .withLongName("Child Task of Parent Task 3").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(newTopLevelTask)).build();
+    succeedCreateTask("billie", childTaskInput);
+
+    // Can edit and create sub-tasks of an existing task: EF 1
+    final Task ef1 = withCredentials(jackUser,
+        t -> queryExecutor.task(FIELDS, "1145e584-4485-4ce0-89c4-2fa2e1fe846a"));
+    // Can edit EF 1
+    succeedUpdateTask("billie", getTaskInput(ef1));
+    // Can create a sub task of EF 1
+    final TaskInput childTaskInput2 =
+        TaskInput.builder().withShortName("EF 1 new child").withLongName("New Child Task of EF 1")
+            .withStatus(Status.ACTIVE).withParentTask(getTaskInput(ef1)).build();
+    succeedCreateTask("billie", childTaskInput2);
+  }
+
+  @Test
+  void changeParentTaskAsSuperuserTest() {
+    final Person superuser = getBobBobtown();
+    final Position superuserPosition = superuser.getPosition();
+
+    final TaskInput taskInput = TaskInput.builder().withShortName("Parent Task 4")
+        .withLongName("Task 4 for Testing Superusers").withStatus(Status.ACTIVE).build();
+    final Task createdParentTask = succeedCreateTask(adminUser, taskInput);
+
+    final TaskInput childTaskInput = TaskInput.builder().withShortName("Child Task 4")
+        .withLongName("Child Task of Parent Task 4").withStatus(Status.ACTIVE)
+        .withParentTask(getTaskInput(createdParentTask)).build();
+    final Task createdChildTask = succeedCreateTask(adminUser, childTaskInput);
+
+    createdChildTask.setParentTask(null);
+    failUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+    createdChildTask.setParentTask(createdParentTask);
+
+    // Set superuser as responsible for the child task
+    createdChildTask.setResponsiblePositions(List.of(superuserPosition));
+    succeedUpdateTask(adminUser, getTaskInput(createdChildTask));
+
+    // Cannot set parent as null because they're not responsible for the parent task
+    createdChildTask.setParentTask(null);
+    failUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+    createdChildTask.setParentTask(createdParentTask);
+    // Set superuser as responsible for the parent task
+    createdParentTask.setResponsiblePositions(List.of(superuserPosition));
+    succeedUpdateTask(adminUser, getTaskInput(createdParentTask));
+    // Now superuser can set the parent task as null
+    createdChildTask.setParentTask(null);
+    succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+
+    final TaskInput newParentTask = TaskInput.builder().withShortName("New Parent Task 4")
+        .withLongName("New Parent Task 4 for Testing Superusers").withStatus(Status.ACTIVE).build();
+
+    final Task createdNewParentTask = succeedCreateTask(adminUser, newParentTask);
+
+    // Cannot assign the new task as the child's parent because they're not responsible for
+    // the new task
+    createdChildTask.setParentTask(createdNewParentTask);
+    failUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+    // Revert previous change
+    createdChildTask.setParentTask(createdParentTask);
+
+    // Update responsible position
+    createdNewParentTask.setResponsiblePositions(List.of(superuserPosition));
+    succeedUpdateTask(adminUser, getTaskInput(createdNewParentTask));
+
+    // Now they can assign the new parent
+    createdChildTask.setParentTask(createdNewParentTask);
+    succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
   }
 
   @Test
@@ -465,5 +602,37 @@ class TaskResourceTest extends AbstractResourceTest {
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     assertThat(searchObjects.getList()).allMatch(t -> t.getParentTask() == null);
+  }
+
+  private void failCreateTask(final String username, final TaskInput taskInput) {
+    try {
+      withCredentials(username, t -> mutationExecutor.createTask(FIELDS, taskInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+  }
+
+  private Task succeedCreateTask(final String username, final TaskInput taskInput) {
+    final Task createdTask =
+        withCredentials(username, t -> mutationExecutor.createTask(FIELDS, taskInput));
+    assertThat(createdTask).isNotNull();
+    assertThat(createdTask.getUuid()).isNotNull();
+    return createdTask;
+  }
+
+  private void failUpdateTask(final String username, final TaskInput taskInput) {
+    try {
+      withCredentials(username, t -> mutationExecutor.updateTask("", taskInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+  }
+
+  private void succeedUpdateTask(final String username, final TaskInput taskInput) {
+    final Integer numTask =
+        withCredentials(username, t -> mutationExecutor.updateTask("", taskInput));
+    assertThat(numTask).isOne();
   }
 }

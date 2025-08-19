@@ -666,3 +666,98 @@ async function canCreateOrganization(t) {
   )
   await $cancelButton.click()
 }
+
+test.serial(
+  "checking superuser that can create top-level tasks permissions",
+  async t => {
+    t.plan(1)
+
+    await t.context.get("/", "jim")
+
+    // Jim can create top-level tasks
+    await canCreateTask(t)
+    // but Jim can not edit tasks
+    const $notResponsibleForTaskLink = await getFromSearchResults(
+      t,
+      "1.1.C",
+      "1.1.C",
+      "tasks"
+    )
+    await $notResponsibleForTaskLink.click()
+    await validateSuperuserNotResponsibleForTaskPermissions(t)
+    await t.context.logout()
+  }
+)
+
+test.serial(
+  "checking superuser that can edit any tasks permissions",
+  async t => {
+    t.plan(3)
+
+    await t.context.get("/", "billie")
+
+    // Billie can create top-level tasks
+    await canCreateTask(t)
+    // And she can also edit any task
+    const $notResponsibleForTaskLink = await getFromSearchResults(
+      t,
+      "1.1.C",
+      "1.1.C",
+      "tasks"
+    )
+    await $notResponsibleForTaskLink.click()
+    await validateSuperuserResponsibleForTaskPermissions(t)
+    await t.context.logout()
+  }
+)
+
+async function validateSuperuserNotResponsibleForTaskPermissions(t) {
+  const { assertElementNotPresent, shortWaitMs } = t.context
+
+  await assertElementNotPresent(
+    t,
+    "#editButton",
+    "Superusers should not be able to edit not-responsible-for tasks",
+    shortWaitMs
+  )
+}
+
+async function validateSuperuserResponsibleForTaskPermissions(t) {
+  const { $, assertElementEnabled } = t.context
+
+  const $editTaskButton = await $("#editButton")
+  await t.context.driver.wait(t.context.until.elementIsVisible($editTaskButton))
+  await $editTaskButton.click()
+  await assertElementEnabled(
+    t,
+    "#parentTask",
+    "Field parentTask of a task should be enabled for admins"
+  )
+  await assertElementEnabled(
+    t,
+    "#shortName",
+    "Field shortName of a task should be enabled for admins"
+  )
+  await assertElementEnabled(
+    t,
+    "#longName",
+    "Field longName of a task should be enabled for admins"
+  )
+}
+
+async function canCreateTask(t) {
+  const { $, By, driver, until, shortWaitMs } = t.context
+
+  const $createButton = await $("#createButton")
+  await $createButton.click()
+  const $createTaskButton = await $("#new-objective")
+  await $createTaskButton.click()
+  const $taskInput = await $("#shortName")
+  await driver.wait(until.elementIsVisible($taskInput), shortWaitMs)
+
+  // Cancel Create Task
+  const $cancelButton = await driver.findElement(
+    By.xpath('//button[text()="Cancel"]')
+  )
+  await $cancelButton.click()
+}

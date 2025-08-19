@@ -310,7 +310,7 @@ export default class Person extends Model {
   // Checks if this user is a valid superuser for a particular organization
   // Must be either
   // - an administrator
-  // - a superuser of CAN_CREATE_OR_EDIT_ANY_ORGANIZATION type
+  // - a superuser of CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK type
   // - a superuser administrating this organization
   // - a superuser administrating this organization's (transitive) parent
   hasAdministrativePermissionsForOrganization(org) {
@@ -323,7 +323,7 @@ export default class Person extends Model {
     if (
       this.position?.type === Position.TYPE.SUPERUSER &&
       this.position?.superuserType ===
-        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK
     ) {
       return true
     }
@@ -343,6 +343,48 @@ export default class Person extends Model {
           return acc
         }, [])
       return orgsAdministratedUuids.includes(org.uuid)
+    }
+    return false
+  }
+
+  // Checks if this user is a valid superuser for a particular task
+  // Must be either
+  // - an administrator
+  // - a superuser of CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK type
+  // - a superuser responsible for this task
+  // - a superuser responsible for this task's (transitive) parent
+  isResponsibleForTask(task) {
+    if (!task) {
+      return false
+    }
+    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
+      return true
+    }
+    if (
+      this.position?.type === Position.TYPE.SUPERUSER &&
+      this.position?.superuserType ===
+        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK
+    ) {
+      return true
+    }
+    if (
+      this.position?.type !== Position.TYPE.SUPERUSER ||
+      !this.position?.organization
+    ) {
+      return false
+    }
+    if (this.position.responsibleTasks) {
+      const responsibleTasksUuids = this.position.responsibleTasks.reduce(
+        (acc, t) => {
+          acc.push(t.uuid)
+          t.descendantTasks.forEach(descTask => {
+            acc.push(descTask.uuid)
+          })
+          return acc
+        },
+        []
+      )
+      return responsibleTasksUuids.includes(task.uuid)
     }
     return false
   }

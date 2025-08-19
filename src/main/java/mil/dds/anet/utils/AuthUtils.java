@@ -7,7 +7,9 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +54,9 @@ public class AuthUtils {
     if (position.getType() != PositionType.SUPERUSER) {
       return false;
     }
-    // SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION can deal with any organization
-    if (position.getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION) {
+    // Enhanced superuser can deal with any organization
+    if (position
+        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK) {
       logger.debug("User {} is a fully enhanced superuser, can automatically administrate org",
           user);
       return true;
@@ -103,6 +106,67 @@ public class AuthUtils {
     return canAdministrateOrg(user, parentOrganizationUuid);
   }
 
+  public static boolean isResponsibleForTask(final Person user, final String taskUuid) {
+    if (taskUuid == null) {
+      logger.debug("Task {} is null or has a null UUID in isResponsibleForTask check for {}",
+          taskUuid, user);
+      return false;
+    }
+    Position position = DaoUtils.getPosition(user);
+    if (position == null) {
+      logger.debug("User {} has no position, hence no permissions", user);
+      return false;
+    }
+    if (position.getType() == PositionType.ADMINISTRATOR) {
+      logger.debug("User {} is an administrator, is automatically responsible for task", user);
+      return true;
+    }
+    logger.debug("Position for user {} is {}", user, position);
+    if (position.getType() != PositionType.SUPERUSER) {
+      return false;
+    }
+    // Enhanced superuser can deal with any task
+    if (position
+        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK) {
+      logger.debug("User {} is a fully enhanced superuser, is automatically responsible for task",
+          user);
+      return true;
+    }
+
+    // Check the responsible tasks.
+    final GraphQLContext context = ApplicationContextProvider.getEngine().getContext();
+    final List<Task> responsibleTasks = position.loadResponsibleTasks(context, null).join();
+    if (responsibleTasks.stream().anyMatch(t -> t.getUuid().equals(taskUuid))) {
+      return true;
+    }
+
+    // As a final resort, check the descendant tasks of the position's responsible tasks.
+    final TaskSearchQuery tsQuery = new TaskSearchQuery();
+    tsQuery.setPageSize(0);
+    for (final Task responsibleTask : responsibleTasks) {
+      if (responsibleTask.loadDescendantTasks(context, tsQuery).join().stream()
+          .anyMatch(t -> t.getUuid().equals(taskUuid))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static boolean canCreateSubTask(final Person user, final String parentTaskUuid) {
+    // Admins can create any organization
+    if (AuthUtils.isAdmin(user)) {
+      return true;
+    }
+
+    if (parentTaskUuid == null) {
+      // Enhanced superusers can create top level tasks
+      return AuthUtils.isEnhancedSuperuser(user);
+    }
+
+    // A sub task is being created -> check permissions on parentTask
+    return isResponsibleForTask(user, parentTaskUuid);
+  }
+
   public static void assertSuperuser(Person user) {
     logger.debug("Asserting superuser position for {}", user);
     if (!isSuperuser(user)) {
@@ -127,10 +191,10 @@ public class AuthUtils {
     return (position != null) && (position.getType() == PositionType.ADMINISTRATOR);
   }
 
-  public static boolean isSuperUserThatCanEditAllOrganizations(Person user) {
+  public static boolean isSuperUserThatCanEditAllOrganizationsOrTasks(Person user) {
     Position position = DaoUtils.getPosition(user);
     return (position != null) && (position.getType() == PositionType.SUPERUSER && position
-        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION);
+        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK);
   }
 
 }
