@@ -102,9 +102,13 @@ public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableA
     this.customSensitiveInformation = customSensitiveInformation;
   }
 
+  public abstract String customFieldsKey();
+
+  public abstract String customSensitiveInformationKey();
+
   public void checkAndFixCustomFields() {
     try {
-      setCustomFields(Utils.sanitizeJson(getCustomFields()));
+      setCustomFields(Utils.sanitizeJson(customFieldsKey(), getCustomFields(), false));
     } catch (JsonProcessingException e) {
       setCustomFields(null);
       logger.error("Unable to process Json, customFields payload discarded", e);

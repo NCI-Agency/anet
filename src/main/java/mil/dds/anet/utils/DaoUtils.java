@@ -97,10 +97,11 @@ public class DaoUtils {
   }
 
   public static void saveCustomSensitiveInformation(final Person user, final String tableName,
-      final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
+      final String uuid, String customSensitiveInformationDictKey,
+      final List<CustomSensitiveInformation> customSensitiveInformation) {
     ApplicationContextProvider.getEngine().getCustomSensitiveInformationDao()
         .insertOrUpdateCustomSensitiveInformation(user, getAuthorizationGroupUuids(user), tableName,
-            uuid, customSensitiveInformation);
+            uuid, customSensitiveInformationDictKey, customSensitiveInformation);
   }
 
   public static Set<String> getAuthorizationGroupUuids(final Person user) {

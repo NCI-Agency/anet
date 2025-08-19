@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.utils.Utils;
 
-public class AbstractEmailableAnetBean extends AbstractCustomizableAnetBean {
+public abstract class AbstractEmailableAnetBean extends AbstractCustomizableAnetBean {
   // annotated below
   private List<EmailAddress> emailAddresses;
 

@@ -117,7 +117,7 @@ public class LocationResource {
     }
 
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, created.getUuid(),
-        l.getCustomSensitiveInformation());
+        l.customSensitiveInformationKey(), l.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Location {} created by {}", created, user);
     return created;
@@ -161,7 +161,7 @@ public class LocationResource {
     }
 
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, l.getUuid(),
-        l.getCustomSensitiveInformation());
+        l.customSensitiveInformationKey(), l.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Location {} updated by {}", l, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows

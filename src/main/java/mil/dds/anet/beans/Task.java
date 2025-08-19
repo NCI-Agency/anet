@@ -297,6 +297,16 @@ public class Task extends AbstractCustomizableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.task.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.task.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof Task)) {
       return false;
