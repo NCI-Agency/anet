@@ -130,11 +130,17 @@ const addLayers = (map, layerControl) => {
   }
 }
 
+export interface MarkerPopupProps {
+  container?: HTMLElement
+  contents?: any
+}
+
 interface LeafletProps {
   width?: number | string
   height?: number | string
   marginBottom?: number | string
   markers?: any[]
+  setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
 }
@@ -160,6 +166,7 @@ const Leaflet = ({
   height = DEFAULT_MAP_STYLE.height,
   marginBottom = DEFAULT_MAP_STYLE.marginBottom,
   markers,
+  setMarkerPopup,
   mapId: initialMapId,
   onMapClick
 }: LeafletProps) => {
@@ -207,6 +214,15 @@ const Leaflet = ({
           marker.bindPopup(
             `<a href="/locations/${m.id}">${_.escape(m.name ?? "Open")}</a>`
           )
+        } else if (m.contents) {
+          const popupDiv = Object.assign(document.createElement("div"), {
+            id: m.id,
+            style: "width: 300px;"
+          })
+          marker.bindPopup(() => {
+            setMarkerPopup?.({ container: popupDiv, contents: m.contents })
+            return popupDiv
+          })
         }
         if (m.onMove) {
           marker.on("moveend", event => m.onMove(event, map))
@@ -220,7 +236,7 @@ const Leaflet = ({
         }
       }
     },
-    [map, markerLayer]
+    [map, markerLayer, setMarkerPopup]
   )
 
   useEffect(() => {
