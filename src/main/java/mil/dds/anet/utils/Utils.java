@@ -419,9 +419,13 @@ public class Utils {
         }
         final String k = formatKey(parentKey, sanitizedKey);
         final String typeDef = typeDefs.get(k);
-        final JsonNode newValue = TYPE_RICH_TEXT.equals(typeDef)
-            ? objectNode.textNode(sanitizeHtml(entry.getValue().asText()))
-            : entry.getValue();
+        final JsonNode newValue;
+        if (TYPE_RICH_TEXT.equals(typeDef)) {
+          newValue = entry.getValue().isNull() ? null
+              : objectNode.textNode(sanitizeHtml(entry.getValue().asText()));
+        } else {
+          newValue = entry.getValue();
+        }
         objectNode.set(sanitizedKey, newValue);
         internalSanitizeJsonForHtml(typeDefs, k, entry.getValue());
       }
