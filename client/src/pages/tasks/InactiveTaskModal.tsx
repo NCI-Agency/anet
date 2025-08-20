@@ -41,7 +41,7 @@ const InactiveTaskModal = ({
         </ul>
       </Modal.Body>
       <Modal.Footer className="justify-content-between">
-        <Button onClick={() => onCancel()} variant="outline-secondary">
+        <Button onClick={onCancel} variant="outline-secondary">
           Cancel
         </Button>
         <Button onClick={onSuccess} variant="primary">
