@@ -38,7 +38,6 @@ import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
-import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -323,217 +322,204 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   // Author can always read assessments
   const canReadAssessments = isAuthor
   return (
-    <Formik
-      validationSchema={Report.yupSchema}
-      validateOnMount
-      initialValues={report}
-    >
-      {() => (
-        <>
-          <CompactReportViewHeader
-            onPrintClick={printReport}
-            returnToDefaultPage={returnToDefaultPage}
-            optionalFields={optionalFields}
-            setOptionalFields={setOptionalFields}
-            setPageSize={setPageSize}
-          />
-          <CompactView
-            className="compact-view"
-            pageSize={pageSize}
-            backgroundText={backgroundText}
-          >
-            <CompactHeaderContent
-              color={null}
-              policyAndClassification={utils.getPolicyAndClassificationForChoice(
-                report.classification
-              )}
-              releasableTo={utils.getReleasableToForChoice(
-                report.classification
-              )}
+    <>
+      <CompactReportViewHeader
+        onPrintClick={printReport}
+        returnToDefaultPage={returnToDefaultPage}
+        optionalFields={optionalFields}
+        setOptionalFields={setOptionalFields}
+        setPageSize={setPageSize}
+      />
+      <CompactView
+        className="compact-view"
+        pageSize={pageSize}
+        backgroundText={backgroundText}
+      >
+        <CompactHeaderContent
+          color={null}
+          policyAndClassification={utils.getPolicyAndClassificationForChoice(
+            report.classification
+          )}
+          releasableTo={utils.getReleasableToForChoice(report.classification)}
+        />
+        <CompactTable>
+          <FullColumn>
+            <CompactTitle label={getReportTitle()} className="reportField" />
+            <CompactSubTitle
+              label={getReportSubTitle()}
+              className="reportField"
             />
-            <CompactTable>
-              <FullColumn>
-                <CompactTitle
-                  label={getReportTitle()}
-                  className="reportField"
-                />
-                <CompactSubTitle
-                  label={getReportSubTitle()}
-                  className="reportField"
-                />
+            <DictionaryField
+              wrappedComponent={CompactRow}
+              dictProps={Settings.fields.report.intent}
+              content={report.intent}
+              className="reportField"
+              hideIfEmpty
+            />
+            <DictionaryField
+              wrappedComponent={CompactRow}
+              dictProps={Settings.fields.report.keyOutcomes}
+              content={<ListItems value={report.keyOutcomes} />}
+              className="reportField"
+              hideIfEmpty
+            />
+            {!report.cancelled && (
+              <>
                 <DictionaryField
                   wrappedComponent={CompactRow}
-                  dictProps={Settings.fields.report.intent}
-                  content={report.intent}
+                  dictProps={Settings.fields.report.atmosphere}
+                  content={
+                    !report.atmosphereDetails
+                      ? utils.sentenceCase(report.atmosphere)
+                      : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`
+                  }
                   className="reportField"
                   hideIfEmpty
                 />
-                <DictionaryField
-                  wrappedComponent={CompactRow}
-                  dictProps={Settings.fields.report.keyOutcomes}
-                  content={<ListItems value={report.keyOutcomes} />}
+              </>
+            )}
+            <DictionaryField
+              wrappedComponent={CompactRow}
+              dictProps={Settings.fields.report.nextSteps}
+              content={<ListItems value={report.nextSteps} />}
+              className="reportField"
+              hideIfEmpty
+            />
+            <CompactRow
+              id="interlocutors"
+              label="Interlocutors"
+              content={getAttendeesAndAssessments(true)}
+              className="reportField"
+              hideIfEmpty
+            />
+            <CompactRow
+              id="advisors"
+              label="Advisors"
+              content={getAttendeesAndAssessments(false)}
+              className="reportField"
+              hideIfEmpty
+            />
+            <CompactRow
+              id="tasks"
+              label={Settings.fields.task.longLabel}
+              content={getTasksAndAssessments()}
+              className="reportField"
+              hideIfEmpty
+            />
+            {report.cancelled && (
+              <DictionaryField
+                wrappedComponent={CompactRow}
+                dictProps={Settings.fields.report.cancelledReason}
+                content={utils.sentenceCase(report.cancelledReason)}
+                className="reportField"
+                hideIfEmpty
+              />
+            )}
+            {optionalFields.workflow.active &&
+              report.showWorkflow() &&
+              !!report.workflow.length && (
+                <CompactRowReportWorkflow
+                  workflow={report.workflow}
                   className="reportField"
-                  hideIfEmpty
+                  isCompact
                 />
-                {!report.cancelled && (
-                  <>
-                    <DictionaryField
-                      wrappedComponent={CompactRow}
-                      dictProps={Settings.fields.report.atmosphere}
-                      content={
-                        !report.atmosphereDetails
-                          ? utils.sentenceCase(report.atmosphere)
-                          : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`
-                      }
-                      className="reportField"
-                      hideIfEmpty
-                    />
-                  </>
-                )}
-                <DictionaryField
-                  wrappedComponent={CompactRow}
-                  dictProps={Settings.fields.report.nextSteps}
-                  content={<ListItems value={report.nextSteps} />}
-                  className="reportField"
-                  hideIfEmpty
-                />
-                <CompactRow
-                  id="interlocutors"
-                  label="Interlocutors"
-                  content={getAttendeesAndAssessments(true)}
-                  className="reportField"
-                  hideIfEmpty
-                />
-                <CompactRow
-                  id="advisors"
-                  label="Advisors"
-                  content={getAttendeesAndAssessments(false)}
-                  className="reportField"
-                  hideIfEmpty
-                />
-                <CompactRow
-                  id="tasks"
-                  label={Settings.fields.task.longLabel}
-                  content={getTasksAndAssessments()}
-                  className="reportField"
-                  hideIfEmpty
-                />
-                {report.cancelled && (
-                  <DictionaryField
-                    wrappedComponent={CompactRow}
-                    dictProps={Settings.fields.report.cancelledReason}
-                    content={utils.sentenceCase(report.cancelledReason)}
-                    className="reportField"
-                    hideIfEmpty
+              )}
+            {report.reportText && (
+              <DictionaryField
+                wrappedComponent={CompactRow}
+                dictProps={Settings.fields.report.reportText}
+                content={
+                  <RichTextEditor
+                    readOnly
+                    showAvatar={false}
+                    value={report.reportText}
                   />
-                )}
-                {optionalFields.workflow.active &&
-                  report.showWorkflow() &&
-                  !!report.workflow.length && (
-                    <CompactRowReportWorkflow
-                      workflow={report.workflow}
-                      className="reportField"
-                      isCompact
-                    />
-                  )}
-                {report.reportText && (
-                  <DictionaryField
-                    wrappedComponent={CompactRow}
-                    dictProps={Settings.fields.report.reportText}
+                }
+                className="reportField keyDetailsRow"
+                hideIfEmpty
+                label={null}
+              />
+            )}
+            {optionalFields.reportSensitiveInformation.active &&
+              report.reportSensitiveInformation?.text && (
+                <>
+                  <CompactRow
+                    id="reportSensitiveInformation"
                     content={
                       <RichTextEditor
                         readOnly
                         showAvatar={false}
-                        value={report.reportText}
-                      />
-                    }
-                    className="reportField keyDetailsRow"
-                    hideIfEmpty
-                    label={null}
-                  />
-                )}
-                {optionalFields.reportSensitiveInformation.active &&
-                  report.reportSensitiveInformation?.text && (
-                    <>
-                      <CompactRow
-                        id="reportSensitiveInformation"
-                        content={
-                          <RichTextEditor
-                            readOnly
-                            showAvatar={false}
-                            value={report.reportSensitiveInformation.text}
-                          />
-                        }
-                        className="reportField"
-                        hideIfEmpty
-                        label="Sensitive information"
-                        labelAlignment="top"
-                      />
-                      <CompactRow
-                        id="authorizedMembers"
-                        content={
-                          <RelatedObjectsTable
-                            title="Authorized Members"
-                            relatedObjects={report.authorizedMembers}
-                          />
-                        }
-                        className="reportField"
-                        hideIfEmpty
-                        label="Authorized Members"
-                      />
-                    </>
-                  )}
-                {optionalFields.assessments.active && (
-                  <CompactRow
-                    id="assessments"
-                    content={
-                      <CompactReportViewS>
-                        {getAttendeesAndAssessments(
-                          true,
-                          true,
-                          "interlocutors-assessments"
-                        )}
-                        {getAttendeesAndAssessments(
-                          false,
-                          true,
-                          "advisors-assessments"
-                        )}
-                        {getTasksAndAssessments(true, "tasks-assessments")}
-                      </CompactReportViewS>
-                    }
-                    className="reportField"
-                    hideIfEmpty
-                  />
-                )}
-                {Settings.fields.report.customFields && (
-                  <CompactRow
-                    id="customFields"
-                    content={
-                      <ReadonlyCustomFields
-                        fieldsConfig={Settings.fields.report.customFields}
-                        values={report}
-                        vertical
-                        isCompact
-                        hideIfEmpty
+                        value={report.reportSensitiveInformation.text}
                       />
                     }
                     className="reportField"
                     hideIfEmpty
+                    label="Sensitive information"
+                    labelAlignment="top"
                   />
-                )}
-              </FullColumn>
-            </CompactTable>
-            <CompactFooterContent
-              object={report}
-              color={null}
-              policyAndClassification={utils.getPolicyAndClassificationForChoice(
-                report.classification
+                  <CompactRow
+                    id="authorizedMembers"
+                    content={
+                      <RelatedObjectsTable
+                        title="Authorized Members"
+                        relatedObjects={report.authorizedMembers}
+                      />
+                    }
+                    className="reportField"
+                    hideIfEmpty
+                    label="Authorized Members"
+                  />
+                </>
               )}
-            />
-          </CompactView>
-        </>
-      )}
-    </Formik>
+            {optionalFields.assessments.active && (
+              <CompactRow
+                id="assessments"
+                content={
+                  <CompactReportViewS>
+                    {getAttendeesAndAssessments(
+                      true,
+                      true,
+                      "interlocutors-assessments"
+                    )}
+                    {getAttendeesAndAssessments(
+                      false,
+                      true,
+                      "advisors-assessments"
+                    )}
+                    {getTasksAndAssessments(true, "tasks-assessments")}
+                  </CompactReportViewS>
+                }
+                className="reportField"
+                hideIfEmpty
+              />
+            )}
+            {Settings.fields.report.customFieldsX && (
+              <CompactRow
+                id="customFields"
+                content={
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.report.customFields}
+                    values={report}
+                    vertical
+                    isCompact
+                    hideIfEmpty
+                  />
+                }
+                className="reportField"
+                hideIfEmpty
+              />
+            )}
+          </FullColumn>
+        </CompactTable>
+        <CompactFooterContent
+          object={report}
+          color={null}
+          policyAndClassification={utils.getPolicyAndClassificationForChoice(
+            report.classification
+          )}
+        />
+      </CompactView>
+    </>
   )
 
   function returnToDefaultPage() {

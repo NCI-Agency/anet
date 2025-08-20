@@ -1256,9 +1256,8 @@ const CustomField = ({
       {helpText && <Form.Text as="div">{helpText}</Form.Text>}
     </FieldComponent>
   ) : (
-    <FastField
-      name={fieldName}
-      component={FieldHelper.ReadonlyField}
+    <FieldHelper.ReadonlyField
+      field={{ name: fieldName }}
       humanValue={<i>Missing FieldComponent for {type}</i>}
       {...fieldProps}
     />

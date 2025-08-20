@@ -20,7 +20,6 @@ import {
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import ReportCollection from "components/ReportCollection"
-import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
@@ -142,128 +141,122 @@ const AuthorizationGroupShow = ({
     )
   const canEdit = currentUser.isAdmin() || isAssignedSuperuser
 
+  const searchText = authorizationGroup.name
+  const action = (
+    <>
+      {canEdit && (
+        <LinkTo
+          modelType="AuthorizationGroup"
+          model={authorizationGroup}
+          edit
+          button="primary"
+        >
+          Edit
+        </LinkTo>
+      )}
+      <FindObjectsButton objectLabel="Community" searchText={searchText} />
+    </>
+  )
+
   return (
-    <Formik enableReinitialize initialValues={authorizationGroup}>
-      {() => {
-        const searchText = authorizationGroup.name
-        const action = (
-          <>
-            {canEdit && (
-              <LinkTo
-                modelType="AuthorizationGroup"
-                model={authorizationGroup}
-                edit
-                button="primary"
-              >
-                Edit
-              </LinkTo>
-            )}
-            <FindObjectsButton
-              objectLabel="Community"
-              searchText={searchText}
-            />
-          </>
-        )
-        return (
-          <div>
-            <Messages success={stateSuccess} error={stateError} />
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={
-                  <>
-                    {
-                      <SubscriptionIcon
-                        subscribedObjectType="authorizationGroups"
-                        subscribedObjectUuid={authorizationGroup.uuid}
-                        isSubscribed={authorizationGroup.isSubscribed}
-                        updatedAt={authorizationGroup.updatedAt}
-                        refetch={refetch}
-                        setError={error => {
-                          setStateError(error)
-                          jumpToTop()
-                        }}
-                        persistent
-                      />
-                    }{" "}
-                    Community {authorizationGroup.name}
-                  </>
-                }
-                action={action}
-              />
-              <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.authorizationGroup.description}
-                  name="description"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.authorizationGroup.status}
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={AuthorizationGroup.humanNameOfStatus}
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={
-                    Settings.fields.authorizationGroup.distributionList
-                  }
-                  name="distributionList"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={utils.formatBoolean}
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={
-                    Settings.fields.authorizationGroup.forSensitiveInformation
-                  }
-                  name="forSensitiveInformation"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={utils.formatBoolean}
-                />
-              </Fieldset>
-
-              <Fieldset
-                title={
-                  Settings.fields.authorizationGroup.administrativePositions
-                    ?.label
-                }
-              >
-                <PositionTable
-                  positions={authorizationGroup.administrativePositions}
-                  showLocation
-                />
-              </Fieldset>
-
-              <Fieldset
-                title={
-                  Settings.fields.authorizationGroup
-                    .authorizationGroupRelatedObjects?.label
-                }
-              >
-                <AuthorizationGroupMembersTable
-                  authorizationGroup={authorizationGroup}
-                />
-              </Fieldset>
-
-              <Fieldset title="Reports">
-                <ReportCollection
-                  paginationKey={`r_${uuid}`}
-                  queryParams={{
-                    authorizationGroupUuid: uuid
+    <div>
+      <Messages success={stateSuccess} error={stateError} />
+      <div className="form-horizontal">
+        <Fieldset
+          title={
+            <>
+              {
+                <SubscriptionIcon
+                  subscribedObjectType="authorizationGroups"
+                  subscribedObjectUuid={authorizationGroup.uuid}
+                  isSubscribed={authorizationGroup.isSubscribed}
+                  updatedAt={authorizationGroup.updatedAt}
+                  refetch={refetch}
+                  setError={error => {
+                    setStateError(error)
+                    jumpToTop()
                   }}
-                  mapId="reports"
+                  persistent
                 />
-              </Fieldset>
-            </Form>
-          </div>
-        )
-      }}
-    </Formik>
+              }{" "}
+              Community {authorizationGroup.name}
+            </>
+          }
+          action={action}
+        />
+        <Fieldset>
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.authorizationGroup.description}
+            field={{
+              name: "description",
+              value: authorizationGroup.description
+            }}
+          />
+
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.authorizationGroup.status}
+            field={{ name: "status" }}
+            humanValue={AuthorizationGroup.humanNameOfStatus(
+              authorizationGroup.status
+            )}
+          />
+
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.authorizationGroup.distributionList}
+            field={{ name: "distributionList" }}
+            humanValue={utils.formatBoolean(
+              authorizationGroup.distributionList
+            )}
+          />
+
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={
+              Settings.fields.authorizationGroup.forSensitiveInformation
+            }
+            field={{ name: "forSensitiveInformation" }}
+            humanValue={utils.formatBoolean(
+              authorizationGroup.forSensitiveInformation
+            )}
+          />
+        </Fieldset>
+
+        <Fieldset
+          title={
+            Settings.fields.authorizationGroup.administrativePositions?.label
+          }
+        >
+          <PositionTable
+            positions={authorizationGroup.administrativePositions}
+            showLocation
+          />
+        </Fieldset>
+
+        <Fieldset
+          title={
+            Settings.fields.authorizationGroup.authorizationGroupRelatedObjects
+              ?.label
+          }
+        >
+          <AuthorizationGroupMembersTable
+            authorizationGroup={authorizationGroup}
+          />
+        </Fieldset>
+
+        <Fieldset title="Reports">
+          <ReportCollection
+            paginationKey={`r_${uuid}`}
+            queryParams={{
+              authorizationGroupUuid: uuid
+            }}
+            mapId="reports"
+          />
+        </Fieldset>
+      </div>
+    </div>
   )
 }
 

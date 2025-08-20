@@ -637,32 +637,28 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 action={action}
               />
               <Fieldset className="show-report-overview">
-                <Field
+                <FieldHelper.SpecialField
                   label="Summary"
-                  name="summary"
-                  component={FieldHelper.SpecialField}
+                  field={{ name: "summary" }}
                   widget={
                     <div id="report-summary">
                       <DictionaryField
-                        wrappedComponent={Field}
+                        wrappedComponent={FieldHelper.ReadonlyField}
                         dictProps={Settings.fields.report.intent}
-                        name="intent"
-                        component={FieldHelper.ReadonlyField}
+                        field={{ name: "intent", value: report.intent }}
                         style={{ marginBottom: 0 }}
                       />
                       <DictionaryField
-                        wrappedComponent={Field}
+                        wrappedComponent={FieldHelper.ReadonlyField}
                         dictProps={Settings.fields.report.keyOutcomes}
-                        name="keyOutcomes"
-                        component={FieldHelper.ReadonlyField}
+                        field={{ name: "keyOutcomes" }}
                         style={{ marginBottom: 0 }}
                         humanValue={<ListItems value={report.keyOutcomes} />}
                       />
                       <DictionaryField
-                        wrappedComponent={Field}
+                        wrappedComponent={FieldHelper.ReadonlyField}
                         dictProps={Settings.fields.report.nextSteps}
-                        name="nextSteps"
-                        component={FieldHelper.ReadonlyField}
+                        field={{ name: "nextSteps" }}
                         style={{ marginBottom: 0 }}
                         humanValue={<ListItems value={report.nextSteps} />}
                       />
@@ -671,10 +667,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 />
 
                 <DictionaryField
-                  wrappedComponent={Field}
+                  wrappedComponent={FieldHelper.ReadonlyField}
                   dictProps={Settings.fields.report.engagementDate}
-                  name="engagementDate"
-                  component={FieldHelper.ReadonlyField}
+                  field={{ name: "engagementDate" }}
                   humanValue={
                     <>
                       {report.engagementDate &&
@@ -688,16 +683,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
                 {Settings.engagementsIncludeTimeAndDuration && (
                   <DictionaryField
-                    wrappedComponent={Field}
+                    wrappedComponent={FieldHelper.ReadonlyField}
                     dictProps={Settings.fields.report.duration}
-                    name="duration"
-                    component={FieldHelper.ReadonlyField}
+                    field={{ name: "duration", value: report.duration }}
                   />
                 )}
 
-                <Field
-                  name="authors"
-                  component={FieldHelper.ReadonlyField}
+                <FieldHelper.ReadonlyField
+                  field={{ name: "authors" }}
                   humanValue={report.authors?.map(a => (
                     <React.Fragment key={a.uuid}>
                       <LinkTo modelType="Person" model={a} />
@@ -706,10 +699,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   ))}
                 />
 
-                <Field
-                  name="advisorOrg"
+                <FieldHelper.ReadonlyField
+                  field={{ name: "advisorOrg" }}
                   label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <LinkTo
                       modelType="Organization"
@@ -718,10 +710,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   }
                 />
 
-                <Field
-                  name="interlocutorOrg"
+                <FieldHelper.ReadonlyField
+                  field={{ name: "interlocutorOrg" }}
                   label={Settings.fields.interlocutor.org.name}
-                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <LinkTo
                       modelType="Organization"
@@ -731,10 +722,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 />
 
                 <DictionaryField
-                  wrappedComponent={Field}
+                  wrappedComponent={FieldHelper.ReadonlyField}
                   dictProps={Settings.fields.report.event}
-                  name="event"
-                  component={FieldHelper.ReadonlyField}
+                  field={{ name: "event" }}
                   humanValue={
                     report.event && (
                       <LinkTo modelType="Event" model={report.event} />
@@ -743,10 +733,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 />
 
                 <DictionaryField
-                  wrappedComponent={Field}
+                  wrappedComponent={FieldHelper.ReadonlyField}
                   dictProps={Settings.fields.report.location}
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
+                  field={{ name: "location" }}
                   humanValue={
                     report.location && (
                       <LinkTo modelType="Location" model={report.location} />
@@ -756,10 +745,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
                 {report.cancelled && (
                   <DictionaryField
-                    wrappedComponent={Field}
+                    wrappedComponent={FieldHelper.ReadonlyField}
                     dictProps={Settings.fields.report.cancelledReason}
-                    name="cancelledReason"
-                    component={FieldHelper.ReadonlyField}
+                    field={{ name: "cancelledReason" }}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
@@ -767,32 +755,32 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 {!report.cancelled && (
                   <>
                     <DictionaryField
-                      wrappedComponent={Field}
+                      wrappedComponent={FieldHelper.ReadonlyField}
                       dictProps={Settings.fields.report.atmosphere}
-                      name="atmosphere"
-                      component={FieldHelper.ReadonlyField}
+                      field={{ name: "atmosphere" }}
                       humanValue={utils.sentenceCase(report.atmosphere)}
                     />
                     <DictionaryField
-                      wrappedComponent={Field}
+                      wrappedComponent={FieldHelper.ReadonlyField}
                       dictProps={Settings.fields.report.atmosphereDetails}
-                      name="atmosphereDetails"
-                      component={FieldHelper.ReadonlyField}
+                      field={{
+                        name: "atmosphereDetails",
+                        value: report.atmosphereDetails
+                      }}
                     />
                   </>
                 )}
 
                 {attachmentsEnabled && (
-                  <Field
-                    name="attachments"
+                  <FieldHelper.ReadonlyField
+                    field={{ name: "attachments" }}
                     label="Attachments"
-                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       <AttachmentsDetailView
                         attachments={attachments}
                         updateAttachments={setAttachments}
                         relatedObjectType={Report.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
+                        relatedObjectUuid={report.uuid}
                         allowEdit={canEdit}
                       />
                     }
@@ -838,7 +826,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
-                    values={values}
+                    values={report}
                     setShowCustomFields={setShowCustomFields}
                   />
                 </Fieldset>
@@ -851,13 +839,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   >
                     <InstantAssessmentsContainerField
                       entityType={Person}
-                      entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      entities={report.reportPeople?.filter(rp => rp.attendee)}
                       relatedObject={report}
                       parentFieldName={
                         Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
                       }
                       formikProps={{
-                        values
+                        values: report
                       }}
                       canRead={canReadAssessments}
                       readonly
@@ -870,11 +858,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   >
                     <InstantAssessmentsContainerField
                       entityType={Task}
-                      entities={values.tasks}
+                      entities={report.tasks}
                       relatedObject={report}
                       parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
                       formikProps={{
-                        values
+                        values: report
                       }}
                       canRead={canReadAssessments}
                       readonly
