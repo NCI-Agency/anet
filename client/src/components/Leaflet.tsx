@@ -189,14 +189,14 @@ const Leaflet = ({
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef(null)
 
-  const nearbyLayerRef = useRef(null)
-  const [nearbyEnabled, setNearbyEnabled] = useState(false)
-  const [nearbyVars, setNearbyVars] = useState({})
+  const anetLocationsLayerRef = useRef(null)
+  const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
+  const [anetLocationsVars, setAnetLocationsVars] = useState({})
 
   const { data, error, loading } = API.useApiQuery(
     NEARBY_LOCATIONS_GQL,
-    nearbyVars,
-    { skip: !(nearbyEnabled && !!nearbyVars) }
+    anetLocationsVars,
+    { skip: !(anetLocationsEnabled && !!anetLocationsVars) }
   )
 
   const updateMarkerLayer = useCallback(
@@ -216,7 +216,7 @@ const Leaflet = ({
         } else if (m.contents) {
           const popupDiv = Object.assign(document.createElement("div"), {
             id: m.id,
-            style: "width: 300px;"
+            style: "width: 200px;"
           })
           marker.bindPopup(() => {
             setMarkerPopup?.({ container: popupDiv, contents: m.contents })
@@ -280,12 +280,12 @@ const Leaflet = ({
     const newMarkerLayer = new MarkerClusterGroup().addTo(newMap)
     setMarkerLayer(newMarkerLayer)
 
-    // nearby layer
-    const nearbyLayer = new MarkerClusterGroup()
-    nearbyLayerRef.current = nearbyLayer
-    layerControl.addOverlay(nearbyLayer, "Nearby locations")
+    // anetLocations layer
+    const anetLocationsLayer = new MarkerClusterGroup()
+    anetLocationsLayerRef.current = anetLocationsLayer
+    layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
 
-    const updateNearbyVarsFromMap = () => {
+    const updateAnetLocationsVarsFromMap = () => {
       const mapBounds = newMap.getBounds()
       const bounds = {
         minLng: mapBounds._southWest.lng,
@@ -295,25 +295,25 @@ const Leaflet = ({
       }
       // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
       if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
-        setNearbyVars({ bounds })
+        setAnetLocationsVars({ bounds })
       }
     }
 
     newMap.on("overlayadd", e => {
-      if (e.layer === nearbyLayer) {
-        setNearbyEnabled(true)
-        updateNearbyVarsFromMap()
+      if (e.layer === anetLocationsLayer) {
+        setAnetLocationsEnabled(true)
+        updateAnetLocationsVarsFromMap()
       }
     })
     newMap.on("overlayremove", e => {
-      if (e.layer === nearbyLayer) {
-        setNearbyEnabled(false)
-        nearbyLayer.clearLayers()
+      if (e.layer === anetLocationsLayer) {
+        setAnetLocationsEnabled(false)
+        anetLocationsLayer.clearLayers()
       }
     })
     newMap.on("moveend", () => {
-      if (newMap.hasLayer(nearbyLayer)) {
-        updateNearbyVarsFromMap()
+      if (newMap.hasLayer(anetLocationsLayer)) {
+        updateAnetLocationsVarsFromMap()
       }
     })
 
@@ -334,12 +334,17 @@ const Leaflet = ({
   }
 
   useEffect(() => {
-    if (!nearbyEnabled || loading || !nearbyLayerRef.current || error) {
+    if (
+      !anetLocationsEnabled ||
+      loading ||
+      !anetLocationsLayerRef.current ||
+      error
+    ) {
       return
     }
 
     const rows = data?.locationList?.list || []
-    const layer = nearbyLayerRef.current
+    const layer = anetLocationsLayerRef.current
 
     const existingIds = getExistingIds(markerLayer)
 
@@ -349,12 +354,12 @@ const Leaflet = ({
         return
       }
       const m = new Marker([loc.lat, loc.lng], {
-        icon: ICON_TYPES.GREEN,
+        icon: ICON_TYPES.AMBER,
         id: loc.uuid
       })
       const popupDiv = Object.assign(document.createElement("div"), {
         id: m.id,
-        style: "width: 300px;"
+        style: "width: 200px;"
       })
       m.bindPopup(() => {
         setLocationMarkerPopup?.({ container: popupDiv, contents: loc })
@@ -362,7 +367,7 @@ const Leaflet = ({
       })
       layer.addLayer(m)
     })
-  }, [data, loading, error, nearbyEnabled, markerLayer])
+  }, [data, loading, error, anetLocationsEnabled, markerLayer])
 
   useEffect(() => {
     /*
