@@ -126,6 +126,17 @@ public class TaskResource {
     return created;
   }
 
+  private void checkForLoops(String taskUuid, String parentTaskUuid) {
+    if (parentTaskUuid != null) {
+      final Map<String, String> children =
+          ApplicationContextProvider.getEngine().buildTopLevelTaskHash(taskUuid);
+      if (children.containsKey(parentTaskUuid)) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Task can not be its own (grand…)parent");
+      }
+    }
+  }
+
   @GraphQLMutation(name = "updateTask")
   public Integer updateTask(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "task") Task t) {
@@ -137,14 +148,7 @@ public class TaskResource {
     assertPermission(user, DaoUtils.getUuid(t));
 
     // Check for loops in the hierarchy
-    if (t.getParentTaskUuid() != null) {
-      final Map<String, String> children =
-          ApplicationContextProvider.getEngine().buildTopLevelTaskHash(DaoUtils.getUuid(t));
-      if (children.containsKey(t.getParentTaskUuid())) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            "Task can not be its own (grand…)parent");
-      }
-    }
+    checkForLoops(t.getUuid(), t.getParentTaskUuid());
 
     // Load the existing task, so we can check for differences.
     final Task existing = dao.getByUuid(t.getUuid());
@@ -222,5 +226,32 @@ public class TaskResource {
             : String.format("Duplicate %s \"%s\" for parent #%s", taskShortLabel, shortName,
                 parentTaskUuid);
     return ResponseUtils.handleSqlException(e, msg);
+  }
+
+  @GraphQLMutation(name = "mergeTasks")
+  public Integer mergeTasks(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerTask") Task winnerTask) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+
+    final var loserTask = dao.getByUuid(loserUuid);
+    checkWhetherTasksAreMergeable(winnerTask, loserTask);
+    // Check for loops in the hierarchy
+    checkForLoops(winnerTask.getUuid(), winnerTask.getParentTaskUuid());
+    checkForLoops(loserUuid, winnerTask.getParentTaskUuid());
+    final var numberOfAffectedRows = dao.mergeTasks(loserTask, winnerTask);
+    if (numberOfAffectedRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process merge operation, error occurred while updating merged task relation information.");
+    }
+    AnetAuditLogger.log("Task {} merged into {} by {}", loserTask, winnerTask, user);
+    return numberOfAffectedRows;
+  }
+
+  private void checkWhetherTasksAreMergeable(final Task winnerTask, final Task loserTask) {
+    if (Objects.equals(DaoUtils.getUuid(loserTask), DaoUtils.getUuid(winnerTask))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot merge identical tasks.");
+    }
   }
 }

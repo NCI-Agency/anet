@@ -646,7 +646,7 @@ INSERT INTO tasks (uuid, "shortName", "longName", selectable, category, "created
   (uuid_generate_v4(), 'TAAC-E', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
   (uuid_generate_v4(), 'TAAC-W', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
   (uuid_generate_v4(), 'TAAC-C', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  (uuid_generate_v4(), 'TAAC Air', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  ('d5383bff-abfe-4e2f-89b1-f937e9eface9', 'TAAC Air', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
   ('826f43ea-9f0a-40c4-87cb-70aba83bf044', 'Factors', 'Factors', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   ('ec49de46-dd69-48c9-bde1-ecc69fa3befe', 'Factor1', 'Factor1', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '826f43ea-9f0a-40c4-87cb-70aba83bf044'),
   ('f07beca6-153e-49da-8aaa-3e29c2a1f4bc', 'Domains', 'Domains', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -718,6 +718,28 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid")
   AND "approvalSteps".uuid NOT IN (SELECT "approvalStepUuid" FROM approvers)
   AND positions.name = 'ANET Administrator';
 
+-- Test for Merging
+INSERT INTO tasks (uuid, "shortName", "longName", selectable, category, "createdAt", "updatedAt", "parentTaskUuid") VALUES
+  ('cb18b0c1-17d6-417e-951f-9db8b2f39b25', 'Merge Task 1', 'Long Merge 1 Name', TRUE, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'd5383bff-abfe-4e2f-89b1-f937e9eface9'),
+  ('867ff6b6-07f7-4448-b2a3-a1bdc9b423be', 'Merge Task 2', 'Long Merge 2 Name', TRUE, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'd5383bff-abfe-4e2f-89b1-f937e9eface9');
+
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), 'cb18b0c1-17d6-417e-951f-9db8b2f39b25', 'Merge Task 1 Approvers', 1);
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), '867ff6b6-07f7-4448-b2a3-a1bdc9b423be', 'Merge Task 2 Approvers', 1);
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), 'cb18b0c1-17d6-417e-951f-9db8b2f39b25', 'Merge Task 1 Planning Approvers', 0);
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), '867ff6b6-07f7-4448-b2a3-a1bdc9b423be', 'Merge Task 2 Planning Approvers', 0);
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Task 1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Task 2 Approvers'), (SELECT uuid from positions where name = 'EF 2.1 Superuser'));
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Task 1 Planning Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Task 2 Planning Approvers'), (SELECT uuid from positions where name = 'EF 2.1 Superuser'));
+
 -- Create a location approval process for some locations
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
   SELECT uuid_generate_v4(), (SELECT uuid FROM locations WHERE name = 'Portugal Cove Ferry Terminal'), 'Location approval', 1;
@@ -763,9 +785,9 @@ INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Approvers', 1);
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
-  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Planning Approvers', 2);
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Planning Approvers', 0);
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
-  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Planning Approvers', 2);
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Planning Approvers', 0);
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
     ((SELECT uuid from "approvalSteps" WHERE name='Merge Org 1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES

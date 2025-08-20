@@ -27,9 +27,9 @@ import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
-class TaskResourceTest extends AbstractResourceTest {
+public class TaskResourceTest extends AbstractResourceTest {
 
-  protected static final String FIELDS =
+  public static final String FIELDS =
       "{ uuid shortName longName description category parentTask { uuid } taskedOrganizations { uuid }"
           + " status customFields }";
 
