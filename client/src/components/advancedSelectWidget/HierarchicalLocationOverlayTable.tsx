@@ -5,6 +5,7 @@ import {
   buildTree,
   compareItems,
   getAdvancedSelectOverlayTableComponent,
+  getEventWithoutExtraFields,
   getSelectedItemValue
 } from "components/advancedSelectWidget/utils"
 import LinkTo from "components/LinkTo"
@@ -103,7 +104,7 @@ export const HierarchicalLocationOverlayTable = ({
         if (isSelected) {
           handleRemoveItem(location)
         } else {
-          handleAddItem(location)
+          handleAddItem(getEventWithoutExtraFields(location))
         }
       }
 

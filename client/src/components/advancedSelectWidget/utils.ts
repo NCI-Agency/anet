@@ -30,7 +30,7 @@ export function getSelectedItemValue(
     : getValueCallback(selectedItems, item, multiSelect)
 }
 
-function getEventWithoutExtraFields(event: object) {
+export function getEventWithoutExtraFields(event: object) {
   return Object.without(event, "parents", "children")
 }
 
