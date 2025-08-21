@@ -10,6 +10,7 @@ import {
 } from "components/advancedSelectWidget/utils"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
+import { Location } from "models"
 import React, { useCallback, useEffect, useState } from "react"
 import LOCATIONS_ICON from "resources/locations.png"
 
@@ -104,7 +105,7 @@ export const HierarchicalLocationOverlayTable = ({
         if (isSelected) {
           handleRemoveItem(location)
         } else {
-          handleAddItem(getEventWithoutExtraFields(location))
+          handleAddItem(new Location(getEventWithoutExtraFields(location)))
         }
       }
 

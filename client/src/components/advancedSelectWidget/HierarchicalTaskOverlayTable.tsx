@@ -118,7 +118,7 @@ export const HierarchicalTaskOverlayTable = ({
         if (isSelected) {
           handleRemoveItem(task)
         } else {
-          handleAddItem(getEventWithoutExtraFields(task))
+          handleAddItem(new Task(getEventWithoutExtraFields(task)))
         }
       }
 
