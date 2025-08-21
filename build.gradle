@@ -10,7 +10,7 @@ plugins {
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.9"
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "12.1.0"
-	id "org.springframework.boot" version "3.5.4" apply false
+	id "org.springframework.boot" version "3.5.5" apply false
 	id 'io.mateo.cxf-codegen' version '2.4.1'
 }
 
