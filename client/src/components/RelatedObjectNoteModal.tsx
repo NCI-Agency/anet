@@ -66,7 +66,6 @@ const RelatedObjectNoteModal = ({
           isValid,
           setFieldValue,
           setFieldTouched,
-          values,
           submitForm
         }) => {
           return (
@@ -145,11 +144,13 @@ const RelatedObjectNoteModal = ({
       })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function onSubmitSuccess(response, values, form) {
     const operation = edit ? "updateNote" : "createNote"
     onSuccess(response[operation])
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const noteRelatedObjects = relatedObjects.map(o => ({
       relatedObjectType: o.relatedObjectType,

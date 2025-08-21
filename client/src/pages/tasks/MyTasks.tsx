@@ -85,7 +85,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery
 })
 

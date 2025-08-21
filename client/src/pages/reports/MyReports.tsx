@@ -115,7 +115,7 @@ const MyReports = ({ pageDispatchers, searchQuery }: MyReportsProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery
 })
 

@@ -361,6 +361,7 @@ const EventSeriesForm = ({
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const eventSeries = EventSeries.filterClientSideFields(
       new EventSeries(values)

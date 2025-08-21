@@ -353,11 +353,11 @@ const BaseDecisivesDashboardImpl = ({
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   searchQuery: state.searchQuery
 })
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery))
 })
 

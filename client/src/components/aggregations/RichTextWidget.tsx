@@ -7,7 +7,7 @@ import utils from "utils"
 const RichTextWidget = ({
   values,
   whenUnspecified = null,
-  ...otherWidgetProps
+  ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: AggregationWidgetPropType) => {
   const [showValues, setShowValues] = useState(false)
   const filteredValues = values.filter(value => !utils.isNullOrUndefined(value))

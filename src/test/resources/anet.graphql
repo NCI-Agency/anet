@@ -529,9 +529,11 @@ input EventInput {
 """"""
 input EventSearchQueryInput {
   adminOrgUuid: [String]
+  anyOrgUuid: [String]
   emailNetwork: String
   endDate: Instant
   eventSeriesUuid: String
+  eventTaskUuid: [String]
   hostOrgUuid: [String]
   inMyReports: Boolean
   includeDate: Instant
@@ -588,7 +590,9 @@ input EventSeriesInput {
 """"""
 input EventSeriesSearchQueryInput {
   adminOrgUuid: [String]
+  anyOrgUuid: [String]
   emailNetwork: String
+  eventTaskUuid: [String]
   hostOrgUuid: [String]
   inMyReports: Boolean
   ownerOrgUuid: [String]
@@ -794,6 +798,7 @@ type Mutation {
   mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
+  mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
   publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
@@ -1613,8 +1618,8 @@ enum SubscriptionUpdateSearchSortBy {
 
 """"""
 enum SuperuserType {
-  CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
-  CAN_CREATE_TOP_LEVEL_ORGANIZATIONS
+  CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK
+  CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS
   REGULAR
 }
 

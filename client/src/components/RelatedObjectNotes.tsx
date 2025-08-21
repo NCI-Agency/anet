@@ -53,13 +53,11 @@ const NotificationBadge = ({
 )
 
 interface RelatedObjectNotesProps {
-  notesElemId: string
   notes?: any[]
   relatedObject?: any
 }
 
 const RelatedObjectNotes = ({
-  notesElemId = "notes-view",
   relatedObject,
   notes: notesProp = []
 }: RelatedObjectNotesProps) => {
@@ -256,13 +254,11 @@ const RelatedObjectNotes = ({
   function deleteNote(uuid) {
     const newNotes = notes.filter(item => item.uuid !== uuid) // remove note
     API.mutation(GQL_DELETE_NOTE, { uuid })
-      .then(data => {
+      .then(() => {
         setError(null)
         setNotes(newNotes) // remove note
       })
-      .catch(error => {
-        setError(error)
-      })
+      .catch(setError)
   }
 }
 

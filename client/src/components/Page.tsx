@@ -22,7 +22,7 @@ const GQL_DELETE_OBJECT_SUBSCRIPTION = gql`
   }
 `
 
-export const mapPageDispatchersToProps = (dispatch, ownProps) => ({
+export const mapPageDispatchersToProps = dispatch => ({
   pageDispatchers: {
     showLoading: () => dispatch(showLoading()),
     hideLoading: () => dispatch(hideLoading()),
@@ -166,7 +166,9 @@ export const SubscriptionIcon = ({
         tagName="button"
         disabled={disabled}
         onClick={async () => {
-          persistent && setDisabled(true)
+          if (persistent) {
+            setDisabled(true)
+          }
           await toggleSubscription(
             subscribedObjectType,
             subscribedObjectUuid,
@@ -176,7 +178,9 @@ export const SubscriptionIcon = ({
             setError
           )
           // TODO: Changing the state of an unmounted component cause warnings. persistent prop can be removed if this changes with react 17
-          persistent && setDisabled(false)
+          if (persistent) {
+            setDisabled(false)
+          }
         }}
       />
     </OverlayTrigger>
@@ -204,7 +208,7 @@ const toggleSubscription = (
     isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
     variables
   )
-    .then(data => refetch())
+    .then(refetch)
     .catch(setError)
 }
 

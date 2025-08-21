@@ -115,8 +115,8 @@ export const getReportsByTasks = reportsList => {
     return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
   })
   let tasks = reportsList.map(d => d.tasks)
-  tasks = [].concat
-    .apply([], tasks)
+  tasks = []
+    .concat(...tasks)
     .filter(
       (item, index, d) =>
         d.findIndex(t => {

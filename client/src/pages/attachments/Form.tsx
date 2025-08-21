@@ -65,10 +65,8 @@ const AttachmentForm = ({
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
@@ -243,7 +241,7 @@ const AttachmentForm = ({
 
   function onConfirmDelete(values, resetForm) {
     API.mutation(GQL_DELETE_ATTACHMENT, { uuid: values.uuid })
-      .then(data => {
+      .then(() => {
         // reset the form to latest values
         // to avoid unsaved changes prompt if it somehow becomes dirty
         resetForm({ values, isSubmitting: true })

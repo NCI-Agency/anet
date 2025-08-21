@@ -60,10 +60,15 @@ const OrganizationFilter = ({
     value: inputValue.value || (multi ? [] : {})
   }
   const toQuery = val => {
-    return {
-      [queryKey]: multi ? val.value?.map(v => v.uuid) : val.value?.uuid,
-      [queryRecurseStrategyKey]: fixedRecurseStrategy
+    const query = {
+      [queryKey]: multi
+        ? (val.value?.map(v => v?.uuid).filter(v => v != null) ?? [])
+        : (val.value?.uuid ?? null)
     }
+    if (queryRecurseStrategyKey) {
+      query[queryRecurseStrategyKey] = fixedRecurseStrategy
+    }
+    return query
   }
   const [value, setValue] = useSearchFilter(
     asFormField,
@@ -131,43 +136,43 @@ export const OrganizationMultiFilter = ({ ...props }) => (
 )
 
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
+    const emptyResult = { key, value: { toQuery: { [queryKey]: null } } }
+    if (query[queryKey] == null) {
+      return emptyResult
+    }
     return API.query(GQL_GET_ORGANIZATION, {
       uuid: query[queryKey]
-    }).then(data => {
-      if (data.organization) {
-        return {
-          key,
-          value: {
-            value: data.organization,
-            toQuery: { ...query }
-          }
-        }
-      } else {
-        return null
-      }
     })
+      .then(data => ({
+        key,
+        value: {
+          value: data.organization,
+          toQuery: { ...query }
+        }
+      }))
+      .catch(() => emptyResult)
   }
   return null
 }
 
 export const deserializeMulti = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
+    const emptyResult = { key, value: { toQuery: { [queryKey]: null } } }
+    if (query[queryKey] == null) {
+      return emptyResult
+    }
     return API.query(GQL_GET_ORGANIZATIONS, {
       uuids: query[queryKey]
-    }).then(data => {
-      if (data.organizations) {
-        return {
-          key,
-          value: {
-            value: data.organizations,
-            toQuery: { ...query }
-          }
-        }
-      } else {
-        return null
-      }
     })
+      .then(data => ({
+        key,
+        value: {
+          value: data.organizations?.filter(v => v != null) ?? [],
+          toQuery: { ...query }
+        }
+      }))
+      .catch(() => emptyResult)
   }
   return null
 }

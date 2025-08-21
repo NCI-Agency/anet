@@ -142,7 +142,7 @@ const MySavedSearches = ({
     })
   }
 
-  const onDropRow = (uuid, toIndex) => {
+  const onDropRow = uuid => {
     const search = searches.find(s => s.uuid === uuid)
     if (!search) {
       return

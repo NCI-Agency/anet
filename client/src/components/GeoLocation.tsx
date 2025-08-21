@@ -58,6 +58,7 @@ export interface CoordinatesPropType {
   displayedCoordinate?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const locationFormats: string[] = Object.keys(Location.LOCATION_FORMATS)
 interface BaseGeoLocationProps {
   labels?: any
@@ -113,10 +114,9 @@ export const BaseGeoLocation = ({
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
-        <Field
-          name={name || "location"}
+        <FieldHelper.ReadonlyField
+          field={{ name: name || "location" }}
           label={label}
-          component={FieldHelper.ReadonlyField}
           humanValue={humanValue}
           style={{ paddingTop: "2px" }}
         />

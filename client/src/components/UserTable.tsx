@@ -1,7 +1,6 @@
 import _get from "lodash/get"
 import React from "react"
 import { Table } from "react-bootstrap"
-import utils from "utils"
 
 interface UserTableProps {
   label: string

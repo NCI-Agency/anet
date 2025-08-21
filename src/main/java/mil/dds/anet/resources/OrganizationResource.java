@@ -130,7 +130,7 @@ public class OrganizationResource {
         org.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
-        org.getCustomSensitiveInformation());
+        org.customSensitiveInformationKey(), org.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Organization {} created by {}", created, user);
     return created;
@@ -152,7 +152,8 @@ public class OrganizationResource {
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
 
-    if (!AuthUtils.isAdmin(user) && !AuthUtils.isSuperUserThatCanEditAllOrganizations(user)) {
+    if (!AuthUtils.isAdmin(user)
+        && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
       // Check if user has administrative permission for the organizations that will be
       // modified with the parent organization update
       if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {
@@ -168,7 +169,7 @@ public class OrganizationResource {
     final int numRows = update(user, org, existing);
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, org.getUuid(),
-        org.getCustomSensitiveInformation());
+        org.customSensitiveInformationKey(), org.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Organization {} updated by {}", org, user);
 

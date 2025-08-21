@@ -477,6 +477,7 @@ const MySavedSearches = ({
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   const onDropRow = (uuid, toIndex) => {
     const search = searches.find(s => s.uuid === uuid)
     if (!search) {

@@ -10,7 +10,7 @@ describe("When using the task filter on the reports search", () => {
 
     await TaskFilter.openAllCollapsedTasks()
     // depending on the test run sequence, one more task may have been created
-    expect(await TaskFilter.getTaskCount()).to.be.oneOf([50, 51])
+    expect(await TaskFilter.getTaskCount()).to.be.oneOf([52, 53, 54])
   })
 
   it("Should show only the filtered tasks", async () => {

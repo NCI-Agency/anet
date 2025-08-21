@@ -140,7 +140,7 @@ const HelpConditional = ({
   data,
   orgUuid,
   appSettings,
-  currentUser,
+  currentUser, // eslint-disable-line @typescript-eslint/no-unused-vars
   pageDispatchers
 }: HelpConditionalProps) => {
   const helpText = appSettings.HELP_TEXT

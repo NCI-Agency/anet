@@ -41,10 +41,48 @@ public abstract class AbstractEventSeriesSearcher
     if (hasTextQuery(query)) {
       addTextQuery(query);
     }
+
+    if (!Utils.isEmptyOrNull(query.getOwnerOrgUuid())) {
+      addOwnerOrgQuery(query);
+    }
+    if (!Utils.isEmptyOrNull(query.getHostOrgUuid())) {
+      addHostOrgQuery(query);
+    }
     if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
       addAdminOrgQuery(query);
     }
+
+    if (!Utils.isEmptyOrNull(query.getAnyOrgUuid())) {
+      addAnyOrgQuery(query);
+    }
+
+    if (!Utils.isEmptyOrNull(query.getEventTaskUuid())) {
+      addEventTaskUuidQuery(query);
+    }
+
     addOrderByClauses(qb, query);
+  }
+
+  protected void addOwnerOrgQuery(EventSeriesSearchQuery query) {
+    if (query.getOwnerOrgUuid().size() == 1
+        && Organization.DUMMY_ORG_UUID.equals(query.getOwnerOrgUuid().get(0))) {
+      qb.addWhereClause("\"eventSeries\".\"ownerOrgUuid\" IS NULL");
+    } else {
+      qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"ownerOrgUuid\""},
+          "parent_owner_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "ownerOrgUuid",
+          query.getOwnerOrgUuid(), true, true);
+    }
+  }
+
+  protected void addHostOrgQuery(EventSeriesSearchQuery query) {
+    if (query.getHostOrgUuid().size() == 1
+        && Organization.DUMMY_ORG_UUID.equals(query.getHostOrgUuid().get(0))) {
+      qb.addWhereClause("\"eventSeries\".\"hostOrgUuid\" IS NULL");
+    } else {
+      qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"hostOrgUuid\""},
+          "parent_host_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "hostOrgUuid",
+          query.getHostOrgUuid(), true, true);
+    }
   }
 
   protected void addAdminOrgQuery(EventSeriesSearchQuery query) {
@@ -53,9 +91,26 @@ public abstract class AbstractEventSeriesSearcher
       qb.addWhereClause("\"eventSeries\".\"adminOrgUuid\" IS NULL");
     } else {
       qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"adminOrgUuid\""},
-          "parent_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "orgUuid",
+          "parent_admin_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "adminOrgUuid",
           query.getAdminOrgUuid(), true, true);
     }
+  }
+
+  private void addAnyOrgQuery(EventSeriesSearchQuery query) {
+    qb.addFromClause("LEFT JOIN events ON \"eventSeries\".uuid = events.\"eventSeriesUuid\"");
+    qb.addWhereClause("(\"eventSeries\".\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR \"eventSeries\".\"hostOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR \"eventSeries\".\"adminOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR events.\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR events.\"hostOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR events.\"adminOrgUuid\" IN ( <anyOrgUuid> ))");
+    qb.addListArg("anyOrgUuid", query.getAnyOrgUuid());
+  }
+
+  private void addEventTaskUuidQuery(EventSeriesSearchQuery query) {
+    qb.addFromClause("JOIN events ON \"eventSeries\".uuid = events.\"eventSeriesUuid\"");
+    qb.addFromClause("JOIN \"eventTasks\" ON \"events\".uuid = \"eventTasks\".\"eventUuid\"");
+    qb.addInListClause("eventTaskUuid", "\"eventTasks\".\"taskUuid\"", query.getEventTaskUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,

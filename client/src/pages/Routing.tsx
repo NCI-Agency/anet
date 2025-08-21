@@ -7,6 +7,7 @@ import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
+import MergeTasks from "pages/admin/merge/MergeTasks"
 import PendingEmailsShow from "pages/admin/pendingEmails/Show"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
@@ -174,6 +175,7 @@ const Routing = () => {
             <Route path="positions" element={<MergePositions />} />
             <Route path="locations" element={<MergeLocations />} />
             <Route path="organizations" element={<MergeOrganizations />} />
+            <Route path="tasks" element={<MergeTasks />} />
           </Route>
           <Route path="userActivities">
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />

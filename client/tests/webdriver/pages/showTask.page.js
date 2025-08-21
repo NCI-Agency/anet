@@ -7,8 +7,12 @@ class ShowTask extends Page {
     await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
   }
 
+  async getCreateSubTaskButton() {
+    return browser.$('//a[text()="Create sub-objective"]')
+  }
+
   async getForm() {
-    return browser.$("form.form-horizontal")
+    return browser.$("div.form-horizontal")
   }
 
   async getShortName() {

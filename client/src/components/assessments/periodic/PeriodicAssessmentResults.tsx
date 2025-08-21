@@ -234,7 +234,7 @@ export const PeriodicAssessmentsRows = ({
           return (
             <td key={index}>
               {!_isEmpty(periodAssessments) ? (
-                periodAssessments.map(({ assessment, assessmentValues }, i) => (
+                periodAssessments.map(({ assessment, assessmentValues }) => (
                   <div key={assessment.uuid}>
                     <PeriodicAssessment
                       assessment={assessment}

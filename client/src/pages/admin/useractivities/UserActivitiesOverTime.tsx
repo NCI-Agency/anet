@@ -409,7 +409,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   userActivitiesState: state.userActivitiesState
 })
 

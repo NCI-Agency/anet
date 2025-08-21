@@ -196,8 +196,12 @@ const BasePositionTable = ({
           <tbody>
             {Position.map(positions, pos => {
               const nameComponents = []
-              pos.name && nameComponents.push(pos.name)
-              pos.code && nameComponents.push(pos.code)
+              if (pos.name) {
+                nameComponents.push(pos.name)
+              }
+              if (pos.code) {
+                nameComponents.push(pos.code)
+              }
               return (
                 <tr key={pos.uuid}>
                   {allowSelection && (

@@ -837,6 +837,16 @@ public class Report extends AbstractCustomizableAnetBean
   }
 
   @Override
+  public String customFieldsKey() {
+    return "fields.report.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.report.customSensitiveInformation";
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof final Report r)) {
       return false;

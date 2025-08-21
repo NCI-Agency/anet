@@ -7,7 +7,6 @@ import { Field, FieldArray } from "formik"
 import _get from "lodash/get"
 import React from "react"
 import { Button, Table } from "react-bootstrap"
-import Settings from "settings"
 
 interface UserInputTableProps {
   fieldArrayName?: string
@@ -71,15 +70,6 @@ const UserInputTable = ({
       )}
     </FieldArray>
   )
-
-  function clearUser(fieldName, form, replace, i) {
-    const user = users[i]
-    if (user) {
-      user.domainUsername = ""
-      replace(i, user)
-      form.setFieldTouched(fieldName)
-    }
-  }
 }
 
 export default UserInputTable

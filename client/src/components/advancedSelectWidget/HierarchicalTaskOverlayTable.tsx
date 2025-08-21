@@ -214,8 +214,7 @@ export const HierarchicalTaskOverlayTable = ({
       "ascendantTasks",
       "descendantTasks",
       "parentTask",
-      items,
-      ["shortName", "longName", "parentTask", "ascendantTasks"]
+      items
     )
     const topLevelTasks = Object.values(treeMap).filter(t =>
       _isEmpty(t.parents)

@@ -14,9 +14,9 @@ const SUPERUSER_ACTIONS = [
   Models.EventSeries
 ]
 
-const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization]
+const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization, Models.Task]
 
-const ADMIN_ACTIONS = [Models.Task, Models.AuthorizationGroup]
+const ADMIN_ACTIONS = [Models.AuthorizationGroup]
 
 const CreateButton = () => {
   const { currentUser } = useContext(AppContext)
@@ -27,7 +27,7 @@ const CreateButton = () => {
   if (modelClasses.length > 1) {
     return (
       <DropdownButton id="createButton" title="Create" align="end">
-        {modelClasses.map((modelClass, i) => {
+        {modelClasses.map(modelClass => {
           const name = modelClass.displayName() || modelClass.resourceName
           return (
             <Dropdown.Item

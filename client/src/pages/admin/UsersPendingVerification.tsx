@@ -136,7 +136,7 @@ const UsersPendingVerification = ({
     return API.mutation(isApproved ? GQL_APPROVE_USER : GQL_DELETE_USER, {
       uuid: person.uuid
     })
-      .then(data => {
+      .then(() => {
         const msg = (
           <>
             Pending user{" "}

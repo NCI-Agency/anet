@@ -178,13 +178,14 @@ const EditAssociatedPositionsModal = ({
 
   function onSubmit(values, form) {
     return save(values, form)
-      .then(response => onSuccess())
+      .then(onSuccess)
       .catch(error => {
         form.setSubmitting(false)
         setError(error)
       })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const newPosition = new Position(values).filterClientSideFields(
       "previousPeople",

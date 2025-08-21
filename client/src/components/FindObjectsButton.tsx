@@ -40,7 +40,7 @@ const FindObjectsButton = ({
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
   setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery))
 })
 

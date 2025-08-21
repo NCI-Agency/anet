@@ -314,7 +314,7 @@ fields:
       label: Tasked organizations
       placeholder: Search for an organization…
     responsiblePositions:
-      label: Responsible positions
+      label: Responsible superusers
       placeholder: Search for a position…
     customFields:
       projectStatus:
@@ -331,6 +331,10 @@ fields:
           RED:
             label: Red
             color: '#ff8279'
+      html:
+        type: special_field
+        label: Rich-text
+        widget: richTextEditor
 
   attachment:
     featureDisabled: false
@@ -635,6 +639,10 @@ fields:
             typeError: Qty must be a number
             label: Qty
         visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+      html:
+        type: special_field
+        label: Rich-text
+        widget: richTextEditor
 
   person:
     status:
@@ -842,6 +850,10 @@ fields:
             label: Object date
             helpText: Help text for object date field
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
+      html:
+        type: special_field
+        label: Rich-text
+        widget: richTextEditor
     customSensitiveInformation:
       birthday:
         type: date
@@ -2038,7 +2050,8 @@ fields:
 
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
-tasking_ORGs: [EF 1.1, EF 1.2, EF 2, EF 4, EF 9]
+# Allow all organizations to have tasks
+#tasking_ORGs: […]
 domainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 activeDomainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 emailNetworks:

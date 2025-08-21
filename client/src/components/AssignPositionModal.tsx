@@ -82,11 +82,7 @@ const AssignPositionModal = ({
         person: { uuid: person.uuid }
       }
     }
-    API.mutation(graphql, variables)
-      .then(data => onSuccess())
-      .catch(error => {
-        setError(error)
-      })
+    API.mutation(graphql, variables).then(onSuccess).catch(setError)
   }, [position, person, onSuccess])
 
   useEffect(() => {
@@ -318,7 +314,11 @@ const AssignPositionModal = ({
       <Modal.Footer className="justify-content-between">
         <Button
           onClick={() => {
-            removeUser ? setRemoveUser(false) : closeModal()
+            if (removeUser) {
+              setRemoveUser(false)
+            } else {
+              closeModal()
+            }
           }}
           variant="outline-secondary"
         >

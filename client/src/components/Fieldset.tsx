@@ -41,7 +41,7 @@ const Fieldset = ({
     <Element
       id={id}
       name={id}
-      className="scroll-anchor-container"
+      className="scroll-anchor-container w-100"
       style={style}
     >
       {(title || action) && (

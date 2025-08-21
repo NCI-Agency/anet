@@ -1,14 +1,8 @@
 import _isEmpty from "lodash/isEmpty"
 import React from "react"
-import { hideLoading, showLoading } from "react-redux-loading-bar"
-
-export const mapDispatchToProps = (dispatch, ownProps) => ({
-  showLoading: () => dispatch(showLoading()),
-  hideLoading: () => dispatch(hideLoading())
-})
 
 interface WrapperProps {
-  loaderMessage?: string | any
+  loaderMessage?: string | React.ComponentType<unknown>
 }
 
 const LoaderHOC = isLoadingPropName => dataPropName => WrappedComponent => {

@@ -92,7 +92,7 @@ const BarChart = ({
         maxXLabelWidth = this.getBBox().width
       }
     }
-    const yLabelWidth = function (d) {
+    const yLabelWidth = function () {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -166,10 +166,10 @@ const BarChart = ({
       .append("g")
       .classed(barClass, true)
       .append("rect")
-      .attr("id", function (d, i) {
+      .attr("id", function (d) {
         return `bar_${getPropValue(d, xProp)}`
       })
-      .classed(selectedBarClass, function (d, i) {
+      .classed(selectedBarClass, function () {
         return this.id === selectedBar
       })
       .attr("x", function (d) {
@@ -184,7 +184,7 @@ const BarChart = ({
       })
     addD3Tooltip(bar, tooltip, !!onBarClick)
     if (onBarClick) {
-      bar.on("click", (event, d) => onBarClick(d))
+      bar.on("click", (_, d) => onBarClick(d))
     }
   }, [
     node,

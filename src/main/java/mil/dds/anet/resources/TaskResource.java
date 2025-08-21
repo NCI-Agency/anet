@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +28,8 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +37,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 @GraphQLApi
 public class TaskResource {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
@@ -43,6 +49,23 @@ public class TaskResource {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.dao = dao;
+  }
+
+
+  public static boolean hasPermission(final Person user, final String taskUuid) {
+    return AuthUtils.isResponsibleForTask(user, taskUuid);
+  }
+
+  public static void assertPermission(final Person user, final String taskUuid) {
+    if (!hasPermission(user, taskUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
+  }
+
+  public static void assertCreateSubTaskPermission(final Person user, final String parentTaskUuid) {
+    if (!AuthUtils.canCreateSubTask(user, parentTaskUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
   }
 
   @GraphQLQuery(name = "task")
@@ -65,8 +88,8 @@ public class TaskResource {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
 
     // If a parent is provided and is INACTIVE, force new task to INACTIVE too
     if (t.getParentTaskUuid() != null) {
@@ -76,6 +99,13 @@ public class TaskResource {
       }
     }
 
+    // Check if user is authorized to create a sub organization
+    assertCreateSubTaskPermission(user, t.getParentTaskUuid());
+    // If the organization is created by a superuser we need to add their position as an
+    // administrating one
+    if (user.getPosition().getType() == Position.PositionType.SUPERUSER) {
+      t.setResponsiblePositions(List.of(user.getPosition()));
+    }
     final Task created;
     try {
       created = dao.insert(t);
@@ -100,10 +130,21 @@ public class TaskResource {
     }
 
     DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, created.getUuid(),
-        t.getCustomSensitiveInformation());
+        t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Task {} created by {}", created, user);
     return created;
+  }
+
+  private void checkForLoops(String taskUuid, String parentTaskUuid) {
+    if (parentTaskUuid != null) {
+      final Map<String, String> children =
+          ApplicationContextProvider.getEngine().buildTopLevelTaskHash(taskUuid);
+      if (children.containsKey(parentTaskUuid)) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Task can not be its own (grand…)parent");
+      }
+    }
   }
 
   @GraphQLMutation(name = "updateTask")
@@ -112,31 +153,30 @@ public class TaskResource {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
-    final List<Position> existingResponsiblePositions =
-        dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
-    // User has to be admin or responsible for the task
-    if (!AuthUtils.isAdmin(user)) {
-      final Position userPosition = DaoUtils.getPosition(user);
-      final boolean canUpdate = existingResponsiblePositions.stream()
-          .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
-      if (!canUpdate) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
-      }
-    }
+    assertPermission(user, DaoUtils.getUuid(t));
 
     // Check for loops in the hierarchy
-    if (t.getParentTaskUuid() != null) {
-      final Map<String, String> children =
-          ApplicationContextProvider.getEngine().buildTopLevelTaskHash(DaoUtils.getUuid(t));
-      if (children.containsKey(t.getParentTaskUuid())) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            "Task can not be its own (grand…)parent");
-      }
-    }
+    checkForLoops(t.getUuid(), t.getParentTaskUuid());
 
     // Load the existing task, so we can check for differences.
     final Task existing = dao.getByUuid(t.getUuid());
+
+    if (!AuthUtils.isAdmin(user)
+        && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
+      // Check if user holds a responsible position for the task that will be
+      // modified with the parent task update
+      if (!Objects.equals(t.getParentTaskUuid(), existing.getParentTaskUuid())) {
+        if (t.getParentTaskUuid() != null) {
+          assertPermission(user, t.getParentTaskUuid());
+        }
+        if (existing.getParentTaskUuid() != null) {
+          assertPermission(user, existing.getParentTaskUuid());
+        }
+      }
+    }
+
     boolean parentChangedToInactive = false;
     if (t.getParentTaskUuid() != null
         && !t.getParentTaskUuid().equals(existing.getParentTaskUuid())) {
@@ -161,7 +201,10 @@ public class TaskResource {
             updatedDescendants);
       }
       // Update positions:
-      if (t.getResponsiblePositions() != null) {
+      if (AuthUtils.isAdmin(user) && t.getResponsiblePositions() != null) {
+        logger.debug("Editing responsible positions for {}", t);
+        final List<Position> existingResponsiblePositions =
+            dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
         Utils.addRemoveElementsByUuid(existingResponsiblePositions, t.getResponsiblePositions(),
             newPos -> dao.addPositionToTask(newPos, t),
             oldPos -> dao.removePositionFromTask(DaoUtils.getUuid(oldPos), t.getUuid()));
@@ -184,7 +227,7 @@ public class TaskResource {
           t.getApprovalSteps(), existingApprovalSteps);
 
       DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, t.getUuid(),
-          t.getCustomSensitiveInformation());
+          t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
       AnetAuditLogger.log("Task {} updated by {}", t, user);
 
@@ -210,5 +253,32 @@ public class TaskResource {
             : String.format("Duplicate %s \"%s\" for parent #%s", taskShortLabel, shortName,
                 parentTaskUuid);
     return ResponseUtils.handleSqlException(e, msg);
+  }
+
+  @GraphQLMutation(name = "mergeTasks")
+  public Integer mergeTasks(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerTask") Task winnerTask) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+
+    final var loserTask = dao.getByUuid(loserUuid);
+    checkWhetherTasksAreMergeable(winnerTask, loserTask);
+    // Check for loops in the hierarchy
+    checkForLoops(winnerTask.getUuid(), winnerTask.getParentTaskUuid());
+    checkForLoops(loserUuid, winnerTask.getParentTaskUuid());
+    final var numberOfAffectedRows = dao.mergeTasks(loserTask, winnerTask);
+    if (numberOfAffectedRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process merge operation, error occurred while updating merged task relation information.");
+    }
+    AnetAuditLogger.log("Task {} merged into {} by {}", loserTask, winnerTask, user);
+    return numberOfAffectedRows;
+  }
+
+  private void checkWhetherTasksAreMergeable(final Task winnerTask, final Task loserTask) {
+    if (Objects.equals(DaoUtils.getUuid(loserTask), DaoUtils.getUuid(winnerTask))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot merge identical tasks.");
+    }
   }
 }

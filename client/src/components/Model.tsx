@@ -467,7 +467,8 @@ export const createYupObjectShape = (
     objShape = Object.fromEntries(
       Object.entries(config)
         .map(([k, v]) => [k, createFieldYupSchema(k, v, parentFieldName)])
-        .filter(([k, v]) => v !== null)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, v]) => v !== null)
     )
     // only the top level config objects keep hold of the invisible fields info
     if (isTopLevel) {
@@ -591,7 +592,7 @@ export default class Model {
   }
 
   static resourceName = null
-  static displayName(appSettings) {
+  static displayName() {
     return null
   }
 
@@ -755,7 +756,8 @@ export default class Model {
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
     return Object.entries(this.getAssessmentsConfig()).filter(
-      ([ak, ac]) =>
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ([_, ac]) =>
         ac.relatedObjectType === relatedObjectType &&
         ac.recurrence === RECURRENCE_TYPE.ONCE
     )
@@ -808,7 +810,7 @@ export default class Model {
       )
     })
     // Sort the assessments before visualizing them inside of a Card.
-    const sortedOnDemandAssessments = onDemandAssessments.sort((a, b) => {
+    return onDemandAssessments.sort((a, b) => {
       return (
         new Date(
           utils.parseJsonSafe(a.assessmentValues)[
@@ -822,7 +824,6 @@ export default class Model {
         )
       )
     })
-    return sortedOnDemandAssessments
   }
 
   static getInstantAssessmentsDetailsForEntities(
@@ -895,7 +896,8 @@ export default class Model {
   static hasPendingAssessments(entity) {
     const entityAssessments = Object.entries(entity.getAssessmentsConfig())
     const periodicAssessments = entityAssessments.filter(
-      ([ak, ac]) => PERIOD_FACTORIES[ac.recurrence]
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ([_, ac]) => PERIOD_FACTORIES[ac.recurrence]
     )
     if (_isEmpty(periodicAssessments)) {
       // no periodic, no pending
@@ -941,7 +943,8 @@ export default class Model {
     if (!_isEmpty(assessmentConfig?.questions)) {
       Object.entries(assessmentConfig.questions)
         .filter(
-          ([key, question]) =>
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([_, question]) =>
             !question.test ||
             !_isEmpty(JSONPath({ path: question.test, json: testValue }))
         )
@@ -952,7 +955,8 @@ export default class Model {
     if (!_isEmpty(assessmentConfig?.questionSets)) {
       Object.entries(assessmentConfig.questionSets)
         .filter(
-          ([key, questionSet]) =>
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([_, questionSet]) =>
             !questionSet.test ||
             !_isEmpty(JSONPath({ path: questionSet.test, json: testValue }))
         )
@@ -1020,9 +1024,9 @@ export default class Model {
         delete currentLevelAssessment.questionSets[questionSet]
     )
     // If there are any valid questionSet left, clear invalid questions and questionSets in these questionSets
-    !_isEmpty(currentLevelAssessment.questionSets) &&
+    if (!_isEmpty(currentLevelAssessment.questionSets)) {
       Object.entries(currentLevelAssessment.questionSets).forEach(
-        ([questionSet, config]) => {
+        ([questionSet]) => {
           // As filterAssessmentConfig only filters one level, we need to pass the current level's assessment config
           const currFiltered = utils.readNestedObjectWithStringPath(
             filtered,
@@ -1037,6 +1041,7 @@ export default class Model {
           )
         }
       )
+    }
   }
 
   static populateCustomFields(entity) {
@@ -1110,8 +1115,9 @@ export default class Model {
   ) {
     const authorizedFieldsConfig = {}
     Object.entries(customSensitiveInformation).forEach(([k, v]) => {
-      isAuthorizedCallback(user, customSensitiveInformation[k], ...args) &&
-        (authorizedFieldsConfig[k] = v)
+      if (isAuthorizedCallback(user, customSensitiveInformation[k], ...args)) {
+        authorizedFieldsConfig[k] = v
+      }
     })
     return authorizedFieldsConfig
   }

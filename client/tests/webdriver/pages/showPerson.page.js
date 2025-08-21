@@ -12,7 +12,7 @@ class ShowPerson extends Page {
   }
 
   async getForm() {
-    return browser.$("form.form-horizontal")
+    return browser.$("div.form-horizontal")
   }
 
   async getEditButton() {

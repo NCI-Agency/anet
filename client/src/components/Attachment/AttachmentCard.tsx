@@ -113,15 +113,13 @@ const AttachmentCard = ({
       item => item.uuid !== attachment.uuid
     )
     API.mutation(GQL_DELETE_ATTACHMENT, { uuid: attachment.uuid })
-      .then(data => {
+      .then(() => {
         setUploadedList(newAttachments)
         toast.success(
           `Your attachment ${attachment.fileName} has been successfully deleted`
         )
       })
-      .catch(error => {
-        setError(error)
-      })
+      .catch(setError)
   }
 }
 

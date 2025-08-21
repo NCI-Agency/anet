@@ -17,11 +17,17 @@ export function getSelectedItemValue(
   multiSelect: boolean,
   selectedItems: object | object[],
   item: object,
-  getValueCallback: (selectedItem: object, item: object) => any
+  getValueCallback: (
+    selectedItem: object,
+    item: object,
+    multiSelect: boolean
+  ) => any
 ) {
   return multiSelect
-    ? selectedItems?.some(selectedItem => getValueCallback(selectedItem, item))
-    : getValueCallback(selectedItems, item)
+    ? selectedItems?.some(selectedItem =>
+        getValueCallback(selectedItem, item, multiSelect)
+      )
+    : getValueCallback(selectedItems, item, multiSelect)
 }
 
 function getEventWithoutExtraFields(event: object) {
@@ -49,11 +55,11 @@ export function handleChangeEvent(
   }
 }
 
-function getItemFromMap(treeMap: object, item: object, mapFields: string[]) {
+function getItemFromMap(treeMap: object, item: object) {
   if (!treeMap[item.uuid]) {
-    const newItem = { uuid: item.uuid }
-    mapFields.forEach(field => {
-      newItem[field] = item[field]
+    const newItem = {}
+    Object.entries(item).forEach(([key, value]) => {
+      newItem[key] = value
     })
     treeMap[item.uuid] = newItem
   }
@@ -63,11 +69,10 @@ function getItemFromMap(treeMap: object, item: object, mapFields: string[]) {
 function addParentsToMapItem(
   treeMap: object,
   item: object,
-  mapFields: string[],
   parents: object[] = []
 ) {
   return parents.map(parent => {
-    const po = getItemFromMap(treeMap, parent, mapFields)
+    const po = getItemFromMap(treeMap, parent)
     if (!item.parents) {
       item.parents = [po]
     } else if (!item.parents.some(p => p.uuid === po.uuid)) {
@@ -80,11 +85,10 @@ function addParentsToMapItem(
 function addChildrenToMapItem(
   treeMap: object,
   item: object,
-  mapFields: string[],
   children: object[] = []
 ) {
   return children.map(child => {
-    const co = getItemFromMap(treeMap, child, mapFields)
+    const co = getItemFromMap(treeMap, child)
     if (!item.children) {
       item.children = [co]
     } else if (!item.children.some(c => c.uuid === co.uuid)) {
@@ -113,20 +117,14 @@ function getChildren(
 function setChildren(
   treeMap: object,
   item: object,
-  mapFields: string[],
   descendants: object[],
   parentsField: string
 ) {
-  const o = getItemFromMap(treeMap, item, mapFields)
+  const o = getItemFromMap(treeMap, item)
   const newChildren = getChildren(o, descendants, parentsField)
-  for (const child of addChildrenToMapItem(
-    treeMap,
-    o,
-    mapFields,
-    newChildren
-  )) {
-    addParentsToMapItem(treeMap, child, mapFields, [o])
-    setChildren(treeMap, child, mapFields, descendants, parentsField)
+  for (const child of addChildrenToMapItem(treeMap, o, newChildren)) {
+    addParentsToMapItem(treeMap, child, [o])
+    setChildren(treeMap, child, descendants, parentsField)
   }
 }
 
@@ -145,15 +143,14 @@ function getParents(item: object, ascendants: object[], parentsField: string) {
 function setParents(
   treeMap: object,
   item: object,
-  mapFields: string[],
   ascendants: object[],
   parentsField: string
 ) {
-  const o = getItemFromMap(treeMap, item, mapFields)
+  const o = getItemFromMap(treeMap, item)
   const newParents = getParents(o, ascendants, parentsField)
-  for (const parent of addParentsToMapItem(treeMap, o, mapFields, newParents)) {
-    addChildrenToMapItem(treeMap, parent, mapFields, [o])
-    setParents(treeMap, parent, mapFields, ascendants, parentsField)
+  for (const parent of addParentsToMapItem(treeMap, o, newParents)) {
+    addChildrenToMapItem(treeMap, parent, [o])
+    setParents(treeMap, parent, ascendants, parentsField)
   }
 }
 
@@ -161,27 +158,40 @@ export function buildTree(
   ascendantsField: string,
   descendantsField: string,
   parentsField: string,
-  items: object[] = [],
-  mapFields: string[] = ["name"]
+  items: object[] = []
 ) {
   const treeMap = {}
   for (const item of items) {
-    setChildren(treeMap, item, mapFields, item[descendantsField], parentsField)
-    setParents(treeMap, item, mapFields, item[ascendantsField], parentsField)
+    setChildren(treeMap, item, item[descendantsField], parentsField)
+    setParents(treeMap, item, item[ascendantsField], parentsField)
   }
   return treeMap
 }
 
-function hasDescendantValueSelected(item: object, value: object) {
+function hasDescendantValueSelected(
+  item: object,
+  value: object,
+  multiSelect: boolean
+) {
   return value.children?.some(
     child =>
-      child.uuid === item?.uuid || hasDescendantValueSelected(item, child)
+      child.uuid === item?.uuid ||
+      hasDescendantValueSelected(item, child, multiSelect)
   )
 }
 
-function hasAscendantValueSelected(item: object, value: object) {
-  return value.parents?.some(
-    child => child.uuid === item?.uuid || hasAscendantValueSelected(item, child)
+function hasAscendantValueSelected(
+  item: object,
+  value: object,
+  multiSelect: boolean
+) {
+  return (
+    multiSelect &&
+    value.parents?.some(
+      parent =>
+        parent.uuid === item?.uuid ||
+        hasAscendantValueSelected(item, parent, multiSelect)
+    )
   )
 }
 

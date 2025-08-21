@@ -41,9 +41,8 @@ const DailyRollupChart = ({
     const chartBox = node.current.getBoundingClientRect()
     const chartWidth = (utils.isNumeric(width) ? width : chartBox.width) - 30
     let chart = d3.select(node.current)
-    const xLabels = [].concat.apply(
-      [],
-      data.map(d => d.past + d.planned + d.cancelled)
+    const xLabels = [].concat(
+      ...data.map(d => d.past + d.planned + d.cancelled)
     )
     const yLabels = {}
     const yDomain = data.map(d => {
@@ -60,7 +59,7 @@ const DailyRollupChart = ({
         maxXLabelWidth = this.getBBox().width
       }
     }
-    const yLabelWidth = function (d) {
+    const yLabelWidth = function () {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -130,16 +129,16 @@ const DailyRollupChart = ({
       .append("g")
       .attr(
         "transform",
-        (d, i) =>
+        (_, i) =>
           `translate(1, ${i * (BAR_HEIGHT + BAR_PADDING) + BAR_PADDING / 2})`
       )
       .classed("bar", true)
-      .attr("id", function (d, i) {
+      .attr("id", function (d) {
         return `bar_${d.org.uuid}`
       })
     addD3Tooltip(bar, tooltip, !!onBarClick)
     if (onBarClick) {
-      bar.on("click", (event, d) => onBarClick(d.org))
+      bar.on("click", (_, d) => onBarClick(d.org))
     }
 
     bar

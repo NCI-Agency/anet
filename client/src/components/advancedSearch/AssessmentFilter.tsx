@@ -43,8 +43,8 @@ const AssessmentFilter = ({
   }
   const toQuery = val => ({
     [queryKey]: {
-      [KEY]: val[KEY],
-      [FILTERS]: val[FILTERS]
+      [KEY]: val[KEY] ?? "",
+      [FILTERS]: val[FILTERS] ?? {}
     }
   })
   const [value, setValue] = useSearchFilter(
@@ -82,6 +82,7 @@ const AssessmentFilter = ({
       </Form.Select>
       {!!assessmentDefinition &&
         Object.entries(assessmentDefinition?.questions || {})
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .filter(([_, v]) => ["enum", "enumset"].includes(v.type))
           .map(([k, v]) => (
             <div
@@ -116,13 +117,15 @@ const AssessmentFilter = ({
       ([k, v]) => {
         const matchingFilter = Object.entries(
           assessmentDefinition?.questions || {}
-        ).find(([adk, _]) => k === adk)?.[1]
+        )
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .find(([adk, _]) => k === adk)?.[1]
         if (!matchingFilter) {
           return null
         }
-        const matchingValues = Object.entries(
-          matchingFilter.choices || {}
-        ).filter(([adc, _]) => v.includes(adc))
+        const matchingValues = Object.entries(matchingFilter.choices || {})
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .filter(([adc, _]) => v.includes(adc))
         if (_isEmpty(matchingValues)) {
           return null
         }
@@ -165,7 +168,7 @@ const AssessmentFilter = ({
 }
 
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
+  if (Object.hasOwn(query, queryKey)) {
     const value = {
       [KEY]: query[queryKey][KEY],
       [FILTERS]: { ...query[queryKey][FILTERS] }

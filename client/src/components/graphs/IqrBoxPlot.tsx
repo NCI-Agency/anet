@@ -19,7 +19,7 @@ interface IqrBoxPlotProps {
 
 const IqrBoxPlot = ({
   values,
-  levels = TRAFFIC_LIGHTS_LEVELS,
+  levels = TRAFFIC_LIGHTS_LEVELS, // eslint-disable-line @typescript-eslint/no-unused-vars
   width = "100%",
   height = "65",
   whenUnspecified = null

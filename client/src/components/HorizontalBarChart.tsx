@@ -100,10 +100,7 @@ const HorizontalBarChart = ({
     const categoryLabels = data.categoryLabels
     const leavesLabels = data.leavesLabels
     let chart = d3.select(node.current)
-    const xLabels = [].concat.apply(
-      [],
-      chartData.map(d => d.values.map(d => d.value))
-    )
+    const xLabels = [].concat(...chartData.map(d => d.values.map(d => d.value)))
     const yLabels = Object.values(categoryLabels)
 
     // Calculate the maximum width of the axis labels
@@ -115,7 +112,7 @@ const HorizontalBarChart = ({
         maxXLabelWidth = this.getBBox().width
       }
     }
-    const yLabelWidth = function (d) {
+    const yLabelWidth = function () {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -203,7 +200,7 @@ const HorizontalBarChart = ({
       .data(chartData)
       .enter()
       .append("g")
-      .attr("class", function (d, i) {
+      .attr("class", function (_, i) {
         return `category-${i % 2}`
       })
       .attr("transform", function (d) {
@@ -236,7 +233,7 @@ const HorizontalBarChart = ({
       .enter()
       .append("g")
       .attr("class", "category-bars-group")
-      .attr("transform", function (d, i) {
+      .attr("transform", function (_, i) {
         return `translate(0, ${yCategoryScale(i * yScale.bandwidth())})`
       })
 
@@ -249,10 +246,10 @@ const HorizontalBarChart = ({
       .filter(d => d.value !== undefined)
       .append("rect")
       .attr("class", "bar")
-      .attr("id", function (d, i) {
+      .attr("id", function (d) {
         return `bar_${d.key}${d.parentKey}`
       })
-      .classed(selectedBarClass, function (d, i) {
+      .classed(selectedBarClass, function () {
         return this.id === selectedBar
       })
       .attr("x", 0)
@@ -269,7 +266,7 @@ const HorizontalBarChart = ({
       .enter()
       .append("text")
       .attr("class", "bar-label")
-      .attr("transform", function (d) {
+      .attr("transform", function () {
         const x = 3
         const y = yCategoryScale(yScale.bandwidth() / 2 + BAR_PADDING)
         return `translate(${x}, ${y})`
@@ -299,7 +296,7 @@ const HorizontalBarChart = ({
 
   function bindElementOnClick(element, onClickHandler) {
     if (onClickHandler) {
-      element.on("click", (event, d) => onClickHandler(d))
+      element.on("click", (_, d) => onClickHandler(d))
     }
   }
 }

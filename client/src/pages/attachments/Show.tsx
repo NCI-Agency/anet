@@ -19,7 +19,6 @@ import {
   usePageTitle
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
-import { Field, Form, Formik } from "formik"
 import { Attachment } from "models"
 import React, { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
@@ -119,119 +118,96 @@ const AttachmentShow = ({ pageDispatchers }: AttachmentShowProps) => {
       currentUser.uuid === attachment.author.uuid)
   const { iconSize, iconImage, contentMissing } =
     utils.getAttachmentIconDetails(attachment)
+  const searchText = [attachment.caption, attachment.fileName].join(" ")
+  const action = (
+    <>
+      <Button variant="primary" disabled={contentMissing}>
+        <a
+          href={`/api/attachment/download/${attachment.uuid}`}
+          style={{
+            color: "white",
+            padding: "6px 12px",
+            textDecoration: "none"
+          }}
+        >
+          {contentMissing ? "Attachment has no content" : "Download"}
+        </a>
+      </Button>
+      {canEdit && (
+        <LinkTo modelType="Attachment" model={attachment} edit button="primary">
+          Edit
+        </LinkTo>
+      )}
+      <FindObjectsButton objectLabel="Attachment" searchText={searchText} />
+    </>
+  )
+
   return (
-    <Formik enableReinitialize initialValues={attachment}>
-      {({ values }) => {
-        const searchText = [attachment.caption, attachment.fileName].join(" ")
-        const action = (
-          <>
-            <Button variant="primary" disabled={contentMissing}>
-              <a
-                href={`/api/attachment/download/${attachment.uuid}`}
-                style={{
-                  color: "white",
-                  padding: "6px 12px",
-                  textDecoration: "none"
-                }}
-              >
-                {contentMissing ? "Attachment has no content" : "Download"}
-              </a>
-            </Button>
-            {canEdit && (
-              <LinkTo
-                modelType="Attachment"
-                model={attachment}
-                edit
-                button="primary"
-              >
-                Edit
-              </LinkTo>
-            )}
-            <FindObjectsButton
-              objectLabel="Attachment"
-              searchText={searchText}
-            />
-          </>
-        )
-        return (
-          <div>
-            <Messages success={stateSuccess} error={stateError} />
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={`Attachment ${attachment.caption}`}
-                action={action}
+    <div>
+      <Messages success={stateSuccess} error={stateError} />
+      <div className="form-horizontal">
+        <Fieldset title={`Attachment ${attachment.caption}`} action={action} />
+        <Fieldset>
+          <div className="attachment-show" style={{ display: "flex" }}>
+            <Col xs={12} sm={3} className="attachment-column label-align">
+              <AttachmentImage
+                uuid={attachment.uuid}
+                caption={attachment.caption}
+                contentMissing={contentMissing}
+                iconSize={iconSize}
+                iconImage={iconImage}
               />
-              <Fieldset>
-                <div className="attachment-show" style={{ display: "flex" }}>
-                  <Col xs={12} sm={3} className="attachment-column label-align">
-                    <AttachmentImage
-                      uuid={attachment.uuid}
-                      caption={attachment.caption}
-                      contentMissing={contentMissing}
-                      iconSize={iconSize}
-                      iconImage={iconImage}
-                    />
-                  </Col>
-                  <Col className="attachment-details" xs={12} sm={3} lg={8}>
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.attachment.fileName}
-                      name="fileName"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="owner"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <LinkTo modelType="Person" model={attachment.author} />
-                      }
-                    />
-                    <Field
-                      name="mimeType"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="contentLength"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={utils.humanReadableFileSize(
-                        attachment.contentLength
-                      )}
-                    />
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.confidentialityLabel}
-                      name="classification"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={utils.getConfidentialityLabelForChoice(
-                        attachment.classification
-                      )}
-                    />
-                    <Field
-                      name="used in"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <AttachmentRelatedObjectsTable
-                          relatedObjects={values.attachmentRelatedObjects}
-                        />
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.attachment.description}
-                      name="description"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <RichTextEditor readOnly value={values.description} />
-                      }
-                    />
-                  </Col>
-                </div>
-              </Fieldset>
-            </Form>
+            </Col>
+            <Col className="attachment-details" xs={12} sm={3} lg={8}>
+              <DictionaryField
+                wrappedComponent={FieldHelper.ReadonlyField}
+                dictProps={Settings.fields.attachment.fileName}
+                field={{ name: "fileName", value: attachment.fileName }}
+              />
+              <FieldHelper.ReadonlyField
+                field={{ name: "owner" }}
+                humanValue={
+                  <LinkTo modelType="Person" model={attachment.author} />
+                }
+              />
+              <FieldHelper.ReadonlyField
+                field={{ name: "mimeType", value: attachment.mimeType }}
+              />
+              <FieldHelper.ReadonlyField
+                field={{ name: "contentLength" }}
+                humanValue={utils.humanReadableFileSize(
+                  attachment.contentLength
+                )}
+              />
+              <DictionaryField
+                wrappedComponent={FieldHelper.ReadonlyField}
+                dictProps={Settings.confidentialityLabel}
+                field={{ name: "classification" }}
+                humanValue={utils.getConfidentialityLabelForChoice(
+                  attachment.classification
+                )}
+              />
+              <FieldHelper.ReadonlyField
+                field={{ name: "used in" }}
+                humanValue={
+                  <AttachmentRelatedObjectsTable
+                    relatedObjects={attachment.attachmentRelatedObjects}
+                  />
+                }
+              />
+              <DictionaryField
+                wrappedComponent={FieldHelper.ReadonlyField}
+                dictProps={Settings.fields.attachment.description}
+                field={{ name: "description" }}
+                humanValue={
+                  <RichTextEditor readOnly value={attachment.description} />
+                }
+              />
+            </Col>
           </div>
-        )
-      }}
-    </Formik>
+        </Fieldset>
+      </div>
+    </div>
   )
 }
 

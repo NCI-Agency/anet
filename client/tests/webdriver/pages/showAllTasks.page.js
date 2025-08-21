@@ -33,10 +33,6 @@ class ShowAllTasks extends Page {
     return visibleDescendants
   }
 
-  async getEventMatrix() {
-    return browser.$("#events-matrix")
-  }
-
   async getTasksTableHeader() {
     return browser.$("#tasks-table-header")
   }

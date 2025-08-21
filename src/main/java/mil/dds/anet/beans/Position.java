@@ -33,7 +33,8 @@ public class Position extends AbstractEmailableAnetBean
   }
 
   public static enum SuperuserType {
-    REGULAR, CAN_CREATE_TOP_LEVEL_ORGANIZATIONS, CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+    REGULAR, CAN_CREATE_TOP_LEVEL_ORGANIZATIONS_OR_TASKS,
+    CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK
   }
 
   public static enum PositionRole {
@@ -398,6 +399,16 @@ public class Position extends AbstractEmailableAnetBean
       @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "network") String network) {
     return super.loadEmailAddresses(context, network);
+  }
+
+  @Override
+  public String customFieldsKey() {
+    return "fields.position.customFields";
+  }
+
+  @Override
+  public String customSensitiveInformationKey() {
+    return "fields.position.customSensitiveInformation";
   }
 
   @Override

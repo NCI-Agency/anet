@@ -151,6 +151,7 @@ const EditOrganizationsAdministratedModal = ({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form) {
     const position = Position.filterClientSideFields(new Position(values))
     return API.mutation(GQL_UPDATE_POSITION, { position })

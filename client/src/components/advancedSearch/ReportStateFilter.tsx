@@ -52,7 +52,7 @@ const ReportStateFilter = ({
   }
   const toQuery = val => {
     const onlyCancelled = isOnlyCancelled(val)
-    const query = { state: val.state }
+    const query = { state: val.state ?? [] }
     if (onlyCancelled && val.cancelledReason) {
       query.cancelledReason = val.cancelledReason
     }

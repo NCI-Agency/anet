@@ -273,6 +273,7 @@ const FutureEngagementsByLocation = ({
     />
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function renderChart(id) {
     return (
       <Chart
@@ -286,10 +287,12 @@ const FutureEngagementsByLocation = ({
     )
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }

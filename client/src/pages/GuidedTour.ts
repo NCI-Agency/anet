@@ -12,6 +12,7 @@ const interlocutorPlural = pluralize(interlocutorSingular)
 const positionSingular = Settings.fields.regular.position.name
 const positionCode = Settings.fields.position.code.label
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 const userTour = (currentUser, navigate) => {
   return {
     id: "home",
@@ -138,6 +139,7 @@ const superuserTour = (currentUser, navigate) => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 const reportTour = (currentUser, navigate) => {
   return {
     id: "report",
@@ -252,6 +254,7 @@ const reportTour = (currentUser, navigate) => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 const orgTour = (currentUser, navigate) => {
   return {
     id: "org",
@@ -330,6 +333,7 @@ const orgTour = (currentUser, navigate) => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 const positionTour = (currentUser, navigate) => {
   return {
     id: "position",
@@ -383,6 +387,7 @@ const positionTour = (currentUser, navigate) => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 const personTour = (currentUser, navigate) => {
   return {
     id: "person",

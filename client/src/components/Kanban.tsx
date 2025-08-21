@@ -73,11 +73,9 @@ const Column = ({ name, tasks }: ColumnProps) => {
           data={counters}
           label={`${tasks.length}`}
           segmentFill={entity => {
-            const matching = Object.entries(enumSettings).filter(
-              ([key, val]) => {
-                return key === entity.data.key
-              }
-            )
+            const matching = Object.entries(enumSettings).filter(([key]) => {
+              return key === entity.data.key
+            })
             return matching.length > 0 ? matching[0][1].color : "#bbbbbb"
           }}
           segmentLabel={d => d.data.value}

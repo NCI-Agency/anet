@@ -65,16 +65,14 @@ export const getSearchQuery = searchQuery => {
   }
   if (searchQuery.filters) {
     searchQuery.filters.forEach(filter => {
-      if (filter.value) {
-        if (filter.value.toQuery) {
-          const toQuery =
-            typeof filter.value.toQuery === "function"
-              ? filter.value.toQuery()
-              : filter.value.toQuery
-          Object.assign(query, toQuery)
-        } else {
-          query[filter.key] = filter.value
-        }
+      if (Object.hasOwn(filter.value, "toQuery")) {
+        const toQuery =
+          typeof filter.value.toQuery === "function"
+            ? filter.value.toQuery()
+            : filter.value.toQuery
+        Object.assign(query, toQuery)
+      } else {
+        query[filter.key] = filter.value ?? null
       }
     })
   }
@@ -964,7 +962,7 @@ export const deserializeQueryParams = (
   })
 
   Promise.all(promises).then(dataList => {
-    dataList.forEach((filterData, index) => {
+    dataList.forEach(filterData => {
       // update filters
       usedFilters.push(filterData)
     })

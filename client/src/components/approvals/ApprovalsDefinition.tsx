@@ -34,7 +34,7 @@ const ApproverTable = ({ approvers, onDelete }: ApproverTableProps) => (
       </tr>
     </thead>
     <tbody>
-      {approvers.map((approver, approverIndex) => (
+      {approvers.map(approver => (
         <tr key={approver.uuid}>
           <td>
             <LinkTo
