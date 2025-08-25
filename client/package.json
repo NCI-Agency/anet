@@ -28,7 +28,7 @@
     "@babel/register": "7.28.3",
     "@babel/runtime": "7.28.3",
     "@colors/colors": "1.6.0",
-    "@faker-js/faker": "9.9.0",
+    "@faker-js/faker": "10.0.0",
     "@graphql-codegen/cli": "5.0.7",
     "@graphql-codegen/schema-ast": "4.1.0",
     "@graphql-codegen/visitor-plugin-common": "5.8.0",
