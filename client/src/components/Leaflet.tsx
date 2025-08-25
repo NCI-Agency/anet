@@ -15,8 +15,12 @@ import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
+import { gql } from "@apollo/client"
+import API from "api"
+import LinkTo from "components/LinkTo"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
 import MARKER_ICON_AMBER from "resources/leaflet/marker-icon-amber.png"
@@ -125,20 +129,43 @@ const addLayers = (map, layerControl) => {
   }
 }
 
+export interface MarkerPopupProps {
+  container?: HTMLElement
+  contents?: any
+}
+
 interface LeafletProps {
   width?: number | string
   height?: number | string
   marginBottom?: number | string
   markers?: any[]
+  setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
 }
+
+const NEARBY_LOCATIONS_GQL = gql`
+  query ($bounds: BoundingBoxInput!) {
+    locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        lat
+        lng
+      }
+    }
+  }
+`
 
 const Leaflet = ({
   width = DEFAULT_MAP_STYLE.width,
   height = DEFAULT_MAP_STYLE.height,
   marginBottom = DEFAULT_MAP_STYLE.marginBottom,
   markers,
+  setMarkerPopup,
   mapId: initialMapId,
   onMapClick
 }: LeafletProps) => {
@@ -157,8 +184,20 @@ const Leaflet = ({
 
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
+  const [locationMarkerPopup, setLocationMarkerPopup] =
+    useState<MarkerPopupProps>({})
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
-  const prevMarkersRef = useRef()
+  const prevMarkersRef = useRef(null)
+
+  const anetLocationsLayerRef = useRef(null)
+  const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
+  const [anetLocationsVars, setAnetLocationsVars] = useState({})
+
+  const { data, error, loading } = API.useApiQuery(
+    NEARBY_LOCATIONS_GQL,
+    anetLocationsVars,
+    { skip: !(anetLocationsEnabled && !!anetLocationsVars) }
+  )
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -174,6 +213,15 @@ const Leaflet = ({
         })
         if (m.name) {
           marker.bindPopup(m.name)
+        } else if (m.contents) {
+          const popupDiv = Object.assign(document.createElement("div"), {
+            id: m.id,
+            style: "width: 200px;"
+          })
+          marker.bindPopup(() => {
+            setMarkerPopup?.({ container: popupDiv, contents: m.contents })
+            return popupDiv
+          })
         }
         if (m.onMove) {
           marker.on("moveend", event => m.onMove(event, map))
@@ -187,7 +235,7 @@ const Leaflet = ({
         }
       }
     },
-    [map, markerLayer]
+    [map, markerLayer, setMarkerPopup]
   )
 
   useEffect(() => {
@@ -232,11 +280,94 @@ const Leaflet = ({
     const newMarkerLayer = new MarkerClusterGroup().addTo(newMap)
     setMarkerLayer(newMarkerLayer)
 
+    // anetLocations layer
+    const anetLocationsLayer = new MarkerClusterGroup()
+    anetLocationsLayerRef.current = anetLocationsLayer
+    layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
+
+    const updateAnetLocationsVarsFromMap = () => {
+      const mapBounds = newMap.getBounds()
+      const bounds = {
+        minLng: mapBounds._southWest.lng,
+        minLat: mapBounds._southWest.lat,
+        maxLng: mapBounds._northEast.lng,
+        maxLat: mapBounds._northEast.lat
+      }
+      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
+      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
+        setAnetLocationsVars({ bounds })
+      }
+    }
+
+    newMap.on("overlayadd", e => {
+      if (e.layer === anetLocationsLayer) {
+        setAnetLocationsEnabled(true)
+        updateAnetLocationsVarsFromMap()
+      }
+    })
+    newMap.on("overlayremove", e => {
+      if (e.layer === anetLocationsLayer) {
+        setAnetLocationsEnabled(false)
+        anetLocationsLayer.clearLayers()
+      }
+    })
+    newMap.on("moveend", () => {
+      if (newMap.hasLayer(anetLocationsLayer)) {
+        updateAnetLocationsVarsFromMap()
+      }
+    })
+
     setDoInitializeMarkerLayer(true)
 
     // Destroy map when done
     return () => newMap.remove()
   }, [mapId])
+
+  function getExistingIds(layerGroup) {
+    const ids = new Set<string>()
+    layerGroup?.eachLayer((layer: any) => {
+      if (layer?.options?.id) {
+        ids.add(String(layer.options.id))
+      }
+    })
+    return ids
+  }
+
+  useEffect(() => {
+    if (
+      !anetLocationsEnabled ||
+      loading ||
+      !anetLocationsLayerRef.current ||
+      error
+    ) {
+      return
+    }
+
+    const rows = data?.locationList?.list || []
+    const layer = anetLocationsLayerRef.current
+
+    const existingIds = getExistingIds(markerLayer)
+
+    layer.clearLayers()
+    rows.forEach((loc: any) => {
+      if (loc?.lat == null || loc?.lng == null || existingIds.has(loc.uuid)) {
+        return
+      }
+      const m = new Marker([loc.lat, loc.lng], {
+        icon: ICON_TYPES.AMBER,
+        id: loc.uuid
+      })
+      const popupDiv = Object.assign(document.createElement("div"), {
+        id: m.id,
+        style: "width: 200px;"
+      })
+      m.bindPopup(() => {
+        setLocationMarkerPopup?.({ container: popupDiv, contents: loc })
+        return popupDiv
+      })
+      layer.addLayer(m)
+    })
+  }, [data, loading, error, anetLocationsEnabled, markerLayer])
 
   useEffect(() => {
     /*
@@ -301,7 +432,25 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
-  return <div id={mapId} style={style} />
+  return (
+    <>
+      <div id={mapId} style={style} />
+      {locationMarkerPopup.container &&
+        createPortal(
+          renderLocationMarkerPopupContents(locationMarkerPopup.contents),
+          locationMarkerPopup.container
+        )}
+    </>
+  )
+
+  function renderLocationMarkerPopupContents(location) {
+    return (
+      <LinkTo
+        modelType="Location"
+        model={{ uuid: location?.uuid, name: location?.name }}
+      />
+    )
+  }
 }
 
 export default Leaflet

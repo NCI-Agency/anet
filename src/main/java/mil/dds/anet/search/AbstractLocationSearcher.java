@@ -3,6 +3,7 @@ package mil.dds.anet.search;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.BoundingBox;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -51,6 +52,15 @@ public abstract class AbstractLocationSearcher
 
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationUuidQuery(query);
+    }
+
+    final BoundingBox bbox = query.getBoundingBox();
+    if (bbox != null) {
+      qb.addWhereClause("(lng BETWEEN :minLng AND :maxLng AND lat BETWEEN :minLat AND :maxLat)");
+      qb.addSqlArg("minLng", bbox.getMinLng());
+      qb.addSqlArg("maxLng", bbox.getMaxLng());
+      qb.addSqlArg("minLat", bbox.getMinLat());
+      qb.addSqlArg("maxLat", bbox.getMaxLat());
     }
 
     if (query.getUser() != null && query.getSubscribed()) {
