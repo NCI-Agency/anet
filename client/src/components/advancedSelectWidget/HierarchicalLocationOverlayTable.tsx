@@ -117,8 +117,7 @@ export const HierarchicalLocationOverlayTable = ({
             flexDirection: "row",
             alignItems: "center",
             paddingLeft: padding,
-            gap: 10,
-            cursor: "auto"
+            gap: 10
           }}
         >
           {hasChildren && (
