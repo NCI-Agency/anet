@@ -38,7 +38,11 @@ const AdvancedSelectOverlayTable = ({
   const selectedItemsUuids = selectedItems.map(a => a[valueKey])
   const disabledItemsUuids = disabledItems.map(a => a.uuid)
   return (
-    <Table responsive hover striped>
+    <Table
+      responsive
+      hover
+      striped
+    >
       <thead>
         <tr>
           {columns.map((col, idx) => (
@@ -56,9 +60,11 @@ const AdvancedSelectOverlayTable = ({
           const isDisabled =
             disabledItemsUuids.includes(item.uuid) || item.isNotSelectable
           const disableSelection = item.disabled
-          const handleClick = isDisabled
-            ? null
-            : () => (isSelected ? handleRemoveItem(item) : handleAddItem(item))
+          const onMouseDown = e => {
+            if (isDisabled || disableSelection || e.button !== 0) return
+            e.preventDefault()
+            isSelected ? handleRemoveItem?.(item) : handleAddItem?.(item)
+          }
           const style = isDisabled
             ? null
             : {
@@ -76,7 +82,7 @@ const AdvancedSelectOverlayTable = ({
           return (
             <tr
               key={`${item.uuid}-${pageNum}-${i}`}
-              onClick={handleClick}
+              onMouseDown={onMouseDown}
               style={style}
             >
               <td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
