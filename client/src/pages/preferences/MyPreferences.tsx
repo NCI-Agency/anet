@@ -13,12 +13,16 @@ const GQL_UPDATE_PERSON_PREFERENCES = gql`
 `
 
 interface MyPreferencesProps {
+  actionLabel: string
   category?: string
-  actionOnSubmit?: () => void
+  title?: string
+  actionOnSubmit?: () => Promise<any>
 }
 
 const MyPreferences = ({
+  actionLabel = "Save Preferences",
   category = null,
+  title = null,
   actionOnSubmit = null
 }: MyPreferencesProps) => {
   const { currentUser } = useContext(AppContext)
@@ -31,7 +35,8 @@ const MyPreferences = ({
       onSubmit={onSubmit}
       saveSuccess={saveSuccess}
       saveError={saveError}
-      title="My Preferences"
+      title={title}
+      actionLabel={actionLabel}
     />
   )
 

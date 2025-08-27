@@ -41,9 +41,11 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
+import mil.dds.anet.test.client.PersonPreferenceInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PreferenceInput;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportPerson;
@@ -504,6 +506,13 @@ public abstract class AbstractResourceTest {
   // Return list fields (when e.g. doing a search) for a set of object fields
   protected static String getListFields(String fields) {
     return String.format("{ pageNum pageSize totalCount list %s }", fields);
+  }
+
+  protected static PersonPreferenceInput getPersonPreferenceInput(final String personUuid,
+      final String preferenceUuid, final String value) {
+    return PersonPreferenceInput.builder().withValue(value)
+        .withPerson(PersonInput.builder().withUuid(personUuid).build())
+        .withPreference(PreferenceInput.builder().withUuid(preferenceUuid).build()).build();
   }
 
   /**

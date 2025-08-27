@@ -448,14 +448,7 @@ const Search = ({
               </Dropdown.Toggle>
               {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
               <Dropdown.Menu className="super-colors">
-                <Dropdown.Item
-                  onClick={() =>
-                    exportSearchResults(
-                      "xlsx",
-                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-                  }
-                >
+                <Dropdown.Item onClick={openExportResultsModal}>
                   Excel (xlsx)
                 </Dropdown.Item>
                 <Dropdown.Item
@@ -467,16 +460,6 @@ const Search = ({
             </Dropdown>
           </>
         )}
-        <span className="ms-2">
-          <Button
-            onClick={openExportResultsModal}
-            id="openExportResultsButton"
-            variant="outline-secondary"
-          >
-            Export Configuration
-            <img src={DOWNLOAD_ICON} height={16} alt="Export search results" />
-          </Button>
-        </span>
         <span className="ms-2">
           <Button
             onClick={openSaveModal}
@@ -813,12 +796,14 @@ const Search = ({
         size="xl"
       >
         <Modal.Header closeButton>
-          <Modal.Title>Export preferences</Modal.Title>
+          <Modal.Title>Export Search Results</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <MyPreferences
+            actionLabel="Save and Export"
             category="export"
-            actionOnSubmit={closeExportResultsModal}
+            title="My Export Preferences"
+            actionOnSubmit={exportResultsFromModal}
           />
         </Modal.Body>
       </Modal>
@@ -920,6 +905,14 @@ const Search = ({
 
   function openExportResultsModal() {
     setShowExportResults(true)
+  }
+
+  async function exportResultsFromModal() {
+    await exportSearchResults(
+      "xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    setShowExportResults(false)
   }
 
   function closeExportResultsModal() {
