@@ -33,12 +33,6 @@ public class ReportEmail implements AnetEmailAction {
     context.put("sender", sender);
     context.put("comment", comment);
 
-    // See if we have an avatar image for this person
-    if (sender.getEntityAvatar() != null) {
-      String avatar = "/api/attachment/view/" + sender.getEntityAvatar().getAttachmentUuid();
-      context.put("avatar", avatar);
-    }
-
     return context;
   }
 

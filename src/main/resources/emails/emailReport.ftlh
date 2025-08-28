@@ -394,10 +394,7 @@ td {
               </div>
             </td>
             <td>
-              <#if avatar>
-                <img src="${avatar}" alt="attendee" class="person-icon" height="20" width="20">
-              </#if>
-              <a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
+              <img src="/assets/img/people.png" alt="attendee" class="person-icon" height="20" width="20"><a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
             </td>
             <td>
               <#if attendee.loadPosition()??>

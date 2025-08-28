@@ -731,11 +731,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     List<PersonPreferenceInput> personPreferences = new ArrayList<>();
     preferences.forEach(preference -> {
       personPreferences
-          .add(getPersonPreferenceInput(getJackJackson().getUuid(), preference.getUuid(), "FALSE"));
+          .add(getPersonPreferenceInput(getJackJackson().getUuid(), preference.getUuid(), "TRUE"));
     });
     final Integer updatedPreferences = withCredentials(jackUser,
         t -> mutationExecutor.updatePersonPreferences("", personPreferences));
-    assertThat(updatedPreferences).isEqualTo(2);
+    assertThat(updatedPreferences).isEqualTo(10);
 
     // Arthur can not change Jack's preferences!
     try {
