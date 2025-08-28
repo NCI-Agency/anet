@@ -98,10 +98,12 @@ class EmailTemplateTest extends AbstractResourceTest {
 
   @Test
   void testDailyRollupTemplate() throws IOException, InterruptedException {
+    final Person person = getAdminBean();
     final DailyRollupEmail action = new DailyRollupEmail();
     action.setStartDate(Instant.now());
     action.setEndDate(Instant.now());
     action.setEndDate(Instant.now());
+    action.setSender(person);
     // ANET Administrators
     action.setOrgUuid("285fa226-05cb-46d3-9037-9de459f4beec");
     action.setChartOrgType(RollupGraph.RollupGraphType.ADVISOR);
