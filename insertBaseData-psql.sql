@@ -1857,7 +1857,7 @@ INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "de
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
     ((SELECT uuid from people where "name" = 'Jackson, Jack'), '4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
-    ((SELECT uuid from people where "name" = 'Jackson, Jack'), '0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'uuid', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ((SELECT uuid from people where "name" = 'Jackson, Jack'), '0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
