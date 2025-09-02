@@ -17,6 +17,7 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
+import ExportFieldsPanel from "./ExportFieldsPanel"
 
 const GQL_GET_PREFERENCES = gql`
   query ($preferenceQuery: PreferenceSearchQueryInput) {
@@ -47,6 +48,34 @@ interface PreferencesFieldsetProps {
   actionLabel?: string
   saveSuccess?: string | null
   saveError?: any
+}
+
+function isExportFieldsPref(name: string) {
+  return name?.endsWith("_EXPORT_FIELDS")
+}
+
+function exportEntityFromPref(name: string) {
+  return (name || "").replace(/_EXPORT_FIELDS$/, "")
+}
+
+function titleForExportPref(name: string) {
+  const entity = exportEntityFromPref(name)
+  const start = entity.replace(/([A-Z])/g, " $1").trim()
+  const cap = start.charAt(0).toUpperCase() + start.slice(1)
+  return `${cap} export fields`
+}
+
+function getLabelFromDictionary(preferenceName: string, field: string) {
+  const key = preferenceName.split("_")[0]
+  const label = Settings.fields[key]?.[field]?.label
+  return label ?? field
+}
+
+function convertStringValueToType(value: any, type: string) {
+  if (type === "boolean") {
+    return String(value).toLowerCase() === "true"
+  }
+  return value
 }
 
 const PreferencesFieldset = ({
@@ -95,14 +124,21 @@ const PreferencesFieldset = ({
     }
   })
 
+  const exportPrefs = preferences.filter(p => isExportFieldsPref(p.name))
+  const otherPrefs = preferences.filter(p => !isExportFieldsPref(p.name))
+
   const initialValues = preferences.reduce((acc, pref) => {
     acc[pref.uuid] = pref.value
     return acc
   }, {})
 
   return (
-    <Formik initialValues={initialValues} onSubmit={onSubmit}>
-      {({ isSubmitting, dirty, setFieldValue, submitForm }) => {
+    <Formik
+      initialValues={initialValues}
+      onSubmit={onSubmit}
+      enableReinitialize
+    >
+      {({ isSubmitting, dirty, setFieldValue, submitForm, values }) => {
         const action = (
           <Button
             variant="primary"
@@ -119,65 +155,90 @@ const PreferencesFieldset = ({
             <Messages success={saveSuccess} error={saveError} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
-              <Fieldset>
-                {preferences.map(preference => (
-                  <React.Fragment key={preference.uuid}>
-                    {preference.type === "boolean" && (
-                      <FastField
-                        name={preference.uuid}
-                        label={preference.description}
-                        component={FieldHelper.RadioButtonToggleGroupField}
-                        buttons={[
-                          { id: "yes", value: true, label: "Yes" },
-                          { id: "no", value: false, label: "No" }
-                        ]}
-                        onChange={value =>
-                          setFieldValue(preference.uuid, value)
-                        }
-                      />
-                    )}
+              {otherPrefs.length > 0 && (
+                <Fieldset title={exportPrefs.length > 0 ? "General" : ""}>
+                  {otherPrefs.map(preference => (
+                    <React.Fragment key={preference.uuid}>
+                      {preference.type === "boolean" && (
+                        <FastField
+                          name={preference.uuid}
+                          label={preference.description}
+                          component={FieldHelper.RadioButtonToggleGroupField}
+                          buttons={[
+                            { id: "yes", value: true, label: "Yes" },
+                            { id: "no", value: false, label: "No" }
+                          ]}
+                          onChange={value =>
+                            setFieldValue(preference.uuid, value)
+                          }
+                        />
+                      )}
 
-                    {preference.type === "enumset" && (
-                      <FastField name={preference.uuid}>
-                        {({ field, form }) => {
-                          const choices = preference.allowedValues
-                            ? Object.fromEntries(
-                                preference.allowedValues.split(",").map(v => [
-                                  v.trim(),
-                                  {
-                                    label: getLabelFromDictionary(
-                                      preference.name,
-                                      v.trim()
+                      {preference.type === "enumset" &&
+                        !isExportFieldsPref(preference.name) && (
+                          <FastField name={preference.uuid}>
+                            {({ field, form }) => {
+                              const choices = preference.allowedValues
+                                ? Object.fromEntries(
+                                    preference.allowedValues
+                                      .split(",")
+                                      .map((v: string) => [
+                                        v.trim(),
+                                        {
+                                          label: getLabelFromDictionary(
+                                            preference.name,
+                                            v.trim()
+                                          )
+                                        }
+                                      ])
+                                  )
+                                : {}
+                              const buttons =
+                                FieldHelper.customEnumButtons(choices)
+                              const selected = field.value
+                                ? field.value.split(",").map(v => v.trim())
+                                : []
+
+                              return (
+                                <FieldHelper.CheckboxButtonToggleGroupField
+                                  field={{ ...field, value: selected }}
+                                  form={form}
+                                  label={preference.description}
+                                  buttons={buttons}
+                                  enableClear
+                                  onChange={selectedValues => {
+                                    const newValue = selectedValues.join(",")
+                                    form.setFieldValue(
+                                      preference.uuid,
+                                      newValue
                                     )
-                                  }
-                                ])
+                                  }}
+                                />
                               )
-                            : {}
+                            }}
+                          </FastField>
+                        )}
+                    </React.Fragment>
+                  ))}
+                </Fieldset>
+              )}
 
-                          const buttons = FieldHelper.customEnumButtons(choices)
-                          const selected = field.value
-                            ? field.value.split(",").map(v => v.trim())
-                            : []
+              {exportPrefs.length > 0 && (
+                <Fieldset title={otherPrefs.length > 0 ? "Export fields" : ""}>
+                  {exportPrefs.map(pref => (
+                    <ExportFieldsPanel
+                      key={pref.uuid}
+                      pref={pref}
+                      values={values}
+                      initialSnapshot={initialValues}
+                      setFieldValue={setFieldValue}
+                      titleForExportPref={titleForExportPref}
+                      getLabelFromDictionary={getLabelFromDictionary}
+                    />
+                  ))}
+                </Fieldset>
+              )}
 
-                          return (
-                            <FieldHelper.CheckboxButtonToggleGroupField
-                              field={{ ...field, value: selected }}
-                              form={form}
-                              label={preference.description}
-                              buttons={buttons}
-                              enableClear
-                              onChange={selectedValues => {
-                                const newValue = selectedValues.join(",")
-                                form.setFieldValue(preference.uuid, newValue)
-                              }}
-                            />
-                          )
-                        }}
-                      </FastField>
-                    )}
-                  </React.Fragment>
-                ))}
-              </Fieldset>
               <div className="submit-buttons">
                 <div />
                 <div>{action}</div>
@@ -188,22 +249,6 @@ const PreferencesFieldset = ({
       }}
     </Formik>
   )
-
-  function convertStringValueToType(value: any, type: string) {
-    if (type === "boolean") {
-      return String(value).toLowerCase() === "true"
-    }
-    return value
-  }
-
-  function getLabelFromDictionary(
-    preferenceName: string,
-    field: string
-  ): string {
-    const key = preferenceName.split("_")[0]
-    const label = Settings.fields[key]?.[field]?.label
-    return label ?? field
-  }
 }
 
 export default connect(null, mapPageDispatchersToProps)(PreferencesFieldset)
