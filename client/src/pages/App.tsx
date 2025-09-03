@@ -34,6 +34,17 @@ const GQL_GET_APP_DATA = gql`
       status
       pendingVerification
       code
+      preferences {
+        uuid
+        preference {
+          uuid
+          name
+        }
+        person {
+          uuid
+        }
+        value
+      }
       emailAddresses {
         network
         address
