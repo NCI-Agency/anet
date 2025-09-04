@@ -120,6 +120,8 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
+const EMAIL_NETWORK = Settings.emailNetworkForNotifications || null
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const orgTypes: string[] = Object.values(RollupGraph.TYPE)
 interface ChartProps {
@@ -675,7 +677,7 @@ const RollupShow = ({
         label: "All people",
         queryVars: {
           status: Model.STATUS.ACTIVE,
-          emailNetwork: "NS"
+          emailNetwork: EMAIL_NETWORK
         }
       }
     }
@@ -688,55 +690,59 @@ const RollupShow = ({
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Field
-              name="toAnetUsers"
-              label="To ANET Users"
-              component={FieldHelper.SpecialField}
-              vertical
-              onChange={value => {
-                setFieldValue("toAnetUsers", [...toAnetUsers, value])
-              }}
-              widget={
-                <AdvancedSingleSelect
-                  fieldName="author"
-                  placeholder="Select ANET users"
-                  value={null}
-                  overlayColumns={[
-                    "Name",
-                    "Position",
-                    "Location",
-                    "Organization"
-                  ]}
-                  overlayRenderRow={PersonDetailedOverlayRow}
-                  filterDefs={peopleFilters}
-                  autoComplete="off"
-                  objectType={Person}
-                  valueKey="name"
-                  fields={personFields}
-                  addon={PEOPLE_ICON}
+            {EMAIL_NETWORK && (
+              <>
+                <Field
+                  name="toAnetUsers"
+                  label="To ANET Users"
+                  component={FieldHelper.SpecialField}
+                  vertical
+                  onChange={value => {
+                    setFieldValue("toAnetUsers", [...toAnetUsers, value])
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="author"
+                      placeholder="Select ANET users"
+                      value={null}
+                      overlayColumns={[
+                        "Name",
+                        "Position",
+                        "Location",
+                        "Organization"
+                      ]}
+                      overlayRenderRow={PersonDetailedOverlayRow}
+                      filterDefs={peopleFilters}
+                      autoComplete="off"
+                      objectType={Person}
+                      valueKey="name"
+                      fields={personFields}
+                      addon={PEOPLE_ICON}
+                    />
+                  }
                 />
-              }
-            />
-            <div className="d-flex flex-wrap gap-2 mb-2 mt-2">
-              {toAnetUsers.map(user => (
-                <div
-                  className="d-flex align-items-center p-2 gap-2 border border-secondary rounded"
-                  key={user.uuid}
-                >
-                  {user.name}
-                  <Icon
-                    icon={IconNames.CROSS}
-                    style={{ cursor: "pointer" }}
-                    onClick={() =>
-                      setFieldValue(
-                        "toAnetUsers",
-                        toAnetUsers.filter(u => u.uuid !== user.uuid)
-                      )
-                    }
-                  />
+                <div className="d-flex flex-wrap gap-2 mb-2 mt-2">
+                  {toAnetUsers.map(user => (
+                    <div
+                      className="d-flex align-items-center p-2 gap-2 border border-secondary rounded"
+                      key={user.uuid}
+                    >
+                      {user.name}
+                      <Icon
+                        icon={IconNames.CROSS}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          setFieldValue(
+                            "toAnetUsers",
+                            toAnetUsers.filter(u => u.uuid !== user.uuid)
+                          )
+                        }
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
             <Field
               name="to"
               label="To Emails"
@@ -840,7 +846,7 @@ const RollupShow = ({
     const toEmails = utils.parseEmailAddresses(values.to)
     const anetUsersEmails = values.toAnetUsers?.map(
       ({ emailAddresses }) =>
-        emailAddresses.find(({ network }) => network === "NS").address
+        emailAddresses.find(({ network }) => network === EMAIL_NETWORK).address
     )
     if (!toEmails.isValid && !anetUsersEmails.length) {
       return
