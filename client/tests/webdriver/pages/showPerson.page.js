@@ -36,7 +36,7 @@ class ShowPerson extends Page {
   }
 
   async getOptionalFieldsButton() {
-    return browser.$('//button[text()="Optional Fields ⇓"]')
+    return browser.$('//button[text()="Optional Fields"]')
   }
 
   async getClearAllButton() {

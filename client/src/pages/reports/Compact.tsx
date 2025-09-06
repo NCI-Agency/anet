@@ -760,7 +760,7 @@ const CompactReportViewHeader = ({
     </DropdownButton>
     <SimpleMultiCheckboxDropdown
       id="optionalFields"
-      label="Optional Fields ⇓"
+      label="Optional Fields"
       options={optionalFields}
       setOptions={setOptionalFields}
     />

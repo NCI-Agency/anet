@@ -583,7 +583,7 @@ const CompactPersonViewHeader = ({
       ))}
     </DropdownButton>
     <SimpleMultiCheckboxDropdown
-      label="Optional Fields ⇓"
+      label="Optional Fields"
       options={optionalFields}
       setOptions={setOptionalFields}
     />

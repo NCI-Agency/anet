@@ -1,4 +1,3 @@
-import styled from "@emotion/styled"
 import React, { useRef, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useOutsideClick } from "utils"
@@ -32,40 +31,68 @@ const SimpleMultiCheckboxDropdown = ({
   useOutsideClick(dropDownRef, () => setActive(false))
 
   return (
-    <DropdownButton ref={dropDownRef} active={active}>
+    <div
+      ref={dropDownRef}
+      className="position-relative d-inline-block"
+      style={{ zIndex: 102 }}
+    >
       <Button
         variant="outline-secondary"
+        type="button"
+        className="d-inline-flex align-items-center"
         onClick={() => setActive(curr => !curr)}
+        onKeyDown={e => e.key === "Escape" && setActive(false)}
       >
-        {label}
+        {label} <span className="ms-1 small">▾</span>
       </Button>
-      <div>
-        <div id={id}>
+
+      <div
+        id={id ? `${id}-menu` : undefined}
+        role="menu"
+        className={`dropdown-menu p-2 shadow ${active ? "show" : ""}`}
+        style={{
+          display: active ? "block" : "none",
+          minWidth: 320,
+          top: "100%",
+          left: 0
+        }}
+      >
+        <div className="row row-cols-1 g-2 m-2">
           {Object.entries(options).map(([optionKey, option]) => (
-            <label htmlFor={optionKey} key={optionKey}>
-              {option.text}
-              <input
-                type="checkbox"
-                id={optionKey}
-                checked={option.active}
-                onChange={() => {
-                  setOptions(prev => {
-                    // since it is object of objects
-                    // we need a sort of a deep copy to not alter the prev state
-                    const newer = {
-                      ...prev,
-                      [optionKey]: { ...prev[optionKey] }
-                    }
-                    newer[optionKey].active = !newer[optionKey].active
-                    return newer
-                  })
-                }}
-              />
-            </label>
+            <div className="col" key={optionKey}>
+              <label
+                htmlFor={optionKey}
+                className="d-flex align-items-center justify-content-between w-100"
+                style={{ cursor: "pointer" }}
+              >
+                <span className="my-1 user-select-none">{option.text}</span>
+                <input
+                  type="checkbox"
+                  id={optionKey}
+                  className="form-check-input m-0 shadow-none"
+                  style={{ cursor: "pointer", borderWidth: 2 }}
+                  checked={option.active}
+                  onChange={() => {
+                    setOptions?.(prev => {
+                      const newer = {
+                        ...prev,
+                        [optionKey]: { ...prev[optionKey] }
+                      }
+                      newer[optionKey].active = !newer[optionKey].active
+                      return newer
+                    })
+                  }}
+                />
+              </label>
+            </div>
           ))}
-          <div>
+        </div>
+        <div className="row g-2 pt-2 mt-2 border-top">
+          <div className="col-6">
             <Button
-              variant="secondary"
+              variant="outline-primary"
+              type="button"
+              className="w-100"
               onClick={() =>
                 setOptions(prev => {
                   const newer = { ...prev }
@@ -76,8 +103,12 @@ const SimpleMultiCheckboxDropdown = ({
             >
               Select All
             </Button>
+          </div>
+          <div className="col-6">
             <Button
-              variant="secondary"
+              variant="outline-danger"
+              type="button"
+              className="w-100"
               onClick={() =>
                 setOptions(prev => {
                   const newer = { ...prev }
@@ -91,63 +122,8 @@ const SimpleMultiCheckboxDropdown = ({
           </div>
         </div>
       </div>
-    </DropdownButton>
+    </div>
   )
 }
-
-const DropdownButton = styled.span`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  z-index: 102;
-  & > div {
-    position: relative;
-    width: 200%;
-  }
-  & > div > div {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-
-    background-color: rgb(208, 232, 240);
-    padding: 3px 5px;
-    border-radius: 0px 0px 5px 5px;
-
-    position: absolute;
-    left: 0;
-
-    label {
-      flex: 1 1 1;
-      width: 48%;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      align-items: center;
-    }
-
-    input {
-      margin-left: auto;
-      min-width: 16px;
-      height: 16px;
-    }
-
-    div {
-      width: 100%;
-
-      button {
-        width: 50%;
-      }
-    }
-  }
-  & > div {
-    display: ${props => (props.active ? "block" : "none")};
-  }
-  @media print {
-    display: none;
-  }
-`
 
 export default SimpleMultiCheckboxDropdown
