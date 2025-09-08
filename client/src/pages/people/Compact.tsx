@@ -540,10 +540,7 @@ const CompactPersonViewHeader = ({
       <label
         htmlFor="leftColumnNumber"
         key="lefColumnNumber"
-        style={{
-          display: "flex",
-          alignItems: "center"
-        }}
+        className="d-flex align-items-center mb-auto"
       >
         Left Column Fields
         <input
@@ -551,7 +548,7 @@ const CompactPersonViewHeader = ({
           id="leftColumnNumber"
           min="0"
           className="form-control"
-          style={{ width: "60px", marginLeft: "5px" }}
+          style={{ width: 60, marginLeft: 5, lineHeight: "1.3rem" }}
           value={leftColumnFields}
           onChange={e => setLeftColumnFields(e.target.value)}
         />
