@@ -291,6 +291,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
         returnToDefaultPage={returnToDefaultPage}
         optionalFields={optionalFields}
         setOptionalFields={setOptionalFields}
+        pageSize={pageSize}
         setPageSize={setPageSize}
         leftColumnFields={leftColumnFields}
         setLeftColumnFields={setLeftColumnFields}
@@ -515,6 +516,7 @@ interface CompactPersonViewHeaderProps {
     }
   >
   setOptionalFields?: (...args: unknown[]) => unknown
+  pageSize?: any
   setPageSize?: (...args: unknown[]) => unknown
   leftColumnFields?: string
   setLeftColumnFields?: (...args: unknown[]) => unknown
@@ -526,83 +528,93 @@ const CompactPersonViewHeader = ({
   noPerson,
   optionalFields,
   setOptionalFields,
+  pageSize,
   setPageSize,
   leftColumnFields,
   setLeftColumnFields
-}: CompactPersonViewHeaderProps) => (
-  <Header>
-    <label
-      htmlFor="leftColumnNumber"
-      key="lefColumnNumber"
-      style={{
-        display: "flex",
-        alignItems: "center"
-      }}
-    >
-      Left Column Fields
-      <input
-        type="number"
-        id="leftColumnNumber"
-        min="0"
-        className="form-control"
-        style={{ width: "60px", marginLeft: "5px" }}
-        value={leftColumnFields}
-        onChange={e => setLeftColumnFields(e.target.value)}
-      />
-    </label>
-    <DropdownButton
-      title="Page Size"
-      variant="outline-secondary"
-      id="pageSizeButton"
-    >
-      {Object.entries(PAGE_SIZES).map(([key, pageSize]) => (
-        <Dropdown.Item
-          key={key}
-          onClick={() => setPageSize(pageSize)}
-          style={{ minWidth: "205px" }}
-        >
-          {pageSize.name}
-        </Dropdown.Item>
-      ))}
-    </DropdownButton>
-    <DropdownButton
-      title="Presets"
-      variant="outline-secondary"
-      id="presetsButton"
-    >
-      {PRESETS.map(preset => (
-        <Dropdown.Item
-          key={preset.name}
-          onClick={() =>
-            onPresetSelect(preset.fields, optionalFields, setOptionalFields)
-          }
-          style={{ minWidth: "185px" }}
-        >
-          {preset.label}
-        </Dropdown.Item>
-      ))}
-    </DropdownButton>
-    <SimpleMultiCheckboxDropdown
-      label="Optional Fields"
-      options={optionalFields}
-      setOptions={setOptionalFields}
-    />
-    <Buttons>
-      {!noPerson && (
-        <Button value="print" variant="primary" onClick={onPrintClick}>
-          Print
-        </Button>
-      )}
-      <Button
-        value="detailedView"
-        variant="primary"
-        onClick={returnToDefaultPage}
+}: CompactPersonViewHeaderProps) => {
+  const pageSizeTrimmed = pageSize.name ? pageSize.name.split(" ")[0] : ""
+  const pageSizeTitle = `Page Size${pageSizeTrimmed ? `: ${pageSizeTrimmed}` : ""}`
+  return (
+    <Header>
+      <label
+        htmlFor="leftColumnNumber"
+        key="lefColumnNumber"
+        style={{
+          display: "flex",
+          alignItems: "center"
+        }}
       >
-        Detailed View
-      </Button>
-    </Buttons>
-  </Header>
-)
+        Left Column Fields
+        <input
+          type="number"
+          id="leftColumnNumber"
+          min="0"
+          className="form-control"
+          style={{ width: "60px", marginLeft: "5px" }}
+          value={leftColumnFields}
+          onChange={e => setLeftColumnFields(e.target.value)}
+        />
+      </label>
+      <DropdownButton
+        title={pageSizeTitle}
+        variant="outline-secondary"
+        id="pageSizeButton"
+      >
+        {Object.entries(PAGE_SIZES).map(([key, ps]) => {
+          const isSelected = pageSize && ps.name === pageSize.name
+          return (
+            <Dropdown.Item
+              key={key}
+              onClick={() => setPageSize?.(ps)}
+              active={isSelected}
+              className="d-flex justify-content-between align-items-center"
+              style={{ minWidth: 200 }}
+            >
+              {ps.name}
+            </Dropdown.Item>
+          )
+        })}
+      </DropdownButton>
+      <DropdownButton
+        title="Presets"
+        variant="outline-secondary"
+        id="presetsButton"
+      >
+        {PRESETS.map(preset => (
+          <Dropdown.Item
+            key={preset.name}
+            onClick={() =>
+              onPresetSelect(preset.fields, optionalFields, setOptionalFields)
+            }
+            style={{ minWidth: "185px" }}
+          >
+            {preset.label}
+          </Dropdown.Item>
+        ))}
+      </DropdownButton>
+      <SimpleMultiCheckboxDropdown
+        label="Optional Fields"
+        options={optionalFields}
+        setOptions={setOptionalFields}
+      />
+      <Buttons>
+        {!noPerson && (
+          <Button value="print" variant="primary" onClick={onPrintClick}>
+            Print
+          </Button>
+        )}
+        <Button
+          value="detailedView"
+          variant="primary"
+          onClick={returnToDefaultPage}
+        >
+          Detailed View
+        </Button>
+      </Buttons>
+    </Header>
+  )
+}
 
 function onPresetSelect(fields, optionalFields, setOptionalFields) {
   const activeFields = { ...optionalFields }

@@ -49,12 +49,10 @@ const SimpleMultiCheckboxDropdown = ({
       <div
         id={id ? `${id}-menu` : undefined}
         role="menu"
-        className={`dropdown-menu p-2 shadow ${active ? "show" : ""}`}
+        className={`dropdown-menu p-2 mt-1 shadow ${active ? "show" : ""}`}
         style={{
           display: active ? "block" : "none",
-          minWidth: 320,
-          top: "100%",
-          left: 0
+          minWidth: 320
         }}
       >
         <div className="row row-cols-1 g-2 m-2">

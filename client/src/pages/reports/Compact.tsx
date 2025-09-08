@@ -328,6 +328,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         returnToDefaultPage={returnToDefaultPage}
         optionalFields={optionalFields}
         setOptionalFields={setOptionalFields}
+        pageSize={pageSize}
         setPageSize={setPageSize}
       />
       <CompactView
@@ -730,6 +731,7 @@ interface CompactReportViewHeaderProps {
     }
   >
   setOptionalFields?: (...args: unknown[]) => unknown
+  pageSize?: any
   setPageSize?: (...args: unknown[]) => unknown
 }
 
@@ -739,47 +741,57 @@ const CompactReportViewHeader = ({
   noReport = false,
   optionalFields,
   setOptionalFields,
+  pageSize,
   setPageSize
-}: CompactReportViewHeaderProps) => (
-  <Header>
-    <HeaderTitle value="title">Summary / Print</HeaderTitle>
-    <DropdownButton
-      title="Page Size"
-      variant="outline-secondary"
-      id="pageSizeButton"
-    >
-      {Object.entries(PAGE_SIZES).map(([key, pageSize]) => (
-        <Dropdown.Item
-          key={key}
-          onClick={() => setPageSize(pageSize)}
-          style={{ minWidth: "205px" }}
-        >
-          {pageSize.name}
-        </Dropdown.Item>
-      ))}
-    </DropdownButton>
-    <SimpleMultiCheckboxDropdown
-      id="optionalFields"
-      label="Optional Fields"
-      options={optionalFields}
-      setOptions={setOptionalFields}
-    />
-    <Buttons>
-      {!noReport && (
-        <Button value="print" variant="primary" onClick={onPrintClick}>
-          Print
-        </Button>
-      )}
-      <Button
-        value="detailedView"
-        variant="primary"
-        onClick={returnToDefaultPage}
+}: CompactReportViewHeaderProps) => {
+  const pageSizeTrimmed = pageSize.name ? pageSize.name.split(" ")[0] : ""
+  const pageSizeTitle = `Page Size${pageSizeTrimmed ? `: ${pageSizeTrimmed}` : ""}`
+  return (
+    <Header>
+      <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <DropdownButton
+        title={pageSizeTitle}
+        variant="outline-secondary"
+        id="pageSizeButton"
       >
-        Detailed View
-      </Button>
-    </Buttons>
-  </Header>
-)
+        {Object.entries(PAGE_SIZES).map(([key, ps]) => {
+          const isSelected = pageSize && ps.name === pageSize.name
+          return (
+            <Dropdown.Item
+              key={key}
+              onClick={() => setPageSize?.(ps)}
+              active={isSelected}
+              className="d-flex justify-content-between align-items-center"
+              style={{ minWidth: 200 }}
+            >
+              {ps.name}
+            </Dropdown.Item>
+          )
+        })}
+      </DropdownButton>
+      <SimpleMultiCheckboxDropdown
+        id="optionalFields"
+        label="Optional Fields"
+        options={optionalFields}
+        setOptions={setOptionalFields}
+      />
+      <Buttons>
+        {!noReport && (
+          <Button value="print" variant="primary" onClick={onPrintClick}>
+            Print
+          </Button>
+        )}
+        <Button
+          value="detailedView"
+          variant="primary"
+          onClick={returnToDefaultPage}
+        >
+          Detailed View
+        </Button>
+      </Buttons>
+    </Header>
+  )
+}
 
 const Header = styled.header`
   display: flex;
