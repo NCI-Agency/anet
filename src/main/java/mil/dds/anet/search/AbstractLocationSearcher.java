@@ -56,9 +56,18 @@ public abstract class AbstractLocationSearcher
 
     final BoundingBox bbox = query.getBoundingBox();
     if (bbox != null) {
-      qb.addWhereClause("(lng BETWEEN :minLng AND :maxLng AND lat BETWEEN :minLat AND :maxLat)");
-      qb.addSqlArg("minLng", bbox.getMinLng());
-      qb.addSqlArg("maxLng", bbox.getMaxLng());
+      // take care of antimeridian wrapping!
+      final double lngDiff = bbox.getMaxLng() - bbox.getMinLng();
+      final double minLng = normalizeLng(bbox.getMinLng(), lngDiff, true);
+      final double maxLng = normalizeLng(bbox.getMaxLng(), lngDiff, false);
+      if (minLng > maxLng) {
+        qb.addWhereClause(
+            "((lng >= :minLng OR lng <= :maxLng) AND lat BETWEEN :minLat AND :maxLat)");
+      } else {
+        qb.addWhereClause("(lng BETWEEN :minLng AND :maxLng AND lat BETWEEN :minLat AND :maxLat)");
+      }
+      qb.addSqlArg("minLng", minLng);
+      qb.addSqlArg("maxLng", maxLng);
       qb.addSqlArg("minLat", bbox.getMinLat());
       qb.addSqlArg("maxLat", bbox.getMaxLat());
     }
@@ -122,6 +131,18 @@ public abstract class AbstractLocationSearcher
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "locations_uuid"));
+  }
+
+  private double normalizeLng(double lng, double lngDiff, boolean forMinLng) {
+    if (lngDiff >= 360.0) {
+      return forMinLng ? -180.0 : 180.0;
+    }
+    double normalizedLng = (lng + 180.0) % 360.0;
+    if (normalizedLng < 0) {
+      normalizedLng += 360.0;
+    }
+    normalizedLng -= 180.0;
+    return normalizedLng;
   }
 
 }

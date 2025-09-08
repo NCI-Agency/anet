@@ -244,6 +244,7 @@ const Leaflet = ({
       {
         zoomControl: true,
         gestureHandling: true,
+        worldCopyJump: true,
         fullscreenControl: true,
         fullscreenControlOptions: { position: "topleft" }
       },
@@ -286,7 +287,7 @@ const Leaflet = ({
     layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
 
     const updateAnetLocationsVarsFromMap = () => {
-      const mapBounds = newMap.getBounds()
+      const mapBounds = newMap.wrapLatLngBounds(newMap.getBounds())
       const bounds = {
         minLng: mapBounds._southWest.lng,
         minLat: mapBounds._southWest.lat,
