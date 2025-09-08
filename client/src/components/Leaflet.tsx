@@ -1,3 +1,6 @@
+import { gql } from "@apollo/client"
+import API from "api"
+import LinkTo from "components/LinkTo"
 import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
@@ -15,9 +18,6 @@ import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
-import { gql } from "@apollo/client"
-import API from "api"
-import LinkTo from "components/LinkTo"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
@@ -28,6 +28,8 @@ import MARKER_ICON_BLUE_2X from "resources/leaflet/marker-icon-blue-2x.png"
 import MARKER_ICON_BLUE from "resources/leaflet/marker-icon-blue.png"
 import MARKER_ICON_GREEN_2X from "resources/leaflet/marker-icon-green-2x.png"
 import MARKER_ICON_GREEN from "resources/leaflet/marker-icon-green.png"
+import MARKER_ICON_LIGHT_2X from "resources/leaflet/marker-icon-light-2x.png"
+import MARKER_ICON_LIGHT from "resources/leaflet/marker-icon-light.png"
 import MARKER_ICON_SEARCH from "resources/leaflet/marker-icon-search.svg"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
@@ -95,10 +97,16 @@ const iconDefault = new Icon({
   iconUrl: MARKER_ICON,
   iconRetinaUrl: MARKER_ICON_2X
 })
+const iconLight = new Icon({
+  ...commonIconProps,
+  iconUrl: MARKER_ICON_LIGHT,
+  iconRetinaUrl: MARKER_ICON_LIGHT_2X
+})
 export const ICON_TYPES = {
   AMBER: iconAmber,
   BLUE: iconBlue,
   GREEN: iconGreen,
+  LIGHT: iconLight,
   DEFAULT: iconDefault
 }
 
@@ -355,7 +363,7 @@ const Leaflet = ({
         return
       }
       const m = new Marker([loc.lat, loc.lng], {
-        icon: ICON_TYPES.AMBER,
+        icon: ICON_TYPES.LIGHT,
         id: loc.uuid
       })
       const popupDiv = Object.assign(document.createElement("div"), {
