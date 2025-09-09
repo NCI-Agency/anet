@@ -744,8 +744,7 @@ const CompactReportViewHeader = ({
   pageSize,
   setPageSize
 }: CompactReportViewHeaderProps) => {
-  const pageSizeTrimmed = pageSize.name ? pageSize.name.split(" ")[0] : ""
-  const pageSizeTitle = `Page Size${pageSizeTrimmed ? `: ${pageSizeTrimmed}` : ""}`
+  const pageSizeTitle = `Page Size${pageSize ? `: ${pageSize.name}` : ""}`
   return (
     <Header>
       <HeaderTitle value="title">Summary / Print</HeaderTitle>
@@ -764,7 +763,7 @@ const CompactReportViewHeader = ({
               className="d-flex justify-content-between align-items-center"
               style={{ minWidth: 200 }}
             >
-              {ps.name}
+              {`${ps.name} (${ps.size})`}
             </Dropdown.Item>
           )
         })}

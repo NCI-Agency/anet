@@ -533,8 +533,7 @@ const CompactPersonViewHeader = ({
   leftColumnFields,
   setLeftColumnFields
 }: CompactPersonViewHeaderProps) => {
-  const pageSizeTrimmed = pageSize.name ? pageSize.name.split(" ")[0] : ""
-  const pageSizeTitle = `Page Size${pageSizeTrimmed ? `: ${pageSizeTrimmed}` : ""}`
+  const pageSizeTitle = `Page Size${pageSize ? `: ${pageSize.name}` : ""}`
   return (
     <Header>
       <label
@@ -548,7 +547,7 @@ const CompactPersonViewHeader = ({
           id="leftColumnNumber"
           min="0"
           className="form-control"
-          style={{ width: 60, marginLeft: 5, lineHeight: "1.3rem" }}
+          style={{ width: 60, marginLeft: 5, height: 35 }}
           value={leftColumnFields}
           onChange={e => setLeftColumnFields(e.target.value)}
         />
@@ -568,7 +567,7 @@ const CompactPersonViewHeader = ({
               className="d-flex justify-content-between align-items-center"
               style={{ minWidth: 200 }}
             >
-              {ps.name}
+              {`${ps.name} (${ps.size})`}
             </Dropdown.Item>
           )
         })}

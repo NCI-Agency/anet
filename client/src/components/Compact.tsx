@@ -11,31 +11,36 @@ import anetLogo from "../../public/favicon/logo.svg"
 
 export const PAGE_SIZES = {
   A4: {
-    name: "A4 (210 x 297 mm)",
+    name: "A4",
+    size: "210 x 297 mm",
     width: "210mm",
     height: "297mm",
     avatarSize: 256
   },
   A5: {
-    name: "A5 (148 x 210 mm)",
+    name: "A5",
+    size: "148 x 210 mm",
     width: "148mm",
     height: "210mm",
     avatarSize: 128
   },
   letter: {
-    name: "Letter (8.5 x 11 inches)",
+    name: "Letter",
+    size: "8.5 x 11 inches",
     width: "216mm",
     height: "279mm",
     avatarSize: 256
   },
   juniorLegal: {
-    name: "Junior Legal (5 x 8 inches)",
+    name: "Junior Legal",
+    size: "5 x 8 inches",
     width: "127mm",
     height: "203mm",
     avatarSize: 128
   },
   legal: {
-    name: "Legal (8.5 x 14 inches)",
+    name: "Legal",
+    size: "8.5 x 14 inches",
     width: "216mm",
     height: "356mm",
     avatarSize: 256
