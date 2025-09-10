@@ -325,13 +325,15 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     const mappedCustomFields = mapReadonlyCustomFieldsToComps({
       fieldsConfig: person.getCustomFieldsOrderedAsObject(),
       values: person,
-      isCompact: true
+      isCompact: true,
+      hideIfEmpty: true
     })
     const mappedSensitiveFields = mapReadonlyCustomFieldsToComps({
       fieldsConfig: person.getSensitiveFieldsOrderedAsObject(),
       parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
       values: person,
-      isCompact: true
+      isCompact: true,
+      hideIfEmpty: true
     })
     const mappedNonCustomFields = mapNonCustomFields()
     // map fields that have privileged access check to the condition
@@ -437,6 +439,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
           className={classNameExceptions[key]}
           id={idExceptions[key]}
           isCompact
+          hideIfEmpty
         />
       )
 

@@ -1409,7 +1409,8 @@ export function mapReadonlyCustomFieldToComp({
   labelColumnWidth,
   isCompact,
   hideLabel,
-  hideTooltip
+  hideTooltip,
+  hideIfEmpty
 }: {
   key: string
   fieldConfig: object
@@ -1420,6 +1421,7 @@ export function mapReadonlyCustomFieldToComp({
   isCompact?: boolean
   hideLabel?: boolean
   hideTooltip?: boolean
+  hideIfEmpty?: boolean
 }) {
   const fieldName = `${parentFieldName}.${key}`
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
@@ -1453,6 +1455,9 @@ export function mapReadonlyCustomFieldToComp({
   const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
   const value = Object.get(values, fieldName) || null
   const field = { name: fieldName, value }
+  if (hideIfEmpty && _isEmpty(value)) {
+    return null
+  }
   return ReadonlyFieldComponent ? (
     <ReadonlyFieldComponent
       key={key}
@@ -1462,6 +1467,7 @@ export function mapReadonlyCustomFieldToComp({
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       isCompact={isCompact}
+      hideIfEmpty={hideIfEmpty}
       {...fieldProps}
       {...extraProps}
     />
@@ -1473,6 +1479,7 @@ export function mapReadonlyCustomFieldToComp({
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       isCompact={isCompact}
+      hideIfEmpty={hideIfEmpty}
       {...fieldProps}
     />
   )
@@ -1485,7 +1492,8 @@ export function mapReadonlyCustomFieldsToComps({
   values,
   vertical,
   labelColumnWidth,
-  isCompact
+  isCompact,
+  hideIfEmpty
 }: {
   fieldsConfig: object
   parentFieldName?: string
@@ -1493,6 +1501,7 @@ export function mapReadonlyCustomFieldsToComps({
   vertical?: boolean
   labelColumnWidth?: number
   isCompact?: boolean
+  hideIfEmpty?: boolean
 }) {
   return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
     accum[key] = mapReadonlyCustomFieldToComp({
@@ -1502,7 +1511,8 @@ export function mapReadonlyCustomFieldsToComps({
       values,
       vertical,
       labelColumnWidth,
-      isCompact
+      isCompact,
+      hideIfEmpty
     })
 
     return accum

@@ -17,7 +17,11 @@ const DictionaryField = ({
   if (_isEmpty(dictProps) || dictProps?.exclude) {
     return null
   }
-  if (hideIfEmpty && _isEmpty(otherProps.content)) {
+  if (
+    hideIfEmpty &&
+    _isEmpty(otherProps.content) &&
+    otherProps?.field?.value === undefined
+  ) {
     return null
   }
   return (
