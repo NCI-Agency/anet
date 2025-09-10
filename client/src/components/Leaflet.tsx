@@ -178,6 +178,11 @@ function createMarker(
   return marker
 }
 
+function wrapLng(lng) {
+  // Wrap lng around the antimeridian
+  return lng < 0 ? lng + 360.0 : lng - 360.0
+}
+
 export interface MarkerPopupProps {
   container?: HTMLElement
   contents?: any
@@ -262,6 +267,15 @@ const Leaflet = ({
           map.fitBounds(markerLayer.getBounds(), { maxZoom })
         }
       }
+
+      // Add a copy of each marker, wrapped around the antimeridian
+      newMarkers.forEach(m => {
+        if (Location.hasCoordinates(m)) {
+          markerLayer.addLayer(
+            createMarker([m.lat, wrapLng(m.lng)], m, setMarkerPopup, map)
+          )
+        }
+      })
     },
     [map, markerLayer, setMarkerPopup]
   )
@@ -408,6 +422,16 @@ const Leaflet = ({
       }
       layer.addLayer(
         createMarker([loc.lat, loc.lng], m, setLocationMarkerPopup, map, -1000)
+      )
+      // Add a copy of the marker, wrapped around the antimeridian
+      layer.addLayer(
+        createMarker(
+          [loc.lat, wrapLng(loc.lng)],
+          m,
+          setLocationMarkerPopup,
+          map,
+          -1000
+        )
       )
     })
   }, [
