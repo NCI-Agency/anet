@@ -137,6 +137,36 @@ const addLayers = (map, layerControl) => {
   }
 }
 
+function createMarker(
+  latLng,
+  m,
+  setPopup: (markerPopupProps: MarkerPopupProps) => void,
+  map
+) {
+  const marker = new Marker(latLng, {
+    icon: m.icon || ICON_TYPES.DEFAULT,
+    draggable: m.draggable || false,
+    autoPan: m.autoPan || false,
+    id: m.id
+  })
+  if (m.name) {
+    marker.bindPopup(m.name)
+  } else if (m.contents) {
+    const popupDiv = Object.assign(document.createElement("div"), {
+      id: m.id,
+      style: "width: 200px;"
+    })
+    marker.bindPopup(() => {
+      setPopup?.({ container: popupDiv, contents: m.contents })
+      return popupDiv
+    })
+  }
+  if (m.onMove) {
+    marker.on("moveend", event => m.onMove(event, map))
+  }
+  return marker
+}
+
 export interface MarkerPopupProps {
   container?: HTMLElement
   contents?: any
@@ -213,28 +243,7 @@ const Leaflet = ({
         const latLng = Location.hasCoordinates(m)
           ? [m.lat, m.lng]
           : map.getCenter()
-        const marker = new Marker(latLng, {
-          icon: m.icon || ICON_TYPES.DEFAULT,
-          draggable: m.draggable || false,
-          autoPan: m.autoPan || false,
-          id: m.id
-        })
-        if (m.name) {
-          marker.bindPopup(m.name)
-        } else if (m.contents) {
-          const popupDiv = Object.assign(document.createElement("div"), {
-            id: m.id,
-            style: "width: 200px;"
-          })
-          marker.bindPopup(() => {
-            setMarkerPopup?.({ container: popupDiv, contents: m.contents })
-            return popupDiv
-          })
-        }
-        if (m.onMove) {
-          marker.on("moveend", event => m.onMove(event, map))
-        }
-        markerLayer.addLayer(marker)
+        markerLayer.addLayer(createMarker(latLng, m, setMarkerPopup, map))
       })
 
       if (newMarkers.length > 0) {
@@ -359,24 +368,27 @@ const Leaflet = ({
 
     layer.clearLayers()
     rows.forEach((loc: any) => {
-      if (loc?.lat == null || loc?.lng == null || existingIds.has(loc.uuid)) {
+      if (!Location.hasCoordinates(loc) || existingIds.has(loc.uuid)) {
         return
       }
-      const m = new Marker([loc.lat, loc.lng], {
+      const m = {
         icon: ICON_TYPES.LIGHT,
-        id: loc.uuid
-      })
-      const popupDiv = Object.assign(document.createElement("div"), {
-        id: m.id,
-        style: "width: 200px;"
-      })
-      m.bindPopup(() => {
-        setLocationMarkerPopup?.({ container: popupDiv, contents: loc })
-        return popupDiv
-      })
-      layer.addLayer(m)
+        id: loc.uuid,
+        contents: loc
+      }
+      layer.addLayer(
+        createMarker([loc.lat, loc.lng], m, setLocationMarkerPopup, map)
+      )
     })
-  }, [data, loading, error, anetLocationsEnabled, markerLayer])
+  }, [
+    data,
+    loading,
+    error,
+    anetLocationsEnabled,
+    markerLayer,
+    map,
+    setLocationMarkerPopup
+  ])
 
   useEffect(() => {
     /*
