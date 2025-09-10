@@ -298,9 +298,10 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
       />
       <CompactView className="compact-view" pageSize={pageSize}>
         <CompactHeaderContent
+          color={null}
           sensitiveInformation={containsSensitiveInformation}
         />
-        <CompactFooterContent object={person} />
+        <CompactFooterContent object={person} color={null} />
         <CompactTable>
           {(_isEmpty(rightColumn) && (
             <FullColumn className="full-table">{leftColumn}</FullColumn>
