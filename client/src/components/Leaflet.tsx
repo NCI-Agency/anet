@@ -141,13 +141,15 @@ function createMarker(
   latLng,
   m,
   setPopup: (markerPopupProps: MarkerPopupProps) => void,
-  map
+  map,
+  zIndexOffset
 ) {
   const marker = new Marker(latLng, {
     icon: m.icon || ICON_TYPES.DEFAULT,
     draggable: m.draggable || false,
     autoPan: m.autoPan || false,
-    id: m.id
+    id: m.id,
+    zIndexOffset
   })
   if (m.name) {
     marker.bindPopup(m.name)
@@ -377,7 +379,7 @@ const Leaflet = ({
         contents: loc
       }
       layer.addLayer(
-        createMarker([loc.lat, loc.lng], m, setLocationMarkerPopup, map)
+        createMarker([loc.lat, loc.lng], m, setLocationMarkerPopup, map, -1000)
       )
     })
   }, [
