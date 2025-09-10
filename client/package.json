@@ -127,7 +127,7 @@
     "@fullcalendar/react": "6.1.19",
     "@fullcalendar/timegrid": "6.1.19",
     "axios": "1.11.0",
-    "bootstrap": "5.3.7",
+    "bootstrap": "5.3.8",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
     "core-js": "3.44.0",
