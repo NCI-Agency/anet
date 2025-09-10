@@ -1,7 +1,16 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
-import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
+import {
+  Control,
+  CRS,
+  DivIcon,
+  Icon,
+  Map,
+  Marker,
+  Point,
+  TileLayer
+} from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
@@ -301,7 +310,26 @@ const Leaflet = ({
     setMarkerLayer(newMarkerLayer)
 
     // anetLocations layer
-    const anetLocationsLayer = new MarkerClusterGroup()
+    const anetLocationsLayer = new MarkerClusterGroup({
+      iconCreateFunction: cluster => {
+        const childCount = cluster.getChildCount()
+
+        let c = " marker-cluster-"
+        if (childCount < 10) {
+          c += "small"
+        } else if (childCount < 100) {
+          c += "medium"
+        } else {
+          c += "large"
+        }
+
+        return new DivIcon({
+          html: `<div><span>${childCount}</span></div>`,
+          className: `marker-cluster locations-marker-cluster ${c}`,
+          iconSize: new Point(40, 40)
+        })
+      }
+    })
     anetLocationsLayerRef.current = anetLocationsLayer
     layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
 

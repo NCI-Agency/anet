@@ -563,6 +563,7 @@ table hr.attendee-divider {
 }
 
 /* Colours for marker clusters */
+/* For reports: */
 .marker-cluster div {
   color: white;
 }
@@ -586,6 +587,35 @@ table hr.attendee-divider {
 }
 .marker-cluster-large div {
   background-color: rgba(211, 12, 1, 0.6);
+}
+
+/* For locations: */
+div.locations-marker-cluster {
+  z-index: -1000 !important;
+}
+.locations-marker-cluster div {
+  color: black;
+}
+/* less than 10 markers */
+.locations-marker-cluster.marker-cluster-small {
+  background-color: rgba(0, 215, 255, 0.6);
+}
+.locations-marker-cluster.marker-cluster-small div {
+  background-color: rgba(9, 198, 245, 0.6);
+}
+/* from 10 to 99 markers */
+.locations-marker-cluster.marker-cluster-medium {
+  background-color: rgba(18, 182, 234, 0.6);
+}
+.locations-marker-cluster.marker-cluster-medium div {
+  background-color: rgba(27, 165, 224, 0.6);
+}
+/* 100 markers or more */
+.locations-marker-cluster.marker-cluster-large {
+    background-color: rgba(36, 149, 213, 0.6);
+}
+.locations-marker-cluster.marker-cluster-large div {
+    background-color: rgba(45, 132, 203, 0.6);
 }
 
 /* Colour indication of reports in the ReportSummary */
