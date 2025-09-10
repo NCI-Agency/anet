@@ -265,6 +265,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
       <CompactRow
         key="fullName"
         content={<Name>{`${person.rank} ${person.name}`}</Name>}
+        className="d-flex justify-content-center"
       />
     ),
     optionalFields.avatar.active && (
@@ -278,6 +279,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
             height={pageSize.avatarSize}
           />
         }
+        className="d-flex justify-content-center"
       />
     ),
     ...leftColumUnderAvatar
@@ -400,7 +402,13 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     }
     // map fields that have specific human value
     const humanValuesExceptions = {
-      biography: <RichTextEditor readOnly value={person.biography} />,
+      biography: (
+        <RichTextEditor
+          readOnly
+          value={person.biography}
+          style={{ marginBottom: -11 }}
+        />
+      ),
       user: utils.formatBoolean(person.user),
       users: (
         <UserTable
