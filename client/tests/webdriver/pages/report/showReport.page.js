@@ -241,9 +241,9 @@ class ShowReport extends Page {
 
   async selectOptionalField(field) {
     const optionalFieldsButton = await browser.$(
-      '//button[text()="Optional Fields ⇓"]'
+      '//button[text()="Optional Fields"]'
     )
-    const optionalFields = await browser.$("#optionalFields")
+    const optionalFields = await browser.$("#optionalFields-menu")
     const fieldCheckbox = await browser.$(`input[id="${field}"]`)
     await optionalFieldsButton.click()
     await optionalFields.waitForDisplayed()
