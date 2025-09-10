@@ -119,7 +119,7 @@ dependencies {
 	implementation 'com.google.guava:guava:33.4.8-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
-	implementation('org.ehcache:ehcache:3.10.8') {
+	implementation('org.ehcache:ehcache:3.11.1') {
 		capabilities {
 			requireCapability('org.ehcache:ehcache-jakarta')
 		}
@@ -143,10 +143,10 @@ dependencies {
 	// For inferring MIME types of attachments
 	implementation 'org.apache.tika:tika-core:3.2.2'
         // For sanitizing SVG uploads
-        implementation 'io.github.borewit:svg-sanitizer:0.3.1'
+        implementation 'io.github.borewit:svg-sanitizer:0.4.0'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.21.1'
+	implementation 'org.jsoup:jsoup:1.21.2'
 
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:21.5'
@@ -731,7 +731,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '11.0.0'
+	toolVersion = '11.0.1'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
