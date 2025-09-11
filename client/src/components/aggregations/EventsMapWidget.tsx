@@ -1,9 +1,10 @@
 import { AggregationWidgetPropType } from "components/aggregations/utils"
-import Leaflet, { ICON_TYPES } from "components/Leaflet"
-import _escape from "lodash/escape"
+import Leaflet, { ICON_TYPES, MarkerPopupProps } from "components/Leaflet"
+import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
+import { createPortal } from "react-dom"
 
 interface EventsMapWidgetProps extends AggregationWidgetPropType {
   width?: number
@@ -18,6 +19,7 @@ const EventsMapWidget = ({
   whenUnspecified = null,
   ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: EventsMapWidgetProps) => {
+  const [markerPopup, setMarkerPopup] = useState<MarkerPopupProps>({})
   const markers = useMemo(() => {
     if (!values.length) {
       return []
@@ -25,14 +27,12 @@ const EventsMapWidget = ({
     const markerArray = []
     values.forEach(event => {
       if (Location.hasCoordinates(event.location)) {
-        let label = _escape(event.name || "<undefined>") // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(event.location.name)}</b>` // escape HTML in locationName!
         markerArray.push({
           id: event.uuid,
           icon: ICON_TYPES.GREEN,
           lat: event.location.lat,
           lng: event.location.lng,
-          name: label
+          contents: event
         })
       }
     })
@@ -45,13 +45,31 @@ const EventsMapWidget = ({
     <div className="non-scrollable">
       <Leaflet
         markers={markers}
+        setMarkerPopup={setMarkerPopup}
         width={width}
         height={height}
         mapId={widgetId}
         marginBottom={0}
       />
+      {markerPopup.container &&
+        createPortal(
+          renderMarkerPopupContents(markerPopup.contents),
+          markerPopup.container
+        )}
     </div>
   )
+
+  function renderMarkerPopupContents(event) {
+    return (
+      <>
+        <LinkTo modelType="Event" model={event} /> @{" "}
+        <LinkTo
+          modelType="Location"
+          model={{ uuid: event?.location?.uuid, name: event?.location?.name }}
+        />
+      </>
+    )
+  }
 }
 
 export default EventsMapWidget
