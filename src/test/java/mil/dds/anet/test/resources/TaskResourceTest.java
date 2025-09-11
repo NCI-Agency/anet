@@ -609,6 +609,86 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getList()).allMatch(t -> t.getParentTask() == null);
   }
 
+  @Test
+  void testSetTaskInactive() {
+    final String TASK_TEST_1_UUID = "0baf4493-7fd8-423a-8ba3-43e8386d11a7";
+    final String TASK_TEST_1_1_UUID = "33c87d55-9f90-4a23-903a-f7d176444de3";
+    final String TASK_TEST_1_1_1_UUID = "36d8b14c-40b2-4bbe-9d15-9b964381f549";
+    final String TASK_TEST_1_1_1_1_UUID = "c38c7c84-66cc-4978-9cf6-b07d10a50667";
+    final List<String> descendantTaskUuids = List.of(TASK_TEST_1_1_1_UUID, TASK_TEST_1_1_1_1_UUID);
+    final String TASK_TEST_2_UUID = "d664b2d9-0038-4130-9bfd-2d27c8b6cb30";
+
+    // Set the test task to INACTIVE
+    final Task testTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_1_UUID));
+    testTask.setStatus(Status.INACTIVE);
+    succeedUpdateTask(adminUser, getTaskInput(testTask));
+
+    // Now check that the descendant tasks have also been set to INACTIVE
+    descendantTaskUuids.forEach(uuid -> {
+      final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
+      assertThat(descendantTask.getStatus()).isEqualTo(Status.INACTIVE);
+    });
+    // And check that its parent is still ACTIVE
+    final Task parentTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_UUID));
+    assertThat(parentTask.getStatus()).isEqualTo(Status.ACTIVE);
+
+    // Set the test task back to ACTIVE
+    testTask.setStatus(Status.ACTIVE);
+    succeedUpdateTask(adminUser, getTaskInput(testTask));
+    // And check that the descendant tasks are still INACTIVE
+    descendantTaskUuids.forEach(uuid -> {
+      final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
+      assertThat(descendantTask.getStatus()).isEqualTo(Status.INACTIVE);
+    });
+
+    // Set the descendant tasks back to ACTIVE
+    descendantTaskUuids.forEach(uuid -> {
+      final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
+      descendantTask.setStatus(Status.ACTIVE);
+      succeedUpdateTask(adminUser, getTaskInput(descendantTask));
+    });
+
+    // Change the parent task to an INACTIVE one
+    final Task newParentTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_2_UUID));
+    assertThat(newParentTask.getStatus()).isEqualTo(Status.INACTIVE);
+    testTask.setParentTask(newParentTask);
+    succeedUpdateTask(adminUser, getTaskInput(testTask));
+
+    // Check that the test task has become INACTIVE
+    final Task updatedTestTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_1_UUID));
+    assertThat(updatedTestTask.getStatus()).isEqualTo(Status.INACTIVE);
+    // And check that the descendant tasks have also been set to INACTIVE
+    descendantTaskUuids.forEach(uuid -> {
+      final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
+      assertThat(descendantTask.getStatus()).isEqualTo(Status.INACTIVE);
+    });
+
+    // Restore the test task to ACTIVE and its original parent
+    updatedTestTask.setStatus(Status.ACTIVE);
+    updatedTestTask.setParentTask(parentTask);
+    succeedUpdateTask(adminUser, getTaskInput(updatedTestTask));
+    // It should now be ACTIVE again
+    final Task restoredTestTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_1_UUID));
+    assertThat(restoredTestTask.getStatus()).isEqualTo(Status.ACTIVE);
+    // But the descendant tasks are still INACTIVE
+    descendantTaskUuids.forEach(uuid -> {
+      final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
+      assertThat(descendantTask.getStatus()).isEqualTo(Status.INACTIVE);
+    });
+
+    // Finally, set the descendant tasks back to ACTIVE
+    descendantTaskUuids.forEach(uuid -> {
+      final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
+      descendantTask.setStatus(Status.ACTIVE);
+      succeedUpdateTask(adminUser, getTaskInput(descendantTask));
+    });
+  }
+
   private void failCreateTask(final String username, final TaskInput taskInput) {
     try {
       withCredentials(username, t -> mutationExecutor.createTask(FIELDS, taskInput));
