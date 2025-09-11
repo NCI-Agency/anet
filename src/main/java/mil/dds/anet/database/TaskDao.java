@@ -11,6 +11,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -237,18 +238,19 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   }
 
   @Transactional
-  public int setStatusForDescendantTasks(String taskUuid, Task.Status status) {
+  public int inactivateDescendantTasks(String taskUuid) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createUpdate("WITH RECURSIVE descendants AS ("
-          + "  SELECT uuid FROM tasks WHERE \"parentTaskUuid\" = :taskUuid AND status = :activeStatus"
-          + "  UNION" + "  SELECT t.uuid FROM tasks t"
-          + "  INNER JOIN descendants d ON t.\"parentTaskUuid\" = d.uuid"
-          + "  WHERE t.status = :activeStatus" + ")" + "UPDATE tasks "
-          + "SET status = :newStatus, \"updatedAt\" = NOW() "
-          + "WHERE uuid IN (SELECT uuid FROM descendants)").bind("taskUuid", taskUuid)
-          .bind("activeStatus", DaoUtils.getEnumId(Task.Status.ACTIVE))
-          .bind("newStatus", DaoUtils.getEnumId(status)).execute();
+      return handle
+          .createUpdate("/* inactivateDescendantTasks */ WITH RECURSIVE descendants AS ("
+              + "SELECT uuid FROM tasks WHERE \"parentTaskUuid\" = :taskUuid "
+              + "UNION SELECT t.uuid FROM tasks t "
+              + "INNER JOIN descendants d ON t.\"parentTaskUuid\" = d.uuid) "
+              + "UPDATE tasks SET status = :inactiveStatus, \"updatedAt\" = :updatedAt "
+              + "WHERE uuid IN (SELECT uuid FROM descendants WHERE status = :activeStatus)")
+          .bind("taskUuid", taskUuid).bind("activeStatus", DaoUtils.getEnumId(Status.ACTIVE))
+          .bind("inactiveStatus", DaoUtils.getEnumId(Status.INACTIVE))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
     } finally {
       closeDbHandle(handle);
     }
