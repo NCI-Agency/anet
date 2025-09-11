@@ -1,4 +1,4 @@
-import { ApolloProvider } from "@apollo/client"
+import { ApolloProvider } from "@apollo/client/react"
 import { OverlaysProvider } from "@blueprintjs/core"
 import API from "api"
 import { jumpToTop } from "components/Page"
