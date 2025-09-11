@@ -1,19 +1,22 @@
 import {
   ApolloClient,
   ApolloLink,
-  from,
+  CombinedGraphQLErrors,
   HttpLink,
   InMemoryCache,
   NetworkStatus,
-  useQuery
+  ServerError
 } from "@apollo/client"
+import { RemoveTypenameFromVariablesLink } from "@apollo/client/link/remove-typename"
 import { RetryLink } from "@apollo/client/link/retry"
+import { useQuery } from "@apollo/client/react"
 import { keycloak } from "keycloak"
-import _isEmpty from "lodash/isEmpty"
 import { toast } from "react-toastify"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
+
+const removeTypenameLink = new RemoveTypenameFromVariablesLink()
 
 const authMiddleware = new ApolloLink((operation, forward) => {
   const [authHeaderName, authHeaderValue] = API._getAuthHeader()
@@ -29,7 +32,10 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 })
 
 const httpLink = new HttpLink({
-  uri: GRAPHQL_ENDPOINT
+  uri: GRAPHQL_ENDPOINT,
+  fetchOptions: {
+    credentials: "same-origin"
+  }
 })
 
 const retryLink = new RetryLink({
@@ -93,25 +99,22 @@ const API = {
     const result = {}
     let error
     // When the result returns a list of errors we only show the first one
-    if (!_isEmpty(response.graphQLErrors)) {
-      error = response.graphQLErrors[0].message
-      if (error.endsWith(" not found")) {
-        // Unfortunately, with GraphQL errors Apollo Client doesn't provide the HTTP statusCode
-        result.status = 404
-      }
-    } else if (response.networkError) {
-      if (response.networkError.response) {
-        result.status = response.networkError.response.status
-        result.statusText = response.networkError.response.statusText
+    if (CombinedGraphQLErrors.is(response)) {
+      error = response.errors?.[0]?.message
+    } else if (ServerError.is(response)) {
+      if (response.response) {
+        result.status = response.response.status
       } else {
-        result.status = response.networkError.statusCode
-        result.statusText = response.networkError.name
+        result.status = response.statusCode
+        result.statusText = response.name
       }
-      if (
-        response.networkError.result &&
-        !_isEmpty(response.networkError.result.errors)
-      ) {
-        error = response.networkError.result.errors[0].message
+      if (response.bodyText) {
+        try {
+          const json = JSON.parse(response.bodyText)
+          error = json.errors?.[0]?.message
+        } catch {
+          error = response.message
+        }
       } else if (result.status === 500) {
         error =
           "An error occurred! Please contact the administrator and let them know what you were doing to get this error"
@@ -130,7 +133,7 @@ const API = {
     // Try to pick the most specific message
     result.message =
       error ||
-      response.message ||
+      response?.message ||
       "You do not have permissions to perform this action"
     return result
   },
@@ -151,8 +154,13 @@ const API = {
 
   useApiQuery(query, variables, others) {
     const results = useQuery(query, { variables, ...others })
-    if (!results.loading && results.networkStatus === NetworkStatus.error) {
-      results.error = results.error && API._handleError(results.error)
+    if (
+      !results.loading &&
+      results.networkStatus === NetworkStatus.error &&
+      !results.errorWasHandled
+    ) {
+      results.errorWasHandled = true
+      results.error = API._handleError(results.error)
     }
     return results
   },
@@ -165,7 +173,12 @@ const API = {
   },
 
   client: new ApolloClient({
-    link: from([authMiddleware, retryLink, httpLink]),
+    link: ApolloLink.from([
+      removeTypenameLink,
+      authMiddleware,
+      retryLink,
+      httpLink
+    ]),
     cache: new InMemoryCache({
       addTypename: false,
       dataIdFromObject: object => object.uuid || null
@@ -180,9 +193,6 @@ const API = {
       mutate: {
         fetchPolicy: "no-cache"
       }
-    },
-    fetchOptions: {
-      credentials: "same-origin"
     }
   })
 }
