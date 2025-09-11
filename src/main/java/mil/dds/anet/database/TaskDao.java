@@ -236,6 +236,24 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
     }
   }
 
+  @Transactional
+  public int setStatusForDescendantTasks(String taskUuid, Task.Status status) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate("WITH RECURSIVE descendants AS ("
+          + "  SELECT uuid FROM tasks WHERE \"parentTaskUuid\" = :taskUuid AND status = :activeStatus"
+          + "  UNION" + "  SELECT t.uuid FROM tasks t"
+          + "  INNER JOIN descendants d ON t.\"parentTaskUuid\" = d.uuid"
+          + "  WHERE t.status = :activeStatus" + ")" + "UPDATE tasks "
+          + "SET status = :newStatus, \"updatedAt\" = NOW() "
+          + "WHERE uuid IN (SELECT uuid FROM descendants)").bind("taskUuid", taskUuid)
+          .bind("activeStatus", DaoUtils.getEnumId(Task.Status.ACTIVE))
+          .bind("newStatus", DaoUtils.getEnumId(status)).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   public CompletableFuture<List<Organization>> getTaskedOrganizationsForTask(GraphQLContext context,
       String taskUuid) {
     return new ForeignKeyFetcher<Organization>().load(context,
