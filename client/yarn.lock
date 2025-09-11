@@ -6556,7 +6556,7 @@ __metadata:
     clean-webpack-plugin: "npm:4.0.0"
     config: "npm:4.1.1"
     copy-webpack-plugin: "npm:13.0.1"
-    core-js: "npm:3.44.0"
+    core-js: "npm:3.45.1"
     countries-list: "npm:3.1.1"
     cross-fetch: "npm:4.1.0"
     cross-spawn: "npm:7.0.6"
@@ -6628,7 +6628,7 @@ __metadata:
     react-mosaic-component: "npm:6.1.1"
     react-redux: "npm:9.2.0"
     react-redux-loading-bar: "npm:5.0.8"
-    react-resize-detector: "npm:12.1.0"
+    react-resize-detector: "npm:12.3.0"
     react-router-bootstrap: "npm:0.26.3"
     react-router-dom: "npm:6.3.0"
     react-scroll: "npm:1.9.3"
@@ -6656,7 +6656,7 @@ __metadata:
     ts-loader: "npm:9.5.4"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.9.2"
-    use-debounce: "npm:10.0.5"
+    use-debounce: "npm:10.0.6"
     uuid: "npm:11.1.0"
     webdriverio: "npm:8.46.0"
     webpack: "npm:5.101.3"
@@ -8476,10 +8476,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:3.44.0":
-  version: 3.44.0
-  resolution: "core-js@npm:3.44.0"
-  checksum: 10c0/759bf3dc5f75068e9425dddf895fd5531c38794a11ea1c2b65e5ef7c527fe3652d59e8c287e574a211af9bab3c057c5c3fa6f6a773f4e142af895106efad38a4
+"core-js@npm:3.45.1":
+  version: 3.45.1
+  resolution: "core-js@npm:3.45.1"
+  checksum: 10c0/c38e5fae5a05ee3a129c45e10056aafe61dbb15fd35d27e0c289f5490387541c89741185e0aeb61acb558559c6697e016c245cca738fa169a73f2b06cd30e6b6
   languageName: node
   linkType: hard
 
@@ -10066,6 +10066,18 @@ __metadata:
     is-date-object: "npm:^1.0.5"
     is-symbol: "npm:^1.0.4"
   checksum: 10c0/c7e87467abb0b438639baa8139f701a06537d2b9bc758f23e8622c3b42fd0fdb5bde0f535686119e446dd9d5e4c0f238af4e14960f4771877cf818d023f6730b
+  languageName: node
+  linkType: hard
+
+"es-toolkit@npm:^1.39.6":
+  version: 1.39.10
+  resolution: "es-toolkit@npm:1.39.10"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 10c0/244dd6be25bc8c7af9f085f5b9aae08169eca760fc7d4735020f8f711b6a572e0bf205400326fa85a7924e20747d315756dba1b3a5f0d2887231374ec3651a98
   languageName: node
   linkType: hard
 
@@ -16936,14 +16948,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resize-detector@npm:12.1.0":
-  version: 12.1.0
-  resolution: "react-resize-detector@npm:12.1.0"
+"react-resize-detector@npm:12.3.0":
+  version: 12.3.0
+  resolution: "react-resize-detector@npm:12.3.0"
   dependencies:
-    lodash: "npm:^4.17.21"
+    es-toolkit: "npm:^1.39.6"
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
-  checksum: 10c0/9c40d1a3c98afee4334ea83733a4514e74082c3503492b0a2cc194969546fac618212f21195848e931bc16527073cf2d7136caedaaff28227d2b309f45a9a74f
+  checksum: 10c0/58075af4f7842debc97934bee15947d7ac1db1af8849832258fc986482487de97489d80b15edea6658260edbe826ac8f8acf6c2df2a28e527c8f63a4bff3436f
   languageName: node
   linkType: hard
 
@@ -19846,12 +19858,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:10.0.5":
-  version: 10.0.5
-  resolution: "use-debounce@npm:10.0.5"
+"use-debounce@npm:10.0.6":
+  version: 10.0.6
+  resolution: "use-debounce@npm:10.0.6"
   peerDependencies:
     react: "*"
-  checksum: 10c0/8232538aa2e2b1252716ef2918204709f16bd53661b56a3a29ad790bf61bc7cbf3bb1126d888408db276a2b05fa6a941e9452149be14bfe438aa22054ccf4e4a
+  checksum: 10c0/f0745de48fc344e6f90ea24384f3c79bf0733d06649827241135847abd67ee8db32f523d490c3276bce9f5a6867194ab1c0187bf6b84cabe1dd679037f4a527e
   languageName: node
   linkType: hard
 
