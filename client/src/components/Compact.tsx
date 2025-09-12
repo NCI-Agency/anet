@@ -172,10 +172,6 @@ export const CompactFooterContent = ({
 const SensitivityInformation = () => {
   return (
     <SensitivityInformationS>
-      <span className="sensitivity-information">
-        {" "}
-        - {Settings.printOptions.sensitiveInformationText}
-      </span>
       <span className="sensitivity-tooltip">
         <Tooltip
           content={Settings.printOptions.sensitiveInformationTooltipText}
@@ -184,13 +180,31 @@ const SensitivityInformation = () => {
           <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
         </Tooltip>
       </span>
+      <span className="sensitivity-information">
+        {Settings.printOptions.sensitiveInformationText}
+      </span>
     </SensitivityInformationS>
   )
 }
 
 const SensitivityInformationS = styled.div`
+  position: absolute;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+
+  .sensitivity-information {
+    max-width: 100px;
+    background-color: cornsilk;
+    color: #856404;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
   .sensitivity-tooltip {
-    padding: 0 1rem;
+    margin: auto;
     svg {
       height: 20px;
     }
