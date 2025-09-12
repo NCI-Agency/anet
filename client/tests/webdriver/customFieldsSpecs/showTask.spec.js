@@ -5,6 +5,10 @@ import ShowTask from "../pages/showTask.page"
 const TASK_12B_UUID = "9d3da7f4-8266-47af-b518-995f587250c9"
 const TASK_EF1_UUID = "1145e584-4485-4ce0-89c4-2fa2e1fe846a"
 const TASK_EF1_2_UUID = "fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0"
+const TASK_TEST_1_UUID = "0baf4493-7fd8-423a-8ba3-43e8386d11a7"
+const TASK_TEST_1_1_UUID = "33c87d55-9f90-4a23-903a-f7d176444de3"
+const TASK_TEST_1_1_1_UUID = "36d8b14c-40b2-4bbe-9d15-9b964381f549"
+const TASK_TEST_1_1_1_1_UUID = "c38c7c84-66cc-4978-9cf6-b07d10a50667"
 
 describe("Show task page", () => {
   beforeEach("Open the show task page", async () => {
@@ -144,6 +148,61 @@ describe("Show task page", () => {
         "» 1.2.B",
         "» 1.2.C"
       ])
+    })
+  })
+  describe("When editing a task and setting it to inactive", () => {
+    it("should display a modal with all the affected children tasks to confirm", async () => {
+      await ShowTask.openAsAdminUser(`${TASK_TEST_1_UUID}/edit`)
+      const inactiveButton = await browser.$('label[for="status_INACTIVE"]')
+      await inactiveButton.waitForExist()
+      await inactiveButton.click()
+      const confirmButton = await browser.$(".modal-footer .btn-primary")
+      await confirmButton.waitForExist()
+      await confirmButton.click()
+      const submitButton = await browser.$("#formBottomSubmit")
+      await submitButton.waitForExist()
+      await submitButton.click()
+
+      // check if child tasks are inactive
+      await ShowTask.openAsAdminUser(TASK_TEST_1_1_UUID)
+      let statusField = await browser.$("#status")
+      await statusField.waitForExist()
+      expect(await statusField.getText()).to.equal("Inactive")
+
+      await ShowTask.openAsAdminUser(TASK_TEST_1_1_1_UUID)
+      statusField = await browser.$("#status")
+      await statusField.waitForExist()
+      expect(await statusField.getText()).to.equal("Inactive")
+
+      await ShowTask.openAsAdminUser(TASK_TEST_1_1_1_1_UUID)
+      statusField = await browser.$("#status")
+      await statusField.waitForExist()
+      expect(await statusField.getText()).to.equal("Inactive")
+    })
+    it("should not display the modal when the task has no active children", async () => {
+      await ShowTask.openAsAdminUser(`${TASK_TEST_1_1_UUID}/edit`)
+      // reset it to active first
+      const activeButton = await browser.$('label[for="status_ACTIVE"]')
+      await activeButton.waitForExist()
+      await activeButton.click()
+      let submitButton = await browser.$("#formBottomSubmit")
+      await submitButton.waitForExist()
+      await submitButton.click()
+      let statusField = await browser.$("#status")
+      await statusField.waitForExist()
+      expect(await statusField.getText()).to.equal("Active")
+
+      // now edit to inactive again, but only the selected task should be affected
+      await ShowTask.openAsAdminUser(`${TASK_TEST_1_1_UUID}/edit`)
+      const inactiveButton = await browser.$('label[for="status_INACTIVE"]')
+      await inactiveButton.waitForExist()
+      await inactiveButton.click()
+      submitButton = await browser.$("#formBottomSubmit")
+      await submitButton.waitForExist()
+      await submitButton.click()
+      statusField = await browser.$("#status")
+      await statusField.waitForExist()
+      expect(await statusField.getText()).to.equal("Inactive")
     })
   })
 })
