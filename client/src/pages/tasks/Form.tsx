@@ -182,7 +182,7 @@ const TaskForm = ({
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
-            {inactiveDescendantTasks?.length && (
+            {!!inactiveDescendantTasks?.length && (
               <InactiveTaskModal
                 showModal={inactiveTaskModalVisible}
                 tasks={inactiveDescendantTasks}
