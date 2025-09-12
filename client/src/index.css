@@ -562,6 +562,13 @@ table hr.attendee-divider {
   clear: both;
 }
 
+.inactive-task {
+  color: gray;
+  &:after {
+    content: " ∅";
+  }
+}
+
 /* Colours for marker clusters */
 .marker-cluster div {
   color: white;

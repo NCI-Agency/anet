@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
@@ -89,13 +90,22 @@ public class TaskResource {
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
 
     final Person user = DaoUtils.getUserFromContext(context);
-    // Check if user is authorized to create a sub organization
+    // Check if user is authorized to create a sub task
     assertCreateSubTaskPermission(user, t.getParentTaskUuid());
-    // If the organization is created by a superuser we need to add their position as an
-    // administrating one
+    // If the task is created by a superuser we need to add their position as a
+    // responsible one
     if (user.getPosition().getType() == Position.PositionType.SUPERUSER) {
       t.setResponsiblePositions(List.of(user.getPosition()));
     }
+
+    // If a parent is provided and is INACTIVE, force new task to INACTIVE too
+    if (t.getParentTaskUuid() != null) {
+      final Task parent = dao.getByUuid(t.getParentTaskUuid());
+      if (parent != null && parent.getStatus() == Status.INACTIVE) {
+        t.setStatus(Status.INACTIVE);
+      }
+    }
+
     final Task created;
     try {
       created = dao.insert(t);
@@ -167,10 +177,28 @@ public class TaskResource {
       }
     }
 
+    boolean parentChangedToInactive = false;
+    if (t.getParentTaskUuid() != null
+        && !t.getParentTaskUuid().equals(existing.getParentTaskUuid())) {
+      final Task newParent = dao.getByUuid(t.getParentTaskUuid());
+      if (newParent != null && newParent.getStatus() == Status.INACTIVE) {
+        // Force current task to INACTIVE if parent is INACTIVE
+        t.setStatus(Status.INACTIVE);
+        parentChangedToInactive = (existing.getStatus() != Status.INACTIVE);
+      }
+    }
+
     try {
       final int numRows = dao.update(t);
       if (numRows == 0) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process task update");
+      }
+
+      if ((t.getStatus() == Status.INACTIVE && existing.getStatus() != Status.INACTIVE)
+          || parentChangedToInactive) {
+        final int updatedDescendants = dao.inactivateDescendantTasks(t.getUuid());
+        AnetAuditLogger.log("Task {} set to INACTIVE, updated {} descendants", t,
+            updatedDescendants);
       }
 
       // Update positions:

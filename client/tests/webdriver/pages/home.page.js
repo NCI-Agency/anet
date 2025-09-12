@@ -111,12 +111,12 @@ class Home extends Page {
     )
   }
 
-  async getSavedSearches() {
-    return browser.$$("fieldset.saved-search-row")
+  async getSavedSearch() {
+    return browser.$("fieldset.saved-search-row")
   }
 
-  async getSavedSearchesCount() {
-    return (await this.getSavedSearches()).length
+  async getSavedSearches() {
+    return browser.$$("fieldset.saved-search-row")
   }
 
   async getSavedSearchTitleText(savedSearch) {
