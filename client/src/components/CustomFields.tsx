@@ -1455,7 +1455,7 @@ export function mapReadonlyCustomFieldToComp({
   const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
   const value = Object.get(values, fieldName) || null
   const field = { name: fieldName, value }
-  if (hideIfEmpty && _isEmpty(value)) {
+  if (hideIfEmpty && utils.isEmptyValue(value)) {
     return null
   }
   return ReadonlyFieldComponent ? (

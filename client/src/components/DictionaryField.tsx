@@ -20,7 +20,8 @@ const DictionaryField = ({
   if (
     hideIfEmpty &&
     _isEmpty(otherProps.content) &&
-    otherProps?.field?.value === undefined
+    _isEmpty(otherProps?.field?.value) &&
+    _isEmpty(otherProps?.humanValue)
   ) {
     return null
   }
