@@ -173,7 +173,8 @@ const ReadonlyTextField = fieldProps => {
     isCompact,
     extraColElem,
     labelColumnWidth,
-    className
+    className,
+    ...otherProps
   } = fieldProps
   const value = Object.get(values, name) || null
   const field = { name, value }
@@ -186,6 +187,7 @@ const ReadonlyTextField = fieldProps => {
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       className={className}
+      {...otherProps}
     />
   )
 }
@@ -214,7 +216,8 @@ const ReadonlyDateField = fieldProps => {
     withTime,
     extraColElem,
     labelColumnWidth,
-    className
+    className,
+    ...otherProps
   } = fieldProps
   const value = Object.get(values, name) || null
   const field = { name, value }
@@ -235,6 +238,7 @@ const ReadonlyDateField = fieldProps => {
         )
       }
       className={className}
+      {...otherProps}
     />
   )
 }
@@ -288,7 +292,8 @@ const ReadonlyJsonField = ({
   values,
   extraColElem,
   labelColumnWidth,
-  className
+  className,
+  ...otherProps
 }: ReadonlyJsonFieldProps) => {
   const value = Object.get(values, name) || {}
   const field = { name, value }
@@ -300,6 +305,7 @@ const ReadonlyJsonField = ({
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       className={className}
+      {...otherProps}
     />
   )
 }
@@ -479,7 +485,8 @@ const ReadonlyEnumField = fieldProps => {
     choices,
     extraColElem,
     labelColumnWidth,
-    className
+    className,
+    ...otherProps
   } = fieldProps
   const value = Object.get(values, name) || null
   const field = { name, value }
@@ -493,6 +500,7 @@ const ReadonlyEnumField = fieldProps => {
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       className={className}
+      {...otherProps}
     />
   )
 }
@@ -768,7 +776,8 @@ const ReadonlyAnetObjectField = ({
   isCompact,
   extraColElem,
   labelColumnWidth,
-  className
+  className,
+  ...otherProps
 }: ReadonlyAnetObjectFieldProps) => {
   const { type, uuid } = Object.get(values, name) || {}
   const field = { name }
@@ -798,6 +807,7 @@ const ReadonlyAnetObjectField = ({
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       className={className}
+      {...otherProps}
     />
   )
 }
@@ -902,7 +912,8 @@ const ReadonlyArrayOfAnetObjectsField = ({
   isCompact,
   extraColElem,
   labelColumnWidth,
-  className
+  className,
+  ...otherProps
 }: ReadonlyArrayOfAnetObjectsFieldProps) => {
   const fieldValue = Object.get(values, name) || []
   const value = Object.get(values, name) || null
@@ -934,6 +945,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       className={className}
+      {...otherProps}
     />
   )
 }
@@ -1428,21 +1440,6 @@ export function mapReadonlyCustomFieldToComp({
   if (hideLabel) {
     fieldProps.label = null
   }
-  let extraColElem = null
-  if (fieldConfig.authorizationGroupUuids && !hideTooltip) {
-    fieldProps.className = "sensitive-information"
-    extraColElem = (
-      <div>
-        <Tooltip content={fieldConfig.tooltipText} intent={Intent.WARNING}>
-          <Icon
-            icon={IconNames.INFO_SIGN}
-            intent={Intent.PRIMARY}
-            className="sensitive-information-icon"
-          />
-        </Tooltip>
-      </div>
-    )
-  }
   const { type } = fieldConfig
   let extraProps = {}
   if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
@@ -1451,6 +1448,10 @@ export function mapReadonlyCustomFieldToComp({
         ? Object.without(fieldConfig, "label")
         : fieldConfig
     }
+  }
+  if (fieldConfig.authorizationGroupUuids && !hideTooltip) {
+    fieldProps.className = "sensitive-information"
+    extraProps.tooltipText = fieldConfig.tooltipText
   }
   const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
   const value = Object.get(values, fieldName) || null
@@ -1464,10 +1465,8 @@ export function mapReadonlyCustomFieldToComp({
       name={fieldName}
       values={values}
       vertical={vertical}
-      extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       isCompact={isCompact}
-      hideIfEmpty={hideIfEmpty}
       {...fieldProps}
       {...extraProps}
     />
@@ -1476,10 +1475,8 @@ export function mapReadonlyCustomFieldToComp({
       key={key}
       field={field}
       humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
-      extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       isCompact={isCompact}
-      hideIfEmpty={hideIfEmpty}
       {...fieldProps}
     />
   )

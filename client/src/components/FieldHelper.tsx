@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core"
+import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import classNames from "classnames"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
@@ -285,6 +285,7 @@ interface ReadonlyFieldProps {
   humanValue?: any
   isCompact?: boolean
   labelColumnWidth?: number
+  tooltipText?: string
 }
 
 export const ReadonlyField = ({
@@ -299,13 +300,28 @@ export const ReadonlyField = ({
   vertical,
   humanValue,
   isCompact,
+  tooltipText,
   ...otherProps
 }: ReadonlyFieldProps) => {
   const { className, style } = otherProps
+  const value = (
+    <div className="d-flex align-items-center px-2 gap-2">
+      <span>{getHumanValue(field, humanValue)}</span>
+      {!!tooltipText && (
+        <Tooltip content={tooltipText} intent={Intent.WARNING}>
+          <Icon
+            icon={IconNames.INFO_SIGN}
+            intent={Intent.PRIMARY}
+            className="sensitive-information-icon"
+          />
+        </Tooltip>
+      )}
+    </div>
+  )
   const widgetElem = useMemo(
     () => (
       <FormControl as="div" plaintext {...field} {...otherProps}>
-        {getHumanValue(field, humanValue)}
+        {value}
       </FormControl>
     ),
     [field, humanValue, otherProps]
