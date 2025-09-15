@@ -415,7 +415,7 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
 
   function clearCache() {
     setActionLoading(true)
-    return API.query(CLEAR_CACHE, {})
+    return API.mutation(CLEAR_CACHE, {})
       .then(result =>
         toast.success(result?.clearCache, { toastId: "success-clear-cache" })
       )
@@ -425,7 +425,7 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
 
   function reloadDictionary() {
     setActionLoading(true)
-    return API.query(RELOAD_DICTIONARY, {})
+    return API.mutation(RELOAD_DICTIONARY, {})
       .then(result => {
         toast.success(result?.reloadDictionary, {
           toastId: "success-reload-dictionary"
