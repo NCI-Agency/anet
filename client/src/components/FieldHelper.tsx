@@ -304,19 +304,19 @@ export const ReadonlyField = ({
   ...otherProps
 }: ReadonlyFieldProps) => {
   const { className, style } = otherProps
-  const value = (
+  const value = tooltipText ? (
     <div className="d-flex align-items-center px-2 gap-2">
       <span>{getHumanValue(field, humanValue)}</span>
-      {!!tooltipText && (
-        <Tooltip content={tooltipText} intent={Intent.WARNING}>
-          <Icon
-            icon={IconNames.INFO_SIGN}
-            intent={Intent.PRIMARY}
-            className="sensitive-information-icon"
-          />
-        </Tooltip>
-      )}
+      <Tooltip content={tooltipText} intent={Intent.WARNING}>
+        <Icon
+          icon={IconNames.INFO_SIGN}
+          intent={Intent.PRIMARY}
+          className="sensitive-information-icon"
+        />
+      </Tooltip>
     </div>
+  ) : (
+    getHumanValue(field, humanValue)
   )
   const widgetElem = useMemo(
     () => (
@@ -324,7 +324,7 @@ export const ReadonlyField = ({
         {value}
       </FormControl>
     ),
-    [field, humanValue, otherProps]
+    [field, humanValue, otherProps, value]
   )
   return (
     <Field
