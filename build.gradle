@@ -7,7 +7,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "9.4.0"
 	id "com.github.node-gradle.node" version "7.1.0"
 	id "com.diffplug.spotless" version "7.2.1"
-	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.9"
+	id "com.graphql-java-generator.graphql-gradle-plugin3" version "3.0.1"
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "12.1.0"
 	id "org.springframework.boot" version "3.5.5" apply false
