@@ -159,7 +159,7 @@ class CreateReport extends cr.CreateReport {
     }
     await (await this.getTitle()).click()
     await (
-      await this.getTasksTable()
+      await this.getTaskSearchPopover()
     ).waitForExist({ reverse: true, timeout: 3000 })
   }
 
@@ -177,7 +177,7 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
-  async selectAthosphere(option) {
+  async selectAtmosphere(option) {
     switch (option) {
       case "Positive":
         await (await this.getAtmospherePositive()).click()
@@ -229,7 +229,7 @@ class CreateReport extends cr.CreateReport {
     }
 
     if (fields.atmosphere) {
-      await this.selectAthosphere(fields.atmosphere)
+      await this.selectAtmosphere(fields.atmosphere)
     }
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
