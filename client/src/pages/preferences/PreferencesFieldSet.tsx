@@ -13,7 +13,7 @@ import {
 } from "components/Page"
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
-import React from "react"
+import React, { useMemo } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
@@ -99,38 +99,48 @@ const PreferencesFieldset = ({
     pageDispatchers
   })
   usePageTitle("My Preferences")
+
+  const preferences = useMemo(() => {
+    const useUserPrefs =
+      Array.isArray(userPreferences) && userPreferences.length > 0
+
+    return (data?.preferenceList?.list ?? []).map(genericPref => {
+      let valueToUse = genericPref.defaultValue
+      if (useUserPrefs) {
+        const match = userPreferences.find(
+          up => up.preference.uuid === genericPref.uuid
+        )
+        valueToUse = match ? match.value : genericPref.defaultValue
+      }
+      return {
+        ...genericPref,
+        value: convertStringValueToType(valueToUse, genericPref.type)
+      }
+    })
+  }, [data?.preferenceList?.list, userPreferences])
+
+  const exportPrefs = useMemo(
+    () => preferences.filter(p => isExportFieldsPref(p.name)),
+    [preferences]
+  )
+  const otherPrefs = useMemo(
+    () => preferences.filter(p => !isExportFieldsPref(p.name)),
+    [preferences]
+  )
+
+  const initialValues = useMemo(() => {
+    return preferences.reduce((acc: Record<string, any>, pref: any) => {
+      acc[pref.uuid] = pref.value
+      return acc
+    }, {})
+  }, [preferences])
+
   if (done) {
     return result
   }
   if (_get(data.preferenceList.list, "length", 0) === 0) {
     return <em>No preferences found</em>
   }
-
-  const useUserPrefs =
-    Array.isArray(userPreferences) && userPreferences.length > 0
-
-  const preferences = data.preferenceList.list.map(genericPref => {
-    let valueToUse = genericPref.defaultValue
-    if (useUserPrefs) {
-      const match = userPreferences.find(
-        userPref => userPref.preference.uuid === genericPref.uuid
-      )
-      valueToUse = match ? match.value : genericPref.defaultValue
-    }
-
-    return {
-      ...genericPref,
-      value: convertStringValueToType(valueToUse, genericPref.type)
-    }
-  })
-
-  const exportPrefs = preferences.filter(p => isExportFieldsPref(p.name))
-  const otherPrefs = preferences.filter(p => !isExportFieldsPref(p.name))
-
-  const initialValues = preferences.reduce((acc, pref) => {
-    acc[pref.uuid] = pref.value
-    return acc
-  }, {})
 
   return (
     <Formik
