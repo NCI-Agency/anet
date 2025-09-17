@@ -8,7 +8,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -122,22 +121,18 @@ public class AdminResource {
     options.setIndentWithIndicator(true);
 
     final Yaml yaml = new Yaml(options);
-    final StringWriter stringWriter = new StringWriter();
-    yaml.dump(dictionaryForMart, stringWriter);
-    final String yamlContent = stringWriter.toString();
-
-    StreamingResponseBody responseBody = outputStream -> {
-      try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-        writer.write(yamlContent);
+    final StreamingResponseBody responseBody = outputStream -> {
+      try (final Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+        yaml.dump(dictionaryForMart, writer);
       }
     };
 
-    HttpHeaders headers = new HttpHeaders();
+    final HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(
         ContentDisposition.attachment().filename("anet-dictionary.yml").build());
 
-    return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/x-yaml"))
-        .headers(headers).body(responseBody);
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_YAML).headers(headers)
+        .body(responseBody);
   }
 
   /**

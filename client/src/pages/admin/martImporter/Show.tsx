@@ -42,7 +42,7 @@ const MartImporterShow = () => {
       if (!response.ok) {
         // Error happened in back-end producing dictionary, notify and end
         const errorJson = await response.json()
-        toast.error(errorJson?.errors[0]?.message)
+        toast.error(errorJson?.errors?.[0]?.message)
         return
       }
       // All good, proceed
