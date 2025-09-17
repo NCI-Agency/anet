@@ -281,6 +281,31 @@ const Search = ({
     queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && numAttachments > 0
   const hasEventsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && numEvents > 0
+
+  const resultObjectTypes = useMemo(() => {
+    const types = []
+    if (hasOrganizationsResults) types.push(SEARCH_OBJECT_TYPES.ORGANIZATIONS)
+    if (hasPeopleResults) types.push(SEARCH_OBJECT_TYPES.PEOPLE)
+    if (hasPositionsResults) types.push(SEARCH_OBJECT_TYPES.POSITIONS)
+    if (hasTasksResults) types.push(SEARCH_OBJECT_TYPES.TASKS)
+    if (hasLocationsResults) types.push(SEARCH_OBJECT_TYPES.LOCATIONS)
+    if (hasReportsResults) types.push(SEARCH_OBJECT_TYPES.REPORTS)
+    if (hasAuthorizationGroupsResults)
+      types.push(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS)
+    if (hasAttachmentsResults) types.push(SEARCH_OBJECT_TYPES.ATTACHMENTS)
+    if (hasEventsResults) types.push(SEARCH_OBJECT_TYPES.EVENTS)
+    return types
+  }, [
+    hasOrganizationsResults,
+    hasPeopleResults,
+    hasPositionsResults,
+    hasTasksResults,
+    hasLocationsResults,
+    hasReportsResults,
+    hasAuthorizationGroupsResults,
+    hasAttachmentsResults,
+    hasEventsResults
+  ])
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -804,6 +829,7 @@ const Search = ({
             category="export"
             title="My Export Preferences"
             actionOnSubmit={exportResultsFromModal}
+            exportObjectTypes={resultObjectTypes}
           />
         </Modal.Body>
       </Modal>

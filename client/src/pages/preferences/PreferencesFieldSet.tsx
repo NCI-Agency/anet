@@ -1,5 +1,9 @@
 import { gql } from "@apollo/client"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_TYPES
+} from "actions"
 import API from "api"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -34,6 +38,18 @@ const GQL_GET_PREFERENCES = gql`
   }
 `
 
+const ENTITY_TO_OBJTYPE = {
+  authorizationGroup: SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS,
+  organization: SEARCH_OBJECT_TYPES.ORGANIZATIONS,
+  person: SEARCH_OBJECT_TYPES.PEOPLE,
+  position: SEARCH_OBJECT_TYPES.POSITIONS,
+  task: SEARCH_OBJECT_TYPES.TASKS,
+  location: SEARCH_OBJECT_TYPES.LOCATIONS,
+  report: SEARCH_OBJECT_TYPES.REPORTS,
+  event: SEARCH_OBJECT_TYPES.EVENTS,
+  attachment: SEARCH_OBJECT_TYPES.ATTACHMENTS
+}
+
 interface UserPreference {
   preference: { uuid: string }
   value: string
@@ -48,6 +64,7 @@ interface PreferencesFieldsetProps {
   actionLabel?: string
   saveSuccess?: string | null
   saveError?: any
+  exportObjectTypes?: string[]
 }
 
 function isExportFieldsPref(name: string) {
@@ -86,7 +103,8 @@ const PreferencesFieldset = ({
   title = "Preferences",
   actionLabel = "Save preferences",
   saveSuccess,
-  saveError
+  saveError,
+  exportObjectTypes = []
 }: PreferencesFieldsetProps) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_PREFERENCES, {
     preferenceQuery: { category, pageNum: 0, pageSize: 0 }
@@ -104,7 +122,7 @@ const PreferencesFieldset = ({
     const useUserPrefs =
       Array.isArray(userPreferences) && userPreferences.length > 0
 
-    return (data?.preferenceList?.list ?? []).map(genericPref => {
+    const prefs = (data?.preferenceList?.list ?? []).map(genericPref => {
       let valueToUse = genericPref.defaultValue
       if (useUserPrefs) {
         const match = userPreferences.find(
@@ -117,7 +135,16 @@ const PreferencesFieldset = ({
         value: convertStringValueToType(valueToUse, genericPref.type)
       }
     })
-  }, [data?.preferenceList?.list, userPreferences])
+
+    if (!exportObjectTypes || exportObjectTypes.length === 0) return prefs
+
+    return prefs.filter(pref => {
+      if (!isExportFieldsPref(pref.name)) return true
+      const entity = exportEntityFromPref(pref.name)
+      const objType = ENTITY_TO_OBJTYPE[entity]
+      return objType ? exportObjectTypes.includes(objType) : false
+    })
+  }, [data?.preferenceList?.list, userPreferences, exportObjectTypes])
 
   const exportPrefs = useMemo(
     () => preferences.filter(p => isExportFieldsPref(p.name)),

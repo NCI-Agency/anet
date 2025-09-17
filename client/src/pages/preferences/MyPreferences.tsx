@@ -17,13 +17,15 @@ interface MyPreferencesProps {
   category?: string
   title?: string
   actionOnSubmit?: () => Promise<any>
+  exportObjectTypes?: string[]
 }
 
 const MyPreferences = ({
   actionLabel = "Save Preferences",
   category = null,
   title = null,
-  actionOnSubmit = null
+  actionOnSubmit = null,
+  exportObjectTypes = []
 }: MyPreferencesProps) => {
   const { currentUser } = useContext(AppContext)
   const [saveError, setSaveError] = useState(null)
@@ -37,6 +39,7 @@ const MyPreferences = ({
       saveError={saveError}
       title={title}
       actionLabel={actionLabel}
+      exportObjectTypes={exportObjectTypes}
     />
   )
 
