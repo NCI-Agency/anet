@@ -1,21 +1,12 @@
 import React, { useMemo } from "react"
 import { Button } from "react-bootstrap"
+import utils from "utils"
 
 type ExportPref = {
   uuid: string
   name: string
   allowedValues?: string
   defaultValue?: string
-}
-
-const splitCsv = v => {
-  if (!v) {
-    return []
-  }
-  return v
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean)
 }
 
 interface ExportFieldsPanelProps {
@@ -25,6 +16,7 @@ interface ExportFieldsPanelProps {
   setFieldValue: (field: string, value: any) => void
   titleForExportPref: (name: string) => string
   getLabelFromDictionary: (preferenceName: string, field: string) => string
+  error?: string
 }
 
 const ExportFieldsPanel = ({
@@ -33,17 +25,19 @@ const ExportFieldsPanel = ({
   initialSnapshot,
   setFieldValue,
   titleForExportPref,
-  getLabelFromDictionary
+  getLabelFromDictionary,
+  error
 }: ExportFieldsPanelProps) => {
   const preferenceName = pref.name
 
   const allValues = useMemo(
-    () => splitCsv(pref.allowedValues),
+    () => utils.splitCsv(pref.allowedValues),
     [pref.allowedValues]
   )
 
-  const selected = splitCsv(values?.[pref.uuid])
-  const initialSelected = splitCsv(initialSnapshot?.[pref.uuid])
+  const selected = utils.splitCsv(values?.[pref.uuid])
+  const initialSelected = utils.splitCsv(initialSnapshot?.[pref.uuid])
+  const hasError = Boolean(error)
 
   const setSelected = arr => {
     setFieldValue(pref.uuid, arr.join(","))
@@ -62,10 +56,17 @@ const ExportFieldsPanel = ({
   }
 
   return (
-    <div className="card mb-3">
+    <div
+      id={`pref-${pref.uuid}`}
+      className="card mb-3"
+      style={{ border: hasError ? "1px solid #dc3545" : undefined }}
+    >
       <div
         className="card-header d-flex justify-content-between align-items-center"
-        style={{ backgroundColor: "#f2f2f2" }}
+        style={{
+          backgroundColor: "#f2f2f2",
+          borderBottom: hasError ? "1px solid #dc3545" : undefined
+        }}
       >
         <strong>{titleForExportPref(preferenceName)}</strong>
         <div className="d-flex gap-2 align-items-center">
@@ -97,6 +98,11 @@ const ExportFieldsPanel = ({
       </div>
 
       <div className="card-body">
+        {hasError && (
+          <div className="text-danger small mb-2" role="alert">
+            {error}
+          </div>
+        )}
         <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2">
           {allValues.map(v => (
             <div className="col" key={v}>
