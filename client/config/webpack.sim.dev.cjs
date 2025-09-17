@@ -8,7 +8,7 @@ module.exports = merge.merge(common.simConfig, {
   output: {
     pathinfo: true,
     path: paths.clientBuild,
-    filename: "anet.sim.dev.js"
+    filename: "anet.sim.dev.cjs"
   },
   plugins: [
     new webpack.DefinePlugin({

@@ -1,4 +1,4 @@
-const test = require("../util/test")
+import test from "../util/test.cjs"
 
 // Ava provides a nice ability to run tests in parallel, but we need to run these tests
 // synchronously because too much parallel activity causes webdriver to throw EPIPE errors.

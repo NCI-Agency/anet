@@ -1,5 +1,5 @@
-const moment = require("moment")
-const test = require("../util/test")
+import moment from "moment"
+import test from "../util/test.cjs"
 
 let testReportURL = null
 

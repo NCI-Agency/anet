@@ -96,6 +96,13 @@ describe("Merge locations error", () => {
     expect(await (await MergeLocations.getAlertDanger()).getText()).to.eq(
       "Location can not be its own (grand…)parent"
     )
+    // attempt to leave when both locations are selected, should show warning
+    await (await browser.$("#anet-logo")).click()
+    const modalDialog = await browser.$(".modal-dialog")
+    // eslint-disable-next-line no-unused-expressions
+    expect(await modalDialog.isExisting()).to.be.true
+    await (await browser.$(".btn-danger")).click()
+    await MergeLocations.logout()
   })
 })
 
@@ -112,9 +119,9 @@ describe("Merge locations page", () => {
     )
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one location is selected, should allow to leave
-    await (await $("#anet-logo")).click()
+    await (await browser.$("#anet-logo")).click()
     // eslint-disable-next-line no-unused-expressions
-    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+    expect(await (await browser.$(".modal-dialog")).isExisting()).to.be.false
 
     await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
@@ -134,11 +141,12 @@ describe("Merge locations page", () => {
     )
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when both locations are selected, should show warning
-    await (await $("#anet-logo")).click()
-    const modalDialog = await $(".modal-dialog")
+    await (await browser.$("#anet-logo")).click()
+    const modalDialog = await browser.$(".modal-dialog")
     // eslint-disable-next-line no-unused-expressions
     expect(await modalDialog.isExisting()).to.be.true
-    await $(".btn-danger").click()
+    await (await browser.$(".btn-danger")).click()
+    await MergeLocations.logout()
   })
   it("Should display fields values of the left location", async () => {
     await MergeLocations.openPage()

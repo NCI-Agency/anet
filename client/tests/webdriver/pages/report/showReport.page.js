@@ -29,9 +29,11 @@ class ShowReport extends Page {
   }
 
   async getAttendeeAssessmentLabel(id, name, i) {
-    return (await this.getAttendeeAssessment(id, name)).$(
-      `../../../following-sibling::tr[${i}]/td`
-    )
+    return (await this.getAttendeeAssessment(id, name))
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .$(`./following-sibling::tr[${i}]/td`)
   }
 
   async getTasksEngagementAssessments(id) {
@@ -45,9 +47,12 @@ class ShowReport extends Page {
   }
 
   async getTaskEngagementAssessmentLabel(id, shortName, i) {
-    return (await this.getTaskEngagementAssessment(id, shortName)).$(
-      `../../../../following-sibling::tr[${i}]/td`
-    )
+    return (await this.getTaskEngagementAssessment(id, shortName))
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .$(`./following-sibling::tr[${i}]/td`)
   }
 
   async getTask12BUrl() {
@@ -200,7 +205,7 @@ class ShowReport extends Page {
       return null
     }
 
-    const row = await td.$("..")
+    const row = await td.parentElement()
     // wait for conflict loader to disappear
     await (
       await row.$("td.conflictButton div.bp6-spinner")

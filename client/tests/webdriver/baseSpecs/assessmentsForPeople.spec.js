@@ -128,6 +128,8 @@ const ASSESSED_PEOPLE = [
 describe("As an admin", () => {
   it("Should see the proper assessment sections for each person", async () => {
     await Home.openAsAdminUser()
+    await (await Home.getSearchBar()).waitForExist()
+    await (await Home.getSearchBar()).waitForDisplayed()
     for (const p of ASSESSED_PEOPLE) {
       await (await Home.getSearchBar()).setValue(p.name)
       await (await Home.getSubmitSearch()).click()
@@ -153,6 +155,8 @@ describe("As an admin", () => {
 
   it("Should not see not-applicable assessment sections for each person", async () => {
     await Home.openAsAdminUser()
+    await (await Home.getSearchBar()).waitForExist()
+    await (await Home.getSearchBar()).waitForDisplayed()
     for (const p of ASSESSED_PEOPLE) {
       await (await Home.getSearchBar()).setValue(p.name)
       await (await Home.getSubmitSearch()).click()
@@ -178,6 +182,8 @@ describe("For the periodic person assessments", () => {
   describe("As an advisor who has a counterpart who needs to be assessed", () => {
     it("Should first search, find and open the person page", async () => {
       await Home.open("/", ADVISOR1_CREDENTIALS)
+      await (await Home.getSearchBar()).waitForExist()
+      await (await Home.getSearchBar()).waitForDisplayed()
       await (await Home.getSearchBar()).setValue(PERSON_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
       await (
@@ -270,6 +276,8 @@ describe("For the periodic person assessments", () => {
   describe("As an admin", () => {
     it("Should first search, find and open the person's page", async () => {
       await Home.openAsAdminUser()
+      await (await Home.getSearchBar()).waitForExist()
+      await (await Home.getSearchBar()).waitForDisplayed()
       await (await Home.getSearchBar()).setValue(PERSON_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
       await (

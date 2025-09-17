@@ -52,9 +52,8 @@ class LocationFilter extends Page {
       "#locationUuid-popover .bp6-icon-chevron-right"
     )
     while (expandibleLocations.length > 0) {
-      for (const location of expandibleLocations) {
-        await location.click()
-      }
+      const location = await expandibleLocations[0]
+      await location.click()
       expandibleLocations = await browser.$$(
         "#locationUuid-popover .bp6-icon-chevron-right"
       )

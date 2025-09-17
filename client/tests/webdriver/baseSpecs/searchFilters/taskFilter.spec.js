@@ -25,7 +25,7 @@ describe("When using the task filter on the reports search", () => {
     expect(await TaskFilter.getTaskCount()).to.equal(1)
     // the only task should now expand, leading to a bigger task count,
     // but expand non-recursively, because another test may have created a subtask for one of them
-    await TaskFilter.openAllCollapsedTasks(true)
+    await TaskFilter.openFirstLevelCollapsedTasks()
     expect(await TaskFilter.getTaskCount()).to.equal(7)
     await TaskFilter.closeTaskFilter()
   })

@@ -258,9 +258,11 @@ export class CreateReport extends Page {
   }
 
   async getAttendeeAssessmentLabel(name, i) {
-    return (await this.getAttendeeAssessment(name)).$(
-      `../../../following-sibling::tr[${i}]/td`
-    )
+    return (await this.getAttendeeAssessment(name))
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .$(`./following-sibling::tr[${i}]/td`)
   }
 
   async getTasksAssessments() {
@@ -278,9 +280,12 @@ export class CreateReport extends Page {
   }
 
   async getTaskAssessmentLabel(shortName, i) {
-    return (await this.getTaskAssessment(shortName)).$(
-      `../../../../following-sibling::tr[${i}]/td`
-    )
+    return (await this.getTaskAssessment(shortName))
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .$(`./following-sibling::tr[${i}]/td`)
   }
 
   async getSubmitButton() {

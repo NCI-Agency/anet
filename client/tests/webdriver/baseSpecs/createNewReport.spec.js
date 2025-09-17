@@ -107,23 +107,25 @@ describe("When creating a report", () => {
   })
 
   it("Should switch an attendee between an advisor and interlocutor", async () => {
-    const advisor = await CreateReport.getPersonByName(ADVISOR)
+    const person1 = await CreateReport.getPersonByName(ADVISOR)
     // change attendee to interlocutor
-    expect(await advisor.advisorCheckbox.isExisting()).to.equal(true)
-    expect(await advisor.advisorCheckbox.isSelected()).to.equal(false)
-    advisor.advisorCheckbox.click()
+    expect(await person1.advisorCheckbox.isExisting()).to.equal(true)
+    expect(await person1.advisorCheckbox.isSelected()).to.equal(false)
+    await person1.advisorCheckbox.click()
     // wait for the attendee to be moved to the other section
     await browser.pause(500)
+    const person2 = await CreateReport.getPersonByName(ADVISOR)
     // change attendee to advisor
-    expect(await advisor.advisorCheckbox.isExisting()).to.equal(false)
-    expect(await advisor.interlocutorCheckbox.isExisting()).to.equal(true)
-    expect(await advisor.interlocutorCheckbox.isSelected()).to.equal(true)
-    advisor.interlocutorCheckbox.click()
+    expect(await person2.advisorCheckbox.isExisting()).to.equal(false)
+    expect(await person2.interlocutorCheckbox.isExisting()).to.equal(true)
+    expect(await person2.interlocutorCheckbox.isSelected()).to.equal(true)
+    await person2.interlocutorCheckbox.click()
     // wait for the attendee to be moved to the other section
     await browser.pause(500)
-    expect(await advisor.interlocutorCheckbox.isExisting()).to.equal(false)
-    expect(await advisor.advisorCheckbox.isExisting()).to.equal(true)
-    expect(await advisor.advisorCheckbox.isSelected()).to.equal(false)
+    const person3 = await CreateReport.getPersonByName(ADVISOR)
+    expect(await person3.interlocutorCheckbox.isExisting()).to.equal(false)
+    expect(await person3.advisorCheckbox.isExisting()).to.equal(true)
+    expect(await person3.advisorCheckbox.isSelected()).to.equal(false)
   })
 
   it("Should show report with advisor and interlocutor organizations at engagement date = now", async () => {
