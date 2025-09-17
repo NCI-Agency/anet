@@ -386,6 +386,14 @@ enum AuthorizationGroupSearchSortBy {
 }
 
 """"""
+input BoundingBoxInput {
+  maxLat: Float!
+  maxLng: Float!
+  minLat: Float!
+  minLng: Float!
+}
+
+""""""
 type Comment {
   author: Person
   createdAt: Instant
@@ -687,6 +695,7 @@ input LocationInput {
 
 """"""
 input LocationSearchQueryInput {
+  boundingBox: BoundingBoxInput
   emailNetwork: String
   inMyReports: Boolean
   locationRecurseStrategy: RecurseStrategy
