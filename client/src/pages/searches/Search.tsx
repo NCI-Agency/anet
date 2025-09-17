@@ -952,7 +952,7 @@ const Search = ({
       genericPreferences.preferences,
       currentUser.preferences,
       searchQueryParams,
-      queryTypes,
+      resultObjectTypes,
       exportType,
       contentType,
       exportMaxResults,
