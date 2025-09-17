@@ -542,6 +542,16 @@ export default {
         color: props?.color
       })
     )
+  },
+
+  splitCsv: function (v) {
+    if (!v) {
+      return []
+    }
+    return v
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean)
   }
 }
 
