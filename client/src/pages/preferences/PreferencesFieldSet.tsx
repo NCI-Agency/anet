@@ -21,6 +21,7 @@ import React, { useMemo } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
+import utils from "utils"
 import ExportFieldsPanel from "./ExportFieldsPanel"
 
 const GQL_GET_PREFERENCES = gql`
@@ -174,8 +175,39 @@ const PreferencesFieldset = ({
       initialValues={initialValues}
       onSubmit={onSubmit}
       enableReinitialize
+      validate={vals => {
+        const errors = {}
+        exportPrefs.forEach(pref => {
+          const selected = utils.splitCsv(vals[pref.uuid])
+          if (selected.length === 0) {
+            errors[pref.uuid] = "Please select at least one field"
+          }
+        })
+        return errors
+      }}
     >
-      {({ isSubmitting, dirty, setFieldValue, submitForm, values }) => {
+      {({
+        isSubmitting,
+        dirty,
+        setFieldValue,
+        submitForm,
+        values,
+        errors,
+        validateForm
+      }) => {
+        const handleSaveClick = async () => {
+          const errs = await validateForm()
+          const keys = Object.keys(errs || {})
+          if (keys.length > 0) {
+            const first = keys[0]
+            const el = document.getElementById(`pref-${first}`)
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" })
+            }
+            return
+          }
+          submitForm()
+        }
         return (
           <>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -261,6 +293,7 @@ const PreferencesFieldset = ({
                       setFieldValue={setFieldValue}
                       titleForExportPref={titleForExportPref}
                       getLabelFromDictionary={getLabelFromDictionary}
+                      error={errors?.[pref.uuid] as string | undefined}
                     />
                   ))}
                 </Fieldset>
@@ -269,7 +302,7 @@ const PreferencesFieldset = ({
               <div className="submit-buttons d-flex justify-content-end">
                 <Button
                   variant="primary"
-                  onClick={submitForm}
+                  onClick={handleSaveClick}
                   disabled={isSubmitting}
                 >
                   {actionLabel}
