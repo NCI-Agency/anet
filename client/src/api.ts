@@ -188,7 +188,8 @@ const API = {
         fetchPolicy: "no-cache"
       },
       watchQuery: {
-        fetchPolicy: "no-cache"
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: false
       },
       mutate: {
         fetchPolicy: "no-cache"
