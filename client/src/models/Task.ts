@@ -168,7 +168,7 @@ export default class Task extends Model {
     return Settings.fields.task.assessments || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["ascendantTasks"]
+  static FILTERED_CLIENT_SIDE_FIELDS = ["ascendantTasks", "descendantTasks"]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(
