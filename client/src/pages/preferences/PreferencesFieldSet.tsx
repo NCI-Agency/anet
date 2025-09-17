@@ -137,10 +137,14 @@ const PreferencesFieldset = ({
       }
     })
 
-    if (!exportObjectTypes || exportObjectTypes.length === 0) return prefs
+    if (!exportObjectTypes || exportObjectTypes.length === 0) {
+      return prefs
+    }
 
     return prefs.filter(pref => {
-      if (!isExportFieldsPref(pref.name)) return true
+      if (!isExportFieldsPref(pref.name)) {
+        return true
+      }
       const entity = exportEntityFromPref(pref.name)
       const objType = ENTITY_TO_OBJTYPE[entity]
       return objType ? exportObjectTypes.includes(objType) : false

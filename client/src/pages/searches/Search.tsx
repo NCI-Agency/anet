@@ -284,16 +284,30 @@ const Search = ({
 
   const resultObjectTypes = useMemo(() => {
     const types = []
-    if (hasOrganizationsResults) types.push(SEARCH_OBJECT_TYPES.ORGANIZATIONS)
-    if (hasPeopleResults) types.push(SEARCH_OBJECT_TYPES.PEOPLE)
-    if (hasPositionsResults) types.push(SEARCH_OBJECT_TYPES.POSITIONS)
-    if (hasTasksResults) types.push(SEARCH_OBJECT_TYPES.TASKS)
-    if (hasLocationsResults) types.push(SEARCH_OBJECT_TYPES.LOCATIONS)
-    if (hasReportsResults) types.push(SEARCH_OBJECT_TYPES.REPORTS)
-    if (hasAuthorizationGroupsResults)
+    if (hasOrganizationsResults) {
+      types.push(SEARCH_OBJECT_TYPES.ORGANIZATIONS)
+    }
+    if (hasPeopleResults) {
+      types.push(SEARCH_OBJECT_TYPES.PEOPLE)
+    }
+    if (hasPositionsResults) {
+      types.push(SEARCH_OBJECT_TYPES.POSITIONS)
+    }
+    if (hasTasksResults) {
+      types.push(SEARCH_OBJECT_TYPES.TASKS)
+    }
+    if (hasLocationsResults) {
+      types.push(SEARCH_OBJECT_TYPES.LOCATIONS)
+    }
+    if (hasReportsResults) {
+      types.push(SEARCH_OBJECT_TYPES.REPORTS)
+    }
+    if (hasAuthorizationGroupsResults) {
       types.push(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS)
-    if (hasAttachmentsResults) types.push(SEARCH_OBJECT_TYPES.ATTACHMENTS)
-    if (hasEventsResults) types.push(SEARCH_OBJECT_TYPES.EVENTS)
+    }
+    if (hasEventsResults) {
+      types.push(SEARCH_OBJECT_TYPES.EVENTS)
+    }
     return types
   }, [
     hasOrganizationsResults,
@@ -301,7 +315,6 @@ const Search = ({
     hasPositionsResults,
     hasTasksResults,
     hasLocationsResults,
-    hasReportsResults,
     hasAuthorizationGroupsResults,
     hasAttachmentsResults,
     hasEventsResults
