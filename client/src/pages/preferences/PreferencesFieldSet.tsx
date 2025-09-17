@@ -176,22 +176,12 @@ const PreferencesFieldset = ({
       enableReinitialize
     >
       {({ isSubmitting, dirty, setFieldValue, submitForm, values }) => {
-        const action = (
-          <Button
-            variant="primary"
-            onClick={submitForm}
-            disabled={isSubmitting}
-          >
-            {actionLabel}
-          </Button>
-        )
-
         return (
           <>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages success={saveSuccess} error={saveError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={title} action={action} />
+              <Fieldset title={title} />
               {otherPrefs.length > 0 && (
                 <Fieldset title={exportPrefs.length > 0 ? "General" : ""}>
                   {otherPrefs.map(preference => (
@@ -276,9 +266,14 @@ const PreferencesFieldset = ({
                 </Fieldset>
               )}
 
-              <div className="submit-buttons">
-                <div />
-                <div>{action}</div>
+              <div className="submit-buttons d-flex justify-content-end">
+                <Button
+                  variant="primary"
+                  onClick={submitForm}
+                  disabled={isSubmitting}
+                >
+                  {actionLabel}
+                </Button>
               </div>
             </Form>
           </>
