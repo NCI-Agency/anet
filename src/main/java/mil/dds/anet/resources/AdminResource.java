@@ -8,7 +8,8 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -109,31 +110,34 @@ public class AdminResource {
     }
     final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     AuthUtils.assertAdministrator(user);
-    final StreamingResponseBody responseBody = outputStream -> {
-      try (final PrintWriter writer =
-          new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-        final Map<String, Object> dictionaryForMart =
-            martDictionaryService.createDictionaryForMart();
 
-        // Set YAML formatting options
-        final DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setIndent(2);
-        options.setIndicatorIndent(2);
-        options.setIndentWithIndicator(true);
+    // Create MART dictionary
+    final Map<String, Object> dictionaryForMart = martDictionaryService.createDictionaryForMart();
 
-        // Create YAML instance
-        final Yaml yaml = new Yaml(options);
-        yaml.dump(dictionaryForMart, writer);
+    // Dump to Yaml and return
+    final DumperOptions options = new DumperOptions();
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    options.setIndent(2);
+    options.setIndicatorIndent(2);
+    options.setIndentWithIndicator(true);
+
+    final Yaml yaml = new Yaml(options);
+    final StringWriter stringWriter = new StringWriter();
+    yaml.dump(dictionaryForMart, stringWriter);
+    final String yamlContent = stringWriter.toString();
+
+    StreamingResponseBody responseBody = outputStream -> {
+      try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+        writer.write(yamlContent);
       }
     };
 
-    final HttpHeaders headers = new HttpHeaders();
+    HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(
         ContentDisposition.attachment().filename("anet-dictionary.yml").build());
 
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_YAML).headers(headers)
-        .body(responseBody);
+    return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/x-yaml"))
+        .headers(headers).body(responseBody);
   }
 
   /**
