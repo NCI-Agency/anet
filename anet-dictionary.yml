@@ -506,6 +506,10 @@ fields:
       label: Event
       placeholder: Was the engagement part of an event?
       filter: [CONFERENCE, EXERCISE, VISIT_BAN, OTHER]
+    reportCommunities:
+      label: Communities of interest
+      placeholder: Search for Communities…
+      exclude: false
     customFields:
       gridLocation:
         type: geo_location
