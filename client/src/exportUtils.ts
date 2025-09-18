@@ -507,16 +507,14 @@ export const exportResults = (
   )
   const includeEvents = queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS)
 
-  const organizationsFields = getExportPreference("organization_EXPORT_FIELDS")
-  const peopleFields = getExportPreference("person_EXPORT_FIELDS")
-  const positionsFields = getExportPreference("position_EXPORT_FIELDS")
-  const tasksFields = getExportPreference("task_EXPORT_FIELDS")
-  const locationsFields = getExportPreference("location_EXPORT_FIELDS")
-  const reportsFields = getExportPreference("report_EXPORT_FIELDS")
-  const authorizationGroupsFields = getExportPreference(
-    "authorizationGroup_EXPORT_FIELDS"
-  )
-  const eventsFields = getExportPreference("event_EXPORT_FIELDS")
+  const organizationsFields = getExportPreference("ORGANIZATIONS")
+  const peopleFields = getExportPreference("PEOPLE")
+  const positionsFields = getExportPreference("POSITIONS")
+  const tasksFields = getExportPreference("TASKS")
+  const locationsFields = getExportPreference("LOCATIONS")
+  const reportsFields = getExportPreference("REPORTS")
+  const authorizationGroupsFields = getExportPreference("AUTHORIZATION_GROUPS")
+  const eventsFields = getExportPreference("EVENTS")
 
   const organizationQuery = !includeOrganizations
     ? {}

@@ -31,6 +31,7 @@ const GQL_GET_PREFERENCES = gql`
         uuid
         name
         type
+        category
         description
         defaultValue
         allowedValues
@@ -38,19 +39,6 @@ const GQL_GET_PREFERENCES = gql`
     }
   }
 `
-
-const ENTITY_TO_OBJTYPE = {
-  authorizationGroup: SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS,
-  organization: SEARCH_OBJECT_TYPES.ORGANIZATIONS,
-  person: SEARCH_OBJECT_TYPES.PEOPLE,
-  position: SEARCH_OBJECT_TYPES.POSITIONS,
-  task: SEARCH_OBJECT_TYPES.TASKS,
-  location: SEARCH_OBJECT_TYPES.LOCATIONS,
-  report: SEARCH_OBJECT_TYPES.REPORTS,
-  event: SEARCH_OBJECT_TYPES.EVENTS,
-  attachment: SEARCH_OBJECT_TYPES.ATTACHMENTS
-}
-
 interface UserPreference {
   preference: { uuid: string }
   value: string
@@ -68,19 +56,8 @@ interface PreferencesFieldsetProps {
   exportObjectTypes?: string[]
 }
 
-function isExportFieldsPref(name: string) {
-  return name?.endsWith("_EXPORT_FIELDS")
-}
-
-function exportEntityFromPref(name: string) {
-  return (name || "").replace(/_EXPORT_FIELDS$/, "")
-}
-
-function titleForExportPref(name: string) {
-  const entity = exportEntityFromPref(name)
-  const start = entity.replace(/([A-Z])/g, " $1").trim()
-  const cap = start.charAt(0).toUpperCase() + start.slice(1)
-  return `${cap} export fields`
+function isExportFieldsPref(category: string) {
+  return category === "export"
 }
 
 function camelCaseToTitle(str: string) {
@@ -147,21 +124,19 @@ const PreferencesFieldset = ({
     }
 
     return prefs.filter(pref => {
-      if (!isExportFieldsPref(pref.name)) {
+      if (!isExportFieldsPref(pref.category)) {
         return true
       }
-      const entity = exportEntityFromPref(pref.name)
-      const objType = ENTITY_TO_OBJTYPE[entity]
-      return objType ? exportObjectTypes.includes(objType) : false
+      return exportObjectTypes.includes(pref.name)
     })
   }, [data?.preferenceList?.list, userPreferences, exportObjectTypes])
 
   const exportPrefs = useMemo(
-    () => preferences.filter(p => isExportFieldsPref(p.name)),
+    () => preferences.filter(p => isExportFieldsPref(p.category)),
     [preferences]
   )
   const otherPrefs = useMemo(
-    () => preferences.filter(p => !isExportFieldsPref(p.name)),
+    () => preferences.filter(p => !isExportFieldsPref(p.category)),
     [preferences]
   )
 
@@ -222,6 +197,15 @@ const PreferencesFieldset = ({
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages success={saveSuccess} error={saveError} />
             <Form className="form-horizontal" method="post">
+              <div className="submit-buttons d-flex justify-content-end">
+                <Button
+                  variant="primary"
+                  onClick={handleSaveClick}
+                  disabled={isSubmitting}
+                >
+                  {actionLabel}
+                </Button>
+              </div>
               <Fieldset title={title} />
               {otherPrefs.length > 0 && (
                 <Fieldset title={exportPrefs.length > 0 ? "General" : ""}>
@@ -243,7 +227,7 @@ const PreferencesFieldset = ({
                       )}
 
                       {preference.type === "enumset" &&
-                        !isExportFieldsPref(preference.name) && (
+                        !isExportFieldsPref(preference.category) && (
                           <FastField name={preference.uuid}>
                             {({ field, form }) => {
                               const choices = preference.allowedValues
@@ -300,7 +284,6 @@ const PreferencesFieldset = ({
                       values={values}
                       initialSnapshot={initialValues}
                       setFieldValue={setFieldValue}
-                      titleForExportPref={titleForExportPref}
                       getLabelFromDictionary={getLabelFromDictionary}
                       error={errors?.[pref.uuid] as string | undefined}
                     />
