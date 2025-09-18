@@ -83,10 +83,15 @@ function titleForExportPref(name: string) {
   return `${cap} export fields`
 }
 
+function camelCaseToTitle(str: string) {
+  const withSpaces = str.replace(/([a-z])([A-Z])/g, "$1 $2")
+  return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1).toLowerCase()
+}
+
 function getLabelFromDictionary(preferenceName: string, field: string) {
   const key = preferenceName.split("_")[0]
   const label = Settings.fields[key]?.[field]?.label
-  return label ?? field
+  return label ?? camelCaseToTitle(field)
 }
 
 function convertStringValueToType(value: any, type: string) {
