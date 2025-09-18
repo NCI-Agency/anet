@@ -1,6 +1,7 @@
 import Checkbox from "components/Checkbox"
 import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
@@ -47,9 +48,14 @@ const TruncatedList = ({
 
 interface AuthorizationGroupTableProps {
   id?: string
+  showDelete?: boolean
+  onDelete?: (...args: unknown[]) => unknown
   // list of authorizationGroups:
   authorizationGroups: any[]
+  noAuthorizationGroupsMessage?: string
   // optional columns
+  showDistributionList?: boolean
+  showForSensitiveInformation?: boolean
   showMembers?: boolean
   showStatus?: boolean
   // fill these when pagination wanted:
@@ -68,7 +74,12 @@ interface AuthorizationGroupTableProps {
 
 const AuthorizationGroupTable = ({
   id,
+  showDelete,
+  onDelete,
   authorizationGroups,
+  noAuthorizationGroupsMessage = "No communities found",
+  showDistributionList,
+  showForSensitiveInformation,
   showMembers,
   showStatus,
   pageSize,
@@ -83,7 +94,7 @@ const AuthorizationGroupTable = ({
   toggleSelection
 }: AuthorizationGroupTableProps) => {
   if (_get(authorizationGroups, "length", 0) === 0) {
-    return <em>No communities found</em>
+    return <em>{noAuthorizationGroupsMessage}</em>
   }
 
   const ags = AuthorizationGroup.fromArray(authorizationGroups)
@@ -101,10 +112,19 @@ const AuthorizationGroupTable = ({
           )}
           <th>{Settings.fields.authorizationGroup.name?.label}</th>
           <th>{Settings.fields.authorizationGroup.description?.label}</th>
-          <th>{Settings.fields.authorizationGroup.distributionList?.label}</th>
-          <th>
-            {Settings.fields.authorizationGroup.forSensitiveInformation?.label}
-          </th>
+          {showDistributionList && (
+            <th>
+              {Settings.fields.authorizationGroup.distributionList?.label}
+            </th>
+          )}
+          {showForSensitiveInformation && (
+            <th>
+              {
+                Settings.fields.authorizationGroup.forSensitiveInformation
+                  ?.label
+              }
+            </th>
+          )}
           {showMembers && (
             <th>
               {
@@ -116,6 +136,7 @@ const AuthorizationGroupTable = ({
           {showStatus && (
             <th>{Settings.fields.authorizationGroup.status?.label}</th>
           )}
+          {showDelete && <th />}
         </tr>
       </thead>
 
@@ -164,8 +185,12 @@ const AuthorizationGroupTable = ({
                 <LinkTo modelType="AuthorizationGroup" model={ag} />
               </td>
               <td>{ag.description}</td>
-              <td>{utils.formatBoolean(ag.distributionList)}</td>
-              <td>{utils.formatBoolean(ag.forSensitiveInformation)}</td>
+              {showDistributionList && (
+                <td>{utils.formatBoolean(ag.distributionList)}</td>
+              )}
+              {showForSensitiveInformation && (
+                <td>{utils.formatBoolean(ag.forSensitiveInformation)}</td>
+              )}
               {showMembers && (
                 <td>
                   <TruncatedList
@@ -183,6 +208,14 @@ const AuthorizationGroupTable = ({
                 </td>
               )}
               {showStatus && <td>{ag.humanNameOfStatus()} </td>}
+              {showDelete && (
+                <td id={"authorizationGroupDelete_" + ag.uuid}>
+                  <RemoveButton
+                    title="Remove community"
+                    onClick={() => onDelete(ag)}
+                  />
+                </td>
+              )}
             </tr>
           )
         })}

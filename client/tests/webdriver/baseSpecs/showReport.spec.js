@@ -136,7 +136,7 @@ describe("Show report page", () => {
       )
     })
   })
-  describe("When on the show page of a with many key outcomes and next steps", () => {
+  describe("When on the show page of a report with many key outcomes and next steps", () => {
     it("We should see the key outcomes as a list", async () => {
       const keyOutcomes = await ShowReport.getKeyOutcomesList()
       expect(keyOutcomes).to.have.length(3)
@@ -154,6 +154,13 @@ describe("Show report page", () => {
         "and testing",
         "and testing"
       ])
+    })
+  })
+  describe("When on the show page of a report with reportCommunities", () => {
+    it("We should see the reportCommunities", async () => {
+      expect(await ShowReport.getReportCommunities()).to.equal(
+        "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization"
+      )
     })
   })
 })

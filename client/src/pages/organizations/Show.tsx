@@ -640,6 +640,8 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
             humanValue={
               <AuthorizationGroupTable
                 authorizationGroups={organization.authorizationGroups}
+                showDistributionList
+                showForSensitiveInformation
               />
             }
           />

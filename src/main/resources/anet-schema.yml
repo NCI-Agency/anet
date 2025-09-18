@@ -824,7 +824,8 @@ properties:
         type: object
         additionalProperties: false
         required: [intent, engagementDate, duration, atmosphere, atmosphereDetails, cancelled,
-                   cancelledReason, nextSteps, keyOutcomes, reportText, location, reportPeople, event]
+                   cancelledReason, nextSteps, keyOutcomes, reportText, location, reportPeople,
+                   event, reportCommunities]
         properties:
           canUnpublishReports:
             type: boolean
@@ -909,6 +910,8 @@ properties:
                       type: string
                       enum:
                         [CONFERENCE, EXERCISE, VISIT_BAN, OTHER]
+          reportCommunities:
+            "$ref": "#/$defs/excludableInputField"
           customFields:
             type: object
             additionalProperties:

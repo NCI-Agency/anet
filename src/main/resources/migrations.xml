@@ -6545,6 +6545,43 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-reportCommunities" author="gjvoosten">
+		<createTable tableName="reportCommunities">
+			<column name="reportUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="authorizationGroupUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint
+			constraintName="FK_reportCommunities_report"
+			baseTableName="reportCommunities"
+			baseColumnNames="reportUuid"
+			referencedTableName="reports"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_reportCommunities_authorizationGroup"
+			baseTableName="reportCommunities"
+			baseColumnNames="authorizationGroupUuid"
+			referencedTableName="authorizationGroups"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addUniqueConstraint
+			constraintName="UQ_ReportCommunities"
+			tableName="reportCommunities"
+			columnNames="reportUuid, authorizationGroupUuid"
+		/>
+		<createIndex
+			tableName="reportCommunities"
+			indexName="IDX_reportCommunities_reportUuid">
+			<column name="reportUuid"/>
+		</createIndex>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
