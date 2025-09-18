@@ -12,6 +12,7 @@ public class Preference extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private String type;
+  @GraphQLQuery
   @GraphQLInputField
   private String category;
   @GraphQLQuery

@@ -1,3 +1,4 @@
+import { SEARCH_OBJECT_LABELS } from "actions"
 import React, { useMemo } from "react"
 import { Button } from "react-bootstrap"
 import utils from "utils"
@@ -14,7 +15,6 @@ interface ExportFieldsPanelProps {
   values: Record<string, any>
   initialSnapshot: Record<string, any>
   setFieldValue: (field: string, value: any) => void
-  titleForExportPref: (name: string) => string
   getLabelFromDictionary: (preferenceName: string, field: string) => string
   error?: string
 }
@@ -24,7 +24,6 @@ const ExportFieldsPanel = ({
   values,
   initialSnapshot,
   setFieldValue,
-  titleForExportPref,
   getLabelFromDictionary,
   error
 }: ExportFieldsPanelProps) => {
@@ -55,6 +54,10 @@ const ExportFieldsPanel = ({
     return getLabelFromDictionary(preferenceName, v)
   }
 
+  function getPanelLabel(preferenceName: string) {
+    return SEARCH_OBJECT_LABELS[preferenceName]
+  }
+
   return (
     <div
       id={`pref-${pref.uuid}`}
@@ -68,7 +71,7 @@ const ExportFieldsPanel = ({
           borderBottom: hasError ? "1px solid #dc3545" : undefined
         }}
       >
-        <strong>{titleForExportPref(preferenceName)}</strong>
+        <strong>{getPanelLabel(preferenceName)}</strong>
         <div className="d-flex gap-2 align-items-center">
           <Button
             size="sm"
