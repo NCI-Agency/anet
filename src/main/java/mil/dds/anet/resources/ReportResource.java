@@ -30,6 +30,7 @@ import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.GenericRelatedObject;
@@ -335,6 +336,15 @@ public class ReportResource {
       Utils.addRemoveElementsByUuid(existingTasks, r.getTasks(),
           newTask -> reportDao.addTaskToReport(newTask, r),
           oldTask -> reportDao.removeTaskFromReport(DaoUtils.getUuid(oldTask), r));
+    }
+
+    // Update ReportCommunities:
+    if (r.getReportCommunities() != null) {
+      final List<AuthorizationGroup> existingCommunities =
+          reportDao.getCommunitiesForReport(engine.getContext(), r.getUuid()).join();
+      Utils.addRemoveElementsByUuid(existingCommunities, r.getReportCommunities(),
+          newCommunity -> reportDao.addCommunityToReport(newCommunity, r),
+          oldCommunity -> reportDao.removeCommunityFromReport(DaoUtils.getUuid(oldCommunity), r));
     }
 
     // Update AuthorizedMembers:

@@ -15,6 +15,7 @@ const REPORT_FIELDS = {
   duration: "60",
   location: "Fort Amherst",
   atmosphere: "Positive",
+  reportCommunities: ["EF 1.1", "EF 5"],
   advisors: [ADVISOR],
   interlocutors: [INTERLOCUTOR],
   tasks: [{ name: "2.A" }],
@@ -133,6 +134,10 @@ describe("When creating a report", () => {
     await browser.pause(1000)
     reportUuid = await ShowReport.getUuid()
     expect(reportUuid.length).to.equal(36)
+    // Validate the reportCommunities
+    expect(await ShowReport.getReportCommunities()).to.equal(
+      "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization"
+    )
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.now, "author")
     await validateAttendee(ADVISOR, EXPECTED_DATA.now, "advisor")

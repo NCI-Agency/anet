@@ -306,6 +306,8 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
             humanValue={
               <AuthorizationGroupTable
                 authorizationGroups={position.authorizationGroups}
+                showDistributionList
+                showForSensitiveInformation
               />
             }
           />

@@ -128,6 +128,11 @@ const GQL_GET_REPORT = gql`
         }
         customFields
       }
+      reportCommunities {
+        uuid
+        name
+        description
+      }
       approvalStep {
         uuid
         name
