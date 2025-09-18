@@ -90,6 +90,7 @@ interface RichTextEditorProps {
   onChange?: (...args: unknown[]) => unknown
   onHandleBlur?: (...args: unknown[]) => unknown
   className?: string
+  style?: any
   readOnly?: boolean
   disableFullSize?: boolean
   showAvatar?: boolean
@@ -101,6 +102,7 @@ const RichTextEditor = ({
   onChange,
   onHandleBlur,
   className,
+  style,
   readOnly,
   disableFullSize,
   showAvatar = true
@@ -166,7 +168,7 @@ const RichTextEditor = ({
   }, [toolbarHeight, readOnly])
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       <Slate
         editor={editor}
         initialValue={slateValue}

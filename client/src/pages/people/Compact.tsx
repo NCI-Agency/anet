@@ -265,6 +265,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
       <CompactRow
         key="fullName"
         content={<Name>{`${person.rank} ${person.name}`}</Name>}
+        className="d-flex justify-content-center"
       />
     ),
     optionalFields.avatar.active && (
@@ -278,6 +279,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
             height={pageSize.avatarSize}
           />
         }
+        className="d-flex justify-content-center"
       />
     ),
     ...leftColumUnderAvatar
@@ -298,9 +300,10 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
       />
       <CompactView className="compact-view" pageSize={pageSize}>
         <CompactHeaderContent
+          color={null}
           sensitiveInformation={containsSensitiveInformation}
         />
-        <CompactFooterContent object={person} />
+        <CompactFooterContent object={person} color={null} />
         <CompactTable>
           {(_isEmpty(rightColumn) && (
             <FullColumn className="full-table">{leftColumn}</FullColumn>
@@ -324,13 +327,15 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     const mappedCustomFields = mapReadonlyCustomFieldsToComps({
       fieldsConfig: person.getCustomFieldsOrderedAsObject(),
       values: person,
-      isCompact: true
+      isCompact: true,
+      hideIfEmpty: true
     })
     const mappedSensitiveFields = mapReadonlyCustomFieldsToComps({
       fieldsConfig: person.getSensitiveFieldsOrderedAsObject(),
       parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
       values: person,
-      isCompact: true
+      isCompact: true,
+      hideIfEmpty: true
     })
     const mappedNonCustomFields = mapNonCustomFields()
     // map fields that have privileged access check to the condition
@@ -397,7 +402,13 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     }
     // map fields that have specific human value
     const humanValuesExceptions = {
-      biography: <RichTextEditor readOnly value={person.biography} />,
+      biography: (
+        <RichTextEditor
+          readOnly
+          value={person.biography}
+          style={{ marginBottom: -11 }}
+        />
+      ),
       user: utils.formatBoolean(person.user),
       users: (
         <UserTable
@@ -436,6 +447,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
           className={classNameExceptions[key]}
           id={idExceptions[key]}
           isCompact
+          hideIfEmpty
         />
       )
 
