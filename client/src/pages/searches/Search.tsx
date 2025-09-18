@@ -314,9 +314,9 @@ const Search = ({
     hasPeopleResults,
     hasPositionsResults,
     hasTasksResults,
+    hasReportsResults,
     hasLocationsResults,
     hasAuthorizationGroupsResults,
-    hasAttachmentsResults,
     hasEventsResults
   ])
   useBoilerplate({
