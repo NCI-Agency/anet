@@ -86,6 +86,8 @@ const MyAuthorizationGroups = ({
       <Fieldset id="my-authorization-groups" title="Communities I administrate">
         <AuthorizationGroupTable
           authorizationGroups={authorizationGroupsAdministrated}
+          showDistributionList
+          showForSensitiveInformation
           showMembers
           showStatus
         />

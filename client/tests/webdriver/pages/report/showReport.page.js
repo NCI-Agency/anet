@@ -152,6 +152,14 @@ class ShowReport extends Page {
     return (await browser.$("div[name='authors']")).getText()
   }
 
+  async getReportCommunities() {
+    return (await browser.$("div[name='reportCommunities']")).getText()
+  }
+
+  async getCompactReportCommunities() {
+    return (await browser.$("table#reportCommunities")).getText()
+  }
+
   async getAdvisorOrg() {
     return (await browser.$("div[name='advisorOrg']")).getText()
   }
