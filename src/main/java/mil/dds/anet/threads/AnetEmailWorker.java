@@ -93,14 +93,17 @@ public class AnetEmailWorker extends AbstractWorker {
       Map<String, Object> emailContext = null;
 
       try {
-        emailContext = buildTemplateContext(context, email);
-        if (emailContext != null) {
-          logger.info("{}Processing email #{} re: \"{}\" to {}",
-              smtpConfig.isDisabled() ? "[Disabled] " : "", email.getId(),
-              getEmailSubject(email, emailContext), email.getToAddresses());
+        // Null actions are never deliverable, so just skip those and pretend they were processed
+        if (email.getAction() != null) {
+          emailContext = buildTemplateContext(context, email);
+          if (emailContext != null) {
+            logger.info("{}Processing email #{} re: \"{}\" to {}",
+                smtpConfig.isDisabled() ? "[Disabled] " : "", email.getId(),
+                getEmailSubject(email, emailContext), email.getToAddresses());
 
-          if (!smtpConfig.isDisabled()) {
-            sendEmail(email, emailContext, smtpProps, smtpAuth, activeDomainNames);
+            if (!smtpConfig.isDisabled()) {
+              sendEmail(email, emailContext, smtpProps, smtpAuth, activeDomainNames);
+            }
           }
         }
         processedEmails.add(email.getId());
