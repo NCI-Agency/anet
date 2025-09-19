@@ -112,11 +112,11 @@ dependencyManagement {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.7'
+	implementation 'org.postgresql:postgresql:42.7.8'
 	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
-	implementation 'com.google.guava:guava:33.4.8-jre' // Pick the non-Android version
+	implementation 'com.google.guava:guava:33.5.0-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.11.1') {
@@ -135,13 +135,13 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.5.8'
+	implementation 'com.networknt:json-schema-validator:1.5.9'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
 	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:3.2.2'
+	implementation 'org.apache.tika:tika-core:3.2.3'
         // For sanitizing SVG uploads
         implementation 'io.github.borewit:svg-sanitizer:0.4.0'
 
@@ -179,7 +179,7 @@ dependencies {
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
-	testImplementation 'org.assertj:assertj-core:3.27.4'
+	testImplementation 'org.assertj:assertj-core:3.27.5'
 
 	testImplementation "org.junit.jupiter:junit-jupiter"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
@@ -743,7 +743,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.4.8-jre')
+		select('com.google.guava:guava:33.5.0-jre')
 	}
 }
 
