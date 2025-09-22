@@ -594,6 +594,8 @@ export const searchFilters = function (includeAdminFilters) {
   const locationTypeOptions = [
     Location.LOCATION_TYPES.POINT_LOCATION,
     Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+    Location.LOCATION_TYPES.TOWN,
+    Location.LOCATION_TYPES.MUNICIPALITY,
     Location.LOCATION_TYPES.COUNTRY,
     Location.LOCATION_TYPES.VIRTUAL_LOCATION
   ]
