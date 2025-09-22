@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Location.LocationType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
+import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.LocationDao;
@@ -152,6 +154,12 @@ public class MartDictionaryService implements IMartDictionaryService {
     return municipalityGroup;
   }
 
+  private List<Location> getMunicipalities() {
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setType(LocationType.MUNICIPALITY);
+    return locationDao.search(query).getList();
+  }
+
   private List<Map<String, String>> exportTasksToMartDictionary(Task rootTask) {
     final List<Map<String, String>> tasks = new ArrayList<>();
     final TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
@@ -198,6 +206,7 @@ public class MartDictionaryService implements IMartDictionaryService {
     final List<Location> municipalities =
         new ArrayList<>(municipalityGroup.loadChildrenLocations(engine.getContext(), null).join()
             .stream().filter(m -> m.getStatus() == WithStatus.Status.ACTIVE).toList());
+    municipalities.addAll(getMunicipalities());
     municipalities.sort(Comparator.comparing(Location::getName));
     for (final Location m : municipalities) {
       final Map<String, Object> municipality = new LinkedHashMap<>();
