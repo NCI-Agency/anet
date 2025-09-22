@@ -640,7 +640,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     private static InputType makeAccessTokenType() {
       final InputType inputType = NVG_OF.createInputType();
       inputType.setId(ACCESS_TOKEN_ID);
-      inputType.setRequired(true);
+      inputType.setRequired(false);
       inputType.setType(InputTypeType.STRING);
       inputType.setName("Web Service Access Token");
       inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
