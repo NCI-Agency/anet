@@ -67,10 +67,6 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
         Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(testCase.getKey(),
             testCase.getValue(), reportUuid)));
 
-    // AuthorizationGroup does not get notified when report is updated
-    final HashMap<String, Subscription> reportSubscriptions = new HashMap<>(subscriptions);
-    reportSubscriptions.remove(AuthorizationGroupDao.TABLE_NAME);
-
     // Check jack's subscription updates
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates =
         getAllSubscriptionUpdates(jackUser);
@@ -85,7 +81,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       UPDATERS.get(subscribedObjectType).accept(subscription.getSubscribedObjectUuid());
       // Check jack's subscription updates
       if (ReportDao.TABLE_NAME.equals(subscribedObjectType)) {
-        checkReportSubscriptionUpdates(reportSubscriptions, beforeUpdate);
+        checkReportSubscriptionUpdates(subscriptions, beforeUpdate);
       } else {
         checkOtherSubscriptionUpdates(subscriptions, beforeUpdate, subscription.getUuid());
       }
@@ -222,6 +218,8 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
             personToPrimaryReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
                 false),
             personToReportPerson(getChristopfTopferness(), true))))
+        .withReportCommunities(List.of(getAuthorizationGroupInput(
+            getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
         .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
         .withEvent(getEventInput(getEvent(getSubscribedObjectUuid(EventDao.TABLE_NAME))))
         .withNextSteps("<p>Test report next steps for subscription updates</p>")
