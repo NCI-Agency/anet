@@ -247,12 +247,6 @@ const Leaflet = ({
   const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
   const [anetLocationsVars, setAnetLocationsVars] = useState({})
 
-  const { data, error, loading } = API.useApiQuery(
-    NEARBY_LOCATIONS_GQL,
-    anetLocationsVars,
-    { skip: !(anetLocationsEnabled && !!anetLocationsVars) }
-  )
-
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
       newMarkers.forEach(m => {
@@ -396,49 +390,55 @@ const Leaflet = ({
   }
 
   useEffect(() => {
-    if (
-      !anetLocationsEnabled ||
-      loading ||
-      !anetLocationsLayerRef.current ||
-      error
-    ) {
+    if (!anetLocationsEnabled || !anetLocationsLayerRef.current) {
       return
     }
 
-    const rows = data?.locationList?.list || []
-    const layer = anetLocationsLayerRef.current
+    const getAnetLocations = async () =>
+      await API.query(NEARBY_LOCATIONS_GQL, anetLocationsVars)
 
-    const existingIds = getExistingIds(markerLayer)
+    getAnetLocations()
+      .then(rows => {
+        const anetLocations = rows?.locationList?.list || []
+        const layer = anetLocationsLayerRef.current
 
-    layer.clearLayers()
-    rows.forEach((loc: any) => {
-      if (!Location.hasCoordinates(loc) || existingIds.has(loc.uuid)) {
-        return
-      }
-      const m = {
-        icon: ICON_TYPES.LIGHT,
-        id: loc.uuid,
-        contents: loc
-      }
-      layer.addLayer(
-        createMarker([loc.lat, loc.lng], m, setLocationMarkerPopup, map, -1000)
-      )
-      // Add a copy of the marker, wrapped around the antimeridian
-      layer.addLayer(
-        createMarker(
-          [loc.lat, wrapLng(loc.lng)],
-          m,
-          setLocationMarkerPopup,
-          map,
-          -1000
-        )
-      )
-    })
+        const existingIds = getExistingIds(markerLayer)
+
+        layer.clearLayers()
+        anetLocations?.forEach((loc: any) => {
+          if (!Location.hasCoordinates(loc) || existingIds.has(loc.uuid)) {
+            return
+          }
+          const m = {
+            icon: ICON_TYPES.LIGHT,
+            id: loc.uuid,
+            contents: loc
+          }
+          layer.addLayer(
+            createMarker(
+              [loc.lat, loc.lng],
+              m,
+              setLocationMarkerPopup,
+              map,
+              -1000
+            )
+          )
+          // Add a copy of the marker, wrapped around the antimeridian
+          layer.addLayer(
+            createMarker(
+              [loc.lat, wrapLng(loc.lng)],
+              m,
+              setLocationMarkerPopup,
+              map,
+              -1000
+            )
+          )
+        })
+      })
+      .catch(() => {})
   }, [
-    data,
-    loading,
-    error,
     anetLocationsEnabled,
+    anetLocationsVars,
     markerLayer,
     map,
     setLocationMarkerPopup
