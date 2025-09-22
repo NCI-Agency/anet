@@ -30,6 +30,8 @@ public class Location extends AbstractCustomizableAnetBean
     PHYSICAL_LOCATION("P"), // -
     GEOGRAPHICAL_AREA("PA"), // -
     COUNTRY("PAC"), // -
+    TOWN("PAT"), // -
+    MUNICIPALITY("PAM"), // -
     POINT_LOCATION("PP"), // -
     @Deprecated
     _PLACEHOLDER_3_(""), // Should no longer be used but remain in place to keep the correct values
