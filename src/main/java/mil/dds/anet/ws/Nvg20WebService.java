@@ -110,6 +110,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       "interlocutorOrganization";
   private static final String ANET_SCHEMA_REPORT_KEY_OUTCOMES = "keyOutcomes";
   private static final String ANET_SCHEMA_REPORT_NEXT_STEPS = "nextSteps";
+  private static final String ANET_SCHEMA_REPORT_TASKS = "tasks";
 
   static final class App6Symbology {
     static final String SYMBOLOGY_VERSION_APP6B = "app6b";
@@ -214,6 +215,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       + " advisorOrg { uuid shortName longName identificationCode }" // -
       + " interlocutorOrg { uuid shortName longName identificationCode }" // -
       + " location { uuid name lat lng type }" // -
+      + " tasks { uuid }" // -
       + " } } }";
   private static final Map<String, Object> DEFAULT_REPORT_QUERY_VARIABLES = Map.of( // -
       "state", new Report.ReportState[] {Report.ReportState.APPROVED, Report.ReportState.PUBLISHED}, // -
@@ -290,7 +292,7 @@ public class Nvg20WebService implements NVGPortType2012 {
             "Invalid APP-6 version");
       }
       final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-      response.setNvg(makeNvg(at, nvgConfig));
+      response.setNvg(makeNvg(at, nvgConfig, getTasksLabel(), getAllTasks(true)));
       return response;
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -308,10 +310,11 @@ public class Nvg20WebService implements NVGPortType2012 {
     return at != null && at.isValid();
   }
 
-  private NvgType makeNvg(AccessToken at, NvgConfig nvgConfig) {
+  private NvgType makeNvg(AccessToken at, NvgConfig nvgConfig, String tasksLabel,
+      Map<String, String> tasks) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
-    makeReportSchema(nvgType);
+    makeReportSchema(nvgType, tasksLabel);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
 
     // Get the current instant
@@ -339,7 +342,7 @@ public class Nvg20WebService implements NVGPortType2012 {
         .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
             nvgConfig.isIncludeElementConfidentialityLabels(),
             nvgConfig.isAddElementConfidentialityLabelsAsMetadata(), defaultConfidentiality, now,
-            r))
+            tasks, r))
         .toList());
 
     return nvgType;
@@ -350,7 +353,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return location != null && location.getLng() != null && location.getLat() != null;
   }
 
-  private void makeReportSchema(NvgType nvgType) {
+  private void makeReportSchema(NvgType nvgType, String tasksLabel) {
     final SchemaType schemaType = NVG_OF.createSchemaType();
     schemaType.setSchemaId(URI_ANET_SCHEMAS_REPORT);
 
@@ -376,6 +379,7 @@ public class Nvg20WebService implements NVGPortType2012 {
         getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_KEY_OUTCOMES), XSD_STRING);
     addSchemaField(schemaType, ANET_SCHEMA_REPORT_NEXT_STEPS,
         getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_NEXT_STEPS), XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_TASKS, tasksLabel, XSD_STRING);
 
     nvgType.getSchema().add(schemaType);
   }
@@ -399,7 +403,8 @@ public class Nvg20WebService implements NVGPortType2012 {
   private PointType reportToNvgPoint(String app6Version,
       boolean includeElementConfidentialityLabels,
       boolean addElementConfidentialityLabelsAsMetadata,
-      ConfidentialityRecord defaultConfidentiality, Instant reportingTime, Report report) {
+      ConfidentialityRecord defaultConfidentiality, Instant reportingTime,
+      Map<String, String> tasks, Report report) {
     final PointType nvgPoint = NVG_OF.createPointType();
     nvgPoint.setLabel(Utils.ellipsizeOnWords(report.getIntent(),
         Utils.orIfNull((Integer) dict.getDictionaryEntry("fields.report.intent.maxLength"), 40)));
@@ -408,7 +413,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     setLocation(report, nvgPoint);
     setSymbol(app6Version, reportingTime, report, nvgPoint);
     nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
-    setExtendedData(report, nvgPoint);
+    setExtendedData(report, nvgPoint, tasks);
 
     if (includeElementConfidentialityLabels) {
       setConfidentialityInformation(addElementConfidentialityLabelsAsMetadata,
@@ -418,7 +423,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return nvgPoint;
   }
 
-  private void setExtendedData(Report report, PointType nvgPoint) {
+  private void setExtendedData(Report report, PointType nvgPoint, Map<String, String> tasks) {
     final ExtendedDataType extendedDataType = NVG_OF.createExtendedDataType();
     final SimpleDataSectionType simpleDataSectionType = NVG_OF.createSimpleDataSectionType();
     simpleDataSectionType.setSchemaRef("#" + URI_ANET_SCHEMAS_REPORT);
@@ -442,8 +447,15 @@ public class Nvg20WebService implements NVGPortType2012 {
         getOrganizationName(report.getInterlocutorOrg()));
     addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_KEY_OUTCOMES, report.getKeyOutcomes());
     addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_NEXT_STEPS, report.getNextSteps());
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_TASKS,
+        getReportTasks(report.getTasks(), tasks));
     extendedDataType.getSection().add(simpleDataSectionType);
     nvgPoint.setExtendedData(extendedDataType);
+  }
+
+  private String getReportTasks(List<Task> reportTasks, Map<String, String> tasks) {
+    return reportTasks.stream().map(rt -> tasks.get(rt.getUuid()))
+        .collect(Collectors.joining("; "));
   }
 
   private String getEngagementStatus(Report report) {
