@@ -52,6 +52,7 @@ import nato.act.tide.wsdl.nvg20.NvgFilterType;
 import nato.act.tide.wsdl.nvg20.NvgType;
 import nato.act.tide.wsdl.nvg20.PointType;
 import nato.act.tide.wsdl.nvg20.SchemaType;
+import nato.act.tide.wsdl.nvg20.SelectResponseType;
 import nato.act.tide.wsdl.nvg20.SelectType;
 import nato.act.tide.wsdl.nvg20.SelectValueType;
 import nato.act.tide.wsdl.nvg20.SimpleDataSectionType;
@@ -605,10 +606,21 @@ public class Nvg20WebService implements NVGPortType2012 {
     public static NvgConfig from(List<Object> nvgQueryList) throws ResponseStatusException {
       final NvgConfig nvgConfig = new NvgConfig();
       for (final Object object : nvgQueryList) {
-        if (object instanceof InputResponseType inputResponse) {
+        if (object instanceof SelectResponseType selectResponse) {
+          if (APP6_VERSION_ID.equals(selectResponse.getRefid())) {
+            nvgConfig.setApp6Version(
+                Utils.isEmptyOrNull(selectResponse.getSelected()) ? DEFAULT_APP6_VERSION
+                    : selectResponse.getSelected().get(0));
+          } else {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unrecognized select_response: " + selectResponse.getRefid());
+          }
+        } else if (object instanceof InputResponseType inputResponse) {
           if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
             nvgConfig.setAccessToken(inputResponse.getValue());
           } else if (APP6_VERSION_ID.equals(inputResponse.getRefid())) {
+            // Note: this is actually not correct, it should be a SelectResponseType (see above),
+            // however we keep it here for backwards compatibility…
             nvgConfig.setApp6Version(inputResponse.getValue());
           } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
             nvgConfig.setPastDays(Integer.parseInt(inputResponse.getValue()));
@@ -632,6 +644,9 @@ public class Nvg20WebService implements NVGPortType2012 {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Unrecognized input_response: " + inputResponse.getRefid());
           }
+        } else {
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Unrecognized response type: " + object.getClass().getSimpleName());
         }
       }
       return nvgConfig;
@@ -657,6 +672,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       selectType.setId(APP6_VERSION_ID);
       selectType.setRequired(false);
       selectType.setName("APP-6 version");
+      selectType.setMultiple(false);
       final SelectType.Values values = NVG_OF.createSelectTypeValues();
       App6Symbology.VALID_APP6_VERSIONS.forEach(app6Version -> values.getValue()
           .add(getSelectValueType(app6Version, App6Symbology.getVersionHelp(app6Version),
