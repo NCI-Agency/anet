@@ -13,6 +13,8 @@ import SecurityBanner from "components/SecurityBanner"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 
+const POLLING_INTERVAL = 60000
+
 interface TopBarProps {
   handleTopbarHeight: (...args: unknown[]) => unknown
   resetPages: (...args: unknown[]) => unknown
@@ -28,10 +30,31 @@ const TopBar = ({
   toggleMenuAction,
   handleSecurityBannerBottom
 }: TopBarProps) => {
-  const { appSettings, currentUser } = useContext(AppContext)
+  const { appSettings, currentUser, loadAppData } = useContext(AppContext)
   const [bannerVisibility, setBannerVisibility] = useState(false)
   const [height, setHeight] = useState(0)
   const topbarDiv = useRef()
+
+  useEffect(() => {
+    let isLoading = false
+
+    const tick = async () => {
+      if (isLoading) {
+        return
+      }
+      isLoading = true
+      try {
+        await loadAppData()
+      } catch {
+      } finally {
+        isLoading = false
+      }
+    }
+
+    tick()
+    const id = setInterval(tick, POLLING_INTERVAL)
+    return () => clearInterval(id)
+  }, [loadAppData])
 
   const visibilitySetting = parseInt(appSettings[GENERAL_BANNER_VISIBILITY], 10)
   const bannerOptions = {
