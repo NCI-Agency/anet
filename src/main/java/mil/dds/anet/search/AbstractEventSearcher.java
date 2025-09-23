@@ -87,7 +87,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     } else {
       qb.addRecursiveClause(null, "events", new String[] {"\"locationUuid\""}, "parent_locations",
           "\"locationRelationships\"", "\"childLocationUuid\"", "\"parentLocationUuid\"",
-          "locationUuid", query.getLocationUuid(), true, true);
+          "locationUuid", query.getLocationUuid(), true, true, null);
     }
   }
 
@@ -98,7 +98,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     } else {
       qb.addRecursiveClause(null, "events", new String[] {"\"ownerOrgUuid\""}, "parent_owner_orgs",
           "organizations", "uuid", "\"parentOrgUuid\"", "ownerOrgUuid", query.getOwnerOrgUuid(),
-          true, true);
+          true, true, null);
     }
   }
 
@@ -109,7 +109,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     } else {
       qb.addRecursiveClause(null, "events", new String[] {"\"hostOrgUuid\""}, "parent_host_orgs",
           "organizations", "uuid", "\"parentOrgUuid\"", "hostOrgUuid", query.getHostOrgUuid(), true,
-          true);
+          true, null);
     }
   }
 
@@ -120,7 +120,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     } else {
       qb.addRecursiveClause(null, "events", new String[] {"\"adminOrgUuid\""}, "parent_admin_orgs",
           "organizations", "uuid", "\"parentOrgUuid\"", "adminOrgUuid", query.getAdminOrgUuid(),
-          true, true);
+          true, true, null);
     }
   }
 
@@ -131,7 +131,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       qb.addWhereClause("et.\"taskUuid\" IS NULL");
     } else {
       qb.addRecursiveClause(null, "et", "\"taskUuid\"", "parent_tasks", "tasks",
-          "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true);
+          "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true, null);
     }
   }
 
