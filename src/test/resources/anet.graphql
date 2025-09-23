@@ -1424,6 +1424,7 @@ input ReportSearchQueryInput {
   includeEngagementDayOfWeek: Boolean
   locationRecurseStrategy: RecurseStrategy
   locationUuid: [String]
+  notTaskUuid: [String]
   orgRecurseStrategy: RecurseStrategy
   orgUuid: [String]
   pageNum: Int
