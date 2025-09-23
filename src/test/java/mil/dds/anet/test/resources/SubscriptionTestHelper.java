@@ -20,7 +20,6 @@ import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
-import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.SubscribableObject;
 import mil.dds.anet.test.client.Subscription;
@@ -61,14 +60,14 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
   }
 
   public Subscription createSubscription(final String username, final String subscribedObjectType,
-      final String subscribedObjectUuid, final String subscriberUuid, final boolean expectException,
+      final String subscribedObjectUuid, final boolean expectException,
       final boolean subscribedObjectIsNull) {
     try {
-      final SubscriptionInput subscriptionInput = SubscriptionInput.builder()
-          .withSubscribedObjectType(subscribedObjectType)
-          .withSubscribedObjectUuid(subscribedObjectUuid)
-          .withCreatedAt(Instant.ofEpochSecond(12345)).withUpdatedAt(Instant.ofEpochSecond(67890))
-          .withSubscriber(PositionInput.builder().withUuid(subscriberUuid).build()).build();
+      final SubscriptionInput subscriptionInput =
+          SubscriptionInput.builder().withSubscribedObjectType(subscribedObjectType)
+              .withSubscribedObjectUuid(subscribedObjectUuid)
+              .withCreatedAt(Instant.ofEpochSecond(12345))
+              .withUpdatedAt(Instant.ofEpochSecond(67890)).build();
       final Subscription subscription = withCredentials(username,
           t -> mutationExecutor.createSubscription(SUBSCRIPTION_FIELDS, subscriptionInput));
       if (expectException) {
@@ -79,8 +78,7 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
       // These should all be set unconditionally on the server-side
       assertThat(subscription.getUuid()).isNotEqualTo(subscriptionInput.getUuid());
       assertThat(subscription.getCreatedAt()).isNotEqualTo(subscriptionInput.getCreatedAt());
-      assertThat(subscription.getSubscriber().getUuid())
-          .isNotEqualTo(subscriptionInput.getSubscriber().getUuid());
+      assertThat(subscription.getSubscriber().getUuid()).isNotNull();
       // These should be our input
       assertThat(subscription.getUpdatedAt()).isEqualTo(subscriptionInput.getUpdatedAt());
       assertThat(subscription.getSubscribedObjectType())
