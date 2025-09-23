@@ -663,43 +663,38 @@ public class Nvg20WebService implements NVGPortType2012 {
       final NvgConfig nvgConfig = new NvgConfig();
       for (final Object object : nvgQueryList) {
         if (object instanceof SelectResponseType selectResponse) {
-          if (APP6_VERSION_ID.equals(selectResponse.getRefid())) {
-            nvgConfig.setApp6Version(
+          switch (selectResponse.getRefid()) {
+            case APP6_VERSION_ID -> nvgConfig.setApp6Version(
                 Utils.isEmptyOrNull(selectResponse.getSelected()) ? DEFAULT_APP6_VERSION
                     : selectResponse.getSelected().get(0));
-          } else if (EXCLUDE_TASKS.equals(selectResponse.getRefid())) {
-            nvgConfig.setExcludeTaskUuids(selectResponse.getSelected());
-          } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            case EXCLUDE_TASKS -> nvgConfig.setExcludeTaskUuids(selectResponse.getSelected());
+            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Unrecognized select_response: " + selectResponse.getRefid());
           }
         } else if (object instanceof InputResponseType inputResponse) {
-          if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setAccessToken(inputResponse.getValue());
-          } else if (APP6_VERSION_ID.equals(inputResponse.getRefid())) {
-            // Note: this is actually not correct, it should be a SelectResponseType (see above),
-            // however we keep it here for backwards compatibility…
-            nvgConfig.setApp6Version(inputResponse.getValue());
-          } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setPastDays(Integer.parseInt(inputResponse.getValue()));
-          } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setFutureDays(Integer.parseInt(inputResponse.getValue()));
-          } else if (INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL.equals(inputResponse.getRefid())) {
-            nvgConfig.setIncludeDocumentConfidentialityLabel(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else if (ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA
-              .equals(inputResponse.getRefid())) {
-            nvgConfig.setAddDocumentConfidentialityLabelAsMetadata(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
-            nvgConfig.setIncludeElementConfidentialityLabels(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else if (ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA
-              .equals(inputResponse.getRefid())) {
-            nvgConfig.setAddElementConfidentialityLabelsAsMetadata(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          switch (inputResponse.getRefid()) {
+            case ACCESS_TOKEN_ID -> nvgConfig.setAccessToken(inputResponse.getValue());
+            case APP6_VERSION_ID ->
+              // Note: this is actually not correct, it should be a SelectResponseType (see above),
+              // however we keep it here for backwards compatibility…
+              nvgConfig.setApp6Version(inputResponse.getValue());
+            case PAST_PERIOD_IN_DAYS_ID ->
+              nvgConfig.setPastDays(Integer.parseInt(inputResponse.getValue()));
+            case FUTURE_PERIOD_IN_DAYS_ID ->
+              nvgConfig.setFutureDays(Integer.parseInt(inputResponse.getValue()));
+            case INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL ->
+              nvgConfig.setIncludeDocumentConfidentialityLabel(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            case ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA ->
+              nvgConfig.setAddDocumentConfidentialityLabelAsMetadata(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            case INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS ->
+              nvgConfig.setIncludeElementConfidentialityLabels(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            case ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA ->
+              nvgConfig.setAddElementConfidentialityLabelsAsMetadata(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Unrecognized input_response: " + inputResponse.getRefid());
           }
         } else {
