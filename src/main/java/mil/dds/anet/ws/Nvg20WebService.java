@@ -10,10 +10,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
@@ -237,17 +239,37 @@ public class Nvg20WebService implements NVGPortType2012 {
   @Override
   public GetCapabilitiesResponse getCapabilities(GetCapabilities parameters) {
     final GetCapabilitiesResponse response = NVG_OF.createGetCapabilitiesResponse();
-    final String tasksLabel = getLabelFromDict("fields.task.%s", "longLabel");
-    response.setNvgCapabilities(NvgConfig.getCapabilities(tasksLabel, getActiveTasks()));
+    response.setNvgCapabilities(NvgConfig.getCapabilities(getTasksLabel(), getAllTasks(false)));
     return response;
   }
 
-  private List<Task> getActiveTasks() {
+  private String getTasksLabel() {
+    return getLabelFromDict("fields.task.%s", "longLabel");
+  }
+
+  private Map<String, String> getAllTasks(boolean includeInactiveTasks) {
     final TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
     taskSearchQuery.setPageSize(0);
-    taskSearchQuery.setStatus(WithStatus.Status.ACTIVE);
-    final AnetBeanList<Task> tasks = taskDao.search(taskSearchQuery);
-    return tasks.getList();
+    final List<Task> allTasks = taskDao.search(taskSearchQuery).getList();
+    final Map<String, Task> taskMap =
+        allTasks.stream().collect(Collectors.toMap(Task::getUuid, t -> t));
+    final Map<String, String> collect = allTasks.stream()
+        .filter(t -> includeInactiveTasks || t.getStatus() == WithStatus.Status.ACTIVE)
+        .collect(Collectors.toMap(Task::getUuid, t -> getBreadcrumbTrail(t, taskMap)));
+    return collect.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors
+        .toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private String getBreadcrumbTrail(Task t, Map<String, Task> taskMap) {
+    final String separator = " » ";
+    final StringBuilder sb = new StringBuilder();
+    if (!Utils.isEmptyOrNull(t.getParentTaskUuid())) {
+      final Task parentTask = taskMap.get(t.getParentTaskUuid());
+      sb.insert(0, separator);
+      sb.insert(0, getBreadcrumbTrail(parentTask, taskMap));
+    }
+    sb.append(t.getShortName());
+    return sb.toString();
   }
 
   @Override
@@ -607,7 +629,8 @@ public class Nvg20WebService implements NVGPortType2012 {
     private boolean addElementConfidentialityLabelsAsMetadata =
         DEFAULT_ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA;
 
-    public static NvgCapabilitiesType getCapabilities(String tasksLabel, List<Task> activeTasks) {
+    public static NvgCapabilitiesType getCapabilities(String tasksLabel,
+        Map<String, String> tasks) {
       final NvgCapabilitiesType nvgCapabilitiesType = NVG_OF.createNvgCapabilitiesType();
       nvgCapabilitiesType.setVersion(NVG_CAPABILITIES_VERSION);
       final List<CapabilityItemType> capabilityItemTypeList =
@@ -616,7 +639,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       capabilityItemTypeList.add(makeApp6VersionType());
       capabilityItemTypeList.add(makePastPeriodInDays());
       capabilityItemTypeList.add(makeFuturePeriodInDays());
-      capabilityItemTypeList.add(makeExcludeTasksType(tasksLabel, activeTasks));
+      capabilityItemTypeList.add(makeExcludeTasksType(tasksLabel, tasks));
       capabilityItemTypeList.add(makeIncludeDocumentConfidentialityLabel());
       capabilityItemTypeList.add(makeAddDocumentConfidentialityLabelAsMetadata());
       capabilityItemTypeList.add(makeIncludeElementConfidentialityLabels());
@@ -741,15 +764,14 @@ public class Nvg20WebService implements NVGPortType2012 {
       return inputType;
     }
 
-    private static SelectType makeExcludeTasksType(String tasksLabel, List<Task> activeTasks) {
+    private static SelectType makeExcludeTasksType(String tasksLabel, Map<String, String> tasks) {
       final SelectType selectType = NVG_OF.createSelectType();
       selectType.setId(EXCLUDE_TASKS);
       selectType.setRequired(false);
       selectType.setName("Exclude " + tasksLabel);
       selectType.setMultiple(true);
       final SelectType.Values values = NVG_OF.createSelectTypeValues();
-      activeTasks.forEach(task -> values.getValue()
-          .add(getSelectValueType(task.getUuid(), task.getShortName(), false)));
+      tasks.forEach((key, value) -> values.getValue().add(getSelectValueType(key, value, false)));
       selectType.setValues(values);
       final HelpType helpType = NVG_OF.createHelpType();
       helpType.setText("Exclude engagement reports linked to these " + tasksLabel);
