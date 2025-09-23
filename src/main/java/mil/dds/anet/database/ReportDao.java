@@ -1197,8 +1197,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
     final boolean isParam = (obj != null);
-    if (isParam && obj.getState() != ReportState.PUBLISHED
-        && obj.getState() != ReportState.CANCELLED) {
+    if (isParam && !Set.of(ReportState.APPROVED, ReportState.PUBLISHED, ReportState.CANCELLED)
+        .contains(obj.getState())) {
       return null;
     }
 
