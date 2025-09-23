@@ -66,13 +66,16 @@ const config = {
       browserName: "chrome",
       browserVersion: "131", // or "stable"
       acceptInsecureCerts: true,
+      // Don't use the Bidi protocol, as some XPath selectors currently fail to work there;
+      // see https://github.com/webdriverio/webdriverio/issues/14675
+      "wdio:enforceWebDriverClassic": true,
       "goog:chromeOptions": {
-        // run in incognito mode
+        // NOTE: wdio v9 always runs in incognito mode
         // Note: it is important to have a big window height as otherwise
         // while scrolling some form fields might go under the header and
         // therefore we would get failing tests related to these fields.
         args: [
-          "--incognito",
+          // "--incognito",
           "--headless=old",
           "--disable-gpu",
           "--disable-search-engine-choice-screen",

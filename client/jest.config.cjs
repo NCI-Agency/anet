@@ -3,8 +3,8 @@ module.exports = {
   moduleNameMapper: {
     "^d3$": "<rootDir>/node_modules/d3/dist/d3.min.js",
     "^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
-      "<rootDir>/config/jest/FileStub.js",
-    "^.+\\.css$": "<rootDir>/config/jest/CSSStub.js"
+      "<rootDir>/config/jest/FileStub.cjs",
+    "^.+\\.css$": "<rootDir>/config/jest/CSSStub.cjs"
   },
   reporters: [
     "default",
@@ -16,8 +16,8 @@ module.exports = {
       }
     ]
   ],
-  setupFiles: ["<rootDir>/config/polyfills"],
-  setupFilesAfterEnv: ["<rootDir>/jest-setup"],
+  setupFiles: ["<rootDir>/config/polyfills.cjs"],
+  setupFilesAfterEnv: ["<rootDir>/jest-setup.cjs"],
   testEnvironment: "jsdom",
   transform: {
     "^.+\\.(m?js|jsx)$": "babel-jest",

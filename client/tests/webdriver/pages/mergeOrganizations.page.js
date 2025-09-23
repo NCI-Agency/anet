@@ -53,7 +53,7 @@ class MergeOrganizations extends Page {
     const buttonDiv = await browser.$(
       `//div[@id="${side}-merge-org-col"]//div[text()="${text}"]`
     )
-    const button = await (await buttonDiv.$("..")).$("..")
+    const button = await buttonDiv.parentElement().parentElement()
     return button.$("small > button")
   }
 

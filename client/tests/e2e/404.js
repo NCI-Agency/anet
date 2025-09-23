@@ -1,4 +1,4 @@
-const test = require("../util/test")
+import test from "../util/test.cjs"
 
 test("Report 404", async t => {
   t.plan(1)

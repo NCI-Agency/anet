@@ -70,8 +70,8 @@ class CreateNewLocation extends Page {
     return (await this.getForm())
       .$(".bp6-popover-content table")
       .$("button*=Latitude")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
       .$("span:first-child")
   }
 
@@ -79,8 +79,8 @@ class CreateNewLocation extends Page {
     return (await this.getForm())
       .$(".bp6-popover-content table")
       .$("button*=Latitude")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
       .$("span:nth-child(3)")
   }
 
@@ -89,8 +89,8 @@ class CreateNewLocation extends Page {
     return (await this.getForm())
       .$(".bp6-popover-content table")
       .$("button*=MGRS")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
       .$("span:first-child")
   }
 

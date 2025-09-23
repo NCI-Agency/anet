@@ -1,5 +1,5 @@
-const uuidv4 = require("uuid").v4
-const test = require("../util/test")
+import { v4 as uuidv4 } from "uuid"
+import test from "../util/test.cjs"
 
 test.serial("checking superuser permissions", async t => {
   t.plan(25)

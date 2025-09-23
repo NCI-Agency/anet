@@ -87,7 +87,7 @@ class CreateOrganization extends Page {
   async closeEditApp6Modal() {
     const applyButton = await browser.$('//button[text()="Apply"]')
     await applyButton.click()
-    await applyButton.waitForDisplayed({ reverse: true })
+    await (await applyButton).waitForExist({ reverse: true, timeout: 3000 })
   }
 
   async getApp6DropdownValue(field) {
@@ -107,7 +107,7 @@ class CreateOrganization extends Page {
     const matchingItem = await dropdownMenu.$(`[data-key="${value}"]`)
     await matchingItem.click()
 
-    await dropdownMenu.waitForDisplayed({ reverse: true })
+    await (await dropdownMenu).waitForExist({ reverse: true, timeout: 3000 })
   }
 
   async openAsSuperuser() {

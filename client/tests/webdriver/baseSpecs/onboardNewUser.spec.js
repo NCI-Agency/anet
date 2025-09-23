@@ -64,10 +64,10 @@ describe("Onboard new user login", () => {
 
     await (await OnboardPage.getLastName()).click()
     const errorMessage = await (await OnboardPage.getEndOfTourDate())
-      .$("..")
-      .$("..")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
+      .parentElement()
+      .parentElement()
       .$("div.invalid-feedback")
     await errorMessage.waitForExist()
     await errorMessage.waitForDisplayed()
@@ -97,6 +97,7 @@ describe("Onboard new user login", () => {
       await OnboardPage.getCountryHelpBlock()
     ).waitForExist({ reverse: true })
 
+    await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())
     await (
       await OnboardPage.getEndOfTourDate()
     ).setValue(personDetails.endOfTourDate)
@@ -104,7 +105,6 @@ describe("Onboard new user login", () => {
     await browser.pause(500) // wait for the error message to disappear
     await OnboardPage.submitForm()
 
-    await OnboardPage.waitForAlertWarningToLoad()
     await OnboardPage.logout()
   })
 })

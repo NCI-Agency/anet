@@ -2,6 +2,8 @@ import { expect } from "chai"
 import Home from "../pages/home.page"
 import Search from "../pages/search.page"
 
+const SHORT_WAIT_MS = 1000
+
 const ARTHURS_DRAFT_REPORT = "Test report with rich text"
 const ERINS_DRAFT_REPORT = "Erin's Draft report, ready for submission"
 const SEARCH_TITLE_TEXTS = [
@@ -39,7 +41,7 @@ describe("When checking the home page tiles", () => {
       // Load drafts
       await (await Home.getMyDraftReports()).click()
       await Search.selectReportTable()
-      await browser.pause(500)
+      await browser.pause(SHORT_WAIT_MS)
       // Arthur's draft report should be there
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -51,7 +53,7 @@ describe("When checking the home page tiles", () => {
       await (await Home.getSearchBar()).setValue(ERINS_DRAFT_REPORT)
       await (await Home.getSubmitSearch()).click()
       await Search.selectReportTable()
-      await browser.pause(500)
+      await browser.pause(SHORT_WAIT_MS)
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (await Search.linkOfReportFound(ERINS_DRAFT_REPORT)).isExisting()
@@ -59,10 +61,11 @@ describe("When checking the home page tiles", () => {
     })
     it("should see the correct number of saved searches when logged in as admin", async () => {
       await Home.openAsAdminUser()
-      await (await Home.getHomeTilesContainer()).waitForExist()
-      await (await Home.getHomeTilesContainer()).waitForDisplayed()
+      // wait for the saved searches to be loaded
+      await (await Home.getSavedSearch()).waitForExist()
+      await (await Home.getSavedSearch()).waitForDisplayed()
       const savedSearches = await Home.getSavedSearches()
-      expect(savedSearches.length).to.eq(3)
+      expect(await savedSearches.length).to.eq(3)
       expect(await Home.getSavedSearchTitleText(savedSearches[0])).to.eq(
         SEARCH_TITLE_TEXTS[0]
       )
@@ -86,7 +89,7 @@ describe("When checking the home page tiles", () => {
       // Load drafts
       await (await Home.getMyDraftReports()).click()
       await Search.selectReportTable()
-      await browser.pause(500)
+      await browser.pause(SHORT_WAIT_MS)
       // Erin's draft report should be there
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -96,7 +99,7 @@ describe("When checking the home page tiles", () => {
       await (await Home.getSearchBar()).setValue(ARTHURS_DRAFT_REPORT)
       await (await Home.getSubmitSearch()).click()
       await Search.selectReportTable()
-      await browser.pause(500)
+      await browser.pause(SHORT_WAIT_MS)
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (

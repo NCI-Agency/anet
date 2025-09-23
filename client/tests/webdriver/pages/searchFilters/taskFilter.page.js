@@ -43,7 +43,7 @@ class TaskFilter extends Page {
     return taskRows.length
   }
 
-  async openAllCollapsedTasks(nonRecursive) {
+  async openAllCollapsedTasks() {
     await browser.waitUntil(
       async () =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
@@ -52,12 +52,24 @@ class TaskFilter extends Page {
       "#taskUuid-popover .bp6-icon-chevron-right"
     )
     while (expandibleTasks.length > 0) {
-      for (const task of expandibleTasks) {
-        await task.click()
-      }
-      expandibleTasks = nonRecursive
-        ? []
-        : await browser.$$("#taskUuid-popover .bp6-icon-chevron-right")
+      const task = await expandibleTasks[0]
+      await task.click()
+      expandibleTasks = await browser.$$(
+        "#taskUuid-popover .bp6-icon-chevron-right"
+      )
+    }
+  }
+
+  async openFirstLevelCollapsedTasks() {
+    await browser.waitUntil(
+      async () =>
+        await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
+    )
+    const expandibleTasks = await browser.$$(
+      "#taskUuid-popover .bp6-icon-chevron-right"
+    )
+    for (const task of expandibleTasks) {
+      await task.click()
     }
   }
 

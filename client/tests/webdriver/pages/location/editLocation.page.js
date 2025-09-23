@@ -29,8 +29,8 @@ class EditLocation extends Page {
     return browser
       .$(".bp6-popover-content table")
       .$("button*=Latitude")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
       .$("span:first-child")
   }
 
@@ -38,8 +38,8 @@ class EditLocation extends Page {
     return browser
       .$(".bp6-popover-content table")
       .$("button*=Latitude")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
       .$("span:nth-child(3)")
   }
 
@@ -48,8 +48,8 @@ class EditLocation extends Page {
     return browser
       .$(".bp6-popover-content table")
       .$("button*=MGRS")
-      .$("..")
-      .$("..")
+      .parentElement()
+      .parentElement()
       .$("span:first-child")
   }
 
