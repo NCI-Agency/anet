@@ -863,7 +863,7 @@ properties:
                   items:
                     type: string
                     enum:
-                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY, TOWN, MUNICIPALITY]
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY]
           reportPeople:
             required: [optionalAttendingAuthor, optionalPrimaryAdvisor, optionalPrimaryPrincipal]
             properties:
