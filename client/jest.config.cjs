@@ -24,6 +24,6 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest"
   },
   transformIgnorePatterns: [
-    "<rootDir>/node_modules/(?!(change-case|geographiclib-mgrs|jsonpath-plus|react-resize-detector|title-case)/)"
+    "<rootDir>/node_modules/(?!(change-case|geographiclib-mgrs|jsonpath-plus|react-resize-detector|title-case|uuid)/)"
   ]
 }
