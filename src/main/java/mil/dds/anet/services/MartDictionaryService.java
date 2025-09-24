@@ -154,12 +154,6 @@ public class MartDictionaryService implements IMartDictionaryService {
     return municipalityGroup;
   }
 
-  private List<Location> getMunicipalities() {
-    final LocationSearchQuery query = new LocationSearchQuery();
-    query.setType(LocationType.MUNICIPALITY);
-    return locationDao.search(query).getList();
-  }
-
   private List<Map<String, String>> exportTasksToMartDictionary(Task rootTask) {
     final List<Map<String, String>> tasks = new ArrayList<>();
     final TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
@@ -203,10 +197,13 @@ public class MartDictionaryService implements IMartDictionaryService {
   private List<Map<String, Object>> exportMunicipalitiesToMartDictionary(Location municipalityGroup)
       throws JsonProcessingException {
     final List<Map<String, Object>> result = new ArrayList<>();
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setType(LocationType.MUNICIPALITY);
+    query.setPageSize(0);
+
     final List<Location> municipalities =
-        new ArrayList<>(municipalityGroup.loadChildrenLocations(engine.getContext(), null).join()
-            .stream().filter(m -> m.getStatus() == WithStatus.Status.ACTIVE).toList());
-    municipalities.addAll(getMunicipalities());
+        new ArrayList<>(municipalityGroup.loadChildrenLocations(engine.getContext(), query).join());
+
     municipalities.sort(Comparator.comparing(Location::getName));
     for (final Location m : municipalities) {
       final Map<String, Object> municipality = new LinkedHashMap<>();
@@ -215,9 +212,14 @@ public class MartDictionaryService implements IMartDictionaryService {
       // Municipality fields
       municipality.put("guid", m.getUuid());
       addCustomFields(MART_DICT_MUNICIPALITY_CUSTOM_FIELDS, municipality, m);
+      final LocationSearchQuery childQuery = new LocationSearchQuery();
+      childQuery.setType(LocationType.TOWN);
+      childQuery.setStatus(WithStatus.Status.ACTIVE);
+      childQuery.setPageSize(0);
+
       final List<Location> municipalityLocations =
-          new ArrayList<>(m.loadChildrenLocations(engine.getContext(), null).join().stream()
-              .filter(l -> l.getStatus() == WithStatus.Status.ACTIVE).toList());
+          new ArrayList<>(m.loadChildrenLocations(engine.getContext(), childQuery).join());
+
       municipalityLocations.sort(Comparator.comparing(Location::getName));
       for (final Location l : municipalityLocations) {
         final Map<String, Object> location = new LinkedHashMap<>();
