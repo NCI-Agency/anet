@@ -67,6 +67,9 @@ import nato.stanag4778.bindinginformation10.MetadataBindingContainerType;
 import nato.stanag4778.bindinginformation10.MetadataBindingType;
 import nato.stanag4778.bindinginformation10.MetadataType;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -234,19 +237,23 @@ public class Nvg20WebService implements NVGPortType2012 {
   @Override
   public GetNvgResponse getNvg(GetNvg parameters) {
     final NvgFilterType nvgFilter = parameters.getNvgFilter();
-    if (nvgFilter != null) {
-      final NvgConfig nvgConfig =
-          NvgConfig.from(nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse());
-      final AccessToken at = getAccessToken(nvgConfig.getAccessToken());
-      if (isValidAccessToken(at)) {
-        if (!App6Symbology.isValidApp6Version(nvgConfig.getApp6Version())) {
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-              "Invalid APP-6 version");
-        }
-        final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-        response.setNvg(makeNvg(at, nvgConfig));
-        return response;
+    final NvgConfig nvgConfig = NvgConfig.from(nvgFilter == null ? List.of()
+        : nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse());
+    // If we get authentication through a bearer token, use it,
+    // else fall back to the access token in the SOAP request
+    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    final String accessToken =
+        authentication instanceof BearerTokenAuthenticationToken bat ? bat.getToken()
+            : nvgConfig.getAccessToken();
+    final AccessToken at = getAccessToken(accessToken);
+    if (isValidAccessToken(at)) {
+      if (!App6Symbology.isValidApp6Version(nvgConfig.getApp6Version())) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Invalid APP-6 version");
       }
+      final GetNvgResponse response = NVG_OF.createGetNvgResponse();
+      response.setNvg(makeNvg(at, nvgConfig));
+      return response;
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Must provide a valid Web Service Access Token");
@@ -633,13 +640,14 @@ public class Nvg20WebService implements NVGPortType2012 {
     private static InputType makeAccessTokenType() {
       final InputType inputType = NVG_OF.createInputType();
       inputType.setId(ACCESS_TOKEN_ID);
-      inputType.setRequired(true);
+      inputType.setRequired(false);
       inputType.setType(InputTypeType.STRING);
       inputType.setName("Web Service Access Token");
       inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
       final HelpType helpType = NVG_OF.createHelpType();
-      helpType.setText(
-          "The web service access token required for authentication; the token can be provided by the ANET administrator");
+      helpType.setText("The web service access token required for authentication;"
+          + " the token can be provided by the ANET administrator."
+          + " Alternatively this token may be specified as the password field in HTTP Basic Auth.");
       inputType.setHelp(helpType);
       return inputType;
     }

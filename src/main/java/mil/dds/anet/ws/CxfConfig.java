@@ -20,6 +20,7 @@ public class CxfConfig {
   @Bean
   public Endpoint nvg20Endpoint() {
     EndpointImpl endpoint = new EndpointImpl(bus, nvg20WebService);
+    endpoint.getInInterceptors().add(new BasicAuthAuthorizationInterceptor());
     endpoint.publish("/nvg/20");
     return endpoint;
   }

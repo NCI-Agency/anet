@@ -46,7 +46,7 @@
 		<xsd:attributeGroup ref="simple-attributes"/>
 		<xsd:attribute name="required" type="xsd:boolean" use="optional" default="false">
 			<xsd:annotation>
-				<xsd:documentation>Identifies whether the element is required in the query			</xsd:documentation>
+				<xsd:documentation>Identifies whether the element is required in the query.</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
@@ -81,7 +81,7 @@
 				<xsd:sequence>
 					<xsd:element name="values">
 						<xsd:annotation>
-							<xsd:documentation>The set of valid values.	</xsd:documentation>
+							<xsd:documentation>The set of valid values.</xsd:documentation>
 						</xsd:annotation>
 						<xsd:complexType>
 							<xsd:sequence>
