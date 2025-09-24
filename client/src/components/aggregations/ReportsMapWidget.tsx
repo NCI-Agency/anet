@@ -1,10 +1,11 @@
 import { AggregationWidgetPropType } from "components/aggregations/utils"
-import Leaflet, { ICON_TYPES } from "components/Leaflet"
-import _escape from "lodash/escape"
+import Leaflet, { ICON_TYPES, MarkerPopupProps } from "components/Leaflet"
+import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Report } from "models"
 import moment from "moment"
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
+import { createPortal } from "react-dom"
 
 const getIcon = report => {
   if (report.state === Report.STATE.CANCELLED) {
@@ -29,6 +30,7 @@ const ReportsMapWidget = ({
   whenUnspecified = null,
   ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ReportsMapWidgetProps) => {
+  const [markerPopup, setMarkerPopup] = useState<MarkerPopupProps>({})
   const markers = useMemo(() => {
     if (!values.length) {
       return []
@@ -36,17 +38,12 @@ const ReportsMapWidget = ({
     const markerArray = []
     values.forEach(report => {
       if (Location.hasCoordinates(report.location)) {
-        let label = `<b>Report:</b> <a href="${Report.pathFor(report)}" target="_blank">${_escape(report.intent || "<undefined>")}</a>` // escape HTML in intent!
-        label += `<br/><b>Location:</b> ${_escape(report.location.name)}` // escape HTML in locationName!
-        if (report.engagementDate) {
-          label += `<br/><b>Date:</b> ${moment(report.engagementDate).format(Report.getEngagementDateFormat())}`
-        }
         markerArray.push({
           id: report.uuid,
           icon: getIcon(report),
           lat: report.location.lat,
           lng: report.location.lng,
-          name: label
+          contents: report
         })
       }
     })
@@ -59,13 +56,42 @@ const ReportsMapWidget = ({
     <div className="non-scrollable">
       <Leaflet
         markers={markers}
+        setMarkerPopup={setMarkerPopup}
         width={width}
         height={height}
         mapId={widgetId}
         marginBottom={0}
       />
+      {markerPopup.container &&
+        createPortal(
+          renderMarkerPopupContents(markerPopup.contents),
+          markerPopup.container
+        )}
     </div>
   )
+
+  function renderMarkerPopupContents(report) {
+    return (
+      <>
+        <b>Report:</b> <LinkTo modelType="Report" model={report} />
+        <br />
+        <b>Location:</b>{" "}
+        <LinkTo
+          modelType="Location"
+          model={{ uuid: report?.location?.uuid, name: report?.location?.name }}
+        />
+        {report.engagementDate && (
+          <>
+            <br />
+            <b>Date:</b>{" "}
+            {moment(report.engagementDate).format(
+              Report.getEngagementDateFormat()
+            )}
+          </>
+        )}
+      </>
+    )
+  }
 }
 
 export default ReportsMapWidget

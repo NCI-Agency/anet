@@ -1,4 +1,16 @@
-import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
+import { gql } from "@apollo/client"
+import API from "api"
+import LinkTo from "components/LinkTo"
+import {
+  Control,
+  CRS,
+  DivIcon,
+  Icon,
+  Map,
+  Marker,
+  Point,
+  TileLayer
+} from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
@@ -17,6 +29,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
 import MARKER_ICON_AMBER from "resources/leaflet/marker-icon-amber.png"
@@ -24,6 +37,8 @@ import MARKER_ICON_BLUE_2X from "resources/leaflet/marker-icon-blue-2x.png"
 import MARKER_ICON_BLUE from "resources/leaflet/marker-icon-blue.png"
 import MARKER_ICON_GREEN_2X from "resources/leaflet/marker-icon-green-2x.png"
 import MARKER_ICON_GREEN from "resources/leaflet/marker-icon-green.png"
+import MARKER_ICON_LIGHT_2X from "resources/leaflet/marker-icon-light-2x.png"
+import MARKER_ICON_LIGHT from "resources/leaflet/marker-icon-light.png"
 import MARKER_ICON_SEARCH from "resources/leaflet/marker-icon-search.svg"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
@@ -91,10 +106,16 @@ const iconDefault = new Icon({
   iconUrl: MARKER_ICON,
   iconRetinaUrl: MARKER_ICON_2X
 })
+const iconLight = new Icon({
+  ...commonIconProps,
+  iconUrl: MARKER_ICON_LIGHT,
+  iconRetinaUrl: MARKER_ICON_LIGHT_2X
+})
 export const ICON_TYPES = {
   AMBER: iconAmber,
   BLUE: iconBlue,
   GREEN: iconGreen,
+  LIGHT: iconLight,
   DEFAULT: iconDefault
 }
 
@@ -125,20 +146,80 @@ const addLayers = (map, layerControl) => {
   }
 }
 
+function createMarker(
+  latLng,
+  m,
+  setPopup: (markerPopupProps: MarkerPopupProps) => void,
+  map,
+  zIndexOffset
+) {
+  const marker = new Marker(latLng, {
+    icon: m.icon || ICON_TYPES.DEFAULT,
+    draggable: m.draggable || false,
+    autoPan: m.autoPan || false,
+    id: m.id,
+    zIndexOffset
+  })
+  if (m.name) {
+    marker.bindPopup(m.name)
+  } else if (m.contents) {
+    const popupDiv = Object.assign(document.createElement("div"), {
+      id: m.id,
+      style: "width: 200px;"
+    })
+    marker.bindPopup(() => {
+      setPopup?.({ container: popupDiv, contents: m.contents })
+      return popupDiv
+    })
+  }
+  if (m.onMove) {
+    marker.on("moveend", event => m.onMove(event, map))
+  }
+  return marker
+}
+
+function wrapLng(lng) {
+  // Wrap lng around the antimeridian
+  return lng < 0 ? lng + 360.0 : lng - 360.0
+}
+
+export interface MarkerPopupProps {
+  container?: HTMLElement
+  contents?: any
+}
+
 interface LeafletProps {
   width?: number | string
   height?: number | string
   marginBottom?: number | string
   markers?: any[]
+  setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
 }
+
+const NEARBY_LOCATIONS_GQL = gql`
+  query ($bounds: BoundingBoxInput!) {
+    locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        lat
+        lng
+      }
+    }
+  }
+`
 
 const Leaflet = ({
   width = DEFAULT_MAP_STYLE.width,
   height = DEFAULT_MAP_STYLE.height,
   marginBottom = DEFAULT_MAP_STYLE.marginBottom,
   markers,
+  setMarkerPopup,
   mapId: initialMapId,
   onMapClick
 }: LeafletProps) => {
@@ -157,8 +238,14 @@ const Leaflet = ({
 
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
+  const [locationMarkerPopup, setLocationMarkerPopup] =
+    useState<MarkerPopupProps>({})
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
-  const prevMarkersRef = useRef()
+  const prevMarkersRef = useRef(null)
+
+  const anetLocationsLayerRef = useRef(null)
+  const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
+  const [anetLocationsVars, setAnetLocationsVars] = useState({})
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -166,19 +253,7 @@ const Leaflet = ({
         const latLng = Location.hasCoordinates(m)
           ? [m.lat, m.lng]
           : map.getCenter()
-        const marker = new Marker(latLng, {
-          icon: m.icon || ICON_TYPES.DEFAULT,
-          draggable: m.draggable || false,
-          autoPan: m.autoPan || false,
-          id: m.id
-        })
-        if (m.name) {
-          marker.bindPopup(m.name)
-        }
-        if (m.onMove) {
-          marker.on("moveend", event => m.onMove(event, map))
-        }
-        markerLayer.addLayer(marker)
+        markerLayer.addLayer(createMarker(latLng, m, setMarkerPopup, map))
       })
 
       if (newMarkers.length > 0) {
@@ -186,8 +261,17 @@ const Leaflet = ({
           map.fitBounds(markerLayer.getBounds(), { maxZoom })
         }
       }
+
+      // Add a copy of each marker, wrapped around the antimeridian
+      newMarkers.forEach(m => {
+        if (Location.hasCoordinates(m)) {
+          markerLayer.addLayer(
+            createMarker([m.lat, wrapLng(m.lng)], m, setMarkerPopup, map)
+          )
+        }
+      })
     },
-    [map, markerLayer]
+    [map, markerLayer, setMarkerPopup]
   )
 
   useEffect(() => {
@@ -196,6 +280,7 @@ const Leaflet = ({
       {
         zoomControl: true,
         gestureHandling: true,
+        worldCopyJump: true,
         fullscreenControl: true,
         fullscreenControlOptions: { position: "topleft" }
       },
@@ -232,11 +317,132 @@ const Leaflet = ({
     const newMarkerLayer = new MarkerClusterGroup().addTo(newMap)
     setMarkerLayer(newMarkerLayer)
 
+    // anetLocations layer
+    const anetLocationsLayer = new MarkerClusterGroup({
+      iconCreateFunction: cluster => {
+        const childCount = cluster.getChildCount()
+
+        let c = " marker-cluster-"
+        if (childCount < 10) {
+          c += "small"
+        } else if (childCount < 100) {
+          c += "medium"
+        } else {
+          c += "large"
+        }
+
+        return new DivIcon({
+          html: `<div><span>${childCount}</span></div>`,
+          className: `marker-cluster locations-marker-cluster ${c}`,
+          iconSize: new Point(40, 40)
+        })
+      }
+    })
+    anetLocationsLayerRef.current = anetLocationsLayer
+    layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
+
+    const updateAnetLocationsVarsFromMap = () => {
+      const mapBounds = newMap.wrapLatLngBounds(newMap.getBounds())
+      const bounds = {
+        minLng: mapBounds._southWest.lng,
+        minLat: mapBounds._southWest.lat,
+        maxLng: mapBounds._northEast.lng,
+        maxLat: mapBounds._northEast.lat
+      }
+      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
+      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
+        setAnetLocationsVars({ bounds })
+      }
+    }
+
+    newMap.on("overlayadd", e => {
+      if (e.layer === anetLocationsLayer) {
+        setAnetLocationsEnabled(true)
+        updateAnetLocationsVarsFromMap()
+      }
+    })
+    newMap.on("overlayremove", e => {
+      if (e.layer === anetLocationsLayer) {
+        setAnetLocationsEnabled(false)
+        anetLocationsLayer.clearLayers()
+      }
+    })
+    newMap.on("moveend", () => {
+      if (newMap.hasLayer(anetLocationsLayer)) {
+        updateAnetLocationsVarsFromMap()
+      }
+    })
+
     setDoInitializeMarkerLayer(true)
 
     // Destroy map when done
     return () => newMap.remove()
   }, [mapId])
+
+  function getExistingIds(layerGroup) {
+    const ids = new Set<string>()
+    layerGroup?.eachLayer((layer: any) => {
+      if (layer?.options?.id) {
+        ids.add(String(layer.options.id))
+      }
+    })
+    return ids
+  }
+
+  useEffect(() => {
+    if (!anetLocationsEnabled || !anetLocationsLayerRef.current) {
+      return
+    }
+
+    const getAnetLocations = async () =>
+      await API.query(NEARBY_LOCATIONS_GQL, anetLocationsVars)
+
+    getAnetLocations()
+      .then(rows => {
+        const anetLocations = rows?.locationList?.list || []
+        const layer = anetLocationsLayerRef.current
+
+        const existingIds = getExistingIds(markerLayer)
+
+        layer.clearLayers()
+        anetLocations?.forEach((loc: any) => {
+          if (!Location.hasCoordinates(loc) || existingIds.has(loc.uuid)) {
+            return
+          }
+          const m = {
+            icon: ICON_TYPES.LIGHT,
+            id: loc.uuid,
+            contents: loc
+          }
+          layer.addLayer(
+            createMarker(
+              [loc.lat, loc.lng],
+              m,
+              setLocationMarkerPopup,
+              map,
+              -1000
+            )
+          )
+          // Add a copy of the marker, wrapped around the antimeridian
+          layer.addLayer(
+            createMarker(
+              [loc.lat, wrapLng(loc.lng)],
+              m,
+              setLocationMarkerPopup,
+              map,
+              -1000
+            )
+          )
+        })
+      })
+      .catch(() => {})
+  }, [
+    anetLocationsEnabled,
+    anetLocationsVars,
+    markerLayer,
+    map,
+    setLocationMarkerPopup
+  ])
 
   useEffect(() => {
     /*
@@ -301,7 +507,25 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
-  return <div id={mapId} style={style} />
+  return (
+    <>
+      <div id={mapId} style={style} />
+      {locationMarkerPopup.container &&
+        createPortal(
+          renderLocationMarkerPopupContents(locationMarkerPopup.contents),
+          locationMarkerPopup.container
+        )}
+    </>
+  )
+
+  function renderLocationMarkerPopupContents(location) {
+    return (
+      <LinkTo
+        modelType="Location"
+        model={{ uuid: location?.uuid, name: location?.name }}
+      />
+    )
+  }
 }
 
 export default Leaflet

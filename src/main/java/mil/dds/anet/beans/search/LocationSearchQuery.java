@@ -17,6 +17,9 @@ public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationS
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy locationRecurseStrategy;
+  @GraphQLQuery
+  @GraphQLInputField
+  private BoundingBox boundingBox;
 
   public LocationSearchQuery() {
     super(LocationSearchSortBy.NAME);
@@ -46,11 +49,22 @@ public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationS
     this.locationRecurseStrategy = locationRecurseStrategy;
   }
 
+  public BoundingBox getBoundingBox() {
+    return boundingBox;
+  }
+
+  public void setBoundingBox(BoundingBox boundingBox) {
+    this.boundingBox = boundingBox;
+  }
+
   @Override
   public LocationSearchQuery clone() throws CloneNotSupportedException {
     final LocationSearchQuery clone = (LocationSearchQuery) super.clone();
     if (locationUuid != null) {
       clone.setLocationUuid(new ArrayList<>(locationUuid));
+    }
+    if (boundingBox != null) {
+      clone.setBoundingBox((BoundingBox) boundingBox.clone());
     }
     return clone;
   }
