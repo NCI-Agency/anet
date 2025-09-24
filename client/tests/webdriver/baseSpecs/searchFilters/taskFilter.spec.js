@@ -1,16 +1,22 @@
 import { expect } from "chai"
 import TaskFilter from "../../pages/searchFilters/taskFilter.page"
 
+const NR_OF_TOP_LEVEL_TASKS = 15
+const INITIAL_NR_OF_TASKS = 57
+
 describe("When using the task filter on the reports search", () => {
   it("Should show all the tasks", async () => {
     await TaskFilter.open()
     await TaskFilter.openTaskFilter()
 
-    expect(await TaskFilter.getTaskCount()).to.equal(13)
+    expect(await TaskFilter.getTaskCount()).to.equal(NR_OF_TOP_LEVEL_TASKS)
 
     await TaskFilter.openAllCollapsedTasks()
-    // depending on the test run sequence, one more task may have been created
-    expect(await TaskFilter.getTaskCount()).to.be.oneOf([52, 53, 54])
+    // depending on the test run sequence, more subtasks may have been created
+    expect(await TaskFilter.getTaskCount()).to.be.within(
+      INITIAL_NR_OF_TASKS,
+      INITIAL_NR_OF_TASKS + 2
+    )
   })
 
   it("Should show only the filtered tasks", async () => {

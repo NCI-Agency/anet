@@ -4,6 +4,7 @@ import ShowAllTasks from "../pages/showAllTasks.page"
 const FIRST_TASK_NAME = "EF 1 | Budget and Planning"
 const FIRST_TASK_DESCENDANT_NAME = "1.1 | Budgeting in the MoD"
 const NO_DESCENDANTS_TASK_NAME = "EF 5 | Force Sustainment (Logistics)"
+const NR_OF_ACTIVE_TOP_LEVEL_TASKS = 14
 
 describe("Show All Tasks Page", () => {
   beforeEach(async () => {
@@ -14,7 +15,7 @@ describe("Show All Tasks Page", () => {
 
   it("Should display all top tasks", async () => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    expect(topTasks).to.have.lengthOf(13)
+    expect(topTasks).to.have.lengthOf(NR_OF_ACTIVE_TOP_LEVEL_TASKS)
     for (const task of topTasks) {
       expect(await task.isDisplayed()).to.equal(true)
     }
