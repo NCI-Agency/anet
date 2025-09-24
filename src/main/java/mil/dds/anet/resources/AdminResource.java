@@ -8,7 +8,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -109,21 +109,20 @@ public class AdminResource {
     }
     final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     AuthUtils.assertAdministrator(user);
+
+    // Create MART dictionary
+    final Map<String, Object> dictionaryForMart = martDictionaryService.createDictionaryForMart();
+
+    // Dump to Yaml and return
+    final DumperOptions options = new DumperOptions();
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    options.setIndent(2);
+    options.setIndicatorIndent(2);
+    options.setIndentWithIndicator(true);
+
+    final Yaml yaml = new Yaml(options);
     final StreamingResponseBody responseBody = outputStream -> {
-      try (final PrintWriter writer =
-          new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-        final Map<String, Object> dictionaryForMart =
-            martDictionaryService.createDictionaryForMart();
-
-        // Set YAML formatting options
-        final DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setIndent(2);
-        options.setIndicatorIndent(2);
-        options.setIndentWithIndicator(true);
-
-        // Create YAML instance
-        final Yaml yaml = new Yaml(options);
+      try (final Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
         yaml.dump(dictionaryForMart, writer);
       }
     };
