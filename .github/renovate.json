@@ -73,7 +73,6 @@
     },
     {
       "matchPackageNames": [
-        "chai",
         "html-to-image",
         "react-router-dom",
         "com.graphql-java:graphql-java",

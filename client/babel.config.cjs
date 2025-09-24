@@ -23,6 +23,7 @@ module.exports = {
     ],
     "@babel/plugin-proposal-throw-expressions",
     "@babel/plugin-transform-class-properties",
+    "@babel/plugin-transform-class-static-block",
     "@babel/plugin-transform-export-namespace-from",
     "@babel/plugin-transform-json-strings",
     "@babel/plugin-transform-logical-assignment-operators",
