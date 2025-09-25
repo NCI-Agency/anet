@@ -283,7 +283,7 @@ export default {
   },
 
   isEmptyValue: function (value) {
-    return _isDate(value) ? false : _isEmpty(value)
+    return !_isDate(value) && _isEmpty(value)
   },
 
   pushHash: function (hash) {

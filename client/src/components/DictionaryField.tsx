@@ -1,5 +1,6 @@
 import _isEmpty from "lodash/isEmpty"
 import React from "react"
+import utils from "utils"
 
 interface DictionaryFieldProps {
   wrappedComponent?: React.ReactElement
@@ -20,7 +21,7 @@ const DictionaryField = ({
   if (
     hideIfEmpty &&
     _isEmpty(otherProps.content) &&
-    _isEmpty(otherProps?.field?.value) &&
+    utils.isEmptyValue(otherProps?.field?.value) &&
     _isEmpty(otherProps?.humanValue)
   ) {
     return null
