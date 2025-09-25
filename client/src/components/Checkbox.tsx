@@ -1,4 +1,6 @@
+import classNames from "classnames"
 import React, { useEffect, useRef } from "react"
+import { Form } from "react-bootstrap"
 
 interface CheckboxProps {
   checked?: boolean
@@ -23,18 +25,23 @@ const Checkbox = ({
   }, [checked])
 
   return (
-    <div className="checkbox">
-      <label className="d-flex align-items-center column-gap-1">
-        <input
-          className="checkbox"
-          type="checkbox"
-          ref={inputRef}
-          disabled={disabled}
-          onChange={onChange}
-        />
-        {label}
-      </label>
-    </div>
+    <Form.Check className="form-check">
+      <Form.Check.Input
+        className="checkbox"
+        type="checkbox"
+        ref={inputRef}
+        disabled={disabled}
+        onChange={onChange}
+        style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+      />
+      {label && (
+        <Form.Check.Label
+          style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+        >
+          {label}
+        </Form.Check.Label>
+      )}
+    </Form.Check>
   )
 }
 

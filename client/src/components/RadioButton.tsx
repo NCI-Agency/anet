@@ -16,20 +16,27 @@ const RadioButton = ({
   label = ""
 }: RadioButtonProps) => {
   return (
-    <div className="radioButton">
-      <label className="d-flex align-items-center column-gap-1">
-        <Form.Check
-          className={classNames("form-check", {
-            indeterminate: checked == null
-          })}
-          type="radio"
-          checked={!!checked}
-          disabled={disabled}
-          onChange={onChange}
-        />
-        {label}
-      </label>
-    </div>
+    <Form.Check
+      className={classNames("radioButton form-check", {
+        indeterminate: checked == null
+      })}
+    >
+      <Form.Check.Input
+        className="radioButton"
+        type="radio"
+        checked={!!checked}
+        disabled={disabled}
+        onChange={onChange}
+        style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+      />
+      {label && (
+        <Form.Check.Label
+          style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+        >
+          {label}
+        </Form.Check.Label>
+      )}
+    </Form.Check>
   )
 }
 
