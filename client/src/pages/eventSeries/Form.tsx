@@ -51,7 +51,7 @@ const EventSeriesForm = ({
   initialValues,
   notesComponent
 }: EventSeriesFormProps) => {
-  const { loadAppData, currentUser } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [attachmentList, setAttachmentList] = useState(
@@ -352,7 +352,6 @@ const EventSeriesForm = ({
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    loadAppData()
     if (!edit) {
       navigate(EventSeries.pathForEdit(eventSeries), { replace: true })
     }

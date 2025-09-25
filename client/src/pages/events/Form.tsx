@@ -90,7 +90,7 @@ const EventForm = ({
   initialValues,
   notesComponent
 }: EventFormProps) => {
-  const { loadAppData, currentUser } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
   const tasksLabel = pluralize(Settings.fields.task.shortLabel)
@@ -712,7 +712,6 @@ const EventForm = ({
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    loadAppData()
     if (!edit) {
       navigate(Event.pathForEdit(event), { replace: true })
     }
