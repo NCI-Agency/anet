@@ -140,6 +140,13 @@ export const HierarchicalTaskOverlayTable = ({
                 handleExpand(task)
               }}
               style={{ cursor: "pointer", pointerEvents: "all" }}
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.code === "Enter") {
+                  e.stopPropagation()
+                  handleExpand(task)
+                }
+              }}
             >
               <Icon
                 icon={
@@ -180,7 +187,7 @@ export const HierarchicalTaskOverlayTable = ({
 
       return (
         <React.Fragment key={task.uuid}>
-          <td className="taskName" onClick={e => e.stopPropagation()}>
+          <td className="taskName" onClick={handleToggleSelection}>
             {indentedLabel}
           </td>
         </React.Fragment>

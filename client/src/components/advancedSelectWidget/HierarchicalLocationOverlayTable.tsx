@@ -127,6 +127,13 @@ export const HierarchicalLocationOverlayTable = ({
                 handleExpand(location)
               }}
               style={{ cursor: "pointer", pointerEvents: "all" }}
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.code === "Enter") {
+                  e.stopPropagation()
+                  handleExpand(location)
+                }
+              }}
             >
               <Icon
                 icon={
@@ -157,7 +164,7 @@ export const HierarchicalLocationOverlayTable = ({
 
       return (
         <React.Fragment key={location.uuid}>
-          <td className="locationName" onClick={e => e.stopPropagation()}>
+          <td className="locationName" onClick={handleToggleSelection}>
             {indentedLabel}
           </td>
         </React.Fragment>

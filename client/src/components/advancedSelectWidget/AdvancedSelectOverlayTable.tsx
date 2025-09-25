@@ -60,7 +60,11 @@ const AdvancedSelectOverlayTable = ({
             if (isDisabled || disableSelection || e.button !== 0) {
               return
             }
-            isSelected ? handleRemoveItem?.(item) : handleAddItem?.(item)
+            if (isSelected) {
+              handleRemoveItem?.(item)
+            } else {
+              handleAddItem?.(item)
+            }
           }
           const style = isDisabled
             ? null
