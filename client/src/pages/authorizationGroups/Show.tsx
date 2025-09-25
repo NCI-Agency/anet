@@ -246,15 +246,31 @@ const AuthorizationGroupShow = ({
           />
         </Fieldset>
 
-        <Fieldset title="Reports">
+        <Fieldset
+          title={`Reports linked: ${Settings.fields.authorizationGroup.forSensitiveInformation?.label}`}
+        >
           <ReportCollection
-            paginationKey={`r_${uuid}`}
+            paginationKey={`rsi_${uuid}`}
             queryParams={{
               authorizationGroupUuid: uuid
             }}
-            mapId="reports"
+            mapId="reportsWithSensitiveInformation"
           />
         </Fieldset>
+
+        {!Settings.fields.report.reportCommunities?.exclude && (
+          <Fieldset
+            title={`Reports linked: ${Settings.fields.report.reportCommunities?.label}`}
+          >
+            <ReportCollection
+              paginationKey={`rc_${uuid}`}
+              queryParams={{
+                reportCommunityUuid: uuid
+              }}
+              mapId="reportsWithCommunity"
+            />
+          </Fieldset>
+        )}
       </div>
     </div>
   )

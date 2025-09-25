@@ -1433,6 +1433,7 @@ input ReportSearchQueryInput {
   pendingApprovalOf: String
   releasedAtEnd: Instant
   releasedAtStart: Instant
+  reportCommunityUuid: String
   sensitiveInfo: Boolean
   sortBy: ReportSearchSortBy
   sortOrder: SortOrder

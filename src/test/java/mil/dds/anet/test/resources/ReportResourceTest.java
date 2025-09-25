@@ -1597,6 +1597,24 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void searchReportCommunityUuid() {
+    // Search by community of interest
+    final String coiUuid = "1050c9e3-e679-4c60-8bdc-5139fbc1c10b"; // EF 1.1
+    final ReportSearchQueryInput query =
+        ReportSearchQueryInput.builder().withReportCommunityUuid(coiUuid).build();
+    final List<Report> reportList =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query))
+            .getList();
+
+    for (final Report report : reportList) {
+      assertThat(report.getReportCommunities()).isNotEmpty();
+      final Set<String> rcUuids = report.getReportCommunities().stream()
+          .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+      assertThat(rcUuids).isNotEmpty().contains(coiUuid);
+    }
+  }
+
+  @Test
   void searchUpdatedAtStartAndEndTest() {
     // insertBaseData has 1 report that is updatedAt 2 days before current timestamp
     final Instant startDate =
