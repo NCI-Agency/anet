@@ -9,6 +9,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -196,6 +197,11 @@ const GQL_GET_REPORT = gql`
           identificationCode
         }
         customFields
+      }
+      reportCommunities {
+        uuid
+        name
+        description
       }
       comments {
         uuid
@@ -770,6 +776,18 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     />
                   </>
                 )}
+
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.report.reportCommunities}
+                  field={{ name: "reportCommunities" }}
+                  humanValue={
+                    <AuthorizationGroupTable
+                      authorizationGroups={report.reportCommunities}
+                      noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
+                    />
+                  }
+                />
 
                 {attachmentsEnabled && (
                   <FieldHelper.ReadonlyField

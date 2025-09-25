@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
+  AuthorizationGroupOverlayRow,
   EventOverlayRow,
   PersonDetailedOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -20,6 +21,7 @@ import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedS
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import UploadAttachment from "components/Attachment/UploadAttachment"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -51,7 +53,15 @@ import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
-import { Event, Location, Person, Position, Report, Task } from "models"
+import {
+  AuthorizationGroup,
+  Event,
+  Location,
+  Person,
+  Position,
+  Report,
+  Task
+} from "models"
 import moment from "moment"
 import CreateNewLocation from "pages/locations/CreateNewLocation"
 import { RECURRENCE_TYPE } from "periodUtils"
@@ -61,6 +71,7 @@ import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import COMMUNITIES_ICON from "resources/communities.png"
 import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -497,6 +508,13 @@ const ReportForm = ({
           }
         }
 
+        const reportCommunitiesFilters = {
+          allEntities: {
+            label: "Communities of interest",
+            queryVars: { distributionList: true }
+          }
+        }
+
         const authorizationGroupsFilters = {
           allEntities: {
             label: "Communities for sensitive information",
@@ -805,6 +823,37 @@ const ReportForm = ({
                     }
                   />
                 )}
+
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.report.reportCommunities}
+                  name="reportCommunities"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("reportCommunities", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("reportCommunities", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="reportCommunities"
+                      value={values.reportCommunities}
+                      renderSelected={
+                        <AuthorizationGroupTable
+                          authorizationGroups={values.reportCommunities}
+                          noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected; click in the box above to select any`}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={AuthorizationGroupOverlayRow}
+                      filterDefs={reportCommunitiesFilters}
+                      objectType={AuthorizationGroup}
+                      fields={AuthorizationGroup.autocompleteQuery}
+                      addon={COMMUNITIES_ICON}
+                    />
+                  }
+                />
               </Fieldset>
 
               <Fieldset
@@ -1596,6 +1645,9 @@ const ReportForm = ({
     report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)
     report.event = utils.getReference(report.event)
+    report.reportCommunities = values.reportCommunities.map(rc =>
+      utils.getReference(rc)
+    )
     report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
     const operation = edit ? "updateReport" : "createReport"

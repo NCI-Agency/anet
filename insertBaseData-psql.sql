@@ -34,6 +34,7 @@ TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 TRUNCATE TABLE "reportActions" CASCADE;
 TRUNCATE TABLE "reportAuthorizedMembers" CASCADE;
+TRUNCATE TABLE "reportCommunities" CASCADE;
 TRUNCATE TABLE "reportPeople" CASCADE;
 TRUNCATE TABLE "reportTasks" CASCADE;
 TRUNCATE TABLE "reportsSensitiveInformation" CASCADE;
@@ -1258,6 +1259,11 @@ INSERT INTO "reportAuthorizedMembers" ("reportUuid", "relatedObjectType", "relat
   ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', 'positions', 'c829e8bc-959e-4e57-9e6f-0a8fc128145f'),
   -- organization EF 5
   ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', 'organizations', 'fe0dfb8d-2e74-4a1e-8b2a-3d987fc2ce4a');
+
+-- Report communities of interest
+INSERT INTO "reportCommunities" ("authorizationGroupUuid", "reportUuid") VALUES
+  ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c'),
+  ('ab1a7d99-4529-44b1-a118-bdee3ca8296b', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c');
 
 -- Create "customSensitiveInformation" for some interlocutors
 INSERT INTO "customSensitiveInformation" (uuid, "customFieldName", "customFieldValue", "relatedObjectType", "relatedObjectUuid", "createdAt", "updatedAt") VALUES

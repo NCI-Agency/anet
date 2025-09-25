@@ -26,6 +26,14 @@ class CreateReport extends cr.CreateReport {
     return (await this.getDatepicker()).$('.//button/span[text()="Today"]')
   }
 
+  async getReportCommunities() {
+    return browser.$("#reportCommunities")
+  }
+
+  async getReportCommunitiesTable() {
+    return browser.$("#reportCommunities-popover .table-responsive table")
+  }
+
   async getReportPeople() {
     return browser.$("#reportPeople")
   }
@@ -68,6 +76,24 @@ class CreateReport extends cr.CreateReport {
 
   async getReportText() {
     return browser.$("#fg-reportText .editable")
+  }
+
+  async selectReportCommunityByName(name) {
+    await (await this.getReportCommunities()).click()
+    // wait for table loader to disappear
+    await (await this.getReportCommunitiesTable()).waitForDisplayed()
+    await browser.keys(name)
+    await (await this.getReportCommunitiesTable()).waitForDisplayed()
+    const checkBox = await (
+      await this.getReportCommunitiesTable()
+    ).$("tbody tr:first-child td:first-child input.checkbox")
+    if (!(await checkBox.isSelected())) {
+      await checkBox.click()
+    }
+    await (await this.getTitle()).click()
+    await (
+      await this.getReportCommunitiesTable()
+    ).waitForExist({ reverse: true, timeout: 3000 })
   }
 
   async getAttendeeColumns(name) {
@@ -230,6 +256,15 @@ class CreateReport extends cr.CreateReport {
 
     if (fields.atmosphere) {
       await this.selectAtmosphere(fields.atmosphere)
+    }
+
+    if (
+      Array.isArray(fields.reportCommunities) &&
+      fields.reportCommunities.length
+    ) {
+      for (const rc of fields.reportCommunities) {
+        await this.selectReportCommunityByName(rc)
+      }
     }
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
