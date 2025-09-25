@@ -136,8 +136,6 @@ fields:
             label: Top 3 issues
             placeholder: Enter the top 3 issues
             widget: richTextEditor
-            style:
-              height: 300px
             validations:
               - type: required
                 params: [You must provide the Top 3 issues]
@@ -187,8 +185,6 @@ fields:
             label: Top 3 issues
             placeholder: Enter the top 3 issues
             widget: richTextEditor
-            style:
-              height: 300px
             validations:
               - type: required
                 params: [You must provide the Top 3 issues]
@@ -218,8 +214,6 @@ fields:
             label: Top 3 issues
             placeholder: Enter the top 3 issues
             widget: richTextEditor
-            style:
-              height: 300px
             validations:
               - type: required
                 params: [You must provide the Top 3 issues]
@@ -1146,14 +1140,10 @@ fields:
             type: special_field
             label: Plan
             widget: richTextEditor
-            style:
-              height: 15px
           question4:
             type: special_field
             label: Exercises
             widget: richTextEditor
-            style:
-              height: 15px
       interactionPlan:
         label: Interaction Plans
         recurrence: ondemand
@@ -1203,20 +1193,14 @@ fields:
             type: special_field
             label: Plan
             widget: richTextEditor
-            style:
-              height: 15px
           interaction:
             type: special_field
             label: Interaction
             widget: richTextEditor
-            style:
-              height: 15px
           exercises:
             type: special_field
             label: Exercises
             widget: richTextEditor
-            style:
-              height: 15px
       organizationOndemand:
         label: Ondemand assessment of organization
         recurrence: ondemand
@@ -1232,8 +1216,6 @@ fields:
             type: special_field
             label: General remarks
             widget: richTextEditor
-            style:
-              height: 70px
           enumset:
             type: enumset
             label: Enumset

@@ -1,6 +1,7 @@
 import * as changeCase from "change-case"
 import * as d3 from "d3"
 import parseAddressList from "email-addresses"
+import _isDate from "lodash/isDate"
 import _isEmpty from "lodash/isEmpty"
 import _isMatchWith from "lodash/isMatchWith"
 import moment from "moment/moment"
@@ -279,6 +280,10 @@ export default {
 
   isDeeplyEqual: function (value1, value2) {
     return _isMatchWith(value1, value2, isMatchWithCustomizer)
+  },
+
+  isEmptyValue: function (value) {
+    return !_isDate(value) && _isEmpty(value)
   },
 
   pushHash: function (hash) {
