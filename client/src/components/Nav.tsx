@@ -416,6 +416,15 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
+      <SidebarLink
+        id="preferences-nav"
+        linkTo="/preferences"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        My Preferences
+      </SidebarLink>
+
       <Nav id="all-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
@@ -516,6 +525,13 @@ const Navigation = ({
                   handleOnClick={resetPages}
                 >
                   GraphQL
+                </SidebarLink>
+                <SidebarLink
+                  id="preferences"
+                  linkTo="/admin/preferences"
+                  handleOnClick={resetPages}
+                >
+                  Default Application Preferences
                 </SidebarLink>
               </span>
             </Nav>

@@ -47,6 +47,9 @@ class EmailTemplateTest extends AbstractResourceTest {
   @Autowired
   private CommentDao commentDao;
 
+  @Autowired
+  private ReportDao reportDao;
+
   private FakeSmtpServer emailServer;
   private AnetEmailWorker emailWorker;
 
@@ -98,10 +101,12 @@ class EmailTemplateTest extends AbstractResourceTest {
 
   @Test
   void testDailyRollupTemplate() throws IOException, InterruptedException {
+    final Person person = getAdminBean();
     final DailyRollupEmail action = new DailyRollupEmail();
     action.setStartDate(Instant.now());
     action.setEndDate(Instant.now());
     action.setEndDate(Instant.now());
+    action.setSender(person);
     // ANET Administrators
     action.setOrgUuid("285fa226-05cb-46d3-9037-9de459f4beec");
     action.setChartOrgType(RollupGraph.RollupGraphType.ADVISOR);
@@ -208,7 +213,7 @@ class EmailTemplateTest extends AbstractResourceTest {
     final int nrOfEmailsOnServer = emailServer.requestAllEmailsFromServer().size();
 
     // Put message in db
-    ReportDao.sendEmailToReportPeople(action, List.of(getAdminBean()));
+    reportDao.sendEmailToReportPeople(action, List.of(getAdminBean()));
     assertThat(emailDao.getAll()).hasSize(nrOfEmailsInDb + 1);
 
     // Send message to mail server
