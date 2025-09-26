@@ -830,6 +830,7 @@ type Mutation {
   updatePersonPreferences(preferences: [PersonPreferenceInput]): Int
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
+  updatePreferences(preferences: [PreferenceInput]): Int
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
   updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
   updateSavedSearch(savedSearch: SavedSearchInput): Int
@@ -1043,7 +1044,6 @@ type PersonPreference {
   person: Person
   preference: Preference
   updatedAt: Instant
-  uuid: String
   value: String
 }
 
@@ -1053,7 +1053,6 @@ input PersonPreferenceInput {
   person: PersonInput
   preference: PreferenceInput
   updatedAt: Instant
-  uuid: String
   value: String
 }
 
@@ -1195,6 +1194,7 @@ enum PositionType {
 """"""
 type Preference {
   allowedValues: String
+  category: String
   createdAt: Instant
   defaultValue: String
   description: String

@@ -19,7 +19,8 @@ public abstract class Searcher {
     final String stmtTpl =
         "( \"subscribedObjectType\" = :%1$s AND \"subscribedObjectUuid\" IN ( %2$s ) )";
     final List<String> stmts = new ArrayList<>();
-    final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
+    final ListIterator<SubscriptionUpdateStatement> iter =
+        subscriptionUpdate.getStmts().listIterator();
     while (iter.hasNext()) {
       final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
       final SubscriptionUpdateStatement stmt = iter.next();

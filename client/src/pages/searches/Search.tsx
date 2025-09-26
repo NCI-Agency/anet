@@ -39,7 +39,7 @@ import SubNav from "components/SubNav"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
-import MyPreferences from "pages/preferences/MyPreferences"
+import UserPreferences from "pages/preferences/UserPreferences"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -837,7 +837,7 @@ const Search = ({
           <Modal.Title>Export Search Results</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <MyPreferences
+          <UserPreferences
             actionLabel="Save and Export"
             category="export"
             title="My Export Preferences"

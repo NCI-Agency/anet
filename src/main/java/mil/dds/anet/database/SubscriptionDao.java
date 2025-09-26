@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQuery<?>> {
 
-  private static final String REPORT_SUBSCRIPTIONS_PREFERENCE = "SUBSCRIPTIONS_EMAILS";
+  private static final String SUBSCRIPTIONS_EMAILS_PREFERENCE = "SUBSCRIPTIONS_EMAILS";
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -172,7 +172,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
       final List<String> stmts = new ArrayList<>();
       final Map<String, Object> params = new HashMap<>();
       final ListIterator<SubscriptionUpdateStatement> iter =
-          subscriptionUpdate.stmts.listIterator();
+          subscriptionUpdate.getStmts().listIterator();
       while (iter.hasNext()) {
         final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
         final SubscriptionUpdateStatement stmt = iter.next();
@@ -184,10 +184,10 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
       }
       final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
       logger.info("Updating subscriptions: sql={}, updatedAt={}, params={}", sqlSuf,
-          subscriptionUpdate.updatedAt, params);
+          subscriptionUpdate.getUpdatedAt(), params);
       final int nRows = handle.createUpdate(sqlPre + sqlSuf)
-          .bind("updatedAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt)).bindMap(params)
-          .execute();
+          .bind("updatedAt", DaoUtils.asLocalDateTime(subscriptionUpdate.getUpdatedAt()))
+          .bindMap(params).execute();
       insertSubscriptionUpdates(subscriptionUpdate);
       return nRows;
     } finally {
@@ -209,7 +209,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
       final List<String> stmts = new ArrayList<>();
       final Map<String, Object> params = new HashMap<>();
       final ListIterator<SubscriptionUpdateStatement> iter =
-          subscriptionUpdate.stmts.listIterator();
+          subscriptionUpdate.getStmts().listIterator();
       while (iter.hasNext()) {
         final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
         final SubscriptionUpdateStatement stmt = iter.next();
@@ -222,14 +222,14 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
       final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
       logger.info(
           "Inserting subscription updates: sql={}, createdAt={}, updatedObjectType={}, updatedObjectUuid={}, isNote={}, params={}",
-          sqlSuf, subscriptionUpdate.updatedAt, subscriptionUpdate.objectType,
-          subscriptionUpdate.objectUuid, subscriptionUpdate.isNote, params);
+          sqlSuf, subscriptionUpdate.getUpdatedAt(), subscriptionUpdate.getObjectType(),
+          subscriptionUpdate.getObjectUuid(), subscriptionUpdate.isNote(), params);
 
       final int rowNum = handle.createUpdate(sqlPre + sqlSuf)
-          .bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
-          .bind("updatedObjectType", subscriptionUpdate.objectType)
-          .bind("updatedObjectUuid", subscriptionUpdate.objectUuid)
-          .bind("isNote", subscriptionUpdate.isNote).bindMap(params).execute();
+          .bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.getUpdatedAt()))
+          .bind("updatedObjectType", subscriptionUpdate.getObjectType())
+          .bind("updatedObjectUuid", subscriptionUpdate.getObjectUuid())
+          .bind("isNote", subscriptionUpdate.isNote()).bindMap(params).execute();
       sendEmailToSubscribers(subscriptionUpdate);
       return rowNum;
     } finally {
@@ -240,15 +240,19 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
   private void sendEmailToSubscribers(SubscriptionUpdateGroup subscriptionUpdate) {
     final List<Person> subscribers =
         getSubscribedPeople(subscriptionUpdate.getObjectType(), subscriptionUpdate.getObjectUuid());
-    final List<String> addresses =
-        DaoUtils.getEmailAddressesBasedOnPreferences(subscribers, REPORT_SUBSCRIPTIONS_PREFERENCE);
-
-    if (!addresses.isEmpty()) {
-      final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
-      final AnetEmail email = new AnetEmail();
-      email.setAction(action);
-      email.setToAddresses(addresses);
-      AnetEmailWorker.sendEmailAsync(email);
+    if (!subscribers.isEmpty()) {
+      final List<String> addresses =
+          getEmailAddressesBasedOnPreference(subscribers, SUBSCRIPTIONS_EMAILS_PREFERENCE);
+      if (!addresses.isEmpty()) {
+        final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
+        action.setUpdatedObjectType(subscriptionUpdate.getObjectType());
+        action.setUpdatedObjectUuid(subscriptionUpdate.getObjectUuid());
+        action.setIsNote(subscriptionUpdate.isNote());
+        final AnetEmail email = new AnetEmail();
+        email.setAction(action);
+        email.setToAddresses(addresses);
+        AnetEmailWorker.sendEmailAsync(email);
+      }
     }
   }
 

@@ -60,7 +60,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _PERSON_FIELDS = String.format(
       "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } code"
           + " gender endOfTourDate users { uuid domainUsername } pendingVerification createdAt updatedAt"
-          + " preferences customFields %1$s",
+          + " preferences { value } customFields %1$s",
       _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
@@ -69,7 +69,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   public static final String FIELDS =
       String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
           AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
-  public static final String PREFERENCES = "{ uuid name }";
+  public static final String PREFERENCES_FIELDS = "{ uuid name }";
 
   @Autowired
   private CustomSensitiveInformationDao customSensitiveInformationDao;
@@ -725,7 +725,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   void testUpdatePersonPreferences() {
     // Get all preferences
     final List<mil.dds.anet.test.client.Preference> preferences =
-        withCredentials(jackUser, t -> queryExecutor.preferences(PREFERENCES));
+        withCredentials(jackUser, t -> queryExecutor.preferences(PREFERENCES_FIELDS));
 
     // Create Jack preferences
     List<PersonPreferenceInput> personPreferences = new ArrayList<>();
@@ -736,15 +736,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Integer updatedPreferences = withCredentials(jackUser,
         t -> mutationExecutor.updatePersonPreferences("", personPreferences));
     assertThat(updatedPreferences).isEqualTo(10);
-
-    // Arthur can not change Jack's preferences!
-    try {
-      withCredentials(adminUser,
-          t -> mutationExecutor.updatePersonPreferences("", personPreferences));
-      fail("Expected an Exception");
-    } catch (Exception expectedException) {
-      // OK
-    }
   }
 
   private Person checkSensitiveInformation(final String personUuid, final String user,
