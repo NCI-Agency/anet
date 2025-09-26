@@ -84,7 +84,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
           || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
-            RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+            RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()), null);
       } else {
         qb.addInListClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
       }
@@ -140,7 +140,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       qb.addRecursiveClause(null, "positions", new String[] {"\"locationUuid\""},
           "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
           "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(),
-          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true,
+          null);
     } else {
       qb.addInListClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
     }

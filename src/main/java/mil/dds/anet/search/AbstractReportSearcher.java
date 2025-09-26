@@ -179,6 +179,10 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       addTaskUuidQuery(query);
     }
 
+    if (!Utils.isEmptyOrNull(query.getNotTaskUuid())) {
+      addNotTaskUuidQuery(query);
+    }
+
     if (!Utils.isEmptyOrNull(query.getOrgUuid())) {
       addOrgUuidQuery(query);
     }
@@ -351,8 +355,18 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addWhereClause("rt.\"taskUuid\" IS NULL");
     } else {
       qb.addRecursiveClause(outerQb, "rt", "\"taskUuid\"", "parent_tasks", "tasks",
-          "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true);
+          "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true, null);
     }
+  }
+
+  protected abstract void addNotTaskUuidQuery(ReportSearchQuery query);
+
+  protected void addNotTaskUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    final String notInClause =
+        "reports.uuid NOT IN (SELECT rt_not.\"reportUuid\" FROM \"reportTasks\" rt_not, parent_tasks_not WHERE (%1$s))";
+    qb.addRecursiveClause(outerQb, "rt_not", "\"taskUuid\"", "parent_tasks_not", "tasks",
+        "\"parentTaskUuid\"", "parentTaskNotUuid", query.getNotTaskUuid(), true, notInClause);
   }
 
   protected abstract void addOrgUuidQuery(ReportSearchQuery query);
@@ -364,8 +378,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addRecursiveClause(outerQb, "reports",
           new String[] {"\"advisorOrganizationUuid\"", "\"interlocutorOrganizationUuid\""},
           "parent_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "orgUuid",
-          query.getOrgUuid(), RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()),
-          false);
+          query.getOrgUuid(), RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()), false,
+          null);
     } else {
       qb.addWhereClause("(reports.\"advisorOrganizationUuid\" IN ( <orgUuid> )"
           + " OR reports.\"interlocutorOrganizationUuid\" IN ( <orgUuid> ))");
@@ -385,7 +399,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addRecursiveClause(outerQb, "reports", new String[] {"\"locationUuid\""},
           "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
           "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(),
-          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true,
+          null);
     } else {
       qb.addInListClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
     }

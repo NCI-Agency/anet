@@ -25,7 +25,7 @@ public class RecursiveM2mBatchParams<B extends AbstractAnetBean, T extends Abstr
       AbstractSearchQueryBuilder<B, T> qb) {
     qb.addRecursiveBatchClause(outerQb, getTableName(), new String[] {getForeignKey()},
         "batch_parents", recursiveTableName, getM2mLeftKey(), recursiveForeignKey, "batchUuids",
-        getBatchUuids(), recurseStrategy);
+        getBatchUuids(), recurseStrategy, null);
   }
 
   public String getRecursiveTableName() {

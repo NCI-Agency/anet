@@ -25,7 +25,7 @@ public class RecursiveFkBatchParams<B extends AbstractAnetBean, T extends Abstra
       AbstractSearchQueryBuilder<B, T> qb) {
     qb.addRecursiveBatchClause(outerQb, getTableName(), new String[] {getForeignKey()},
         "batch_parents", recursiveTableName, "uuid", recursiveForeignKey, "batchUuids",
-        getBatchUuids(), recurseStrategy);
+        getBatchUuids(), recurseStrategy, null);
   }
 
   public String getRecursiveTableName() {

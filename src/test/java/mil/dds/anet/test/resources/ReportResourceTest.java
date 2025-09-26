@@ -1668,6 +1668,75 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void searchTaskUuids() {
+    // Reports with any task
+    final ReportSearchQueryInput anyTaskQuery = ReportSearchQueryInput.builder().build();
+    // Reports without a non-existing task
+    final ReportSearchQueryInput nonExistingTaskQuery =
+        ReportSearchQueryInput.builder().withNotTaskUuid(List.of("nonexisting")).build();
+
+    final AnetBeanList_Report anyTaskResults = withCredentials(adminUser,
+        t -> queryExecutor.reportList(getListFields(FIELDS), anyTaskQuery));
+    assertThat(anyTaskResults).isNotNull();
+    assertThat(anyTaskResults.getTotalCount()).isPositive();
+    final AnetBeanList_Report nonExistingTaskResults = withCredentials(adminUser,
+        t -> queryExecutor.reportList(getListFields(FIELDS), nonExistingTaskQuery));
+    assertThat(nonExistingTaskResults).isNotNull();
+    assertThat(nonExistingTaskResults.getTotalCount()).isPositive();
+
+    assertThat(anyTaskResults.getTotalCount()).isEqualTo(nonExistingTaskResults.getTotalCount());
+
+    // Reports with and without the same specific tasks
+    final String TASK_EF1_UUID = "1145e584-4485-4ce0-89c4-2fa2e1fe846a";
+    final ReportSearchQueryInput withAndWithoutQuery = ReportSearchQueryInput.builder()
+        .withTaskUuid(List.of(TASK_EF1_UUID)).withNotTaskUuid(List.of(TASK_EF1_UUID)).build();
+    final AnetBeanList_Report withAndWithoutResults = withCredentials(adminUser,
+        t -> queryExecutor.reportList(getListFields(FIELDS), withAndWithoutQuery));
+    assertThat(withAndWithoutResults).isNotNull();
+    assertThat(withAndWithoutResults.getTotalCount()).isZero();
+
+    // Reports with specific tasks
+    final String TASK_1_1_UUID = "fdf107e7-a88a-4dc4-b744-748e9aaffabc";
+    final String TASK_1_1_A_UUID = "7b2ad5c3-018b-48f5-b679-61fbbda21693";
+    final ReportSearchQueryInput query1 =
+        ReportSearchQueryInput.builder().withTaskUuid(List.of(TASK_EF1_UUID)).build();
+    final ReportSearchQueryInput query2 =
+        ReportSearchQueryInput.builder().withTaskUuid(List.of(TASK_1_1_UUID)).build();
+    final ReportSearchQueryInput query3 =
+        ReportSearchQueryInput.builder().withTaskUuid(List.of(TASK_1_1_A_UUID)).build();
+    final ReportSearchQueryInput query4 = ReportSearchQueryInput.builder()
+        .withTaskUuid(List.of(TASK_EF1_UUID)).withNotTaskUuid(List.of(TASK_1_1_UUID)).build();
+    final ReportSearchQueryInput query5 = ReportSearchQueryInput.builder()
+        .withTaskUuid(List.of(TASK_1_1_UUID)).withNotTaskUuid(List.of(TASK_1_1_A_UUID)).build();
+
+    final AnetBeanList_Report results1 =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
+    assertThat(results1).isNotNull();
+    assertThat(results1.getTotalCount()).isPositive();
+    final AnetBeanList_Report results2 =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
+    assertThat(results2).isNotNull();
+    assertThat(results2.getTotalCount()).isPositive();
+    final AnetBeanList_Report results3 =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
+    assertThat(results3).isNotNull();
+    assertThat(results3.getTotalCount()).isPositive();
+    final AnetBeanList_Report results4 =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query4));
+    assertThat(results4).isNotNull();
+    assertThat(results4.getTotalCount()).isPositive();
+    final AnetBeanList_Report results5 =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query5));
+    assertThat(results5).isNotNull();
+    assertThat(results5.getTotalCount()).isPositive();
+
+    assertThat(results1.getTotalCount() - results2.getTotalCount())
+        .isEqualTo(results4.getTotalCount());
+    assertThat(results2.getTotalCount() - results3.getTotalCount())
+        .isEqualTo(results5.getTotalCount());
+  }
+
+  @Test
   void reportDeleteTest() {
     final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
     final Person elizabeth = getElizabethElizawell();

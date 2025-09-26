@@ -70,7 +70,7 @@ public abstract class AbstractEventSeriesSearcher
     } else {
       qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"ownerOrgUuid\""},
           "parent_owner_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "ownerOrgUuid",
-          query.getOwnerOrgUuid(), true, true);
+          query.getOwnerOrgUuid(), true, true, null);
     }
   }
 
@@ -81,7 +81,7 @@ public abstract class AbstractEventSeriesSearcher
     } else {
       qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"hostOrgUuid\""},
           "parent_host_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "hostOrgUuid",
-          query.getHostOrgUuid(), true, true);
+          query.getHostOrgUuid(), true, true, null);
     }
   }
 
@@ -92,7 +92,7 @@ public abstract class AbstractEventSeriesSearcher
     } else {
       qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"adminOrgUuid\""},
           "parent_admin_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "adminOrgUuid",
-          query.getAdminOrgUuid(), true, true);
+          query.getAdminOrgUuid(), true, true, null);
     }
   }
 

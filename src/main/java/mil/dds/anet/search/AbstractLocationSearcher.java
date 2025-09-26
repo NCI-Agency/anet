@@ -108,7 +108,8 @@ public abstract class AbstractLocationSearcher
       qb.addRecursiveClause(null, "locations", new String[] {"uuid"}, "parent_locations",
           "\"locationRelationships\"", "\"childLocationUuid\"", "\"parentLocationUuid\"",
           "locationUuid", query.getLocationUuid(),
-          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true,
+          null);
     } else {
       qb.addInListClause("locationUuid", "locations.uuid", query.getLocationUuid());
     }

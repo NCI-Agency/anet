@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -238,35 +239,38 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
 
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
       String foreignKey, String withTableName, String recursiveTableName,
-      String recursiveForeignKey, String paramName, String fieldValue, boolean findChildren) {
+      String recursiveForeignKey, String paramName, String fieldValue, boolean findChildren,
+      String notInClause) {
     addRecursiveClause(outerQb, tableName, new String[] {foreignKey}, withTableName,
         recursiveTableName, "uuid", recursiveForeignKey, paramName,
-        Collections.singletonList(fieldValue), findChildren, false);
+        Collections.singletonList(fieldValue), findChildren, false, notInClause);
   }
 
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
       String[] foreignKeys, String withTableName, String recursiveTableName,
-      String recursiveForeignKey, String paramName, String fieldValue, boolean findChildren) {
+      String recursiveForeignKey, String paramName, String fieldValue, boolean findChildren,
+      String notInClause) {
     addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName, "uuid",
-        recursiveForeignKey, paramName, Collections.singletonList(fieldValue), findChildren, false);
+        recursiveForeignKey, paramName, Collections.singletonList(fieldValue), findChildren, false,
+        notInClause);
   }
 
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
       String foreignKey, String withTableName, String recursiveTableName,
-      String recursiveForeignKey, String paramName, List<String> fieldValues,
-      boolean findChildren) {
+      String recursiveForeignKey, String paramName, List<String> fieldValues, boolean findChildren,
+      String notInClause) {
     addRecursiveClause(outerQb, tableName, new String[] {foreignKey}, withTableName,
         recursiveTableName, "uuid", recursiveForeignKey, paramName, fieldValues, findChildren,
-        false);
+        false, notInClause);
   }
 
   public final void addRecursiveBatchClause(AbstractSearchQueryBuilder<B, T> outerQb,
       String tableName, String[] foreignKeys, String withTableName, String recursiveTableName,
       String baseKey, String recursiveForeignKey, String paramName, List<String> fieldValues,
-      RecurseStrategy recurseStrategy) {
+      RecurseStrategy recurseStrategy, String notInClause) {
     final boolean findChildren = RecurseStrategy.CHILDREN.equals(recurseStrategy);
     addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName, baseKey,
-        recursiveForeignKey, paramName, fieldValues, findChildren, false);
+        recursiveForeignKey, paramName, fieldValues, findChildren, false, notInClause);
     addSelectClause(String.format("%1$s.%2$s AS \"batchUuid\"", withTableName,
         findChildren ? "parent_uuid" : "uuid"));
   }
@@ -274,9 +278,9 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
       String[] foreignKeys, String withTableName, String recursiveTableName, String baseKey,
       String recursiveForeignKey, String paramName, List<String> fieldValues, boolean findChildren,
-      boolean includeSelf) {
+      boolean includeSelf, String notInClause) {
     createWithClause(outerQb, withTableName, recursiveTableName, baseKey, recursiveForeignKey,
-        true);
+        notInClause == null);
     final List<String> orClauses = new ArrayList<>();
     for (final String foreignKey : foreignKeys) {
       orClauses.add(String.format("%1$s.%2$s = %3$s.%4$s", tableName, foreignKey, withTableName,
@@ -292,7 +296,9 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
             .add(String.format("(%1$s.%2$s IN ( <%3$s> ))", tableName, foreignKey, paramName));
       }
     }
-    addWhereClause(String.format("(%1$s)", Joiner.on(" OR ").join(recursiveWhereClauses)));
+    addWhereClause(
+        String.format("(%1$s)", String.format(Objects.requireNonNullElse(notInClause, "%1$s"),
+            Joiner.on(" OR ").join(recursiveWhereClauses))));
     addListArg(paramName, fieldValues);
   }
 

@@ -132,7 +132,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
       qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
           "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
-          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()), null);
     } else {
       qb.addInListClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
           query.getTaskedOrgUuid());
@@ -144,7 +144,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         || RecurseStrategy.PARENTS.equals(query.getParentTaskRecurseStrategy())) {
       qb.addRecursiveClause(null, "tasks", "\"uuid\"", "parent_tasks", "tasks",
           "\"parentTaskUuid\"", "parentTaskUuid", query.getParentTaskUuid(),
-          RecurseStrategy.CHILDREN.equals(query.getParentTaskRecurseStrategy()));
+          RecurseStrategy.CHILDREN.equals(query.getParentTaskRecurseStrategy()), null);
     } else if (query.getParentTaskUuid().size() == 1
         && Task.DUMMY_TASK_UUID.equals(query.getParentTaskUuid().get(0))) {
       qb.addIsNullOrEmptyClause("tasks.\"parentTaskUuid\"");
