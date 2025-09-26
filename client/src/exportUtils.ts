@@ -16,11 +16,11 @@ const getOrganizationFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "shortName") ? "shortName" : ""}
-        ${shouldInclude(fields, "longName") ? "longName" : ""}
-        ${shouldInclude(fields, "identificationCode") ? "identificationCode" : ""}
-        ${shouldInclude(fields, "emailAddresses") ? getEmailAddresses() : ""}
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "shortName")}
+        ${shouldInclude(fields, "longName")}
+        ${shouldInclude(fields, "identificationCode")}
+        ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
       }
     }
   }
@@ -32,14 +32,14 @@ const getPersonFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "name") ? "name" : ""}
-        ${shouldInclude(fields, "rank") ? "rank" : ""}
-        ${shouldInclude(fields, "emailAddresses") ? getEmailAddresses() : ""}
-        ${
-          shouldInclude(fields, "position")
-            ? `
-          position {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "rank")}
+        ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
+        ${shouldInclude(
+          fields,
+          "position",
+          `position {
             uuid
             name
             type
@@ -55,10 +55,8 @@ const getPersonFragment = (fields: string[] = []) => `
               longName
               identificationCode
             }
-          }
-        `
-            : ""
-        }
+          }`
+        )}
       }
     }
   }
@@ -70,46 +68,40 @@ const getPositionFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "name") ? "name" : ""}
-        ${shouldInclude(fields, "code") ? "code" : ""}
-        ${shouldInclude(fields, "type") ? "type" : ""}
-        ${shouldInclude(fields, "role") ? "role" : ""}
-        ${shouldInclude(fields, "status") ? "status" : ""}
-        ${shouldInclude(fields, "emailAddresses") ? getEmailAddresses() : ""}
-        ${
-          shouldInclude(fields, "location")
-            ? `
-          location {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "code")}
+        ${shouldInclude(fields, "type")}
+        ${shouldInclude(fields, "role")}
+        ${shouldInclude(fields, "status")}
+        ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
+        ${shouldInclude(
+          fields,
+          "location",
+          `location {
             uuid
             name
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "organization")
-            ? `
-          organization {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "organization",
+          `organization {
             uuid
             shortName
             longName
             identificationCode
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "person")
-            ? `
-          person {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "person",
+          `person {
             uuid
             name
             rank
-          }
-        `
-            : ""
-        }
+          }`
+        )}
       }
     }
   }
@@ -121,32 +113,28 @@ const getTaskFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "shortName") ? "shortName" : ""}
-        ${shouldInclude(fields, "longName") ? "longName" : ""}
-        ${shouldInclude(fields, "status") ? "status" : ""}
-        ${
-          shouldInclude(fields, "taskedOrganizations")
-            ? `
-          taskedOrganizations {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "shortName")}
+        ${shouldInclude(fields, "longName")}
+        ${shouldInclude(fields, "status")}
+        ${shouldInclude(
+          fields,
+          "taskedOrganizations",
+          `taskedOrganizations {
             uuid
             shortName
             longName
             identificationCode
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "parentTask")
-            ? `
-          parentTask {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "parentTask",
+          `parentTask {
             uuid
             shortName
-          }
-        `
-            : ""
-        }
+          }`
+        )}
       }
     }
   }
@@ -158,11 +146,11 @@ const getLocationFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "name") ? "name" : ""}
-        ${shouldInclude(fields, "lat") ? "lat" : ""}
-        ${shouldInclude(fields, "lng") ? "lng" : ""}
-        ${shouldInclude(fields, "type") ? "type" : ""}
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "lat")}
+        ${shouldInclude(fields, "lng")}
+        ${shouldInclude(fields, "type")}
       }
     }
   }
@@ -174,42 +162,38 @@ const getReportFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "intent") ? "intent" : ""}
-        ${shouldInclude(fields, "engagementDate") ? "engagementDate" : ""}
-        ${shouldInclude(fields, "duration") ? "duration" : ""}
-        ${shouldInclude(fields, "keyOutcomes") ? "keyOutcomes" : ""}
-        ${shouldInclude(fields, "nextSteps") ? "nextSteps" : ""}
-        ${shouldInclude(fields, "cancelledReason") ? "cancelledReason" : ""}
-        ${shouldInclude(fields, "atmosphere") ? "atmosphere" : ""}
-        ${shouldInclude(fields, "atmosphereDetails") ? "atmosphereDetails" : ""}
-        ${shouldInclude(fields, "state") ? "state" : ""}
-        ${
-          shouldInclude(fields, "authors")
-            ? `
-          authors {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "intent")}
+        ${shouldInclude(fields, "engagementDate")}
+        ${shouldInclude(fields, "duration")}
+        ${shouldInclude(fields, "keyOutcomes")}
+        ${shouldInclude(fields, "nextSteps")}
+        ${shouldInclude(fields, "cancelledReason")}
+        ${shouldInclude(fields, "atmosphere")}
+        ${shouldInclude(fields, "atmosphereDetails")}
+        ${shouldInclude(fields, "state")}
+        ${shouldInclude(
+          fields,
+          "authors",
+          `authors {
             uuid
             name
             rank
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "reportPeople")
-            ? `
-          reportPeople {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "reportPeople",
+          `reportPeople {
             uuid
             name
             rank
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "primaryAdvisor")
-            ? `
-          primaryAdvisor {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "primaryAdvisor",
+          `primaryAdvisor {
             uuid
             name
             rank
@@ -222,71 +206,59 @@ const getReportFragment = (fields: string[] = []) => `
                 identificationCode
               }
             }
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "primaryInterlocutor")
-            ? `
-          primaryInterlocutor {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "primaryInterlocutor",
+          `primaryInterlocutor {
             uuid
             name
             rank
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "advisorOrg")
-            ? `
-          advisorOrg {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "advisorOrg",
+          `advisorOrg {
             uuid
             shortName
             longName
             identificationCode
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "interlocutorOrg")
-            ? `
-          interlocutorOrg {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "interlocutorOrg",
+          `interlocutorOrg {
             uuid
             shortName
             longName
             identificationCode
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "location")
-            ? `
-          location {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "location",
+          `location {
             uuid
             name
             lat
             lng
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "tasks")
-            ? `
-          tasks {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "tasks",
+          `tasks {
             uuid
             shortName
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "workflow")
-            ? `
-          workflow {
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "workflow",
+          `workflow {
             type
             createdAt
             step {
@@ -307,11 +279,9 @@ const getReportFragment = (fields: string[] = []) => `
               name
               rank
             }
-          }
-        `
-            : ""
-        }
-        ${shouldInclude(fields, "updatedAt") ? "updatedAt" : ""}
+          }`
+        )}
+        ${shouldInclude(fields, "updatedAt")}
       }
     }
   }
@@ -323,11 +293,11 @@ const getAuthorizationGroupFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "name") ? "name" : ""}
-        ${shouldInclude(fields, "description") ? "description" : ""}
-        ${shouldInclude(fields, "status") ? "status" : ""}
-        ${shouldInclude(fields, "forSensitiveInformation") ? "forSensitiveInformation" : ""}
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "description")}
+        ${shouldInclude(fields, "status")}
+        ${shouldInclude(fields, "forSensitiveInformation")}
         communityRelatedObjects: authorizationGroupRelatedObjects {
           relatedObjectType
           relatedObject {
@@ -358,76 +328,73 @@ const getEventFragment = (fields: string[] = []) => `
       pageSize
       totalCount
       list {
-        ${shouldInclude(fields, "uuid") ? "uuid" : ""}
-        ${shouldInclude(fields, "type") ? "type" : ""}
-        ${shouldInclude(fields, "name") ? "name" : ""}
-        ${shouldInclude(fields, "startDate") ? "startDate" : ""}
-        ${shouldInclude(fields, "endDate") ? "endDate" : ""}
-        ${
-          shouldInclude(fields, "ownerOrg")
-            ? `
-          ownerOrg {
-            ${shouldInclude(fields, "ownerOrg.uuid") ? "uuid" : ""}
-            ${shouldInclude(fields, "ownerOrg.shortName") ? "shortName" : ""}
-            ${shouldInclude(fields, "ownerOrg.longName") ? "longName" : ""}
-            ${shouldInclude(fields, "ownerOrg.identificationCode") ? "identificationCode" : ""}
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "hostOrg")
-            ? `
-          hostOrg {
-            ${shouldInclude(fields, "hostOrg.uuid") ? "uuid" : ""}
-            ${shouldInclude(fields, "hostOrg.shortName") ? "shortName" : ""}
-            ${shouldInclude(fields, "hostOrg.longName") ? "longName" : ""}
-            ${shouldInclude(fields, "hostOrg.identificationCode") ? "identificationCode" : ""}
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "adminOrg")
-            ? `
-          adminOrg {
-            ${shouldInclude(fields, "adminOrg.uuid") ? "uuid" : ""}
-            ${shouldInclude(fields, "adminOrg.shortName") ? "shortName" : ""}
-            ${shouldInclude(fields, "adminOrg.longName") ? "longName" : ""}
-            ${shouldInclude(fields, "adminOrg.identificationCode") ? "identificationCode" : ""}
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "eventSeries")
-            ? `
-          eventSeries {
-            ${shouldInclude(fields, "eventSeries.uuid") ? "uuid" : ""}
-            ${shouldInclude(fields, "eventSeries.name") ? "name" : ""}
-          }
-        `
-            : ""
-        }
-        ${
-          shouldInclude(fields, "location")
-            ? `
-          location {
-            ${shouldInclude(fields, "location.uuid") ? "uuid" : ""}
-            ${shouldInclude(fields, "location.name") ? "name" : ""}
-            ${shouldInclude(fields, "location.lat") ? "lat" : ""}
-            ${shouldInclude(fields, "location.lng") ? "lng" : ""}
-          }
-        `
-            : ""
-        }
-        ${shouldInclude(fields, "updatedAt") ? "updatedAt" : ""}
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "type")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "startDate")}
+        ${shouldInclude(fields, "endDate")}
+        ${shouldInclude(
+          fields,
+          "ownerOrg",
+          `ownerOrg {
+            ${shouldInclude(fields, "ownerOrg.uuid", "uuid")}
+            ${shouldInclude(fields, "ownerOrg.shortName", "shortName")}
+            ${shouldInclude(fields, "ownerOrg.longName", "longName")}
+            ${shouldInclude(fields, "ownerOrg.identificationCode", "identificationCode")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "hostOrg",
+          `hostOrg {
+            ${shouldInclude(fields, "hostOrg.uuid", "uuid")}
+            ${shouldInclude(fields, "hostOrg.shortName", "shortName")}
+            ${shouldInclude(fields, "hostOrg.longName", "longName")}
+            ${shouldInclude(fields, "hostOrg.identificationCode", "identificationCode")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "adminOrg",
+          `adminOrg {
+            ${shouldInclude(fields, "adminOrg.uuid", "uuid")}
+            ${shouldInclude(fields, "adminOrg.shortName", "shortName")}
+            ${shouldInclude(fields, "adminOrg.longName", "longName")}
+            ${shouldInclude(fields, "adminOrg.identificationCode", "identificationCode")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "eventSeries",
+          `eventSeries {
+            ${shouldInclude(fields, "eventSeries.uuid", "uuid")}
+            ${shouldInclude(fields, "eventSeries.name", "name")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "location",
+          `location {
+            ${shouldInclude(fields, "location.uuid", "uuid")}
+            ${shouldInclude(fields, "location.name", "name")}
+            ${shouldInclude(fields, "location.lat", "lat")}
+            ${shouldInclude(fields, "location.lng", "lng")}
+          }`
+        )}
+        ${shouldInclude(fields, "updatedAt")}
       }
     }
   }
 `
-const shouldInclude = (fields: string[], field: string): boolean => {
+
+const shouldInclude = (
+  fields: string[],
+  field: string,
+  gqlField?: string
+): string => {
   return fields.length === 0 || fields.includes(field)
+    ? (gqlField ?? field)
+    : ""
 }
 
 const buildGqlGetDataQuery = ({

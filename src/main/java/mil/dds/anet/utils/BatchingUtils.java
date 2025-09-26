@@ -245,11 +245,6 @@ public final class BatchingUtils {
                 .supplyAsync(() -> engine.getPersonDao().getPersonPreferences(foreignKeys),
                     dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.PREFERENCES.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, Preference>) keys -> CompletableFuture
-                .supplyAsync(() -> engine.getPreferenceDao().getByIds(keys), dispatcherService),
-            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.POSITIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, Position>) keys -> CompletableFuture
@@ -278,6 +273,11 @@ public final class BatchingUtils {
             (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getPositionDao().getPersonPositionHistory(foreignKeys),
                     dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.PREFERENCES.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Preference>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getPreferenceDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
         DataLoaderFactory.newDataLoader(

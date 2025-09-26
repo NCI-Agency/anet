@@ -411,11 +411,6 @@ public class Person extends AbstractEmailableAnetBean
       return CompletableFuture.completedFuture(preferences);
     }
     return engine().getPersonDao().getPreferences(context, uuid).thenApply(o -> {
-      // Load generic preference
-      CompletableFuture.allOf(
-          o.stream().map(a -> a.loadPreference(ApplicationContextProvider.getEngine().getContext()))
-              .toArray(CompletableFuture<?>[]::new))
-          .join();
       preferences = o;
       return o;
     });

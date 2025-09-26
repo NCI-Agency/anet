@@ -445,6 +445,13 @@ public abstract class AbstractResourceTest {
     return getInput(report, ReportInput.class);
   }
 
+  protected static PersonPreferenceInput getPersonPreferenceInput(final String personUuid,
+      final String preferenceUuid, final String value) {
+    return PersonPreferenceInput.builder().withValue(value)
+        .withPerson(PersonInput.builder().withUuid(personUuid).build())
+        .withPreference(PreferenceInput.builder().withUuid(preferenceUuid).build()).build();
+  }
+
   // Conversions from Person to ReportPerson
   public static ReportPerson personToPrimaryReportPerson(Person p, boolean interlocutor) {
     final ReportPerson rp = personToReportPerson(p, interlocutor);
@@ -506,13 +513,6 @@ public abstract class AbstractResourceTest {
   // Return list fields (when e.g. doing a search) for a set of object fields
   protected static String getListFields(String fields) {
     return String.format("{ pageNum pageSize totalCount list %s }", fields);
-  }
-
-  protected static PersonPreferenceInput getPersonPreferenceInput(final String personUuid,
-      final String preferenceUuid, final String value) {
-    return PersonPreferenceInput.builder().withValue(value)
-        .withPerson(PersonInput.builder().withUuid(personUuid).build())
-        .withPreference(PreferenceInput.builder().withUuid(preferenceUuid).build()).build();
   }
 
   /**

@@ -3,7 +3,6 @@ import API from "api"
 import { jumpToTop, mapPageDispatchersToProps } from "components/Page"
 import PreferencesFieldset from "pages/preferences/PreferencesFieldSet"
 import React, { useState } from "react"
-import { connect } from "react-redux"
 
 const GQL_UPDATE_PREFERENCES = gql`
   mutation ($preferences: [PreferenceInput]!) {
@@ -52,4 +51,4 @@ const Preferences = () => {
   }
 }
 
-export default connect(null, mapPageDispatchersToProps)(Preferences)
+export default Preferences

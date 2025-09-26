@@ -2,6 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.GraphQLContext;
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -9,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class PersonPreference extends AbstractAnetBean {
 
@@ -91,4 +94,16 @@ public class PersonPreference extends AbstractAnetBean {
     this.preference = new ForeignObjectHolder<>(preference);
   }
 
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getUuid() {
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on PersonPreference");
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    // just ignore
+  }
 }

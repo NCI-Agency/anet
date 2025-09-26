@@ -6584,7 +6584,9 @@
 
 	<changeSet id="add-preferences-table" author="fdelcastillo">
 		<createTable tableName="preferences">
-			<column name="uuid" type="${uuid_type}" />
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
 			<column name="name" type="varchar(255)" />
 			<column name="description" type="varchar(255)" />
 			<column name="type" type="varchar(255)" />
@@ -6608,8 +6610,12 @@
 
 	<changeSet id="add-people-preferences-table" author="fdelcastillo">
 		<createTable tableName="peoplePreferences">
-			<column name="preferenceUuid" type="${uuid_type}" />
-			<column name="personUuid" type="${uuid_type}" />
+			<column name="preferenceUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
 			<column name="value" type="varchar(255)" />
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />

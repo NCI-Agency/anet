@@ -1,13 +1,15 @@
 package mil.dds.anet.database;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
-import org.apache.poi.ss.formula.functions.T;
 import org.jdbi.v3.core.Handle;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,6 +99,34 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
   @Transactional
   public int _deleteByUuid(String tableName, String fieldName, String uuid) {
     return deleteForMerge(tableName, fieldName, uuid);
+
+  }
+
+  public List<String> getEmailAddressesBasedOnPreference(List<? extends Person> people,
+      String preferenceName) {
+    List<String> peopleUuids = people.stream().map(Person::getUuid).collect(Collectors.toList());
+
+    // Returns email addresses of the people that opted for this preference (or when the preference
+    // default value is TRUE)
+    final Handle handle = getDbHandle();
+    final String peopleUuidsParam = "peopleUuids";
+    final String preferenceNameParam = "preferenceNameParam";
+    try {
+      return handle
+          .createQuery("/* getEmailAddressesBasedOnPreference */ SELECT DISTINCT ea.address "
+              + "FROM preferences pref " + "JOIN \"emailAddresses\" ea "
+              + "      ON ea.\"relatedObjectType\" = 'people' "
+              + "     AND ea.\"relatedObjectUuid\" IN (<" + peopleUuidsParam + ">) "
+              + "LEFT JOIN \"peoplePreferences\" pp "
+              + "       ON pp.\"preferenceUuid\" = pref.uuid " + "      AND pp.\"personUuid\" IN (<"
+              + peopleUuidsParam + ">) " + "WHERE pref.name = :" + preferenceNameParam + " "
+              + "  AND ( (pp.\"personUuid\" IS NULL AND UPPER(pref.\"defaultValue\") = 'TRUE') "
+              + "       OR (UPPER(pp.value) = 'TRUE') )")
+          .bindList(peopleUuidsParam, peopleUuids).bind(preferenceNameParam, preferenceName)
+          .mapTo(String.class).list();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   protected AnetDictionary dict() {

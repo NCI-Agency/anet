@@ -416,6 +416,15 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
+      <SidebarLink
+        id="preferences-nav"
+        linkTo="/preferences"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        My Preferences
+      </SidebarLink>
+
       <Nav id="all-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
@@ -576,14 +585,6 @@ const Navigation = ({
           ))}
         </NavDropdown>
       )}
-      <SidebarLink
-        id="preferences-nav"
-        linkTo="/preferences"
-        handleOnClick={resetPages}
-        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
-      >
-        My Preferences
-      </SidebarLink>
     </Nav>
   )
 }

@@ -270,18 +270,17 @@ public class PersonResource {
       @GraphQLArgument(name = "preferences") List<PersonPreference> preferences) {
     final Person user = DaoUtils.getUserFromContext(context);
 
-    int numRows = 0;
+    int totalRows = 0;
     for (PersonPreference preference : preferences) {
-      // Check the preference belongs to the user
-      if (!preference.getPerson().getUuid().equals(user.getUuid())) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "You do not have permissions to edit this person");
+      final int numRows = personPreferenceDao.upsert(user, preference);
+      if (numRows == 0) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Couldn't upsert person preference: " + preference);
       }
-      personPreferenceDao.upsert(preference);
-      numRows++;
+      totalRows += numRows;
     }
-    AnetAuditLogger.log("Preferences updated by {}", user);
-    return numRows;
+    AnetAuditLogger.log("Person preferences updated by {}", user);
+    return totalRows;
   }
 
   @GraphQLQuery(name = "personList")

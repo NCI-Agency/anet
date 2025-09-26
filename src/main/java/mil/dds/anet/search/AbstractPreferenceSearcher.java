@@ -44,7 +44,12 @@ public abstract class AbstractPreferenceSearcher
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       PreferenceSearchQuery query) {
-    qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "preferences_category"));
+    switch (query.getSortBy()) {
+      case CATEGORY:
+      default:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "preferences_category"));
+        break;
+    }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "preferences_name"));
   }
 }

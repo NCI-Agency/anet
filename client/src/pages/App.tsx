@@ -35,13 +35,9 @@ const GQL_GET_APP_DATA = gql`
       pendingVerification
       code
       preferences {
-        uuid
         preference {
           uuid
           name
-        }
-        person {
-          uuid
         }
         value
       }
