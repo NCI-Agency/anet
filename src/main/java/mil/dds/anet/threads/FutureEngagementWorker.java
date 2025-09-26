@@ -49,7 +49,7 @@ public class FutureEngagementWorker extends AbstractWorker {
       try {
         final FutureEngagementUpdated action = new FutureEngagementUpdated();
         action.setReport(r);
-        ReportDao.sendEmailToReportAuthors(action, r);
+        dao.sendEmailToReportAuthors(action, r);
         dao.updateToDraftState(r);
       } catch (Exception e) {
         logger.error("Exception when updating", e);

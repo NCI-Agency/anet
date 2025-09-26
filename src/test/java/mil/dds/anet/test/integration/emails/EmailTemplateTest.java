@@ -47,6 +47,9 @@ class EmailTemplateTest extends AbstractResourceTest {
   @Autowired
   private CommentDao commentDao;
 
+  @Autowired
+  private ReportDao reportDao;
+
   private FakeSmtpServer emailServer;
   private AnetEmailWorker emailWorker;
 
@@ -210,7 +213,7 @@ class EmailTemplateTest extends AbstractResourceTest {
     final int nrOfEmailsOnServer = emailServer.requestAllEmailsFromServer().size();
 
     // Put message in db
-    ReportDao.sendEmailToReportPeople(action, List.of(getAdminBean()));
+    reportDao.sendEmailToReportPeople(action, List.of(getAdminBean()));
     assertThat(emailDao.getAll()).hasSize(nrOfEmailsInDb + 1);
 
     // Send message to mail server

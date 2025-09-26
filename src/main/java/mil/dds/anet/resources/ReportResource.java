@@ -215,7 +215,7 @@ public class ReportResource {
         ReportEditedEmail action = new ReportEditedEmail();
         action.setReport(existing);
         action.setEditor(editor);
-        ReportDao.sendEmailToReportAuthors(action, existing);
+        reportDao.sendEmailToReportAuthors(action, existing);
       }
     }
 
@@ -589,7 +589,7 @@ public class ReportResource {
     action.setReport(r);
     action.setRejector(rejector);
     action.setComment(rejectionComment);
-    ReportDao.sendEmailToReportAuthors(action, r);
+    reportDao.sendEmailToReportAuthors(action, r);
   }
 
   @GraphQLMutation(name = "publishReport")
@@ -682,7 +682,7 @@ public class ReportResource {
     NewReportCommentEmail action = new NewReportCommentEmail();
     action.setReport(r);
     action.setComment(comment);
-    ReportDao.sendEmailToReportAuthors(action, r);
+    reportDao.sendEmailToReportAuthors(action, r);
   }
 
   @GraphQLMutation(name = "emailReport")
@@ -779,15 +779,15 @@ public class ReportResource {
       @GraphQLArgument(name = "orgType") RollupGraphType orgType,
       @GraphQLArgument(name = "orgUuid") String orgUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
-
     DailyRollupEmail action = new DailyRollupEmail();
     action.setStartDate(start);
     action.setEndDate(end);
     action.setComment(email.getComment());
     action.setOrgUuid(orgUuid);
     action.setChartOrgType(orgType);
-    email.setAction(action);
     action.setSender(DaoUtils.getUserFromContext(context));
+
+    email.setAction(action);
     AnetEmailWorker.sendEmailAsync(email);
     // GraphQL mutations *have* to return something, we return an integer
     return 1;
