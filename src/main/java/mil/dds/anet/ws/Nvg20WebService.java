@@ -175,8 +175,8 @@ public class Nvg20WebService implements NVGPortType2012 {
             STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6D, // -
             STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6D));
 
-    // Not the correct interpretation of the standard, but currently used by external tools
-    static final String DEFAULT_APP6_VERSION = SYMBOLOGY_VERSION_APP6D_UNOFFICIAL;
+    // Use the current standard by default
+    static final String DEFAULT_APP6_VERSION = SYMBOLOGY_VERSION_APP6D;
     static final Set<String> VALID_APP6_VERSIONS = Set.of(SYMBOLOGY_VERSION_APP6B,
         SYMBOLOGY_VERSION_APP6D_UNOFFICIAL, SYMBOLOGY_VERSION_APP6D);
 
