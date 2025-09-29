@@ -43,7 +43,11 @@ interface PreferencesFieldsetProps {
   pageDispatchers?: PageDispatchersPropType
   category?: string
   userPreferences?: UserPreference[]
-  onSubmit: (values: Record<string, any>, formikBag: any) => void
+  onSubmit: (
+    values: Record<string, any>,
+    formikBag: any,
+    refetch?: (variables?: any) => any
+  ) => void
   title?: string
   actionLabel?: string
   saveSuccess?: string | null
@@ -84,9 +88,12 @@ const PreferencesFieldset = ({
   saveError,
   exportObjectTypes = []
 }: PreferencesFieldsetProps) => {
-  const { loading, error, data } = API.useApiQuery(GQL_GET_PREFERENCES, {
-    preferenceQuery: { category, pageSize: 0 }
-  })
+  const { loading, error, data, refetch } = API.useApiQuery(
+    GQL_GET_PREFERENCES,
+    {
+      preferenceQuery: { category, pageSize: 0 }
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -151,7 +158,7 @@ const PreferencesFieldset = ({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={onSubmit}
+      onSubmit={(values, form) => onSubmit(values, form, refetch)}
       enableReinitialize
       validate={vals => {
         const errors = {}
