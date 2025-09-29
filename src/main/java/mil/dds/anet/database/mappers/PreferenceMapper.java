@@ -10,7 +10,7 @@ public class PreferenceMapper implements RowMapper<Preference> {
 
   public Preference map(ResultSet rs, StatementContext ctx) throws SQLException {
     Preference p = new Preference();
-    p.setUuid(rs.getString("preferences_uuid"));
+    MapperUtils.setCommonBeanFields(p, rs, "preferences");
     p.setName(rs.getString("preferences_name"));
     p.setType(rs.getString("preferences_type"));
     p.setCategory(rs.getString("preferences_category"));
