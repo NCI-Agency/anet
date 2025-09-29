@@ -12,13 +12,14 @@ const GQL_UPDATE_PREFERENCES = gql`
 const Preferences = () => {
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
-  usePageTitle("Default Application Preferences")
+  const title = "Default Application Preferences"
+  usePageTitle(title)
   return (
     <PreferencesFieldset
       onSubmit={onSubmit}
       saveSuccess={saveSuccess}
       saveError={saveError}
-      title="Default Application Preferences"
+      title={title}
     />
   )
 
@@ -41,7 +42,7 @@ const Preferences = () => {
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
-    setSaveSuccess("Preferences saved")
+    setSaveSuccess(`${title} saved`)
     jumpToTop()
   }
 
