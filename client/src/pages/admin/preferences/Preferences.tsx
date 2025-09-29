@@ -23,26 +23,27 @@ const Preferences = () => {
     />
   )
 
-  function onSubmit(values, form) {
+  function onSubmit(values, form, refetch) {
     const preferences = Object.entries(values).map(([key, value]) => ({
       uuid: key,
       defaultValue: String(value)
     }))
 
     return API.mutation(GQL_UPDATE_PREFERENCES, { preferences })
-      .then(() => onSubmitSuccess(values, form))
+      .then(() => onSubmitSuccess(values, form, refetch))
       .catch(error => {
         handleError(error)
         form.setSubmitting(false)
       })
   }
 
-  function onSubmitSuccess(values, form) {
+  function onSubmitSuccess(values, form, refetch) {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess(`${title} saved`)
+    refetch()
     jumpToTop()
   }
 
