@@ -70,6 +70,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   List<String> taskUuid;
   @GraphQLQuery
   @GraphQLInputField
+  private List<String> notTaskUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   String pendingApprovalOf;
   @GraphQLQuery
   @GraphQLInputField
@@ -254,6 +257,14 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.taskUuid = taskUuid;
   }
 
+  public List<String> getNotTaskUuid() {
+    return notTaskUuid;
+  }
+
+  public void setNotTaskUuid(List<String> notTaskUuid) {
+    this.notTaskUuid = notTaskUuid;
+  }
+
   public String getPendingApprovalOf() {
     return pendingApprovalOf;
   }
@@ -385,6 +396,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getLocationRecurseStrategy(), other.getLocationRecurseStrategy())
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
+        && Objects.equals(getNotTaskUuid(), other.getNotTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())
         && Objects.equals(getState(), other.getState())
         && Objects.equals(getIncludeAllDrafts(), other.getIncludeAllDrafts())
@@ -420,7 +432,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     if (taskUuid != null) {
       clone.setTaskUuid(new ArrayList<>(taskUuid));
     }
+    if (notTaskUuid != null) {
+      clone.setTaskUuid(new ArrayList<>(notTaskUuid));
+    }
     return clone;
   }
-
 }

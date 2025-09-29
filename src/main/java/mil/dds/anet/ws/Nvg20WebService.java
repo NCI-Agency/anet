@@ -10,10 +10,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
@@ -24,12 +26,16 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AccessTokenDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
@@ -52,6 +58,7 @@ import nato.act.tide.wsdl.nvg20.NvgFilterType;
 import nato.act.tide.wsdl.nvg20.NvgType;
 import nato.act.tide.wsdl.nvg20.PointType;
 import nato.act.tide.wsdl.nvg20.SchemaType;
+import nato.act.tide.wsdl.nvg20.SelectResponseType;
 import nato.act.tide.wsdl.nvg20.SelectType;
 import nato.act.tide.wsdl.nvg20.SelectValueType;
 import nato.act.tide.wsdl.nvg20.SimpleDataSectionType;
@@ -103,6 +110,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       "interlocutorOrganization";
   private static final String ANET_SCHEMA_REPORT_KEY_OUTCOMES = "keyOutcomes";
   private static final String ANET_SCHEMA_REPORT_NEXT_STEPS = "nextSteps";
+  private static final String ANET_SCHEMA_REPORT_TASKS = "tasks";
 
   static final class App6Symbology {
     static final String SYMBOLOGY_VERSION_APP6B = "app6b";
@@ -207,6 +215,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       + " advisorOrg { uuid shortName longName identificationCode }" // -
       + " interlocutorOrg { uuid shortName longName identificationCode }" // -
       + " location { uuid name lat lng type }" // -
+      + " tasks { uuid }" // -
       + " } } }";
   private static final Map<String, Object> DEFAULT_REPORT_QUERY_VARIABLES = Map.of( // -
       "state", new Report.ReportState[] {Report.ReportState.APPROVED, Report.ReportState.PUBLISHED}, // -
@@ -218,20 +227,51 @@ public class Nvg20WebService implements NVGPortType2012 {
   private final AnetDictionary dict;
   private final GraphQLResource graphQLResource;
   private final AccessTokenDao accessTokenDao;
+  private final TaskDao taskDao;
 
   public Nvg20WebService(AnetConfig config, AnetDictionary dict, GraphQLResource graphQLResource,
-      AccessTokenDao accessTokenDao) {
+      AccessTokenDao accessTokenDao, TaskDao taskDao) {
     this.config = config;
     this.dict = dict;
     this.graphQLResource = graphQLResource;
     this.accessTokenDao = accessTokenDao;
+    this.taskDao = taskDao;
   }
 
   @Override
   public GetCapabilitiesResponse getCapabilities(GetCapabilities parameters) {
     final GetCapabilitiesResponse response = NVG_OF.createGetCapabilitiesResponse();
-    response.setNvgCapabilities(NvgConfig.getCapabilities());
+    response.setNvgCapabilities(NvgConfig.getCapabilities(getTasksLabel(), getAllTasks(false)));
     return response;
+  }
+
+  private String getTasksLabel() {
+    return getLabelFromDict("fields.task.%s", "longLabel");
+  }
+
+  private Map<String, String> getAllTasks(boolean includeInactiveTasks) {
+    final TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
+    taskSearchQuery.setPageSize(0);
+    final List<Task> allTasks = taskDao.search(taskSearchQuery).getList();
+    final Map<String, Task> taskMap =
+        allTasks.stream().collect(Collectors.toMap(Task::getUuid, t -> t));
+    final Map<String, String> collect = allTasks.stream()
+        .filter(t -> includeInactiveTasks || t.getStatus() == WithStatus.Status.ACTIVE)
+        .collect(Collectors.toMap(Task::getUuid, t -> getBreadcrumbTrail(t, taskMap)));
+    return collect.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors
+        .toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private String getBreadcrumbTrail(Task t, Map<String, Task> taskMap) {
+    final String separator = " » ";
+    final StringBuilder sb = new StringBuilder();
+    if (!Utils.isEmptyOrNull(t.getParentTaskUuid())) {
+      final Task parentTask = taskMap.get(t.getParentTaskUuid());
+      sb.insert(0, separator);
+      sb.insert(0, getBreadcrumbTrail(parentTask, taskMap));
+    }
+    sb.append(t.getShortName());
+    return sb.toString();
   }
 
   @Override
@@ -252,7 +292,7 @@ public class Nvg20WebService implements NVGPortType2012 {
             "Invalid APP-6 version");
       }
       final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-      response.setNvg(makeNvg(at, nvgConfig));
+      response.setNvg(makeNvg(at, nvgConfig, getTasksLabel(), getAllTasks(true)));
       return response;
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -270,10 +310,11 @@ public class Nvg20WebService implements NVGPortType2012 {
     return at != null && at.isValid();
   }
 
-  private NvgType makeNvg(AccessToken at, NvgConfig nvgConfig) {
+  private NvgType makeNvg(AccessToken at, NvgConfig nvgConfig, String tasksLabel,
+      Map<String, String> tasks) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
-    makeReportSchema(nvgType);
+    makeReportSchema(nvgType, tasksLabel);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
 
     // Get the current instant
@@ -295,12 +336,13 @@ public class Nvg20WebService implements NVGPortType2012 {
       }
     }
 
-    final List<Report> reports = getReportsByPeriod(at, start, end);
+    final List<Report> reports =
+        getReportsByPeriod(at, start, end, nvgConfig.getExcludeTaskUuids());
     contentTypeList.addAll(reports.stream().filter(this::hasLocationCoordinates)
         .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
             nvgConfig.isIncludeElementConfidentialityLabels(),
             nvgConfig.isAddElementConfidentialityLabelsAsMetadata(), defaultConfidentiality, now,
-            r))
+            tasks, r))
         .toList());
 
     return nvgType;
@@ -311,7 +353,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return location != null && location.getLng() != null && location.getLat() != null;
   }
 
-  private void makeReportSchema(NvgType nvgType) {
+  private void makeReportSchema(NvgType nvgType, String tasksLabel) {
     final SchemaType schemaType = NVG_OF.createSchemaType();
     schemaType.setSchemaId(URI_ANET_SCHEMAS_REPORT);
 
@@ -337,6 +379,7 @@ public class Nvg20WebService implements NVGPortType2012 {
         getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_KEY_OUTCOMES), XSD_STRING);
     addSchemaField(schemaType, ANET_SCHEMA_REPORT_NEXT_STEPS,
         getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_NEXT_STEPS), XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_TASKS, tasksLabel, XSD_STRING);
 
     nvgType.getSchema().add(schemaType);
   }
@@ -360,7 +403,8 @@ public class Nvg20WebService implements NVGPortType2012 {
   private PointType reportToNvgPoint(String app6Version,
       boolean includeElementConfidentialityLabels,
       boolean addElementConfidentialityLabelsAsMetadata,
-      ConfidentialityRecord defaultConfidentiality, Instant reportingTime, Report report) {
+      ConfidentialityRecord defaultConfidentiality, Instant reportingTime,
+      Map<String, String> tasks, Report report) {
     final PointType nvgPoint = NVG_OF.createPointType();
     nvgPoint.setLabel(Utils.ellipsizeOnWords(report.getIntent(),
         Utils.orIfNull((Integer) dict.getDictionaryEntry("fields.report.intent.maxLength"), 40)));
@@ -369,7 +413,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     setLocation(report, nvgPoint);
     setSymbol(app6Version, reportingTime, report, nvgPoint);
     nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
-    setExtendedData(report, nvgPoint);
+    setExtendedData(report, nvgPoint, tasks);
 
     if (includeElementConfidentialityLabels) {
       setConfidentialityInformation(addElementConfidentialityLabelsAsMetadata,
@@ -379,7 +423,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return nvgPoint;
   }
 
-  private void setExtendedData(Report report, PointType nvgPoint) {
+  private void setExtendedData(Report report, PointType nvgPoint, Map<String, String> tasks) {
     final ExtendedDataType extendedDataType = NVG_OF.createExtendedDataType();
     final SimpleDataSectionType simpleDataSectionType = NVG_OF.createSimpleDataSectionType();
     simpleDataSectionType.setSchemaRef("#" + URI_ANET_SCHEMAS_REPORT);
@@ -403,8 +447,15 @@ public class Nvg20WebService implements NVGPortType2012 {
         getOrganizationName(report.getInterlocutorOrg()));
     addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_KEY_OUTCOMES, report.getKeyOutcomes());
     addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_NEXT_STEPS, report.getNextSteps());
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_TASKS,
+        getReportTasks(report.getTasks(), tasks));
     extendedDataType.getSection().add(simpleDataSectionType);
     nvgPoint.setExtendedData(extendedDataType);
+  }
+
+  private String getReportTasks(List<Task> reportTasks, Map<String, String> tasks) {
+    return reportTasks.stream().map(rt -> tasks.get(rt.getUuid()))
+        .collect(Collectors.joining("; "));
   }
 
   private String getEngagementStatus(Report report) {
@@ -533,10 +584,12 @@ public class Nvg20WebService implements NVGPortType2012 {
     nvgPoint.setY(location.getLat());
   }
 
-  private List<Report> getReportsByPeriod(AccessToken at, final Instant start, final Instant end) {
+  private List<Report> getReportsByPeriod(AccessToken at, final Instant start, final Instant end,
+      final List<String> excludeTaskUuids) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
     reportQuery.put("engagementDateEnd", end.toEpochMilli());
+    reportQuery.put("notTaskUuid", excludeTaskUuids);
     final GraphQLRequest graphQLRequest =
         new GraphQLRequest("nvgData", REPORT_QUERY, null, Map.of("reportQuery", reportQuery));
     final Map<String, Object> result =
@@ -560,6 +613,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
     private static final String FUTURE_PERIOD_IN_DAYS_ID = "futureDays";
     private static final int DEFAULT_FUTURE_PERIOD_IN_DAYS = 0;
+    private static final String EXCLUDE_TASKS = "excludeTasks";
     private static final String INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL =
         "includeDocumentConfidentialityLabel";
     private static final boolean DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL = false;
@@ -577,6 +631,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     private String app6Version = DEFAULT_APP6_VERSION;
     private int pastDays = DEFAULT_PAST_PERIOD_IN_DAYS;
     private int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
+    private List<String> excludeTaskUuids = List.of();
     private boolean includeDocumentConfidentialityLabel =
         DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL;
     private boolean addDocumentConfidentialityLabelAsMetadata =
@@ -586,7 +641,8 @@ public class Nvg20WebService implements NVGPortType2012 {
     private boolean addElementConfidentialityLabelsAsMetadata =
         DEFAULT_ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA;
 
-    public static NvgCapabilitiesType getCapabilities() {
+    public static NvgCapabilitiesType getCapabilities(String tasksLabel,
+        Map<String, String> tasks) {
       final NvgCapabilitiesType nvgCapabilitiesType = NVG_OF.createNvgCapabilitiesType();
       nvgCapabilitiesType.setVersion(NVG_CAPABILITIES_VERSION);
       final List<CapabilityItemType> capabilityItemTypeList =
@@ -595,6 +651,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       capabilityItemTypeList.add(makeApp6VersionType());
       capabilityItemTypeList.add(makePastPeriodInDays());
       capabilityItemTypeList.add(makeFuturePeriodInDays());
+      capabilityItemTypeList.add(makeExcludeTasksType(tasksLabel, tasks));
       capabilityItemTypeList.add(makeIncludeDocumentConfidentialityLabel());
       capabilityItemTypeList.add(makeAddDocumentConfidentialityLabelAsMetadata());
       capabilityItemTypeList.add(makeIncludeElementConfidentialityLabels());
@@ -605,33 +662,44 @@ public class Nvg20WebService implements NVGPortType2012 {
     public static NvgConfig from(List<Object> nvgQueryList) throws ResponseStatusException {
       final NvgConfig nvgConfig = new NvgConfig();
       for (final Object object : nvgQueryList) {
-        if (object instanceof InputResponseType inputResponse) {
-          if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setAccessToken(inputResponse.getValue());
-          } else if (APP6_VERSION_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setApp6Version(inputResponse.getValue());
-          } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setPastDays(Integer.parseInt(inputResponse.getValue()));
-          } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
-            nvgConfig.setFutureDays(Integer.parseInt(inputResponse.getValue()));
-          } else if (INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL.equals(inputResponse.getRefid())) {
-            nvgConfig.setIncludeDocumentConfidentialityLabel(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else if (ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA
-              .equals(inputResponse.getRefid())) {
-            nvgConfig.setAddDocumentConfidentialityLabelAsMetadata(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
-            nvgConfig.setIncludeElementConfidentialityLabels(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else if (ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA
-              .equals(inputResponse.getRefid())) {
-            nvgConfig.setAddElementConfidentialityLabelsAsMetadata(
-                Boolean.parseBoolean(inputResponse.getValue()));
-          } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        if (object instanceof SelectResponseType selectResponse) {
+          switch (selectResponse.getRefid()) {
+            case APP6_VERSION_ID -> nvgConfig.setApp6Version(
+                Utils.isEmptyOrNull(selectResponse.getSelected()) ? DEFAULT_APP6_VERSION
+                    : selectResponse.getSelected().get(0));
+            case EXCLUDE_TASKS -> nvgConfig.setExcludeTaskUuids(selectResponse.getSelected());
+            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unrecognized select_response: " + selectResponse.getRefid());
+          }
+        } else if (object instanceof InputResponseType inputResponse) {
+          switch (inputResponse.getRefid()) {
+            case ACCESS_TOKEN_ID -> nvgConfig.setAccessToken(inputResponse.getValue());
+            case APP6_VERSION_ID ->
+              // Note: this is actually not correct, it should be a SelectResponseType (see above),
+              // however we keep it here for backwards compatibility…
+              nvgConfig.setApp6Version(inputResponse.getValue());
+            case PAST_PERIOD_IN_DAYS_ID ->
+              nvgConfig.setPastDays(Integer.parseInt(inputResponse.getValue()));
+            case FUTURE_PERIOD_IN_DAYS_ID ->
+              nvgConfig.setFutureDays(Integer.parseInt(inputResponse.getValue()));
+            case INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL ->
+              nvgConfig.setIncludeDocumentConfidentialityLabel(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            case ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA ->
+              nvgConfig.setAddDocumentConfidentialityLabelAsMetadata(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            case INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS ->
+              nvgConfig.setIncludeElementConfidentialityLabels(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            case ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA ->
+              nvgConfig.setAddElementConfidentialityLabelsAsMetadata(
+                  Boolean.parseBoolean(inputResponse.getValue()));
+            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Unrecognized input_response: " + inputResponse.getRefid());
           }
+        } else {
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Unrecognized response type: " + object.getClass().getSimpleName());
         }
       }
       return nvgConfig;
@@ -657,6 +725,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       selectType.setId(APP6_VERSION_ID);
       selectType.setRequired(false);
       selectType.setName("APP-6 version");
+      selectType.setMultiple(false);
       final SelectType.Values values = NVG_OF.createSelectTypeValues();
       App6Symbology.VALID_APP6_VERSIONS.forEach(app6Version -> values.getValue()
           .add(getSelectValueType(app6Version, App6Symbology.getVersionHelp(app6Version),
@@ -700,6 +769,21 @@ public class Nvg20WebService implements NVGPortType2012 {
       helpType.setText("Future period over which you want to retrieve engagements");
       inputType.setHelp(helpType);
       return inputType;
+    }
+
+    private static SelectType makeExcludeTasksType(String tasksLabel, Map<String, String> tasks) {
+      final SelectType selectType = NVG_OF.createSelectType();
+      selectType.setId(EXCLUDE_TASKS);
+      selectType.setRequired(false);
+      selectType.setName("Exclude " + tasksLabel);
+      selectType.setMultiple(true);
+      final SelectType.Values values = NVG_OF.createSelectTypeValues();
+      tasks.forEach((key, value) -> values.getValue().add(getSelectValueType(key, value, false)));
+      selectType.setValues(values);
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText("Exclude engagement reports linked to these " + tasksLabel);
+      selectType.setHelp(helpType);
+      return selectType;
     }
 
     private static InputType makeIncludeDocumentConfidentialityLabel() {
@@ -786,6 +870,14 @@ public class Nvg20WebService implements NVGPortType2012 {
 
     public void setFutureDays(int futureDays) {
       this.futureDays = futureDays;
+    }
+
+    public List<String> getExcludeTaskUuids() {
+      return excludeTaskUuids;
+    }
+
+    public void setExcludeTaskUuids(List<String> excludeTaskUuids) {
+      this.excludeTaskUuids = excludeTaskUuids;
     }
 
     public boolean isIncludeDocumentConfidentialityLabel() {
