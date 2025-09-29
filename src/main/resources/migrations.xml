@@ -6597,11 +6597,6 @@
 			<column name="updatedAt" type="datetime" />
 		</createTable>
 		<addUniqueConstraint
-			constraintName="UQ_Preference_uuid"
-			tableName="preferences"
-			columnNames="uuid"
-		/>
-		<addUniqueConstraint
 			constraintName="UQ_Preference_name"
 			tableName="preferences"
 			columnNames="name"
