@@ -77,7 +77,7 @@ const UserPreferences = ({
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
-    setSaveSuccess("Preferences saved")
+    setSaveSuccess(`${title} saved`)
     loadAppData()
     jumpToTop()
     if (typeof actionOnSubmit === "function") {
