@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
