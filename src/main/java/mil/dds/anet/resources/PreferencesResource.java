@@ -9,7 +9,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Preference;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -28,8 +27,8 @@ public class PreferencesResource {
 
   private final PreferenceDao dao;
 
-  public PreferencesResource(AnetObjectEngine engine) {
-    this.dao = engine.getPreferenceDao();
+  public PreferencesResource(PreferenceDao dao) {
+    this.dao = dao;
   }
 
   @GraphQLQuery(name = "preferences")
