@@ -25,12 +25,17 @@ public class PersonPreferenceDao extends AbstractDao {
   public int upsert(Person user, final PersonPreference personPreference) {
     final Handle handle = getDbHandle();
     try {
+      DaoUtils.setInsertFields(personPreference);
       return handle
           .createUpdate("/* upsertPersonPreference */ INSERT INTO \"peoplePreferences\" "
               + "(\"preferenceUuid\", \"personUuid\", value, \"createdAt\", \"updatedAt\") "
               + "VALUES (:preferenceUuid, :personUuid, :value, :createdAt, :updatedAt) "
-              + "ON CONFLICT (\"preferenceUuid\", \"personUuid\") DO UPDATE SET value = :value")
-          .bind("personUuid", DaoUtils.getUuid(user)).bindBean(personPreference).execute();
+              + "ON CONFLICT (\"preferenceUuid\", \"personUuid\") DO "
+              + "UPDATE SET value = :value, \"updatedAt\" = :updatedAt")
+          .bindBean(personPreference)
+          .bind("createdAt", DaoUtils.asLocalDateTime(personPreference.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(personPreference.getUpdatedAt()))
+          .bind("personUuid", DaoUtils.getUuid(user)).execute();
     } finally {
       closeDbHandle(handle);
     }
