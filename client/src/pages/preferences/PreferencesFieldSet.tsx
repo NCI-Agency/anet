@@ -90,7 +90,7 @@ const PreferencesFieldset = ({
   exportObjectTypes = []
 }: PreferencesFieldsetProps) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_PREFERENCES, {
-    preferenceQuery: { category, pageNum: 0, pageSize: 0 }
+    preferenceQuery: { category, pageSize: 0 }
   })
   const { done, result } = useBoilerplate({
     loading,
