@@ -65,8 +65,8 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
       if (Utils.isEmptyOrNull(subscribedObjectType) || Utils.isEmptyOrNull(subscribedObjectUuid)) {
         return Collections.emptyList();
       }
-      return handle.attach(SubscriptionDao.SubscriptionListQueries.class)
-          .getSubscribedPeople(subscribedObjectType, subscribedObjectUuid);
+      return handle.attach(SubscriptionListQueries.class).getSubscribedPeople(subscribedObjectType,
+          subscribedObjectUuid);
     } finally {
       closeDbHandle(handle);
     }
@@ -74,7 +74,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
 
   public interface SubscriptionListQueries {
     @RegisterRowMapper(PersonMapper.class)
-    @SqlQuery("SELECT p.uuid AS people_uuid, p.name AS people_name " + " FROM subscriptions s "
+    @SqlQuery("SELECT p.uuid AS people_uuid, p.name AS people_name FROM subscriptions s "
         + " INNER JOIN positions pos ON s.\"subscriberUuid\" = pos.uuid "
         + " INNER JOIN people p ON pos.\"currentPersonUuid\" = p.uuid "
         + " WHERE \"subscribedObjectType\" = :subscribedObjectType AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
