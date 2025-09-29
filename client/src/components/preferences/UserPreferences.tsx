@@ -2,9 +2,9 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import { jumpToTop, mapPageDispatchersToProps } from "components/Page"
-import PreferencesFieldset from "components/preferences/PreferencesFieldSet"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
+import PreferencesFieldset from "./PreferencesFieldSet"
 
 const GQL_UPDATE_PERSON_PREFERENCES = gql`
   mutation ($preferences: [PersonPreferenceInput]!) {
