@@ -7,6 +7,7 @@ import ShowReport from "../pages/report/showReport.page"
 describe("When creating a Report with conflicts", () => {
   let firstReportUUID
   let secondReportUUID
+  let thirdReportUUID
   const report01 = {
     intent: "111111111111",
     engagementDate: moment()
@@ -30,6 +31,10 @@ describe("When creating a Report with conflicts", () => {
     duration: "10",
     advisors: ["CIV REPORTGUY, Ima", "CIV REPORTGIRL, Ima"],
     interlocutors: ["CIV KYLESON, Kyle", "OF-3 CHRISVILLE, Chris"]
+  }
+  const report03 = {
+    intent: "333333333333",
+    engagementDate: moment()
   }
 
   it("Should create first draft report without any conflicts", async () => {
@@ -226,6 +231,64 @@ describe("When creating a Report with conflicts", () => {
   it("Should delete the second report", async () => {
     await EditReport.open(secondReportUUID)
     await EditReport.deleteReport(secondReportUUID, true)
+
+    expect(await (await EditReport.getAlertSuccess()).getText()).to.equal(
+      "Report deleted"
+    )
+  })
+
+  it("Should create third report without conflicts", async () => {
+    await CreateReport.open()
+    await browser.pause(500) // wait for the page transition and rendering of custom fields
+    // this engagement overlaps with a cancelled engagement from the SQL data
+    await CreateReport.fillForm(report03)
+
+    expect(await (await CreateReport.getIntent()).getValue()).to.equal(
+      report03.intent
+    )
+    expect(await (await CreateReport.getEngagementDate()).getValue()).to.equal(
+      report03.engagementDate.format("DD-MM-YYYY HH:mm")
+    )
+    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
+    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    expect(await advisor01.conflictButton.isExisting()).to.equal(false)
+
+    await CreateReport.submitForm()
+    await ShowReport.waitForShowReportToLoad()
+
+    expect(await ShowReport.getReportStatusText()).to.equal(
+      ShowReport.REPORT_IS_DRAFT
+    )
+    expect(await ShowReport.getIntent()).to.equal(report03.intent)
+
+    thirdReportUUID = await ShowReport.getUuid()
+    expect(thirdReportUUID.length).to.equal(36)
+  })
+
+  it("Should display third report without conflicts", async () => {
+    await ShowReport.open(thirdReportUUID)
+    await ShowReport.waitForShowReportToLoad()
+
+    expect((await ShowReport.getUuid()).length).to.equal(36)
+    expect(await ShowReport.getReportStatusText()).to.equal(
+      ShowReport.REPORT_IS_DRAFT
+    )
+    expect(await ShowReport.getIntent()).to.equal(report03.intent)
+    expect(await ShowReport.getEngagementDate()).to.equal(
+      report03.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+    )
+    expect(
+      await (await ShowReport.getReportConflictIcon()).isExisting()
+    ).to.equal(false)
+
+    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
+    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    expect(await advisor01.conflictButton.isExisting()).to.equal(false)
+  })
+
+  it("Should delete the third report", async () => {
+    await EditReport.open(thirdReportUUID)
+    await EditReport.deleteReport(thirdReportUUID, false)
 
     expect(await (await EditReport.getAlertSuccess()).getText()).to.equal(
       "Report deleted"
