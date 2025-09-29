@@ -53,9 +53,10 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
     final Handle handle = getDbHandle();
     try {
       handle.createUpdate(
-          "/* preferenceInsert */ INSERT INTO \"preferences\" (uuid, name, type, category, description, \"defaultValue\", \"allowedValues\",  "
-              + "\"createdAt\", \"updatedAt\") "
-              + " VALUES (:uuid, :name, :type, :category, :description, :value, :allowedValues, :createdAt, :updatedAt)")
+          "/* preferenceInsert */ INSERT INTO \"preferences\" (uuid, name, type, category, "
+              + "description,  \"defaultValue\", \"allowedValues\", \"createdAt\", \"updatedAt\") "
+              + " VALUES (:uuid, :name, :type, :category, :description, :value, :allowedValues, "
+              + ":createdAt, :updatedAt)")
           .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt())).execute();
       return p;
@@ -91,8 +92,9 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
     final Handle handle = getDbHandle();
     try {
       return handle.createUpdate(
-          "/* preferencesUpdate */ UPDATE preferences SET name = :name, type = :type, category = :category, description = :description, "
-              + "\"defaultValue\" = :defaultValue, \"allowedValues\" = :allowedValues WHERE uuid = :uuid")
+          "/* preferencesUpdate */ UPDATE preferences SET name = :name, type = :type, "
+              + "category = :category, description = :description, \"defaultValue\" = :defaultValue, "
+              + "\"allowedValues\" = :allowedValues \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("name", p.getName()).bind("type", p.getType()).bind("category", p.getCategory())
           .bind("description", p.getDescription()).bind("defaultValue", p.getDefaultValue())
