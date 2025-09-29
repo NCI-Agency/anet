@@ -99,7 +99,7 @@ const PreferencesFieldset = ({
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("My Preferences")
+  usePageTitle(title)
 
   const preferences = useMemo(() => {
     const useUserPrefs =
