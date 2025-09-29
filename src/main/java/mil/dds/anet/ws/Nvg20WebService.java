@@ -123,7 +123,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     // - %1$s = status: P for Present, A for Anticipated/Planned
     // - U = function id: Unit
     // - ------- = more defaults
-    private static final String ACTIVITY_MEETING_APP6B = "SFG%1$sU-------";
+    private static final String ACTIVITY_MEETING_APP6B = "SFG%1$sU----------";
     private static final String ACTIVITY_STATUS_PRESENT_APP6B = "P";
     private static final String ACTIVITY_STATUS_PLANNED_APP6B = "A";
 
