@@ -24,6 +24,19 @@ public class PersonPreference extends AbstractAnetBean {
   @GraphQLInputField
   private String value;
 
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getUuid() {
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on PersonPreference");
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    // just ignore
+  }
+
   public String getValue() {
     return value;
   }
@@ -94,16 +107,4 @@ public class PersonPreference extends AbstractAnetBean {
     this.preference = new ForeignObjectHolder<>(preference);
   }
 
-  @Override
-  @JsonIgnore
-  @GraphQLIgnore
-  public String getUuid() {
-    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-        "no UUID field on PersonPreference");
-  }
-
-  @Override
-  public void setUuid(String uuid) {
-    // just ignore
-  }
 }
