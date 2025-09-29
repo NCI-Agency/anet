@@ -1,10 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import {
-  jumpToTop,
-  mapPageDispatchersToProps,
-  usePageTitle
-} from "components/Page"
+import { jumpToTop, usePageTitle } from "components/Page"
 import PreferencesFieldset from "components/preferences/PreferencesFieldSet"
 import React, { useState } from "react"
 

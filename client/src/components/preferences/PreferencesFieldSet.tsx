@@ -1,9 +1,5 @@
 import { gql } from "@apollo/client"
-import {
-  DEFAULT_PAGE_PROPS,
-  DEFAULT_SEARCH_PROPS,
-  SEARCH_OBJECT_TYPES
-} from "actions"
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -12,8 +8,7 @@ import NavigationWarning from "components/NavigationWarning"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate,
-  usePageTitle
+  useBoilerplate
 } from "components/Page"
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
