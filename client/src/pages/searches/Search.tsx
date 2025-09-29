@@ -21,6 +21,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
@@ -39,7 +40,6 @@ import SubNav from "components/SubNav"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
-import UserPreferences from "pages/preferences/UserPreferences"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -947,7 +947,7 @@ const Search = ({
   }
 
   async function exportResultsFromModal() {
-    await exportSearchResults(
+    exportSearchResults(
       "xlsx",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )

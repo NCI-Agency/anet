@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import { jumpToTop, mapPageDispatchersToProps } from "components/Page"
-import PreferencesFieldset from "pages/preferences/PreferencesFieldSet"
+import PreferencesFieldset from "components/preferences/PreferencesFieldSet"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 

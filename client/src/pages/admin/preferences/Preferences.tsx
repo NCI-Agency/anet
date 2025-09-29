@@ -1,7 +1,11 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import { jumpToTop, mapPageDispatchersToProps } from "components/Page"
-import PreferencesFieldset from "pages/preferences/PreferencesFieldSet"
+import {
+  jumpToTop,
+  mapPageDispatchersToProps,
+  usePageTitle
+} from "components/Page"
+import PreferencesFieldset from "components/preferences/PreferencesFieldSet"
 import React, { useState } from "react"
 
 const GQL_UPDATE_PREFERENCES = gql`
@@ -12,6 +16,7 @@ const GQL_UPDATE_PREFERENCES = gql`
 const Preferences = () => {
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
+  usePageTitle("Default Application Preferences")
   return (
     <PreferencesFieldset
       onSubmit={onSubmit}
