@@ -23,7 +23,6 @@ public class PreferenceSearchQuery extends SubscribableObjectSearchQuery<Prefere
     this.category = category;
   }
 
-
   @Override
   public PreferenceSearchQuery clone() throws CloneNotSupportedException {
     return (PreferenceSearchQuery) super.clone();
