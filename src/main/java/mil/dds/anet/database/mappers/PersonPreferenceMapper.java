@@ -14,10 +14,13 @@ public class PersonPreferenceMapper implements RowMapper<PersonPreference> {
     p.setValue(rs.getString("value"));
     p.setPreferenceUuid(rs.getString("preferenceUuid"));
     p.setPersonUuid(rs.getString("personUuid"));
+    p.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
+    p.setUpdatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "updatedAt"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));
     }
     return p;
   }
+
 }
