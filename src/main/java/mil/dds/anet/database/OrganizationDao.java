@@ -408,6 +408,13 @@ public class OrganizationDao
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);
 
+      // Update subscriptions
+      updateM2mForMerge("subscriptions", "subscriberUuid", "subscribedObjectUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
+      // Update subscriptionUpdates
+      updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerOrganizationUuid,
+          loserOrganizationUuid);
+
       // Finally, delete loser
       final int nrDeleted =
           deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);

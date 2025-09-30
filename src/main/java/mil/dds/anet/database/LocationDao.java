@@ -175,6 +175,13 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     // Delete customSensitiveInformation for loser
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserLocationUuid);
 
+    // Update subscriptions
+    updateM2mForMerge("subscriptions", "subscriberUuid", "subscribedObjectUuid", winnerLocationUuid,
+        loserLocationUuid);
+    // Update subscriptionUpdates
+    updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerLocationUuid,
+        loserLocationUuid);
+
     // Finally, delete the location
     final int nrDeleted = deleteForMerge(LocationDao.TABLE_NAME, "uuid", loserLocationUuid);
     if (nrDeleted > 0) {
