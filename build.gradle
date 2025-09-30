@@ -11,7 +11,7 @@ plugins {
 	id "org.beryx.runtime" version "2.0.0-rc"
 	id "com.netflix.nebula.rpm" version "12.1.1"
 	id "org.springframework.boot" version "3.5.6" apply false
-	id 'io.mateo.cxf-codegen' version '2.4.1'
+	id 'io.mateo.cxf-codegen' version '2.5.0'
 }
 
 apply plugin: 'java'
