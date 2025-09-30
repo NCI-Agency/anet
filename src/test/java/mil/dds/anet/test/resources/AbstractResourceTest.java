@@ -11,6 +11,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
@@ -18,6 +19,8 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.GraphQLPluginConfiguration;
 import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.client.AnetBeanList_Person;
+import mil.dds.anet.test.client.AnetBeanList_Subscription;
+import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
 import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
 import mil.dds.anet.test.client.Assessment;
@@ -45,6 +48,13 @@ import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportPerson;
 import mil.dds.anet.test.client.ReportPersonInput;
+import mil.dds.anet.test.client.SortOrder;
+import mil.dds.anet.test.client.Subscription;
+import mil.dds.anet.test.client.SubscriptionInput;
+import mil.dds.anet.test.client.SubscriptionSearchQueryInput;
+import mil.dds.anet.test.client.SubscriptionUpdate;
+import mil.dds.anet.test.client.SubscriptionUpdateSearchQueryInput;
+import mil.dds.anet.test.client.SubscriptionUpdateSearchSortBy;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
@@ -55,6 +65,7 @@ import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.provider.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -525,5 +536,94 @@ public abstract class AbstractResourceTest {
 
   protected String getFirstClassification() {
     return getAllowedClassifications().iterator().next();
+  }
+
+  protected Stream<Arguments> provideMergeTestParameters() {
+    return Stream.of( // -
+        Arguments.of(false, false), // don't subscribe
+        Arguments.of(true, false), // subscribe to loser
+        Arguments.of(false, true), // subscribe to winner
+        Arguments.of(true, true) // subscribe to both
+    );
+  }
+
+  protected String addSubscription(boolean subscribe, String objectType, String objectUuid,
+      ThrowingFunction<Object, Integer> updateCallback) {
+    if (!subscribe) {
+      return null;
+    }
+    // Subscribe to the object
+    final SubscriptionInput subscriptionInput = SubscriptionInput.builder()
+        .withSubscribedObjectType(objectType).withSubscribedObjectUuid(objectUuid).build();
+    final Subscription subscription = withCredentials(adminUser,
+        t -> mutationExecutor.createSubscription("{ uuid }", subscriptionInput));
+    assertThat(subscription).isNotNull();
+    assertThat(subscription.getUuid()).isNotNull();
+    // Edit the object so we get a subscriptionUpdate
+    final Integer n = withCredentials(adminUser, updateCallback);
+    assertThat(n).isOne();
+    // Get the subscriptionUpdates
+    final SubscriptionUpdateSearchQueryInput subscriptionUpdateSearchQueryInput =
+        SubscriptionUpdateSearchQueryInput.builder()
+            .withSortBy(SubscriptionUpdateSearchSortBy.CREATED_AT).withSortOrder(SortOrder.DESC)
+            .withPageSize(1).build();
+    final AnetBeanList_SubscriptionUpdate subscriptionUpdates = withCredentials(adminUser,
+        t -> queryExecutor.mySubscriptionUpdates(
+            getListFields("{ updatedObjectType updatedObjectUuid }"),
+            subscriptionUpdateSearchQueryInput));
+    assertThat(subscriptionUpdates).isNotNull();
+    assertThat(subscriptionUpdates.getList()).isNotEmpty().hasSize(1);
+    final SubscriptionUpdate subscriptionUpdate = subscriptionUpdates.getList().get(0);
+    assertThat(subscriptionUpdate.getUpdatedObjectType()).isEqualTo(objectType);
+    assertThat(subscriptionUpdate.getUpdatedObjectUuid()).isEqualTo(objectUuid);
+    return subscription.getUuid();
+  }
+
+  protected void checkSubscriptionsAndUpdatesAfterMerge(boolean subscribed, String objectType,
+      String loserUuid, String winnerUuid) {
+    final int expectedNrOfSubscriptions = subscribed ? 1 : 0;
+    final int expectedNrOfSubscriptionUpdates = subscribed ? 2 : 0;
+    // Check the subscriptions to the object
+    final AnetBeanList_Subscription subscriptions = withCredentials(adminUser,
+        t -> queryExecutor.mySubscriptions(
+            getListFields("{ subscribedObjectType subscribedObjectUuid }"),
+            SubscriptionSearchQueryInput.builder().withPageSize(0).build()));
+    assertThat(subscriptions).isNotNull();
+    assertThat(subscriptions.getList()).hasSize(expectedNrOfSubscriptions);
+    assertThat(subscriptions.getList())
+        .filteredOn(s -> objectType.equals(s.getSubscribedObjectType()))
+        .noneMatch(s -> loserUuid.equals(s.getSubscribedObjectUuid()))
+        .filteredOn(s -> winnerUuid.equals(s.getSubscribedObjectUuid()))
+        .hasSize(expectedNrOfSubscriptions);
+    // Check the subscriptionUpdates for the object
+    final AnetBeanList_SubscriptionUpdate subscriptionUpdates = withCredentials(adminUser,
+        t -> queryExecutor.mySubscriptionUpdates(
+            getListFields("{ updatedObjectType updatedObjectUuid }"),
+            SubscriptionUpdateSearchQueryInput.builder().withPageSize(0).build()));
+    assertThat(subscriptionUpdates).isNotNull();
+    assertThat(subscriptionUpdates.getList()).hasSize(expectedNrOfSubscriptionUpdates);
+    assertThat(subscriptionUpdates.getList())
+        .filteredOn(s -> objectType.equals(s.getUpdatedObjectType()))
+        .noneMatch(s -> loserUuid.equals(s.getUpdatedObjectUuid()))
+        .filteredOn(s -> winnerUuid.equals(s.getUpdatedObjectUuid()))
+        .hasSize(expectedNrOfSubscriptionUpdates);
+  }
+
+  protected void deleteSubscription(boolean expectException, String subscriptionUuid) {
+    if (subscriptionUuid != null) {
+      // Unsubscribe from the object
+      try {
+        final Integer n = withCredentials(adminUser,
+            t -> mutationExecutor.deleteSubscription("", subscriptionUuid));
+        if (expectException) {
+          fail("Expected an exception");
+        }
+        assertThat(n).isOne();
+      } catch (Exception e) {
+        if (!expectException) {
+          fail("Unexpected exception", e);
+        }
+      }
+    }
   }
 }

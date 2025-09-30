@@ -26,12 +26,16 @@ import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.PositionResourceTest;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class PositionMergeTest extends AbstractResourceTest {
 
-  @Test
-  void testMerge() {
+  @ParameterizedTest
+  @MethodSource("provideMergeTestParameters")
+  void testMerge(boolean subscribeToLoser, boolean subscribeToWinner) {
+    final String objectType = PositionDao.TABLE_NAME;
+
     // Create a new position and designate the person upfront
     final PersonInput testPersonInput = PersonInput.builder().withName("MergePositionsTest Person")
         .withStatus(Status.ACTIVE).build();
@@ -58,9 +62,8 @@ class PositionMergeTest extends AbstractResourceTest {
     assertThat(firstPosition.getUuid()).isNotNull();
 
     // Add an attachment
-    final GenericRelatedObjectInput loserPositionAttachment =
-        GenericRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
-            .withRelatedObjectUuid(firstPosition.getUuid()).build();
+    final GenericRelatedObjectInput loserPositionAttachment = GenericRelatedObjectInput.builder()
+        .withRelatedObjectType(objectType).withRelatedObjectUuid(firstPosition.getUuid()).build();
     final AttachmentInput loserPositionAttachmentInput =
         AttachmentInput.builder().withFileName("testLoserPositionAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
@@ -68,6 +71,11 @@ class PositionMergeTest extends AbstractResourceTest {
     final String createdLoserPositionAttachmentUuid = withCredentials(adminUser,
         t -> mutationExecutor.createAttachment("", loserPositionAttachmentInput));
     assertThat(createdLoserPositionAttachmentUuid).isNotNull();
+
+    // Subscribe to the position
+    final String winnerSubscriptionUuid =
+        addSubscription(subscribeToWinner, objectType, firstPosition.getUuid(),
+            t -> mutationExecutor.updatePosition("", getPositionInput(firstPosition)));
 
     final PositionInput secondPositionInput = PositionInput.builder()
         .withName("MergePositionsTest Second Position").withType(PositionType.REGULAR)
@@ -80,9 +88,8 @@ class PositionMergeTest extends AbstractResourceTest {
     assertThat(secondPosition.getUuid()).isNotNull();
 
     // Add an attachment
-    final GenericRelatedObjectInput winnerPositionAttachment =
-        GenericRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
-            .withRelatedObjectUuid(secondPosition.getUuid()).build();
+    final GenericRelatedObjectInput winnerPositionAttachment = GenericRelatedObjectInput.builder()
+        .withRelatedObjectType(objectType).withRelatedObjectUuid(secondPosition.getUuid()).build();
     final AttachmentInput winnerPositionAttachmentInput =
         AttachmentInput.builder().withFileName("testLoserPositionAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
@@ -90,6 +97,11 @@ class PositionMergeTest extends AbstractResourceTest {
     final String createdWinnerPositionAttachmentUuid = withCredentials(adminUser,
         t -> mutationExecutor.createAttachment("", winnerPositionAttachmentInput));
     assertThat(createdWinnerPositionAttachmentUuid).isNotNull();
+
+    // Subscribe to the position
+    final String loserSubscriptionUuid =
+        addSubscription(subscribeToLoser, objectType, secondPosition.getUuid(),
+            t -> mutationExecutor.updatePosition("", getPositionInput(secondPosition)));
 
     final PersonPositionHistoryInput hist =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
@@ -105,6 +117,7 @@ class PositionMergeTest extends AbstractResourceTest {
     mergedPositionInput.setStatus(secondPosition.getStatus());
     mergedPositionInput.setType(secondPosition.getType());
 
+    // Merge the two positions
     final int nrUpdated = withCredentials(adminUser,
         t -> mutationExecutor.mergePositions("", secondPosition.getUuid(), mergedPositionInput));
     assertThat(nrUpdated).isOne();
@@ -121,6 +134,13 @@ class PositionMergeTest extends AbstractResourceTest {
     final Position mergedPosition = withCredentials(adminUser,
         t -> queryExecutor.position(PositionResourceTest.FIELDS, mergedPositionInput.getUuid()));
     assertThat(mergedPosition.getAttachments()).hasSize(2);
+
+    // Check the subscriptions and updates
+    checkSubscriptionsAndUpdatesAfterMerge(subscribeToLoser || subscribeToWinner, objectType,
+        secondPosition.getUuid(), firstPosition.getUuid());
+    // And unsubscribe
+    deleteSubscription(subscribeToWinner, loserSubscriptionUuid);
+    deleteSubscription(false, winnerSubscriptionUuid);
   }
 
 }
