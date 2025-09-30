@@ -28,10 +28,12 @@ TRUNCATE TABLE "notes" CASCADE;
 TRUNCATE TABLE "organizationAdministrativePositions" CASCADE;
 TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
+TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
 TRUNCATE TABLE "people" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
+-- Skip preferences, as these are inserted by the migrations
 TRUNCATE TABLE "reportActions" CASCADE;
 TRUNCATE TABLE "reportAuthorizedMembers" CASCADE;
 TRUNCATE TABLE "reportCommunities" CASCADE;
@@ -1833,9 +1835,8 @@ INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query",
 
 -- Specific preferences values for Jack
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
-    ((SELECT uuid from people where "name" = 'Jackson, Jack'), '4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
-    ((SELECT uuid from people where "name" = 'Jackson, Jack'), '0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS_EMAILS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS_EMAILS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
