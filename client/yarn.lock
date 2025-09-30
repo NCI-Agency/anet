@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.0.4":
-  version: 4.0.4
-  resolution: "@apollo/client@npm:4.0.4"
+"@apollo/client@npm:4.0.6":
+  version: 4.0.6
+  resolution: "@apollo/client@npm:4.0.6"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/0fb502bb565f94cb0fcdc992051f7efe9d3c5a3f6508944bf30e30a6638e0aebffc7d838b7421c65d4d17e07c42843e4bc673d5ca06cc0e96afbc8c8e5600d17
+  checksum: 10c0/f8328786c5f551c0e0ee6dc41084bbbe8a4094e71cdcd6ca3bc2f92b12aa2b8fb73bc56d662c143d4818b7212c8b45c8d05180f0a924113e39a84e5072fb8d3b
   languageName: node
   linkType: hard
 
@@ -6899,7 +6899,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.0.4"
+    "@apollo/client": "npm:4.0.6"
     "@babel/core": "npm:7.28.4"
     "@babel/eslint-parser": "npm:7.28.4"
     "@babel/plugin-proposal-decorators": "npm:7.28.0"
@@ -6958,7 +6958,7 @@ __metadata:
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.4.21"
     ava: "npm:6.4.1"
-    axios: "npm:1.12.0"
+    axios: "npm:1.12.2"
     babel-jest: "npm:30.2.0"
     babel-loader: "npm:10.0.0"
     bootstrap: "npm:5.3.8"
@@ -7016,7 +7016,7 @@ __metadata:
     keycloak-js: "npm:26.2.0"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
-    leaflet-geosearch: "npm:4.2.0"
+    leaflet-geosearch: "npm:4.2.2"
     leaflet-gesture-handling: "npm:1.2.2"
     leaflet.fullscreen: "npm:4.0.0"
     leaflet.markercluster: "npm:1.5.3"
@@ -7078,7 +7078,7 @@ __metadata:
     webpack-dev-server: "npm:5.2.2"
     webpack-merge: "npm:6.0.1"
     xhr2: "npm:0.2.1"
-    yup: "npm:1.7.0"
+    yup: "npm:1.7.1"
   languageName: unknown
   linkType: soft
 
@@ -7565,14 +7565,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.12.0, axios@npm:^1.7.4":
-  version: 1.12.0
-  resolution: "axios@npm:1.12.0"
+"axios@npm:1.12.2, axios@npm:^1.7.4":
+  version: 1.12.2
+  resolution: "axios@npm:1.12.2"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.4"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/44a1e4cfb69a2d59aa12bbc441a336e5c18e87c02b904c509fd33607d94e8cb8cc221c17e9d53f67841a4efe13abf1aa1497c85df390cdb8681ee723998d11b0
+  checksum: 10c0/80b063e318cf05cd33a4d991cea0162f3573481946f9129efb7766f38fde4c061c34f41a93a9f9521f02b7c9565ccbc197c099b0186543ac84a24580017adfed
   languageName: node
   linkType: hard
 
@@ -14323,9 +14323,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet-geosearch@npm:4.2.0":
-  version: 4.2.0
-  resolution: "leaflet-geosearch@npm:4.2.0"
+"leaflet-geosearch@npm:4.2.2":
+  version: 4.2.2
+  resolution: "leaflet-geosearch@npm:4.2.2"
   dependencies:
     "@googlemaps/js-api-loader": "npm:^1.16.6"
     leaflet: "npm:^1.6.0"
@@ -14334,7 +14334,7 @@ __metadata:
       optional: true
     leaflet:
       optional: true
-  checksum: 10c0/431d00d5779af179a51edbbf08c68779b353ee7001b8a44950eb4185207a514a835b101c745a632904e7f87fd547cc85ef3a9b453467bef67e62ee2ef6204e80
+  checksum: 10c0/fc46b9884e23116ce8d36d19fc58d862bb0620ef2f550e208790e10ed92d4a791839b36fc30444b68759066cf0a99f7090aeeec406a46a6d6861a9e73471bb59
   languageName: node
   linkType: hard
 
@@ -20767,15 +20767,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yup@npm:1.7.0":
-  version: 1.7.0
-  resolution: "yup@npm:1.7.0"
+"yup@npm:1.7.1":
+  version: 1.7.1
+  resolution: "yup@npm:1.7.1"
   dependencies:
     property-expr: "npm:^2.0.5"
     tiny-case: "npm:^1.0.3"
     toposort: "npm:^2.0.2"
     type-fest: "npm:^2.19.0"
-  checksum: 10c0/76760553b6813705092735ab1fe0049061545673b7cc9a8e554ef59c09db241888bdcca6c42b58bd0f8a707c1d9665ab1adb75a8e4cf380bfc89f17827f2b182
+  checksum: 10c0/76b8c7fc2ba467a346935d027a25c067f9653bb0413cd60fbe0518e3d62637a56dbfca49979c4bab1a93d8e9a50843ca73d90bdc271e2f5bce1effa7734e5f28
   languageName: node
   linkType: hard
 
