@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
+import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
 import FileSaver from "file-saver"
 
 const getEmailAddresses = () => `
@@ -474,14 +475,20 @@ export const exportResults = (
   )
   const includeEvents = queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS)
 
-  const organizationsFields = getExportPreference("ORGANIZATIONS")
-  const peopleFields = getExportPreference("PEOPLE")
-  const positionsFields = getExportPreference("POSITIONS")
-  const tasksFields = getExportPreference("TASKS")
-  const locationsFields = getExportPreference("LOCATIONS")
-  const reportsFields = getExportPreference("REPORTS")
-  const authorizationGroupsFields = getExportPreference("AUTHORIZATION_GROUPS")
-  const eventsFields = getExportPreference("EVENTS")
+  const organizationsFields = getExportPreference(
+    "ORGANIZATIONS",
+    CATEGORY_EXPORT
+  )
+  const peopleFields = getExportPreference("PEOPLE", CATEGORY_EXPORT)
+  const positionsFields = getExportPreference("POSITIONS", CATEGORY_EXPORT)
+  const tasksFields = getExportPreference("TASKS", CATEGORY_EXPORT)
+  const locationsFields = getExportPreference("LOCATIONS", CATEGORY_EXPORT)
+  const reportsFields = getExportPreference("REPORTS", CATEGORY_EXPORT)
+  const authorizationGroupsFields = getExportPreference(
+    "AUTHORIZATION_GROUPS",
+    CATEGORY_EXPORT
+  )
+  const eventsFields = getExportPreference("EVENTS", CATEGORY_EXPORT)
 
   const organizationQuery = !includeOrganizations
     ? {}
@@ -585,10 +592,19 @@ export const exportResults = (
     })
     .catch(error => setError(error))
 
-  function getExportPreference(reportEntity: string): string[] {
+  function getExportPreference(
+    preferenceName: string,
+    preferenceCategory: string
+  ): string[] {
     const preference =
-      userPreferences.find(p => p.preference.name === reportEntity) ??
-      genericPreferences.find(p => p.name === reportEntity)
+      userPreferences.find(
+        p =>
+          p.preference.name === preferenceName &&
+          p.preference.category === preferenceCategory
+      ) ??
+      genericPreferences.find(
+        p => p.name === preferenceName && p.category === preferenceCategory
+      )
 
     const value = preference?.value ?? preference?.defaultValue
 

@@ -21,6 +21,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
 import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
@@ -839,7 +840,7 @@ const Search = ({
         <Modal.Body>
           <UserPreferences
             actionLabel="Save and Export"
-            category="export"
+            category={CATEGORY_EXPORT}
             title="My Export Preferences"
             actionOnSubmit={exportResultsFromModal}
             exportObjectTypes={resultObjectTypes}

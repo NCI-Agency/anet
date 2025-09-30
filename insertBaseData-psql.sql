@@ -1835,8 +1835,8 @@ INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query",
 
 -- Specific preferences values for Jack
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
-  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS_EMAILS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS_EMAILS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
