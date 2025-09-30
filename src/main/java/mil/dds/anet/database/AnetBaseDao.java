@@ -9,6 +9,7 @@ import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,26 +105,29 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
 
   public List<String> getEmailAddressesBasedOnPreference(List<? extends Person> people,
       String preferenceName) {
-    List<String> peopleUuids = people.stream().map(Person::getUuid).collect(Collectors.toList());
+    final List<String> peopleUuids =
+        people.stream().map(Person::getUuid).collect(Collectors.toList());
 
     // Returns email addresses of the people that opted for this preference (or when the preference
     // default value is TRUE)
     final Handle handle = getDbHandle();
     final String peopleUuidsParam = "peopleUuids";
     final String preferenceNameParam = "preferenceNameParam";
+    final String emailNetworkParam = "emailNetwork";
     try {
-      return handle
-          .createQuery("/* getEmailAddressesBasedOnPreference */ SELECT DISTINCT ea.address "
-              + "FROM preferences pref " + "JOIN \"emailAddresses\" ea "
-              + "      ON ea.\"relatedObjectType\" = 'people' "
-              + "     AND ea.\"relatedObjectUuid\" IN (<" + peopleUuidsParam + ">) "
-              + "LEFT JOIN \"peoplePreferences\" pp "
-              + "       ON pp.\"preferenceUuid\" = pref.uuid " + "      AND pp.\"personUuid\" IN (<"
-              + peopleUuidsParam + ">) " + "WHERE pref.name = :" + preferenceNameParam + " "
-              + "  AND ( (pp.\"personUuid\" IS NULL AND UPPER(pref.\"defaultValue\") = 'TRUE') "
-              + "       OR (UPPER(pp.value) = 'TRUE') )")
-          .bindList(peopleUuidsParam, peopleUuids).bind(preferenceNameParam, preferenceName)
-          .mapTo(String.class).list();
+      return handle.createQuery("/* getEmailAddressesBasedOnPreference */"
+          + " SELECT DISTINCT ea.address FROM \"emailAddresses\" ea"
+          + " JOIN preferences pref ON pref.name = :" + preferenceNameParam
+          + " LEFT JOIN \"peoplePreferences\" pp"
+          + " ON pp.\"preferenceUuid\" = pref.uuid AND pp.\"personUuid\" = ea.\"relatedObjectUuid\""
+          + " WHERE ea.network = :" + emailNetworkParam
+          + " AND ea.\"relatedObjectType\" = 'people' AND ea.\"relatedObjectUuid\" IN (<"
+          + peopleUuidsParam + ">)"
+          + " AND ( (pp.\"personUuid\" IS NULL AND UPPER(pref.\"defaultValue\") = 'TRUE')"
+          + " OR (UPPER(pp.value) = 'TRUE') )").bindList(peopleUuidsParam, peopleUuids)
+          .bind(preferenceNameParam, preferenceName)
+          .bind(emailNetworkParam, Utils.getEmailNetworkForNotifications()).mapTo(String.class)
+          .list();
     } finally {
       closeDbHandle(handle);
     }
