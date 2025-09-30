@@ -128,7 +128,7 @@ dependencies {
 	implementation 'commons-beanutils:commons-beanutils:1.11.0'
 
 	implementation "org.simplejavamail:simple-java-mail:${simplejavamailVersion}"
-	implementation 'org.eclipse.angus:jakarta.mail:2.0.4'
+	implementation 'org.eclipse.angus:jakarta.mail:2.0.5'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 
@@ -179,7 +179,7 @@ dependencies {
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
-	testImplementation 'org.assertj:assertj-core:3.27.5'
+	testImplementation 'org.assertj:assertj-core:3.27.6'
 
 	testImplementation "org.junit.jupiter:junit-jupiter"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
@@ -731,7 +731,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '11.0.1'
+	toolVersion = '11.1.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
@@ -739,12 +739,6 @@ checkstyleMain {
 }
 checkstyleTest {
 	source = fileTree('src/test/java')
-}
-//Work-around for https://github.com/gradle/gradle/issues/27035
-configurations.checkstyle {
-	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.5.0-jre')
-	}
 }
 
 spotless {
