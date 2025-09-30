@@ -19,6 +19,8 @@ import Settings from "settings"
 import utils from "utils"
 import ExportFieldsPanel from "./ExportFieldsPanel"
 
+export const CATEGORY_EXPORT = "export"
+
 const GQL_GET_PREFERENCES = gql`
   query ($preferenceQuery: PreferenceSearchQueryInput) {
     preferenceList(query: $preferenceQuery) {
@@ -56,7 +58,7 @@ interface PreferencesFieldsetProps {
 }
 
 function isExportFieldsPref(category: string) {
-  return category === "export"
+  return category === CATEGORY_EXPORT
 }
 
 function camelCaseToTitle(str: string) {

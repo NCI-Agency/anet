@@ -38,8 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQuery<?>> {
 
-  private static final String SUBSCRIPTIONS_EMAILS_PREFERENCE = "SUBSCRIPTIONS_EMAILS";
-
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -241,8 +239,8 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
     final List<Person> subscribers =
         getSubscribedPeople(subscriptionUpdate.getObjectType(), subscriptionUpdate.getObjectUuid());
     if (!subscribers.isEmpty()) {
-      final List<String> addresses =
-          getEmailAddressesBasedOnPreference(subscribers, SUBSCRIPTIONS_EMAILS_PREFERENCE);
+      final List<String> addresses = getEmailAddressesBasedOnPreference(subscribers,
+          PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
       if (!addresses.isEmpty()) {
         final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
         action.setUpdatedObjectType(subscriptionUpdate.getObjectType());

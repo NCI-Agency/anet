@@ -38,6 +38,7 @@ const GQL_GET_APP_DATA = gql`
         preference {
           uuid
           name
+          category
         }
         value
       }

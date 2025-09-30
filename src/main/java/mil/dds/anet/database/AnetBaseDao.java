@@ -104,7 +104,7 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
   }
 
   public List<String> getEmailAddressesBasedOnPreference(List<? extends Person> people,
-      String preferenceName) {
+      String preferenceName, String preferenceCategory) {
     final List<String> peopleUuids =
         people.stream().map(Person::getUuid).collect(Collectors.toList());
 
@@ -113,11 +113,13 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
     final Handle handle = getDbHandle();
     final String peopleUuidsParam = "peopleUuids";
     final String preferenceNameParam = "preferenceNameParam";
+    final String preferenceCategoryParam = "preferenceCategoryParam";
     final String emailNetworkParam = "emailNetwork";
     try {
       return handle.createQuery("/* getEmailAddressesBasedOnPreference */"
           + " SELECT DISTINCT ea.address FROM \"emailAddresses\" ea"
           + " JOIN preferences pref ON pref.name = :" + preferenceNameParam
+          + " AND pref.category = :" + preferenceCategoryParam
           + " LEFT JOIN \"peoplePreferences\" pp"
           + " ON pp.\"preferenceUuid\" = pref.uuid AND pp.\"personUuid\" = ea.\"relatedObjectUuid\""
           + " WHERE ea.network = :" + emailNetworkParam
@@ -126,6 +128,7 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
           + " AND ( (pp.\"personUuid\" IS NULL AND UPPER(pref.\"defaultValue\") = 'TRUE')"
           + " OR (UPPER(pp.value) = 'TRUE') )").bindList(peopleUuidsParam, peopleUuids)
           .bind(preferenceNameParam, preferenceName)
+          .bind(preferenceCategoryParam, preferenceCategory)
           .bind(emailNetworkParam, Utils.getEmailNetworkForNotifications()).mapTo(String.class)
           .list();
     } finally {

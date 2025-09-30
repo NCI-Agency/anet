@@ -22,6 +22,10 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
   public static final String PREFERENCE_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
+  public static final String CATEGORY_EMAILING = "emailing";
+  public static final String PREFERENCE_REPORTS = "REPORTS";
+  public static final String PREFERENCE_SUBSCRIPTIONS = "SUBSCRIPTIONS";
+
   public PreferenceDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
   }
