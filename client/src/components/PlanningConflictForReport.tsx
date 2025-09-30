@@ -21,6 +21,7 @@ const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
             uuid
             engagementDate
             duration
+            state
           }
         }
       }
