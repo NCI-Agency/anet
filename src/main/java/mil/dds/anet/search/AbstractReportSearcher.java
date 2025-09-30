@@ -196,6 +196,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("eventUuid", query.getEventUuid());
     }
 
+    if (!Utils.isEmptyOrNull(query.getReportCommunityUuid())) {
+      qb.addFromClause("INNER JOIN \"reportCommunities\" rc ON rc.\"reportUuid\" = reports.uuid");
+      qb.addWhereClause("rc.\"authorizationGroupUuid\" = :reportCommunityUuid");
+      qb.addSqlArg("reportCommunityUuid", query.getReportCommunityUuid());
+    }
+
     if (query.getPendingApprovalOf() != null) {
       qb.addWhereClause("reports.\"approvalStepUuid\" IN"
           + " (SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN"

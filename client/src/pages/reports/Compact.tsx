@@ -34,6 +34,7 @@ import {
   usePageTitle
 } from "components/Page"
 import "components/RelatedObjectNotes"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
@@ -167,6 +168,11 @@ const GQL_GET_REPORT = gql`
         }
         customFields
       }
+      reportCommunities {
+        uuid
+        name
+        description
+      }
       comments {
         uuid
         text
@@ -297,6 +303,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   } else {
     data.report.cancelled = !!data.report.cancelledReason
     data.report.tasks = Task.fromArray(data.report.tasks)
+    data.report.reportCommunities = Task.fromArray(
+      data.report.reportCommunities
+    )
     data.report.attendees = Person.fromArray(data.report.attendees)
     data.report.to = ""
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
@@ -416,6 +425,18 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
+            <DictionaryField
+              wrappedComponent={CompactRow}
+              dictProps={Settings.fields.report.reportCommunities}
+              content={
+                <AuthorizationGroupTable
+                  id="reportCommunities"
+                  authorizationGroups={report.reportCommunities}
+                />
+              }
+              className="reportField"
+              hideIfEmpty
+            />
             {optionalFields.workflow.active &&
               report.showWorkflow() &&
               !!report.workflow.length && (

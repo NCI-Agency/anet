@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +35,8 @@ import mil.dds.anet.test.client.Subscription;
 import mil.dds.anet.test.client.SubscriptionUpdate;
 import mil.dds.anet.test.client.SubscriptionUpdateSearchQueryInput;
 import mil.dds.anet.test.client.Task;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
 
@@ -58,18 +58,15 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       AuthorizationGroupDao.TABLE_NAME, this::updateAuthorizationGroup, //
       EventDao.TABLE_NAME, this::updateEvent);
 
-  @Test
-  void testSubscriptionUpdate() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void testSubscriptionUpdate(boolean isCancelled) {
     // Create a report using the objects we are going to subscribe to
-    final String reportUuid = createReport();
+    final String reportUuid = createReport(isCancelled);
     // Subscribe jack to all object types, where for report we use the one we just created
     final Map<String, Subscription> subscriptions = SUBSCRIPTION_TESTS.entrySet().stream().collect(
         Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(testCase.getKey(),
-            testCase.getValue(), reportUuid)));
-
-    // AuthorizationGroup does not get notified when report is updated
-    final HashMap<String, Subscription> reportSubscriptions = new HashMap<>(subscriptions);
-    reportSubscriptions.remove(AuthorizationGroupDao.TABLE_NAME);
+            ReportDao.TABLE_NAME.equals(testCase.getKey()) ? reportUuid : testCase.getValue())));
 
     // Check jack's subscription updates
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates =
@@ -85,7 +82,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       UPDATERS.get(subscribedObjectType).accept(subscription.getSubscribedObjectUuid());
       // Check jack's subscription updates
       if (ReportDao.TABLE_NAME.equals(subscribedObjectType)) {
-        checkReportSubscriptionUpdates(reportSubscriptions, beforeUpdate);
+        checkReportSubscriptionUpdates(subscriptions, beforeUpdate);
       } else {
         checkOtherSubscriptionUpdates(subscriptions, beforeUpdate, subscription.getUuid());
       }
@@ -99,14 +96,15 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     deleteReport(reportUuid);
   }
 
-  @Test
-  void testSubscriptionUpdateWithNote() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void testSubscriptionUpdateWithNote(boolean isCancelled) {
     // Create a report using the objects we are going to subscribe to
-    final String reportUuid = createReport();
+    final String reportUuid = createReport(isCancelled);
     // Subscribe jack to all object types, where for report we use the one we just created
     final Map<String, Subscription> subscriptions = SUBSCRIPTION_TESTS.entrySet().stream().collect(
         Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(testCase.getKey(),
-            testCase.getValue(), reportUuid)));
+            ReportDao.TABLE_NAME.equals(testCase.getKey()) ? reportUuid : testCase.getValue())));
 
     // Check jack's subscription updates
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates =
@@ -146,21 +144,19 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private Subscription createTestSubscription(final String subscribedObjectType,
-      final String subscribedObjectUuid, final String reportUuid) {
-    final String adminSubscriberUuid = admin.getPosition().getUuid();
-    return createSubscription(jackUser, subscribedObjectType,
-        ReportDao.TABLE_NAME.equals(subscribedObjectType) ? reportUuid : subscribedObjectUuid,
-        adminSubscriberUuid, false, false);
+      final String subscribedObjectUuid) {
+    return createSubscription(jackUser, subscribedObjectType, subscribedObjectUuid, false, false);
   }
 
   private void checkReportSubscriptionUpdates(final Map<String, Subscription> subscriptions,
       final Instant beforeUpdate) {
-    // When updating a CANCELLED report (or PUBLISHED, but we're not testing that here),
+    // When updating a CANCELLED or APPROVED report (or PUBLISHED, but we're not testing that here),
     // these subscriptions should get an update:
     // * to the report itself
     // * to the report's people
     // * to the report's people's positions
     // * to the report's advisorOrg (and interlocutorOrg, but we're not testing that here)
+    // * to the report's communities
     // * to the report's tasks
     // * to the report's location
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates2 =
@@ -211,20 +207,22 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     withCredentials(adminUser, t -> mutationExecutor.deleteNote("", note.getUuid()));
   }
 
-  private String createReport() {
+  private String createReport(boolean isCancelled) {
     // Create a DRAFT report referencing the subscribed objects
     final ReportInput reportInput = ReportInput.builder().withState(ReportState.DRAFT)
         .withIntent("Test report for subscription updates").withEngagementDate(Instant.now())
         .withLocation(
             getLocationInput(getLocation(getSubscribedObjectUuid(LocationDao.TABLE_NAME))))
-        .withCancelledReason(ReportCancelledReason.CANCELLED_BY_ADVISOR)
+        .withCancelledReason(isCancelled ? ReportCancelledReason.CANCELLED_BY_ADVISOR : null)
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(getJackJackson()),
             personToPrimaryReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
                 false),
             personToReportPerson(getChristopfTopferness(), true))))
+        .withReportCommunities(List.of(getAuthorizationGroupInput(
+            getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
         .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
         .withEvent(getEventInput(getEvent(getSubscribedObjectUuid(EventDao.TABLE_NAME))))
-        .withNextSteps("<p>Test report next steps for subscription updates</p>")
+        .withNextSteps("Test report next steps for subscription updates")
         .withReportText("<p>Test report intent for subscription updates</p>").build();
     final String reportUuid = withCredentials(jackUser,
         t -> mutationExecutor.createReport("{ uuid }", reportInput).getUuid());
@@ -233,7 +231,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private void updateReport(final String reportUuid) {
-    // Approve report, which will update report state to CANCELLED
+    // Approve report, which will update report state to CANCELLED or APPROVED
     withCredentials(adminUser, t -> mutationExecutor.approveReport("", null, reportUuid));
   }
 

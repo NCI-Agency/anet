@@ -542,6 +542,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       authorizationGroups: (
         <AuthorizationGroupTable
           authorizationGroups={person.authorizationGroups}
+          showDistributionList
+          showForSensitiveInformation
         />
       ),
       biography: <RichTextEditor readOnly value={person.biography} />,

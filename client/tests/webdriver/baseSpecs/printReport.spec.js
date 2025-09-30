@@ -50,7 +50,8 @@ describe("Show print report page", () => {
         "Next steps",
         "Interlocutors",
         "Advisors",
-        "Objectives"
+        "Objectives",
+        "Communities of interest"
       ]
       const fields = await ShowReport.getCompactReportFields()
       const fieldTexts = await fields.map(async field => await field.getText())
@@ -187,6 +188,11 @@ describe("Show print report page", () => {
           "Engagement assessment of objective"
         )
       }
+      it("Should display all reportCommunities", async () => {
+        expect(await ShowReport.getCompactReportCommunities()).to.equal(
+          "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization"
+        )
+      })
     })
   })
   describe("When on the print page of a report without classification", () => {

@@ -120,6 +120,8 @@ public class Report extends AbstractCustomizableAnetBean
   private List<ReportAction> workflow;
   // annotated below
   private ForeignObjectHolder<Event> event = new ForeignObjectHolder<>();
+  // annotated below
+  private List<AuthorizationGroup> reportCommunities;
 
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
@@ -836,6 +838,27 @@ public class Report extends AbstractCustomizableAnetBean
     return event.getForeignObject();
   }
 
+  @GraphQLQuery(name = "reportCommunities")
+  public CompletableFuture<List<AuthorizationGroup>> loadReportCommunities(
+      @GraphQLRootContext GraphQLContext context) {
+    if (reportCommunities != null) {
+      return CompletableFuture.completedFuture(reportCommunities);
+    }
+    return engine().getReportDao().getCommunitiesForReport(context, uuid).thenApply(o -> {
+      reportCommunities = o;
+      return o;
+    });
+  }
+
+  public List<AuthorizationGroup> getReportCommunities() {
+    return reportCommunities;
+  }
+
+  @GraphQLInputField(name = "reportCommunities")
+  public void setReportCommunities(List<AuthorizationGroup> reportCommunities) {
+    this.reportCommunities = reportCommunities;
+  }
+
   @Override
   public String customFieldsKey() {
     return "fields.report.customFields";
@@ -868,7 +891,8 @@ public class Report extends AbstractCustomizableAnetBean
         && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
         && Objects.equals(r.getAuthorizedMembers(), authorizedMembers)
-        && Objects.equals(r.getEvent(), getEvent());
+        && Objects.equals(r.getEvent(), getEvent())
+        && Objects.equals(r.getReportCommunities(), reportCommunities);
   }
 
   @Override
@@ -876,7 +900,7 @@ public class Report extends AbstractCustomizableAnetBean
     return Objects.hash(super.hashCode(), uuid, state, approvalStep, createdAt, updatedAt, location,
         intent, exsum, reportPeople, tasks, reportText, nextSteps, comments, atmosphere,
         atmosphereDetails, engagementDate, duration, reportSensitiveInformation, authorizedMembers,
-        event);
+        event, reportCommunities);
   }
 
   public static Report createWithUuid(String uuid) {

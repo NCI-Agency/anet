@@ -1267,6 +1267,7 @@ type Report {
   primaryAdvisor: ReportPerson
   primaryInterlocutor: ReportPerson
   releasedAt: Instant
+  reportCommunities: [AuthorizationGroup]
   reportPeople: [ReportPerson]
   reportSensitiveInformation: ReportSensitiveInformation
   reportText: String
@@ -1325,6 +1326,7 @@ input ReportInput {
   location: LocationInput
   nextSteps: String
   releasedAt: Instant
+  reportCommunities: [AuthorizationGroupInput]
   reportPeople: [ReportPersonInput]
   reportSensitiveInformation: ReportSensitiveInformationInput
   reportText: String
@@ -1432,6 +1434,7 @@ input ReportSearchQueryInput {
   pendingApprovalOf: String
   releasedAtEnd: Instant
   releasedAtStart: Instant
+  reportCommunityUuid: String
   sensitiveInfo: Boolean
   sortBy: ReportSearchSortBy
   sortOrder: SortOrder

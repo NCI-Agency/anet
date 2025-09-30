@@ -24,6 +24,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
@@ -44,6 +45,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
@@ -167,6 +169,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         rb.insertReportTasks(r.getUuid(), r.getTasks());
       }
 
+      if (r.getReportCommunities() != null) {
+        rb.insertReportCommunities(r.getUuid(), r.getReportCommunities());
+      }
 
       return r;
     } finally {
@@ -195,6 +200,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     @SqlBatch("INSERT INTO \"reportTasks\" (\"reportUuid\", \"taskUuid\") VALUES (:reportUuid, :uuid)")
     void insertReportTasks(@Bind("reportUuid") String reportUuid, @BindBean List<Task> tasks);
+
+    @SqlBatch("INSERT INTO \"reportCommunities\" (\"reportUuid\", \"authorizationGroupUuid\") VALUES (:reportUuid, :uuid)")
+    void insertReportCommunities(@Bind("reportUuid") String reportUuid,
+        @BindBean List<AuthorizationGroup> authorizationGroups);
   }
 
   @Transactional
@@ -479,6 +488,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public int deleteInternal(String reportUuid) {
     final Handle handle = getDbHandle();
     try {
+      // Delete reportCommunities
+      handle.execute(
+          "/* deleteReport.reportCommunities */ DELETE FROM \"reportCommunities\" where \"reportUuid\" = ?",
+          reportUuid);
+
       // Delete tasks
       handle.execute(
           "/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?",
@@ -884,6 +898,57 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return new TasksBatcher().getByForeignKeys(foreignKeys);
   }
 
+  public CompletableFuture<List<AuthorizationGroup>> getCommunitiesForReport(
+      @GraphQLRootContext GraphQLContext context, String reportUuid) {
+    return new ForeignKeyFetcher<AuthorizationGroup>().load(context,
+        FkDataLoaderKey.REPORT_REPORT_COMMUNITIES, reportUuid);
+  }
+
+  class ReportCommunitiesBatcher extends ForeignKeyBatcher<AuthorizationGroup> {
+    private static final String SQL = "/* batch.getCommunitiesForReport */ SELECT "
+        + AuthorizationGroupDao.AUTHORIZATION_GROUP_FIELDS
+        + ", \"reportCommunities\".\"reportUuid\" FROM \"reportCommunities\" "
+        + "LEFT JOIN \"authorizationGroups\" "
+        + "ON \"reportCommunities\".\"authorizationGroupUuid\" = \"authorizationGroups\".uuid "
+        + "WHERE \"reportCommunities\".\"reportUuid\" IN ( <foreignKeys> ) "
+        + "ORDER BY \"authorizationGroups\".name, \"authorizationGroups\".uuid";
+
+    public ReportCommunitiesBatcher() {
+      super(ReportDao.this.databaseHandler, SQL, "foreignKeys", new AuthorizationGroupMapper(),
+          "reportUuid");
+    }
+  }
+
+  public List<List<AuthorizationGroup>> getReportCommunities(List<String> foreignKeys) {
+    return new ReportCommunitiesBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  @Transactional
+  public int addCommunityToReport(AuthorizationGroup ag, Report r) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* addCommunityToReport */ INSERT INTO \"reportCommunities\" (\"authorizationGroupUuid\", \"reportUuid\") "
+              + "VALUES (:authorizationGroupUuid, :reportUuid)")
+          .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", ag.getUuid()).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int removeCommunityFromReport(String authorizationGroupUuid, Report r) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate("/* removeCommunityFromReport*/ DELETE FROM \"reportCommunities\" "
+          + "WHERE \"reportUuid\" = :reportUuid AND \"authorizationGroupUuid\" = :authorizationGroupUuid")
+          .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", authorizationGroupUuid)
+          .execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   static class ReportSearchBatcher extends SearchQueryBatcher<Report, ReportSearchQuery> {
     public ReportSearchBatcher() {
       super(ApplicationContextProvider.getEngine().getReportDao());
@@ -1132,8 +1197,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
     final boolean isParam = (obj != null);
-    if (isParam && obj.getState() != ReportState.PUBLISHED
-        && obj.getState() != ReportState.CANCELLED) {
+    if (isParam && !Set.of(ReportState.APPROVED, ReportState.PUBLISHED, ReportState.CANCELLED)
+        .contains(obj.getState())) {
       return null;
     }
 
@@ -1173,6 +1238,13 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     // update event
     update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
         isParam ? obj.getEventUuid() : null, "events", "reports.eventUuid"));
+
+    // update reportCommunities
+    update.stmts.add(new SubscriptionUpdateStatement("authorizationGroups",
+        "SELECT \"authorizationGroupUuid\" FROM \"reportCommunities\" WHERE \"reportUuid\" = "
+            + paramOrJoin("reports.uuid", isParam),
+        // param is already added above
+        Collections.emptyMap()));
 
     return update;
   }

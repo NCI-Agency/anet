@@ -123,7 +123,7 @@ public class ReportResourceTest extends AbstractResourceTest {
           + " comments %6$s notes %7$s authorizedMembers %8$s"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
           + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } "
-          + " attachments %9$s }",
+          + " attachments %9$s reportCommunities { uuid status distributionList } }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AUTHORIZED_MEMBERS_FIELDS,
       AttachmentResourceTest.ATTACHMENT_FIELDS);
@@ -1597,6 +1597,24 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void searchReportCommunityUuid() {
+    // Search by community of interest
+    final String coiUuid = "1050c9e3-e679-4c60-8bdc-5139fbc1c10b"; // EF 1.1
+    final ReportSearchQueryInput query =
+        ReportSearchQueryInput.builder().withReportCommunityUuid(coiUuid).build();
+    final List<Report> reportList =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query))
+            .getList();
+
+    for (final Report report : reportList) {
+      assertThat(report.getReportCommunities()).isNotEmpty();
+      final Set<String> rcUuids = report.getReportCommunities().stream()
+          .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+      assertThat(rcUuids).isNotEmpty().contains(coiUuid);
+    }
+  }
+
+  @Test
   void searchUpdatedAtStartAndEndTest() {
     // insertBaseData has 1 report that is updatedAt 2 days before current timestamp
     final Instant startDate =
@@ -2673,5 +2691,98 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
+
+  @Test
+  void reportCommunitiesTest() {
+    final Person elizabeth = getElizabethElizawell();
+    final Person jack = getJackJackson();
+    final Person roger = getRogerRogwell();
+    final List<ReportPersonInput> reportPeopleInput =
+        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger, true),
+            personToReportPerson(elizabeth, false), personToPrimaryReportAuthor(jack)));
+
+    final AuthorizationGroupSearchQueryInput inactiveAgsQuery =
+        AuthorizationGroupSearchQueryInput.builder().withStatus(Status.INACTIVE).build();
+    final AnetBeanList_AuthorizationGroup inactiveAgs =
+        withCredentials(jackUser, t -> queryExecutor.authorizationGroupList(
+            getListFields(AuthorizationGroupResourceTest.FIELDS), inactiveAgsQuery));
+    assertThat(inactiveAgs.getList()).isNotEmpty();
+    final AuthorizationGroupSearchQueryInput activeAgsQuery = AuthorizationGroupSearchQueryInput
+        .builder().withStatus(Status.ACTIVE).withDistributionList(true).build();
+    final AnetBeanList_AuthorizationGroup activeAgs =
+        withCredentials(jackUser, t -> queryExecutor.authorizationGroupList(
+            getListFields(AuthorizationGroupResourceTest.FIELDS), activeAgsQuery));
+    assertThat(activeAgs.getList()).isNotEmpty();
+
+    // Write a report
+    final ReportInput rInput = ReportInput.builder()
+        .withIntent("This is a report that should be deleted").withAtmosphere(Atmosphere.NEUTRAL)
+        .withReportPeople(reportPeopleInput)
+        .withReportText("I'm writing a report that I intend to delete very soon.")
+        .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
+        .withReportCommunities(inactiveAgs.getList().stream()
+            .map(AbstractResourceTest::getAuthorizationGroupInput).toList())
+        .withEngagementDate(Instant.now()).withDuration(15).build();
+    final Report r = withCredentials(jackUser, t -> mutationExecutor.createReport(FIELDS, rInput));
+    assertThat(r).isNotNull();
+    assertThat(r.getUuid()).isNotNull();
+
+    // Retrieve the report and check the reportCommunities
+    final Report check = withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
+    assertThat(check.getReportCommunities()).isNotEmpty()
+        .allMatch(rc -> rc.getStatus().equals(Status.INACTIVE));
+    final Set<String> inactiveAgUuids =
+        inactiveAgs.getList().stream().map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+    final Set<String> rcUuids = check.getReportCommunities().stream()
+        .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+    assertThat(inactiveAgUuids).isEqualTo(rcUuids);
+
+    // Update the report and check the reportCommunities
+    final ReportInput update = getReportInput(check);
+    update.setReportCommunities(activeAgs.getList().stream()
+        .map(AbstractResourceTest::getAuthorizationGroupInput).toList());
+    final Report updated =
+        withCredentials(jackUser, t -> mutationExecutor.updateReport(FIELDS, update, false));
+    assertThat(updated).isNotNull();
+    final Report updateCheck =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
+    assertThat(updateCheck.getReportCommunities()).isNotEmpty()
+        .allMatch(rc -> rc.getStatus().equals(Status.ACTIVE)
+            && Boolean.TRUE.equals(rc.getDistributionList()));
+    final Set<String> activeAgUuids =
+        activeAgs.getList().stream().map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+    final Set<String> updateRcUuids = updateCheck.getReportCommunities().stream()
+        .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+    assertThat(activeAgUuids).isEqualTo(updateRcUuids);
+
+    // Delete the report
+    final Integer nrDeleted =
+        withCredentials(jackUser, t -> mutationExecutor.deleteReport("", r.getUuid()));
+    assertThat(nrDeleted).isEqualTo(1);
+
+    // Assert that the report is gone
+    try {
+      withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Assert that the communities are still there
+    final AnetBeanList_AuthorizationGroup inactiveAgsAfterDelete =
+        withCredentials(jackUser, t -> queryExecutor.authorizationGroupList(
+            getListFields(AuthorizationGroupResourceTest.FIELDS), inactiveAgsQuery));
+    assertThat(inactiveAgsAfterDelete.getList()).isNotEmpty();
+    final Set<String> inactiveAgAfterDeleteUuids = inactiveAgsAfterDelete.getList().stream()
+        .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+    assertThat(inactiveAgUuids).isEqualTo(inactiveAgAfterDeleteUuids);
+    final AnetBeanList_AuthorizationGroup activeAgsAfterDelete =
+        withCredentials(jackUser, t -> queryExecutor.authorizationGroupList(
+            getListFields(AuthorizationGroupResourceTest.FIELDS), activeAgsQuery));
+    assertThat(activeAgsAfterDelete.getList()).isNotEmpty();
+    final Set<String> activeAgAfterDeleteUuids = activeAgsAfterDelete.getList().stream()
+        .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
+    assertThat(activeAgUuids).isEqualTo(activeAgAfterDeleteUuids);
   }
 }

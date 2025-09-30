@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
@@ -120,6 +121,11 @@ const GQL_GET_REPORT = gql`
           identificationCode
         }
         customFields
+      }
+      reportCommunities {
+        uuid
+        name
+        description
       }
       interlocutorOrg {
         uuid
@@ -337,6 +343,18 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
             />
           </>
         )}
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.report.reportCommunities}
+          extraColForValue
+          value={
+            <AuthorizationGroupTable
+              authorizationGroups={report.reportCommunities}
+              noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
+            />
+          }
+        />
       </div>
       <h4>
         {report.isFuture()

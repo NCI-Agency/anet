@@ -205,6 +205,7 @@ export default class Report extends Model {
             : true
         )
         .default([]),
+      reportCommunities: yup.array().nullable().default([]),
       comments: yup.array().nullable().default([]),
       reportText: yup
         .string()
