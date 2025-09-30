@@ -123,7 +123,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     // - %1$s = status: P for Present, A for Anticipated/Planned
     // - U = function id: Unit
     // - ------- = more defaults
-    private static final String ACTIVITY_MEETING_APP6B = "SFG%1$sU-------";
+    private static final String ACTIVITY_MEETING_APP6B = "SFG%1$sU----------";
     private static final String ACTIVITY_STATUS_PRESENT_APP6B = "P";
     private static final String ACTIVITY_STATUS_PLANNED_APP6B = "A";
 
@@ -175,8 +175,8 @@ public class Nvg20WebService implements NVGPortType2012 {
             STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6D, // -
             STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6D));
 
-    // Not the correct interpretation of the standard, but currently used by external tools
-    static final String DEFAULT_APP6_VERSION = SYMBOLOGY_VERSION_APP6D_UNOFFICIAL;
+    // Use the current standard by default
+    static final String DEFAULT_APP6_VERSION = SYMBOLOGY_VERSION_APP6D;
     static final Set<String> VALID_APP6_VERSIONS = Set.of(SYMBOLOGY_VERSION_APP6B,
         SYMBOLOGY_VERSION_APP6D_UNOFFICIAL, SYMBOLOGY_VERSION_APP6D);
 
