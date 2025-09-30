@@ -6640,26 +6640,17 @@
 
 	<changeSet id="create-generic-preferences" author="fdelcastillo">
 		<sql>
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt") VALUES
-				('4fbb173a-501b-4823-a4b7-d3e623dcfadd', 'SUBSCRIPTIONS_EMAILS', 'Receive emails related to subscriptions', 'boolean', 'emailing', 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt") VALUES
-				('0ba90456-6b31-49cc-9d2b-bd31eb23b5eb', 'REPORTS_EMAILS', 'Receive emails related to reports', 'boolean', 'emailing', 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('a04d9520-9ba6-4c7b-9a6b-8c173215ede2', 'ORGANIZATIONS', 'Fields to include in organizations export', 'enumset', 'export', 'uuid,shortName,longName,identificationCode,emailAddresses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,shortName,longName,identificationCode,emailAddresses');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('fbe6e4bd-f816-4674-acde-bb87966ed2d0', 'PEOPLE', 'Fields to include in people export', 'enumset', 'export', 'uuid,name,rank,emailAddresses,position', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,name,rank,emailAddresses,position');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('9ae668a3-ffe3-493b-9ed4-0135e15d672b', 'POSITIONS', 'positions', 'enumset', 'export', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,name,code,type,role,status,emailAddresses,location,organization,person');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('847af827-eebf-473a-a1ef-ac8f13bff441', 'TASKS', 'tasks', 'enumset', 'export', 'uuid, shortName,longName,status,taskedOrganizations,parentTask', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,shortName,longName,status,taskedOrganizations,parentTask');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('9c0af1fd-2321-4e82-9cd3-f2920c132658', 'LOCATIONS', 'Fields to include in locations export', 'enumset', 'export', 'uuid,name,lat,lng,type', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,name,lat,lng,type');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('c7a69e63-7678-4c83-9834-8cca32ac3be0', 'REPORTS', 'Fields to include in reports export', 'enumset', 'export', 'uuid,intent,engagementDate,duration,keyOutcomes,nextSteps,cancelledReason,atmosphere,atmosphereDetails,state,authors,reportPeople,primaryAdvisor,primaryInterlocutor,advisorOrg,interlocutorOrg,location,tasks,workflow,updatedAt', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,intent,engagementDate,duration,keyOutcomes,nextSteps,cancelledReason,atmosphere,atmosphereDetails,state,authors,reportPeople,primaryAdvisor,primaryInterlocutor,advisorOrg,interlocutorOrg,location,tasks,workflow,updatedAt');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('868f9d28-f5f8-4d9b-850a-8072a42202eb', 'AUTHORIZATION_GROUPS', 'Fields to include in communities export', 'enumset', 'export', 'uuid,name,description,status,forSensitiveInformation', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,name,description,status,forSensitiveInformation');
-			INSERT INTO "preferences" ("uuid", "name", "description","type", "category", "defaultValue", "createdAt", "updatedAt", "allowedValues") VALUES
-				('2f248ed0-773b-4056-9935-141d6f481749', 'EVENTS', 'Fields to include in events export', 'enumset', 'export', 'uuid,type,name,startDate,endDate,ownerOrg,hostOrg,adminOrg,eventSeries,location', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'uuid,type,name,startDate,endDate,ownerOrg,hostOrg,adminOrg,eventSeries,location');
+			INSERT INTO "preferences" ("uuid", "name", "description", "type", "category", "defaultValue", "allowedValues", "createdAt", "updatedAt") VALUES
+				(${uuid_function}, 'SUBSCRIPTIONS_EMAILS', 'Receive emails related to subscriptions', 'boolean', 'emailing', 'FALSE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'REPORTS_EMAILS', 'Receive emails related to reports', 'boolean', 'emailing', 'TRUE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'ORGANIZATIONS', 'Fields to include in organizations export', 'enumset', 'export', 'uuid,shortName,longName,identificationCode,emailAddresses', 'uuid,shortName,longName,identificationCode,emailAddresses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'PEOPLE', 'Fields to include in people export', 'enumset', 'export', 'uuid,name,rank,emailAddresses,position', 'uuid,name,rank,emailAddresses,position', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'POSITIONS', 'positions', 'enumset', 'export', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'TASKS', 'tasks', 'enumset', 'export', 'uuid, shortName,longName,status,taskedOrganizations,parentTask', 'uuid,shortName,longName,status,taskedOrganizations,parentTask', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'LOCATIONS', 'Fields to include in locations export', 'enumset', 'export', 'uuid,name,lat,lng,type', 'uuid,name,lat,lng,type', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'REPORTS', 'Fields to include in reports export', 'enumset', 'export', 'uuid,intent,engagementDate,duration,keyOutcomes,nextSteps,cancelledReason,atmosphere,atmosphereDetails,state,authors,reportPeople,primaryAdvisor,primaryInterlocutor,advisorOrg,interlocutorOrg,location,tasks,workflow,updatedAt', 'uuid,intent,engagementDate,duration,keyOutcomes,nextSteps,cancelledReason,atmosphere,atmosphereDetails,state,authors,reportPeople,primaryAdvisor,primaryInterlocutor,advisorOrg,interlocutorOrg,location,tasks,workflow,updatedAt', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'AUTHORIZATION_GROUPS', 'Fields to include in communities export', 'enumset', 'export', 'uuid,name,description,status,forSensitiveInformation', 'uuid,name,description,status,forSensitiveInformation', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'EVENTS', 'Fields to include in events export', 'enumset', 'export', 'uuid,type,name,startDate,endDate,ownerOrg,hostOrg,adminOrg,eventSeries,location', 'uuid,type,name,startDate,endDate,ownerOrg,hostOrg,adminOrg,eventSeries,location', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 		</sql>
 	</changeSet>
 
