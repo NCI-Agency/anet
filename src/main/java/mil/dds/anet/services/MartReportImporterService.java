@@ -401,9 +401,15 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
-    final LocationSearchQuery searchQuery = new LocationSearchQuery();
-    searchQuery.setText(martReport.getCountry());
-    final List<Location> countries = locationDao.search(searchQuery).getList();
+    LocationSearchQuery searchQuery = new LocationSearchQuery();
+    searchQuery.setTrigram(martReport.getCountry());
+    searchQuery.setType(Location.LocationType.COUNTRY);
+    List<Location> countries = locationDao.search(searchQuery).getList();
+    if (countries.isEmpty()) {
+      searchQuery.setTrigram(null);
+      searchQuery.setText(martReport.getCountry());
+      countries = locationDao.search(searchQuery).getList();
+    }
     if (countries.isEmpty()) {
       errors.add(String.format("Can not find submitter country '%s'", martReport.getCountry()));
     } else {
