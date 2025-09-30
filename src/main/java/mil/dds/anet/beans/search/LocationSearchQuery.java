@@ -16,6 +16,9 @@ public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationS
   private List<String> locationUuid;
   @GraphQLQuery
   @GraphQLInputField
+  private String trigram;
+  @GraphQLQuery
+  @GraphQLInputField
   private RecurseStrategy locationRecurseStrategy;
 
   public LocationSearchQuery() {
@@ -36,6 +39,14 @@ public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationS
 
   public void setLocationUuid(List<String> locationUuid) {
     this.locationUuid = locationUuid;
+  }
+
+  public String getTrigram() {
+    return trigram;
+  }
+
+  public void setTrigram(String trigram) {
+    this.trigram = trigram;
   }
 
   public RecurseStrategy getLocationRecurseStrategy() {

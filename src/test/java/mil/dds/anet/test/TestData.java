@@ -135,7 +135,7 @@ public class TestData {
     reportDto.setEngagementDate(Instant.now());
     reportDto.setLocationUuid("0855fb0a-995e-4a79-a132-4024ee2983ff");
     reportDto.setLocationName("General Hospital");
-    reportDto.setCountry("British");
+    reportDto.setCountry("ESP");
     reportDto.setPositionName("MART Team Member");
     reportDto.setSubmittedAt(Instant.now());
     reportDto.setAtmosphere("Positive");
@@ -158,6 +158,7 @@ public class TestData {
     reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
     reportDto.getTasks().put("does not exist", "does not exist");
     reportDto.setSecurityMarking(null);
+    reportDto.setCountry("Spain");
     return reportDto;
   }
 
