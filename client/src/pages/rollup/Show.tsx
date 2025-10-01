@@ -11,6 +11,7 @@ import {
 import API from "api"
 import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
 import * as FieldHelper from "components/FieldHelper"
@@ -40,8 +41,9 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, RollupGraph } from "models"
 import moment from "moment"
+import App from "pages/App"
 import pluralize from "pluralize"
-import React, { useMemo, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
@@ -373,6 +375,23 @@ const RollupShow = ({
   searchQuery,
   setSearchQuery
 }: RollupShowProps) => {
+  const { currentUser } = useContext(AppContext)
+  const currentUserAuthorizationGroupUuids =
+    currentUser.authorizationGroups?.map(ag => ag.uuid) ?? []
+  const authorizationGroupUuids =
+    Settings.fields.person.emailAddresses?.authorizationGroupUuids
+  const currentUserIsAuthorized =
+    authorizationGroupUuids == null ||
+    currentUserAuthorizationGroupUuids.some(agu =>
+      authorizationGroupUuids.includes(agu)
+    )
+  const canPickPersonEmail =
+    // admins can see all emailAddresses
+    currentUser.isAdmin() ||
+    // superusers can see at least some emailAddresses
+    currentUser.isSuperuser() ||
+    // authorized users can see all emailAddresses
+    currentUserIsAuthorized
   const [period, setPeriod] = useState(ROLLUP_PERIODS[0])
   const [orgType, setOrgType] = useState(RollupGraph.TYPE.ADVISOR)
   const [showEmailModal, setShowEmailModal] = useState(false)
@@ -690,7 +709,7 @@ const RollupShow = ({
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {EMAIL_NETWORK && (
+            {EMAIL_NETWORK && canPickPersonEmail && (
               <>
                 <Field
                   name="toAnetUsers"
