@@ -100,6 +100,9 @@ public class AuthorizationGroupResource {
               List.of(DaoUtils.getUuid(oldPosition))));
     }
 
+    // Update any subscriptions
+    dao.updateSubscriptions(a);
+
     AnetAuditLogger.log("AuthorizationGroup {} updated by {}", a, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

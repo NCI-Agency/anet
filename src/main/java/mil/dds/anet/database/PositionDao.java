@@ -486,11 +486,6 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Override
-  protected Position getObjectForSubscriptionDelete(String uuid) {
-    return new Position();
-  }
-
-  @Override
   public int deleteInternal(String positionUuid) {
     final Handle handle = getDbHandle();
     try {

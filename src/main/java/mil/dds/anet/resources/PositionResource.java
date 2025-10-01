@@ -191,6 +191,9 @@ public class PositionResource {
       }
     }
 
+    // Update any subscriptions
+    dao.updateSubscriptions(pos);
+
     AnetAuditLogger.log("Position {} updated by {}", pos, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
@@ -280,13 +283,20 @@ public class PositionResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete an active position");
     }
 
-    AnetAuditLogger.log("Position {} deleted by {}", positionUuid, user);
-
     // if this position has any history, we'll just delete it
     // if this position is in an approval chain, we just delete it
     // if this position is in an organization, just remove it
     // if this position has any associated positions, just remove them
-    return dao.delete(positionUuid);
+    final int numRows = dao.delete(positionUuid);
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process position delete");
+    }
+
+    // Update any subscriptions
+    dao.updateSubscriptions(position);
+
+    AnetAuditLogger.log("Position {} deleted by {}", positionUuid, user);
+    return numRows;
   }
 
   @GraphQLMutation(name = "mergePositions")
@@ -320,6 +330,10 @@ public class PositionResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged position relation information.");
     }
+
+    // Update any subscriptions
+    dao.updateSubscriptions(winnerPosition);
+
     AnetAuditLogger.log("Position {} merged into {} by {}", loserPosition, winnerPosition, user);
     return numRows;
   }

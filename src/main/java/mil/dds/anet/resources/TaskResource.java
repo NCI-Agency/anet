@@ -230,8 +230,10 @@ public class TaskResource {
       DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, t.getUuid(),
           t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
-      AnetAuditLogger.log("Task {} updated by {}", t, user);
+      // Update any subscriptions
+      dao.updateSubscriptions(t);
 
+      AnetAuditLogger.log("Task {} updated by {}", t, user);
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;
     } catch (UnableToExecuteStatementException e) {
@@ -273,6 +275,10 @@ public class TaskResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged task relation information.");
     }
+
+    // Update any subscriptions
+    dao.updateSubscriptions(winnerTask);
+
     AnetAuditLogger.log("Task {} merged into {} by {}", loserTask, winnerTask, user);
     return numberOfAffectedRows;
   }

@@ -237,17 +237,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   @Transactional
   public int update(Report r, Person user) {
     DaoUtils.setUpdateFields(r);
-    return updateWithSubscriptions(r, user);
-  }
-
-  private int updateWithSubscriptions(Report r, Person user) {
-    final int numRows = updateInternal(r, user);
-    if (numRows > 0) {
-      final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(r);
-      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
-      subscriptionDao.updateSubscriptions(subscriptionUpdate);
-    }
-    return numRows;
+    return updateInternal(r, user);
   }
 
   @Override
@@ -470,14 +460,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public CompletableFuture<AnetBeanList<Report>> search(GraphQLContext context,
       Set<String> subFields, ReportSearchQuery query) {
     return new PostgresqlReportSearcher(databaseHandler).runSearch(context, subFields, query);
-  }
-
-  @Override
-  protected Report getObjectForSubscriptionDelete(String uuid) {
-    final Report obj = new Report();
-    final Report tmp = getByUuid(uuid);
-    obj.setState(tmp.getState());
-    return obj;
   }
 
   /*
