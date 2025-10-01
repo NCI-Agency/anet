@@ -1605,6 +1605,18 @@ const ReportForm = ({
 
   function save(values, sendEmail) {
     const report = Report.filterClientSideFields(new Report(values))
+    // Check engagement date in range of engagement event if present
+    if (
+      report.event &&
+      !(
+        report.engagementDate >= report.event.startDate &&
+        report.engagementDate <= report.event.endDate
+      )
+    ) {
+      return Promise.reject(
+        new Error("The engagement date must be within the event dates!")
+      )
+    }
     report.authorizedMembers = values.authorizedMembers.map(
       ({ relatedObjectType, relatedObjectUuid }) => ({
         relatedObjectType,
