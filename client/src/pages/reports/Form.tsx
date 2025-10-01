@@ -1608,10 +1608,9 @@ const ReportForm = ({
     // Check engagement date in range of engagement event if present
     if (
       report.event &&
-      !(
-        report.engagementDate >= report.event.startDate &&
-        report.engagementDate <= report.event.endDate
-      )
+      report.engagementDate &&
+      (report.engagementDate < report.event.startDate ||
+        report.engagementDate > report.event.endDate)
     ) {
       return Promise.reject(
         new Error("The engagement date must be within the event dates!")
