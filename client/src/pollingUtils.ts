@@ -1,20 +1,24 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useLocation } from "react-router-dom"
 import Version from "version"
 
-const GQL_GET_VERSION_INFO = gql`
+const GQL_POLLING_REQUEST = gql`
   query {
     projectVersion
+    adminSettings {
+      key
+      value
+    }
   }
 `
 
 const POLL_INTERVAL_IN_MS = 60_000 // milliseconds
 
-export const useConnectionInfo = () => {
+export const usePollingRequest = () => {
   const { error, data, stopPolling } = API.useApiQuery(
-    GQL_GET_VERSION_INFO,
+    GQL_POLLING_REQUEST,
     {},
     {
       pollInterval: POLL_INTERVAL_IN_MS,
@@ -25,6 +29,18 @@ export const useConnectionInfo = () => {
       }
     }
   )
+
+  const adminSettings = useMemo(() => {
+    const list = data?.adminSettings || []
+    if (!list.length) {
+      return undefined
+    }
+    const output = {}
+    for (const setting of list) {
+      output[setting.key] = setting.value
+    }
+    return output
+  }, [data?.adminSettings])
 
   const { pathname } = useLocation()
   const prevLocation = useRef(pathname)
@@ -51,6 +67,7 @@ export const useConnectionInfo = () => {
   }, [pathname, newVersion])
 
   return {
+    adminSettings,
     newVersion,
     error: !!error
   }
