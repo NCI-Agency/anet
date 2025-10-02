@@ -163,6 +163,9 @@ public class LocationResource {
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, l.getUuid(),
         l.customSensitiveInformationKey(), l.getCustomSensitiveInformation());
 
+    // Update any subscriptions
+    dao.updateSubscriptions(l);
+
     AnetAuditLogger.log("Location {} updated by {}", l, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
@@ -201,6 +204,10 @@ public class LocationResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged location relation information.");
     }
+
+    // Update any subscriptions
+    dao.updateSubscriptions(winnerLocation);
+
     AnetAuditLogger.log("Location {} merged into {} by {}", loserLocation, winnerLocation, user);
     return numRows;
   }

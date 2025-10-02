@@ -338,6 +338,12 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserTaskUuid);
 
+      // Update subscriptions
+      updateM2mForMerge("subscriptions", "subscriberUuid", "subscribedObjectUuid", winnerTaskUuid,
+          loserTaskUuid);
+      // Update subscriptionUpdates
+      updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerTaskUuid, loserTaskUuid);
+
       // Finally, delete loser
       final int nrDeleted = deleteForMerge(TaskDao.TABLE_NAME, "uuid", loserTaskUuid);
       if (nrDeleted > 0) {

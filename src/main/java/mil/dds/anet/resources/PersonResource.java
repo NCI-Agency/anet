@@ -224,6 +224,9 @@ public class PersonResource {
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
         p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
 
+    // Update any subscriptions
+    dao.updateSubscriptions(p);
+
     AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
@@ -295,6 +298,9 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
     }
+
+    // Update any subscriptions
+    dao.updateSubscriptions(person);
 
     AnetAuditLogger.log("Person {} " + (isApproved ? "approved" : "deleted") + " by {}", person,
         user);
@@ -388,8 +394,11 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged person relation information.");
     }
-    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
 
+    // Update any subscriptions
+    dao.updateSubscriptions(winner);
+
+    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }

@@ -98,6 +98,9 @@ public class EventSeriesResource {
           "Couldn't process event series update");
     }
 
+    // Update any subscriptions
+    dao.updateSubscriptions(eventSeries);
+
     AnetAuditLogger.log("EventSeries {} updated by {}", eventSeries, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

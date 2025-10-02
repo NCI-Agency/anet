@@ -486,11 +486,6 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Override
-  protected Position getObjectForSubscriptionDelete(String uuid) {
-    return new Position();
-  }
-
-  @Override
   public int deleteInternal(String positionUuid) {
     final Handle handle = getDbHandle();
     try {
@@ -670,6 +665,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           winner.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
+
+      // Update subscriptions
+      updateM2mForMerge("subscriptions", "subscriberUuid", "subscribedObjectUuid", winnerUuid,
+          loserUuid);
+      // Update subscriptionUpdates
+      updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerUuid, loserUuid);
 
       // Finally, delete loser
       final int nrDeleted = deleteForMerge(PositionDao.TABLE_NAME, "uuid", loserUuid);

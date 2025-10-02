@@ -549,6 +549,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
+      // Update subscriptions
+      updateM2mForMerge("subscriptions", "subscriberUuid", "subscribedObjectUuid", winnerUuid,
+          loserUuid);
+      // Update subscriptionUpdates
+      updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerUuid, loserUuid);
+
       // Finally, delete loser
       final int nrDeleted = deleteForMerge(PersonDao.TABLE_NAME, "uuid", loserUuid);
       if (nrDeleted > 0) {

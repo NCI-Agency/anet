@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
+import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
@@ -16,6 +17,8 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.AttachmentResourceTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class LocationMergeTest extends AbstractResourceTest {
 
@@ -42,8 +45,11 @@ public class LocationMergeTest extends AbstractResourceTest {
     }
   }
 
-  @Test
-  void testMerge() {
+  @ParameterizedTest
+  @MethodSource("provideMergeTestParameters")
+  void testMerge(boolean subscribeToLoser, boolean subscribeToWinner) {
+    final String objectType = LocationDao.TABLE_NAME;
+
     // Create winner Location
     final LocationInput firstLocationInput =
         LocationInput.builder().withName("MergeLocationsTest First Location")
@@ -57,7 +63,7 @@ public class LocationMergeTest extends AbstractResourceTest {
 
     // Add an attachment
     final GenericRelatedObjectInput firstLocationAttachment = GenericRelatedObjectInput.builder()
-        .withRelatedObjectType("locations").withRelatedObjectUuid(firstLocation.getUuid()).build();
+        .withRelatedObjectType(objectType).withRelatedObjectUuid(firstLocation.getUuid()).build();
     final AttachmentInput firstLocationAttachmentInput =
         AttachmentInput.builder().withFileName("testFirstLocationAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
@@ -65,6 +71,11 @@ public class LocationMergeTest extends AbstractResourceTest {
     final String createdFirstLocationAttachmentUuid = withCredentials(adminUser,
         t -> mutationExecutor.createAttachment("", firstLocationAttachmentInput));
     assertThat(createdFirstLocationAttachmentUuid).isNotNull();
+
+    // Subscribe to the organization
+    final String winnerSubscriptionUuid =
+        addSubscription(subscribeToWinner, objectType, firstLocation.getUuid(),
+            t -> mutationExecutor.updateLocation("", getLocationInput(firstLocation)));
 
     // Create loser Location
     final LocationInput secondLocationInput =
@@ -88,7 +99,7 @@ public class LocationMergeTest extends AbstractResourceTest {
 
     // Add an attachment
     final GenericRelatedObjectInput secondLocationAttachment = GenericRelatedObjectInput.builder()
-        .withRelatedObjectType("locations").withRelatedObjectUuid(secondLocation.getUuid()).build();
+        .withRelatedObjectType(objectType).withRelatedObjectUuid(secondLocation.getUuid()).build();
     final AttachmentInput secondLocationAttachmentInput =
         AttachmentInput.builder().withFileName("testSecondLocationAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
@@ -96,6 +107,11 @@ public class LocationMergeTest extends AbstractResourceTest {
     final String createdSecondLocationAttachmentUuid = withCredentials(adminUser,
         t -> mutationExecutor.createAttachment("", secondLocationAttachmentInput));
     assertThat(createdSecondLocationAttachmentUuid).isNotNull();
+
+    // Subscribe to the location
+    final String loserSubscriptionUuid =
+        addSubscription(subscribeToLoser, objectType, secondLocation.getUuid(),
+            t -> mutationExecutor.updateLocation("", getLocationInput(secondLocation)));
 
     // Merge the two locations
     final LocationInput mergedLocationInput = getLocationInput(firstLocation);
@@ -126,6 +142,13 @@ public class LocationMergeTest extends AbstractResourceTest {
     assertThat(testPersonMerged.getCountry().getName()).isEqualTo(mergedLocation.getName());
     assertThat(testPersonMerged.getCountry().getDigram()).isEqualTo(mergedLocation.getDigram());
     assertThat(testPersonMerged.getCountry().getTrigram()).isEqualTo(mergedLocation.getTrigram());
+
+    // Check the subscriptions and updates
+    checkSubscriptionsAndUpdatesAfterMerge(subscribeToLoser || subscribeToWinner, objectType,
+        secondLocation.getUuid(), firstLocation.getUuid());
+    // And unsubscribe
+    deleteSubscription(subscribeToWinner, loserSubscriptionUuid);
+    deleteSubscription(false, winnerSubscriptionUuid);
   }
 
 }

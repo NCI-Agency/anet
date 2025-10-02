@@ -228,6 +228,9 @@ public class OrganizationResource {
     engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, org.getUuid(),
         org.getEmailAddresses());
 
+    // Update any subscriptions
+    dao.updateSubscriptions(org);
+
     return numRows;
   }
 
@@ -255,6 +258,10 @@ public class OrganizationResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged organization relation information.");
     }
+
+    // Update any subscriptions
+    dao.updateSubscriptions(winnerOrganization);
+
     AnetAuditLogger.log("Organization {} merged into {} by {}", loserOrganization,
         winnerOrganization, user);
     return numberOfAffectedRows;

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
@@ -35,11 +36,16 @@ import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class PersonMergeTest extends AbstractResourceTest {
 
-  @Test
-  void testMerge() {
+  @ParameterizedTest
+  @MethodSource("provideMergeTestParameters")
+  void testMerge(boolean subscribeToLoser, boolean subscribeToWinner) {
+    final String objectType = PersonDao.TABLE_NAME;
+
     final LocationSearchQueryInput lsq =
         LocationSearchQueryInput.builder().withType(LocationType.COUNTRY).withPageSize(2).build();
     final AnetBeanList_Location locationList = withCredentials(adminUser,
@@ -116,7 +122,7 @@ class PersonMergeTest extends AbstractResourceTest {
 
     // Add an attachment
     final GenericRelatedObjectInput loserPersonAttachment = GenericRelatedObjectInput.builder()
-        .withRelatedObjectType("people").withRelatedObjectUuid(loser1.getUuid()).build();
+        .withRelatedObjectType(objectType).withRelatedObjectUuid(loser1.getUuid()).build();
     final AttachmentInput loserPersonAttachmentInput =
         AttachmentInput.builder().withFileName("testLoserPersonAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
@@ -124,6 +130,10 @@ class PersonMergeTest extends AbstractResourceTest {
     final String createdLoserPersonAttachmentUuid = withCredentials(adminUser,
         t -> mutationExecutor.createAttachment("", loserPersonAttachmentInput));
     assertThat(createdLoserPersonAttachmentUuid).isNotNull();
+
+    // Subscribe to the person
+    final String loserSubscriptionUuid = addSubscription(subscribeToLoser, objectType,
+        loser1.getUuid(), t -> mutationExecutor.updatePerson("", getPersonInput(loser1)));
 
     // Create a person
     final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
@@ -144,7 +154,7 @@ class PersonMergeTest extends AbstractResourceTest {
 
     // Add an attachment
     final GenericRelatedObjectInput winnerPersonAttachment = GenericRelatedObjectInput.builder()
-        .withRelatedObjectType("people").withRelatedObjectUuid(winner.getUuid()).build();
+        .withRelatedObjectType(objectType).withRelatedObjectUuid(winner.getUuid()).build();
     final AttachmentInput winnerPersonAttachmentInput =
         AttachmentInput.builder().withFileName("testLoserPersonAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
@@ -152,6 +162,10 @@ class PersonMergeTest extends AbstractResourceTest {
     final String createdWinnerPersonAttachmentUuid = withCredentials(adminUser,
         t -> mutationExecutor.createAttachment("", winnerPersonAttachmentInput));
     assertThat(createdWinnerPersonAttachmentUuid).isNotNull();
+
+    // Subscribe to the person
+    final String winnerSubscriptionUuid = addSubscription(subscribeToWinner, objectType,
+        winner.getUuid(), t -> mutationExecutor.updatePerson("", getPersonInput(winner)));
 
     // Merge the two persons
     winnerInput.setUuid(winner.getUuid());
@@ -171,6 +185,13 @@ class PersonMergeTest extends AbstractResourceTest {
     final Person mergedPerson =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, winnerInput.getUuid()));
     assertThat(mergedPerson.getAttachments()).hasSize(2);
+
+    // Check the subscriptions and updates
+    checkSubscriptionsAndUpdatesAfterMerge(subscribeToLoser || subscribeToWinner, objectType,
+        loser1.getUuid(), winner.getUuid());
+    // And unsubscribe
+    deleteSubscription(subscribeToWinner, loserSubscriptionUuid);
+    deleteSubscription(false, winnerSubscriptionUuid);
 
     // Assert that the position is empty.
     Position winnerPos =

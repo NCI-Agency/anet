@@ -94,17 +94,18 @@ public class EventResource {
     assertPermission(user, existing.getAdminOrgUuid());
 
     // perform all modifications to the event and its tasks in a single transaction,
-    return executeEventUpdates(event);
+    return executeEventUpdates(user, event);
   }
 
   /**
    * Perform all modifications to the event and its tasks, returning the original state of the
    * event. Should be wrapped in a single transaction to ensure consistency.
    *
+   * @param user The user executing the updates
    * @param event Event object with the desired modifications
    * @return number of rows of the update
    */
-  private Integer executeEventUpdates(Event event) {
+  private Integer executeEventUpdates(Person user, Event event) {
     // Verify this person has access to edit this report
     // Either they are an author, or an approver for the current step.
     final Event existing = dao.getByUuid(event.getUuid());
@@ -148,6 +149,10 @@ public class EventResource {
           oldPerson -> dao.removePersonFromEvent(DaoUtils.getUuid(oldPerson), event));
     }
 
+    // Update any subscriptions
+    dao.updateSubscriptions(event);
+
+    AnetAuditLogger.log("Event {} updated by {}", event, user);
     return numRows;
   }
 

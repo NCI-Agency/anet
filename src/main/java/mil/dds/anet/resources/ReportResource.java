@@ -365,6 +365,10 @@ public class ReportResource {
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
         r.customSensitiveInformationKey(), r.getCustomSensitiveInformation());
 
+    // Update any subscriptions
+    reportDao.updateSubscriptions(r);
+
+    AnetAuditLogger.log("Report {} updated by {}", r, editor);
     // Return the report in the response; used in autoSave by the client form
     return existing;
   }
@@ -514,6 +518,9 @@ public class ReportResource {
       commentDao.insert(comment1);
     }
 
+    // Update any subscriptions
+    reportDao.updateSubscriptions(r);
+
     AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
     return numRows;
@@ -615,6 +622,9 @@ public class ReportResource {
           "Couldn't process report publication");
     }
 
+    // Update any subscriptions
+    reportDao.updateSubscriptions(r);
+
     AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
     // GraphQL mutations *have* to return something
     return numRows;
@@ -715,9 +725,17 @@ public class ReportResource {
     }
 
     assertCanDeleteReport(report, user);
-    AnetAuditLogger.log("report {} deleted by {}", reportUuid, user);
 
-    return reportDao.delete(reportUuid);
+    final int numRows = reportDao.delete(reportUuid);
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process report delete");
+    }
+
+    // Update any subscriptions
+    reportDao.updateSubscriptions(report);
+
+    AnetAuditLogger.log("Report {} deleted by {}", reportUuid, user);
+    return numRows;
   }
 
   private void assertCanDeleteReport(Report report, Person user) {

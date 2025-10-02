@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractSubscribableAnetBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,36 +23,10 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
   public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
 
   @Transactional
-  @Override
-  public int update(T obj) {
-    DaoUtils.setUpdateFields(obj);
-    final int numRows = updateInternal(obj);
-    if (numRows > 0) {
-      final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
-      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
-      subscriptionDao.updateSubscriptions(subscriptionUpdate);
-    }
-    return numRows;
-  }
-
-  @Transactional
-  @Override
-  public int delete(String uuid) {
-    final T obj = getObjectForSubscriptionDelete(uuid);
-    final int numRows = deleteInternal(uuid);
-    if (numRows > 0 && obj != null) {
-      obj.setUuid(uuid);
-      DaoUtils.setUpdateFields(obj);
-      final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
-      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
-      subscriptionDao.updateSubscriptions(subscriptionUpdate);
-    }
-    return numRows;
-  }
-
-  /* override this method if you want to update subscriptions on delete */
-  protected T getObjectForSubscriptionDelete(String uuid) {
-    return null;
+  public void updateSubscriptions(T obj) {
+    final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
+    final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
+    subscriptionDao.updateSubscriptions(subscriptionUpdate);
   }
 
   protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractSubscribableAnetBean obj,
