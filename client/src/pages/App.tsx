@@ -10,13 +10,13 @@ import {
 } from "components/Page"
 import "components/previews/RegisterPreviewComponents"
 import ResponsiveLayout from "components/ResponsiveLayout"
-import { useConnectionInfo } from "connectionUtils"
 import { Organization, Person } from "models"
 import {
   getNotifications,
   GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS
 } from "notificationsUtils"
 import Routing from "pages/Routing"
+import { usePollingRequest } from "pollingUtils"
 import React from "react"
 import { connect } from "react-redux"
 import { Navigate, useLocation, useNavigate } from "react-router-dom"
@@ -172,11 +172,6 @@ const GQL_GET_APP_DATA = gql`
       }
     }
 
-    adminSettings {
-      key
-      value
-    }
-
     topLevelOrgs: organizationList(
       query: {
         pageSize: 0
@@ -206,7 +201,7 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
   const routerLocation = useLocation()
 
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
-  const connectionInfo = useConnectionInfo()
+  const { adminSettings, ...connectionInfo } = usePollingRequest()
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -233,7 +228,7 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
   return (
     <AppContext.Provider
       value={{
-        appSettings: appState.settings,
+        appSettings: adminSettings,
         currentUser: appState.currentUser,
         loadAppData: refetch,
         notifications: appState.notifications,
@@ -268,16 +263,10 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
     }
 
     const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
-    const settings = {}
-    data.adminSettings.forEach(
-      setting => (settings[setting.key] = setting.value)
-    )
-
     const currentUser = new Person(data.me)
     const notifications = getNotifications(currentUser.position)
     return {
       currentUser,
-      settings,
       allOrganizations,
       notifications
     }
