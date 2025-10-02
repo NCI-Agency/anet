@@ -1159,7 +1159,7 @@ INSERT INTO "adminSettings" (key, value) VALUES
   ('GENERAL_BANNER_TEXT', ''),
   ('GENERAL_BANNER_LEVEL', 'notice'),
   ('GENERAL_BANNER_VISIBILITY', '1'),
-  ('UNLIMITED_EXPORTS_AUTHORIZATION_GROUP', '89d8d60a-f3ff-4fa6-8246-805fd74d14fd'),
+  ('UNLIMITED_EXPORTS_COMMUNITY', '89d8d60a-f3ff-4fa6-8246-805fd74d14fd'),
   ('HELP_TEXT', '');
 
 -- System user, used when importing data that can't be linked to any specific user
