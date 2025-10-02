@@ -9,16 +9,11 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
-import EmailAddressList from "components/EmailAddressList"
-import * as FieldHelper from "components/FieldHelper"
+import { EmailModal } from "components/EmailModal"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
 import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
@@ -38,16 +33,15 @@ import {
   getSearchQuery,
   SearchQueryPropType
 } from "components/SearchFilters"
-import { Field, Form, Formik } from "formik"
+import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Report, RollupGraph } from "models"
+import { Report, RollupGraph } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useContext, useMemo, useState } from "react"
-import { Button, FormText, Modal } from "react-bootstrap"
+import React, { useMemo, useState } from "react"
+import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
-import PEOPLE_ICON from "resources/people.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
@@ -121,8 +115,6 @@ const GQL_EMAIL_ROLLUP = gql`
     )
   }
 `
-
-const EMAIL_NETWORK = Settings.emailNetworkForNotifications || null
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const orgTypes: string[] = Object.values(RollupGraph.TYPE)
@@ -375,23 +367,6 @@ const RollupShow = ({
   searchQuery,
   setSearchQuery
 }: RollupShowProps) => {
-  const { currentUser } = useContext(AppContext)
-  const currentUserAuthorizationGroupUuids =
-    currentUser.authorizationGroups?.map(ag => ag.uuid) ?? []
-  const authorizationGroupUuids =
-    Settings.fields.person.emailAddresses?.authorizationGroupUuids
-  const currentUserIsAuthorized =
-    authorizationGroupUuids == null ||
-    currentUserAuthorizationGroupUuids.some(agu =>
-      authorizationGroupUuids.includes(agu)
-    )
-  const canPickPersonEmail =
-    // admins can see all emailAddresses
-    currentUser.isAdmin() ||
-    // superusers can see at least some emailAddresses
-    currentUser.isSuperuser() ||
-    // authorized users can see all emailAddresses
-    currentUserIsAuthorized
   const [period, setPeriod] = useState(ROLLUP_PERIODS[0])
   const [orgType, setOrgType] = useState(RollupGraph.TYPE.ADVISOR)
   const [showEmailModal, setShowEmailModal] = useState(false)
@@ -690,100 +665,11 @@ const RollupShow = ({
   function renderEmailModal(formikProps) {
     const { isSubmitting, submitForm, setFieldValue } = formikProps
     const toAnetUsers = formikProps.values.toAnetUsers || []
-
-    const peopleFilters = {
-      allPeople: {
-        label: "All people",
-        queryVars: {
-          status: Model.STATUS.ACTIVE,
-          emailNetwork: EMAIL_NETWORK
-        }
-      }
-    }
-
-    const personFields = `${Person.autocompleteQuery} emailAddresses(network: "${EMAIL_NETWORK}") { network address }`
     return (
-      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
-        <Form>
-          <Modal.Header closeButton>
-            <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {EMAIL_NETWORK && canPickPersonEmail && (
-              <>
-                <Field
-                  name="toAnetUsers"
-                  label="To ANET Users"
-                  component={FieldHelper.SpecialField}
-                  vertical
-                  onChange={value => setFieldValue("toAnetUsers", value)}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="author"
-                      placeholder="Select ANET users"
-                      value={toAnetUsers}
-                      overlayColumns={[
-                        "Email",
-                        "Name",
-                        "Position",
-                        "Location",
-                        "Organization"
-                      ]}
-                      overlayRenderRow={ToAnetUsersOverlayRow}
-                      filterDefs={peopleFilters}
-                      autoComplete="off"
-                      objectType={Person}
-                      fields={personFields}
-                      addon={PEOPLE_ICON}
-                    />
-                  }
-                />
-                <div className="d-flex flex-wrap gap-2 mb-2 mt-2">
-                  {toAnetUsers.map(user => (
-                    <div
-                      className="d-flex align-items-center p-2 gap-2 border border-secondary rounded"
-                      key={user.uuid}
-                    >
-                      {user.name}
-                      <Icon
-                        icon={IconNames.CROSS}
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          setFieldValue(
-                            "toAnetUsers",
-                            toAnetUsers.filter(u => u.uuid !== user.uuid)
-                          )
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-            <Field
-              name="to"
-              label="To Emails"
-              component={FieldHelper.InputField}
-              validate={email => handleEmailValidation(email, toAnetUsers)}
-              vertical
-            >
-              <FormText>
-                One or more email addresses, comma separated, e.g.:
-                <br />
-                <em>
-                  jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr.
-                  X" &lt;x@example.org&gt;
-                </em>
-              </FormText>
-            </Field>
-            <Field
-              name="comment"
-              component={FieldHelper.InputField}
-              asA="textarea"
-              vertical
-            />
-          </Modal.Body>
-          <Modal.Footer>
+      <EmailModal
+        title={`Email rollup - ${getDateStr()}`}
+        footer={
+          <>
             <Button
               id="preview-rollup-email"
               href={previewPlaceholderUrl}
@@ -801,15 +687,14 @@ const RollupShow = ({
             >
               Send email
             </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+          </>
+        }
+        selectedUsers={toAnetUsers}
+        onChange={value => setFieldValue("toAnetUsers", value)}
+        showEmailModal={showEmailModal}
+        toggleEmailModal={toggleEmailModal}
+      />
     )
-  }
-
-  function handleEmailValidation(value, toAnetUsers) {
-    const r = utils.parseEmailAddresses(value)
-    return r.isValid || toAnetUsers.length ? null : r.message
   }
 
   function toggleEmailModal() {
@@ -842,7 +727,12 @@ const RollupShow = ({
 
   function onSubmitEmailRollup(values, form) {
     emailRollup(values, form)
-      .then(response => onSubmitEmailRollupSuccess(response, values, form))
+      .then(() => {
+        setSaveSuccess("Email successfully sent")
+        setSaveError(null)
+        setShowEmailModal(false)
+        form.resetForm() // Reset the email modal field values
+      })
       .catch(error => {
         setSaveSuccess(null)
         setSaveError(error)
@@ -851,23 +741,13 @@ const RollupShow = ({
       })
   }
 
-  function onSubmitEmailRollupSuccess(response, values, form) {
-    setSaveSuccess("Email successfully sent")
-    setSaveError(null)
-    setShowEmailModal(false)
-    form.resetForm() // Reset the email modal field values
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function emailRollup(values, form) {
     const toEmails = utils.parseEmailAddresses(values.to)
     const anetUsersEmails = values.toAnetUsers
-      ?.map(
-        ({ emailAddresses }) =>
-          emailAddresses?.find(({ network }) => network === EMAIL_NETWORK)
-            ?.address
-      )
-      .filter(Boolean)
+      ?.flatMap(u => u.emailAddresses)
+      ?.map(ea => ea.address)
+      ?.filter(Boolean)
     if (!toEmails.isValid && !anetUsersEmails.length) {
       return Promise.reject(new Error("No email addresses were selected"))
     }
@@ -886,40 +766,6 @@ const RollupShow = ({
     return API.mutation(GQL_EMAIL_ROLLUP, variables)
   }
 }
-
-const ToAnetUsersOverlayRow = (item: any) => (
-  <React.Fragment key={item.uuid}>
-    <td>
-      <EmailAddressList
-        label={Settings.fields.person.emailAddresses.label}
-        emailAddresses={item.emailAddresses}
-      />
-    </td>
-    <td>
-      <LinkTo modelType="Person" model={item} isLink={false} />
-    </td>
-    <td>
-      <LinkTo modelType="Position" model={item.position} isLink={false} />
-      {item.position?.code ? `, ${item.position.code}` : ""}
-    </td>
-    <td>
-      <LinkTo
-        modelType="Location"
-        model={item.position?.location}
-        whenUnspecified=""
-      />
-    </td>
-    <td>
-      {item.position?.organization && (
-        <LinkTo
-          modelType="Organization"
-          model={item.position?.organization}
-          isLink={false}
-        />
-      )}
-    </td>
-  </React.Fragment>
-)
 
 const mapStateToProps = state => ({
   searchQuery: state.searchQuery
