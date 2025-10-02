@@ -9,13 +9,14 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
+import EmailAddressList from "components/EmailAddressList"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import MosaicLayout from "components/MosaicLayout"
@@ -41,7 +42,6 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, RollupGraph } from "models"
 import moment from "moment"
-import App from "pages/App"
 import pluralize from "pluralize"
 import React, { useContext, useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
@@ -701,7 +701,7 @@ const RollupShow = ({
       }
     }
 
-    const personFields = `${Person.autocompleteQuery} emailAddresses { network address }`
+    const personFields = `${Person.autocompleteQuery} emailAddresses(network: "${EMAIL_NETWORK}") { network address }`
     return (
       <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Form>
@@ -716,25 +716,23 @@ const RollupShow = ({
                   label="To ANET Users"
                   component={FieldHelper.SpecialField}
                   vertical
-                  onChange={value => {
-                    setFieldValue("toAnetUsers", [...toAnetUsers, value])
-                  }}
+                  onChange={value => setFieldValue("toAnetUsers", value)}
                   widget={
-                    <AdvancedSingleSelect
+                    <AdvancedMultiSelect
                       fieldName="author"
                       placeholder="Select ANET users"
-                      value={null}
+                      value={toAnetUsers}
                       overlayColumns={[
+                        "Email",
                         "Name",
                         "Position",
                         "Location",
                         "Organization"
                       ]}
-                      overlayRenderRow={PersonDetailedOverlayRow}
+                      overlayRenderRow={ToAnetUsersOverlayRow}
                       filterDefs={peopleFilters}
                       autoComplete="off"
                       objectType={Person}
-                      valueKey="name"
                       fields={personFields}
                       addon={PEOPLE_ICON}
                     />
@@ -863,12 +861,15 @@ const RollupShow = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function emailRollup(values, form) {
     const toEmails = utils.parseEmailAddresses(values.to)
-    const anetUsersEmails = values.toAnetUsers?.map(
-      ({ emailAddresses }) =>
-        emailAddresses.find(({ network }) => network === EMAIL_NETWORK).address
-    )
+    const anetUsersEmails = values.toAnetUsers
+      ?.map(
+        ({ emailAddresses }) =>
+          emailAddresses?.find(({ network }) => network === EMAIL_NETWORK)
+            ?.address
+      )
+      .filter(Boolean)
     if (!toEmails.isValid && !anetUsersEmails.length) {
-      return
+      return Promise.reject(new Error("No email addresses were selected"))
     }
     const emails = [...(toEmails.to || []), ...anetUsersEmails]
     const emailDelivery = {
@@ -885,6 +886,40 @@ const RollupShow = ({
     return API.mutation(GQL_EMAIL_ROLLUP, variables)
   }
 }
+
+const ToAnetUsersOverlayRow = (item: any) => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <EmailAddressList
+        label={Settings.fields.person.emailAddresses.label}
+        emailAddresses={item.emailAddresses}
+      />
+    </td>
+    <td>
+      <LinkTo modelType="Person" model={item} isLink={false} />
+    </td>
+    <td>
+      <LinkTo modelType="Position" model={item.position} isLink={false} />
+      {item.position?.code ? `, ${item.position.code}` : ""}
+    </td>
+    <td>
+      <LinkTo
+        modelType="Location"
+        model={item.position?.location}
+        whenUnspecified=""
+      />
+    </td>
+    <td>
+      {item.position?.organization && (
+        <LinkTo
+          modelType="Organization"
+          model={item.position?.organization}
+          isLink={false}
+        />
+      )}
+    </td>
+  </React.Fragment>
+)
 
 const mapStateToProps = state => ({
   searchQuery: state.searchQuery
