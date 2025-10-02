@@ -10,14 +10,14 @@ class Preferences extends Page {
   async hasSubscriptionsEmailsPreference() {
     await browser.$("fieldset").waitForDisplayed()
     return browser
-      .$('//label[text()="Receive emails related to subscriptions"]')
+      .$('//label[text()="Email me about subscription updates"]')
       .isExisting()
   }
 
   async hasReportsEmailsPreference() {
     await browser.$("fieldset").waitForDisplayed()
     return browser
-      .$('//label[text()="Receive emails related to reports"]')
+      .$('//label[text()="Email me about report approvals"]')
       .isExisting()
   }
 }
