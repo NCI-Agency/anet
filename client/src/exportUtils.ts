@@ -1,260 +1,320 @@
 import { gql } from "@apollo/client"
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
+import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
 import FileSaver from "file-saver"
 
-const GQL_EMAIL_ADDRESSES = `
+const getEmailAddresses = () => `
   emailAddresses(network: $emailNetwork) {
     network
     address
   }
 `
-const GQL_GET_ORGANIZATION_LIST = gql`
+const getOrganizationFragment = (fields: string[] = []) => `
   fragment organizations on Query {
     organizations: organizationList(query: $organizationQuery) {
       pageNum
       pageSize
       totalCount
       list {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GQL_EMAIL_ADDRESSES}
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "shortName")}
+        ${shouldInclude(fields, "longName")}
+        ${shouldInclude(fields, "identificationCode")}
+        ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
       }
     }
   }
 `
-const GQL_GET_PERSON_LIST = gql`
+const getPersonFragment = (fields: string[] = []) => `
   fragment people on Query {
     people: personList(query: $personQuery) {
       pageNum
       pageSize
       totalCount
       list {
-        uuid
-        name
-        rank
-        ${GQL_EMAIL_ADDRESSES}
-        position {
-          uuid
-          name
-          type
-          role
-          code
-          location {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "rank")}
+        ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
+        ${shouldInclude(
+          fields,
+          "position",
+          `position {
             uuid
             name
-          }
-          organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }
-        }
-      }
-    }
-  }
-`
-const GQL_GET_POSITION_LIST = gql`
-  fragment positions on Query {
-    positions: positionList(query: $positionQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GQL_EMAIL_ADDRESSES}
-        location {
-          uuid
-          name
-        }
-        organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        person {
-          uuid
-          name
-          rank
-        }
-      }
-    }
-  }
-`
-const GQL_GET_TASK_LIST = gql`
-  fragment tasks on Query {
-    tasks: taskList(query: $taskQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        uuid
-        shortName
-        longName
-        status
-        taskedOrganizations {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        parentTask {
-          uuid
-          shortName
-        }
-      }
-    }
-  }
-`
-const GQL_GET_LOCATION_LIST = gql`
-  fragment locations on Query {
-    locations: locationList(query: $locationQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        uuid
-        name
-        lat
-        lng
-        type
-      }
-    }
-  }
-`
-const GQL_GET_REPORT_LIST = gql`
-  fragment reports on Query {
-    reports: reportList(query: $reportQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        uuid
-        intent
-        engagementDate
-        duration
-        keyOutcomes
-        nextSteps
-        cancelledReason
-        atmosphere
-        atmosphereDetails
-        state
-        authors {
-          uuid
-          name
-          rank
-        }
-        reportPeople {
-          uuid
-          name
-          rank
-        }
-        primaryAdvisor {
-          uuid
-          name
-          rank
-          position {
-            uuid
+            type
+            role
+            code
+            location {
+              uuid
+              name
+            }
             organization {
               uuid
               shortName
               longName
               identificationCode
             }
-          }
-        }
-        primaryInterlocutor {
-          uuid
-          name
-          rank
-        }
-        advisorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        interlocutorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        location {
-          uuid
-          name
-          lat
-          lng
-        }
-        tasks {
-          uuid
-          shortName
-        }
-        workflow {
-          type
-          createdAt
-          step {
-            uuid
-            name
-            approvers {
-              uuid
-              name
-              person {
-                uuid
-                name
-                rank
-              }
-            }
-          }
-          person {
-            uuid
-            name
-            rank
-          }
-        }
-        updatedAt
+          }`
+        )}
       }
     }
   }
 `
-const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
+const getPositionFragment = (fields: string[] = []) => `
+  fragment positions on Query {
+    positions: positionList(query: $positionQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "code")}
+        ${shouldInclude(fields, "type")}
+        ${shouldInclude(fields, "role")}
+        ${shouldInclude(fields, "status")}
+        ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
+        ${shouldInclude(
+          fields,
+          "location",
+          `location {
+            uuid
+            name
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "organization",
+          `organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "person",
+          `person {
+            uuid
+            name
+            rank
+          }`
+        )}
+      }
+    }
+  }
+`
+const getTaskFragment = (fields: string[] = []) => `
+  fragment tasks on Query {
+    tasks: taskList(query: $taskQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "shortName")}
+        ${shouldInclude(fields, "longName")}
+        ${shouldInclude(fields, "status")}
+        ${shouldInclude(
+          fields,
+          "taskedOrganizations",
+          `taskedOrganizations {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "parentTask",
+          `parentTask {
+            uuid
+            shortName
+          }`
+        )}
+      }
+    }
+  }
+`
+const getLocationFragment = (fields: string[] = []) => `
+  fragment locations on Query {
+    locations: locationList(query: $locationQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "lat")}
+        ${shouldInclude(fields, "lng")}
+        ${shouldInclude(fields, "type")}
+      }
+    }
+  }
+`
+const getReportFragment = (fields: string[] = []) => `
+  fragment reports on Query {
+    reports: reportList(query: $reportQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "intent")}
+        ${shouldInclude(fields, "engagementDate")}
+        ${shouldInclude(fields, "duration")}
+        ${shouldInclude(fields, "keyOutcomes")}
+        ${shouldInclude(fields, "nextSteps")}
+        ${shouldInclude(fields, "cancelledReason")}
+        ${shouldInclude(fields, "atmosphere")}
+        ${shouldInclude(fields, "atmosphereDetails")}
+        ${shouldInclude(fields, "state")}
+        ${shouldInclude(
+          fields,
+          "authors",
+          `authors {
+            uuid
+            name
+            rank
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "reportPeople",
+          `reportPeople {
+            uuid
+            name
+            rank
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "primaryAdvisor",
+          `primaryAdvisor {
+            uuid
+            name
+            rank
+            position {
+              uuid
+              organization {
+                uuid
+                shortName
+                longName
+                identificationCode
+              }
+            }
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "primaryInterlocutor",
+          `primaryInterlocutor {
+            uuid
+            name
+            rank
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "advisorOrg",
+          `advisorOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "interlocutorOrg",
+          `interlocutorOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "location",
+          `location {
+            uuid
+            name
+            lat
+            lng
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "tasks",
+          `tasks {
+            uuid
+            shortName
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "workflow",
+          `workflow {
+            type
+            createdAt
+            step {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                }
+              }
+            }
+            person {
+              uuid
+              name
+              rank
+            }
+          }`
+        )}
+        ${shouldInclude(fields, "updatedAt")}
+      }
+    }
+  }
+`
+const getAuthorizationGroupFragment = (fields: string[] = []) => `
   fragment authorizationGroups on Query {
     communities: authorizationGroupList(query: $authorizationGroupQuery) {
       pageNum
       pageSize
       totalCount
       list {
-        uuid
-        name
-        description
-        status
-        distributionList
-        forSensitiveInformation
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "description")}
+        ${shouldInclude(fields, "status")}
+        ${shouldInclude(fields, "forSensitiveInformation")}
         communityRelatedObjects: authorizationGroupRelatedObjects {
           relatedObjectType
           relatedObject {
             ... on Organization {
               shortName
-              ${GQL_EMAIL_ADDRESSES}
+              ${getEmailAddresses()}
             }
             ... on Person {
               name
               rank
-              ${GQL_EMAIL_ADDRESSES}
+              ${getEmailAddresses()}
             }
             ... on Position {
               type
               name
-              ${GQL_EMAIL_ADDRESSES}
+              ${getEmailAddresses()}
             }
           }
         }
@@ -262,93 +322,139 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
     }
   }
 `
-
-const GQL_GET_EVENT_LIST = gql`
+const getEventFragment = (fields: string[] = []) => `
   fragment events on Query {
     events: eventList(query: $eventQuery) {
       pageNum
       pageSize
       totalCount
       list {
-        uuid
-        type
-        name
-        startDate
-        endDate
-        ownerOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        adminOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        eventSeries {
-          uuid
-          name
-        }
-        location {
-          uuid
-          name
-          lat
-          lng
-        }
-        updatedAt
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "type")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "startDate")}
+        ${shouldInclude(fields, "endDate")}
+        ${shouldInclude(
+          fields,
+          "ownerOrg",
+          `ownerOrg {
+            ${shouldInclude(fields, "ownerOrg.uuid", "uuid")}
+            ${shouldInclude(fields, "ownerOrg.shortName", "shortName")}
+            ${shouldInclude(fields, "ownerOrg.longName", "longName")}
+            ${shouldInclude(fields, "ownerOrg.identificationCode", "identificationCode")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "hostOrg",
+          `hostOrg {
+            ${shouldInclude(fields, "hostOrg.uuid", "uuid")}
+            ${shouldInclude(fields, "hostOrg.shortName", "shortName")}
+            ${shouldInclude(fields, "hostOrg.longName", "longName")}
+            ${shouldInclude(fields, "hostOrg.identificationCode", "identificationCode")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "adminOrg",
+          `adminOrg {
+            ${shouldInclude(fields, "adminOrg.uuid", "uuid")}
+            ${shouldInclude(fields, "adminOrg.shortName", "shortName")}
+            ${shouldInclude(fields, "adminOrg.longName", "longName")}
+            ${shouldInclude(fields, "adminOrg.identificationCode", "identificationCode")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "eventSeries",
+          `eventSeries {
+            ${shouldInclude(fields, "eventSeries.uuid", "uuid")}
+            ${shouldInclude(fields, "eventSeries.name", "name")}
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "location",
+          `location {
+            ${shouldInclude(fields, "location.uuid", "uuid")}
+            ${shouldInclude(fields, "location.name", "name")}
+            ${shouldInclude(fields, "location.lat", "lat")}
+            ${shouldInclude(fields, "location.lng", "lng")}
+          }`
+        )}
+        ${shouldInclude(fields, "updatedAt")}
       }
     }
   }
 `
 
-const GQL_GET_DATA = gql`
-  query (
-    $includeOrganizations: Boolean!
-    $organizationQuery: OrganizationSearchQueryInput
-    $includePeople: Boolean!
-    $personQuery: PersonSearchQueryInput
-    $includePositions: Boolean!
-    $positionQuery: PositionSearchQueryInput
-    $includeTasks: Boolean!
-    $taskQuery: TaskSearchQueryInput
-    $includeLocations: Boolean!
-    $locationQuery: LocationSearchQueryInput
-    $includeReports: Boolean!
-    $reportQuery: ReportSearchQueryInput
-    $includeAuthorizationGroups: Boolean!
-    $authorizationGroupQuery: AuthorizationGroupSearchQueryInput
-    $includeEvents: Boolean!
-    $eventQuery: EventSearchQueryInput
-    $emailNetwork: String
-  ) {
-    ...organizations @include(if: $includeOrganizations)
-    ...people @include(if: $includePeople)
-    ...positions @include(if: $includePositions)
-    ...tasks @include(if: $includeTasks)
-    ...locations @include(if: $includeLocations)
-    ...reports @include(if: $includeReports)
-    ...authorizationGroups @include(if: $includeAuthorizationGroups)
-    ...events @include(if: $includeEvents)
-  }
+const shouldInclude = (
+  fields: string[],
+  field: string,
+  gqlField?: string
+): string => {
+  return fields.length === 0 || fields.includes(field)
+    ? (gqlField ?? field)
+    : ""
+}
 
-  ${GQL_GET_ORGANIZATION_LIST}
-  ${GQL_GET_PERSON_LIST}
-  ${GQL_GET_POSITION_LIST}
-  ${GQL_GET_TASK_LIST}
-  ${GQL_GET_LOCATION_LIST}
-  ${GQL_GET_REPORT_LIST}
-  ${GQL_GET_AUTHORIZATION_GROUP_LIST}
-  ${GQL_GET_EVENT_LIST}
-`
+const buildGqlGetDataQuery = ({
+  reportFields = [],
+  personFields = [],
+  positionFields = [],
+  organizationFields = [],
+  taskFields = [],
+  locationFields = [],
+  authorizationGroupFields = [],
+  eventFields = []
+}) => {
+  const fragments = [
+    getOrganizationFragment(organizationFields),
+    getPersonFragment(personFields),
+    getPositionFragment(positionFields),
+    getTaskFragment(taskFields),
+    getLocationFragment(locationFields),
+    getReportFragment(reportFields),
+    getAuthorizationGroupFragment(authorizationGroupFields),
+    getEventFragment(eventFields)
+  ]
+
+  return gql`
+    query (
+      $includeOrganizations: Boolean!
+      $organizationQuery: OrganizationSearchQueryInput
+      $includePeople: Boolean!
+      $personQuery: PersonSearchQueryInput
+      $includePositions: Boolean!
+      $positionQuery: PositionSearchQueryInput
+      $includeTasks: Boolean!
+      $taskQuery: TaskSearchQueryInput
+      $includeLocations: Boolean!
+      $locationQuery: LocationSearchQueryInput
+      $includeReports: Boolean!
+      $reportQuery: ReportSearchQueryInput
+      $includeAuthorizationGroups: Boolean!
+      $authorizationGroupQuery: AuthorizationGroupSearchQueryInput
+      $includeEvents: Boolean!
+      $eventQuery: EventSearchQueryInput
+      $emailNetwork: String
+    ) {
+      ...organizations @include(if: $includeOrganizations)
+      ...people @include(if: $includePeople)
+      ...positions @include(if: $includePositions)
+      ...tasks @include(if: $includeTasks)
+      ...locations @include(if: $includeLocations)
+      ...reports @include(if: $includeReports)
+      ...authorizationGroups @include(if: $includeAuthorizationGroups)
+      ...events @include(if: $includeEvents)
+    }
+    ${fragments.join("\n")}
+  `
+}
+
 export const exportResults = (
+  genericPreferences,
+  userPreferences,
   searchQueryParams,
   queryTypes,
   exportType,
@@ -368,62 +474,86 @@ export const exportResults = (
     SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS
   )
   const includeEvents = queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS)
+
+  const organizationsFields = getExportPreference(
+    "ORGANIZATIONS",
+    CATEGORY_EXPORT
+  )
+  const peopleFields = getExportPreference("PEOPLE", CATEGORY_EXPORT)
+  const positionsFields = getExportPreference("POSITIONS", CATEGORY_EXPORT)
+  const tasksFields = getExportPreference("TASKS", CATEGORY_EXPORT)
+  const locationsFields = getExportPreference("LOCATIONS", CATEGORY_EXPORT)
+  const reportsFields = getExportPreference("REPORTS", CATEGORY_EXPORT)
+  const authorizationGroupsFields = getExportPreference(
+    "AUTHORIZATION_GROUPS",
+    CATEGORY_EXPORT
+  )
+  const eventsFields = getExportPreference("EVENTS", CATEGORY_EXPORT)
+
   const organizationQuery = !includeOrganizations
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "ASC"
-      })
+      }
   const personQuery = !includePeople
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "ASC"
-      })
+      }
   const positionQuery = !includePositions
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "ASC"
-      })
+      }
   const taskQuery = !includeTasks
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "ASC"
-      })
+      }
   const locationQuery = !includeLocations
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "ASC"
-      })
+      }
   const reportQuery = !includeReports
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "ENGAGEMENT_DATE",
         sortOrder: "DESC"
-      })
+      }
   const authorizationGroupQuery = !includeAuthorizationGroups
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "DESC"
-      })
+      }
   const eventQuery = !includeEvents
     ? {}
-    : Object.assign({}, searchQueryParams, {
+    : {
+        ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
         sortOrder: "DESC"
-      })
+      }
   const { emailNetwork } = searchQueryParams
   const variables = {
     includeOrganizations,
@@ -444,9 +574,40 @@ export const exportResults = (
     eventQuery,
     emailNetwork
   }
-  return API.queryExport(GQL_GET_DATA, variables, exportType, contentType)
+
+  const gqlQuery = buildGqlGetDataQuery({
+    organizationFields: organizationsFields,
+    personFields: peopleFields,
+    positionFields: positionsFields,
+    taskFields: tasksFields,
+    locationFields: locationsFields,
+    reportFields: reportsFields,
+    authorizationGroupFields: authorizationGroupsFields,
+    eventFields: eventsFields
+  })
+
+  return API.queryExport(gqlQuery, variables, exportType, contentType)
     .then(blob => {
       FileSaver.saveAs(blob, `anet_export.${exportType}`)
     })
     .catch(error => setError(error))
+
+  function getExportPreference(
+    preferenceName: string,
+    preferenceCategory: string
+  ): string[] {
+    const preference =
+      userPreferences.find(
+        p =>
+          p.preference.name === preferenceName &&
+          p.preference.category === preferenceCategory
+      ) ??
+      genericPreferences.find(
+        p => p.name === preferenceName && p.category === preferenceCategory
+      )
+
+    const value = preference?.value ?? preference?.defaultValue
+
+    return value ? value.split(",") : []
+  }
 }

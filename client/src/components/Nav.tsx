@@ -270,6 +270,15 @@ const Navigation = ({
         Home
       </SidebarLink>
 
+      <SidebarLink
+        id="preferences-nav"
+        linkTo="/preferences"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        My Preferences
+      </SidebarLink>
+
       <Nav id="search-nav" />
 
       <Nav.Item
@@ -516,6 +525,13 @@ const Navigation = ({
                   handleOnClick={resetPages}
                 >
                   GraphQL
+                </SidebarLink>
+                <SidebarLink
+                  id="preferences"
+                  linkTo="/admin/preferences"
+                  handleOnClick={resetPages}
+                >
+                  Default Application Preferences
                 </SidebarLink>
               </span>
             </Nav>

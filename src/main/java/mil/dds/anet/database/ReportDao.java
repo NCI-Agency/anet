@@ -25,7 +25,6 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -958,7 +957,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .map(a -> a.loadPerson(engine.getContext()).join()).toList();
     final ApprovalNeededEmail action = new ApprovalNeededEmail();
     action.setReport(r);
-    sendEmailToReportPeople(action, approvers);
+    if (!approvers.isEmpty()) {
+      sendEmailToReportPeople(action, approvers);
+    }
   }
 
   public void sendReportPublishedEmail(Report r) {
@@ -967,25 +968,23 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sendEmailToReportAuthors(action, r);
   }
 
-  public static void sendEmailToReportAuthors(AnetEmailAction action, Report report) {
+  public void sendEmailToReportAuthors(AnetEmailAction action, Report report) {
     final List<ReportPerson> authors =
         report.loadAuthors(ApplicationContextProvider.getEngine().getContext()).join();
-    sendEmailToReportPeople(action, authors);
+    if (!authors.isEmpty()) {
+      sendEmailToReportPeople(action, authors);
+    }
   }
 
-  public static void sendEmailToReportPeople(AnetEmailAction action,
-      List<? extends Person> people) {
-    // Make sure all email addresses are loaded
-    CompletableFuture.allOf(people.stream()
-        .map(a -> a.loadEmailAddresses(ApplicationContextProvider.getEngine().getContext(), null))
-        .toArray(CompletableFuture<?>[]::new)).join();
-    AnetEmail email = new AnetEmail();
-    email.setAction(action);
-    final List<String> addresses = people.stream()
-        .map(p -> p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null))
-        .filter(ea -> !Utils.isEmptyOrNull(ea)).toList();
-    email.setToAddresses(addresses);
-    AnetEmailWorker.sendEmailAsync(email);
+  public void sendEmailToReportPeople(AnetEmailAction action, List<? extends Person> people) {
+    final List<String> emailAddresses = getEmailAddressesBasedOnPreference(people,
+        PreferenceDao.PREFERENCE_REPORTS, PreferenceDao.CATEGORY_EMAILING);
+    if (!emailAddresses.isEmpty()) {
+      AnetEmail email = new AnetEmail();
+      email.setAction(action);
+      email.setToAddresses(emailAddresses);
+      AnetEmailWorker.sendEmailAsync(email);
+    }
   }
 
   public int submit(final Report r, final Person user) {
@@ -1188,45 +1187,50 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final SubscriptionUpdateGroup update =
         getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid");
     // update reportPeople
-    update.stmts.add(new SubscriptionUpdateStatement("people",
-        "SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
-            + paramOrJoin("reports.uuid", isParam),
-        // param is already added above
-        Collections.emptyMap()));
+    update.getStmts()
+        .add(new SubscriptionUpdateStatement("people",
+            "SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
+                + paramOrJoin("reports.uuid", isParam),
+            // param is already added above
+            Collections.emptyMap()));
     // update reportPeople positions
-    update.stmts.add(new SubscriptionUpdateStatement("positions",
-        "SELECT uuid FROM positions WHERE \"currentPersonUuid\" in ("
-            + " SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
-            + paramOrJoin("reports.uuid", isParam) + " )",
-        // param is already added above
-        Collections.emptyMap()));
+    update.getStmts()
+        .add(new SubscriptionUpdateStatement("positions",
+            "SELECT uuid FROM positions WHERE \"currentPersonUuid\" in ("
+                + " SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
+                + paramOrJoin("reports.uuid", isParam) + " )",
+            // param is already added above
+            Collections.emptyMap()));
     // update organizations
     // TODO: is this correct?
-    update.stmts
+    update.getStmts()
         .add(getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getAdvisorOrgUuid() : null,
             "organizations", "reports.advisorOrganizationUuid"));
-    update.stmts.add(
-        getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getInterlocutorOrgUuid() : null,
-            "organizations", "reports.interlocutorOrganizationUuid"));
+    update.getStmts()
+        .add(getCommonSubscriptionUpdateStatement(isParam,
+            isParam ? obj.getInterlocutorOrgUuid() : null, "organizations",
+            "reports.interlocutorOrganizationUuid"));
     // update tasks
-    update.stmts.add(new SubscriptionUpdateStatement("tasks",
-        "SELECT \"taskUuid\" FROM \"reportTasks\" WHERE \"reportUuid\" = "
-            + paramOrJoin("reports.uuid", isParam),
-        // param is already added above
-        Collections.emptyMap()));
+    update.getStmts()
+        .add(new SubscriptionUpdateStatement("tasks",
+            "SELECT \"taskUuid\" FROM \"reportTasks\" WHERE \"reportUuid\" = "
+                + paramOrJoin("reports.uuid", isParam),
+            // param is already added above
+            Collections.emptyMap()));
     // update location
-    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
+    update.getStmts().add(getCommonSubscriptionUpdateStatement(isParam,
         isParam ? obj.getLocationUuid() : null, "locations", "reports.locationUuid"));
     // update event
-    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
+    update.getStmts().add(getCommonSubscriptionUpdateStatement(isParam,
         isParam ? obj.getEventUuid() : null, "events", "reports.eventUuid"));
 
     // update reportCommunities
-    update.stmts.add(new SubscriptionUpdateStatement("authorizationGroups",
-        "SELECT \"authorizationGroupUuid\" FROM \"reportCommunities\" WHERE \"reportUuid\" = "
-            + paramOrJoin("reports.uuid", isParam),
-        // param is already added above
-        Collections.emptyMap()));
+    update.getStmts()
+        .add(new SubscriptionUpdateStatement("authorizationGroups",
+            "SELECT \"authorizationGroupUuid\" FROM \"reportCommunities\" WHERE \"reportUuid\" = "
+                + paramOrJoin("reports.uuid", isParam),
+            // param is already added above
+            Collections.emptyMap()));
 
     return update;
   }

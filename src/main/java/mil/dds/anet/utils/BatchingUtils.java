@@ -22,7 +22,9 @@ import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Preference;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
@@ -237,6 +239,12 @@ public final class BatchingUtils {
                 .supplyAsync(() -> engine.getPersonDao().getPersonPositionHistory(foreignKeys),
                     dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.PERSON_PERSON_PREFERENCES.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<PersonPreference>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getPersonDao().getPersonPreferences(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.POSITIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, Position>) keys -> CompletableFuture
@@ -265,6 +273,11 @@ public final class BatchingUtils {
             (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getPositionDao().getPersonPositionHistory(foreignKeys),
                     dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.PREFERENCES.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Preference>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getPreferenceDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
         DataLoaderFactory.newDataLoader(

@@ -410,9 +410,7 @@ test.beforeEach(t => {
       )
     },
     async clickMenuLinksButton() {
-      const $menuLinksButton = await t.context.$(
-        "#leftNav div:nth-child(3) > a"
-      )
+      const $menuLinksButton = await t.context.$("#my-work")
       await t.context.driver.wait(
         t.context.until.elementIsVisible($menuLinksButton)
       )

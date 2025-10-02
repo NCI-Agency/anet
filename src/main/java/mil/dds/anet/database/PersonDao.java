@@ -24,6 +24,7 @@ import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
@@ -32,6 +33,7 @@ import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
+import mil.dds.anet.database.mappers.PersonPreferenceMapper;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
@@ -123,6 +125,21 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
     return new PersonPositionHistoryBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  class PersonPreferenceBatcher extends ForeignKeyBatcher<PersonPreference> {
+    private static final String SQL =
+        "/* batch.getPersonPreferences */ SELECT * FROM \"peoplePreferences\" "
+            + "WHERE \"personUuid\" IN ( <foreignKeys> )";
+
+    public PersonPreferenceBatcher() {
+      super(PersonDao.this.databaseHandler, SQL, "foreignKeys", new PersonPreferenceMapper(),
+          "personUuid");
+    }
+  }
+
+  public List<List<PersonPreference>> getPersonPreferences(List<String> foreignKeys) {
+    return new PersonPreferenceBatcher().getByForeignKeys(foreignKeys);
   }
 
   @Override
@@ -699,5 +716,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     } finally {
       closeDbHandle(handle);
     }
+  }
+
+  public CompletableFuture<List<PersonPreference>> getPreferences(GraphQLContext context,
+      String personUuid) {
+    return new ForeignKeyFetcher<PersonPreference>().load(context,
+        FkDataLoaderKey.PERSON_PERSON_PREFERENCES, personUuid);
   }
 }
