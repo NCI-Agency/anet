@@ -1,5 +1,5 @@
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
-import React, { useMemo, useState } from "react"
+import React from "react"
 import { Button, Modal } from "react-bootstrap"
 
 interface InactiveTaskModalProps {
