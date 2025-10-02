@@ -1044,6 +1044,7 @@ input PersonSearchQueryInput {
   endOfTourDateStart: Instant
   hasBiography: Boolean
   inMyReports: Boolean
+  isUser: Boolean
   locationRecurseStrategy: RecurseStrategy
   locationUuid: [String]
   matchPositionName: Boolean

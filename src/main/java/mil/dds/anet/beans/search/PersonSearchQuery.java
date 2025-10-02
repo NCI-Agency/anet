@@ -60,6 +60,11 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   @GraphQLInputField
   List<PositionType> positionType;
 
+  // Find people who are ANET users
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean isUser;
+
   public PersonSearchQuery() {
     super(PersonSearchSortBy.NAME);
     this.setPageSize(100);
@@ -170,6 +175,14 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     this.assessment = assessment;
   }
 
+  public Boolean getIsUser() {
+    return isUser;
+  }
+
+  public void setIsUser(Boolean isUser) {
+    this.isUser = isUser;
+  }
+
   @Override
   public PersonSearchQuery clone() throws CloneNotSupportedException {
     final PersonSearchQuery clone = (PersonSearchQuery) super.clone();
@@ -188,5 +201,4 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     }
     return clone;
   }
-
 }
