@@ -473,7 +473,8 @@ const Search = ({
             id="openExportResultsButton"
             variant="outline-secondary"
           >
-            Export preferences
+            Export Configuration
+            <img src={DOWNLOAD_ICON} height={16} alt="Export search results" />
           </Button>
         </span>
         <span className="ms-2">

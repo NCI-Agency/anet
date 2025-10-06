@@ -18,7 +18,7 @@ const Preferences = () => {
       onSubmit={onSubmit}
       saveSuccess={saveSuccess}
       saveError={saveError}
-      title="User Preferences"
+      title="Default Application Preferences"
     />
   )
 

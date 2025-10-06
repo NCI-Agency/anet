@@ -791,7 +791,8 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "emailRollup")
-  public Integer emailRollup(@GraphQLRootContext GraphQLContext context, @GraphQLArgument(name = "startDate") Instant start,
+  public Integer emailRollup(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "startDate") Instant start,
       @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") RollupGraphType orgType,
       @GraphQLArgument(name = "orgUuid") String orgUuid,

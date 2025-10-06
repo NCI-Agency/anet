@@ -8,18 +8,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.EmailDao;
-import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.GraphQLPluginConfiguration;
 import mil.dds.anet.test.SpringTestConfig;
@@ -32,7 +27,6 @@ import mil.dds.anet.test.client.Assessment;
 import mil.dds.anet.test.client.AssessmentInput;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
-import mil.dds.anet.test.client.EmailAddress;
 import mil.dds.anet.test.client.Event;
 import mil.dds.anet.test.client.EventInput;
 import mil.dds.anet.test.client.EventSeries;
@@ -47,11 +41,9 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
-import mil.dds.anet.test.client.PersonPreferenceInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
-import mil.dds.anet.test.client.PreferenceInput;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportPerson;
@@ -67,9 +59,6 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
-import mil.dds.anet.test.integration.utils.EmailResponse;
-import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
 import mil.dds.anet.utils.Utils;
@@ -106,15 +95,6 @@ public abstract class AbstractResourceTest {
 
   @Autowired
   protected AdminDao adminDao;
-
-  @Autowired
-  private JobHistoryDao jobHistoryDao;
-
-  @Autowired
-  private EmailDao emailDao;
-
-  private static FakeSmtpServer emailServer;
-  private static AnetEmailWorker emailWorker;
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -209,10 +189,6 @@ public abstract class AbstractResourceTest {
     final Person erin = findOrPutPersonInDb("erin", Person.builder().build());
     assertThat(erin).isNotNull();
     return erin;
-  }
-
-  public Person getAdminUser() {
-    return findOrPutPersonInDb(adminUser, Person.builder().build());
   }
 
   public Person getAndrewAnderson() {
@@ -422,13 +398,6 @@ public abstract class AbstractResourceTest {
 
   protected static PersonInput getPersonInput(final mil.dds.anet.test.client.Person person) {
     return getInput(person, PersonInput.class);
-  }
-
-  protected static PersonPreferenceInput getPersonPreferenceInput(final String personUuid,
-      final String preferenceUuid, final String value) {
-    return PersonPreferenceInput.builder().withValue(value)
-        .withPerson(PersonInput.builder().withUuid(personUuid).build())
-        .withPreference(PreferenceInput.builder().withUuid(preferenceUuid).build()).build();
   }
 
   protected static List<ReportPersonInput> getReportPeopleInput(
@@ -656,60 +625,5 @@ public abstract class AbstractResourceTest {
         }
       }
     }
-  }
-
-  protected void setUpEmailServer() throws Exception {
-    if (config.getSmtp().isDisabled()) {
-      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
-    }
-    final Map<String, Object> newDict = new HashMap<>(dict.getDictionary());
-    @SuppressWarnings("unchecked")
-    final List<String> activeDomainNames = (List<String>) newDict.get("activeDomainNames");
-    activeDomainNames.add("example.com");
-    dict.setDictionary(newDict);
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
-    emailServer = new FakeSmtpServer(config.getSmtp());
-  }
-
-  protected void clearEmailsOnServer() {
-    try {
-      emailServer.clearEmailServer();
-    } catch (Exception e) {
-      fail("Error clearing emails", e);
-    }
-  }
-
-  protected void assertEmails(int expectedNrOfEmails, Person... expectedRecipients) {
-    final List<EmailResponse> emails = getEmailsFromServer();
-    // Check the number of email messages
-    assertThat(emails).hasSize(expectedNrOfEmails);
-    // Check that each message has one of the intended recipients
-    emails.forEach(e -> assertThat(expectedRecipients)
-        .anyMatch(r -> emailMatchesRecipient(e, r.getEmailAddresses())));
-    // Check that each recipient received a message
-    Arrays.asList(expectedRecipients).forEach(
-        r -> assertThat(emails).anyMatch(e -> emailMatchesRecipient(e, r.getEmailAddresses())));
-    // Clean up
-    clearEmailsOnServer();
-  }
-
-  protected void sendEmailsToServer() {
-    // Make sure all messages have been (asynchronously) sent
-    emailWorker.run();
-  }
-
-  private List<EmailResponse> getEmailsFromServer() {
-    try {
-      return emailServer.requestAllEmailsFromServer();
-    } catch (Exception e) {
-      fail("Error checking emails", e);
-    }
-    return null;
-  }
-
-  private boolean emailMatchesRecipient(EmailResponse email,
-      List<EmailAddress> expectedRecipientAddresses) {
-    return email.to.values.stream().anyMatch(
-        v -> expectedRecipientAddresses.stream().anyMatch(ea -> v.address.equals(ea.getAddress())));
   }
 }
