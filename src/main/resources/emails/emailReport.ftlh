@@ -15,30 +15,20 @@ body {
 p {
   margin: 0 0 10px;
 }
-.col-sm-2, .col-sm-7 {
+.col-sm-3, .col-sm-9 {
   float: left;
   position: relative;
   min-height: 1px;
 }
-.col-sm-2 {
+.col-sm-3 {
   padding-right: 15px;
-  width: 16.66666667%;
+  width: 25%;
 }
-.col-sm-7 {
-  width: 58.33333333%;
+.col-sm-9 {
+  width: 75%;
 }
 .form-group {
   clear: both;
-}
-label {
-  display: inline-block;
-  margin-bottom: 5px;
-  font-weight: 700;
-}
-.form-horizontal .control-label {
-  padding-top: 7px;
-  margin-bottom: 0;
-  text-align: right;
 }
 .form-control-static {
   min-height: 34px;
@@ -63,9 +53,6 @@ table > thead > tr > th {
 hr {
   border: 0;
   border-top: 1px solid #eee;
-}
-img {
-  vertical-align: middle;
 }
 .checkbox label {
   min-height: 20px;
@@ -98,21 +85,6 @@ img {
   background-color: #d9534f;
   border-color: #d43f3a;
 }
-.label {
-  display: inline;
-  padding: .2em .6em .3em;
-  font-size: 75%;
-  font-weight: 700;
-  line-height: 1;
-  color: #fff;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: .25em;
-}
-.label-info {
-  background-color: #5bc0de;
-}
 </style>
 
 <style type="text/css">
@@ -125,23 +97,39 @@ input[type=checkbox][readonly] {
 }
 fieldset {
   background: #fff;
-  border: 1px solid #e0e0e0;
-  margin: 0;
-  margin-bottom: 3rem;
+  box-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
+  padding: 1.75em;
+  margin: 0 0 4rem;
+  width: 100%;
 }
-.legend {
-  float: left;
+.ellipsized-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  max-width: 100%;
+}
+h4.legend {
   width: 100%;
   color: #363636;
   border: none;
   font-weight: normal;
-}
-h2.legend {
-  font-size: 2rem;
   margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  column-gap: 0.5rem;
+  justify-content: space-between;
 }
-.person-icon {
-  margin-right: 4px;
+h4.legend span.limit-title-text {
+  min-width: 20rem;
+}
+.form-label {
+  font-weight: bold;
+}
+.form-horizontal .form-label {
+  padding-top: 9px;
+  text-align: right;
 }
 .primary-attendee .checkbox {
   padding: 0;
@@ -154,12 +142,6 @@ table.borderless td {
 table hr.attendee-divider {
   margin: 0px;
 }
-.reportTag {
-  margin-right: 0.5em;
-}
-.reportTag::before {
-  content: "#";
-}
 .form-control-static {
   margin-bottom: -11px;
 }
@@ -167,47 +149,74 @@ table hr.attendee-divider {
 
 <style type="text/css">
 /* minimal copies from ReportWorkflow CSS: */
-fieldset.workflow-fieldset .workflow-action {
-  position: relative;
+.workflow-fieldset .workflow-action {
   display: inline-block;
-  padding-right: 18px;
-  margin-top: 3px;
   vertical-align: top;
   text-align: center;
+  margin-bottom: 30px;
 }
-fieldset.workflow-fieldset .workflow-action .btn-pending {
-  background-color: #969696;
+
+.workflow-fieldset .workflow-action:not(:last-child) {
+  margin-right: 35px
+}
+
+.workflow-fieldset .workflow-action .btn-pending.default {
+  background-color: #bdbdaf;
+  color: #000;
+}
+
+.workflow-fieldset .workflow-action .btn-success.submitted {
+  background-color: #848478;
+  color: #000;
+}
+
+.workflow-fieldset .workflow-action .btn-success.published {
+  background-color: #5cb85c;
+  color: #000;
+}
+
+.workflow-fieldset .workflow-action .btn-danger.unpublished {
+  background-color: #fcaf3e;
+  color: #000;
+}
+
+.workflow-fieldset .workflow-action .btn-success.approved {
+  background-color: #75eb75;
+  color: #000;
+}
+
+.workflow-fieldset .workflow-action .btn-danger.rejected {
+  background-color: #c23030;
   color: #fff;
 }
-fieldset.workflow-fieldset .workflow-action .btn-pending:hover {
-  background-color: #777;
-  color: #fff;
-}
-fieldset.workflow-fieldset .workflow-action .btn {
+
+.workflow-fieldset .workflow-action .btn {
   border-radius: 30px;
-}
-fieldset.workflow-fieldset .workflow-action button::after {
+  margin: 10px 0px;
+  width: 100%;
   position: relative;
-  font-family: 'Glyphicons Halflings';
+}
+
+.workflow-fieldset .workflow-action .btn > .workflow-step-name {
+  margin: 5px;
+}
+
+.workflow-fieldset .workflow-action .btn[disabled] {
+  opacity: 1;
+}
+
+.workflow-fieldset .workflow-action:not(:last-child) button::after {
+  position: absolute;
   font-style: normal;
   font-weight: 400;
   line-height: 1;
   -webkit-font-smoothing: antialiased;
-  content: "\e092";
-  color: #777;
-  width: 18px;
-  height: 18px;
-  top: 3px;
-  right: -26px;
+  content: "\27a1";
+  color: #000;
+  right: -25px;
+  top: calc(50% - 5px);
 }
-fieldset.workflow-fieldset :last-child button::after {
-  content: "";
-}
-fieldset.workflow-fieldset.compact {
-  border: 0;
-  border-bottom: 1px solid #ccc;
-  margin-bottom: 1rem;
-}
+
 .action-status {
   text-transform: uppercase;
   font-weight: bold;
@@ -249,15 +258,14 @@ td {
 <div class="form-horizontal">
 
   <div>
-    <h2 class="legend">
-      <span class="title-text">Report #${report.uuid}</span>
-      [<a class=" btn btn-primary" href="/reports/${report.uuid}">view on-line</a>]
-    </h2>
+    <h4 class="legend">
+      <span class="title-text ellipsized-text limit-title-text">Report <a href="/reports/${report.uuid}">${report.intent}</a></span>
+    </h4>
 
     <fieldset class="show-report-overview">
       <div class="form-group">
-        <label for="intent" class="col-sm-2 control-label">Summary</label>
-        <div class="col-sm-7">
+        <label for="intent" class="col-sm-3 form-label">Summary</label>
+        <div class="col-sm-9">
           <div id="intent" class="form-control-static">
             <p>
               <strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}
@@ -277,8 +285,8 @@ td {
       </div>
 
       <div class="form-group">
-        <label for="engagementDate" class="col-sm-2 control-label">Engagement Date</label>
-        <div class="col-sm-7">
+        <label for="engagementDate" class="col-sm-3 form-label">${fields.report.engagementDate.label!}</label>
+        <div class="col-sm-9">
           <div id="engagementDate" class="form-control-static">
             ${(engagementDateFormatter.format(report.engagementDate))!}
           </div>
@@ -287,8 +295,8 @@ td {
 
       <#if engagementsIncludeTimeAndDuration>
         <div class="form-group">
-          <label for="duration" class="col-sm-2 control-label">Duration (minutes)</label>
-          <div class="col-sm-7">
+          <label for="duration" class="col-sm-3 form-label">${fields.report.duration.label!}</label>
+          <div class="col-sm-9">
             <div id="duration" class="form-control-static">
               ${(report.duration)!}
             </div>
@@ -297,8 +305,20 @@ td {
       </#if>
 
       <div class="form-group">
-        <label for="location" class="col-sm-2 control-label">Location</label>
-        <div class="col-sm-7">
+        <label for="event" class="col-sm-3 form-label">${fields.report.event.label!}</label>
+        <div class="col-sm-9">
+          <div id="event" class="form-control-static">
+            <#if report.loadEvent(context).get()??>
+              <#assign event = report.getEvent()>
+              <a href="/events/${event.uuid}">${(event.name)!}</a>
+            </#if>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="location" class="col-sm-3 form-label">${fields.report.location.label!}</label>
+        <div class="col-sm-9">
           <div id="location" class="form-control-static">
             <#if report.loadLocation(context).get()??>
               <#assign location = report.getLocation()>
@@ -311,15 +331,15 @@ td {
       <div class="form-group">
         <#assign isCancelled = report.cancelledReason??>
         <#if isCancelled>
-          <label for="cancelledReason" class="col-sm-2 control-label">Cancelled Reason</label>
-          <div class="col-sm-7">
+          <label for="cancelledReason" class="col-sm-3 form-label">Cancelled Reason</label>
+          <div class="col-sm-9">
             <div id="cancelledReason" class="form-control-static">
               ${report.cancelledReason?replace("_", " ")?lower_case?cap_first}
             </div>
           </div>
         <#else>
-          <label for="atmosphere" class="col-sm-2 control-label">${fields.report.atmosphere.label!}</label>
-          <div class="col-sm-7">
+          <label for="atmosphere" class="col-sm-3 form-label">${fields.report.atmosphere.label!}</label>
+          <div class="col-sm-9">
             <div id="atmosphere" class="form-control-static">
               ${(report.atmosphere)!?capitalize} - ${(report.atmosphereDetails)!}
             </div>
@@ -327,9 +347,44 @@ td {
         </#if>
       </div>
 
+      <#if report.loadReportCommunities(context).get()??>
+        <#assign reportCommunities = report.getReportCommunities()>
+        <div class="form-group">
+          <label for="reportCommunities" class="col-sm-3 form-label">${fields.report.reportCommunities.label!}</label>
+          <div class="col-sm-9">
+            <div id="reportCommunities" class="form-control-static">
+              <table class="borderless table">
+                <thead>
+                  <tr>
+                    <th>
+                      Name
+                    </th>
+                    <th>
+                      Description
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <#list reportCommunities as reportCommunity>
+                  <tr>
+                    <td>
+                      <a href="/communities/${reportCommunity.uuid}">${(reportCommunity.name)!}</a>
+                    </td>
+                    <td>
+                      ${(reportCommunity.description)!}
+                    </td>
+                  </tr>
+                  </#list>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </#if>
+
       <div class="form-group">
-        <label for="author" class="col-sm-2 control-label">Report author</label>
-        <div class="col-sm-7">
+        <label for="author" class="col-sm-3 form-label">Report author</label>
+        <div class="col-sm-9">
           <div id="author" class="form-control-static">
             <#assign reportAuthors = (report.loadAuthors(context).get())!>
             <#list reportAuthors as reportAuthor>
@@ -341,8 +396,8 @@ td {
       </div>
 
       <div class="form-group">
-        <label for="advisorOrg" class="col-sm-2 control-label">${fields.advisor.org.name}</label>
-        <div class="col-sm-7">
+        <label for="advisorOrg" class="col-sm-3 form-label">${fields.advisor.org.name!}</label>
+        <div class="col-sm-9">
           <div id="advisorOrg" class="form-control-static">
             <#if report.loadAdvisorOrg(context).get()??>
               <#assign advisorOrg = report.getAdvisorOrg()>
@@ -353,8 +408,8 @@ td {
       </div>
 
       <div class="form-group">
-        <label for="interlocutorOrg" class="col-sm-2 control-label">${fields.interlocutor.org.name}</label>
-        <div class="col-sm-7">
+        <label for="interlocutorOrg" class="col-sm-3 form-label">${fields.interlocutor.org.name!}</label>
+        <div class="col-sm-9">
           <div id="interlocutorOrg" class="form-control-static">
             <#if report.loadInterlocutorOrg(context).get()??>
               <#assign interlocutorOrg = report.getInterlocutorOrg()>
@@ -367,9 +422,9 @@ td {
   </div>
 
   <div>
-    <h2 class="legend">
+    <h4 class="legend">
       <span class="title-text">People involved in this engagement</span>
-    </h2>
+    </h4>
     <fieldset>
       <table class="borderless table">
         <thead>
@@ -390,11 +445,11 @@ td {
           <tr>
             <td class="primary-attendee">
               <div class="checkbox">
-                <label title=""><input readonly <#if attendee.primary>checked</#if> type="checkbox"></label>
+                <label title=""><input readonly <#if attendee.primary>checked</#if> type="checkbox" onclick="return false;"></label>
               </div>
             </td>
             <td>
-              <img src="/assets/img/people.png" alt="attendee" class="person-icon" height="20" width="20"><a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
+              <a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
             </td>
             <td>
               <#if attendee.loadPosition()??>
@@ -430,18 +485,15 @@ td {
   <#if report.loadTasks(context).get()??>
     <#assign tasks = report.getTasks()>
     <div>
-      <h2 class="legend">
-        <span class="title-text">${fields.task.longLabel}</span>
-      </h2>
+      <h4 class="legend">
+        <span class="title-text">${fields.task.longLabel!}</span>
+      </h4>
       <fieldset>
-        <table class="table">
+        <table class="borderless table">
           <thead>
             <tr>
               <th>
                 Name
-              </th>
-              <th>
-                Tasked organizations
               </th>
             </tr>
           </thead>
@@ -450,14 +502,6 @@ td {
             <tr>
               <td class="taskName">
                 <a href="/tasks/${task.uuid}">${(task.shortName)!} - ${(task.longName)!}</a>
-              </td>
-              <td class="taskOrg">
-                <#if task.loadTaskedOrganizations(context).get()??>
-                  <#assign taskedOrgs = task.getTaskedOrganizations()>
-                    <#list taskedOrgs as taskedOrg>
-                      <a href="/organizations/${taskedOrg.uuid}">${(taskedOrg.shortName)!}</a>&nbsp;
-                    </#list>
-                </#if>
               </td>
             </tr>
             </#list>
@@ -469,9 +513,9 @@ td {
 
   <#if report.reportText??>
     <div>
-      <h2 class="legend">
+      <h4 class="legend">
         <span class="title-text">${fields.report.reportText.label!}</span>
-      </h2>
+      </h4>
       <fieldset>
         <div>
           <p>
@@ -485,9 +529,9 @@ td {
   <#assign workflow = (report.loadWorkflow(context).get())!>
   <#if workflow??>
     <div id="approvals">
-      <h2 class="legend">
+      <h4 class="legend">
         <span class="title-text">Workflow</span>
-      </h2>
+      </h4>
       <fieldset class="workflow-fieldset">
         <#list workflow as reportAction>
           <#if !reportAction.type??>
@@ -499,6 +543,15 @@ td {
           <#elseif reportAction.type == "REJECT">
             <#assign type = "Changes requested">
             <#assign styleClass = "btn-danger rejected">
+          <#elseif reportAction.type == "SUBMIT">
+            <#assign type = "Submitted">
+            <#assign styleClass = "btn-success submitted">
+          <#elseif reportAction.type == "PUBLISH">
+            <#assign type = "Published">
+            <#assign styleClass = "btn-success published">
+          <#elseif reportAction.type == "UNPUBLISH">
+            <#assign type = "Unpublished">
+            <#assign styleClass = "btn-danger unpublished">
           <#else>
             <#assign type = "Unknown">
             <#assign styleClass = "btn-pending default">
@@ -507,21 +560,26 @@ td {
             <div class="action-status">
               ${type}
             </div>
-            <#if reportAction.loadStep(context).get()??>
-              <#assign step = reportAction.getStep()>
+            <#assign step = (reportAction.loadStep(context).get())!>
+            <#assign person = (reportAction.loadPerson(context).get())!>
+            <#assign SYSTEM_USER = "system">
+            <#if step.name??>
               <button type="button" class="${styleClass} btn-sm btn btn-default">
-                <span>
+                <div class="workflow-step-name">
                   ${(step.name)!}
+                </div>
+              </button>
+            <#else>
+              <button type="button" class="${styleClass} btn-sm btn btn-outline-secondary">
+                <span>
+                  ${(person.name)!SYSTEM_USER}
                 </span>
               </button>
-              <#if reportAction.loadPerson(context).get()??>
-                <#assign person = reportAction.getPerson()>
-                <div>
-                  <span>By ${(person.name)!}</span><br>
-                  <small>On ${(dateTimeFormatter.format(approvalAction.createdAt))!}</small>
-                </div>
-              </#if>
             </#if>
+            <div>
+              <span>By ${(person.name)!SYSTEM_USER}</span><br>
+              <small>On ${(dateTimeFormatter.format(reportAction.createdAt))!}</small>
+            </div>
           </div>
         </#list>
       </fieldset>
