@@ -6641,8 +6641,8 @@
 	<changeSet id="create-generic-preferences" author="fdelcastillo">
 		<sql>
 			INSERT INTO "preferences" ("uuid", "name", "description", "type", "category", "defaultValue", "allowedValues", "createdAt", "updatedAt") VALUES
-				(${uuid_function}, 'SUBSCRIPTIONS', 'Receive emails related to subscriptions', 'boolean', 'emailing', 'FALSE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-				(${uuid_function}, 'REPORTS', 'Receive emails related to reports', 'boolean', 'emailing', 'TRUE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'SUBSCRIPTIONS', 'Email me about subscription updates', 'boolean', 'emailing', 'FALSE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'REPORTS', 'Email me about report approvals', 'boolean', 'emailing', 'TRUE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 				(${uuid_function}, 'ORGANIZATIONS', 'Fields to include in organizations export', 'enumset', 'export', 'uuid,shortName,longName,identificationCode,emailAddresses', 'uuid,shortName,longName,identificationCode,emailAddresses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 				(${uuid_function}, 'PEOPLE', 'Fields to include in people export', 'enumset', 'export', 'uuid,name,rank,emailAddresses,position', 'uuid,name,rank,emailAddresses,position', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 				(${uuid_function}, 'POSITIONS', 'positions', 'enumset', 'export', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
