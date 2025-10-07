@@ -129,8 +129,11 @@ public class LocationResource {
     l.checkAndFixCustomFields();
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
+
     final Person user = DaoUtils.getUserFromContext(context);
+    final Location existing = dao.getByUuid(l.getUuid());
     assertPermission(user, DaoUtils.getUuid(l));
+    DaoUtils.assertObjectIsFresh(l, existing);
 
     // Check for loops in the hierarchy
     checkForLoops(l.getUuid(), l.getParentLocations());
@@ -139,9 +142,6 @@ public class LocationResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process location update");
     }
-
-    // Load the existing location, so we can check for differences.
-    final Location existing = dao.getByUuid(l.getUuid());
 
     // Update approval steps:
     final List<ApprovalStep> existingPlanningApprovalSteps =

@@ -26,6 +26,7 @@ const GQL_GET_TASK = gql`
   query($uuid: String!) {
     task(uuid: $uuid) {
       uuid
+      updatedAt
       shortName
       longName
       selectable

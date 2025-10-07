@@ -18,6 +18,7 @@ const GQL_GET_SELF = gql`
   query {
     me {
       uuid
+      updatedAt
       name
       rank
       status

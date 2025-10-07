@@ -173,6 +173,7 @@ const AssessmentModal = ({
     )
     const updatedAssessment = {
       uuid: assessment.uuid,
+      updatedAt: assessment.updatedAt,
       author: assessment.author,
       assessmentKey: `${dictionaryPath}.${assessmentKey}`,
       assessmentRelatedObjects

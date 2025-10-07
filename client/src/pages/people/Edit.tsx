@@ -30,6 +30,7 @@ const GQL_GET_PERSON = gql`
   query($uuid: String!) {
     person(uuid: $uuid) {
       uuid
+      updatedAt
       name
       rank
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}

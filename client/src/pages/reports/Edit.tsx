@@ -27,6 +27,7 @@ const GQL_GET_REPORT = gql`
   query($uuid: String!) {
     report(uuid: $uuid) {
       uuid
+      updatedAt
       intent
       classification
       engagementDate

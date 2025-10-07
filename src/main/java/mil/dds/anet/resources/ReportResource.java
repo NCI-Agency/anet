@@ -247,6 +247,7 @@ public class ReportResource {
     if (existing == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
+    DaoUtils.assertObjectIsFresh(r, existing);
 
     if (r.getReportPeople() == null
         || r.getReportPeople().stream().noneMatch(ReportPerson::isAuthor)) {

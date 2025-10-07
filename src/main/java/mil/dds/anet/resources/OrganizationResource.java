@@ -144,13 +144,12 @@ public class OrganizationResource {
         Utils.isEmptyHtml(org.getProfile()) ? null : Utils.sanitizeHtml(org.getProfile()));
 
     final Person user = DaoUtils.getUserFromContext(context);
-    // Verify correct Organization
+    final Organization existing = dao.getByUuid(org.getUuid());
     assertPermission(user, org.getUuid());
+    DaoUtils.assertObjectIsFresh(org, existing);
+
     // Check for loops in the hierarchy
     checkForLoops(org.getUuid(), org.getParentOrgUuid());
-
-    // Load the existing organization, so we can check for differences.
-    final Organization existing = dao.getByUuid(org.getUuid());
 
     if (!AuthUtils.isAdmin(user)
         && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {

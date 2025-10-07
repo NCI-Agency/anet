@@ -70,6 +70,7 @@ public class AuthorizationGroupResource {
   public Integer updateAuthorizationGroup(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup a) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final AuthorizationGroup existing = dao.getByUuid(a.getUuid());
     final List<Position> existingAdministrativePositions =
         dao.getAdministrativePositionsForAuthorizationGroup(
             ApplicationContextProvider.getEngine().getContext(), DaoUtils.getUuid(a)).join();
@@ -81,11 +82,11 @@ public class AuthorizationGroupResource {
       if (!canUpdate) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
       }
-      // Load the existing community, so we can keep the original the value of
-      // forSensitiveInformation, as non-admins are not allowed to change it!
-      final AuthorizationGroup existing = dao.getByUuid(a.getUuid());
+      // Keep the original the value of forSensitiveInformation, as non-admins are not allowed to
+      // change it!
       a.setForSensitiveInformation(existing.getForSensitiveInformation());
     }
+    DaoUtils.assertObjectIsFresh(a, existing);
 
     final int numRows = dao.update(a);
     if (numRows == 0) {

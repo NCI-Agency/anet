@@ -49,12 +49,14 @@ public class NoteResource {
   @GraphQLMutation(name = "updateNote")
   public Note updateNote(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "note") Note n) {
+    final Person user = DaoUtils.getUserFromContext(context);
     final Note original = dao.getByUuid(DaoUtils.getUuid(n));
     if (original == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found");
     }
-    final Person user = DaoUtils.getUserFromContext(context);
     checkNotePermission(user, original.getAuthorUuid(), UpdateType.UPDATE);
+    DaoUtils.assertObjectIsFresh(n, original);
+
     ResourceUtils.checkAndFixNote(n);
     final int numRows = dao.update(n);
     if (numRows == 0) {

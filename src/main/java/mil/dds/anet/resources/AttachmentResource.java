@@ -178,6 +178,8 @@ public class AttachmentResource {
     final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
     assertAttachmentPermission(user, existing,
         "You don't have permission to update this attachment");
+    DaoUtils.assertObjectIsFresh(attachment, existing);
+
     assertAllowedMimeType(attachment.getMimeType());
     ResourceUtils.assertAllowedClassification(attachment.getClassification());
 

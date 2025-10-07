@@ -140,11 +140,13 @@ public class PositionResource {
     pos.checkAndFixCustomFields();
     pos.setDescription(
         Utils.isEmptyHtml(pos.getDescription()) ? null : Utils.sanitizeHtml(pos.getDescription()));
-    final Person user = DaoUtils.getUserFromContext(context);
-    assertPermission(user, pos);
-    validatePosition(user, pos);
 
+    final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
+    assertPermission(user, pos);
+    DaoUtils.assertObjectIsFresh(pos, existing);
+
+    validatePosition(user, pos);
 
     final int numRows = dao.update(pos);
     if (numRows == 0) {

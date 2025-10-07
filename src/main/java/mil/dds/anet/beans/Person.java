@@ -103,6 +103,12 @@ public class Person extends AbstractEmailableAnetBean
 
   @Override
   @AllowUnverifiedUsers
+  public Instant getUpdatedAt() {
+    return super.getUpdatedAt();
+  }
+
+  @Override
+  @AllowUnverifiedUsers
   public String getName() {
     return name;
   }

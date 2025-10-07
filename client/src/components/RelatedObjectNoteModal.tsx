@@ -158,6 +158,7 @@ const RelatedObjectNoteModal = ({
     }))
     const updatedNote = {
       uuid: values.uuid,
+      updatedAt: values.updatedAt,
       author: values.author,
       noteRelatedObjects,
       text: values.text

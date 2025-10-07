@@ -152,9 +152,11 @@ public class PersonResource {
   public Integer updatePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     p.checkAndFixCustomFields();
+
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
+    DaoUtils.assertObjectIsFresh(p, existing);
 
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
@@ -340,14 +342,18 @@ public class PersonResource {
   @AllowUnverifiedUsers
   public Integer updateCurrentUser(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
+    p.checkAndFixCustomFields();
+
     final Person user = DaoUtils.getUserFromContext(context);
     if (!Objects.equals(DaoUtils.getUuid(user), p.getUuid())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update yourself");
     }
 
+    final Person existing = dao.getByUuid(p.getUuid());
+    DaoUtils.assertObjectIsFresh(p, existing);
+
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
-      final Person existing = dao.getByUuid(p.getUuid());
       p.setUser(existing.getUser());
       p.setUsers(existing.getUsers());
     }
@@ -360,7 +366,6 @@ public class PersonResource {
         (Boolean) dict.getDictionaryEntry("automaticallyAllowAllNewUsers");
     if (Boolean.FALSE.equals(automaticallyAllowAllNewUsers)) {
       // Users can not verify their own account!
-      final Person existing = dao.getByUuid(p.getUuid());
       p.setPendingVerification(existing.getPendingVerification());
     }
 

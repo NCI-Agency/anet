@@ -148,6 +148,7 @@ const GQL_CREATE_REPORT = gql`
   mutation ($report: ReportInput!) {
     createReport(report: $report) {
       uuid
+      updatedAt
       state
       authors {
         uuid
@@ -163,6 +164,7 @@ const GQL_UPDATE_REPORT = gql`
   mutation ($report: ReportInput!, $sendEditEmail: Boolean!) {
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
+      updatedAt
       state
       authors {
         uuid

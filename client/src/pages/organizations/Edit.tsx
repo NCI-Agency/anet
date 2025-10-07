@@ -26,6 +26,7 @@ const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
     organization(uuid: $uuid) {
       uuid
+      updatedAt
       shortName
       longName
       identificationCode

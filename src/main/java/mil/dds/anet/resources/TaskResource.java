@@ -155,13 +155,12 @@ public class TaskResource {
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
 
     final Person user = DaoUtils.getUserFromContext(context);
+    final Task existing = dao.getByUuid(t.getUuid());
     assertPermission(user, DaoUtils.getUuid(t));
+    DaoUtils.assertObjectIsFresh(t, existing);
 
     // Check for loops in the hierarchy
     checkForLoops(t.getUuid(), t.getParentTaskUuid());
-
-    // Load the existing task, so we can check for differences.
-    final Task existing = dao.getByUuid(t.getUuid());
 
     if (!AuthUtils.isAdmin(user)
         && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {

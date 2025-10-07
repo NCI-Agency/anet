@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,8 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.views.AbstractAnetBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class DaoUtils {
 
@@ -64,6 +67,32 @@ public class DaoUtils {
   public static void setUpdateFields(AbstractAnetBean bean) {
     final Instant now = Instant.now();
     bean.setUpdatedAt(now);
+  }
+
+  public static void assertObjectIsFresh(AbstractAnetBean objectToBeUpdated,
+      AbstractAnetBean existingObject) {
+    if (!hasSameUpdatedAtInMillis(objectToBeUpdated, existingObject)) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
+          "Saving these changes (timestamped at %s) would overwrite later updates (timestamped at %s)",
+          formatUpdateDate(objectToBeUpdated.getUpdatedAt()),
+          formatUpdateDate(existingObject.getUpdatedAt())));
+    }
+  }
+
+  private static boolean hasSameUpdatedAtInMillis(AbstractAnetBean objectToBeUpdated,
+      AbstractAnetBean existingObject) {
+    if (objectToBeUpdated.getUpdatedAt() == null || existingObject.getUpdatedAt() == null) {
+      // If either of them is null, we can't compare them, so return false
+      return false;
+    }
+    return objectToBeUpdated.getUpdatedAt().truncatedTo(ChronoUnit.MILLIS)
+        .equals(existingObject.getUpdatedAt().truncatedTo(ChronoUnit.MILLIS));
+  }
+
+  private static String formatUpdateDate(Instant updatedAt) {
+    final DateTimeFormatter dateTimeFormatter = Utils.getDateTimeFormatter(
+        ApplicationContextProvider.getDictionary(), "dateFormats.upToDateCheck");
+    return updatedAt == null ? "unknown time" : dateTimeFormatter.format(updatedAt);
   }
 
   public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {
