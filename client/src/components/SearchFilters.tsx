@@ -440,6 +440,16 @@ export const searchFilters = function (includeAdminFilters) {
           labels: ["Yes", "No"]
         }
       },
+      [`Is ${Settings.fields.person.user?.label}?`]: {
+        component: RadioButtonFilter,
+        deserializer: deserializeRadioButtonFilter,
+        labelClass: "pt-0",
+        props: {
+          queryKey: "isUser",
+          options: [true, false],
+          labels: ["Yes", "No"]
+        }
+      },
       "Holding Position As": {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
