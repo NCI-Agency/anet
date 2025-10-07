@@ -92,7 +92,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String LOCATION_FIELDS = "{ uuid name status lat lng }";
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _ORGANIZATION_FIELDS =
-      "uuid shortName longName status identificationCode";
+      "uuid updatedAt shortName longName status identificationCode";
   private static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } %2$s }",
           _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
@@ -256,7 +256,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Task top = withCredentials(adminUser,
         t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("test-1", "Test Top Task", "TOP", null,
-                Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE)));
+                Collections.singletonList(getOrganizationInput(orgWithSteps)), Status.ACTIVE)));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
     final Task action = withCredentials(adminUser,
@@ -361,7 +361,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}",
-        returned2.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+        returned2.getUuid(), approvalStep.getUuid(), orgWithSteps.getUuid(), author);
     assertThat(returned2.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
 
     // verify the location on this report
@@ -527,13 +527,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
-    advisorOrg.setApprovalSteps(List.of());
+    orgWithSteps.setApprovalSteps(List.of());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg)));
+        t -> mutationExecutor.updateOrganization("", getOrganizationInput(orgWithSteps)));
     assertThat(nrUpdated).isEqualTo(1);
 
     Organization updatedOrg = withCredentials(adminUser,
-        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, orgWithSteps.getUuid()));
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
   }
@@ -675,7 +675,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Task top = withCredentials(adminUser,
         t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("test-1-2", "Interlocutor Test Top Task", "TOP", null,
-                Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE)));
+                Collections.singletonList(getOrganizationInput(orgWithSteps)), Status.ACTIVE)));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
     final Task action = withCredentials(adminUser,
@@ -711,7 +711,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
-    assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
+    assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(orgWithSteps.getUuid());
     assertThat(created.getInterlocutorOrg().getUuid()).isEqualTo(reportAttendeeOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
@@ -773,7 +773,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}",
-        returned2.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+        returned2.getUuid(), approvalStep.getUuid(), orgWithSteps.getUuid(), author);
     assertThat(returned2.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
 
     // verify the location on this report
@@ -939,13 +939,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
-    advisorOrg.setApprovalSteps(List.of());
+    orgWithSteps.setApprovalSteps(List.of());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg)));
+        t -> mutationExecutor.updateOrganization("", getOrganizationInput(orgWithSteps)));
     assertThat(nrUpdated).isEqualTo(1);
 
     Organization updatedOrg = withCredentials(adminUser,
-        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, orgWithSteps.getUuid()));
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
   }
@@ -1029,6 +1029,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows = withCredentials(adminUser, t -> mutationExecutor.rejectReport("",
         TestData.createCommentInput("default approval chain test rejection"), returned.getUuid()));
     assertThat(numRows).isOne();
+    final Report rejected =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, returned.getUuid()));
 
     // Fetch needed organizations
     final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder().build();
@@ -1043,32 +1045,32 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(ef6).isPresent();
 
     // Change primary advisor of the report to someone in EF 1.1 (Bob)
-    returned.setReportPeople(
+    rejected.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(bob, false), personToReportAuthor(author)));
 
     final Report updated = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(rejected), true));
     assertThat(updated).isNotNull();
-    assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
+    assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(rejected.getAdvisorOrg().getUuid());
 
     // Re-submit the reported
     numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
+    final Report submittedReport =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
 
     // Report should now have the EF 1.1 approval step
-    validateReportApprovalStep(
-        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid())),
-        ef11.get().getUuid());
+    validateReportApprovalStep(submittedReport, ef11.get().getUuid());
 
     // Change primary advisor of the report to someone in EF 6.1 (Ben)
-    updated.setReportPeople(
+    submittedReport.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(ben, false), personToReportAuthor(author)));
 
     final Report updated2 = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(updated), true));
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(submittedReport), true));
     assertThat(updated2).isNotNull();
     assertThat(updated2.getAdvisorOrg().getUuid()).isNotEqualTo(updated.getAdvisorOrg().getUuid());
 
@@ -1076,13 +1078,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
+    final Report submittedReport2 =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
 
     // EF 6.1 does not have approval steps but EF 6 does,
     // Report should now be up for review by EF 6 approvers due to inheriting approval steps form
     // parent
-    validateReportApprovalStep(
-        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid())),
-        ef6.get().getUuid());
+    validateReportApprovalStep(submittedReport2, ef6.get().getUuid());
   }
 
   private void validateReportApprovalStep(Report report, String organizationUuid) {
@@ -2675,7 +2677,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Erin should be able to edit it again
     final Report updatedReport = withCredentials("erin",
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(submittedReport), false));
 
     // It should be back to Draft
     assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);

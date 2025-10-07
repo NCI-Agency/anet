@@ -14,7 +14,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
 
   private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
   public static final String FIELDS =
-      "{ uuid status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
+      "{ uuid updatedAt status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
 
   @Test
   void eventTestSeriesGraphQL() {

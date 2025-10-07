@@ -24,7 +24,7 @@ public class LocationMergeTest extends AbstractResourceTest {
 
   public static final String FIELDS =
       String.format(
-          "{ uuid name type digram trigram description status lat lng customFields"
+          "{ uuid updatedAt name type digram trigram description status lat lng customFields"
               + " attachments %s parentLocations { uuid } }",
           AttachmentResourceTest.ATTACHMENT_FIELDS);
   private static final String PERSON_FIELDS = String.format("{ uuid country %s }", FIELDS);

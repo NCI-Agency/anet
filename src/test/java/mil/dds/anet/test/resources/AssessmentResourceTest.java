@@ -32,15 +32,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 class AssessmentResourceTest extends AbstractResourceTest {
 
   protected static final String ASSESSMENT_FIELDS =
-      "{ uuid assessmentKey assessmentValues author { uuid }"
+      "{ uuid updatedAt assessmentKey assessmentValues author { uuid }"
           + " assessmentRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ASSESSMENTS_FIELDS =
       String.format("assessments %1$s", ASSESSMENT_FIELDS);
   private static final String PERSON_FIELDS =
       String.format("{ uuid name %1$s }", _ASSESSMENTS_FIELDS);
-  private static final String REPORT_FIELDS = String
-      .format("{ uuid intent state reportPeople { uuid name author attendee primary interlocutor }"
-          + " tasks { uuid shortName } %1$s }", _ASSESSMENTS_FIELDS);
+  private static final String REPORT_FIELDS = String.format(
+      "{ uuid updatedAt intent state reportPeople { uuid name author attendee primary interlocutor }"
+          + " tasks { uuid shortName } %1$s }",
+      _ASSESSMENTS_FIELDS);
   private static final String TASK_FIELDS =
       String.format("{ uuid shortName %1$s }", _ASSESSMENTS_FIELDS);
 
@@ -693,11 +694,9 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInput = getAssessmentInput(createdAssessment);
     updatedAssessmentInput
         .setAssessmentValues(createAssessmentValues("updated by andrew", recurrence));
-    succeedAssessmentUpdate("andrew", updatedAssessmentInput);
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
-    final Assessment updatedAssessment =
-        succeedAssessmentUpdate(getDomainUsername(getRegularUser()), updatedAssessmentInput);
+    final Assessment updatedAssessment = succeedAssessmentUpdate("andrew", updatedAssessmentInput);
 
     // - S: delete it as someone without counterpart and with no auth.groups defined in the
     // dictionary
@@ -921,7 +920,6 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInput = getAssessmentInput(createdAssessment);
     updatedAssessmentInput
         .setAssessmentValues(createAssessmentValues("updated by erin", recurrence));
-    succeedAssessmentUpdate("erin", updatedAssessmentInput);
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment = succeedAssessmentUpdate("erin", updatedAssessmentInput);

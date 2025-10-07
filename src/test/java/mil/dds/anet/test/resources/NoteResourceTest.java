@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class NoteResourceTest extends AbstractResourceTest {
 
-  protected static final String NOTE_FIELDS = "{ uuid text author { uuid }"
+  protected static final String NOTE_FIELDS = "{ uuid updatedAt text author { uuid }"
       + " noteRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
   private static final String PERSON_FIELDS = String.format("{ uuid name %1$s }", _NOTES_FIELDS);

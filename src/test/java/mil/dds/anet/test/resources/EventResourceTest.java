@@ -25,7 +25,7 @@ public class EventResourceTest extends AbstractResourceTest {
       "{ uuid status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
   public static final String FIELDS =
       "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid }"
-          + " startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
+          + " updatedAt startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
   void eventTestGraphQL() {
@@ -46,26 +46,26 @@ public class EventResourceTest extends AbstractResourceTest {
     assertThat(updated.getName()).isEqualTo(created.getName());
 
     // Add entities to event
-    created.setEventSeries(withCredentials(adminUser,
+    updated.setEventSeries(withCredentials(adminUser,
         t -> mutationExecutor.createEventSeries(EVENT_SERIES_FIELDS,
             TestData.createEventSeriesInput("Event Series", "Event Series Description",
                 getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org)))));
-    created.setOrganizations(Collections.singletonList(org));
-    created.setPeople(Collections.singletonList(getJackJackson()));
-    created.setTasks(Collections.singletonList(withCredentials(adminUser,
+    updated.setOrganizations(Collections.singletonList(org));
+    updated.setPeople(Collections.singletonList(getJackJackson()));
+    updated.setTasks(Collections.singletonList(withCredentials(adminUser,
         t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("The New Task for the NMI PDT Event",
                 "The New Task for the NMI PDT Event", "The New Task for the NMI PDT Event",
                 UtilsTest.getCombinedJsonTestCase().getInput())))));
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", getEventInput(created)));
+    final EventInput updatedInput = getEventInput(updated);
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.updateEvent("", updatedInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
     assertThat(updated.getEventSeries()).isNotNull();
-    assertThat(updated.getOrganizations().size()).isEqualTo(1);
-    assertThat(updated.getPeople().size()).isEqualTo(1);
-    assertThat(updated.getTasks().size()).isEqualTo(1);
+    assertThat(updated.getOrganizations()).hasSize(1);
+    assertThat(updated.getPeople()).hasSize(1);
+    assertThat(updated.getTasks()).hasSize(1);
 
     // Search
     final EventSearchQueryInput query =

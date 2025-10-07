@@ -38,7 +38,7 @@ class RestrictedFieldsTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS =
       "{ uuid name code type role " + EMAIL_ADDRESSES_FIELDS + " }";
   private static final String AUTHORIZATION_GROUP_FIELDS =
-      "{ uuid name authorizationGroupRelatedObjects { "
+      "{ uuid updatedAt name authorizationGroupRelatedObjects { "
           + "relatedObjectType relatedObjectUuid relatedObject { ... on Organization "
           + ORGANIZATION_FIELDS + "... on Person " + PERSON_FIELDS + "... on Position "
           + POSITION_FIELDS + " } } }";

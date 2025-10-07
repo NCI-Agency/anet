@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 public class AttachmentResourceTest extends AbstractResourceTest {
 
   public static final String ATTACHMENT_FIELDS =
-      "{ uuid mimeType fileName description classification caption author { uuid }"
+      "{ uuid updatedAt mimeType fileName description classification caption author { uuid }"
           + " attachmentRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ATTACHMENTS_FIELDS =
       String.format("attachments %1$s", ATTACHMENT_FIELDS);
@@ -127,8 +127,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
       // Fail attachment create with any user other than admin
       failAttachmentCreate(jackUser, testAttachmentInput);
       // Succeed attachment create as admin
-      final String createdAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
-      assertThat(createdAttachmentUuid).isNotNull();
+      succeedAttachmentCreate(adminUser, testAttachmentInput);
     }
 
     // Succeed attachment create with right classification and mimetype
@@ -137,12 +136,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .withDescription("a test attachment created by testCreateAttachment")
         .withCaption("testCaption").withClassification(getFirstClassification())
         .withAttachmentRelatedObjects(List.of()).build();
-    final String createdAttachmentUuid2 = succeedAttachmentCreate(jackUser, testAttachmentInput2);
-    assertThat(createdAttachmentUuid2).isNotNull();
-
-    // Get the attachment
-    final Attachment createdAttachment = withCredentials(jackUser,
-        t -> queryExecutor.attachment(ATTACHMENT_FIELDS, createdAttachmentUuid2));
+    final Attachment createdAttachment = succeedAttachmentCreate(jackUser, testAttachmentInput2);
     assertThat(createdAttachment.getAuthor().getUuid()).isEqualTo(getJackJackson().getUuid());
     assertThat(createdAttachment.getFileName()).isEqualTo(testAttachmentInput2.getFileName());
     assertThat(createdAttachment.getMimeType()).isEqualTo(testAttachmentInput2.getMimeType());
@@ -209,14 +203,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentCreate("erin", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
-    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
-    return new CreateLocationAttachmentsResult(superuserAttachmentUuid1, superuserAttachmentUuid2,
-        adminAttachmentUuid);
+    return new CreateLocationAttachmentsResult(superuserAttachment1.getUuid(),
+        superuserAttachment2.getUuid(), adminAttachment.getUuid());
   }
 
   private record CreateLocationAttachmentsResult(String superuserAttachmentUuid1,
@@ -337,14 +331,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentCreate("henry", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
-    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
-    return new CreateOrganizationAttachmentsResult(superuserAttachmentUuid1,
-        superuserAttachmentUuid2, adminAttachmentUuid);
+    return new CreateOrganizationAttachmentsResult(superuserAttachment1.getUuid(),
+        superuserAttachment2.getUuid(), adminAttachment.getUuid());
   }
 
   private record CreateOrganizationAttachmentsResult(String superuserAttachmentUuid1,
@@ -476,14 +470,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentCreate("henry", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
-    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
-    return new CreatePositionAttachmentsResult(superuserAttachmentUuid1, superuserAttachmentUuid2,
-        adminAttachmentUuid);
+    return new CreatePositionAttachmentsResult(superuserAttachment1.getUuid(),
+        superuserAttachment2.getUuid(), adminAttachment.getUuid());
   }
 
   private record CreatePositionAttachmentsResult(String superuserAttachmentUuid1,
@@ -608,12 +602,12 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentCreate("erin", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
     // S - create attachment as author
-    final String authorAttachmentUuid = succeedAttachmentCreate(jackUser, testAttachmentInput);
+    final Attachment authorAttachment = succeedAttachmentCreate(jackUser, testAttachmentInput);
 
-    return new CreateReportAttachmentsResult(authorAttachmentUuid, adminAttachmentUuid);
+    return new CreateReportAttachmentsResult(authorAttachment.getUuid(), adminAttachment.getUuid());
   }
 
   private record CreateReportAttachmentsResult(String authorAttachmentUuid,
@@ -715,20 +709,20 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   private CreatePersonAttachmentsResult testCreatePersonAttachments(
       AttachmentInput testAttachmentInput) {
     // S - create attachment as normal user
-    final String userAttachmentUuid = succeedAttachmentCreate("erin", testAttachmentInput);
+    final Attachment userAttachment = succeedAttachmentCreate("erin", testAttachmentInput);
 
     // F - create attachment as superuser of different person
     failAttachmentCreate("henry", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
-    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final Attachment superuserAttachment2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
-    return new CreatePersonAttachmentsResult(userAttachmentUuid, superuserAttachmentUuid1,
-        superuserAttachmentUuid2, adminAttachmentUuid);
+    return new CreatePersonAttachmentsResult(userAttachment.getUuid(),
+        superuserAttachment1.getUuid(), superuserAttachment2.getUuid(), adminAttachment.getUuid());
   }
 
   private record CreatePersonAttachmentsResult(String userAttachmentUuid,
@@ -816,12 +810,13 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .withRelatedObjectUuid(uuid).build();
   }
 
-  private String succeedAttachmentCreate(final String username,
+  private Attachment succeedAttachmentCreate(final String username,
       final AttachmentInput attachmentInput) {
     final String createdAttachmentUuid =
         withCredentials(username, t -> mutationExecutor.createAttachment("", attachmentInput));
     assertThat(createdAttachmentUuid).isNotNull();
-    return createdAttachmentUuid;
+    return withCredentials(username,
+        t -> queryExecutor.attachment(ATTACHMENT_FIELDS, createdAttachmentUuid));
   }
 
   private void failAttachmentCreate(final String username, final AttachmentInput attachmentInput) {
@@ -848,11 +843,13 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     }
   }
 
-  private void succeedAttachmentUpdate(final String username,
+  private Attachment succeedAttachmentUpdate(final String username,
       final AttachmentInput attachmentInput) {
     final String updatedAttachmentUuid =
         withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput));
     assertThat(updatedAttachmentUuid).isNotNull();
+    return withCredentials(username,
+        t -> queryExecutor.attachment(ATTACHMENT_FIELDS, updatedAttachmentUuid));
   }
 
   private void failAttachmentUpdate(final String username, final AttachmentInput attachmentInput) {

@@ -38,9 +38,10 @@ public class PositionResourceTest extends AbstractResourceTest {
   private static final String _ORGANIZATION_FIELDS =
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      String.format("uuid name %1$s", _EMAIL_ADDRESSES_FIELDS);
-  private static final String _POSITION_FIELDS = String.format(
-      "uuid name code type role status description customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
+      String.format("uuid updatedAt name %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _POSITION_FIELDS =
+      String.format("uuid updatedAt name code type role status description customFields %1$s",
+          _EMAIL_ADDRESSES_FIELDS);
   public static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
@@ -215,26 +216,29 @@ public class PositionResourceTest extends AbstractResourceTest {
     nrDeleted = withCredentials(adminUser,
         t -> mutationExecutor.deletePersonFromPosition("", tashkil.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
+    final Position updatedTashkil =
+        withCredentials(jackUser, t -> queryExecutor.position(FIELDS, tashkil.getUuid()));
 
     // Try to delete this position, it should fail because the tashkil is active
     try {
-      withCredentials(adminUser, t -> mutationExecutor.deletePosition("", tashkil.getUuid()));
+      withCredentials(adminUser,
+          t -> mutationExecutor.deletePosition("", updatedTashkil.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
 
-    tashkil.setStatus(Status.INACTIVE);
+    updatedTashkil.setStatus(Status.INACTIVE);
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePosition("", getPositionInput(tashkil)));
+        t -> mutationExecutor.updatePosition("", getPositionInput(updatedTashkil)));
     assertThat(nrUpdated).isEqualTo(1);
 
-    nrDeleted =
-        withCredentials(adminUser, t -> mutationExecutor.deletePosition("", tashkil.getUuid()));
+    nrDeleted = withCredentials(adminUser,
+        t -> mutationExecutor.deletePosition("", updatedTashkil.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
 
     try {
-      withCredentials(jackUser, t -> queryExecutor.position(FIELDS, tashkil.getUuid()));
+      withCredentials(jackUser, t -> queryExecutor.position(FIELDS, updatedTashkil.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -681,7 +685,9 @@ public class PositionResourceTest extends AbstractResourceTest {
     }
 
     // try to update a regular user position and make it superuser
-    final PositionInput p3 = getPositionInput(newPosition);
+    final Position updatedNewPosition =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, newPosition.getUuid()));
+    final PositionInput p3 = getPositionInput(updatedNewPosition);
     try {
       p3.setType(PositionType.SUPERUSER);
       final Integer nrUpdated =
