@@ -28,6 +28,7 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
+import mil.dds.anet.test.client.PersonPreferenceInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.PersonSearchSortBy;
 import mil.dds.anet.test.client.Position;
@@ -59,7 +60,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _PERSON_FIELDS = String.format(
       "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } code"
           + " gender endOfTourDate users { uuid domainUsername } pendingVerification createdAt updatedAt"
-          + " customFields %1$s",
+          + " preferences { value } customFields %1$s",
       _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
@@ -68,6 +69,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   public static final String FIELDS =
       String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
           AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
+  public static final String PREFERENCES_FIELDS = "{ uuid name }";
 
   @Autowired
   private CustomSensitiveInformationDao customSensitiveInformationDao;
@@ -717,6 +719,23 @@ public class PersonResourceTest extends AbstractResourceTest {
     checkSensitiveInformationEdit(steveUuid, "henry", List.of(BIRTHDAY_FIELD), false);
     // Bob has access to Steve's politicalPosition
     checkSensitiveInformationEdit(steveUuid, "bob", List.of(POLITICAL_POSITION_FIELD), false);
+  }
+
+  @Test
+  void testUpdatePersonPreferences() {
+    // Get all preferences
+    final List<mil.dds.anet.test.client.Preference> preferences =
+        withCredentials(jackUser, t -> queryExecutor.preferences(PREFERENCES_FIELDS));
+
+    // Create Jack preferences
+    List<PersonPreferenceInput> personPreferences = new ArrayList<>();
+    preferences.forEach(preference -> {
+      personPreferences
+          .add(getPersonPreferenceInput(getJackJackson().getUuid(), preference.getUuid(), "TRUE"));
+    });
+    final Integer updatedPreferences = withCredentials(jackUser,
+        t -> mutationExecutor.updatePersonPreferences("", personPreferences));
+    assertThat(updatedPreferences).isEqualTo(10);
   }
 
   private Person checkSensitiveInformation(final String personUuid, final String user,

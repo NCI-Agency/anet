@@ -6582,6 +6582,78 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="add-preferences-table" author="fdelcastillo">
+		<createTable tableName="preferences">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="name" type="varchar(255)" />
+			<column name="description" type="varchar(255)" />
+			<column name="type" type="varchar(255)" />
+			<column name="category" type="varchar(255)" />
+			<column name="allowedValues" type="text" />
+			<column name="defaultValue" type="varchar(255)" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+		<addUniqueConstraint
+			constraintName="UQ_Preference_name_category"
+			tableName="preferences"
+			columnNames="name,category"
+		/>
+	</changeSet>
+
+	<changeSet id="add-people-preferences-table" author="fdelcastillo">
+		<createTable tableName="peoplePreferences">
+			<column name="preferenceUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="value" type="varchar(255)" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+		<addUniqueConstraint
+			constraintName="UQ_PersonPreference_Preference_Person"
+			tableName="peoplePreferences"
+			columnNames="preferenceUuid, personUuid"
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_peoplePreferences_preference"
+			baseTableName="peoplePreferences"
+			baseColumnNames="preferenceUuid"
+			referencedTableName="preferences"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_peoplePreferences_person"
+			baseTableName="peoplePreferences"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="create-generic-preferences" author="fdelcastillo">
+		<sql>
+			INSERT INTO "preferences" ("uuid", "name", "description", "type", "category", "defaultValue", "allowedValues", "createdAt", "updatedAt") VALUES
+				(${uuid_function}, 'SUBSCRIPTIONS', 'Email me about subscription updates', 'boolean', 'emailing', 'FALSE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'REPORTS', 'Email me about report approvals', 'boolean', 'emailing', 'TRUE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'ORGANIZATIONS', 'Fields to include in organizations export', 'enumset', 'export', 'uuid,shortName,longName,identificationCode,emailAddresses', 'uuid,shortName,longName,identificationCode,emailAddresses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'PEOPLE', 'Fields to include in people export', 'enumset', 'export', 'uuid,name,rank,emailAddresses,position', 'uuid,name,rank,emailAddresses,position', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'POSITIONS', 'positions', 'enumset', 'export', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', 'uuid,name,code,type,role,status,emailAddresses,location,organization,person', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'TASKS', 'tasks', 'enumset', 'export', 'uuid, shortName,longName,status,taskedOrganizations,parentTask', 'uuid,shortName,longName,status,taskedOrganizations,parentTask', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'LOCATIONS', 'Fields to include in locations export', 'enumset', 'export', 'uuid,name,lat,lng,type', 'uuid,name,lat,lng,type', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'REPORTS', 'Fields to include in reports export', 'enumset', 'export', 'uuid,intent,engagementDate,duration,keyOutcomes,nextSteps,cancelledReason,atmosphere,atmosphereDetails,state,authors,reportPeople,primaryAdvisor,primaryInterlocutor,advisorOrg,interlocutorOrg,location,tasks,workflow,updatedAt', 'uuid,intent,engagementDate,duration,keyOutcomes,nextSteps,cancelledReason,atmosphere,atmosphereDetails,state,authors,reportPeople,primaryAdvisor,primaryInterlocutor,advisorOrg,interlocutorOrg,location,tasks,workflow,updatedAt', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'AUTHORIZATION_GROUPS', 'Fields to include in communities export', 'enumset', 'export', 'uuid,name,description,status,forSensitiveInformation', 'uuid,name,description,status,forSensitiveInformation', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				(${uuid_function}, 'EVENTS', 'Fields to include in events export', 'enumset', 'export', 'uuid,type,name,startDate,endDate,ownerOrg,hostOrg,adminOrg,eventSeries,location', 'uuid,type,name,startDate,endDate,ownerOrg,hostOrg,adminOrg,eventSeries,location', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

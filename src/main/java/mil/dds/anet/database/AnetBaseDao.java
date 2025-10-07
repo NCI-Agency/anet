@@ -1,11 +1,15 @@
 package mil.dds.anet.database;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,6 +100,40 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
   @Transactional
   public int _deleteByUuid(String tableName, String fieldName, String uuid) {
     return deleteForMerge(tableName, fieldName, uuid);
+
+  }
+
+  public List<String> getEmailAddressesBasedOnPreference(List<? extends Person> people,
+      String preferenceName, String preferenceCategory) {
+    final List<String> peopleUuids =
+        people.stream().map(Person::getUuid).collect(Collectors.toList());
+
+    // Returns email addresses of the people that opted for this preference (or when the preference
+    // default value is TRUE)
+    final Handle handle = getDbHandle();
+    final String peopleUuidsParam = "peopleUuids";
+    final String preferenceNameParam = "preferenceNameParam";
+    final String preferenceCategoryParam = "preferenceCategoryParam";
+    final String emailNetworkParam = "emailNetwork";
+    try {
+      return handle.createQuery("/* getEmailAddressesBasedOnPreference */"
+          + " SELECT DISTINCT ea.address FROM \"emailAddresses\" ea"
+          + " JOIN preferences pref ON pref.name = :" + preferenceNameParam
+          + " AND pref.category = :" + preferenceCategoryParam
+          + " LEFT JOIN \"peoplePreferences\" pp"
+          + " ON pp.\"preferenceUuid\" = pref.uuid AND pp.\"personUuid\" = ea.\"relatedObjectUuid\""
+          + " WHERE ea.network = :" + emailNetworkParam
+          + " AND ea.\"relatedObjectType\" = 'people' AND ea.\"relatedObjectUuid\" IN (<"
+          + peopleUuidsParam + ">)"
+          + " AND ( (pp.\"personUuid\" IS NULL AND UPPER(pref.\"defaultValue\") = 'TRUE')"
+          + " OR (UPPER(pp.value) = 'TRUE') )").bindList(peopleUuidsParam, peopleUuids)
+          .bind(preferenceNameParam, preferenceName)
+          .bind(preferenceCategoryParam, preferenceCategory)
+          .bind(emailNetworkParam, Utils.getEmailNetworkForNotifications()).mapTo(String.class)
+          .list();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   protected AnetDictionary dict() {

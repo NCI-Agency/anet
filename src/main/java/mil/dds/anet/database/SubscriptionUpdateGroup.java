@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubscriptionUpdateGroup {
-  public String objectType;
-  public String objectUuid;
-  public Instant updatedAt;
-  public List<SubscriptionUpdateStatement> stmts;
-  public boolean isNote;
+  private final String objectType;
+  private final String objectUuid;
+  private final Instant updatedAt;
+  private final List<SubscriptionUpdateStatement> stmts;
+  private final boolean isNote;
 
   public SubscriptionUpdateGroup(String objectType, String objectUuid, Instant updatedAt,
       List<SubscriptionUpdateStatement> stmts, boolean isNote) {
@@ -40,5 +40,25 @@ public class SubscriptionUpdateGroup {
   public boolean isValid() {
     return this.objectType != null && this.objectUuid != null && this.updatedAt != null
         && this.stmts != null;
+  }
+
+  public String getObjectType() {
+    return objectType;
+  }
+
+  public String getObjectUuid() {
+    return objectUuid;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public List<SubscriptionUpdateStatement> getStmts() {
+    return stmts;
+  }
+
+  public boolean isNote() {
+    return isNote;
   }
 }

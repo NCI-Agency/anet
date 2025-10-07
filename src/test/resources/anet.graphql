@@ -160,6 +160,14 @@ type AnetBeanList_Position {
 }
 
 """"""
+type AnetBeanList_Preference {
+  list: [Preference]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_Report {
   list: [Report]
   pageNum: Int
@@ -828,8 +836,10 @@ type Mutation {
   updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int
   updatePersonHistory(person: PersonInput): Int!
+  updatePersonPreferences(preferences: [PersonPreferenceInput]): Int
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
+  updatePreferences(preferences: [PreferenceInput]): Int
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
   updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
   updateSavedSearch(savedSearch: SavedSearchInput): Int
@@ -980,6 +990,7 @@ type Person {
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
+  preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
   rank: String
   status: Status
@@ -1006,6 +1017,7 @@ input PersonInput {
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
+  preferences: [PersonPreferenceInput]
   previousPositions: [PersonPositionHistoryInput]
   rank: String
   status: Status
@@ -1033,6 +1045,24 @@ input PersonPositionHistoryInput {
   position: PositionInput
   startTime: Instant
   updatedAt: Instant
+}
+
+""""""
+type PersonPreference {
+  createdAt: Instant
+  person: Person
+  preference: Preference
+  updatedAt: Instant
+  value: String
+}
+
+""""""
+input PersonPreferenceInput {
+  createdAt: Instant
+  person: PersonInput
+  preference: PreferenceInput
+  updatedAt: Instant
+  value: String
 }
 
 """"""
@@ -1171,6 +1201,51 @@ enum PositionType {
   _PLACEHOLDER_1_ @deprecated(reason: "Deprecated")
 }
 
+""""""
+type Preference {
+  allowedValues: String
+  category: String
+  createdAt: Instant
+  defaultValue: String
+  description: String
+  name: String
+  type: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input PreferenceInput {
+  allowedValues: String
+  category: String
+  createdAt: Instant
+  defaultValue: String
+  description: String
+  name: String
+  type: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input PreferenceSearchQueryInput {
+  category: String
+  emailNetwork: String
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: PreferenceSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+}
+
+""""""
+enum PreferenceSearchSortBy {
+  CATEGORY
+}
+
 """Query root"""
 type Query {
   accessTokenList: [AccessToken]
@@ -1201,6 +1276,8 @@ type Query {
   personList(query: PersonSearchQueryInput): AnetBeanList_Person
   position(uuid: String): Position
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
+  preferenceList(query: PreferenceSearchQueryInput): AnetBeanList_Preference
+  preferences: [Preference]
   projectVersion: String
   recentActivities: RecentActivities
   report(uuid: String): Report
@@ -1364,6 +1441,7 @@ type ReportPerson {
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
+  preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
   primary: Boolean!
   rank: String
@@ -1394,6 +1472,7 @@ input ReportPersonInput {
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
+  preferences: [PersonPreferenceInput]
   previousPositions: [PersonPositionHistoryInput]
   primary: Boolean!
   rank: String

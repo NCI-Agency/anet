@@ -28,10 +28,12 @@ TRUNCATE TABLE "notes" CASCADE;
 TRUNCATE TABLE "organizationAdministrativePositions" CASCADE;
 TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
+TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
 TRUNCATE TABLE "people" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
+-- Skip preferences, as these are inserted by the migrations
 TRUNCATE TABLE "reportActions" CASCADE;
 TRUNCATE TABLE "reportAuthorizedMembers" CASCADE;
 TRUNCATE TABLE "reportCommunities" CASCADE;
@@ -1830,6 +1832,11 @@ INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query",
   ('7665adc2-c753-45b6-a335-1df5f35ede0f', 'Admins', 1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"ACTIVE","positionType":"ADMINISTRATOR"}', true, 0, 1),
   ('0c6bbbcb-cb19-4dd8-9704-13c67670591d', 'Kabul reports', 0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"state":["APPROVED","PUBLISHED"],"status":"ACTIVE","locationUuid":["e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c"],"locationRecurseStrategy":"CHILDREN"}', true, 1, 2),
   ('fea7ebc5-2acd-4c5a-997e-3ed3daf0ab49', 'EF 1 Objectives', 2, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"ACTIVE","taskedOrgUuid":["9a35caa7-a095-4963-ac7b-b784fde4d583"],"orgRecurseStrategy":"CHILDREN"}', true, 2, 3);
+
+-- Specific preferences values for Jack
+INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
+  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";

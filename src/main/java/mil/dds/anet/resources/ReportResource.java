@@ -215,7 +215,7 @@ public class ReportResource {
         ReportEditedEmail action = new ReportEditedEmail();
         action.setReport(existing);
         action.setEditor(editor);
-        ReportDao.sendEmailToReportAuthors(action, existing);
+        reportDao.sendEmailToReportAuthors(action, existing);
       }
     }
 
@@ -596,7 +596,7 @@ public class ReportResource {
     action.setReport(r);
     action.setRejector(rejector);
     action.setComment(rejectionComment);
-    ReportDao.sendEmailToReportAuthors(action, r);
+    reportDao.sendEmailToReportAuthors(action, r);
   }
 
   @GraphQLMutation(name = "publishReport")
@@ -692,7 +692,7 @@ public class ReportResource {
     NewReportCommentEmail action = new NewReportCommentEmail();
     action.setReport(r);
     action.setComment(comment);
-    ReportDao.sendEmailToReportAuthors(action, r);
+    reportDao.sendEmailToReportAuthors(action, r);
   }
 
   @GraphQLMutation(name = "emailReport")
@@ -791,7 +791,8 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "emailRollup")
-  public Integer emailRollup(@GraphQLArgument(name = "startDate") Instant start,
+  public Integer emailRollup(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "startDate") Instant start,
       @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") RollupGraphType orgType,
       @GraphQLArgument(name = "orgUuid") String orgUuid,
@@ -802,6 +803,7 @@ public class ReportResource {
     action.setComment(email.getComment());
     action.setOrgUuid(orgUuid);
     action.setChartOrgType(orgType);
+    action.setSender(DaoUtils.getUserFromContext(context));
 
     email.setAction(action);
     AnetEmailWorker.sendEmailAsync(email);

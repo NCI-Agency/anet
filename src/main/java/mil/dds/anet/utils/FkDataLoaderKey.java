@@ -19,6 +19,7 @@ public enum FkDataLoaderKey {
   PERSON_ORGANIZATIONS, // person.organizations
   PERSON_ORGANIZATIONS_WHEN, // person.organizations at a given date
   PERSON_PERSON_POSITION_HISTORY, // person.personPositionHistory
+  PERSON_PERSON_PREFERENCES, // person.personPreferences
   POSITION_ASSOCIATED_POSITIONS, // position.associatedPositions
   POSITION_CURRENT_POSITION_FOR_PERSON, // position.currentPositionForPerson
   POSITION_PERSON_POSITION_HISTORY, // position.personPositionHistory
