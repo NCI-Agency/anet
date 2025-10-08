@@ -61,8 +61,10 @@ public class CustomSensitiveInformationDao
           + "INSERT INTO \"customSensitiveInformation\" (uuid, \"customFieldName\", "
           + "\"customFieldValue\", \"relatedObjectType\", \"relatedObjectUuid\", \"createdAt\", "
           + "\"updatedAt\") VALUES (:uuid, :customFieldName, :customFieldValue, "
-          + ":relatedObjectType, :relatedObjectUuid, :createdAt, :updatedAt)").bindBean(csi)
-          .bind("createdAt", DaoUtils.asLocalDateTime(csi.getCreatedAt()))
+          + ":relatedObjectType, :relatedObjectUuid, :createdAt, :updatedAt)"
+          + " ON CONFLICT (\"customFieldName\", \"relatedObjectType\", \"relatedObjectUuid\") DO UPDATE "
+          + " SET \"customFieldValue\" = :customFieldValue, \"updatedAt\" = :updatedAt")
+          .bindBean(csi).bind("createdAt", DaoUtils.asLocalDateTime(csi.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(csi.getUpdatedAt())).execute();
       return csi;
     } finally {
