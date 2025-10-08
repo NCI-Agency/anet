@@ -1547,17 +1547,19 @@ export const updateCustomSensitiveInformation = (
 ) => {
   const customSensitiveInformation = []
   const sensitiveFieldValues = Object.get(values, parentFieldName) || []
-  Object.keys(sensitiveFieldValues).forEach(sensitiveFieldName => {
-    const existingField = values.customSensitiveInformation?.find(
-      sf => sf.customFieldName === sensitiveFieldName
-    )
-    customSensitiveInformation.push({
-      customFieldName: sensitiveFieldName,
-      customFieldValue: JSON.stringify({
-        [sensitiveFieldName]: sensitiveFieldValues[sensitiveFieldName]
-      }),
-      uuid: existingField?.uuid
+  Object.keys(sensitiveFieldValues)
+    .filter(k => k !== INVISIBLE_CUSTOM_FIELDS_FIELD)
+    .forEach(sensitiveFieldName => {
+      const existingField = values.customSensitiveInformation?.find(
+        sf => sf.customFieldName === sensitiveFieldName
+      )
+      customSensitiveInformation.push({
+        customFieldName: sensitiveFieldName,
+        customFieldValue: JSON.stringify({
+          [sensitiveFieldName]: sensitiveFieldValues[sensitiveFieldName]
+        }),
+        uuid: existingField?.uuid
+      })
     })
-  })
   return customSensitiveInformation
 }
