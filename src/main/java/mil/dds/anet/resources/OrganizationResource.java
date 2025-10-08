@@ -138,7 +138,8 @@ public class OrganizationResource {
 
   @GraphQLMutation(name = "updateOrganization")
   public Integer updateOrganization(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "organization") Organization org) {
+      @GraphQLArgument(name = "organization") Organization org,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     org.checkAndFixCustomFields();
     org.setProfile(
         Utils.isEmptyHtml(org.getProfile()) ? null : Utils.sanitizeHtml(org.getProfile()));
@@ -146,7 +147,7 @@ public class OrganizationResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Organization existing = dao.getByUuid(org.getUuid());
     assertPermission(user, org.getUuid());
-    DaoUtils.assertObjectIsFresh(org, existing);
+    DaoUtils.assertObjectIsFresh(org, existing, force);
 
     // Check for loops in the hierarchy
     checkForLoops(org.getUuid(), org.getParentOrgUuid());

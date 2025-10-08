@@ -68,7 +68,8 @@ public class AuthorizationGroupResource {
 
   @GraphQLMutation(name = "updateAuthorizationGroup")
   public Integer updateAuthorizationGroup(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup a) {
+      @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup a,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
     final AuthorizationGroup existing = dao.getByUuid(a.getUuid());
     final List<Position> existingAdministrativePositions =
@@ -86,7 +87,7 @@ public class AuthorizationGroupResource {
       // change it!
       a.setForSensitiveInformation(existing.getForSensitiveInformation());
     }
-    DaoUtils.assertObjectIsFresh(a, existing);
+    DaoUtils.assertObjectIsFresh(a, existing, force);
 
     final int numRows = dao.update(a);
     if (numRows == 0) {

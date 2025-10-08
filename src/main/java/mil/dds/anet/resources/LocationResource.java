@@ -125,7 +125,8 @@ public class LocationResource {
 
   @GraphQLMutation(name = "updateLocation")
   public Integer updateLocation(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "location") Location l) {
+      @GraphQLArgument(name = "location") Location l,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     l.checkAndFixCustomFields();
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
@@ -133,7 +134,7 @@ public class LocationResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Location existing = dao.getByUuid(l.getUuid());
     assertPermission(user, DaoUtils.getUuid(l));
-    DaoUtils.assertObjectIsFresh(l, existing);
+    DaoUtils.assertObjectIsFresh(l, existing, force);
 
     // Check for loops in the hierarchy
     checkForLoops(l.getUuid(), l.getParentLocations());

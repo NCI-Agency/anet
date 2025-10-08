@@ -136,7 +136,8 @@ public class PositionResource {
 
   @GraphQLMutation(name = "updatePosition")
   public Integer updatePosition(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "position") Position pos) {
+      @GraphQLArgument(name = "position") Position pos,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     pos.checkAndFixCustomFields();
     pos.setDescription(
         Utils.isEmptyHtml(pos.getDescription()) ? null : Utils.sanitizeHtml(pos.getDescription()));
@@ -144,7 +145,7 @@ public class PositionResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
     assertPermission(user, pos);
-    DaoUtils.assertObjectIsFresh(pos, existing);
+    DaoUtils.assertObjectIsFresh(pos, existing, force);
 
     validatePosition(user, pos);
 

@@ -150,13 +150,14 @@ public class PersonResource {
 
   @GraphQLMutation(name = "updatePerson")
   public Integer updatePerson(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "person") Person p) {
+      @GraphQLArgument(name = "person") Person p,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     p.checkAndFixCustomFields();
 
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
-    DaoUtils.assertObjectIsFresh(p, existing);
+    DaoUtils.assertObjectIsFresh(p, existing, force);
 
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
@@ -341,7 +342,8 @@ public class PersonResource {
   @GraphQLMutation(name = "updateMe")
   @AllowUnverifiedUsers
   public Integer updateCurrentUser(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "person") Person p) {
+      @GraphQLArgument(name = "person") Person p,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     p.checkAndFixCustomFields();
 
     final Person user = DaoUtils.getUserFromContext(context);
@@ -350,7 +352,7 @@ public class PersonResource {
     }
 
     final Person existing = dao.getByUuid(p.getUuid());
-    DaoUtils.assertObjectIsFresh(p, existing);
+    DaoUtils.assertObjectIsFresh(p, existing, force);
 
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {

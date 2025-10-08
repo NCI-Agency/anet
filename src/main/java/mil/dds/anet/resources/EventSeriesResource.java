@@ -81,11 +81,12 @@ public class EventSeriesResource {
 
   @GraphQLMutation(name = "updateEventSeries")
   public Integer updateEventSeries(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "eventSeries") EventSeries eventSeries) {
+      @GraphQLArgument(name = "eventSeries") EventSeries eventSeries,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
     final EventSeries existing = dao.getByUuid(eventSeries.getUuid());
     assertPermission(user, existing.getAdminOrgUuid());
-    DaoUtils.assertObjectIsFresh(eventSeries, existing);
+    DaoUtils.assertObjectIsFresh(eventSeries, existing, force);
 
     validateEventSeries(user, eventSeries);
 

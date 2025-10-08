@@ -149,7 +149,8 @@ public class TaskResource {
 
   @GraphQLMutation(name = "updateTask")
   public Integer updateTask(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "task") Task t) {
+      @GraphQLArgument(name = "task") Task t,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     t.checkAndFixCustomFields();
     t.setDescription(
         Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
@@ -157,7 +158,7 @@ public class TaskResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Task existing = dao.getByUuid(t.getUuid());
     assertPermission(user, DaoUtils.getUuid(t));
-    DaoUtils.assertObjectIsFresh(t, existing);
+    DaoUtils.assertObjectIsFresh(t, existing, force);
 
     // Check for loops in the hierarchy
     checkForLoops(t.getUuid(), t.getParentTaskUuid());

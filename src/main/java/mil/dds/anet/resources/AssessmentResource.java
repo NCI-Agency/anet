@@ -49,14 +49,15 @@ public class AssessmentResource {
 
   @GraphQLMutation(name = "updateAssessment")
   public Assessment updateAssessment(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "assessment") Assessment a) {
+      @GraphQLArgument(name = "assessment") Assessment a,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Assessment original = dao.getByUuid(DaoUtils.getUuid(a));
     if (original == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
     }
     checkAssessmentPermission(user, a, UpdateType.UPDATE);
-    DaoUtils.assertObjectIsFresh(a, original);
+    DaoUtils.assertObjectIsFresh(a, original, force);
 
     ResourceUtils.checkAndFixAssessment(a);
     final int numRows = dao.update(a);

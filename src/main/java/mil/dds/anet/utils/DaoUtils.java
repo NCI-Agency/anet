@@ -70,7 +70,10 @@ public class DaoUtils {
   }
 
   public static void assertObjectIsFresh(AbstractAnetBean objectToBeUpdated,
-      AbstractAnetBean existingObject) {
+      AbstractAnetBean existingObject, boolean force) {
+    if (force) {
+      return;
+    }
     if (!hasSameUpdatedAtInMillis(objectToBeUpdated, existingObject)) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
           "Saving these changes (timestamped at %s) would overwrite later updates (timestamped at %s)",
