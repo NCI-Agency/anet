@@ -20,7 +20,7 @@ import {
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
@@ -50,8 +50,8 @@ const GQL_CREATE_TASK = gql`
   }
 `
 const GQL_UPDATE_TASK = gql`
-  mutation ($task: TaskInput!) {
-    updateTask(task: $task)
+  mutation ($task: TaskInput!, $force: Boolean) {
+    updateTask(task: $task, force: $force)
   }
 `
 
@@ -181,7 +181,15 @@ const TaskForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Task"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             {!!inactiveDescendantTasks?.length && (
               <InactiveTaskModal
                 showModal={inactiveTaskModalVisible}
@@ -481,8 +489,8 @@ const TaskForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
+  function onSubmit(values, form, force) {
+    return save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -511,7 +519,7 @@ const TaskForm = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const task = Task.filterClientSideFields(new Task(values))
     task.parentTask = utils.getReference(task.parentTask)
     task.customFields = customFieldsJSONString(values)
@@ -519,7 +527,10 @@ const TaskForm = ({
       utils.getReference(a)
     )
 
-    return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, { task })
+    return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, {
+      task,
+      force
+    })
   }
 }
 

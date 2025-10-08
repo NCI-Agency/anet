@@ -8,7 +8,7 @@ import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -33,8 +33,8 @@ const GQL_CREATE_EVENTSERIES = gql`
 `
 
 const GQL_UPDATE_EVENTSERIES = gql`
-  mutation ($eventSeries: EventSeriesInput!) {
-    updateEventSeries(eventSeries: $eventSeries)
+  mutation ($eventSeries: EventSeriesInput!, $force: Boolean) {
+    updateEventSeries(eventSeries: $eventSeries, force: $force)
   }
 `
 
@@ -126,7 +126,15 @@ const EventSeriesForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Event Series"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -332,8 +340,8 @@ const EventSeriesForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
+  function onSubmit(values, form, force) {
+    return save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -361,7 +369,7 @@ const EventSeriesForm = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const eventSeries = EventSeries.filterClientSideFields(
       new EventSeries(values)
     )
@@ -371,7 +379,7 @@ const EventSeriesForm = ({
     eventSeries.adminOrg = utils.getReference(eventSeries.adminOrg)
     return API.mutation(
       edit ? GQL_UPDATE_EVENTSERIES : GQL_CREATE_EVENTSERIES,
-      { eventSeries }
+      { eventSeries, force }
     )
   }
 }

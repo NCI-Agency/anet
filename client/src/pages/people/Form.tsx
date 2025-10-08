@@ -19,7 +19,7 @@ import EmailAddressInputTable, {
 } from "components/EmailAddressInputTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
@@ -59,13 +59,13 @@ const GQL_CREATE_PERSON = gql`
   }
 `
 const GQL_UPDATE_SELF = gql`
-  mutation ($person: PersonInput!) {
-    updateMe(person: $person)
+  mutation ($person: PersonInput!, $force: Boolean) {
+    updateMe(person: $person, force: $force)
   }
 `
 const GQL_UPDATE_PERSON = gql`
-  mutation ($person: PersonInput!) {
-    updatePerson(person: $person)
+  mutation ($person: PersonInput!, $force: Boolean) {
+    updatePerson(person: $person, force: $force)
   }
 `
 const GQL_GET_PERSON_COUNT = gql`
@@ -185,6 +185,8 @@ const PersonForm = ({
         setFieldTouched,
         values,
         validateForm,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
@@ -248,7 +250,15 @@ const PersonForm = ({
           <>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Form className="form-horizontal" method="post">
-              <Messages error={error} />
+              <MessagesWithConflict
+                error={error}
+                objectType="Person"
+                onCancel={onCancel}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
               <Fieldset title={title} action={action} />
               <Fieldset>
                 {/* Main Row for the first FieldSet */}
@@ -819,8 +829,8 @@ const PersonForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    save(values, form)
+  function onSubmit(values, form, force) {
+    save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -865,7 +875,7 @@ const PersonForm = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const person = Person.filterClientSideFields(new Person(values))
     if (values.pendingVerification && Settings.automaticallyAllowAllNewUsers) {
       person.pendingVerification = false
@@ -879,7 +889,8 @@ const PersonForm = ({
     person.customFields = customFieldsJSONString(values)
     const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON
     return API.mutation(edit ? updateMutation : GQL_CREATE_PERSON, {
-      person
+      person,
+      force
     })
   }
 

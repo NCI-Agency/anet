@@ -4,7 +4,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import { FastField, Form, Formik } from "formik"
@@ -16,8 +16,8 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_UPDATE_POSITION = gql`
-  mutation ($position: PositionInput!) {
-    updatePosition(position: $position)
+  mutation ($position: PositionInput!, $force: Boolean) {
+    updatePosition(position: $position, force: $force)
   }
 `
 
@@ -47,7 +47,14 @@ const EditOrganizationsAdministratedModal = ({
 
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
-      {({ setFieldValue, values, submitForm, setFieldTouched }) => {
+      {({
+        setFieldValue,
+        values,
+        submitForm,
+        setFieldTouched,
+        resetForm,
+        setSubmitting
+      }) => {
         const organizationsAdministratedSettings =
           Settings.fields.position.organizationsAdministrated
         return (
@@ -64,7 +71,15 @@ const EditOrganizationsAdministratedModal = ({
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Messages error={error} />
+              <MessagesWithConflict
+                error={error}
+                objectType="Position"
+                onCancel={() => close(setFieldValue)}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
               <Form className="form-horizontal" method="post">
                 <Container fluid>
                   <Row>
@@ -141,9 +156,9 @@ const EditOrganizationsAdministratedModal = ({
     onCancel()
   }
 
-  async function onSubmit(values, form) {
+  async function onSubmit(values, form, force) {
     try {
-      await save(values, form)
+      await save(values, form, force)
       return onSuccess()
     } catch (error) {
       form.setSubmitting(false)
@@ -152,9 +167,9 @@ const EditOrganizationsAdministratedModal = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const position = Position.filterClientSideFields(new Position(values))
-    return API.mutation(GQL_UPDATE_POSITION, { position })
+    return API.mutation(GQL_UPDATE_POSITION, { position, force })
   }
 }
 

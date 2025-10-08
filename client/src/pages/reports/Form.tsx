@@ -31,7 +31,7 @@ import {
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
   EXCLUDED_ASSESSMENT_FIELDS,
@@ -161,8 +161,12 @@ const GQL_CREATE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT = gql`
-  mutation ($report: ReportInput!, $sendEditEmail: Boolean!) {
-    updateReport(report: $report, sendEditEmail: $sendEditEmail) {
+  mutation ($report: ReportInput!, $sendEditEmail: Boolean!, $force: Boolean) {
+    updateReport(
+      report: $report
+      sendEditEmail: $sendEditEmail
+      force: $force
+    ) {
       uuid
       updatedAt
       state
@@ -551,7 +555,15 @@ const ReportForm = ({
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={saveError} />
+            <MessagesWithConflict
+              error={saveError}
+              objectType="Report"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
 
             {showAssignedPositionWarning && (
               <div className="alert alert-warning" style={alertStyle}>
@@ -1469,21 +1481,26 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-        .catch(() => {
-          // Show an error message
-          autoSaveSettings.current.autoSaveTimeout.add(
-            autoSaveSettings.current.autoSaveTimeout
-          ) // exponential back-off
-          toast.warning(
-            `There was an error autosaving your ${getReportType(
-              autoSaveSettings.current.values
-            )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
-          )
-          // And re-schedule the auto-save timer
-          autoSaveSettings.current.timeoutId = window.setTimeout(
-            autosaveHandler,
-            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
-          )
+        .catch(error => {
+          if (utils.isConflictError(error)) {
+            setSaveError(error)
+            jumpToTop()
+          } else {
+            // Show an error message
+            autoSaveSettings.current.autoSaveTimeout.add(
+              autoSaveSettings.current.autoSaveTimeout
+            ) // exponential back-off
+            toast.warning(
+              `There was an error autosaving your ${getReportType(
+                autoSaveSettings.current.values
+              )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
+            )
+            // And re-schedule the auto-save timer
+            autoSaveSettings.current.timeoutId = window.setTimeout(
+              autosaveHandler,
+              autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
+            )
+          }
         })
     }
   }
@@ -1506,9 +1523,9 @@ const ReportForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
+  function onSubmit(values, form, force) {
     form.setSubmitting(true)
-    return save(values, true)
+    return save(values, true, force)
       .then(response => onSubmitSuccess(response, values, form.resetForm))
       .catch(error => {
         setSaveError(error)
@@ -1605,7 +1622,7 @@ const ReportForm = ({
     return assessments
   }
 
-  function save(values, sendEmail) {
+  function save(values, sendEmail, force) {
     const report = Report.filterClientSideFields(new Report(values))
     report.authorizedMembers = values.authorizedMembers.map(
       ({ relatedObjectType, relatedObjectUuid }) => ({
@@ -1653,7 +1670,7 @@ const ReportForm = ({
     report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
     const operation = edit ? "updateReport" : "createReport"
-    const variables = { report }
+    const variables = { report, force }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
       if (!canWriteAssessments) {
