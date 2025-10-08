@@ -8,7 +8,7 @@ plugins {
 	id "com.github.node-gradle.node" version "7.1.0"
 	id "com.diffplug.spotless" version "8.0.0"
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "3.0.1"
-	id "org.beryx.runtime" version "2.0.0-rc"
+	id "org.beryx.runtime" version "2.0.0"
 	id "com.netflix.nebula.rpm" version "12.1.1"
 	id "org.springframework.boot" version "3.5.6" apply false
 	id 'io.mateo.cxf-codegen' version '2.5.0'
