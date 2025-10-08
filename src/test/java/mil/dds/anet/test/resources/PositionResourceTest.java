@@ -230,7 +230,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     updatedTashkil.setStatus(Status.INACTIVE);
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePosition("", getPositionInput(updatedTashkil)));
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(updatedTashkil)));
     assertThat(nrUpdated).isEqualTo(1);
 
     nrDeleted = withCredentials(adminUser,
@@ -288,7 +288,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Change Name/Code
     created.setName("Deputy Chief of Donuts");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePosition("", getPositionInput(created)));
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
     Position returned =
         withCredentials(jackUser, t -> queryExecutor.position(FIELDS, created.getUuid()));
@@ -549,7 +549,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PersonInput prin2UpdateInput = getPersonInput(prin2);
     prin2UpdateInput.setPosition(prin2PositionInput);
     Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", prin2UpdateInput));
+        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, prin2UpdateInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Reload this person to check their position was set.
@@ -644,7 +644,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final Position p1 = userOrgPositions.get(0);
     try {
       final Integer nrUpdated = withCredentials(getDomainUsername(user),
-          t -> mutationExecutor.updatePosition("", getPositionInput(p1)));
+          t -> mutationExecutor.updatePosition("", false, getPositionInput(p1)));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else if (isSuperuser) {
@@ -672,7 +672,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // try to update the new position (not related to the user's organization)
     try {
       final Integer nrUpdated = withCredentials(getDomainUsername(user),
-          t -> mutationExecutor.updatePosition("", getPositionInput(newPosition)));
+          t -> mutationExecutor.updatePosition("", false, getPositionInput(newPosition)));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
@@ -690,8 +690,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PositionInput p3 = getPositionInput(updatedNewPosition);
     try {
       p3.setType(PositionType.SUPERUSER);
-      final Integer nrUpdated =
-          withCredentials(getDomainUsername(user), t -> mutationExecutor.updatePosition("", p3));
+      final Integer nrUpdated = withCredentials(getDomainUsername(user),
+          t -> mutationExecutor.updatePosition("", false, p3));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {

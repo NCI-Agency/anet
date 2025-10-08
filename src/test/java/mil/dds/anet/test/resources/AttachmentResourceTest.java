@@ -845,8 +845,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private Attachment succeedAttachmentUpdate(final String username,
       final AttachmentInput attachmentInput) {
-    final String updatedAttachmentUuid =
-        withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput));
+    final String updatedAttachmentUuid = withCredentials(username,
+        t -> mutationExecutor.updateAttachment("", attachmentInput, false));
     assertThat(updatedAttachmentUuid).isNotNull();
     return withCredentials(username,
         t -> queryExecutor.attachment(ATTACHMENT_FIELDS, updatedAttachmentUuid));
@@ -854,7 +854,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private void failAttachmentUpdate(final String username, final AttachmentInput attachmentInput) {
     try {
-      withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput));
+      withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput, false));
       fail("Expected exception updating attachment");
     } catch (Exception expectedException) {
       // OK

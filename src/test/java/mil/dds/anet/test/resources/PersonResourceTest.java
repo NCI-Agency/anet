@@ -125,8 +125,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     // update JSON of customFields
     updatedNewPersonInput.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
 
-    Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", updatedNewPersonInput));
+    Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updatePerson("", false, updatedNewPersonInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person updatedNewPerson = withCredentials(jackUser,
@@ -191,14 +191,14 @@ public class PersonResourceTest extends AbstractResourceTest {
     // A person cannot change their own position
     try {
       withCredentials(getDomainUsername(newPerson2),
-          t -> mutationExecutor.updatePerson("", getPersonInput(newPerson2)));
+          t -> mutationExecutor.updatePerson("", false, getPersonInput(newPerson2)));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
 
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", getPersonInput(newPerson2)));
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(newPerson2)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person retPerson =
@@ -212,7 +212,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Because they are not in newPerson2's organization.
     try {
       withCredentials(getDomainUsername(newPerson2),
-          t -> mutationExecutor.updatePerson("", getPersonInput(updatedNewPerson)));
+          t -> mutationExecutor.updatePerson("", false, getPersonInput(updatedNewPerson)));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -222,7 +222,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     retPerson.setBiography(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", getPersonInput(retPerson)));
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(retPerson)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person updatedRetPerson =
@@ -419,7 +419,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     retPerson.setStatus(Status.INACTIVE);
     final Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", getPersonInput(retPerson)));
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(retPerson)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person retPerson2 =
@@ -444,7 +444,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Inactivate user nopos
     noPosPerson.setStatus(Status.INACTIVE);
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", getPersonInput(noPosPerson)));
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(noPosPerson)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person noPosInactive =
@@ -471,7 +471,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     noPosReactivateInput.getUsers().get(0).setDomainUsername("erin");
     noPosReactivateInput.setPendingVerification(false);
     nrUpdated = withCredentials(noPosDomainUsername,
-        t -> mutationExecutor.updateMe("", noPosReactivateInput));
+        t -> mutationExecutor.updateMe("", false, noPosReactivateInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // User nopos should now be fully available again
@@ -492,8 +492,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     final PersonInput noPosUpdatedInput = getPersonInput(noPosReactivated);
     noPosUpdatedInput.setUser(!noPosReactivated.getUser());
     noPosUpdatedInput.getUsers().get(0).setDomainUsername("erin");
-    nrUpdated =
-        withCredentials(noPosDomainUsername, t -> mutationExecutor.updateMe("", noPosUpdatedInput));
+    nrUpdated = withCredentials(noPosDomainUsername,
+        t -> mutationExecutor.updateMe("", false, noPosUpdatedInput));
     assertThat(nrUpdated).isEqualTo(1);
     final Person noPosUpdated =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, noPosUuid));
@@ -778,7 +778,7 @@ public class PersonResourceTest extends AbstractResourceTest {
           getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
     }
     final Integer nrUpdated =
-        withCredentials(user, t -> mutationExecutor.updatePerson("", personInput));
+        withCredentials(user, t -> mutationExecutor.updatePerson("", false, personInput));
     assertThat(nrUpdated).isEqualTo(1);
     final Person personUpdated =
         withCredentials(user, t -> queryExecutor.person(FIELDS, personInput.getUuid()));
@@ -808,7 +808,7 @@ public class PersonResourceTest extends AbstractResourceTest {
       personInput.getCustomSensitiveInformation().forEach(csiInput -> csiInput.setCustomFieldValue(
           getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
       final Integer nrUpdatedRestore =
-          withCredentials(user, t -> mutationExecutor.updatePerson("", personInputRestore));
+          withCredentials(user, t -> mutationExecutor.updatePerson("", false, personInputRestore));
       assertThat(nrUpdatedRestore).isEqualTo(1);
     }
   }
@@ -845,7 +845,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     personInput.setCustomSensitiveInformation(csiInput);
     final Instant beforeUpdate = Instant.now();
     final Integer nrUpdated =
-        withCredentials(user, t -> mutationExecutor.updatePerson("", personInput));
+        withCredentials(user, t -> mutationExecutor.updatePerson("", false, personInput));
     assertThat(nrUpdated).isEqualTo(1);
     final Person personUpdated =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, personInput.getUuid()));
@@ -895,7 +895,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final PositionInput positionInput = personInput4.getPosition();
     positionInput.setCustomSensitiveInformation(personInput4.getCustomSensitiveInformation());
     final Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", positionInput));
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, positionInput));
     assertThat(nrUpdated).isEqualTo(1);
     final Position positionUpdated = withCredentials(adminUser,
         t -> queryExecutor.position(POSITION_FIELDS, positionInput.getUuid()));
@@ -911,7 +911,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private Person checkIllegalSensitiveInformation(final Person person,
       final PersonInput personToUpdate, final PersonInput personToCheck) {
     final Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", personToUpdate));
+        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, personToUpdate));
     assertThat(nrUpdated).isEqualTo(1);
     final Person personUpdated =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, personToCheck.getUuid()));

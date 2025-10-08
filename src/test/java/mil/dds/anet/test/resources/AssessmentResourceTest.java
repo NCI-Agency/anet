@@ -1443,7 +1443,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
     withCredentials(getDomainUsername(reportAuthor),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), false));
     // Then delete it
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
@@ -1515,7 +1515,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
     withCredentials(getDomainUsername(reportAuthor),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), false));
     // Then delete it
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
@@ -1584,7 +1584,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
     withCredentials(getDomainUsername(reportAuthor),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), false));
     // Then delete it
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
@@ -1637,7 +1637,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private void failAssessmentUpdate(final String username, final AssessmentInput assessmentInput) {
     try {
       withCredentials(username,
-          t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput));
+          t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput, false));
       fail("Expected exception updating assessment");
     } catch (Exception expectedException) {
       // OK
@@ -1665,7 +1665,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private Assessment succeedAssessmentUpdate(final String username,
       final AssessmentInput assessmentInput) {
     final Assessment updatedAssessment = withCredentials(username,
-        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput));
+        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput, false));
     assertThat(updatedAssessment).isNotNull();
     assertThat(updatedAssessment.getAssessmentValues())
         .isEqualTo(assessmentInput.getAssessmentValues());

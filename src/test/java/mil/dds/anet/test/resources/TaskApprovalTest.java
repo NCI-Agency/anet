@@ -709,7 +709,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private void deleteReport(Person author, Report report) {
     final Report updated = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), true));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getState()).isEqualTo(ReportState.DRAFT);
     withCredentials(getDomainUsername(author),
@@ -787,7 +787,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private Task updateTask(TaskInput task) {
     final Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateTask("", task));
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, task));
     assertThat(nrUpdated).isEqualTo(1);
     return getTaskFromDb(task.getUuid());
   }

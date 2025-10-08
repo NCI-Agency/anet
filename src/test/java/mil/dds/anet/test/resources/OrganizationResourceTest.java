@@ -81,7 +81,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
     final Organization updated =
         withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, created.getUuid()));
@@ -89,7 +89,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // update profile
     updated.setProfile(UtilsTest.getCombinedHtmlTestCase().getInput());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(updated)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(updated)));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify the AO name is updated.
@@ -103,7 +103,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     updated2.setProfile(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(updated2)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(updated2)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Organization updated3 =
@@ -126,8 +126,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(b1.getOrganization().getUuid()).isEqualTo(updated3.getUuid());
 
     b1.setOrganization(updated3);
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", getPositionInput(b1)));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(b1)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Position ret = withCredentials(adminUser,
@@ -158,8 +158,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .build();
     final OrganizationInput childInput1 = getOrganizationInput(child);
     childInput1.setApprovalSteps(List.of(step1Input));
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput1));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, childInput1));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify approval step was saved.
@@ -185,8 +185,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final OrganizationInput childInput2 = getOrganizationInput(updated4);
     childInput2.setTasks(List.of(getTaskInput(task)));
     childInput2.setApprovalSteps(null);
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput2));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, childInput2));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify task was saved.
@@ -205,8 +205,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final OrganizationInput updatedStepsInput = getOrganizationInput(updated5);
     updatedStepsInput.setApprovalSteps(List.of(step1Input, step2Input));
     updatedStepsInput.setTasks(null);
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", updatedStepsInput));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, updatedStepsInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify approval steps updated correctly.
@@ -274,7 +274,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     created2.setIdentificationCode(created1.getIdentificationCode());
     try {
       withCredentials(adminUser,
-          t -> mutationExecutor.updateOrganization("", getOrganizationInput(created2)));
+          t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(created2)));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -339,7 +339,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Updating this AO with empty identificationCode should succeed
     created5.setIdentificationCode("");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created5)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(created5)));
     assertThat(nrUpdated).isEqualTo(1);
     final Organization updated5 =
         withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, created5.getUuid()));
@@ -347,7 +347,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Updating this AO with NULL identificationCode should succeed
     created5.setIdentificationCode(null);
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(updated5)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(updated5)));
     assertThat(nrUpdated).isEqualTo(1);
   }
 
@@ -685,7 +685,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     topOrgInput.setParentOrg(parentTopOrgInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", topOrgInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", false, topOrgInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -696,7 +696,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     topOrgInput.setParentOrg(parentSubOrgInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", topOrgInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", false, topOrgInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -734,7 +734,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   private void failUpdateOrganization(final String username, final OrganizationInput orgInput) {
     try {
-      withCredentials(username, t -> mutationExecutor.updateOrganization("", orgInput));
+      withCredentials(username, t -> mutationExecutor.updateOrganization("", false, orgInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -744,7 +744,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   private Organization succeedUpdateOrganization(final String username,
       final OrganizationInput orgInput) {
     final Integer numOrg =
-        withCredentials(username, t -> mutationExecutor.updateOrganization("", orgInput));
+        withCredentials(username, t -> mutationExecutor.updateOrganization("", false, orgInput));
     assertThat(numOrg).isOne();
     return withCredentials(username, t -> queryExecutor.organization(FIELDS, orgInput.getUuid()));
   }

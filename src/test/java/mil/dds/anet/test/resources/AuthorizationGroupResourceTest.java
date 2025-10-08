@@ -76,7 +76,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
     final Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput, false));
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
         t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
@@ -96,7 +96,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(authorizationGroup).isNotNull();
     try {
       withCredentials("jacob", t -> mutationExecutor.updateAuthorizationGroup("",
-          getAuthorizationGroupInput(authorizationGroup)));
+          getAuthorizationGroupInput(authorizationGroup), false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -116,7 +116,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
     final Integer nrUpdated = withCredentials(getDomainUsername(getSuperuser()),
-        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput, false));
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
         t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
@@ -149,7 +149,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(authorizationGroup).isNotNull();
     try {
       withCredentials(jackUser, t -> mutationExecutor.updateAuthorizationGroup("",
-          getAuthorizationGroupInput(authorizationGroup)));
+          getAuthorizationGroupInput(authorizationGroup), false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK

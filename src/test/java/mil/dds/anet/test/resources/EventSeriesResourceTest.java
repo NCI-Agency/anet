@@ -28,7 +28,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
     // Update an event series field
     created.setName("NMI PDT v2");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateEventSeries("", getEventSeriesInput(created)));
+        t -> mutationExecutor.updateEventSeries("", getEventSeriesInput(created), false));
     assertThat(nrUpdated).isEqualTo(1);
     EventSeries updated =
         withCredentials(adminUser, t -> queryExecutor.eventSeries(FIELDS, created.getUuid()));
@@ -76,7 +76,8 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
 
   private void failUpdateEventSeries(final EventSeriesInput eventSeriesInput) {
     try {
-      withCredentials(jackUser, t -> mutationExecutor.updateEventSeries("", eventSeriesInput));
+      withCredentials(jackUser,
+          t -> mutationExecutor.updateEventSeries("", eventSeriesInput, false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK

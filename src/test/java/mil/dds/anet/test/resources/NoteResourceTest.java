@@ -245,7 +245,7 @@ class NoteResourceTest extends AbstractResourceTest {
 
   private void failNoteUpdate(final String username, final NoteInput noteInput) {
     try {
-      withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, noteInput));
+      withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, false, noteInput));
       fail("Expected exception updating note");
     } catch (Exception expectedException) {
       // OK
@@ -271,7 +271,7 @@ class NoteResourceTest extends AbstractResourceTest {
 
   private Note succeedNoteUpdate(final String username, final NoteInput noteInput) {
     final Note updatedNote =
-        withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, noteInput));
+        withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, false, noteInput));
     assertThat(updatedNote).isNotNull();
     assertThat(updatedNote.getText()).isEqualTo(noteInput.getText());
     return updatedNote;

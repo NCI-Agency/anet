@@ -38,8 +38,8 @@ public class EventResourceTest extends AbstractResourceTest {
 
     // Update an event field
     created.setName("NMI PDT v2");
-    Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", getEventInput(created)));
+    Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateEvent("", getEventInput(created), false));
     assertThat(nrUpdated).isEqualTo(1);
     Event updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
     assertThat(updated.getStatus()).isEqualTo(created.getStatus());
@@ -58,7 +58,8 @@ public class EventResourceTest extends AbstractResourceTest {
                 "The New Task for the NMI PDT Event", "The New Task for the NMI PDT Event",
                 UtilsTest.getCombinedJsonTestCase().getInput())))));
     final EventInput updatedInput = getEventInput(updated);
-    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.updateEvent("", updatedInput));
+    nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", updatedInput, false));
     assertThat(nrUpdated).isEqualTo(1);
 
     updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
@@ -121,7 +122,7 @@ public class EventResourceTest extends AbstractResourceTest {
 
   private void failUpdateEvent(final EventInput eventInput) {
     try {
-      withCredentials(jackUser, t -> mutationExecutor.updateEvent("", eventInput));
+      withCredentials(jackUser, t -> mutationExecutor.updateEvent("", eventInput, false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
