@@ -619,7 +619,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           placement="top"
           overlay={<Tooltip id="edit-position-tooltip">Edit position</Tooltip>}
         >
-          <span>
+          <span className="edit-position">
             <LinkTo
               modelType="Position"
               model={position}

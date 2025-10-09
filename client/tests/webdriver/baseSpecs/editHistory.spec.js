@@ -12,6 +12,12 @@ let origEndDate
 describe("As admin we should be able to edit position history", () => {
   it("We should be able to edit position history for a person", async () => {
     await ShowPerson.openAsAdminUser(PERSON_UUID)
+    await (await ShowPerson.getEditPositionButton()).waitForExist()
+    await (await ShowPerson.getEditPositionButton()).waitForDisplayed()
+    await (await ShowPerson.getChangeAssignedPositionButton()).waitForExist()
+    await (
+      await ShowPerson.getChangeAssignedPositionButton()
+    ).waitForDisplayed()
     await (await ShowPerson.getEditHistoryButton()).click()
     await (await ShowPerson.getEditHistoryDialog()).waitForExist()
     await (await ShowPerson.getEditHistoryDialog()).waitForDisplayed()
@@ -83,5 +89,22 @@ describe("As admin we should be able to edit position history", () => {
     ).waitForExist({ reverse: true })
     // eslint-disable-next-line no-unused-expressions
     expect(await (await ShowPosition.getAlertDanger()).isExisting()).to.be.false
+    await ShowPerson.logout()
+  })
+})
+
+describe("As regular user we should not be able to edit our own position or history", () => {
+  it("We should not be able to edit position or history for self", async () => {
+    const erinsUuid = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"
+    await ShowPerson.open(erinsUuid)
+    await (await ShowPerson.getCurrentPosition()).waitForExist()
+    await (await ShowPerson.getCurrentPosition()).waitForDisplayed()
+    await (
+      await ShowPerson.getEditPositionButton()
+    ).waitForExist({ reverse: true })
+    await (
+      await ShowPerson.getChangeAssignedPositionButton()
+    ).waitForExist({ reverse: true })
+    await ShowPerson.logout()
   })
 })
