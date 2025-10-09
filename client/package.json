@@ -117,7 +117,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "4.0.6",
+    "@apollo/client": "4.0.7",
     "@blueprintjs/core": "6.3.1",
     "@blueprintjs/datetime": "6.0.5",
     "@emotion/react": "11.14.0",
@@ -132,7 +132,7 @@
     "bootstrap": "5.3.8",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
-    "core-js": "3.45.1",
+    "core-js": "3.46.0",
     "d3": "7.9.0",
     "email-addresses": "5.0.0",
     "escape-html": "1.0.3",
@@ -143,7 +143,7 @@
     "graphql": "16.11.0",
     "html-to-image": "1.11.11",
     "jsonpath-plus": "10.3.0",
-    "keycloak-js": "26.2.0",
+    "keycloak-js": "26.2.1",
     "leaflet": "1.9.4",
     "leaflet-defaulticon-compatibility": "0.1.2",
     "leaflet-geosearch": "4.2.2",
