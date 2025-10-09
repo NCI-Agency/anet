@@ -222,14 +222,14 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser?.isAdmin()
   const hasPosition = position?.uuid
-  const canEdit =
-    Person.isEqual(currentUser, person) ||
+  const canEditPosition =
     isAdmin ||
     (hasPosition &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
     (!hasPosition && currentUser.isSuperuser())
+  const canEdit = canEditPosition || Person.isEqual(currentUser, person)
   // When the person is not in a position, any superuser can assign them.
   const canAssignPosition = currentUser.isSuperuser()
   const canAddPeriodicAssessment =
@@ -385,7 +385,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           </Container>
         </Fieldset>
 
-        {canEdit && (
+        {canEditPosition && (
           <AssignPositionModal
             showModal={showAssignPositionModal}
             person={person}
@@ -534,7 +534,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   function mapNonCustomFields() {
     const classNameExceptions = {
-      biography: "biography"
+      biography: "biography",
+      position: "text-start"
     }
 
     // map fields that have specific human value
@@ -613,11 +614,11 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   function getPositionActions() {
     const editPositionButton =
-      hasPosition && canEdit ? (
+      hasPosition && canEditPosition ? (
         <OverlayTrigger
           key="edit-position-overlay"
           placement="top"
-          overlay={<Tooltip id="edit-position-tooltip">Edit position</Tooltip>}
+          overlay={<Tooltip id="edit-position-tooltip">Edit Position</Tooltip>}
         >
           <span className="edit-position">
             <LinkTo
@@ -635,7 +636,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       ) : null
 
     const changePositionButton =
-      hasPosition && canEdit ? (
+      hasPosition && canEditPosition ? (
         <OverlayTrigger
           key="change-position-overlay"
           placement="top"
@@ -682,7 +683,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   }
 
   function getPreviousPositionsActions() {
-    const editHistoryButton = isAdmin ? (
+    return isAdmin ? (
       <OverlayTrigger
         key="edit-history-overlay"
         placement="top"
@@ -696,8 +697,6 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         </Button>
       </OverlayTrigger>
     ) : null
-
-    return <>{editHistoryButton}</>
   }
 
   function getPrevPositionsHumanValue() {
