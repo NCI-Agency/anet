@@ -79,7 +79,7 @@
     "eslint-plugin-n": "17.23.1",
     "eslint-plugin-promise": "7.2.1",
     "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-hooks": "7.0.0",
     "eslint-webpack-plugin": "5.0.2",
     "express-session": "1.18.2",
     "git-describe": "4.1.1",
