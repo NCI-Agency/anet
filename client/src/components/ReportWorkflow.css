@@ -14,7 +14,7 @@
   color: #000;
 }
 
-.workflow-fieldset .workflow-action .btn-pending.submitted {
+.workflow-fieldset .workflow-action .btn-success.submitted {
   background-color: #848478;
   color: #000;
 }
@@ -46,7 +46,7 @@
   position: relative;
 }
 
-.workflow-fieldset .workflow-action .btn > .worflow-step-name {
+.workflow-fieldset .workflow-action .btn > .workflow-step-name {
   margin: 5px;
 }
 
@@ -65,7 +65,6 @@
   right: -25px;
   top: calc(50% - 5px);
 }
-
 
 fieldset.workflow-fieldset.compact {
   border: 0;

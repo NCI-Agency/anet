@@ -10,7 +10,7 @@ import "./ReportWorkflow.css"
 const ACTION_TYPE_DETAILS = {
   APPROVE: { text: "Approved", cssClass: "btn-success approved" },
   REJECT: { text: "Changes requested", cssClass: "btn-danger rejected" },
-  SUBMIT: { text: "Submitted", cssClass: "btn-pending submitted" },
+  SUBMIT: { text: "Submitted", cssClass: "btn-success submitted" },
   PUBLISH: { text: "Published", cssClass: "btn-success published" },
   UNPUBLISH: { text: "Unpublished", cssClass: "btn-danger unpublished" },
   null: { text: "Pending", cssClass: "btn-pending default" }
@@ -67,7 +67,7 @@ const ApprovalStepModal = ({ action }: ApprovalStepModalProps) => {
         onClick={() => setShowModal(true)}
         variant="default"
       >
-        <div className="worflow-step-name">{step.name}</div>
+        <div className="workflow-step-name">{step.name}</div>
       </Button>
       <Modal centered show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
