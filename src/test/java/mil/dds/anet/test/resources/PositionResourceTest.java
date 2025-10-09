@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
+import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
@@ -20,6 +21,7 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
+import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
@@ -40,7 +42,7 @@ public class PositionResourceTest extends AbstractResourceTest {
   private static final String _ORGANIZATION_FIELDS =
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      String.format("uuid updatedAt name %1$s", _EMAIL_ADDRESSES_FIELDS);
+      String.format("uuid updatedAt additionalPositions name %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _POSITION_FIELDS =
       String.format("uuid updatedAt name code type role status description customFields %1$s",
           _EMAIL_ADDRESSES_FIELDS);
@@ -82,8 +84,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(created1.getOrganization().getUuid()).isEqualTo(ao.getUuid());
 
     // Assign a person into the position
-    Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(jack), created1.getUuid()));
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(jack), true, created1.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     Position currPos =
@@ -100,25 +102,25 @@ public class PositionResourceTest extends AbstractResourceTest {
       /* ignore */
     }
 
-    // change the person in this position
+    // Put Steve into created1 position
     final Person steve = getSteveSteveson();
     final Position stevesCurrentPosition = steve.getPosition();
     assertThat(stevesCurrentPosition).isNotNull();
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(steve), created1.getUuid()));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(steve), true, created1.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
-    // Verify that the new person is in the position
+    // Verify that the Steve is in created1 position
     currPos = withCredentials(jackUser, t -> queryExecutor.position(FIELDS, created1.getUuid()));
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPerson().getUuid()).isEqualTo(steve.getUuid());
 
-    // Verify that the previous person is now no longer in a position
+    // Verify that Jack is no longer in created1 position
     final Person returnedPerson =
         withCredentials(jackUser, t -> queryExecutor.person(PERSON_FIELDS, jack.getUuid()));
     assertThat(returnedPerson.getPosition()).isNull();
 
-    // delete the person from this position
+    // delete Steve from created1 position
     Integer nrDeleted = withCredentials(adminUser,
         t -> mutationExecutor.deletePersonFromPosition("", created1.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
@@ -128,7 +130,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put steve back in his old position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(steve), stevesCurrentPosition.getUuid()));
+        getPersonInput(steve), true, stevesCurrentPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos = withCredentials(jackUser,
@@ -183,8 +185,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(tashkil.getUuid()).isNotNull();
 
     // put the interlocutor in a tashkil
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(roger), tashkil.getUuid()));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(roger), true, tashkil.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // assign the tashkil to the position
@@ -248,7 +250,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put jack back in his old position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(jack), jacksOldPosition.getUuid()));
+        getPersonInput(jack), true, jacksOldPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos =
@@ -258,7 +260,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put roger back in his old position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(roger), rogersOldPosition.getUuid()));
+        getPersonInput(roger), true, rogersOldPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos = withCredentials(adminUser,
@@ -302,8 +304,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     final Position stevesCurrPos = steve.getPosition();
     assertThat(stevesCurrPos).isNotNull();
 
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(steve), created.getUuid()));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(steve), true, created.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     Position interlocutorPos =
@@ -313,7 +315,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put steve back in his originial position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(steve), stevesCurrPos.getUuid()));
+        getPersonInput(steve), true, stevesCurrPos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Ensure the old position is now empty
@@ -804,5 +806,86 @@ public class PositionResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
     assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
     assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
+  }
+
+  @Test
+  void testGiveAdditionalPosition() {
+    final String testUuid = "888d6c4b-deaa-4218-b8fd-abfb7c81a4c6";
+    final Position test = withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+
+    // Update it
+    final PositionInput updatedInput = getPositionInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Position updated =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final PositionInput outdatedInput = getPositionInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Position forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
+  }
+
+  @Test
+  void testGiveNonPrimaryPosition() {
+    final Person jack = getJackJackson();
+    assertThat(jack.getUuid()).isNotNull();
+
+    // Create Position assigned to an AO
+    final Organization ao = withCredentials(adminUser, t -> mutationExecutor
+        .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
+    final PositionInput testInput = PositionInput.builder().withName(
+        "A Test Position created by PositionResourceTest for testing non primary position assigment")
+        .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+        .withOrganization(getOrganizationInput(ao))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
+
+    final Position newPosition =
+        withCredentials(adminUser, t -> mutationExecutor.createPosition(FIELDS, testInput));
+    assertThat(newPosition).isNotNull();
+    assertThat(newPosition.getUuid()).isNotNull();
+    assertThat(newPosition.getName()).isEqualTo(testInput.getName());
+    assertThat(newPosition.getOrganization().getUuid()).isEqualTo(ao.getUuid());
+
+    // Give this position to Jak as additional
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(jack), false, newPosition.getUuid()));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    // Reload Jack to check his additional position was set
+    final Person jackUpdated =
+        withCredentials(adminUser, t -> queryExecutor.person(PERSON_FIELDS, jack.getUuid()));
+    assertThat(jackUpdated).isNotNull();
+    assertThat(jackUpdated.getAdditionalPositions()).isNotNull();
+    assertThat(jackUpdated.getAdditionalPositions().size()).isEqualTo(1);
+    assertThat(jackUpdated.getAdditionalPositions().get(0).getName()).isEqualTo(
+        "A Test Position created by PositionResourceTest for testing non primary position assigment");
+
+    // Ensure the old position is now empty
+    Position upatedPosition =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, newPosition.getUuid()));
+    assertThat(upatedPosition.getPerson()).isNotNull();
+    assertThat(upatedPosition.getPerson().getUuid()).isEqualTo(jack.getUuid());
   }
 }

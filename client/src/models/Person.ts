@@ -233,6 +233,11 @@ export default class Person extends Model {
         }
       }
     }
+    additionalPositions {
+      uuid
+      name
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    }
     previousPositions {
       startTime
       endTime
