@@ -112,8 +112,8 @@ test.serial("Move someone in and out of a position", async t => {
     `${positionName} is currently empty.`
   )
 
-  const $changeAssignedPersonButton = await $("button.change-assigned-person")
-  await $changeAssignedPersonButton.click()
+  const $assignCurrentPersonButton = await $("button.assign-current-person")
+  await $assignCurrentPersonButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
   const $assignedPerson =
@@ -444,12 +444,8 @@ test.serial("Update permissions while changing positions", async t => {
   await positionButton.click()
   // Wait for the transition.
   await t.context.driver.sleep(mediumWaitMs)
-  // Grab the change assigned person button.
-  const changeAssignedPersonButton = await t.context.driver.findElement(
-    By.xpath('//button[text()="Change assigned person"]')
-  )
-  // Click on the "Change assigned person" button.
-  await changeAssignedPersonButton.click()
+  const $changeCurrentPersonButton = await $("button.change-current-person")
+  await $changeCurrentPersonButton.click()
   // Wait for transition
   await t.context.driver.sleep(mediumWaitMs)
   // Grab the person input field
