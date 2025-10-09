@@ -21,5 +21,10 @@ jobs:
       # Drafts next Release notes as Pull Requests are merged into the default branch;
       # uses default config template .github/release-drafter.yml
       - uses: release-drafter/release-drafter@v6
+        id: release-drafter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify release-drafter status
+        if: steps.release-drafter.outputs.id == ''
+        run: exit 1
