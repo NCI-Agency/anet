@@ -37,6 +37,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionsTable from "components/PositionsTable"
 import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
@@ -126,6 +127,11 @@ const GQL_GET_PERSON = gql`
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
+      }
+      additionalPositions {
+        uuid
+        name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       previousPositions {
         startTime
@@ -577,6 +583,12 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           Settings.dateFormats.forms.displayShort.date
         ),
       position: getPositionHumanValue(),
+      additionalPositions: (
+        <PositionsTable
+          label="Additional Positions"
+          positions={person.additionalPositions}
+        />
+      ),
       prevPositions: getPrevPositionsHumanValue(),
       status: Person.humanNameOfStatus(person.status)
     }

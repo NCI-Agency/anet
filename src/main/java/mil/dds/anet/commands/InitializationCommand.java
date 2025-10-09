@@ -120,7 +120,7 @@ public class InitializationCommand {
     admin.setName(adminFullName);
     admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
-    engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
+    engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid(), true);
 
     // Create admin user
     User user = new User();

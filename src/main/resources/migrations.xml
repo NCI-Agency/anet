@@ -2054,10 +2054,6 @@
 			WHERE "identificationCode" IS NOT NULL
 			AND "identificationCode" != '';
 
-			CREATE UNIQUE ${non_clustered} INDEX "UQ_CurrentPersonInPosition"
-			ON positions ("currentPersonUuid")
-			WHERE "currentPersonUuid" IS NOT NULL;
-
 			CREATE UNIQUE ${non_clustered} INDEX "UQ_PositionCodes"
 			ON positions (code)
 			WHERE code IS NOT NULL;
@@ -6790,6 +6786,12 @@
 			<column name="trigram" value="XKK" />
 		</insert>
 	</changeSet>
+
+    <changeSet id="add-isPrimary-colum-to-peoplePositions" author="fdelcastillo">
+        <addColumn tableName="peoplePositions">
+            <column name="isPrimary" type="boolean" defaultValue="true" />
+        </addColumn>
+    </changeSet>
 
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
