@@ -219,8 +219,14 @@ const AssignPositionModal = ({
     <Modal centered show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Set Position for{" "}
-          <LinkTo modelType="Person" model={person} isLink={false} />
+          Set position for{" "}
+          <LinkTo
+            modelType="Person"
+            model={person}
+            isLink={false}
+            showAvatar={false}
+            showIcon={false}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

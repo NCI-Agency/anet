@@ -14,7 +14,6 @@ import React, { useContext, useState } from "react"
 import { Button, Col, Container, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 import { RECURSE_STRATEGY } from "searchUtils"
-import Settings from "settings"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
   mutation ($position: PositionInput!) {
@@ -86,7 +85,7 @@ const EditAssociatedPositionsModal = ({
 }: EditAssociatedPositionsModalProps) => {
   const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
-  const assignedRole = Settings.fields.regular.person.name
+
   const positionSearchQuery = {
     status: Model.STATUS.ACTIVE,
     matchPersonName: true
@@ -109,7 +108,7 @@ const EditAssociatedPositionsModal = ({
       {({ setFieldValue, values, submitForm }) => (
         <Modal centered show={showModal} onHide={() => close(setFieldValue)}>
           <Modal.Header closeButton>
-            <Modal.Title>Modify assigned {assignedRole}</Modal.Title>
+            <Modal.Title>Modify assigned counterparts</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Messages error={error} />
@@ -128,7 +127,7 @@ const EditAssociatedPositionsModal = ({
                       widget={
                         <AdvancedMultiSelect
                           fieldName="associatedPositions"
-                          placeholder={`Search for a ${assignedRole} position…`}
+                          placeholder="Search for a counterpart position…"
                           value={values.associatedPositions}
                           renderSelected={
                             <AssociatedPositionsTable

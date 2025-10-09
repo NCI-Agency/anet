@@ -165,9 +165,14 @@ const AssignPersonModal = ({
     <Modal centered show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Assign Person to the{" "}
-          <LinkTo modelType="Position" model={position} isLink={false} />{" "}
-          Position
+          Assign person to{" "}
+          <LinkTo
+            modelType="Position"
+            model={position}
+            isLink={false}
+            showAvatar={false}
+            showIcon={false}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
