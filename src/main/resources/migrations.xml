@@ -7446,4 +7446,16 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="insert-kosovo-into-locations" author="midmarch">
+		<sql>
+			INSERT INTO locations (uuid, type, status, name, digram, trigram) VALUES('851da178-7237-4b60-b163-18f4f38fc777', 'PAC', 0, 'Kosovo', 'XK', 'XKK');
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM locations
+				WHERE uuid='851da178-7237-4b60-b163-18f4f38fc777';
+			</sql>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
