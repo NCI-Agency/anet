@@ -108,6 +108,7 @@ export const gqlAllLocationFields = `
   ${gqlBasicLocationFields}
   description
   customFields
+  geoJson
 `
 
 // Organization

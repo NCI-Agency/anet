@@ -148,8 +148,12 @@ export default class Location extends Model {
       ${gqlEntityFieldsMap.Location}
       type
     }
+    customFields
+    geoJson
     ${gqlNotesFields}
   `
+
+  geoJson?: string
 
   static hasCoordinates(location) {
     return (

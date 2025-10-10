@@ -9,6 +9,8 @@ import {
   Control,
   CRS,
   DivIcon,
+  FeatureGroup,
+  geoJSON,
   Icon,
   Map,
   Marker,
@@ -51,6 +53,7 @@ import MARKER_ICON_SEARCH from "resources/leaflet/marker-icon-search.svg"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
 import Settings from "settings"
+import { number, string } from "yup"
 
 export const DEFAULT_MAP_STYLE = {
   width: "100%",
@@ -217,6 +220,7 @@ interface LeafletProps {
   onSelectAnetLocation?: (loc: any) => void
   allowCreateLocation?: boolean
   onCreateLocation?: (coords: { lat: number; lng: number }) => void
+  shapes?: string[]
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
@@ -239,6 +243,7 @@ const Leaflet = ({
   marginBottom = DEFAULT_MAP_STYLE.marginBottom,
   markers,
   setMarkerPopup,
+  shapes,
   mapId: initialMapId,
   onMapClick,
   onSelectAnetLocation,
@@ -264,6 +269,7 @@ const Leaflet = ({
     useState<MarkerPopupProps>({})
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef(null)
+  const shapeGroupLayerRef = useRef(new FeatureGroup())
 
   const anetLocationsLayerRef = useRef(null)
   const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
@@ -331,6 +337,7 @@ const Leaflet = ({
     }
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
     layerControl.addTo(newMap)
+    shapeGroupLayerRef.current.addTo(newMap)
     addLayers(newMap, layerControl)
 
     setMap(newMap)
@@ -590,6 +597,23 @@ const Leaflet = ({
     width,
     widthPropUnchanged
   ])
+
+  /**
+   * Handle assigned shapes (GeoJSON strings)
+   */
+  useEffect(() => {
+    const groupLayer = shapeGroupLayerRef.current
+    groupLayer.clearLayers()
+    if (shapes && shapes.length > 0 && map) {
+      shapes.forEach(shape => {
+        const geoJsonObject = JSON.parse(shape)
+        const geoJsonLayer = geoJSON(geoJsonObject)
+        geoJsonLayer.addTo(groupLayer)
+      })
+      // Set map bounds (navigate) to include all shapes
+      map.fitBounds(groupLayer.getBounds())
+    }
+  }, [shapes, map])
 
   return (
     <>
