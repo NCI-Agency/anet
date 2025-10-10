@@ -107,6 +107,7 @@ const ReportNewConditional = ({
     const event = new Event(data.event)
     report.event = event
     report.location = event.location
+    report.engagementDate = event.startDate
   }
   // mutates the object
   initInvisibleFields(report, Settings.fields.report.customFields)
