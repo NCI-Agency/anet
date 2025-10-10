@@ -7611,4 +7611,12 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-location-column-geoJson" author="midmarch">
+		<!-- Add locations.geoJson, to expand location with geographical area's / boundaries, using raw GeoJSON stored as text -->
+		<addColumn tableName="locations">
+			<column name="geoJson" type="text" />
+		</addColumn>
+
+	</changeSet>
+
 </databaseChangeLog>
