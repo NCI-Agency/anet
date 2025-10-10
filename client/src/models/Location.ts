@@ -178,8 +178,11 @@ export default class Location extends Model {
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     customFields
+    geoJson
     ${GRAPHQL_NOTES_FIELDS}
   `
+
+  geoJson?: string
 
   static hasCoordinates(location) {
     return (

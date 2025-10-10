@@ -353,18 +353,19 @@ export function getActionButton(
 const HIDDEN_STYLE = { visibility: "hidden" }
 
 export function getLeafletMap(mapId, location, hideWhenEmpty) {
-  return Location.hasCoordinates(location) ? (
-    <Leaflet
-      mapId={mapId}
-      markers={[
+  const shapes = location.geoJson ? [location.geoJson] : []
+  const markers = Location.hasCoordinates(location)
+    ? [
         {
           id: "marker-" + mapId,
           name: _escape(location?.name) || "", // escape HTML in location name!
           lat: Location.hasCoordinates(location) ? location.lat : null,
           lng: Location.hasCoordinates(location) ? location.lng : null
         }
-      ]}
-    />
+      ]
+    : []
+  return [shapes.length + markers.length] > 0 ? (
+    <Leaflet mapId={mapId} markers={markers} shapes={shapes} />
   ) : (
     <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />
   )
