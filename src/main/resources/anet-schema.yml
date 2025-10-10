@@ -863,7 +863,7 @@ properties:
                   items:
                     type: string
                     enum:
-                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY]
           reportPeople:
             required: [optionalAttendingAuthor, optionalPrimaryAdvisor, optionalPrimaryPrincipal]
             properties:
@@ -994,14 +994,14 @@ properties:
             items:
               type: string
               enum:
-                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY]
           regularuserTypeOptions:
             type: array
             uniqueItems: true
             items:
               type: string
               enum:
-                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY]
           format:
             type: string
             title: Default format for location
@@ -1040,7 +1040,7 @@ properties:
                   items:
                     type: string
                     enum:
-                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY]
           organizationsAdministrated:
             "$ref": "#/$defs/inputField"
           emailAddresses:
@@ -1110,7 +1110,7 @@ properties:
                   items:
                     type: string
                     enum:
-                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION, TOWN, MUNICIPALITY]
           administratingPositions:
             "$ref": "#/$defs/inputField"
           profile:
