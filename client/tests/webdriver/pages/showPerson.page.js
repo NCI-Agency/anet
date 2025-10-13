@@ -268,6 +268,18 @@ class ShowPerson extends Page {
     const agTable = await this.getAuthorizationGroupsTable()
     return agTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
   }
+
+  async getCurrentPosition() {
+    return browser.$("#fg-position")
+  }
+
+  async getEditPositionButton() {
+    return browser.$("span.edit-position a.btn")
+  }
+
+  async getChangeAssignedPositionButton() {
+    return browser.$("button.change-assigned-position")
+  }
 }
 
 export default new ShowPerson()
