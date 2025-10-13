@@ -215,7 +215,6 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const person = new Person(data ? data.person : {})
   // The position for this person's counterparts
   const position = person.position
-  const assignedRole = Settings.fields.regular.person.name
 
   // User can always edit themselves
   // Admins can always edit anybody
@@ -396,14 +395,14 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
         {hasPosition && (
           <Fieldset
-            title={`Assigned ${assignedRole}`}
+            title="Assigned counterparts"
             action={
               canEdit && (
                 <Button
                   onClick={() => setShowAssociatedPositionsModal(true)}
                   variant="outline-secondary"
                 >
-                  Change assigned {assignedRole}
+                  Change assigned counterparts
                 </Button>
               )
             }
@@ -705,45 +704,46 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   function renderCounterparts(position) {
     return (
-      <FormGroup controlId="counterparts">
-        <Col sm={4}>
-          <FormLabel>Counterpart of</FormLabel>
-        </Col>
-        <Col sm={12}>
-          <Table striped hover responsive>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Organization</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Position.map(position.associatedPositions, assocPos => (
-                <tr key={assocPos.uuid}>
-                  <td>
-                    {assocPos.person && (
-                      <LinkTo modelType="Person" model={assocPos.person} />
-                    )}
-                  </td>
-                  <td>
-                    <LinkTo modelType="Position" model={assocPos} />
-                  </td>
-                  <td>
-                    <LinkTo
-                      modelType="Organization"
-                      model={assocPos.organization}
-                    />
-                  </td>
+      (position.associatedPositions.length === 0 && (
+        <em>{position.name} has no counterparts assigned</em>
+      )) || (
+        <FormGroup controlId="counterparts">
+          <Col sm={4}>
+            <FormLabel>Counterpart of</FormLabel>
+          </Col>
+          <Col sm={12}>
+            <Table striped hover responsive>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Position</th>
+                  <th>Organization</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-          {position.associatedPositions.length === 0 && (
-            <em>{position.name} has no counterparts assigned</em>
-          )}
-        </Col>
-      </FormGroup>
+              </thead>
+              <tbody>
+                {Position.map(position.associatedPositions, assocPos => (
+                  <tr key={assocPos.uuid}>
+                    <td>
+                      {assocPos.person && (
+                        <LinkTo modelType="Person" model={assocPos.person} />
+                      )}
+                    </td>
+                    <td>
+                      <LinkTo modelType="Position" model={assocPos} />
+                    </td>
+                    <td>
+                      <LinkTo
+                        modelType="Organization"
+                        model={assocPos.organization}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Col>
+        </FormGroup>
+      )
     )
   }
 

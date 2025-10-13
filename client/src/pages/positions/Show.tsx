@@ -361,7 +361,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
         )}
 
         <Fieldset
-          title="Current assigned person"
+          title="Current person holding this position"
           id="assigned-person"
           className={
             !position.person || !position.person.uuid ? "warning" : undefined
@@ -374,8 +374,9 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
               <Button
                 onClick={() => setShowAssignPersonModal(true)}
                 variant="outline-secondary"
+                className="change-current-person"
               >
-                Change assigned person
+                Change current person
               </Button>
             )
           }
@@ -397,9 +398,9 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                   <Button
                     onClick={() => setShowAssignPersonModal(true)}
                     variant="outline-secondary"
-                    className="change-assigned-person"
+                    className="assign-current-person"
                   >
-                    Change assigned person
+                    Assign current person
                   </Button>
                 </p>
               )}
@@ -414,7 +415,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
         </Fieldset>
 
         <Fieldset
-          title={`Assigned ${Settings.fields.regular.person.name}`}
+          title="Assigned counterparts"
           id="assigned-counterpart"
           action={
             canEdit && (
@@ -422,19 +423,17 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                 onClick={() => setShowAssociatedPositionsModal(true)}
                 variant="outline-secondary"
               >
-                Change assigned {Settings.fields.regular.person.name}
+                Change assigned counterparts
               </Button>
             )
           }
         >
-          <AssociatedPositions
-            associatedPositions={position.associatedPositions}
-          />
-          {position.associatedPositions.length === 0 && (
-            <em>
-              {position.name} has no associated{" "}
-              {Settings.fields.regular.person.name}
-            </em>
+          {(position.associatedPositions.length === 0 && (
+            <em>{position.name} has no counterparts assigned</em>
+          )) || (
+            <AssociatedPositions
+              associatedPositions={position.associatedPositions}
+            />
           )}
 
           {canEdit && (
