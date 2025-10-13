@@ -60,6 +60,14 @@ export const EmailModal = ({
       }
     }
   }
+
+  const getUserPillInfo = (user: any) => {
+    const email = user.emailAddresses?.find(
+      ea => ea.network === EMAIL_NETWORK
+    )?.address
+    return `${user.name}${email ? ` <${email}>` : ""}`
+  }
+
   const personFields = `${Person.autocompleteQuery} emailAddresses(network: "${EMAIL_NETWORK}") { network address }`
   return (
     <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
@@ -103,7 +111,7 @@ export const EmailModal = ({
                     className="d-flex align-items-center p-2 gap-2 border border-secondary rounded"
                     key={user.uuid}
                   >
-                    {user.name}
+                    {getUserPillInfo(user)}
                     <Icon
                       icon={IconNames.CROSS}
                       style={{ cursor: "pointer" }}
