@@ -401,7 +401,7 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
-    LocationSearchQuery searchQuery = new LocationSearchQuery();
+    final LocationSearchQuery searchQuery = new LocationSearchQuery();
     searchQuery.setTrigram(martReport.getCountry());
     searchQuery.setType(Location.LocationType.COUNTRY);
     List<Location> countries = locationDao.search(searchQuery).getList();
