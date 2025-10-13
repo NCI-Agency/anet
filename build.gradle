@@ -783,8 +783,8 @@ startScripts {
 
 node {
 	nodeProjectDir = file("${project.projectDir}/client")
-	version = '20.10.0'
-	yarnVersion = '1.22.19'
+	version = '20.19.5'
+	yarnVersion = '1.22.22'
 	download = true
 }
 
