@@ -22,7 +22,7 @@ runs:
       path: |
         ~/.gradle/caches
         ./.gradle
-      key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle', 'settings.gradle') }}
       restore-keys: |
         ${{ runner.os }}-gradle-
   - name: Set up yarn
