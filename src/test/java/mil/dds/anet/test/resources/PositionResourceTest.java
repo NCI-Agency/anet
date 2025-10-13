@@ -31,7 +31,9 @@ import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.utils.Utils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class PositionResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
@@ -763,5 +765,44 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "888d6c4b-deaa-4218-b8fd-abfb7c81a4c6";
+    final Position test = withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+
+    // Update it
+    final PositionInput updatedInput = getPositionInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Position updated =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final PositionInput outdatedInput = getPositionInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Position forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 }

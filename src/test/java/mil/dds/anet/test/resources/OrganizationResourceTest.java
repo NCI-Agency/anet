@@ -25,7 +25,9 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
@@ -714,6 +716,59 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(getDomainUsername(getRegularUser()), orgInput);
   }
 
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var searchText = "exercitation";
+    final var query = OrganizationSearchQueryInput.builder().withText(searchText).build();
+    final var searchObjects = withCredentials(adminUser,
+        t -> queryExecutor.organizationList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isOne();
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "70193ee9-05b4-4aac-80b5-75609825db9f";
+    final Organization test =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testUuid));
+
+    // Update it
+    final OrganizationInput updatedInput = getOrganizationInput(test);
+    final String updatedProfile = UUID.randomUUID().toString();
+    updatedInput.setProfile(updatedProfile);
+    final Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Organization updated =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getProfile()).isEqualTo(updatedProfile);
+
+    // Try to update it again, with the input that is now outdated
+    final OrganizationInput outdatedInput = getOrganizationInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateOrganization("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Organization forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getProfile()).isEqualTo(test.getProfile());
+  }
+
   private void failCreateOrganization(final String username, final OrganizationInput orgInput) {
     try {
       withCredentials(username, t -> mutationExecutor.createOrganization(FIELDS, orgInput));
@@ -747,17 +802,5 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         withCredentials(username, t -> mutationExecutor.updateOrganization("", false, orgInput));
     assertThat(numOrg).isOne();
     return withCredentials(username, t -> queryExecutor.organization(FIELDS, orgInput.getUuid()));
-  }
-
-  @Test
-  void shouldBeSearchableViaCustomFields() {
-    final var searchText = "exercitation";
-    final var query = OrganizationSearchQueryInput.builder().withText(searchText).build();
-    final var searchObjects = withCredentials(adminUser,
-        t -> queryExecutor.organizationList(getListFields(FIELDS), query));
-    assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isOne();
-    assertThat(searchObjects.getList()).allSatisfy(
-        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }
 }

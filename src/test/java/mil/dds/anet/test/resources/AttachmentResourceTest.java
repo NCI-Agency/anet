@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -28,7 +29,9 @@ import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.utils.Utils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class AttachmentResourceTest extends AbstractResourceTest {
 
@@ -802,6 +805,46 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
     person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 4);
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "f076406f-1a9b-4fc9-8ab2-cd2a138ec26d";
+    final Attachment test =
+        withCredentials(adminUser, t -> queryExecutor.attachment(ATTACHMENT_FIELDS, testUuid));
+
+    // Update it
+    final AttachmentInput updatedInput = getInput(test, AttachmentInput.class);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final String updatedUuid =
+        withCredentials(adminUser, t -> mutationExecutor.updateAttachment("", updatedInput, false));
+    assertThat(updatedUuid).isEqualTo(testUuid);
+    final Attachment updated =
+        withCredentials(adminUser, t -> queryExecutor.attachment(ATTACHMENT_FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final AttachmentInput outdatedInput = getInput(test, AttachmentInput.class);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updateAttachment("", outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final String forceUpdatedUuid =
+        withCredentials(adminUser, t -> mutationExecutor.updateAttachment("", outdatedInput, true));
+    assertThat(forceUpdatedUuid).isEqualTo(testUuid);
+    final Attachment forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.attachment(ATTACHMENT_FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 
   private GenericRelatedObjectInput createAttachmentRelatedObject(final String tableName,

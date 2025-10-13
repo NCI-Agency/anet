@@ -23,7 +23,9 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
@@ -690,6 +692,43 @@ public class TaskResourceTest extends AbstractResourceTest {
       descendantTask.setStatus(Status.ACTIVE);
       succeedUpdateTask(adminUser, getTaskInput(descendantTask));
     });
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "12b8dbcc-8f31-444a-9437-00fe00fc1f7b";
+    final Task test = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testUuid));
+
+    // Update it
+    final TaskInput updatedInput = getTaskInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Task updated = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final TaskInput outdatedInput = getTaskInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Task forceUpdated = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 
   private void failCreateTask(final String username, final TaskInput taskInput) {

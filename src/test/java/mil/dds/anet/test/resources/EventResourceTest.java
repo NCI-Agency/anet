@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.UUID;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Event;
 import mil.dds.anet.test.client.Event;
@@ -14,7 +15,9 @@ import mil.dds.anet.test.client.EventType;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class EventResourceTest extends AbstractResourceTest {
 
@@ -109,6 +112,44 @@ public class EventResourceTest extends AbstractResourceTest {
         getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
     failCreateEvent(eInput);
     failUpdateEvent(eInput);
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "e850846e-9741-40e8-bc51-4dccc30cf47f";
+    final Event test = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, testUuid));
+
+    // Update it
+    final EventInput updatedInput = getEventInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", updatedInput, false));
+    assertThat(nrUpdated).isOne();
+    final Event updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final EventInput outdatedInput = getEventInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updateEvent("", outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", outdatedInput, true));
+    assertThat(nrForceUpdated).isOne();
+    final Event forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.event(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 
   private void failCreateEvent(final EventInput eventInput) {

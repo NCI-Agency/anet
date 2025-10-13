@@ -9,6 +9,7 @@ import graphql.com.google.common.collect.Iterables;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
@@ -26,8 +27,10 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 class AssessmentResourceTest extends AbstractResourceTest {
 
@@ -1604,6 +1607,45 @@ class AssessmentResourceTest extends AbstractResourceTest {
         succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
     assertThat(createdAssessment.getAssessmentValues()).isEqualTo(createAssessmentValues(
         combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""), recurrence));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testTaskUuid = "953e0b0b-25e6-44b6-bc77-ef98251d046a";
+    final Task testTask =
+        withCredentials(adminUser, t -> queryExecutor.task(TASK_FIELDS, testTaskUuid));
+    assertThat(testTask.getAssessments()).isNotEmpty();
+    final Assessment test = testTask.getAssessments().get(0);
+
+    // Update it
+    final AssessmentInput updatedInput = getAssessmentInput(test);
+    final String updatedAssessmentValues = String.format(
+        "{\"__recurrence\":\"once\",\"__relatedObjectType\":\"report\",\"question1\":\"%s\"}",
+        UUID.randomUUID());
+    updatedInput.setAssessmentValues(updatedAssessmentValues);
+    final Assessment updated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, updatedInput, false));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getAssessmentValues()).isEqualTo(updatedAssessmentValues);
+
+    // Try to update it again, with the input that is now outdated
+    final AssessmentInput outdatedInput = getAssessmentInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Assessment forceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, outdatedInput, true));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getAssessmentValues()).isEqualTo(test.getAssessmentValues());
   }
 
   private AssessmentInput createAssessment(final String assessmentKey, final String text,

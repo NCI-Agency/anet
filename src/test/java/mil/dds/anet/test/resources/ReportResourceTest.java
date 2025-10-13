@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ReportDao;
@@ -79,9 +80,11 @@ import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class ReportResourceTest extends AbstractResourceTest {
 
@@ -2786,5 +2789,39 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Set<String> activeAgAfterDeleteUuids = activeAgsAfterDelete.getList().stream()
         .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
     assertThat(activeAgUuids).isEqualTo(activeAgAfterDeleteUuids);
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "34265a98-7f82-4f16-b132-abcb60d307ad";
+    final Report test = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, testUuid));
+
+    // Update it
+    final ReportInput updatedInput = getReportInput(test);
+    final String updatedReportText = UUID.randomUUID().toString();
+    updatedInput.setReportText(updatedReportText);
+    final Report updated = withCredentials(adminUser,
+        t -> mutationExecutor.updateReport(FIELDS, false, updatedInput, false));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getReportText()).isEqualTo(updatedReportText);
+
+    // Try to update it again, with the input that is now outdated
+    final ReportInput outdatedInput = getReportInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateReport(FIELDS, false, outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Report forceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateReport(FIELDS, true, outdatedInput, false));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getReportText()).isEqualTo(test.getReportText());
   }
 }

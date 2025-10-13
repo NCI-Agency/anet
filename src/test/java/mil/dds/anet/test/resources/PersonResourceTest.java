@@ -42,10 +42,12 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
@@ -948,5 +950,83 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "d9f3ee10-6e01-4d57-9916-67978608e9ba";
+    final Person test = withCredentials(adminUser, t -> queryExecutor.person(FIELDS, testUuid));
+
+    // Update it
+    final PersonInput updatedInput = getPersonInput(test);
+    final String updatedBiography = UUID.randomUUID().toString();
+    updatedInput.setBiography(updatedBiography);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Person updated = withCredentials(adminUser, t -> queryExecutor.person(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getBiography()).isEqualTo(updatedBiography);
+
+    // Try to update it again, with the input that is now outdated
+    final PersonInput outdatedInput = getPersonInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Person forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getBiography()).isEqualTo(test.getBiography());
+  }
+
+  @Test
+  void testUpdateMeConflict() {
+    final String testUuid = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9";
+    final String regularUser = "erin";
+    final Person test = withCredentials(regularUser, t -> queryExecutor.me(FIELDS));
+
+    // Update it
+    final PersonInput updatedInput = getPersonInput(test);
+    final String updatedBiography = UUID.randomUUID().toString();
+    updatedInput.setBiography(updatedBiography);
+    final Integer nrUpdated =
+        withCredentials(regularUser, t -> mutationExecutor.updateMe("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Person updated =
+        withCredentials(regularUser, t -> queryExecutor.person(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getBiography()).isEqualTo(updatedBiography);
+
+    // Try to update it again, with the input that is now outdated
+    final PersonInput outdatedInput = getPersonInput(test);
+    try {
+      withCredentials(regularUser, t -> mutationExecutor.updateMe("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(regularUser, t -> mutationExecutor.updateMe("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Person forceUpdated =
+        withCredentials(regularUser, t -> queryExecutor.person(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getBiography()).isEqualTo(test.getBiography());
   }
 }
