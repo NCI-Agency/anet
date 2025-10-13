@@ -199,6 +199,7 @@ public class MartDictionaryService implements IMartDictionaryService {
     final List<Map<String, Object>> result = new ArrayList<>();
     final LocationSearchQuery query = new LocationSearchQuery();
     query.setType(LocationType.MUNICIPALITY);
+    query.setStatus(WithStatus.Status.ACTIVE);
     query.setPageSize(0);
 
     final List<Location> municipalities =

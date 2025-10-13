@@ -31,12 +31,8 @@ public class Location extends AbstractCustomizableAnetBean
     GEOGRAPHICAL_AREA("PA"), // -
     COUNTRY("PAC"), // -
     MUNICIPALITY("PAM"), // -
-    TOWN("PAMT"), // -
+    TOWN("PAT"), // -
     POINT_LOCATION("PP"), // -
-    @Deprecated
-    _PLACEHOLDER_3_(""), // Should no longer be used but remain in place to keep the correct values
-    @Deprecated
-    _PLACEHOLDER_4_(""), // Should no longer be used but remain in place to keep the correct values
     VIRTUAL_LOCATION("V");
 
     private static final Map<String, LocationType> BY_CODE = new HashMap<>();

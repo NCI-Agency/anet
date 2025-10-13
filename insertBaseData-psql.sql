@@ -251,7 +251,7 @@ INSERT INTO locations (uuid, type, name, "createdAt", "updatedAt") VALUES
   ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('92fbce65-8fa9-403b-a5a2-f0c3189e4f9a', 'PA', 'MART Municipality Group', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('9f83fe70-e9f5-4e92-ae48-5c4fd7076f46', 'PAM', 'Decani / Decan', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('178dfbba-f15a-400b-9135-6ff800246be0', 'PAMT', 'Babaloc / Baballoq', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('178dfbba-f15a-400b-9135-6ff800246be0', 'PAT', 'Babaloc / Baballoq', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Set up locationRelationships
 INSERT INTO "locationRelationships" ("childLocationUuid", "parentLocationUuid") VALUES
