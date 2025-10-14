@@ -72,6 +72,9 @@ const AttachmentSearchResults = (props: GenericSearchResultsProps) => (
     tableResultsProp="attachments"
     tableId="attachments-search-results"
     {...props}
+    extraProps={{
+      showOwner: true
+    }}
   />
 )
 

@@ -66,6 +66,9 @@ const EventSearchResults = (props: GenericSearchResultsProps) => (
     tableResultsProp="events"
     tableId="events-search-results"
     {...props}
+    extraProps={{
+      showEventSeries: true
+    }}
   />
 )
 
