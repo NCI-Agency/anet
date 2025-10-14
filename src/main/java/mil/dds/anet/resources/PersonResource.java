@@ -252,7 +252,7 @@ public class PersonResource {
         existingPositionUuid);
 
     if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "At least one of the positions in the history is occupied for the specified period.");
     }
 
@@ -415,7 +415,7 @@ public class PersonResource {
         winnerPositionUuid);
 
     if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "At least one of the positions in the history is occupied for the specified period.");
     }
 

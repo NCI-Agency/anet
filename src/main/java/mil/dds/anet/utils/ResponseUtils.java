@@ -204,7 +204,7 @@ public class ResponseUtils {
         logger.error("Duplicate found", e);
         logger.error("Caused by", cause);
         logger.error("With message: {}", message);
-        return new ResponseStatusException(HttpStatus.CONFLICT, userMessage);
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, userMessage);
       }
     }
     logger.error("Unexpected SQL exception raised", e);
