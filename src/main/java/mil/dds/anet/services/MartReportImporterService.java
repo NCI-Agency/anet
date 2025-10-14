@@ -402,16 +402,16 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
     final LocationSearchQuery searchQuery = new LocationSearchQuery();
-    searchQuery.setTrigram(martReport.getCountry());
     searchQuery.setType(Location.LocationType.COUNTRY);
+    searchQuery.setStatus(WithStatus.Status.ACTIVE);
+    if (isValidAlpha3Format(martReport.getCountry())) {
+      searchQuery.setTrigram(martReport.getCountry());
+    } else {
+      searchQuery.setName(martReport.getCountry());
+    }
     List<Location> countries = locationDao.search(searchQuery).getList();
     if (countries.isEmpty()) {
-      searchQuery.setTrigram(null);
-      searchQuery.setText(martReport.getCountry());
-      countries = locationDao.search(searchQuery).getList();
-    }
-    if (countries.isEmpty()) {
-      errors.add(String.format("Can not find submitter country '%s'", martReport.getCountry()));
+      errors.add(String.format("Can not find submitter country: '%s'", martReport.getCountry()));
     } else {
       person.setCountry(countries.get(0));
     }
@@ -426,5 +426,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     rp.setInterlocutor(false);
     BeanUtils.copyProperties(person, rp);
     return rp;
+  }
+
+  private static boolean isValidAlpha3Format(String code) {
+    return code != null && code.matches("^[A-Z]{3}$");
   }
 }

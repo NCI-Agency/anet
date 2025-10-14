@@ -125,8 +125,8 @@ public class TestData {
     reportDto.setOrganizationName("Planning Programming, Budgeting and Execution");
     reportDto.setRank("OF-6");
     reportDto.setEmail("mart-user@kfor.nato.int");
-    reportDto.setFirstName("MART");
-    reportDto.setLastName("User");
+    reportDto.setFirstName("Larry");
+    reportDto.setLastName("Bird");
 
     // Report Info
     reportDto.setCreatedAt(Instant.now());
@@ -152,13 +152,34 @@ public class TestData {
     return reportDto;
   }
 
+  public static ReportDto createGoodMartReportWithDifferentUser(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setUuid("545dc623-114e-4edd-be4f-8a000109791a");
+    reportDto.setRank("OF-5");
+    reportDto.setEmail("mart-user-2@kfor.nato.int");
+    reportDto.setFirstName("Reggie");
+    reportDto.setLastName("Miller");
+    reportDto.setCountry("Spain");
+    return reportDto;
+  }
+
+  public static ReportDto createGoodMartReportWithDifferentUserAndWrongCountry(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setUuid("f35ea806-acac-467c-96a7-75d809cd6705");
+    reportDto.setRank("OF-4");
+    reportDto.setEmail("mart-user-3@kfor.nato.int");
+    reportDto.setFirstName("John");
+    reportDto.setLastName("Stockton");
+    reportDto.setCountry("Bogus");
+    return reportDto;
+  }
+
   public static ReportDto createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(
       long sequence) {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
     reportDto.getTasks().put("does not exist", "does not exist");
     reportDto.setSecurityMarking(null);
-    reportDto.setCountry("Spain");
     return reportDto;
   }
 
