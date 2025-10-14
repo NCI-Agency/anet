@@ -130,6 +130,8 @@ const EventForm = ({
         setFieldValue,
         setFieldTouched,
         values,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()

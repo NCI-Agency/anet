@@ -148,6 +148,8 @@ const TaskForm = ({
         setFieldTouched,
         values,
         validateForm,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isAdmin = currentUser?.isAdmin()

@@ -94,6 +94,8 @@ const EventSeriesForm = ({
         setFieldValue,
         setFieldTouched,
         values,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isAdmin = currentUser?.isAdmin()
