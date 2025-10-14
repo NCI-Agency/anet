@@ -732,6 +732,7 @@ const EventForm = ({
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
     event.location = utils.getReference(event.location)
+    event.eventSeries = utils.getReference(event.eventSeries)
     return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
       event
     })
