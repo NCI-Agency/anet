@@ -463,13 +463,14 @@ const MySavedSearches = ({
 
       let newHomepagePriority
       if (to === 0) {
-        newHomepagePriority = updated[0].homepagePriority - 1
-      } else if (to === updated.length - 1) {
-        newHomepagePriority = updated[updated.length - 1].homepagePriority + 1.0
+        newHomepagePriority = prevSearches[0].homepagePriority - 1.0
+      } else if (to === prevSearches.length - 1) {
+        newHomepagePriority =
+          prevSearches[prevSearches.length - 1].homepagePriority + 1.0
       } else {
         const above = updated[to - 1].homepagePriority
         const below = updated[to + 1].homepagePriority
-        newHomepagePriority = (above + below) / 2
+        newHomepagePriority = (above + below) / 2.0
       }
 
       updated[to].homepagePriority = newHomepagePriority
@@ -483,9 +484,7 @@ const MySavedSearches = ({
     if (!search) {
       return
     }
-    API.mutation(GQL_UPDATE_SAVED_SEARCH, {
-      savedSearch: search
-    })
+    API.mutation(GQL_UPDATE_SAVED_SEARCH, { savedSearch: search })
   }
 
   const showSearch = uuid => {

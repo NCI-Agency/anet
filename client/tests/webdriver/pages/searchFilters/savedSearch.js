@@ -17,6 +17,7 @@ class SavedSearch extends Page {
     await addFilterButton.click()
 
     const withinOrganizationButton = await browser.$("a*=Within Organization")
+    await withinOrganizationButton.waitForDisplayed()
     await withinOrganizationButton.click()
   }
 

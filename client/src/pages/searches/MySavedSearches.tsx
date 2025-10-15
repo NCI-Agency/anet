@@ -122,23 +122,23 @@ const MySavedSearches = ({
 
   const moveRow = (from, to) => {
     setSearches(prevSearches => {
-      const updatedSearches = [...prevSearches]
-      const [removed] = updatedSearches.splice(from, 1)
-      updatedSearches.splice(to, 0, removed)
+      const updated = [...prevSearches]
+      const [removed] = updated.splice(from, 1)
+      updated.splice(to, 0, removed)
 
       let newPriority
       if (to === 0) {
-        newPriority = updatedSearches[0].priority - 1
-      } else if (to === updatedSearches.length - 1) {
-        newPriority = updatedSearches[updatedSearches.length - 1].priority + 1.0
+        newPriority = prevSearches[0].priority - 1.0
+      } else if (to === prevSearches.length - 1) {
+        newPriority = prevSearches[prevSearches.length - 1].priority + 1.0
       } else {
-        const above = updatedSearches[to - 1].priority
-        const below = updatedSearches[to + 1].priority
-        newPriority = (above + below) / 2
+        const above = updated[to - 1].priority
+        const below = updated[to + 1].priority
+        newPriority = (above + below) / 2.0
       }
 
-      updatedSearches[to].priority = newPriority
-      return updatedSearches
+      updated[to].priority = newPriority
+      return updated
     })
   }
 
