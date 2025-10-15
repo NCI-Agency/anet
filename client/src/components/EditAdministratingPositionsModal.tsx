@@ -5,7 +5,7 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import { FastField, Form, Formik } from "formik"
@@ -17,8 +17,8 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_UPDATE_ORGANIZATION = gql`
-  mutation ($organization: OrganizationInput!) {
-    updateOrganization(organization: $organization)
+  mutation ($organization: OrganizationInput!, $force: Boolean) {
+    updateOrganization(organization: $organization, force: $force)
   }
 `
 
@@ -55,7 +55,14 @@ const EditAdministratingPositionsModal = ({
 
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={organization}>
-      {({ setFieldValue, values, submitForm, setFieldTouched }) => {
+      {({
+        setFieldValue,
+        values,
+        submitForm,
+        setFieldTouched,
+        resetForm,
+        setSubmitting
+      }) => {
         return (
           <Modal
             centered
@@ -72,7 +79,15 @@ const EditAdministratingPositionsModal = ({
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Messages error={error} />
+              <MessagesWithConflict
+                error={error}
+                objectType="Organization"
+                onCancel={() => close(setFieldValue)}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
               <Form className="form-horizontal" method="post">
                 <Container fluid>
                   <Row>
@@ -153,9 +168,9 @@ const EditAdministratingPositionsModal = ({
     onCancel()
   }
 
-  async function onSubmit(values, form) {
+  async function onSubmit(values, form, force) {
     try {
-      await save(values, form)
+      await save(values, form, force)
       return onSuccess()
     } catch (error) {
       form.setSubmitting(false)
@@ -164,7 +179,7 @@ const EditAdministratingPositionsModal = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const organization = Organization.filterClientSideFields(
       new Organization(values)
     )
@@ -172,7 +187,7 @@ const EditAdministratingPositionsModal = ({
     organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
     organization.customFields = customFieldsJSONString(values)
-    return API.mutation(GQL_UPDATE_ORGANIZATION, { organization })
+    return API.mutation(GQL_UPDATE_ORGANIZATION, { organization, force })
   }
 }
 

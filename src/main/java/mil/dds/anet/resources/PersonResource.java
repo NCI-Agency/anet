@@ -150,11 +150,14 @@ public class PersonResource {
 
   @GraphQLMutation(name = "updatePerson")
   public Integer updatePerson(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "person") Person p) {
+      @GraphQLArgument(name = "person") Person p,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     p.checkAndFixCustomFields();
+
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
+    DaoUtils.assertObjectIsFresh(p, existing, force);
 
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
@@ -249,7 +252,7 @@ public class PersonResource {
         existingPositionUuid);
 
     if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "At least one of the positions in the history is occupied for the specified period.");
     }
 
@@ -339,15 +342,20 @@ public class PersonResource {
   @GraphQLMutation(name = "updateMe")
   @AllowUnverifiedUsers
   public Integer updateCurrentUser(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "person") Person p) {
+      @GraphQLArgument(name = "person") Person p,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
+    p.checkAndFixCustomFields();
+
     final Person user = DaoUtils.getUserFromContext(context);
     if (!Objects.equals(DaoUtils.getUuid(user), p.getUuid())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update yourself");
     }
 
+    final Person existing = dao.getByUuid(p.getUuid());
+    DaoUtils.assertObjectIsFresh(p, existing, force);
+
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
-      final Person existing = dao.getByUuid(p.getUuid());
       p.setUser(existing.getUser());
       p.setUsers(existing.getUsers());
     }
@@ -360,7 +368,6 @@ public class PersonResource {
         (Boolean) dict.getDictionaryEntry("automaticallyAllowAllNewUsers");
     if (Boolean.FALSE.equals(automaticallyAllowAllNewUsers)) {
       // Users can not verify their own account!
-      final Person existing = dao.getByUuid(p.getUuid());
       p.setPendingVerification(existing.getPendingVerification());
     }
 
@@ -408,7 +415,7 @@ public class PersonResource {
         winnerPositionUuid);
 
     if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "At least one of the positions in the history is occupied for the specified period.");
     }
 

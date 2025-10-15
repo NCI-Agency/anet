@@ -26,6 +26,7 @@ const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
       uuid
+      updatedAt
       name
       code
       status

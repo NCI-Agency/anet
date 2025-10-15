@@ -74,8 +74,10 @@ public class ReportSensitiveInformationDao
       DaoUtils.setInsertFields(rsi);
       handle
           .createUpdate("/* insertReportsSensitiveInformation */ INSERT INTO \"" + TABLE_NAME
-              + "\" " + " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
-              + "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
+              + "\" (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\")"
+              + " VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)"
+              + " ON CONFLICT (\"reportUuid\") DO UPDATE "
+              + " SET text = :text, \"updatedAt\" = :updatedAt")
           .bindBean(rsi).bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
           .bind("reportUuid", report.getUuid()).execute();

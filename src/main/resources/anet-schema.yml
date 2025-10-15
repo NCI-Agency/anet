@@ -482,7 +482,7 @@ properties:
   dateFormats:
     type: object
     additionalProperties: false
-    required: [email, excel, forms]
+    required: [email, excel, upToDateCheck, forms]
     properties:
       email:
         type: object
@@ -500,7 +500,11 @@ properties:
       excel:
         type: string
         title: The date format for Excel export
-        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
+        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
+      upToDateCheck:
+        type: string
+        title: The date format used in messages related to the up-to-date check when saving objects
+        description: See https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
       forms:
         type: object
         additionalProperties: false

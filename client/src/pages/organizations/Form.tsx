@@ -29,7 +29,7 @@ import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
@@ -58,8 +58,8 @@ const GQL_CREATE_ORGANIZATION = gql`
   }
 `
 const GQL_UPDATE_ORGANIZATION = gql`
-  mutation ($organization: OrganizationInput!) {
-    updateOrganization(organization: $organization)
+  mutation ($organization: OrganizationInput!, $force: Boolean) {
+    updateOrganization(organization: $organization, force: $force)
   }
 `
 
@@ -122,6 +122,8 @@ const OrganizationForm = ({
         setFieldTouched,
         values,
         validateForm,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
@@ -205,7 +207,15 @@ const OrganizationForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Organization"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -653,8 +663,8 @@ const OrganizationForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
+  function onSubmit(values, form, force) {
+    return save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -683,7 +693,7 @@ const OrganizationForm = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const organization = Organization.filterClientSideFields(
       new Organization(values)
     )
@@ -694,7 +704,7 @@ const OrganizationForm = ({
     organization.customFields = customFieldsJSONString(values)
     return API.mutation(
       edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
-      { organization }
+      { organization, force }
     ).then()
   }
 }

@@ -22,7 +22,7 @@ import EmailAddressInputTable, {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -50,8 +50,8 @@ const GQL_CREATE_POSITION = gql`
   }
 `
 const GQL_UPDATE_POSITION = gql`
-  mutation ($position: PositionInput!) {
-    updatePosition(position: $position)
+  mutation ($position: PositionInput!, $force: Boolean) {
+    updatePosition(position: $position, force: $force)
   }
 `
 const GQL_GET_POSITION_COUNT = gql`
@@ -205,6 +205,8 @@ const PositionForm = ({
         setFieldTouched,
         values,
         validateForm,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
@@ -263,7 +265,15 @@ const PositionForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Position"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -563,8 +573,8 @@ const PositionForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
+  function onSubmit(values, form, force) {
+    return save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -592,7 +602,7 @@ const PositionForm = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const position = new Position(values).filterClientSideFields(
       "previousPeople",
       "customFields",
@@ -610,7 +620,8 @@ const PositionForm = ({
     position.customFields = customFieldsJSONString(values)
 
     return API.mutation(edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION, {
-      position
+      position,
+      force
     })
   }
 

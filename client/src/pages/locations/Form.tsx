@@ -18,7 +18,7 @@ import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import LocationTable from "components/LocationTable"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -45,8 +45,8 @@ const GQL_CREATE_LOCATION = gql`
   }
 `
 const GQL_UPDATE_LOCATION = gql`
-  mutation ($location: LocationInput!) {
-    updateLocation(location: $location)
+  mutation ($location: LocationInput!, $force: Boolean) {
+    updateLocation(location: $location, force: $force)
   }
 `
 
@@ -180,6 +180,8 @@ const LocationForm = ({
         setFieldValue,
         values,
         validateForm,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const marker = {
@@ -222,7 +224,15 @@ const LocationForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Location"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -533,8 +543,8 @@ const LocationForm = ({
     }
   }
 
-  function onSubmit(values, form) {
-    return save(values)
+  function onSubmit(values, form, force) {
+    return save(values, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -568,7 +578,7 @@ const LocationForm = ({
     }
   }
 
-  function save(values) {
+  function save(values, force) {
     const location = new Location(values).filterClientSideFields("customFields")
     // strip unnecessary fields
     location.parentLocations = values.parentLocations?.map(l =>
@@ -580,7 +590,8 @@ const LocationForm = ({
     }
     location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
-      location
+      location,
+      force
     })
   }
 

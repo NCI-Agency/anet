@@ -9,6 +9,7 @@ import graphql.com.google.common.collect.Iterables;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
@@ -26,21 +27,24 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 class AssessmentResourceTest extends AbstractResourceTest {
 
   protected static final String ASSESSMENT_FIELDS =
-      "{ uuid assessmentKey assessmentValues author { uuid }"
+      "{ uuid updatedAt assessmentKey assessmentValues author { uuid }"
           + " assessmentRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ASSESSMENTS_FIELDS =
       String.format("assessments %1$s", ASSESSMENT_FIELDS);
   private static final String PERSON_FIELDS =
       String.format("{ uuid name %1$s }", _ASSESSMENTS_FIELDS);
-  private static final String REPORT_FIELDS = String
-      .format("{ uuid intent state reportPeople { uuid name author attendee primary interlocutor }"
-          + " tasks { uuid shortName } %1$s }", _ASSESSMENTS_FIELDS);
+  private static final String REPORT_FIELDS = String.format(
+      "{ uuid updatedAt intent state reportPeople { uuid name author attendee primary interlocutor }"
+          + " tasks { uuid shortName } %1$s }",
+      _ASSESSMENTS_FIELDS);
   private static final String TASK_FIELDS =
       String.format("{ uuid shortName %1$s }", _ASSESSMENTS_FIELDS);
 
@@ -693,11 +697,9 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInput = getAssessmentInput(createdAssessment);
     updatedAssessmentInput
         .setAssessmentValues(createAssessmentValues("updated by andrew", recurrence));
-    succeedAssessmentUpdate("andrew", updatedAssessmentInput);
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
-    final Assessment updatedAssessment =
-        succeedAssessmentUpdate(getDomainUsername(getRegularUser()), updatedAssessmentInput);
+    final Assessment updatedAssessment = succeedAssessmentUpdate("andrew", updatedAssessmentInput);
 
     // - S: delete it as someone without counterpart and with no auth.groups defined in the
     // dictionary
@@ -921,7 +923,6 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInput = getAssessmentInput(createdAssessment);
     updatedAssessmentInput
         .setAssessmentValues(createAssessmentValues("updated by erin", recurrence));
-    succeedAssessmentUpdate("erin", updatedAssessmentInput);
     final List<AssessmentInput> updatedAssessmentsInput =
         Lists.newArrayList(updatedAssessmentInput);
     final Assessment updatedAssessment = succeedAssessmentUpdate("erin", updatedAssessmentInput);
@@ -1445,7 +1446,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
     withCredentials(getDomainUsername(reportAuthor),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), false));
     // Then delete it
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
@@ -1517,7 +1518,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
     withCredentials(getDomainUsername(reportAuthor),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), false));
     // Then delete it
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
@@ -1586,7 +1587,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     // Update it as author so it goes back to draft
     withCredentials(getDomainUsername(reportAuthor),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), false));
     // Then delete it
     final int nrDeleted = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.deleteReport("", reportUuid));
@@ -1606,6 +1607,45 @@ class AssessmentResourceTest extends AbstractResourceTest {
         succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
     assertThat(createdAssessment.getAssessmentValues()).isEqualTo(createAssessmentValues(
         combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""), recurrence));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testTaskUuid = "953e0b0b-25e6-44b6-bc77-ef98251d046a";
+    final Task testTask =
+        withCredentials(adminUser, t -> queryExecutor.task(TASK_FIELDS, testTaskUuid));
+    assertThat(testTask.getAssessments()).isNotEmpty();
+    final Assessment test = testTask.getAssessments().get(0);
+
+    // Update it
+    final AssessmentInput updatedInput = getAssessmentInput(test);
+    final String updatedAssessmentValues = String.format(
+        "{\"__recurrence\":\"once\",\"__relatedObjectType\":\"report\",\"question1\":\"%s\"}",
+        UUID.randomUUID());
+    updatedInput.setAssessmentValues(updatedAssessmentValues);
+    final Assessment updated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, updatedInput, false));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getAssessmentValues()).isEqualTo(updatedAssessmentValues);
+
+    // Try to update it again, with the input that is now outdated
+    final AssessmentInput outdatedInput = getAssessmentInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Assessment forceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, outdatedInput, true));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getAssessmentValues()).isEqualTo(test.getAssessmentValues());
   }
 
   private AssessmentInput createAssessment(final String assessmentKey, final String text,
@@ -1639,7 +1679,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private void failAssessmentUpdate(final String username, final AssessmentInput assessmentInput) {
     try {
       withCredentials(username,
-          t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput));
+          t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput, false));
       fail("Expected exception updating assessment");
     } catch (Exception expectedException) {
       // OK
@@ -1667,7 +1707,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private Assessment succeedAssessmentUpdate(final String username,
       final AssessmentInput assessmentInput) {
     final Assessment updatedAssessment = withCredentials(username,
-        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput));
+        t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput, false));
     assertThat(updatedAssessment).isNotNull();
     assertThat(updatedAssessment.getAssessmentValues())
         .isEqualTo(assessmentInput.getAssessmentValues());

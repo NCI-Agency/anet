@@ -7,7 +7,7 @@ import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
@@ -28,8 +28,8 @@ const GQL_CREATE_ATTACHMENT = gql`
 `
 
 const GQL_UPDATE_ATTACHMENT = gql`
-  mutation ($attachment: AttachmentInput!) {
-    updateAttachment(attachment: $attachment)
+  mutation ($attachment: AttachmentInput!, $force: Boolean) {
+    updateAttachment(attachment: $attachment, force: $force)
   }
 `
 
@@ -71,6 +71,7 @@ const AttachmentForm = ({
         setFieldTouched,
         values,
         resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const { iconSize, iconImage } = utils.getAttachmentIconDetails(values)
@@ -88,7 +89,15 @@ const AttachmentForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Attachment"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -257,8 +266,8 @@ const AttachmentForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values)
+  function onSubmit(values, form, force) {
+    return save(values, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -285,7 +294,7 @@ const AttachmentForm = ({
     })
   }
 
-  function save(values) {
+  function save(values, force) {
     const attachment = Attachment.filterClientSideFields(values)
     attachment.attachmentRelatedObjects = values.attachmentRelatedObjects.map(
       ({ relatedObjectType, relatedObjectUuid }) => ({
@@ -294,7 +303,8 @@ const AttachmentForm = ({
       })
     )
     return API.mutation(edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT, {
-      attachment
+      attachment,
+      force
     })
   }
 }

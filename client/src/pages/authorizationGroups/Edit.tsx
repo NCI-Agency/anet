@@ -18,6 +18,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String!) {
     authorizationGroup(uuid: $uuid) {
       uuid
+      updatedAt
       name
       description
       status

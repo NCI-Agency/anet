@@ -7,7 +7,7 @@ import AppContext from "components/AppContext"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -30,8 +30,11 @@ const GQL_CREATE_AUTHORIZATION_GROUP = gql`
   }
 `
 const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
-  mutation ($authorizationGroup: AuthorizationGroupInput!) {
-    updateAuthorizationGroup(authorizationGroup: $authorizationGroup)
+  mutation ($authorizationGroup: AuthorizationGroupInput!, $force: Boolean) {
+    updateAuthorizationGroup(
+      authorizationGroup: $authorizationGroup
+      force: $force
+    )
   }
 `
 
@@ -88,6 +91,8 @@ const AuthorizationGroupForm = ({
         setFieldValue,
         setFieldTouched,
         values,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const action = (
@@ -103,7 +108,15 @@ const AuthorizationGroupForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType="Community"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -305,8 +318,8 @@ const AuthorizationGroupForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
+  function onSubmit(values, form, force) {
+    return save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -336,7 +349,7 @@ const AuthorizationGroupForm = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const authorizationGroup = AuthorizationGroup.filterClientSideFields(values)
     authorizationGroup.authorizationGroupRelatedObjects =
       authorizationGroup.authorizationGroupRelatedObjects.map(ro =>
@@ -344,7 +357,7 @@ const AuthorizationGroupForm = ({
       )
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
-      { authorizationGroup }
+      { authorizationGroup, force }
     )
   }
 }

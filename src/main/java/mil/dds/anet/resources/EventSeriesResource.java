@@ -81,13 +81,14 @@ public class EventSeriesResource {
 
   @GraphQLMutation(name = "updateEventSeries")
   public Integer updateEventSeries(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "eventSeries") EventSeries eventSeries) {
+      @GraphQLArgument(name = "eventSeries") EventSeries eventSeries,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
-    validateEventSeries(user, eventSeries);
-
-    // Validate user has permission also for the original adminOrg
     final EventSeries existing = dao.getByUuid(eventSeries.getUuid());
     assertPermission(user, existing.getAdminOrgUuid());
+    DaoUtils.assertObjectIsFresh(eventSeries, existing, force);
+
+    validateEventSeries(user, eventSeries);
 
     eventSeries.setDescription(Utils.isEmptyHtml(eventSeries.getDescription()) ? null
         : Utils.sanitizeHtml(eventSeries.getDescription()));

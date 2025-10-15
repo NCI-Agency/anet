@@ -161,8 +161,8 @@ export const GQL_CREATE_ASSESSMENT = gql`
   }
 `
 export const GQL_UPDATE_ASSESSMENT = gql`
-  mutation($assessment: AssessmentInput!) {
-    updateAssessment(assessment: $assessment) {
+  mutation($assessment: AssessmentInput!, $force: Boolean) {
+    updateAssessment(assessment: $assessment, force: $force) {
       ${GRAPHQL_ASSESSMENT_FIELDS}
     }
   }
@@ -182,8 +182,8 @@ export const GQL_CREATE_NOTE = gql`
   }
 `
 export const GQL_UPDATE_NOTE = gql`
-  mutation($note: NoteInput!) {
-    updateNote(note: $note) {
+  mutation($note: NoteInput!, $force: Boolean) {
+    updateNote(note: $note, force: $force) {
       ${GRAPHQL_NOTE_FIELDS}
     }
   }

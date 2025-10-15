@@ -1,7 +1,7 @@
 import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import * as FieldHelper from "components/FieldHelper"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model, { GQL_CREATE_NOTE, GQL_UPDATE_NOTE } from "components/Model"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
@@ -66,6 +66,8 @@ const RelatedObjectNoteModal = ({
           isValid,
           setFieldValue,
           setFieldTouched,
+          resetForm,
+          setSubmitting,
           submitForm
         }) => {
           return (
@@ -84,7 +86,15 @@ const RelatedObjectNoteModal = ({
                     height: "100%"
                   }}
                 >
-                  <Messages error={error} />
+                  <MessagesWithConflict
+                    error={error}
+                    objectType="Note"
+                    onCancel={close}
+                    onConfirm={() => {
+                      resetForm({ note, isSubmitting: true })
+                      onSubmit(note, { resetForm, setSubmitting }, true)
+                    }}
+                  />
                   <Field
                     name="text"
                     value={note.text}
@@ -135,8 +145,8 @@ const RelatedObjectNoteModal = ({
     </Modal>
   )
 
-  function onSubmit(values, form) {
-    return save(values, form)
+  function onSubmit(values, form, force) {
+    return save(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -151,19 +161,21 @@ const RelatedObjectNoteModal = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const noteRelatedObjects = relatedObjects.map(o => ({
       relatedObjectType: o.relatedObjectType,
       relatedObjectUuid: o.relatedObjectUuid
     }))
     const updatedNote = {
       uuid: values.uuid,
+      updatedAt: values.updatedAt,
       author: values.author,
       noteRelatedObjects,
       text: values.text
     }
     return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
-      note: updatedNote
+      note: updatedNote,
+      force
     })
   }
 

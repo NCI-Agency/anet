@@ -201,12 +201,13 @@ public class ReportResource {
   @GraphQLMutation(name = "updateReport")
   public Report updateReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "report") Report r,
-      @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail) {
+      @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     r.checkAndFixCustomFields();
     Person editor = DaoUtils.getUserFromContext(context);
     // perform all modifications to the report and its tasks and steps in a single transaction,
     // returning the original state of the report
-    final Report existing = executeReportUpdates(editor, r);
+    final Report existing = executeReportUpdates(editor, r, force);
 
     if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
       boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
@@ -238,15 +239,17 @@ public class ReportResource {
    *
    * @param editor the current user (for authorization checks)
    * @param r a Report object with the desired modifications
+   * @param force whether to force the update
    * @return the report as it was stored in the database before this method was called.
    */
-  private Report executeReportUpdates(Person editor, Report r) {
+  private Report executeReportUpdates(Person editor, Report r, boolean force) {
     // Verify this person has access to edit this report
     // Either they are an author, or an approver for the current step.
     final Report existing = reportDao.getByUuid(r.getUuid());
     if (existing == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
+    DaoUtils.assertObjectIsFresh(r, existing, force);
 
     if (r.getReportPeople() == null
         || r.getReportPeople().stream().noneMatch(ReportPerson::isAuthor)) {

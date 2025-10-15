@@ -25,19 +25,21 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   public static final String FIELDS =
-      String.format("{ uuid shortName longName status identificationCode profile location"
+      String.format("{ uuid updatedAt shortName longName status identificationCode profile location"
           + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier app6entity"
           + " app6entityType app6entitySubtype app6sectorOneModifier app6sectorTwoModifier"
           + " customFields tasks { uuid } parentOrg { uuid }"
           + " approvalSteps { uuid name approvers { uuid } } %1$s }", _EMAIL_ADDRESSES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
-      "{ uuid name code type role status organization { uuid } location { uuid } %1$s }",
+      "{ uuid updatedAt name code type role status organization { uuid } location { uuid } %1$s }",
       _EMAIL_ADDRESSES_FIELDS);
 
   private static final Map<String, String> APP6_MAP = Map.ofEntries(Map.entry("app6context", "0"),
@@ -81,37 +83,39 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
+    final Organization updated =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, created.getUuid()));
 
     // update profile
-    created.setProfile(UtilsTest.getCombinedHtmlTestCase().getInput());
+    updated.setProfile(UtilsTest.getCombinedHtmlTestCase().getInput());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(updated)));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify the AO name is updated.
-    Organization updated =
-        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, created.getUuid()));
-    assertThat(updated.getLongName()).isEqualTo(created.getLongName());
+    final Organization updated2 =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, updated.getUuid()));
+    assertThat(updated2.getLongName()).isEqualTo(updated.getLongName());
     // check that HTML of profile is sanitized after update
-    assertThat(updated.getProfile()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    assertThat(updated2.getProfile()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     // Add HTML to profile and ensure it gets stripped out.
-    created.setProfile(
+    updated2.setProfile(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(updated2)));
     assertThat(nrUpdated).isEqualTo(1);
 
-    updated =
-        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, created.getUuid()));
-    assertThat(updated.getProfile()).contains("<b>Hello world</b>");
-    assertThat(updated.getProfile()).doesNotContain("<script>window.alert");
+    final Organization updated3 =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, updated2.getUuid()));
+    assertThat(updated3.getProfile()).contains("<b>Hello world</b>");
+    assertThat(updated3.getProfile()).doesNotContain("<script>window.alert");
 
     // Create a position and put it in this AO
     final PositionInput b1Input = getPositionInput(TestData.getTestAdvisor());
-    b1Input.setOrganization(getOrganizationInput(updated));
+    b1Input.setOrganization(getOrganizationInput(updated3));
     b1Input.setLocation(getLocationInput(getGeneralHospital()));
     b1Input.setCode(b1Input.getCode() + "_" + Instant.now().toEpochMilli());
     final Position createdPos =
@@ -121,17 +125,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final Position b1 = withCredentials(adminUser,
         t -> queryExecutor.position(POSITION_FIELDS, createdPos.getUuid()));
     assertThat(b1.getUuid()).isNotNull();
-    assertThat(b1.getOrganization().getUuid()).isEqualTo(updated.getUuid());
+    assertThat(b1.getOrganization().getUuid()).isEqualTo(updated3.getUuid());
 
-    b1.setOrganization(updated);
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", getPositionInput(b1)));
+    b1.setOrganization(updated3);
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(b1)));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Position ret = withCredentials(adminUser,
         t -> queryExecutor.position(POSITION_FIELDS, createdPos.getUuid()));
     assertThat(ret.getOrganization()).isNotNull();
-    assertThat(ret.getOrganization().getUuid()).isEqualTo(updated.getUuid());
+    assertThat(ret.getOrganization().getUuid()).isEqualTo(updated3.getUuid());
 
     // Create a child organizations
     final OrganizationInput childInput =
@@ -156,14 +160,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .build();
     final OrganizationInput childInput1 = getOrganizationInput(child);
     childInput1.setApprovalSteps(List.of(step1Input));
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput1));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, childInput1));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify approval step was saved.
-    updated =
+    final Organization updated4 =
         withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, childInput1.getUuid()));
-    List<ApprovalStep> returnedSteps = updated.getApprovalSteps();
+    List<ApprovalStep> returnedSteps = updated4.getApprovalSteps();
     assertThat(returnedSteps).hasSize(1);
     assertThat(returnedSteps.get(0).getApprovers()).anyMatch(a -> a.getUuid().equals(b1.getUuid()));
 
@@ -180,17 +184,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(task).isNotNull();
     assertThat(task.getUuid()).isNotNull();
 
-    final OrganizationInput childInput2 = getOrganizationInput(updated);
+    final OrganizationInput childInput2 = getOrganizationInput(updated4);
     childInput2.setTasks(List.of(getTaskInput(task)));
     childInput2.setApprovalSteps(null);
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput2));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, childInput2));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify task was saved.
-    updated =
+    final Organization updated5 =
         withCredentials(jackUser, t -> queryExecutor.organization(FIELDS, childInput2.getUuid()));
-    final List<Task> tasks = updated.getTasks();
+    final List<Task> tasks = updated5.getTasks();
     assertThat(tasks).isNotNull();
     assertThat(tasks).hasSize(1);
     assertThat(tasks.get(0).getUuid()).isEqualTo(task.getUuid());
@@ -200,16 +204,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final ApprovalStepInput step2Input = ApprovalStepInput.builder().withName("Final Reviewers")
         .withType(ApprovalStepType.REPORT_APPROVAL).withApprovers(List.of(getPositionInput(b1)))
         .build();
-    childInput2.setApprovalSteps(List.of(step1Input, step2Input));
-    childInput2.setTasks(null);
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput2));
+    final OrganizationInput updatedStepsInput = getOrganizationInput(updated5);
+    updatedStepsInput.setApprovalSteps(List.of(step1Input, step2Input));
+    updatedStepsInput.setTasks(null);
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, updatedStepsInput));
     assertThat(nrUpdated).isEqualTo(1);
 
-    // Verify approval steps updated correct.
-    updated =
-        withCredentials(jackUser, t -> queryExecutor.organization(FIELDS, childInput2.getUuid()));
-    returnedSteps = updated.getApprovalSteps();
+    // Verify approval steps updated correctly.
+    final Organization updated6 = withCredentials(jackUser,
+        t -> queryExecutor.organization(FIELDS, updatedStepsInput.getUuid()));
+    returnedSteps = updated6.getApprovalSteps();
     assertThat(returnedSteps).hasSize(2);
     assertThat(returnedSteps.get(0).getName()).isEqualTo(step1Input.getName());
     assertThat(returnedSteps.get(0).getApprovers())
@@ -271,7 +276,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     created2.setIdentificationCode(created1.getIdentificationCode());
     try {
       withCredentials(adminUser,
-          t -> mutationExecutor.updateOrganization("", getOrganizationInput(created2)));
+          t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(created2)));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -336,13 +341,15 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Updating this AO with empty identificationCode should succeed
     created5.setIdentificationCode("");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created5)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(created5)));
     assertThat(nrUpdated).isEqualTo(1);
+    final Organization updated5 =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, created5.getUuid()));
 
     // Updating this AO with NULL identificationCode should succeed
     created5.setIdentificationCode(null);
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(created5)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(updated5)));
     assertThat(nrUpdated).isEqualTo(1);
   }
 
@@ -468,9 +475,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .withLocation(getLocationInput(getGeneralHospital())).build();
     final Organization org = succeedCreateOrganization(adminUser, orgInput);
 
-    succeedUpdateOrganization(adminUser, getOrganizationInput(org));
-    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(org));
-    failUpdateOrganization(getDomainUsername(regularUser), getOrganizationInput(org));
+    final Organization updatedOrg = succeedUpdateOrganization(adminUser, getOrganizationInput(org));
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(updatedOrg));
+    failUpdateOrganization(getDomainUsername(regularUser), getOrganizationInput(updatedOrg));
   }
 
   @Test
@@ -513,12 +520,16 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Given responsibility now they can edit their organization
     superuserOrg.setAdministratingPositions(List.of(superuserPosition));
-    succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
-    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
+    final Organization updatedSuperuserOrg =
+        succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
+    succeedUpdateOrganization(getDomainUsername(superuser),
+        getOrganizationInput(updatedSuperuserOrg));
+    final Organization updatedSuperuserOrg2 = withCredentials(adminUser,
+        t -> queryExecutor.organization(FIELDS, updatedSuperuserOrg.getUuid()));
 
     // Remove position
     superuserOrg.setAdministratingPositions(new ArrayList<>());
-    succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
+    succeedUpdateOrganization(adminUser, getOrganizationInput(updatedSuperuserOrg2));
   }
 
   @Test
@@ -617,18 +628,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Set superuser as responsible for the child organization
     createdChildOrg.setAdministratingPositions(List.of(superuserPosition));
-    succeedUpdateOrganization(adminUser, getOrganizationInput(createdChildOrg));
+    final Organization updatedChildOrg =
+        succeedUpdateOrganization(adminUser, getOrganizationInput(createdChildOrg));
 
     // Cannot set parent as null because they're not responsible for the parent organization
-    createdChildOrg.setParentOrg(null);
-    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
-    createdChildOrg.setParentOrg(createdParentOrg);
+    updatedChildOrg.setParentOrg(null);
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(updatedChildOrg));
+    updatedChildOrg.setParentOrg(createdParentOrg);
     // Set superuser as responsible for the parent organization
     createdParentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdParentOrg));
     // Now superuser can set the parent organization as null
-    createdChildOrg.setParentOrg(null);
-    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
+    updatedChildOrg.setParentOrg(null);
+    final Organization updatedChildOrg2 = succeedUpdateOrganization(getDomainUsername(superuser),
+        getOrganizationInput(updatedChildOrg));
 
     final OrganizationInput newParentOrg =
         OrganizationInput.builder().withShortName("New Parent Organization 4")
@@ -640,18 +653,18 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Cannot assign the new organization as the child's parent because they're not responsible for
     // the new organization
-    createdChildOrg.setParentOrg(createdNewParentOrg);
-    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
+    updatedChildOrg2.setParentOrg(createdNewParentOrg);
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(updatedChildOrg2));
     // Revert previous change
-    createdChildOrg.setParentOrg(createdParentOrg);
+    updatedChildOrg2.setParentOrg(createdParentOrg);
 
     // Update responsible position
     createdNewParentOrg.setAdministratingPositions(List.of(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdNewParentOrg));
 
     // Now they can assign the new parent
-    createdChildOrg.setParentOrg(createdNewParentOrg);
-    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
+    updatedChildOrg2.setParentOrg(createdNewParentOrg);
+    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(updatedChildOrg2));
   }
 
   @Test
@@ -674,7 +687,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     topOrgInput.setParentOrg(parentTopOrgInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", topOrgInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", false, topOrgInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -685,7 +698,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     topOrgInput.setParentOrg(parentSubOrgInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", topOrgInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", false, topOrgInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -701,6 +714,59 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization(getDomainUsername(getRegularUser()), orgInput);
     failUpdateOrganization(getDomainUsername(getRegularUser()), orgInput);
+  }
+
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var searchText = "exercitation";
+    final var query = OrganizationSearchQueryInput.builder().withText(searchText).build();
+    final var searchObjects = withCredentials(adminUser,
+        t -> queryExecutor.organizationList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isOne();
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "70193ee9-05b4-4aac-80b5-75609825db9f";
+    final Organization test =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testUuid));
+
+    // Update it
+    final OrganizationInput updatedInput = getOrganizationInput(test);
+    final String updatedProfile = UUID.randomUUID().toString();
+    updatedInput.setProfile(updatedProfile);
+    final Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Organization updated =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getProfile()).isEqualTo(updatedProfile);
+
+    // Try to update it again, with the input that is now outdated
+    final OrganizationInput outdatedInput = getOrganizationInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateOrganization("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Organization forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getProfile()).isEqualTo(test.getProfile());
   }
 
   private void failCreateOrganization(final String username, final OrganizationInput orgInput) {
@@ -723,28 +789,18 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   private void failUpdateOrganization(final String username, final OrganizationInput orgInput) {
     try {
-      withCredentials(username, t -> mutationExecutor.updateOrganization("", orgInput));
+      withCredentials(username, t -> mutationExecutor.updateOrganization("", false, orgInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
   }
 
-  private void succeedUpdateOrganization(final String username, final OrganizationInput orgInput) {
+  private Organization succeedUpdateOrganization(final String username,
+      final OrganizationInput orgInput) {
     final Integer numOrg =
-        withCredentials(username, t -> mutationExecutor.updateOrganization("", orgInput));
+        withCredentials(username, t -> mutationExecutor.updateOrganization("", false, orgInput));
     assertThat(numOrg).isOne();
-  }
-
-  @Test
-  void shouldBeSearchableViaCustomFields() {
-    final var searchText = "exercitation";
-    final var query = OrganizationSearchQueryInput.builder().withText(searchText).build();
-    final var searchObjects = withCredentials(adminUser,
-        t -> queryExecutor.organizationList(getListFields(FIELDS), query));
-    assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isOne();
-    assertThat(searchObjects.getList()).allSatisfy(
-        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+    return withCredentials(username, t -> queryExecutor.organization(FIELDS, orgInput.getUuid()));
   }
 }

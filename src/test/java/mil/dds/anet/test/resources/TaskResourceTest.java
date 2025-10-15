@@ -3,7 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
 import mil.dds.anet.test.client.AssessmentSearchQueryInput;
 import mil.dds.anet.test.client.Organization;
-import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
@@ -25,12 +23,14 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
   public static final String FIELDS =
-      "{ uuid shortName longName description category parentTask { uuid } taskedOrganizations { uuid }"
+      "{ uuid updatedAt shortName longName description category parentTask { uuid } taskedOrganizations { uuid }"
           + " status customFields }";
 
   @Test
@@ -80,7 +80,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     // update JSON of customFields
     taskAInput.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateTask("", taskAInput));
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, taskAInput));
     assertThat(nrUpdated).isEqualTo(1);
     final Task returnedA =
         withCredentials(adminUser, t -> queryExecutor.task(FIELDS, taskA.getUuid()));
@@ -92,17 +92,21 @@ public class TaskResourceTest extends AbstractResourceTest {
     }
 
     // update description
-    taskAInput.setDescription(UtilsTest.getCombinedHtmlTestCase().getInput());
-    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.updateTask("", taskAInput));
+    returnedA.setDescription(UtilsTest.getCombinedHtmlTestCase().getInput());
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateTask("", false, getTaskInput(returnedA)));
     assertThat(nrUpdated).isEqualTo(1);
+    final Task updatedTaskA =
+        withCredentials(jackUser, t -> queryExecutor.task(FIELDS, taskAInput.getUuid()));
 
     // add html to description and ensure it gets stripped out.
-    taskAInput.setDescription(
+    updatedTaskA.setDescription(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
-    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.updateTask("", taskAInput));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateTask("", false, getTaskInput(updatedTaskA)));
     assertThat(nrUpdated).isEqualTo(1);
     final Task updated =
-        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, taskA.getUuid()));
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, updatedTaskA.getUuid()));
     assertThat(updated.getDescription()).contains("<b>Hello world</b>");
     assertThat(updated.getDescription()).doesNotContain("<script>window.alert");
 
@@ -115,12 +119,12 @@ public class TaskResourceTest extends AbstractResourceTest {
         orgs.getList().stream().filter(o -> o.getShortName().equals("EF8")).findFirst().get();
     assertThat(ef8).isNotNull();
 
-    taskAInput.setTaskedOrganizations(Collections.singletonList(getOrganizationInput(ef8)));
-    final Integer nrUpdated2 =
-        withCredentials(adminUser, t -> mutationExecutor.updateTask("", taskAInput));
+    updated.setTaskedOrganizations(Collections.singletonList(ef8));
+    final Integer nrUpdated2 = withCredentials(adminUser,
+        t -> mutationExecutor.updateTask("", false, getTaskInput(updated)));
     assertThat(nrUpdated2).isEqualTo(1);
     final Task returnedA2 =
-        withCredentials(jackUser, t -> queryExecutor.task(FIELDS, taskA.getUuid()));
+        withCredentials(jackUser, t -> queryExecutor.task(FIELDS, updated.getUuid()));
     assertThat(returnedA2.getTaskedOrganizations().iterator().next().getUuid())
         .isEqualTo(ef8.getUuid());
 
@@ -132,12 +136,12 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(tasks.getList()).anyMatch(t -> t.getUuid().equals(returnedA.getUuid()));
 
     // set task to inactive
-    taskAInput.setStatus(Status.INACTIVE);
-    final Integer nrUpdated3 =
-        withCredentials(adminUser, t -> mutationExecutor.updateTask("", taskAInput));
+    returnedA2.setStatus(Status.INACTIVE);
+    final Integer nrUpdated3 = withCredentials(adminUser,
+        t -> mutationExecutor.updateTask("", false, getTaskInput(returnedA2)));
     assertThat(nrUpdated3).isEqualTo(1);
     final Task returnedA3 =
-        withCredentials(jackUser, t -> queryExecutor.task(FIELDS, taskA.getUuid()));
+        withCredentials(jackUser, t -> queryExecutor.task(FIELDS, returnedA2.getUuid()));
     assertThat(returnedA3.getStatus()).isEqualTo(Status.INACTIVE);
   }
 
@@ -416,18 +420,19 @@ public class TaskResourceTest extends AbstractResourceTest {
 
     // Set superuser as responsible for the child task
     createdChildTask.setResponsiblePositions(List.of(superuserPosition));
-    succeedUpdateTask(adminUser, getTaskInput(createdChildTask));
+    final Task updatedChildTask = succeedUpdateTask(adminUser, getTaskInput(createdChildTask));
 
     // Cannot set parent as null because they're not responsible for the parent task
-    createdChildTask.setParentTask(null);
-    failUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
-    createdChildTask.setParentTask(createdParentTask);
+    updatedChildTask.setParentTask(null);
+    failUpdateTask(getDomainUsername(superuser), getTaskInput(updatedChildTask));
+    updatedChildTask.setParentTask(createdParentTask);
     // Set superuser as responsible for the parent task
     createdParentTask.setResponsiblePositions(List.of(superuserPosition));
     succeedUpdateTask(adminUser, getTaskInput(createdParentTask));
     // Now superuser can set the parent task as null
-    createdChildTask.setParentTask(null);
-    succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+    updatedChildTask.setParentTask(null);
+    final Task updatedChildTask2 =
+        succeedUpdateTask(getDomainUsername(superuser), getTaskInput(updatedChildTask));
 
     final TaskInput newParentTask = TaskInput.builder().withShortName("New Parent Task 4")
         .withLongName("New Parent Task 4 for Testing Superusers").withStatus(Status.ACTIVE).build();
@@ -436,18 +441,18 @@ public class TaskResourceTest extends AbstractResourceTest {
 
     // Cannot assign the new task as the child's parent because they're not responsible for
     // the new task
-    createdChildTask.setParentTask(createdNewParentTask);
-    failUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+    updatedChildTask2.setParentTask(createdNewParentTask);
+    failUpdateTask(getDomainUsername(superuser), getTaskInput(updatedChildTask2));
     // Revert previous change
-    createdChildTask.setParentTask(createdParentTask);
+    updatedChildTask2.setParentTask(createdParentTask);
 
     // Update responsible position
     createdNewParentTask.setResponsiblePositions(List.of(superuserPosition));
     succeedUpdateTask(adminUser, getTaskInput(createdNewParentTask));
 
     // Now they can assign the new parent
-    createdChildTask.setParentTask(createdNewParentTask);
-    succeedUpdateTask(getDomainUsername(superuser), getTaskInput(createdChildTask));
+    updatedChildTask2.setParentTask(createdNewParentTask);
+    succeedUpdateTask(getDomainUsername(superuser), getTaskInput(updatedChildTask2));
   }
 
   @Test
@@ -470,7 +475,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     topTaskInput.setParentTask(parentTopTaskInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateTask("", topTaskInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, topTaskInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -481,7 +486,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     topTaskInput.setParentTask(parentSubTaskInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateTask("", topTaskInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, topTaskInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -622,7 +627,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     final Task testTask =
         withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_1_UUID));
     testTask.setStatus(Status.INACTIVE);
-    succeedUpdateTask(adminUser, getTaskInput(testTask));
+    final Task updatedTestTask = succeedUpdateTask(adminUser, getTaskInput(testTask));
 
     // Now check that the descendant tasks have also been set to INACTIVE
     descendantTaskUuids.forEach(uuid -> {
@@ -635,8 +640,8 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(parentTask.getStatus()).isEqualTo(Status.ACTIVE);
 
     // Set the test task back to ACTIVE
-    testTask.setStatus(Status.ACTIVE);
-    succeedUpdateTask(adminUser, getTaskInput(testTask));
+    updatedTestTask.setStatus(Status.ACTIVE);
+    final Task updatedTestTask2 = succeedUpdateTask(adminUser, getTaskInput(updatedTestTask));
     // And check that the descendant tasks are still INACTIVE
     descendantTaskUuids.forEach(uuid -> {
       final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
@@ -654,13 +659,13 @@ public class TaskResourceTest extends AbstractResourceTest {
     final Task newParentTask =
         withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_2_UUID));
     assertThat(newParentTask.getStatus()).isEqualTo(Status.INACTIVE);
-    testTask.setParentTask(newParentTask);
-    succeedUpdateTask(adminUser, getTaskInput(testTask));
+    updatedTestTask2.setParentTask(newParentTask);
+    succeedUpdateTask(adminUser, getTaskInput(updatedTestTask2));
 
     // Check that the test task has become INACTIVE
-    final Task updatedTestTask =
+    final Task updatedTestTask3 =
         withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_1_UUID));
-    assertThat(updatedTestTask.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(updatedTestTask3.getStatus()).isEqualTo(Status.INACTIVE);
     // And check that the descendant tasks have also been set to INACTIVE
     descendantTaskUuids.forEach(uuid -> {
       final Task descendantTask = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, uuid));
@@ -668,9 +673,9 @@ public class TaskResourceTest extends AbstractResourceTest {
     });
 
     // Restore the test task to ACTIVE and its original parent
-    updatedTestTask.setStatus(Status.ACTIVE);
-    updatedTestTask.setParentTask(parentTask);
-    succeedUpdateTask(adminUser, getTaskInput(updatedTestTask));
+    updatedTestTask3.setStatus(Status.ACTIVE);
+    updatedTestTask3.setParentTask(parentTask);
+    succeedUpdateTask(adminUser, getTaskInput(updatedTestTask3));
     // It should now be ACTIVE again
     final Task restoredTestTask =
         withCredentials(adminUser, t -> queryExecutor.task(FIELDS, TASK_TEST_1_1_UUID));
@@ -687,6 +692,43 @@ public class TaskResourceTest extends AbstractResourceTest {
       descendantTask.setStatus(Status.ACTIVE);
       succeedUpdateTask(adminUser, getTaskInput(descendantTask));
     });
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "12b8dbcc-8f31-444a-9437-00fe00fc1f7b";
+    final Task test = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testUuid));
+
+    // Update it
+    final TaskInput updatedInput = getTaskInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Task updated = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final TaskInput outdatedInput = getTaskInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Task forceUpdated = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 
   private void failCreateTask(final String username, final TaskInput taskInput) {
@@ -708,16 +750,17 @@ public class TaskResourceTest extends AbstractResourceTest {
 
   private void failUpdateTask(final String username, final TaskInput taskInput) {
     try {
-      withCredentials(username, t -> mutationExecutor.updateTask("", taskInput));
+      withCredentials(username, t -> mutationExecutor.updateTask("", false, taskInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
   }
 
-  private void succeedUpdateTask(final String username, final TaskInput taskInput) {
+  private Task succeedUpdateTask(final String username, final TaskInput taskInput) {
     final Integer numTask =
-        withCredentials(username, t -> mutationExecutor.updateTask("", taskInput));
+        withCredentials(username, t -> mutationExecutor.updateTask("", false, taskInput));
     assertThat(numTask).isOne();
+    return withCredentials(username, t -> queryExecutor.task(FIELDS, taskInput.getUuid()));
   }
 }

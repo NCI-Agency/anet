@@ -1,25 +1,25 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import { Form, Formik } from "formik"
 import { Location, Organization, Task } from "models"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const GQL_UPDATE_LOCATION = gql`
-  mutation ($location: LocationInput!) {
-    updateLocation(location: $location)
+  mutation ($location: LocationInput!, $force: Boolean) {
+    updateLocation(location: $location, force: $force)
   }
 `
 const GQL_UPDATE_ORGANIZATION = gql`
-  mutation ($organization: OrganizationInput!) {
-    updateOrganization(organization: $organization)
+  mutation ($organization: OrganizationInput!, $force: Boolean) {
+    updateOrganization(organization: $organization, force: $force)
   }
 `
 const GQL_UPDATE_TASK = gql`
-  mutation ($task: TaskInput!) {
-    updateTask(task: $task)
+  mutation ($task: TaskInput!, $force: Boolean) {
+    updateTask(task: $task, force: $force)
   }
 `
 
@@ -58,7 +58,14 @@ const EditApprovalsModal = ({
         [fieldName]: relatedObject[fieldName] || []
       }}
     >
-      {({ values, setFieldValue, setFieldTouched, submitForm }) => (
+      {({
+        values,
+        setFieldValue,
+        setFieldTouched,
+        resetForm,
+        setSubmitting,
+        submitForm
+      }) => (
         <Modal
           show={showModal}
           onHide={() => close(setFieldValue)}
@@ -69,7 +76,15 @@ const EditApprovalsModal = ({
             <Modal.Title>Edit {title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Messages error={error} />
+            <MessagesWithConflict
+              error={error}
+              objectType={objectType}
+              onCancel={() => close(setFieldValue)}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal">
               <ApprovalsDefinition
                 fieldName={fieldName}
@@ -106,9 +121,9 @@ const EditApprovalsModal = ({
     onCancel()
   }
 
-  async function onSubmit(values, form) {
+  async function onSubmit(values, form, force) {
     try {
-      await save(values, form)
+      await save(values, form, force)
       setError(null)
       onSuccess()
     } catch (error) {
@@ -118,7 +133,7 @@ const EditApprovalsModal = ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function save(values, form) {
+  function save(values, form, force) {
     const updatedObject = {
       ...relatedObject,
       [fieldName]: values[fieldName]
@@ -149,7 +164,7 @@ const EditApprovalsModal = ({
     }
 
     const input = filterFunction(updatedObject, ...excludeFields)
-    const variables = { [inputKey]: input }
+    const variables = { [inputKey]: input, force }
     return API.mutation(mutation, variables)
   }
 }

@@ -38,8 +38,9 @@ class OrganizationMergeTest extends AbstractResourceTest {
     assertThat(loser).isNotNull().extracting(Organization::getUuid).isNotNull();
 
     // Subscribe to the organization
-    final String loserSubscriptionUuid = addSubscription(subscribeToLoser, objectType,
-        loser.getUuid(), t -> mutationExecutor.updateOrganization("", getOrganizationInput(loser)));
+    final String loserSubscriptionUuid =
+        addSubscription(subscribeToLoser, objectType, loser.getUuid(),
+            t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(loser)));
 
     final var winnerInput = OrganizationInput.builder().withShortName("WM1")
         .withLongName("Winner for Merge").withStatus(ACTIVE).build();
@@ -49,7 +50,7 @@ class OrganizationMergeTest extends AbstractResourceTest {
     // Subscribe to the organization
     final String winnerSubscriptionUuid =
         addSubscription(subscribeToWinner, objectType, winner.getUuid(),
-            t -> mutationExecutor.updateOrganization("", getOrganizationInput(winner)));
+            t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(winner)));
 
     // Merge the two organizations
     final var mergeInput = getOrganizationInput(winner);

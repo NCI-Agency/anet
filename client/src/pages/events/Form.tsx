@@ -22,7 +22,7 @@ import CustomDateInput from "components/CustomDateInput"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
@@ -65,8 +65,8 @@ const GQL_CREATE_EVENT = gql`
 `
 
 const GQL_UPDATE_EVENT = gql`
-  mutation ($event: EventInput!) {
-    updateEvent(event: $event)
+  mutation ($event: EventInput!, $force: Boolean) {
+    updateEvent(event: $event, force: $force)
   }
 `
 
@@ -130,6 +130,8 @@ const EventForm = ({
         setFieldValue,
         setFieldTouched,
         values,
+        resetForm,
+        setSubmitting,
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
@@ -243,7 +245,15 @@ const EventForm = ({
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Messages error={saveError} />
+            <MessagesWithConflict
+              error={saveError}
+              objectType="Event"
+              onCancel={onCancel}
+              onConfirm={() => {
+                resetForm({ values, isSubmitting: true })
+                onSubmit(values, { resetForm, setSubmitting }, true)
+              }}
+            />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
@@ -692,8 +702,8 @@ const EventForm = ({
     navigate(-1)
   }
 
-  function onSubmit(values, form) {
-    return save(values)
+  function onSubmit(values, form, force) {
+    return save(values, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setSaveError(error)
@@ -720,7 +730,7 @@ const EventForm = ({
     })
   }
 
-  function save(values) {
+  function save(values, force) {
     const event = Event.filterClientSideFields(new Event(values))
     // strip tasks fields not in data model
     event.tasks = values.tasks.map(t => utils.getReference(t))
@@ -734,7 +744,8 @@ const EventForm = ({
     event.location = utils.getReference(event.location)
     event.eventSeries = utils.getReference(event.eventSeries)
     return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
-      event
+      event,
+      force
     })
   }
 }

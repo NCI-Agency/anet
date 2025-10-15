@@ -65,10 +65,11 @@ class TaskApprovalTest extends AbstractResourceTest {
       "{ uuid name restrictedApproval relatedObjectUuid nextStepUuid approvers"
           + " { uuid name person { uuid name rank } } }";
   private static final String REPORT_FIELDS =
-      "{ uuid state workflow { type createdAt person { uuid } step " + APPROVAL_STEP_FIELDS
+      "{ uuid updatedAt state workflow { type createdAt person { uuid } step "
+          + APPROVAL_STEP_FIELDS
           + " } reportPeople { uuid primary author attendee interlocutor } }";
   private static final String TASK_FIELDS =
-      "{ uuid shortName longName status" + " plannedCompletion projectedCompletion"
+      "{ uuid updatedAt shortName longName status plannedCompletion projectedCompletion"
           + " taskedOrganizations { uuid shortName longName identificationCode }"
           + " parentTask { uuid } responsiblePositions { uuid } planningApprovalSteps "
           + APPROVAL_STEP_FIELDS + " approvalSteps " + APPROVAL_STEP_FIELDS + " customFields }";
@@ -192,13 +193,13 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
     // Go through organization approval first
-    organizationalApproval(report, isPlanned);
+    final Report organizationalApprovedReport = organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approver should have received email
-    checkPendingApproval(approver, report, 1, true, null);
+    checkPendingApproval(approver, organizationalApprovedReport, 1, true, null);
 
     // Approve the report
-    approveReport(report, approver, false);
+    approveReport(organizationalApprovedReport, approver, false);
     // Mail queue should be empty
     assertEmails(0);
   }
@@ -230,13 +231,13 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
     // Go through organization approval first
-    organizationalApproval(report, isPlanned);
+    final Report organizationalApprovedReport = organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approver should have received email
-    checkPendingApproval(approver, report, 1, true, null);
+    checkPendingApproval(approver, organizationalApprovedReport, 1, true, null);
 
     // Approve the report
-    approveReport(report, approver, false);
+    approveReport(organizationalApprovedReport, approver, false);
     // Mail queue should be empty
     assertEmails(0);
   }
@@ -269,16 +270,16 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 0);
 
     // Go through organization approval first
-    organizationalApproval(report, isPlanned);
+    final Report organizationalApprovedReport = organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approver should not have received email
-    checkPendingApproval(approver, report, 0, true, null);
+    checkPendingApproval(approver, organizationalApprovedReport, 0, true, null);
 
     // Try to approve the report
-    approveReport(report, approver, true);
+    final Report approvedReport = approveReport(organizationalApprovedReport, approver, true);
 
     // Delete the report
-    deleteReport(author, report);
+    deleteReport(author, approvedReport);
   }
 
   // submitted report, restricted approval step for effort has matching org
@@ -307,13 +308,13 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
     // Go through organization approval first
-    organizationalApproval(report, isPlanned);
+    final Report organizationalApprovedReport = organizationalApproval(report, isPlanned);
 
     // Check reports pending approval
-    checkPendingApproval(approver, report, 1, true, null);
+    checkPendingApproval(approver, organizationalApprovedReport, 1, true, null);
 
     // Approve the report
-    approveReport(report, approver, false);
+    approveReport(organizationalApprovedReport, approver, false);
     // Mail queue should be empty
     assertEmails(0);
   }
@@ -350,10 +351,10 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
     // Go through organization approval first
-    organizationalApproval(report, isPlanned);
+    final Report organizationalApprovedReport = organizationalApproval(report, isPlanned);
 
     // Check reports pending approval
-    checkPendingApproval(approver, report, 1, true, null);
+    checkPendingApproval(approver, organizationalApprovedReport, 1, true, null);
 
     // Replace the approver from the approval step
     final Task replacedTask = replaceApproversFromTaskApprovalSteps(updatedTaskInput,
@@ -372,10 +373,10 @@ class TaskApprovalTest extends AbstractResourceTest {
     checkPendingApproval(approver, report2, 0, true, null);
 
     // Try to approve the report
-    approveReport(report2, approver, true);
+    final Report approvedReport2 = approveReport(report2, approver, true);
 
     // Delete the report
-    deleteReport(author, report2);
+    deleteReport(author, approvedReport2);
   }
 
   // submitted report, three approval steps for the effort:
@@ -428,25 +429,25 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 2);
 
     // Go through organization approval first
-    organizationalApproval(report, isPlanned);
+    final Report organizationalApprovedReport = organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approverStep1 should have received email
-    checkPendingApproval(approverStep1, report, 1, true, null);
+    checkPendingApproval(approverStep1, organizationalApprovedReport, 1, true, null);
 
     // Approve the report
-    approveReport(report, approverStep1, false);
+    final Report approvedReport = approveReport(organizationalApprovedReport, approverStep1, false);
 
     // Check reports pending approval; email will be checked for approverStep3
-    checkPendingApproval(approverStep2, report, 0, false, null);
+    checkPendingApproval(approverStep2, approvedReport, 0, false, null);
 
     // Try to approve the report
-    approveReport(report, approverStep2, true);
+    approveReport(approvedReport, approverStep2, true);
 
     // Check reports pending approval; approverStep3 should have received email
-    checkPendingApproval(approverStep3, report, 1, true, null);
+    checkPendingApproval(approverStep3, approvedReport, 1, true, null);
 
     // Approve the report
-    approveReport(report, approverStep3, false);
+    approveReport(approvedReport, approverStep3, false);
     // Mail queue should be empty
     assertEmails(0);
   }
@@ -471,14 +472,14 @@ class TaskApprovalTest extends AbstractResourceTest {
     final Report report1 = submitReport(text + "1", author, null, updatedTaskInput, isPlanned,
         ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report1, updatedTaskInput.getUuid(), 1);
-    organizationalApproval(report1, isPlanned);
-    checkPendingApproval(approver1, report1, 1, true, null);
+    final Report approvedReport1 = organizationalApproval(report1, isPlanned);
+    checkPendingApproval(approver1, approvedReport1, 1, true, null);
 
     final Report report2 = submitReport(text + "2", author, null, updatedTaskInput, isPlanned,
         ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report2, updatedTaskInput.getUuid(), 1);
-    organizationalApproval(report2, isPlanned);
-    checkPendingApproval(approver1, report2, 1, true, null);
+    final Report approvedReport2 = organizationalApproval(report2, isPlanned);
+    checkPendingApproval(approver1, approvedReport2, 1, true, null);
 
     // Someone from EF 1.1
     final Person approver2 = getPersonFromDb("Elizawell, Elizabeth");
@@ -496,8 +497,8 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertWorkflowSize(report3, updatedTask2Input.getUuid(), 1);
     final Person org2Approver = getPersonFromDb("Bobtown, Bob");
     assertEmails(1, org2Approver);
-    approveReport(report3, org2Approver, false);
-    checkPendingApproval(approver2, report3, 1, true, null);
+    final Report approvedReport3 = approveReport(report3, org2Approver, false);
+    checkPendingApproval(approver2, approvedReport3, 1, true, null);
 
     // Check reports pending approval without pagination
     final ReportSearchQueryInput pendingQuery =
@@ -506,12 +507,12 @@ class TaskApprovalTest extends AbstractResourceTest {
         checkPendingApproval(approver1, report1, 1, false, pendingQuery);
     assertThat(allResults1.getTotalCount()).isEqualTo(2);
     checkPendingApproval(approver1, report2, 1, false, pendingQuery);
-    checkPendingApproval(approver1, report3, 0, false, pendingQuery);
+    checkPendingApproval(approver1, approvedReport3, 0, false, pendingQuery);
     final AnetBeanList_Report allResults2 =
         checkPendingApproval(approver2, report1, 0, false, pendingQuery);
     assertThat(allResults2.getTotalCount()).isEqualTo(1);
     checkPendingApproval(approver2, report2, 0, false, pendingQuery);
-    checkPendingApproval(approver2, report3, 1, false, pendingQuery);
+    checkPendingApproval(approver2, approvedReport3, 1, false, pendingQuery);
 
     // Now try with a pageSize of 1
     pendingQuery.setPageSize(1);
@@ -519,9 +520,9 @@ class TaskApprovalTest extends AbstractResourceTest {
     final AnetBeanList_Report results1p1 =
         checkPendingApproval(approver1, report2, 1, false, pendingQuery);
     assertPendingReports(allResults1, results1p1, pendingQuery, pendingQuery.getPageSize());
-    // Here, report3 should be returned
+    // Here, approved report3 should be returned
     final AnetBeanList_Report results2p1 =
-        checkPendingApproval(approver2, report3, 1, false, pendingQuery);
+        checkPendingApproval(approver2, approvedReport3, 1, false, pendingQuery);
     assertPendingReports(allResults2, results2p1, pendingQuery, pendingQuery.getPageSize());
     // Retrieve the next page
     pendingQuery.setPageNum(pendingQuery.getPageNum() + 1);
@@ -531,13 +532,13 @@ class TaskApprovalTest extends AbstractResourceTest {
     assertPendingReports(allResults1, results1p2, pendingQuery, pendingQuery.getPageSize());
     // Should return an empty page as there are no more results
     final AnetBeanList_Report results2p2 =
-        checkPendingApproval(approver2, report3, 0, false, pendingQuery);
+        checkPendingApproval(approver2, approvedReport3, 0, false, pendingQuery);
     assertPendingReports(allResults2, results2p2, pendingQuery, 0);
 
     // Delete the reports
-    deleteReport(author, report1);
-    deleteReport(author, report2);
-    deleteReport(author, report3);
+    deleteReport(author, approvedReport1);
+    deleteReport(author, approvedReport2);
+    deleteReport(author, approvedReport3);
   }
 
   // Helper methods below
@@ -596,21 +597,22 @@ class TaskApprovalTest extends AbstractResourceTest {
     return updateTask(taskInput);
   }
 
-  private void organizationalApproval(Report report, boolean isPlanned) {
+  private Report organizationalApproval(Report report, boolean isPlanned) {
     // No organizational workflow for planned engagements
     if (!isPlanned) {
       final Person jacob = getPersonFromDb("Jacobson, Jacob");
       // jacob should have received email
       assertEmails(1, jacob);
-      approveReport(report, jacob, false);
+      final Report approvedReport = approveReport(report, jacob, false);
       final Person rebecca = getPersonFromDb("Beccabon, Rebecca");
       // rebecca should have received email
       assertEmails(1, rebecca);
-      approveReport(report, rebecca, false);
+      return approveReport(approvedReport, rebecca, false);
     }
+    return report;
   }
 
-  private void approveReport(Report report, Person person, boolean expectedToFail) {
+  private Report approveReport(Report report, Person person, boolean expectedToFail) {
     try {
       final int numRows = withCredentials(getDomainUsername(person),
           t -> mutationExecutor.approveReport("", null, report.getUuid()));
@@ -625,6 +627,8 @@ class TaskApprovalTest extends AbstractResourceTest {
     }
 
     sendEmailsToServer();
+    return withCredentials(getDomainUsername(person),
+        t -> queryExecutor.report(REPORT_FIELDS, report.getUuid()));
   }
 
   private AnetBeanList_Report checkPendingApproval(Person approver, Report report, int size,
@@ -705,7 +709,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private void deleteReport(Person author, Report report) {
     final Report updated = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), true));
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, false, getReportInput(report), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getState()).isEqualTo(ReportState.DRAFT);
     withCredentials(getDomainUsername(author),
@@ -783,7 +787,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private Task updateTask(TaskInput task) {
     final Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateTask("", task));
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", false, task));
     assertThat(nrUpdated).isEqualTo(1);
     return getTaskFromDb(task.getUuid());
   }

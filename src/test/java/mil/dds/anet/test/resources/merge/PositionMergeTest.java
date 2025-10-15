@@ -60,6 +60,8 @@ class PositionMergeTest extends AbstractResourceTest {
         t -> mutationExecutor.createPosition(FIELDS, firstPositionInput));
     assertThat(firstPosition).isNotNull();
     assertThat(firstPosition.getUuid()).isNotNull();
+    final Position updatedFirstPosition =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, firstPosition.getUuid()));
 
     // Add an attachment
     final GenericRelatedObjectInput loserPositionAttachment = GenericRelatedObjectInput.builder()
@@ -73,9 +75,9 @@ class PositionMergeTest extends AbstractResourceTest {
     assertThat(createdLoserPositionAttachmentUuid).isNotNull();
 
     // Subscribe to the position
-    final String winnerSubscriptionUuid =
-        addSubscription(subscribeToWinner, objectType, firstPosition.getUuid(),
-            t -> mutationExecutor.updatePosition("", getPositionInput(firstPosition)));
+    final String winnerSubscriptionUuid = addSubscription(subscribeToWinner, objectType,
+        firstPosition.getUuid(),
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(updatedFirstPosition)));
 
     final PositionInput secondPositionInput = PositionInput.builder()
         .withName("MergePositionsTest Second Position").withType(PositionType.REGULAR)
@@ -101,7 +103,7 @@ class PositionMergeTest extends AbstractResourceTest {
     // Subscribe to the position
     final String loserSubscriptionUuid =
         addSubscription(subscribeToLoser, objectType, secondPosition.getUuid(),
-            t -> mutationExecutor.updatePosition("", getPositionInput(secondPosition)));
+            t -> mutationExecutor.updatePosition("", false, getPositionInput(secondPosition)));
 
     final PersonPositionHistoryInput hist =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))

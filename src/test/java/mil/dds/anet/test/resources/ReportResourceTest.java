@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ReportDao;
@@ -79,9 +80,11 @@ import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class ReportResourceTest extends AbstractResourceTest {
 
@@ -92,7 +95,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String LOCATION_FIELDS = "{ uuid name status lat lng }";
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _ORGANIZATION_FIELDS =
-      "uuid shortName longName status identificationCode";
+      "uuid updatedAt shortName longName status identificationCode";
   private static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } %2$s }",
           _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
@@ -233,8 +236,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
     advisorOrgInput.setApprovalSteps(approvalStepsInput);
 
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", advisorOrgInput));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, advisorOrgInput));
     assertThat(nrUpdated).isEqualTo(1);
     // Pull the approval workflow for this AO
     final Organization orgWithSteps = withCredentials(adminUser,
@@ -256,7 +259,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Task top = withCredentials(adminUser,
         t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("test-1", "Test Top Task", "TOP", null,
-                Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE)));
+                Collections.singletonList(getOrganizationInput(orgWithSteps)), Status.ACTIVE)));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
     final Task action = withCredentials(adminUser,
@@ -339,7 +342,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Verify that author can still edit the report
     returned1.setAtmosphereDetails("Everybody was super nice! Again!");
     final Report r2 = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned1), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(returned1), true));
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned1.getAtmosphereDetails());
 
     // Have the author submit the report, again
@@ -361,7 +364,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}",
-        returned2.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+        returned2.getUuid(), approvalStep.getUuid(), orgWithSteps.getUuid(), author);
     assertThat(returned2.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
 
     // verify the location on this report
@@ -527,13 +530,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
-    advisorOrg.setApprovalSteps(List.of());
+    orgWithSteps.setApprovalSteps(List.of());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(orgWithSteps)));
     assertThat(nrUpdated).isEqualTo(1);
 
     Organization updatedOrg = withCredentials(adminUser,
-        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, orgWithSteps.getUuid()));
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
   }
@@ -608,12 +611,12 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PersonInput approver1ActivateInput = getPersonInput(approver1);
     approver1ActivateInput.setPendingVerification(false);
     nrUpdated = withCredentials(getDomainUsername(approver1),
-        t -> mutationExecutor.updateMe("", approver1ActivateInput));
+        t -> mutationExecutor.updateMe("", false, approver1ActivateInput));
     assertThat(nrUpdated).isEqualTo(1);
     final PersonInput approver2ActivateInput = getPersonInput(approver2);
     approver2ActivateInput.setPendingVerification(false);
     nrUpdated = withCredentials(getDomainUsername(approver2),
-        t -> mutationExecutor.updateMe("", approver2ActivateInput));
+        t -> mutationExecutor.updateMe("", false, approver2ActivateInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
@@ -652,8 +655,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
     advisorOrgInput.setApprovalSteps(approvalStepsInput);
 
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", advisorOrgInput));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", false, advisorOrgInput));
     assertThat(nrUpdated).isEqualTo(1);
     // Pull the approval workflow for this AO
     final Organization orgWithSteps = withCredentials(adminUser,
@@ -675,7 +678,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Task top = withCredentials(adminUser,
         t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("test-1-2", "Interlocutor Test Top Task", "TOP", null,
-                Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE)));
+                Collections.singletonList(getOrganizationInput(orgWithSteps)), Status.ACTIVE)));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
     final Task action = withCredentials(adminUser,
@@ -711,7 +714,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
-    assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
+    assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(orgWithSteps.getUuid());
     assertThat(created.getInterlocutorOrg().getUuid()).isEqualTo(reportAttendeeOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
@@ -751,7 +754,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Verify that author can still edit the report
     returned1.setAtmosphereDetails("Everybody was super nice! Again!");
     final Report r2 = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned1), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(returned1), true));
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned1.getAtmosphereDetails());
 
     // Have the author submit the report, again
@@ -773,7 +776,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}",
-        returned2.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+        returned2.getUuid(), approvalStep.getUuid(), orgWithSteps.getUuid(), author);
     assertThat(returned2.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
 
     // verify the location on this report
@@ -939,13 +942,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
-    advisorOrg.setApprovalSteps(List.of());
+    orgWithSteps.setApprovalSteps(List.of());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg)));
+        t -> mutationExecutor.updateOrganization("", false, getOrganizationInput(orgWithSteps)));
     assertThat(nrUpdated).isEqualTo(1);
 
     Organization updatedOrg = withCredentials(adminUser,
-        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, orgWithSteps.getUuid()));
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
   }
@@ -1029,6 +1032,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows = withCredentials(adminUser, t -> mutationExecutor.rejectReport("",
         TestData.createCommentInput("default approval chain test rejection"), returned.getUuid()));
     assertThat(numRows).isOne();
+    final Report rejected =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, returned.getUuid()));
 
     // Fetch needed organizations
     final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder().build();
@@ -1043,32 +1048,32 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(ef6).isPresent();
 
     // Change primary advisor of the report to someone in EF 1.1 (Bob)
-    returned.setReportPeople(
+    rejected.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(bob, false), personToReportAuthor(author)));
 
     final Report updated = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(rejected), true));
     assertThat(updated).isNotNull();
-    assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
+    assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(rejected.getAdvisorOrg().getUuid());
 
     // Re-submit the reported
     numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
+    final Report submittedReport =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
 
     // Report should now have the EF 1.1 approval step
-    validateReportApprovalStep(
-        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid())),
-        ef11.get().getUuid());
+    validateReportApprovalStep(submittedReport, ef11.get().getUuid());
 
     // Change primary advisor of the report to someone in EF 6.1 (Ben)
-    updated.setReportPeople(
+    submittedReport.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(ben, false), personToReportAuthor(author)));
 
     final Report updated2 = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(updated), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(submittedReport), true));
     assertThat(updated2).isNotNull();
     assertThat(updated2.getAdvisorOrg().getUuid()).isNotEqualTo(updated.getAdvisorOrg().getUuid());
 
@@ -1076,13 +1081,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
+    final Report submittedReport2 =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
 
     // EF 6.1 does not have approval steps but EF 6 does,
     // Report should now be up for review by EF 6 approvers due to inheriting approval steps form
     // parent
-    validateReportApprovalStep(
-        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid())),
-        ef6.get().getUuid());
+    validateReportApprovalStep(submittedReport2, ef6.get().getUuid());
   }
 
   private void validateReportApprovalStep(Report report, String organizationUuid) {
@@ -1153,7 +1158,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         personToReportPerson(nick, false), personToPrimaryReportAuthor(elizabeth)));
     returned.setTasks(List.of());
     Report updated = withCredentials(getDomainUsername(elizabeth),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(returned), true));
     assertThat(updated).isNotNull();
 
     // Verify the report changed
@@ -1198,7 +1203,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     returned3
         .setTasks(List.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
     updated = withCredentials("bob",
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned3), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(returned3), true));
     assertThat(updated).isNotNull();
 
     Report returned4 = withCredentials(getDomainUsername(elizabeth),
@@ -1924,7 +1929,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     r1.setEngagementDate(Instant.now());
     r1.setDuration(50);
     final Report updated = withCredentials(adminUser,
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(r1), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(r1), true));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
@@ -2004,7 +2009,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     r1.setEngagementDate(Instant.now());
     r1.setDuration(115);
     final Report updated = withCredentials(getDomainUsername(elizabeth),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(r1), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(r1), true));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
@@ -2083,7 +2088,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     returned2.getReportSensitiveInformation()
         .setText(UtilsTest.getCombinedHtmlTestCase().getInput() + "<p>test</p>");
     final Report updated = withCredentials(getDomainUsername(elizabeth),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned2), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(returned2), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after update
@@ -2413,8 +2418,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Try to remove the author, should fail
     reportFirstAuthor.setReportPeople(null);
     try {
-      withCredentials(getDomainUsername(author),
-          t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true));
+      withCredentials(getDomainUsername(author), t -> mutationExecutor.updateReport(FIELDS, false,
+          getReportInput(reportFirstAuthor), true));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -2425,7 +2430,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     reportFirstAuthor
         .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
     final Report reportTwoAuthors = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(reportFirstAuthor), true));
     assertThat(reportTwoAuthors.getReportPeople())
         .anyMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
     assertThat(reportTwoAuthors.getReportPeople())
@@ -2434,7 +2439,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Remove the first author
     reportTwoAuthors.setReportPeople(List.of(personToReportAuthor(liz)));
     final Report reportSecondAuthor = withCredentials(getDomainUsername(author),
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportTwoAuthors), true));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(reportTwoAuthors), true));
     assertThat(reportSecondAuthor.getReportPeople())
         .noneMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
     assertThat(reportSecondAuthor.getReportPeople())
@@ -2443,8 +2448,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Try to edit the report as the first author, should fail
     reportSecondAuthor.setIntent("Testing report authors again");
     try {
-      withCredentials(getDomainUsername(author),
-          t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true));
+      withCredentials(getDomainUsername(author), t -> mutationExecutor.updateReport(FIELDS, false,
+          getReportInput(reportSecondAuthor), true));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -2454,8 +2459,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     reportSecondAuthor
         .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
     try {
-      withCredentials(getDomainUsername(author),
-          t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true));
+      withCredentials(getDomainUsername(author), t -> mutationExecutor.updateReport(FIELDS, false,
+          getReportInput(reportSecondAuthor), true));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -2565,7 +2570,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Edit a published report as admin
     final Report updatedReport = withCredentials(adminUser,
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(published), false));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(published), false));
     // Check that report is still published and release date is unchanged
     assertThat(updatedReport.getState()).isEqualTo(published.getState());
     assertThat(updatedReport.getReleasedAt()).isEqualTo(published.getReleasedAt());
@@ -2675,7 +2680,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Erin should be able to edit it again
     final Report updatedReport = withCredentials("erin",
-        t -> mutationExecutor.updateReport(FIELDS, getReportInput(report), false));
+        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(submittedReport), false));
 
     // It should be back to Draft
     assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);
@@ -2743,7 +2748,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     update.setReportCommunities(activeAgs.getList().stream()
         .map(AbstractResourceTest::getAuthorizationGroupInput).toList());
     final Report updated =
-        withCredentials(jackUser, t -> mutationExecutor.updateReport(FIELDS, update, false));
+        withCredentials(jackUser, t -> mutationExecutor.updateReport(FIELDS, false, update, false));
     assertThat(updated).isNotNull();
     final Report updateCheck =
         withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
@@ -2784,5 +2789,39 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Set<String> activeAgAfterDeleteUuids = activeAgsAfterDelete.getList().stream()
         .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
     assertThat(activeAgUuids).isEqualTo(activeAgAfterDeleteUuids);
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "34265a98-7f82-4f16-b132-abcb60d307ad";
+    final Report test = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, testUuid));
+
+    // Update it
+    final ReportInput updatedInput = getReportInput(test);
+    final String updatedReportText = UUID.randomUUID().toString();
+    updatedInput.setReportText(updatedReportText);
+    final Report updated = withCredentials(adminUser,
+        t -> mutationExecutor.updateReport(FIELDS, false, updatedInput, false));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getReportText()).isEqualTo(updatedReportText);
+
+    // Try to update it again, with the input that is now outdated
+    final ReportInput outdatedInput = getReportInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateReport(FIELDS, false, outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Report forceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateReport(FIELDS, true, outdatedInput, false));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getReportText()).isEqualTo(test.getReportText());
   }
 }

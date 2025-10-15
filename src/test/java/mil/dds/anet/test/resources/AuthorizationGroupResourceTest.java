@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
 import java.util.List;
+import java.util.UUID;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
@@ -16,10 +17,12 @@ import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.Status;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 class AuthorizationGroupResourceTest extends AbstractResourceTest {
-  protected static final String FIELDS = "{ uuid name description status"
+  protected static final String FIELDS = "{ uuid updatedAt name description status"
       + " distributionList forSensitiveInformation"
       + " administrativePositions { uuid name code type role status location { uuid name }"
       + " organization { uuid shortName longName identificationCode }"
@@ -76,7 +79,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
     final Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput, false));
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
         t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
@@ -96,7 +99,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(authorizationGroup).isNotNull();
     try {
       withCredentials("jacob", t -> mutationExecutor.updateAuthorizationGroup("",
-          getAuthorizationGroupInput(authorizationGroup)));
+          getAuthorizationGroupInput(authorizationGroup), false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -116,7 +119,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
     final Integer nrUpdated = withCredentials(getDomainUsername(getSuperuser()),
-        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput, false));
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
         t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
@@ -149,7 +152,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(authorizationGroup).isNotNull();
     try {
       withCredentials(jackUser, t -> mutationExecutor.updateAuthorizationGroup("",
-          getAuthorizationGroupInput(authorizationGroup)));
+          getAuthorizationGroupInput(authorizationGroup), false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -202,5 +205,46 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(organization.getAuthorizationGroups()).hasSize(1);
     assertThat(organization.getAuthorizationGroups().get(0).getUuid())
         .isEqualTo(expectedAuthorizationGroupUuid);
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "90a5196d-acf3-4a81-8ff9-3a8c7acabdf3";
+    final AuthorizationGroup test =
+        withCredentials(adminUser, t -> queryExecutor.authorizationGroup(FIELDS, testUuid));
+
+    // Update it
+    final AuthorizationGroupInput updatedInput = getAuthorizationGroupInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedInput, false));
+    assertThat(nrUpdated).isOne();
+    final AuthorizationGroup updated =
+        withCredentials(adminUser, t -> queryExecutor.authorizationGroup(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final AuthorizationGroupInput outdatedInput = getAuthorizationGroupInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateAuthorizationGroup("", outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAuthorizationGroup("", outdatedInput, true));
+    assertThat(nrForceUpdated).isOne();
+    final AuthorizationGroup forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.authorizationGroup(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 }

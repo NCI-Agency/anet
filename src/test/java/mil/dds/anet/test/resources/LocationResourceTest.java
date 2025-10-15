@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.Location;
@@ -16,12 +17,14 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
   public static final String _LOCATION_FIELDS =
-      "uuid name type description status lat lng customFields";
+      "uuid updatedAt name type description status lat lng customFields";
   public static final String FIELDS = String
       .format("{ %1$s parentLocations { %1$s } childrenLocations { %1$s } }", _LOCATION_FIELDS);
 
@@ -49,7 +52,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     // Update
     created.setName("Down by the Bay");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateLocation("", getLocationInput(created)));
+        t -> mutationExecutor.updateLocation("", false, getLocationInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
     final Location updated =
         withCredentials(adminUser, t -> queryExecutor.location(FIELDS, created.getUuid()));
@@ -58,22 +61,22 @@ public class LocationResourceTest extends AbstractResourceTest {
     // Update description
     updated.setDescription(UtilsTest.getCombinedHtmlTestCase().getInput());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updateLocation("", getLocationInput(updated)));
+        t -> mutationExecutor.updateLocation("", false, getLocationInput(updated)));
     assertThat(nrUpdated).isEqualTo(1);
-
+    final Location updated2 =
+        withCredentials(adminUser, t -> queryExecutor.location(FIELDS, created.getUuid()));
 
     // Add html to description and ensure it gets stripped out
-    final LocationInput updatedDescInput = getLocationInput(updated);
+    final LocationInput updatedDescInput = getLocationInput(updated2);
     updatedDescInput.setDescription(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
-    nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", updatedDescInput));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateLocation("", false, updatedDescInput));
     assertThat(nrUpdated).isEqualTo(1);
     final Location updatedDesc =
-        withCredentials(adminUser, t -> queryExecutor.location(FIELDS, updated.getUuid()));
+        withCredentials(adminUser, t -> queryExecutor.location(FIELDS, updatedDescInput.getUuid()));
     assertThat(updatedDesc.getDescription()).contains("<b>Hello world</b>");
     assertThat(updatedDesc.getDescription()).doesNotContain("<script>window.alert");
-
   }
 
   @Test
@@ -133,7 +136,7 @@ public class LocationResourceTest extends AbstractResourceTest {
 
     try {
       final Integer nrUpdated = withCredentials(getDomainUsername(user),
-          t -> mutationExecutor.updateLocation("", getLocationInput(l)));
+          t -> mutationExecutor.updateLocation("", false, getLocationInput(l)));
       if (isSuperuser) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
@@ -188,7 +191,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     topLocInput.setParentLocations(List.of(getLocationInput(topLoc), getLocationInput(topLoc2)));
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", topLocInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, topLocInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -198,7 +201,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     topLocInput.setParentLocations(List.of(getLocationInput(topLoc2), getLocationInput(topLoc)));
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", topLocInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, topLocInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -208,7 +211,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     topLocInput.setParentLocations(List.of(getLocationInput(subLoc), getLocationInput(topLoc2)));
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", topLocInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, topLocInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -218,7 +221,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     topLocInput.setParentLocations(List.of(getLocationInput(topLoc2), getLocationInput(subLoc)));
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", topLocInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, topLocInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -262,7 +265,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     subLocInput.setParentLocations(
         List.of(getLocationInput(topLoc), getLocationInput(topLoc2), getLocationInput(topLoc3)));
     final Integer nrResults =
-        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", subLocInput));
+        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, subLocInput));
     assertThat(nrResults).isOne();
 
     final Location updatedSubLoc =
@@ -275,9 +278,9 @@ public class LocationResourceTest extends AbstractResourceTest {
     assertThat(updatedParentLocationUuids).hasSameElementsAs(parentLocationUuids);
 
     // Remove all parents
-    subLocInput.setParentLocations(List.of());
-    final Integer nrResults2 =
-        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", subLocInput));
+    updatedSubLoc.setParentLocations(List.of());
+    final Integer nrResults2 = withCredentials(adminUser,
+        t -> mutationExecutor.updateLocation("", false, getLocationInput(updatedSubLoc)));
     assertThat(nrResults2).isOne();
 
     final Location updatedSubLoc2 =
@@ -285,17 +288,56 @@ public class LocationResourceTest extends AbstractResourceTest {
     assertThat(updatedSubLoc2.getParentLocations()).isEmpty();
 
     // Restore original parent
-    subLocInput.setParentLocations(List.of(getLocationInput(topLoc)));
-    final Integer nrResults3 =
-        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", subLocInput));
+    updatedSubLoc2.setParentLocations(subLoc.getParentLocations());
+    final Integer nrResults3 = withCredentials(adminUser,
+        t -> mutationExecutor.updateLocation("", false, getLocationInput(updatedSubLoc2)));
     assertThat(nrResults3).isOne();
 
     final Location updatedSubLoc3 =
         withCredentials(adminUser, t -> queryExecutor.location(FIELDS, subLoc.getUuid()));
     final List<String> parentLocationUuids3 =
-        subLocInput.getParentLocations().stream().map(LocationInput::getUuid).toList();
+        updatedSubLoc2.getParentLocations().stream().map(Location::getUuid).toList();
     final List<String> updatedParentLocationUuids3 =
         updatedSubLoc3.getParentLocations().stream().map(Location::getUuid).toList();
     assertThat(updatedParentLocationUuids3).hasSameElementsAs(parentLocationUuids3);
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "283797ec-7077-49b2-87b8-9afd5499b6f3";
+    final Location test = withCredentials(adminUser, t -> queryExecutor.location(FIELDS, testUuid));
+
+    // Update it
+    final LocationInput updatedInput = getLocationInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Location updated =
+        withCredentials(adminUser, t -> queryExecutor.location(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final LocationInput outdatedInput = getLocationInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updateLocation("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateLocation("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Location forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.location(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 }

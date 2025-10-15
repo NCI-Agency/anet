@@ -61,7 +61,8 @@ const OnDemandAssessment = ({
   // Used to determine if the AssessmentModal is in edit mode or create mode.
   const [editModeObject, setEditModeObject] = useState({
     questionnaireResults: {},
-    uuid: ""
+    uuid: "",
+    updatedAt: null
   })
   // 'assessmentConfig' has question set for ondemand assessments defined in the dictionary
   // and 'assessmentYupSchema' used for this question set.
@@ -144,7 +145,8 @@ const OnDemandAssessment = ({
                         onClick={() => {
                           setEditModeObject({
                             questionnaireResults: assessmentFieldsObject,
-                            uuid: assessment.uuid
+                            uuid: assessment.uuid,
+                            updatedAt: assessment.updatedAt
                           })
                           setShowModal(true)
                         }}
@@ -344,7 +346,8 @@ const OnDemandAssessment = ({
             uuid:
               Object.keys(editModeObject.questionnaireResults).length > 0
                 ? editModeObject.uuid
-                : ""
+                : "",
+            updatedAt: editModeObject.updatedAt
           }}
           assessmentValues={editModeObject.questionnaireResults}
           entity={entity}
@@ -365,11 +368,19 @@ const OnDemandAssessment = ({
                   : 0
               )
             }
-            setEditModeObject({ questionnaireResults: {}, uuid: "" })
+            setEditModeObject({
+              questionnaireResults: {},
+              uuid: "",
+              updatedAt: null
+            })
           }}
           onCancel={() => {
             setShowModal(false)
-            setEditModeObject({ questionnaireResults: {}, uuid: "" })
+            setEditModeObject({
+              questionnaireResults: {},
+              uuid: "",
+              updatedAt: null
+            })
           }}
         />
       </div>

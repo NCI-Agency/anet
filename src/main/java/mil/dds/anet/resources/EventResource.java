@@ -85,13 +85,14 @@ public class EventResource {
 
   @GraphQLMutation(name = "updateEvent")
   public Integer updateEvent(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "event") Event event) {
+      @GraphQLArgument(name = "event") Event event,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
-    validateEvent(user, event);
-
-    // Validate user has permission also for the original adminOrg
     final Event existing = dao.getByUuid(event.getUuid());
     assertPermission(user, existing.getAdminOrgUuid());
+    DaoUtils.assertObjectIsFresh(event, existing, force);
+
+    validateEvent(user, event);
 
     // perform all modifications to the event and its tasks in a single transaction,
     return executeEventUpdates(user, event);

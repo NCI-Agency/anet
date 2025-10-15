@@ -136,15 +136,18 @@ public class PositionResource {
 
   @GraphQLMutation(name = "updatePosition")
   public Integer updatePosition(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "position") Position pos) {
+      @GraphQLArgument(name = "position") Position pos,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     pos.checkAndFixCustomFields();
     pos.setDescription(
         Utils.isEmptyHtml(pos.getDescription()) ? null : Utils.sanitizeHtml(pos.getDescription()));
-    final Person user = DaoUtils.getUserFromContext(context);
-    assertPermission(user, pos);
-    validatePosition(user, pos);
 
+    final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
+    assertPermission(user, pos);
+    DaoUtils.assertObjectIsFresh(pos, existing, force);
+
+    validatePosition(user, pos);
 
     final int numRows = dao.update(pos);
     if (numRows == 0) {
@@ -211,7 +214,7 @@ public class PositionResource {
 
     if (engine.getPersonDao().hasHistoryConflict(pos.getUuid(), null, pos.getPreviousPeople(),
         false)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "At least one of the positions in the history is occupied for the specified period.");
     }
 
@@ -320,7 +323,7 @@ public class PositionResource {
     arePositionsMergeable(winnerPosition, loserPosition);
     if (ApplicationContextProvider.getEngine().getPersonDao().hasHistoryConflict(
         winnerPosition.getUuid(), loserUuid, winnerPosition.getPreviousPeople(), false)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "At least one of the people in the history is occupied for the specified period.");
     }
     validatePosition(user, winnerPosition);

@@ -24,7 +24,7 @@ public class LocationMergeTest extends AbstractResourceTest {
 
   public static final String FIELDS =
       String.format(
-          "{ uuid name type digram trigram description status lat lng customFields"
+          "{ uuid updatedAt name type digram trigram description status lat lng customFields"
               + " attachments %s parentLocations { uuid } }",
           AttachmentResourceTest.ATTACHMENT_FIELDS);
   private static final String PERSON_FIELDS = String.format("{ uuid country %s }", FIELDS);
@@ -75,7 +75,7 @@ public class LocationMergeTest extends AbstractResourceTest {
     // Subscribe to the organization
     final String winnerSubscriptionUuid =
         addSubscription(subscribeToWinner, objectType, firstLocation.getUuid(),
-            t -> mutationExecutor.updateLocation("", getLocationInput(firstLocation)));
+            t -> mutationExecutor.updateLocation("", false, getLocationInput(firstLocation)));
 
     // Create loser Location
     final LocationInput secondLocationInput =
@@ -111,7 +111,7 @@ public class LocationMergeTest extends AbstractResourceTest {
     // Subscribe to the location
     final String loserSubscriptionUuid =
         addSubscription(subscribeToLoser, objectType, secondLocation.getUuid(),
-            t -> mutationExecutor.updateLocation("", getLocationInput(secondLocation)));
+            t -> mutationExecutor.updateLocation("", false, getLocationInput(secondLocation)));
 
     // Merge the two locations
     final LocationInput mergedLocationInput = getLocationInput(firstLocation);

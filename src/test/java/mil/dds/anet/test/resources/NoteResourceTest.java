@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
@@ -21,12 +22,14 @@ import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.Status;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 class NoteResourceTest extends AbstractResourceTest {
 
-  protected static final String NOTE_FIELDS = "{ uuid text author { uuid }"
+  protected static final String NOTE_FIELDS = "{ uuid updatedAt text author { uuid }"
       + " noteRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
   private static final String PERSON_FIELDS = String.format("{ uuid name %1$s }", _NOTES_FIELDS);
@@ -228,6 +231,43 @@ class NoteResourceTest extends AbstractResourceTest {
         updatedNotesInput, 1);
   }
 
+  @Test
+  void testUpdateConflict() {
+    final String testReportUuid = "9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5";
+    final Report testReport =
+        withCredentials(adminUser, t -> queryExecutor.report(REPORT_FIELDS, testReportUuid));
+    assertThat(testReport.getNotes()).isNotEmpty();
+    final Note test = testReport.getNotes().get(0);
+
+    // Update it
+    final NoteInput updatedInput = getNoteInput(test);
+    final String updatedTest = UUID.randomUUID().toString();
+    updatedInput.setText(updatedTest);
+    final Note updated = withCredentials(adminUser,
+        t -> mutationExecutor.updateNote(NOTE_FIELDS, false, updatedInput));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getText()).isEqualTo(updatedTest);
+
+    // Try to update it again, with the input that is now outdated
+    final NoteInput outdatedInput = getNoteInput(test);
+    try {
+      withCredentials(adminUser,
+          t -> mutationExecutor.updateNote(NOTE_FIELDS, false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Note forceUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateNote(NOTE_FIELDS, true, outdatedInput));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getText()).isEqualTo(test.getText());
+  }
+
   private GenericRelatedObjectInput createNoteRelatedObject(final String tableName,
       final String uuid) {
     return GenericRelatedObjectInput.builder().withRelatedObjectType(tableName)
@@ -245,7 +285,7 @@ class NoteResourceTest extends AbstractResourceTest {
 
   private void failNoteUpdate(final String username, final NoteInput noteInput) {
     try {
-      withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, noteInput));
+      withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, false, noteInput));
       fail("Expected exception updating note");
     } catch (Exception expectedException) {
       // OK
@@ -271,7 +311,7 @@ class NoteResourceTest extends AbstractResourceTest {
 
   private Note succeedNoteUpdate(final String username, final NoteInput noteInput) {
     final Note updatedNote =
-        withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, noteInput));
+        withCredentials(username, t -> mutationExecutor.updateNote(NOTE_FIELDS, false, noteInput));
     assertThat(updatedNote).isNotNull();
     assertThat(updatedNote.getText()).isEqualTo(noteInput.getText());
     return updatedNote;

@@ -172,12 +172,15 @@ public class AttachmentResource {
 
   @GraphQLMutation(name = "updateAttachment")
   public String updateAttachment(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "attachment") Attachment attachment) {
+      @GraphQLArgument(name = "attachment") Attachment attachment,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
     final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
     assertAttachmentPermission(user, existing,
         "You don't have permission to update this attachment");
+    DaoUtils.assertObjectIsFresh(attachment, existing, force);
+
     assertAllowedMimeType(attachment.getMimeType());
     ResourceUtils.assertAllowedClassification(attachment.getClassification());
 

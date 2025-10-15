@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.UUID;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Event;
 import mil.dds.anet.test.client.Event;
@@ -14,7 +15,9 @@ import mil.dds.anet.test.client.EventType;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.utils.UtilsTest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class EventResourceTest extends AbstractResourceTest {
 
@@ -25,7 +28,7 @@ public class EventResourceTest extends AbstractResourceTest {
       "{ uuid status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
   public static final String FIELDS =
       "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid }"
-          + " startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
+          + " updatedAt startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
   void eventTestGraphQL() {
@@ -38,34 +41,35 @@ public class EventResourceTest extends AbstractResourceTest {
 
     // Update an event field
     created.setName("NMI PDT v2");
-    Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", getEventInput(created)));
+    Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateEvent("", getEventInput(created), false));
     assertThat(nrUpdated).isEqualTo(1);
     Event updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
     assertThat(updated.getStatus()).isEqualTo(created.getStatus());
     assertThat(updated.getName()).isEqualTo(created.getName());
 
     // Add entities to event
-    created.setEventSeries(withCredentials(adminUser,
+    updated.setEventSeries(withCredentials(adminUser,
         t -> mutationExecutor.createEventSeries(EVENT_SERIES_FIELDS,
             TestData.createEventSeriesInput("Event Series", "Event Series Description",
                 getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org)))));
-    created.setOrganizations(Collections.singletonList(org));
-    created.setPeople(Collections.singletonList(getJackJackson()));
-    created.setTasks(Collections.singletonList(withCredentials(adminUser,
+    updated.setOrganizations(Collections.singletonList(org));
+    updated.setPeople(Collections.singletonList(getJackJackson()));
+    updated.setTasks(Collections.singletonList(withCredentials(adminUser,
         t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("The New Task for the NMI PDT Event",
                 "The New Task for the NMI PDT Event", "The New Task for the NMI PDT Event",
                 UtilsTest.getCombinedJsonTestCase().getInput())))));
+    final EventInput updatedInput = getEventInput(updated);
     nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", getEventInput(created)));
+        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", updatedInput, false));
     assertThat(nrUpdated).isEqualTo(1);
 
     updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
     assertThat(updated.getEventSeries()).isNotNull();
-    assertThat(updated.getOrganizations().size()).isEqualTo(1);
-    assertThat(updated.getPeople().size()).isEqualTo(1);
-    assertThat(updated.getTasks().size()).isEqualTo(1);
+    assertThat(updated.getOrganizations()).hasSize(1);
+    assertThat(updated.getPeople()).hasSize(1);
+    assertThat(updated.getTasks()).hasSize(1);
 
     // Search
     final EventSearchQueryInput query =
@@ -110,6 +114,44 @@ public class EventResourceTest extends AbstractResourceTest {
     failUpdateEvent(eInput);
   }
 
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "e850846e-9741-40e8-bc51-4dccc30cf47f";
+    final Event test = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, testUuid));
+
+    // Update it
+    final EventInput updatedInput = getEventInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", updatedInput, false));
+    assertThat(nrUpdated).isOne();
+    final Event updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final EventInput outdatedInput = getEventInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updateEvent("", outdatedInput, false));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateEvent("", outdatedInput, true));
+    assertThat(nrForceUpdated).isOne();
+    final Event forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.event(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
+  }
+
   private void failCreateEvent(final EventInput eventInput) {
     try {
       withCredentials(jackUser, t -> mutationExecutor.createEvent(FIELDS, eventInput));
@@ -121,7 +163,7 @@ public class EventResourceTest extends AbstractResourceTest {
 
   private void failUpdateEvent(final EventInput eventInput) {
     try {
-      withCredentials(jackUser, t -> mutationExecutor.updateEvent("", eventInput));
+      withCredentials(jackUser, t -> mutationExecutor.updateEvent("", eventInput, false));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK

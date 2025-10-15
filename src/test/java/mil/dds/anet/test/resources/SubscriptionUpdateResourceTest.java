@@ -242,7 +242,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private void updateLocation(final String subscribedObjectUuid) {
     final Location subscribedObject = getLocation(subscribedObjectUuid);
     withCredentials(adminUser,
-        t -> mutationExecutor.updateLocation("", getLocationInput(subscribedObject)));
+        t -> mutationExecutor.updateLocation("", false, getLocationInput(subscribedObject)));
   }
 
   private Location getLocation(final String subscribedObjectUuid) {
@@ -252,8 +252,8 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
 
   private void updateOrganization(final String subscribedObjectUuid) {
     final Organization subscribedObject = getOrganization(subscribedObjectUuid);
-    withCredentials(adminUser,
-        t -> mutationExecutor.updateOrganization("", getOrganizationInput(subscribedObject)));
+    withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", false,
+        getOrganizationInput(subscribedObject)));
   }
 
   private Organization getOrganization(final String subscribedObjectUuid) {
@@ -264,7 +264,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private void updatePerson(final String subscribedObjectUuid) {
     final Person subscribedObject = getPerson(subscribedObjectUuid);
     withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", getPersonInput(subscribedObject)));
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(subscribedObject)));
   }
 
   private Person getPerson(final String subscribedObjectUuid) {
@@ -275,7 +275,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private void updatePosition(final String subscribedObjectUuid) {
     final Position subscribedObject = getPosition(subscribedObjectUuid);
     withCredentials(adminUser,
-        t -> mutationExecutor.updatePosition("", getPositionInput(subscribedObject)));
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(subscribedObject)));
   }
 
   private Position getPosition(final String subscribedObjectUuid) {
@@ -286,7 +286,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private void updateTask(final String subscribedObjectUuid) {
     final Task subscribedObject = getTask(subscribedObjectUuid);
     withCredentials(adminUser,
-        t -> mutationExecutor.updateTask("", getTaskInput(subscribedObject)));
+        t -> mutationExecutor.updateTask("", false, getTaskInput(subscribedObject)));
   }
 
   private Task getTask(final String subscribedObjectUuid) {
@@ -297,7 +297,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private void updateAuthorizationGroup(final String subscribedObjectUuid) {
     final AuthorizationGroup subscribedObject = getAuthorizationGroup(subscribedObjectUuid);
     withCredentials(adminUser, t -> mutationExecutor.updateAuthorizationGroup("",
-        getAuthorizationGroupInput(subscribedObject)));
+        getAuthorizationGroupInput(subscribedObject), false));
   }
 
   private AuthorizationGroup getAuthorizationGroup(final String subscribedObjectUuid) {
@@ -308,7 +308,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private void updateEvent(final String subscribedObjectUuid) {
     final Event subscribedObject = getEvent(subscribedObjectUuid);
     withCredentials(adminUser,
-        t -> mutationExecutor.updateEvent("", getEventInput(subscribedObject)));
+        t -> mutationExecutor.updateEvent("", getEventInput(subscribedObject), false));
   }
 
   private Event getEvent(final String subscribedObjectUuid) {

@@ -133,7 +133,7 @@ class PersonMergeTest extends AbstractResourceTest {
 
     // Subscribe to the person
     final String loserSubscriptionUuid = addSubscription(subscribeToLoser, objectType,
-        loser1.getUuid(), t -> mutationExecutor.updatePerson("", getPersonInput(loser1)));
+        loser1.getUuid(), t -> mutationExecutor.updatePerson("", false, getPersonInput(loser1)));
 
     // Create a person
     final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
@@ -165,7 +165,7 @@ class PersonMergeTest extends AbstractResourceTest {
 
     // Subscribe to the person
     final String winnerSubscriptionUuid = addSubscription(subscribeToWinner, objectType,
-        winner.getUuid(), t -> mutationExecutor.updatePerson("", getPersonInput(winner)));
+        winner.getUuid(), t -> mutationExecutor.updatePerson("", false, getPersonInput(winner)));
 
     // Merge the two persons
     winnerInput.setUuid(winner.getUuid());

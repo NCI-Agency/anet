@@ -31,16 +31,19 @@ import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.utils.Utils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class PositionResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _ORGANIZATION_FIELDS =
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      String.format("uuid name %1$s", _EMAIL_ADDRESSES_FIELDS);
-  private static final String _POSITION_FIELDS = String.format(
-      "uuid name code type role status description customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
+      String.format("uuid updatedAt name %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _POSITION_FIELDS =
+      String.format("uuid updatedAt name code type role status description customFields %1$s",
+          _EMAIL_ADDRESSES_FIELDS);
   public static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
@@ -215,26 +218,29 @@ public class PositionResourceTest extends AbstractResourceTest {
     nrDeleted = withCredentials(adminUser,
         t -> mutationExecutor.deletePersonFromPosition("", tashkil.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
+    final Position updatedTashkil =
+        withCredentials(jackUser, t -> queryExecutor.position(FIELDS, tashkil.getUuid()));
 
     // Try to delete this position, it should fail because the tashkil is active
     try {
-      withCredentials(adminUser, t -> mutationExecutor.deletePosition("", tashkil.getUuid()));
+      withCredentials(adminUser,
+          t -> mutationExecutor.deletePosition("", updatedTashkil.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
 
-    tashkil.setStatus(Status.INACTIVE);
+    updatedTashkil.setStatus(Status.INACTIVE);
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePosition("", getPositionInput(tashkil)));
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(updatedTashkil)));
     assertThat(nrUpdated).isEqualTo(1);
 
-    nrDeleted =
-        withCredentials(adminUser, t -> mutationExecutor.deletePosition("", tashkil.getUuid()));
+    nrDeleted = withCredentials(adminUser,
+        t -> mutationExecutor.deletePosition("", updatedTashkil.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
 
     try {
-      withCredentials(jackUser, t -> queryExecutor.position(FIELDS, tashkil.getUuid()));
+      withCredentials(jackUser, t -> queryExecutor.position(FIELDS, updatedTashkil.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -284,7 +290,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Change Name/Code
     created.setName("Deputy Chief of Donuts");
     Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePosition("", getPositionInput(created)));
+        t -> mutationExecutor.updatePosition("", false, getPositionInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
     Position returned =
         withCredentials(jackUser, t -> queryExecutor.position(FIELDS, created.getUuid()));
@@ -545,7 +551,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PersonInput prin2UpdateInput = getPersonInput(prin2);
     prin2UpdateInput.setPosition(prin2PositionInput);
     Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", prin2UpdateInput));
+        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, prin2UpdateInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Reload this person to check their position was set.
@@ -640,7 +646,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final Position p1 = userOrgPositions.get(0);
     try {
       final Integer nrUpdated = withCredentials(getDomainUsername(user),
-          t -> mutationExecutor.updatePosition("", getPositionInput(p1)));
+          t -> mutationExecutor.updatePosition("", false, getPositionInput(p1)));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else if (isSuperuser) {
@@ -668,7 +674,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // try to update the new position (not related to the user's organization)
     try {
       final Integer nrUpdated = withCredentials(getDomainUsername(user),
-          t -> mutationExecutor.updatePosition("", getPositionInput(newPosition)));
+          t -> mutationExecutor.updatePosition("", false, getPositionInput(newPosition)));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
@@ -681,11 +687,13 @@ public class PositionResourceTest extends AbstractResourceTest {
     }
 
     // try to update a regular user position and make it superuser
-    final PositionInput p3 = getPositionInput(newPosition);
+    final Position updatedNewPosition =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, newPosition.getUuid()));
+    final PositionInput p3 = getPositionInput(updatedNewPosition);
     try {
       p3.setType(PositionType.SUPERUSER);
-      final Integer nrUpdated =
-          withCredentials(getDomainUsername(user), t -> mutationExecutor.updatePosition("", p3));
+      final Integer nrUpdated = withCredentials(getDomainUsername(user),
+          t -> mutationExecutor.updatePosition("", false, p3));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
@@ -757,5 +765,44 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
+
+  @Test
+  void testUpdateConflict() {
+    final String testUuid = "888d6c4b-deaa-4218-b8fd-abfb7c81a4c6";
+    final Position test = withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+
+    // Update it
+    final PositionInput updatedInput = getPositionInput(test);
+    final String updatedDescription = UUID.randomUUID().toString();
+    updatedInput.setDescription(updatedDescription);
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, updatedInput));
+    assertThat(nrUpdated).isOne();
+    final Position updated =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+    assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
+    assertThat(updated.getDescription()).isEqualTo(updatedDescription);
+
+    // Try to update it again, with the input that is now outdated
+    final PositionInput outdatedInput = getPositionInput(test);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.updatePosition("", false, outdatedInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      final Throwable rootCause = ExceptionUtils.getRootCause(expectedException);
+      if (!(rootCause instanceof WebClientResponseException.Conflict)) {
+        fail("Expected WebClientResponseException.Conflict");
+      }
+    }
+
+    // Now do a force-update
+    final Integer nrForceUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePosition("", true, outdatedInput));
+    assertThat(nrForceUpdated).isOne();
+    final Position forceUpdated =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, testUuid));
+    assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
+    assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 }

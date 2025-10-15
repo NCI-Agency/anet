@@ -16,6 +16,7 @@ dateFormats:
     date: d MMMM yyyy Z
     withTime: d MMMM yyyy @ HH:mm Z
   excel: d MMMM yyyy
+  upToDateCheck: dd-MM-yyyy HH:mm:ss.SSS
   forms:
     input:
       date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,

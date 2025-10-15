@@ -30,7 +30,7 @@ export default class Attachment extends Model {
   })
 
   static basicFieldsQuery =
-    "uuid fileName caption description classification mimeType contentLength createdAt"
+    "uuid fileName caption description classification mimeType contentLength createdAt updatedAt"
 
   static autocompleteQuery = Attachment.basicFieldsQuery
 

@@ -41,7 +41,7 @@ class TaskMergeTest extends AbstractResourceTest {
 
     // Subscribe to the task
     final String loserSubscriptionUuid = addSubscription(subscribeToLoser, objectType,
-        loser.getUuid(), t -> mutationExecutor.updateTask("", getTaskInput(loser)));
+        loser.getUuid(), t -> mutationExecutor.updateTask("", false, getTaskInput(loser)));
 
     final var winnerInput = TaskInput.builder().withShortName("WM1-" + UUID.randomUUID())
         .withLongName("Winner for Merge").withStatus(ACTIVE).build();
@@ -50,7 +50,7 @@ class TaskMergeTest extends AbstractResourceTest {
 
     // Subscribe to the task
     final String winnerSubscriptionUuid = addSubscription(subscribeToWinner, objectType,
-        winner.getUuid(), t -> mutationExecutor.updateTask("", getTaskInput(winner)));
+        winner.getUuid(), t -> mutationExecutor.updateTask("", false, getTaskInput(winner)));
 
     // Merge the two tasks
     final var mergeInput = getTaskInput(winner);

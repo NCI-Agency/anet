@@ -138,19 +138,19 @@ public class OrganizationResource {
 
   @GraphQLMutation(name = "updateOrganization")
   public Integer updateOrganization(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "organization") Organization org) {
+      @GraphQLArgument(name = "organization") Organization org,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     org.checkAndFixCustomFields();
     org.setProfile(
         Utils.isEmptyHtml(org.getProfile()) ? null : Utils.sanitizeHtml(org.getProfile()));
 
     final Person user = DaoUtils.getUserFromContext(context);
-    // Verify correct Organization
+    final Organization existing = dao.getByUuid(org.getUuid());
     assertPermission(user, org.getUuid());
+    DaoUtils.assertObjectIsFresh(org, existing, force);
+
     // Check for loops in the hierarchy
     checkForLoops(org.getUuid(), org.getParentOrgUuid());
-
-    // Load the existing organization, so we can check for differences.
-    final Organization existing = dao.getByUuid(org.getUuid());
 
     if (!AuthUtils.isAdmin(user)
         && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {

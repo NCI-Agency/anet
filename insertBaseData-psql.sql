@@ -1113,7 +1113,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('34265a98-7f82-4f16-b132-abcb60d307ad', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Test report with rich text',
-  '<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>Handle text without tags. <p>Handle the white space below</p> <p>'||chr(10)||'</p> <blockquote>Blockquote</blockquote><b>Bold</b> <i>Italic</i> <u>Underline</u> <strike>Strike</strike> <strike><b>BoldStrike</b></strike> <i><b>BoldItalic</b></i><ol><li>numbered list 1</li><li><p><b>numbered</b> list 2<p></li></ol><ul><li>bulleted list 1</li><li>bulleted list 2</li></ul>',
+  '<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>Handle text without tags. <p>Handle the white space below</p> <p>'||chr(10)||'</p> <blockquote>Blockquote</blockquote><b>Bold</b> <i>Italic</i> <u>Underline</u> <strike>Strike</strike> <strike><b>BoldStrike</b></strike> <i><b>BoldItalic</b></i><ol><li>numbered list 1</li><li><p><b>numbered</b> list 2</p></li></ol><ul><li>bulleted list 1</li><li>bulleted list 2</li></ul>',
   'Keep testing', 0, '2022-08-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES

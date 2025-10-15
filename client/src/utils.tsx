@@ -286,6 +286,10 @@ export default {
     return !_isDate(value) && _isEmpty(value)
   },
 
+  isConflictError: function (error) {
+    return error?.status === 409
+  },
+
   pushHash: function (hash) {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""

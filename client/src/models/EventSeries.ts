@@ -63,6 +63,7 @@ export default class EventSeries extends Model {
         name
         description
         isSubscribed
+        updatedAt
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
           uuid

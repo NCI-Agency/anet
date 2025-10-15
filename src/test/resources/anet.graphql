@@ -824,26 +824,26 @@ type Mutation {
   submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
   updateAccessToken(accessToken: AccessTokenInput): Int
-  updateAssessment(assessment: AssessmentInput): Assessment
+  updateAssessment(assessment: AssessmentInput, force: Boolean = false): Assessment
   updateAssociatedPosition(position: PositionInput): Int
-  updateAttachment(attachment: AttachmentInput): String
-  updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
-  updateEvent(event: EventInput): Int
-  updateEventSeries(eventSeries: EventSeriesInput): Int
-  updateLocation(location: LocationInput): Int
-  updateMe(person: PersonInput): Int
-  updateNote(note: NoteInput): Note
-  updateOrganization(organization: OrganizationInput): Int
-  updatePerson(person: PersonInput): Int
+  updateAttachment(attachment: AttachmentInput, force: Boolean = false): String
+  updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput, force: Boolean = false): Int
+  updateEvent(event: EventInput, force: Boolean = false): Int
+  updateEventSeries(eventSeries: EventSeriesInput, force: Boolean = false): Int
+  updateLocation(force: Boolean = false, location: LocationInput): Int
+  updateMe(force: Boolean = false, person: PersonInput): Int
+  updateNote(force: Boolean = false, note: NoteInput): Note
+  updateOrganization(force: Boolean = false, organization: OrganizationInput): Int
+  updatePerson(force: Boolean = false, person: PersonInput): Int
   updatePersonHistory(person: PersonInput): Int!
   updatePersonPreferences(preferences: [PersonPreferenceInput]): Int
-  updatePosition(position: PositionInput): Int
+  updatePosition(force: Boolean = false, position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
   updatePreferences(preferences: [PreferenceInput]): Int
-  updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
+  updateReport(force: Boolean = false, report: ReportInput, sendEditEmail: Boolean = true): Report
   updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
   updateSavedSearch(savedSearch: SavedSearchInput): Int
-  updateTask(task: TaskInput): Int
+  updateTask(force: Boolean = false, task: TaskInput): Int
 }
 
 """"""

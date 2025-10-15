@@ -82,7 +82,7 @@ public class ResourceUtils {
       final PersonPositionHistory pph = previousPositions.get(i);
       for (int j = i + 1; j < historySize; j++) {
         if (overlap(pph, previousPositions.get(j))) {
-          throw new ResponseStatusException(HttpStatus.CONFLICT,
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               "History entries should not overlap.");
         }
       }

@@ -3,7 +3,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
-import Messages from "components/Messages"
+import { MessagesWithConflict } from "components/Messages"
 import Model, {
   ENTITY_ASSESSMENT_PARENT_FIELD,
   GQL_CREATE_ASSESSMENT,
@@ -77,6 +77,8 @@ const AssessmentModal = ({
           setFieldTouched,
           validateForm,
           values,
+          resetForm,
+          setSubmitting,
           submitForm
         }) => {
           return (
@@ -93,7 +95,19 @@ const AssessmentModal = ({
                     height: "100%"
                   }}
                 >
-                  <Messages error={assessmentError} />
+                  <MessagesWithConflict
+                    error={assessmentError}
+                    objectType="Assessment"
+                    onCancel={closeModal}
+                    onConfirm={() => {
+                      resetForm({ values, isSubmitting: true })
+                      onAssessmentSubmit(
+                        values,
+                        { resetForm, setSubmitting },
+                        true
+                      )
+                    }}
+                  />
                   {!_isEmpty(assessmentConfig.questions) && (
                     <CustomFieldsContainer
                       fieldsConfig={assessmentConfig.questions}
@@ -148,8 +162,8 @@ const AssessmentModal = ({
     onCancel()
   }
 
-  function onAssessmentSubmit(values, form) {
-    return saveAssessment(values, form)
+  function onAssessmentSubmit(values, form, force) {
+    return saveAssessment(values, form, force)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setAssessmentError(error)
@@ -159,12 +173,13 @@ const AssessmentModal = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function onSubmitSuccess(response, values, form) {
+    setAssessmentError(null)
     const operation = edit ? "updateAssessment" : "createAssessment"
     onSuccess(response[operation])
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function saveAssessment(values, form) {
+  function saveAssessment(values, form, force) {
     const assessmentRelatedObjects = assessment.assessmentRelatedObjects.map(
       o => ({
         relatedObjectType: o.relatedObjectType,
@@ -173,6 +188,7 @@ const AssessmentModal = ({
     )
     const updatedAssessment = {
       uuid: assessment.uuid,
+      updatedAt: assessment.updatedAt,
       author: assessment.author,
       assessmentKey: `${dictionaryPath}.${assessmentKey}`,
       assessmentRelatedObjects
@@ -191,7 +207,8 @@ const AssessmentModal = ({
       ENTITY_ASSESSMENT_PARENT_FIELD
     )
     return API.mutation(edit ? GQL_UPDATE_ASSESSMENT : GQL_CREATE_ASSESSMENT, {
-      assessment: updatedAssessment
+      assessment: updatedAssessment,
+      force
     })
   }
 }
