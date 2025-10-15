@@ -384,6 +384,28 @@ public class OrganizationDao
       updateM2mForMerge("authorizationGroupRelatedObjects", "authorizationGroupUuid",
           "relatedObjectUuid", winnerOrganizationUuid, loserOrganizationUuid);
 
+      // Update event organizations
+      updateM2mForMerge("eventOrganizations", "eventUuid", "organizationUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update event owner organizations
+      updateForMerge("events", "ownerOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update event host organizations
+      updateForMerge("events", "hostOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update event admin organizations
+      updateForMerge("events", "adminOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update eventSeries owner organizations
+      updateForMerge("eventSeries", "ownerOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update eventSeries host organizations
+      updateForMerge("eventSeries", "hostOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
+      // Update eventSeries admin organizations
+      updateForMerge("eventSeries", "adminOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+
       // Update reportAuthorizedMembers
       updateM2mForMerge("reportAuthorizedMembers", "reportUuid", "relatedObjectUuid",
           winnerOrganizationUuid, loserOrganizationUuid);
