@@ -729,11 +729,11 @@ enum LocationSearchSortBy {
 enum LocationType {
   COUNTRY
   GEOGRAPHICAL_AREA
+  MUNICIPALITY
   PHYSICAL_LOCATION
   POINT_LOCATION
+  TOWN
   VIRTUAL_LOCATION
-  _PLACEHOLDER_3_ @deprecated(reason: "Deprecated")
-  _PLACEHOLDER_4_ @deprecated(reason: "Deprecated")
 }
 
 """A 64-bit signed integer"""
