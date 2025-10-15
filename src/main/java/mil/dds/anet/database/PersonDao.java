@@ -532,6 +532,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       updateM2mForMerge("authorizationGroupRelatedObjects", "authorizationGroupUuid",
           "relatedObjectUuid", winnerUuid, loserUuid);
 
+      // Update imported MART reports
+      updateForMerge("martImportedReports", "personUuid", winnerUuid, loserUuid);
+
       // Update attachments
       updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
           winnerUuid, loserUuid);

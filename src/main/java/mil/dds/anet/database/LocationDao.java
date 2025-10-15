@@ -142,6 +142,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerLocationUuid,
         loserLocationUuid);
 
+    // Update event locations
+    updateForMerge("events", "locationUuid", winnerLocationUuid, loserLocationUuid);
+
     // Update attachments
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
         winnerLocationUuid, loserLocationUuid);

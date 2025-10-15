@@ -6661,6 +6661,125 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="remove-cascading-deletes-from-foreignKeyConstraints" author="gjvoosten">
+		<dropForeignKeyConstraint
+			constraintName="FK_eventSeries_ownerOrganization"
+			baseTableName="eventSeries"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_ownerOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="ownerOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_eventSeries_hostOrganization"
+			baseTableName="eventSeries"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_hostOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="hostOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_eventSeries_adminOrganization"
+			baseTableName="eventSeries"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_adminOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="adminOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_events_ownerOrganization"
+			baseTableName="events"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_ownerOrganization"
+			baseTableName="events"
+			baseColumnNames="ownerOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_events_hostOrganization"
+			baseTableName="events"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_hostOrganization"
+			baseTableName="events"
+			baseColumnNames="hostOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_events_adminOrganization"
+			baseTableName="events"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_adminOrganization"
+			baseTableName="events"
+			baseColumnNames="adminOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_events_eventSeries"
+			baseTableName="events"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_eventSeries"
+			baseTableName="events"
+			baseColumnNames="eventSeriesUuid"
+			referencedTableName="eventSeries"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="FK_events_location"
+			baseTableName="events"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_location"
+			baseTableName="events"
+			baseColumnNames="locationUuid"
+			referencedTableName="locations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<dropForeignKeyConstraint
+			constraintName="fk_martImportedReports_person"
+			baseTableName="martImportedReports"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_martImportedReports_person"
+			baseTableName="martImportedReports"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
