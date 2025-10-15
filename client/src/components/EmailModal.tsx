@@ -102,6 +102,7 @@ export const EmailModal = ({
                     objectType={Person}
                     fields={personFields}
                     addon={PEOPLE_ICON}
+                    disableCheckboxIfNullPath="emailAddresses"
                   />
                 }
               />
