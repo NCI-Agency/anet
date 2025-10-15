@@ -553,7 +553,7 @@ const EventForm = ({
                           noOrganizationsMessage="No Organizations currently assigned to this event. Click in the Organizations attending box to select organizations."
                         />
                       }
-                      overlayColumns={[Settings.fields.organization.shortLabel]}
+                      overlayColumns={["Name"]}
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
                       objectType={Organization}
@@ -585,7 +585,7 @@ const EventForm = ({
                           noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select people."
                         />
                       }
-                      overlayColumns={[Settings.fields.person.shortLabel]}
+                      overlayColumns={["Name"]}
                       overlayRenderRow={PersonSimpleOverlayRow}
                       filterDefs={peopleFilters}
                       objectType={Person}
