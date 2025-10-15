@@ -384,6 +384,10 @@ public class OrganizationDao
       updateM2mForMerge("authorizationGroupRelatedObjects", "authorizationGroupUuid",
           "relatedObjectUuid", winnerOrganizationUuid, loserOrganizationUuid);
 
+      // Update event organizations
+      updateM2mForMerge("eventOrganizations", "eventUuid", "organizationUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
+
       // Update event owner organizations
       updateForMerge("events", "ownerOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
 

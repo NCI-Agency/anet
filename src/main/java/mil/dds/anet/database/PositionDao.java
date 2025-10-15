@@ -619,6 +619,10 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid,
           loserUuid);
 
+      // Update authorizationGroup administrative positions
+      updateM2mForMerge("authorizationGroupAdministrativePositions", "authorizationGroupUuid",
+          "positionUuid", winnerUuid, loserUuid);
+
       // Update attachments
       updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
           winnerUuid, loserUuid);
