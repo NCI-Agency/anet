@@ -78,6 +78,14 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#fg-reportText .editable")
   }
 
+  async getEvent() {
+    return browser.$('#fg-event input[id="event"]')
+  }
+
+  async getEventTable() {
+    return browser.$("#event-popover .table-responsive table")
+  }
+
   async selectReportCommunityByName(name) {
     await (await this.getReportCommunities()).click()
     // wait for table loader to disappear
@@ -203,6 +211,20 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
+  async selectEvent(event, rowNumber = 1) {
+    await (await this.getEvent()).click()
+    await browser.keys(event)
+    await (await this.getEventTable()).waitForDisplayed()
+    const checkBox = await (
+      await this.getEventTable()
+    ).$(
+      `tbody tr:nth-child(${rowNumber}) td:first-child input.form-check-input`
+    )
+    if (!(await checkBox.isSelected())) {
+      await checkBox.click()
+    }
+  }
+
   async selectAtmosphere(option) {
     switch (option) {
       case "Positive":
@@ -299,6 +321,10 @@ class CreateReport extends cr.CreateReport {
       await (await this.getReportText()).scrollIntoView()
       await (await this.getReportText()).click()
       await browser.keys(fields.reportText)
+    }
+
+    if (fields.event) {
+      await this.selectEvent(fields.event)
     }
   }
 }
