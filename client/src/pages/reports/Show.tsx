@@ -1194,7 +1194,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       toAddresses: emails,
       comment: values.comment
     }
-    API.mutation(GQL_EMAIL_REPORT, {
+    return API.mutation(GQL_EMAIL_REPORT, {
       uuid,
       email: emailDelivery
     })
