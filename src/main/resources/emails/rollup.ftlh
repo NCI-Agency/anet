@@ -39,19 +39,19 @@ a {
 <h1 style="color: #000000;">${title}</h1>
 
 <#if sender??>
-	<div>
-		<h3 style="color: #981B1E;">This email was sent by:</h3>
+	<p style="color: #555555;">
+		Email sent by:
 		<a href="${serverUrl}/people/${sender.uuid}" >
 			${sender.name}
 		</a>
-	</div>
+	</p>
 </#if>
 
 <br>
 
 <#if comment?has_content>
 	<div>
-		<h3 style="color: #981B1E;">${sender.name} wrote:</h3>
+		<h3 style="color: #004ee1;">${sender.name} wrote:</h3>
 		<p>${comment}</p>
 	</div>
 </#if>
@@ -157,8 +157,8 @@ a {
 	</div>
 	<#assign tasks = (report.loadTasks(context).get())!>
     <#list tasks as task>
-    <div class="row">
-        <div class="col-xs-12">
+    <div>
+        <div>
             <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
                 <strong>${fields.task.shortLabel}:</strong> ${(task.shortName)!} ${(task.longName)!}
             <#-- </a> -->
@@ -166,8 +166,8 @@ a {
     </div>
     </#list>
 
-    <div class="row">
-        <div class="col-md-8">
+    <div>
+        <div>
             <p><strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}</p>
             <#if report.keyOutcomes??>
               <#if fields.report.keyOutcomes??>
