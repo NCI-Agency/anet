@@ -28,7 +28,8 @@ class RestrictedFieldsTest extends AbstractResourceTest {
   private static final String EMAIL_NETWORK_INTERNET = "Internet";
   private static final String EMAIL_NETWORK_NS = "NS";
   private static final String EMAIL_NETWORK_PARAMETER = "emailNetwork";
-  private static final String MART_EMAIL_ADDRESS = "mart-user@kfor.nato.int";
+  private static final List<String> MART_EMAIL_ADDRESSES =
+      List.of("mart-user@kfor.nato.int", "mart-user-2@kfor.nato.int", "mart-user-3@kfor.nato.int");
   private static final String EMAIL_ADDRESSES_FIELDS =
       "emailAddresses(network: ?" + EMAIL_NETWORK_PARAMETER + ") { network address }";
   private static final String PERSON_FIELDS =
@@ -189,7 +190,7 @@ class RestrictedFieldsTest extends AbstractResourceTest {
         .containsAll(expectedPhoneNumbers);
     assertThat(results.getList())
         .filteredOn(p -> !Utils.isEmptyOrNull(p.getEmailAddresses()) && p.getEmailAddresses()
-            .stream().noneMatch(ea -> MART_EMAIL_ADDRESS.equals(ea.getAddress())))
+            .stream().noneMatch(ea -> MART_EMAIL_ADDRESSES.contains(ea.getAddress())))
         .flatMap(Person::getEmailAddresses).hasSize(expectedNrOfEmailAddresses)
         .usingRecursiveFieldByFieldElementComparator().containsAll(
             expectedEmailAddresses.stream().map(a -> buildEmailAddress(emailNetwork, a)).toList());

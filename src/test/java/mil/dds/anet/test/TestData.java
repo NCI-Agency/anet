@@ -125,8 +125,8 @@ public class TestData {
     reportDto.setOrganizationName("Planning Programming, Budgeting and Execution");
     reportDto.setRank("OF-6");
     reportDto.setEmail("mart-user@kfor.nato.int");
-    reportDto.setFirstName("MART");
-    reportDto.setLastName("User");
+    reportDto.setFirstName("Larry");
+    reportDto.setLastName("Bird");
 
     // Report Info
     reportDto.setCreatedAt(Instant.now());
@@ -135,7 +135,7 @@ public class TestData {
     reportDto.setEngagementDate(Instant.now());
     reportDto.setLocationUuid("0855fb0a-995e-4a79-a132-4024ee2983ff");
     reportDto.setLocationName("General Hospital");
-    reportDto.setCountry("British");
+    reportDto.setCountry("ESP");
     reportDto.setPositionName("MART Team Member");
     reportDto.setSubmittedAt(Instant.now());
     reportDto.setAtmosphere("Positive");
@@ -149,6 +149,28 @@ public class TestData {
     tasks.put("19364d81-3203-483d-a6bf-461d58888c76", "Intelligence");
     reportDto.setTasks(tasks);
 
+    return reportDto;
+  }
+
+  public static ReportDto createGoodMartReportWithDifferentUser(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setUuid("545dc623-114e-4edd-be4f-8a000109791a");
+    reportDto.setRank("OF-5");
+    reportDto.setEmail("mart-user-2@kfor.nato.int");
+    reportDto.setFirstName("Reggie");
+    reportDto.setLastName("Miller");
+    reportDto.setCountry("Spain");
+    return reportDto;
+  }
+
+  public static ReportDto createGoodMartReportWithDifferentUserAndWrongCountry(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setUuid("f35ea806-acac-467c-96a7-75d809cd6705");
+    reportDto.setRank("OF-4");
+    reportDto.setEmail("mart-user-3@kfor.nato.int");
+    reportDto.setFirstName("John");
+    reportDto.setLastName("Stockton");
+    reportDto.setCountry("Bogus");
     return reportDto;
   }
 
