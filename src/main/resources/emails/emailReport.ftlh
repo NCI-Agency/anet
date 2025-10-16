@@ -237,11 +237,10 @@ td {
 
 <#if sender??>
   <div>
-    <h3 style="color: #981B1E;">This email was sent by:</h3>
     <a href="${serverUrl}/people/${sender.uuid}" >
       ${sender.name}
     </a>
-  </div>
+  </p>
 </#if>
 
 <br>

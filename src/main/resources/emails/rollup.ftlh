@@ -39,12 +39,12 @@ a {
 <h1 style="color: #000000;">${title}</h1>
 
 <#if sender??>
-	<div>
-		<h3 style="color: #981B1E;">This email was sent by:</h3>
+	<p style="color: #555555;">
+		Email sent by:
 		<a href="${serverUrl}/people/${sender.uuid}" >
 			${sender.name}
 		</a>
-	</div>
+	</p>
 </#if>
 
 <br>
