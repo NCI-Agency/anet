@@ -119,8 +119,8 @@
 
 <#assign tasks = (report.loadTasks(context).get())!>
 <#list tasks as task>
-<div class="row">
-  <div class="col-xs-12">
+<div>
+  <div>
     <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
     <strong>${fields.task.shortLabel}:</strong> ${(task.longName)!}
     <#-- </a> -->
@@ -128,8 +128,8 @@
 </div>
 </#list>
 
-<div class="row">
-  <div class="col-md-8">
+<div>
+  <div>
     <p><strong>${fields.report.intent.label!}:</strong> ${report.intent}</p>
     <#if report.keyOutcomes??>
       <#if fields.report.keyOutcomes??>
