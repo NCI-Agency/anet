@@ -203,8 +203,20 @@ class ShowTask extends Page {
     })
   }
 
+  async getSyncMatrix() {
+    return browser.$('div[id="syncMatrix"]')
+  }
+
+  async getEventMatrixEventSeries() {
+    return browser.$$("tr.event-series-row")
+  }
+
   async getEventMatrixTasks() {
-    return browser.$$("#tasks-table-header ~ tr")
+    return browser.$$("tr.event-series-task-row")
+  }
+
+  async gotoPreviousPeriod() {
+    return (await browser.$("#previous-period")).click()
   }
 }
 

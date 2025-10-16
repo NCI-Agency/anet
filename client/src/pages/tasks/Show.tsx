@@ -459,7 +459,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
         refetch={refetch}
       />
 
-      {(task?.uuid || eventSeries.length) && (
+      {(task?.uuid || !!eventSeries.length) && (
         <Fieldset
           id="syncMatrix"
           title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
