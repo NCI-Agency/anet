@@ -13,6 +13,7 @@ import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import { EmailModal } from "components/EmailModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -50,7 +51,7 @@ import { Attachment, Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useState } from "react"
-import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
+import { Alert, Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -518,7 +519,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         const reportTitle = report.intent || `#${report.uuid}`
         return (
           <div className="report-show">
-            {renderEmailModal(values, setFieldValue)}
+            <Formik
+              enableReinitialize
+              onSubmit={onSubmitEmailReport}
+              initialValues={{ to: "", comment: "", toAnetUsers: [] }}
+            >
+              {formikProps => renderEmailModal(formikProps)}
+            </Formik>
 
             <Messages success={saveSuccess} error={saveError} />
 
@@ -1044,6 +1051,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       )
     }
   }
+
   function onConfirmUnpublish() {
     API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
       .then(() => {
@@ -1123,47 +1131,26 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     )
   }
 
-  function renderEmailModal(values, setFieldValue) {
+  function renderEmailModal(formikProps) {
+    const { isSubmitting, submitForm, setFieldValue } = formikProps
+    const toAnetUsers = formikProps.values.toAnetUsers || []
     return (
-      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Email {reportTypeUpperFirst}</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Field
-            name="to"
-            component={FieldHelper.InputField}
-            validate={email => handleEmailValidation(email)}
-            vertical
-          >
-            <FormText>
-              One or more email addresses, comma separated, e.g.:
-              <br />
-              <em>
-                jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X"
-                &lt;x@example.org&gt;
-              </em>
-            </FormText>
-          </Field>
-
-          <Field
-            name="comment"
-            component={FieldHelper.InputField}
-            asA="textarea"
-            vertical
-          />
-        </Modal.Body>
-
-        <Modal.Footer>
+      <EmailModal
+        title={`Email ${reportTypeUpperFirst}`}
+        footer={
           <Button
             variant="primary"
-            onClick={() => emailReport(values, setFieldValue)}
+            onClick={submitForm}
+            disabled={isSubmitting}
           >
             Send Email
           </Button>
-        </Modal.Footer>
-      </Modal>
+        }
+        selectedUsers={toAnetUsers}
+        onChange={value => setFieldValue("toAnetUsers", value)}
+        showEmailModal={showEmailModal}
+        toggleEmailModal={toggleEmailModal}
+      />
     )
   }
 
@@ -1177,35 +1164,40 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     }
   }
 
-  function handleEmailValidation(value) {
-    const r = utils.parseEmailAddresses(value)
-    return r.isValid ? null : r.message
+  function onSubmitEmailReport(values, form) {
+    emailReport(values, form)
+      .then(() => {
+        setSaveSuccess("Email successfully sent")
+        setSaveError(null)
+        setShowEmailModal(false)
+        form.resetForm() // Reset the email modal field values
+      })
+      .catch(error => {
+        handleError(error)
+        setShowEmailModal(false)
+        form.setSubmitting(false)
+      })
   }
 
-  function emailReport(values, setFieldValue) {
-    const r = utils.parseEmailAddresses(values.to)
-    if (!r.isValid) {
-      return
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
+  function emailReport(values, form) {
+    const toEmails = utils.parseEmailAddresses(values.to)
+    const anetUsersEmails = values.toAnetUsers
+      ?.flatMap(u => u.emailAddresses)
+      ?.map(ea => ea.address)
+      ?.filter(Boolean)
+    if (!toEmails.isValid && !anetUsersEmails.length) {
+      return Promise.reject(new Error("No email addresses were selected"))
     }
+    const emails = [...(toEmails.to || []), ...anetUsersEmails]
     const emailDelivery = {
-      toAddresses: r.to,
+      toAddresses: emails,
       comment: values.comment
     }
     API.mutation(GQL_EMAIL_REPORT, {
       uuid,
       email: emailDelivery
     })
-      .then(() => {
-        setFieldValue("to", "")
-        setFieldValue("comment", "")
-        setSaveSuccess("Email successfully sent")
-        setSaveError(null)
-        setShowEmailModal(false)
-      })
-      .catch(error => {
-        setShowEmailModal(false)
-        handleError(error)
-      })
   }
 
   function submitDraft() {

@@ -9,9 +9,10 @@ import API from "api"
 import classNames from "classnames"
 import Model from "components/Model"
 import UltimatePagination from "components/UltimatePagination"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
@@ -117,6 +118,7 @@ export interface AdvancedSelectProps {
   // Optional: Parameters to pass to all search filters.
   queryParams?: any
   // Optional: GraphQL string of fields to return from search.
+  disableCheckboxIfNullPath?: string
   fields?: string
   showDismiss?: boolean
   handleAddItem?: (...args: unknown[]) => unknown
@@ -149,6 +151,7 @@ const AdvancedSelect = ({
   onChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   objectType,
   queryParams,
+  disableCheckboxIfNullPath,
   fields,
   showDismiss,
   handleAddItem,
@@ -313,6 +316,34 @@ const AdvancedSelect = ({
     }
   }, [doReset, firstFilter, selectedValueAsString, keepSearchText])
 
+  const computedDisabledItems = useMemo(() => {
+    if (!disableCheckboxIfNullPath) {
+      return disabledValue
+    }
+
+    const toId = x => (x && typeof x === "object" ? x[valueKey] : x)
+
+    const baseIds = new Set(
+      (Array.isArray(disabledValue)
+        ? disabledValue
+        : disabledValue
+          ? [disabledValue]
+          : []
+      )
+        .map(toId)
+        .filter(v => v != null)
+    )
+    const nullPathIds = new Set(
+      (items ?? [])
+        .filter(it => utils.isEmptyValue(_get(it, disableCheckboxIfNullPath)))
+        .map(toId)
+        .filter(v => v != null)
+    )
+    const disabledIds = new Set([...baseIds, ...nullPathIds])
+
+    return (items ?? []).filter(it => disabledIds.has(toId(it)))
+  }, [items, disabledValue, valueKey, disableCheckboxIfNullPath])
+
   return (
     <>
       {!(disabled && renderSelectedWithDelete) && (
@@ -366,7 +397,7 @@ const AdvancedSelect = ({
                               restrictSelectableItems={restrictSelectableItems}
                               multiSelect={multiSelect}
                               selectedItems={value}
-                              disabledItems={disabledValue}
+                              disabledItems={computedDisabledItems}
                               valueKey={valueKey}
                               handleAddItem={item => {
                                 handleAddItem(item)

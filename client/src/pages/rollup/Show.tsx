@@ -11,7 +11,7 @@ import {
 import API from "api"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
-import * as FieldHelper from "components/FieldHelper"
+import { EmailModal } from "components/EmailModal"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
@@ -33,13 +33,13 @@ import {
   getSearchQuery,
   SearchQueryPropType
 } from "components/SearchFilters"
-import { Field, Form, Formik } from "formik"
+import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Report, RollupGraph } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useMemo, useState } from "react"
-import { Button, FormText, Modal } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -511,7 +511,7 @@ const RollupShow = ({
       <Formik
         enableReinitialize
         onSubmit={onSubmitEmailRollup}
-        initialValues={{ to: "", comment: "" }}
+        initialValues={{ to: "", comment: "", toAnetUsers: [] }}
       >
         {formikProps => renderEmailModal(formikProps)}
       </Formik>
@@ -663,37 +663,13 @@ const RollupShow = ({
   }
 
   function renderEmailModal(formikProps) {
-    const { isSubmitting, submitForm } = formikProps
+    const { isSubmitting, submitForm, setFieldValue } = formikProps
+    const toAnetUsers = formikProps.values.toAnetUsers || []
     return (
-      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
-        <Form>
-          <Modal.Header closeButton>
-            <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Field
-              name="to"
-              component={FieldHelper.InputField}
-              validate={email => handleEmailValidation(email)}
-              vertical
-            >
-              <FormText>
-                One or more email addresses, comma separated, e.g.:
-                <br />
-                <em>
-                  jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr.
-                  X" &lt;x@example.org&gt;
-                </em>
-              </FormText>
-            </Field>
-            <Field
-              name="comment"
-              component={FieldHelper.InputField}
-              asA="textarea"
-              vertical
-            />
-          </Modal.Body>
-          <Modal.Footer>
+      <EmailModal
+        title={`Email rollup - ${getDateStr()}`}
+        footer={
+          <>
             <Button
               id="preview-rollup-email"
               href={previewPlaceholderUrl}
@@ -711,15 +687,14 @@ const RollupShow = ({
             >
               Send email
             </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+          </>
+        }
+        selectedUsers={toAnetUsers}
+        onChange={value => setFieldValue("toAnetUsers", value)}
+        showEmailModal={showEmailModal}
+        toggleEmailModal={toggleEmailModal}
+      />
     )
-  }
-
-  function handleEmailValidation(value) {
-    const r = utils.parseEmailAddresses(value)
-    return r.isValid ? null : r.message
   }
 
   function toggleEmailModal() {
@@ -752,7 +727,12 @@ const RollupShow = ({
 
   function onSubmitEmailRollup(values, form) {
     emailRollup(values, form)
-      .then(response => onSubmitEmailRollupSuccess(response, values, form))
+      .then(() => {
+        setSaveSuccess("Email successfully sent")
+        setSaveError(null)
+        setShowEmailModal(false)
+        form.resetForm() // Reset the email modal field values
+      })
       .catch(error => {
         setSaveSuccess(null)
         setSaveError(error)
@@ -761,21 +741,19 @@ const RollupShow = ({
       })
   }
 
-  function onSubmitEmailRollupSuccess(response, values, form) {
-    setSaveSuccess("Email successfully sent")
-    setSaveError(null)
-    setShowEmailModal(false)
-    form.resetForm() // Reset the email modal field values
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function emailRollup(values, form) {
-    const r = utils.parseEmailAddresses(values.to)
-    if (!r.isValid) {
-      return
+    const toEmails = utils.parseEmailAddresses(values.to)
+    const anetUsersEmails = values.toAnetUsers
+      ?.flatMap(u => u.emailAddresses)
+      ?.map(ea => ea.address)
+      ?.filter(Boolean)
+    if (!toEmails.isValid && !anetUsersEmails.length) {
+      return Promise.reject(new Error("No email addresses were selected"))
     }
+    const emails = [...(toEmails.to || []), ...anetUsersEmails]
     const emailDelivery = {
-      toAddresses: r.to,
+      toAddresses: emails,
       comment: values.comment
     }
     const variables = {
