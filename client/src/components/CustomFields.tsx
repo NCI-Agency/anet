@@ -345,7 +345,9 @@ const GeoLocationField = ({
     })
     Object.assign(leafletProps, {
       onMapClick: (event, map) =>
-        updateCoordinateFields(map.wrapLatLng(event.latlng))
+        updateCoordinateFields(map.wrapLatLng(event.latlng)),
+      onSelectLocation: (loc: any) =>
+        updateCoordinateFields({ lat: loc.lat, lng: loc.lng })
     })
   }
   if (Location.hasCoordinates(coordinates)) {
