@@ -51,7 +51,7 @@ a {
 
 <#if comment?has_content>
 	<div>
-		<h3 style="color: #981B1E;">${sender.name} wrote:</h3>
+		<h3 style="color: #004ee1;">${sender.name} wrote:</h3>
 		<p>${comment}</p>
 	</div>
 </#if>
