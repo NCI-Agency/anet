@@ -278,6 +278,23 @@ export default class Report extends Model {
         // Only do validation warning when engagement not cancelled
         cancelled ? schema : Report.testPrimaryAttendees(schema, false)
       ),
+    engagementDate: yupDate.nullable().when("event", ([event], schema) =>
+      !event
+        ? schema
+        : schema.test(
+            "within-event-interval",
+            "The engagement date is not within the dates of the event selected",
+            engagementDate => {
+              return (
+                !engagementDate ||
+                Report.isEngagementDateWithinEventInterval(
+                  event,
+                  engagementDate
+                )
+              )
+            }
+          )
+    ),
     reportSensitiveInformation: yup.object().nullable().default({}),
     authorizedMembers: yup
       .array()
@@ -379,6 +396,14 @@ export default class Report extends Model {
 
   static isFuture(engagementDate) {
     return engagementDate && moment().endOf("day").isBefore(engagementDate)
+  }
+
+  static isEngagementDateWithinEventInterval(event, engagementDate) {
+    return (
+      engagementDate &&
+      engagementDate.getTime() >= event.startDate &&
+      engagementDate.getTime() <= event.endDate
+    )
   }
 
   isFuture() {

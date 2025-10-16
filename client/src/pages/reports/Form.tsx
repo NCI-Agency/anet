@@ -244,13 +244,6 @@ const ReportForm = ({
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
-  // If this report is linked to an Event restrict the dates that can be selected for engagementDate
-  const [minDate, setMinDate] = useState(
-    getEventMinDate(initialValues.event?.startDate)
-  )
-  const [maxDate, setMaxDate] = useState(
-    getEventMaxDate(initialValues.event?.endDate)
-  )
   // To check if there is a visit ban in the location
   const [locationUuid, setLocationUuid] = useState(
     initialValues?.location?.uuid
@@ -648,8 +641,6 @@ const ReportForm = ({
                     <CustomDateInput
                       id="engagementDate"
                       withTime={Settings.engagementsIncludeTimeAndDuration}
-                      minDate={minDate}
-                      maxDate={maxDate}
                     />
                   }
                 >
@@ -694,8 +685,10 @@ const ReportForm = ({
                     setFieldValue("event", value, true)
                     setFieldValue("location", value?.location)
                     setLocationUuid(value?.location?.uuid)
-                    setMinDate(getEventMinDate(value?.startDate))
-                    setMaxDate(getEventMaxDate(value?.endDate))
+                    // If event selected and engagementDate empty assign start date of the event
+                    if (value?.startDate && !engagementDate) {
+                      setFieldValue("engagementDate", value?.startDate)
+                    }
                   }}
                   widget={
                     <AdvancedSingleSelect
