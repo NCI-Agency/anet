@@ -67,8 +67,18 @@ const EmailAddressTable = ({
     }
     const current = getMerged()
     const next = current.filter(e => e?.network !== network)
-    dispatchMergeActions(
-      setAMergedField("emailAddresses", next, null)
+    dispatchMergeActions(setAMergedField("emailAddresses", next, null))
+  }
+
+  const isSelectedForNetwork = network => {
+    const currentState = getMerged().find(
+      e => e?.network === network
+    )
+    const networkValue = emailAddresses?.find(e => e?.network === network)
+    return (
+      currentState &&
+      networkValue &&
+      currentState.address === networkValue.address
     )
   }
 
@@ -89,7 +99,9 @@ const EmailAddressTable = ({
               <td>
                 <Button
                   size="sm"
-                  variant="primary"
+                  variant={
+                    isSelectedForNetwork(ea.network) ? "success" : "primary"
+                  }
                   onClick={() => pickFromSide(ea)}
                   title={`Use this ${ea.network} address`}
                 >
@@ -105,7 +117,9 @@ const EmailAddressTable = ({
               <td>
                 <Button
                   size="sm"
-                  variant="primary"
+                  variant={
+                    isSelectedForNetwork(ea.network) ? "success" : "primary"
+                  }
                   onClick={() => pickFromSide(ea)}
                   title={`Use this ${ea.network} address`}
                 >
