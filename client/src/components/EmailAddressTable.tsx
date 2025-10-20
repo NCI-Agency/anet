@@ -18,7 +18,7 @@ interface EmailAddressTableProps {
 const EmailAddressTable = ({
   label,
   emailAddresses,
-  mergeMode = false,
+  mergeMode,
   align,
   mergeState,
   dispatchMergeActions
