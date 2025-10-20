@@ -261,6 +261,10 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
                   <EmailAddressTable
                     label={Settings.fields.position.emailAddresses.label}
                     emailAddresses={mergedPosition.emailAddresses}
+                    mergeMode
+                    align={ALIGN_OPTIONS.CENTER}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -663,6 +667,10 @@ const PositionColumn = ({
               <EmailAddressTable
                 label={Settings.fields.position.emailAddresses.label}
                 emailAddresses={position.emailAddresses}
+                mergeMode
+                align={align}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
             }
             align={align}
