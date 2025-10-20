@@ -56,7 +56,7 @@ const EmailAddressTable = ({
       setAMergedField(
         "emailAddresses",
         next,
-        (align as "left" | "right") ?? null
+        isFullySelected() ? align : "partial"
       )
     )
   }
@@ -67,19 +67,39 @@ const EmailAddressTable = ({
     }
     const current = getMerged()
     const next = current.filter(e => e?.network !== network)
-    dispatchMergeActions(setAMergedField("emailAddresses", next, null))
+    dispatchMergeActions(
+      setAMergedField(
+        "emailAddresses",
+        next,
+        isFullySelected() ? align : "partial"
+      )
+    )
   }
 
   const isSelectedForNetwork = network => {
-    const currentState = getMerged().find(
-      e => e?.network === network
-    )
+    const currentState = getMerged().find(e => e?.network === network)
     const networkValue = emailAddresses?.find(e => e?.network === network)
     return (
       currentState &&
       networkValue &&
       currentState.address === networkValue.address
     )
+  }
+
+  const isFullySelected = () => {
+    const current = getMerged()
+    if (current.length !== emailAddresses?.length) {
+      return false
+    }
+    for (const ea of emailAddresses ?? []) {
+      const match = current.find(
+        e => e?.network === ea?.network && e?.address === ea?.address
+      )
+      if (!match) {
+        return false
+      }
+    }
+    return true
   }
 
   return (
