@@ -275,6 +275,10 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                   <EmailAddressTable
                     label={Settings.fields.person.emailAddresses.label}
                     emailAddresses={mergedPerson.emailAddresses}
+                    mergeMode
+                    align={ALIGN_OPTIONS.CENTER}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -657,6 +661,10 @@ const PersonColumn = ({
               <EmailAddressTable
                 label={Settings.fields.person.emailAddresses.label}
                 emailAddresses={person.emailAddresses}
+                mergeMode
+                align={align}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
             }
             align={align}
