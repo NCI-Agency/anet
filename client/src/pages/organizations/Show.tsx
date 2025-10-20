@@ -226,9 +226,16 @@ const GQL_GET_ORGANIZATION = gql`
         uuid
         shortName
         selectable
+        status
+        parentTask {
+          uuid
+          shortName
+          status
+        }
         ascendantTasks {
           uuid
           shortName
+          status
           parentTask {
             uuid
           }
@@ -237,9 +244,16 @@ const GQL_GET_ORGANIZATION = gql`
           uuid
           shortName
           selectable
+          status
+          parentTask {
+            uuid
+            shortName
+            status
+          }
           ascendantTasks {
             uuid
             shortName
+            status
             parentTask {
               uuid
             }
