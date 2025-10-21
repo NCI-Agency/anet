@@ -41,7 +41,7 @@ describe("Show event series page", () => {
     expect(await (await ShowEventSeries.getEventsTable()).getText()).to.include(
       "NMI PDT 2024-01"
     )
-    await (await ShowEventSeries.getEvent(1)).click()
+    await (await ShowEventSeries.getEvent(3)).click()
     expect(await browser.getUrl()).to.include(
       "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
     )
