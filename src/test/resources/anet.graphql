@@ -708,6 +708,7 @@ input LocationSearchQueryInput {
   inMyReports: Boolean
   locationRecurseStrategy: RecurseStrategy
   locationUuid: [String]
+  name: String
   pageNum: Int
   pageSize: Int
   sortBy: LocationSearchSortBy
@@ -715,6 +716,7 @@ input LocationSearchQueryInput {
   status: Status
   subscribed: Boolean
   text: String
+  trigram: String
   type: LocationType
 }
 
