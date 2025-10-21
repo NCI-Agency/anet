@@ -42,6 +42,8 @@ const GQL_GET_REPORT = gql`
       location {
         uuid
         name
+        lat
+        lng
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       authors {

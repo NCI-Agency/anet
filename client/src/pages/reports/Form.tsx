@@ -122,7 +122,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        ${Location.autocompleteQuery}
+        ${locationFields}
       }
     }
     personList(
@@ -770,8 +770,7 @@ const ReportForm = ({
                                   ]
                                 : []
                             }
-                            anetLocationsSelected
-                            onSelectLocation={(loc: any) => {
+                            onSelectAnetLocation={(loc: any) => {
                               setFieldTouched("location", true, false)
                               setFieldValue("location", loc, true)
                               setLocationUuid(loc.uuid)

@@ -29,6 +29,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Button } from "react-bootstrap"
 import { createPortal } from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
@@ -195,9 +196,8 @@ interface LeafletProps {
   markers?: any[]
   setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
   mapId?: string
-  anetLocationsSelected?: boolean
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
-  onSelectLocation?: (loc: any) => void
+  onSelectAnetLocation?: (loc: any) => void
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
@@ -223,9 +223,8 @@ const Leaflet = ({
   markers,
   setMarkerPopup,
   mapId: initialMapId,
-  anetLocationsSelected,
   onMapClick,
-  onSelectLocation
+  onSelectAnetLocation
 }: LeafletProps) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -257,28 +256,7 @@ const Leaflet = ({
         const latLng = Location.hasCoordinates(m)
           ? [m.lat, m.lng]
           : map.getCenter()
-        const marker = new Marker(latLng, {
-          icon: m.icon || ICON_TYPES.DEFAULT,
-          draggable: m.draggable || false,
-          autoPan: m.autoPan || false,
-          id: m.id
-        })
-        if (m.name) {
-          marker.bindPopup(m.name)
-        } else if (m.contents) {
-          const popupDiv = Object.assign(document.createElement("div"), {
-            id: m.id,
-            style: "width: 200px;"
-          })
-          marker.bindPopup(() => {
-            setMarkerPopup?.({ container: popupDiv, contents: m.contents })
-            return popupDiv
-          })
-        }
-        if (m.onMove) {
-          marker.on("moveend", event => m.onMove(event, map))
-        }
-        markerLayer.addLayer(marker)
+        markerLayer.addLayer(createMarker(latLng, m, setMarkerPopup, map))
       })
 
       if (newMarkers.length > 0) {
@@ -298,35 +276,6 @@ const Leaflet = ({
     },
     [map, markerLayer, setMarkerPopup]
   )
-
-  const lockAnetCheckbox = (layerControl: Control.Layers) => {
-    const container = layerControl.getContainer?.()
-    if (!container) {
-      return
-    }
-
-    const labels = container.querySelectorAll<HTMLLabelElement>(
-      ".leaflet-control-layers-overlays label"
-    )
-    labels.forEach((label: HTMLLabelElement) => {
-      const text = (label.textContent || "").trim()
-      if (text === "ANET Locations") {
-        const input = label.querySelector<HTMLInputElement>(
-          'input[type="checkbox"]'
-        )
-        if (!input) {
-          return
-        }
-
-        input.checked = true
-        input.disabled = true
-        input.tabIndex = -1
-        input.setAttribute("aria-disabled", "true")
-        label.style.opacity = "0.6"
-        label.style.pointerEvents = "none"
-      }
-    })
-  }
 
   useEffect(() => {
     Map.addInitHook("addHandler", "gestureHandling", GestureHandling)
@@ -371,6 +320,20 @@ const Leaflet = ({
     const newMarkerLayer = new MarkerClusterGroup().addTo(newMap)
     setMarkerLayer(newMarkerLayer)
 
+    const updateAnetLocationsVarsFromMap = () => {
+      const mapBounds = newMap.wrapLatLngBounds(newMap.getBounds())
+      const bounds = {
+        minLng: mapBounds._southWest.lng,
+        minLat: mapBounds._southWest.lat,
+        maxLng: mapBounds._northEast.lng,
+        maxLat: mapBounds._northEast.lat
+      }
+      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
+      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
+        setAnetLocationsVars({ bounds })
+      }
+    }
+
     // anetLocations layer
     const anetLocationsLayer = new MarkerClusterGroup({
       iconCreateFunction: cluster => {
@@ -393,44 +356,24 @@ const Leaflet = ({
       }
     })
     anetLocationsLayerRef.current = anetLocationsLayer
-    layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
-
-    const updateAnetLocationsVarsFromMap = () => {
-      const mapBounds = newMap.wrapLatLngBounds(newMap.getBounds())
-      const bounds = {
-        minLng: mapBounds._southWest.lng,
-        minLat: mapBounds._southWest.lat,
-        maxLng: mapBounds._northEast.lng,
-        maxLat: mapBounds._northEast.lat
-      }
-      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
-      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
-        setAnetLocationsVars({ bounds })
-      }
-    }
-
-    if (anetLocationsSelected) {
-      newMap.addLayer(anetLocationsLayer)
+    if (onSelectAnetLocation) {
+      // Always add the layer to the map
+      newMap.addLayer(anetLocationsLayer, "ANET Locations")
       setAnetLocationsEnabled(true)
       updateAnetLocationsVarsFromMap()
-      setTimeout(() => lockAnetCheckbox(layerControl), 0)
+    } else {
+      // Allow the user to show/hide the layer
+      layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
     }
 
     newMap.on("overlayadd", e => {
       if (e.layer === anetLocationsLayer) {
         setAnetLocationsEnabled(true)
         updateAnetLocationsVarsFromMap()
-        if (anetLocationsSelected) {
-          setTimeout(() => lockAnetCheckbox(layerControl), 0)
-        }
       }
     })
     newMap.on("overlayremove", e => {
       if (e.layer === anetLocationsLayer) {
-        if (anetLocationsSelected) {
-          newMap.addLayer(anetLocationsLayer)
-          return
-        }
         setAnetLocationsEnabled(false)
         anetLocationsLayer.clearLayers()
       }
@@ -438,11 +381,6 @@ const Leaflet = ({
     newMap.on("moveend", () => {
       if (newMap.hasLayer(anetLocationsLayer)) {
         updateAnetLocationsVarsFromMap()
-      }
-    })
-    newMap.on("zoomend", () => {
-      if (anetLocationsSelected) {
-        lockAnetCheckbox(layerControl)
       }
     })
 
@@ -460,35 +398,6 @@ const Leaflet = ({
       }
     })
     return ids
-  }
-
-  function bindAnetlocationsPopup(marker, loc, onSelect, setPortal) {
-    const container = document.createElement("div")
-    container.className = "d-flex flex-column"
-    container.style.width = "200px"
-
-    const reactMount = document.createElement("div")
-    reactMount.id = `nearby-popup-${loc?.uuid}`
-    container.appendChild(reactMount)
-
-    if (onSelect) {
-      const btn = document.createElement("button")
-      btn.type = "button"
-      btn.textContent = "Select this location"
-      btn.className = "btn btn-sm btn-primary mt-2"
-      btn.addEventListener("click", e => {
-        e.preventDefault()
-        e.stopPropagation()
-        onSelect(loc)
-        marker.closePopup()
-      })
-      container.appendChild(btn)
-    }
-
-    marker.bindPopup(() => {
-      setPortal?.({ container: reactMount, contents: loc })
-      return container
-    })
   }
 
   useEffect(() => {
@@ -516,35 +425,25 @@ const Leaflet = ({
             id: loc.uuid,
             contents: loc
           }
-          const marker = createMarker(
-            [loc.lat, loc.lng],
-            m,
-            setLocationMarkerPopup,
-            map,
-            -1000
-          )
-          layer.addLayer(marker)
-          bindAnetlocationsPopup(
-            marker,
-            loc,
-            onSelectLocation,
-            setLocationMarkerPopup
-          )
 
-          // Add and bind a copy of the marker, wrapped around the antimeridian
-          const wrappedMarker = createMarker(
-            [loc.lat, wrapLng(loc.lng)],
-            m,
-            setLocationMarkerPopup,
-            map,
-            -1000
+          layer.addLayer(
+            createMarker(
+              [loc.lat, loc.lng],
+              m,
+              setLocationMarkerPopup,
+              map,
+              -1000
+            )
           )
-          layer.addLayer(wrappedMarker)
-          bindAnetlocationsPopup(
-            wrappedMarker,
-            loc,
-            onSelectLocation,
-            setLocationMarkerPopup
+          // Add a copy of the marker, wrapped around the antimeridian
+          layer.addLayer(
+            createMarker(
+              [loc.lat, wrapLng(loc.lng)],
+              m,
+              setLocationMarkerPopup,
+              map,
+              -1000
+            )
           )
         })
       })
@@ -553,8 +452,8 @@ const Leaflet = ({
     anetLocationsEnabled,
     anetLocationsVars,
     markerLayer,
+    markers, // if the markers change, we also need to update the layer
     map,
-    onSelectLocation,
     setLocationMarkerPopup
   ])
 
@@ -634,10 +533,21 @@ const Leaflet = ({
 
   function renderLocationMarkerPopupContents(location) {
     return (
-      <LinkTo
-        modelType="Location"
-        model={{ uuid: location?.uuid, name: location?.name }}
-      />
+      <div className="d-flex flex-column justify-content-center">
+        <LinkTo
+          modelType="Location"
+          model={{ uuid: location?.uuid, name: location?.name }}
+        />
+        {onSelectAnetLocation && (
+          <Button
+            onClick={() => onSelectAnetLocation(location)}
+            variant="primary"
+            className="mt-2"
+          >
+            Select this location
+          </Button>
+        )}
+      </div>
     )
   }
 }

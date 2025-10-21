@@ -346,7 +346,7 @@ const GeoLocationField = ({
     Object.assign(leafletProps, {
       onMapClick: (event, map) =>
         updateCoordinateFields(map.wrapLatLng(event.latlng)),
-      onSelectLocation: (loc: any) =>
+      onSelectAnetLocation: (loc: any) =>
         updateCoordinateFields({ lat: loc.lat, lng: loc.lng })
     })
   }
