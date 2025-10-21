@@ -42,6 +42,8 @@ const GQL_GET_POSITION = gql`
       location {
         uuid
         name
+        lat
+        lng
       }
       associatedPositions {
         uuid
