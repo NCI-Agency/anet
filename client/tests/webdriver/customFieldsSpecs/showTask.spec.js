@@ -181,9 +181,12 @@ describe("Show task page", () => {
 describe("Show task page", () => {
   describe("When in the show page of a task with children tasks", () => {
     it("the task's full path should be displayed in the event matrix", async () => {
+      // only first task (self) should contain the full path,
+      // the remaining ones should contain what comes after the current task
+      const EF1_2_MATRIX_TASKS = ["EF 1.2", "»\n1.2.A", "»\n1.2.B", "»\n1.2.C"]
       await ShowTask.openAsAdminUser(TASK_EF1_2_UUID)
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(4)
+      expect(tasks.length).to.equal(EF1_2_MATRIX_TASKS.length)
 
       const containsStarIcon = await tasks.map(
         async task =>
@@ -195,14 +198,7 @@ describe("Show task page", () => {
       const taskPath = await tasks.map(
         async task => await (await task.$("td:first-child")).getText()
       )
-      // only first task (self) should contain the full path,
-      // the remaining ones should contain what comes after the current task
-      expect(taskPath).to.deep.equal([
-        "EF 1.2",
-        "» 1.2.A",
-        "» 1.2.B",
-        "» 1.2.C"
-      ])
+      expect(taskPath).to.deep.equal(EF1_2_MATRIX_TASKS)
     })
   })
   describe("When editing a task and setting it to inactive", () => {
