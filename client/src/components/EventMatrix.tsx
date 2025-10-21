@@ -5,6 +5,7 @@ import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -23,6 +24,7 @@ const GET_TASKS = gql`
       uuid
       shortName
       selectable
+      status
       ascendantTasks {
         uuid
         shortName
@@ -34,6 +36,7 @@ const GET_TASKS = gql`
         uuid
         shortName
         selectable
+        status
         ascendantTasks {
           uuid
           shortName
@@ -58,8 +61,10 @@ const GET_EVENTS_AND_REPORTS = gql`
         name
         startDate
         endDate
+        status
         eventSeries {
           uuid
+          status
         }
         tasks {
           uuid
@@ -88,6 +93,9 @@ const GET_EVENTS_AND_REPORTS = gql`
     }
   }
 `
+
+const nextDay = date => moment(date).add(1, "day")
+const hasTask = (tasks, task) => !!tasks?.find(t => t.uuid === task?.uuid)
 
 interface EventMatrixProps {
   pageDispatchers?: PageDispatchersPropType
@@ -136,16 +144,18 @@ const EventMatrix = ({
     if (_isEmpty(weekDays)) {
       return
     }
+    const isoStartDate = weekDays[0].toISOString()
+    const isoEndDate = moment(weekDays[6]).endOf("day").toISOString()
     const eventQuery = {
       pageSize: 0,
-      startDate: weekDays[0].toISOString(),
-      endDate: weekDays[6].endOf("day").toISOString()
+      startDate: isoStartDate,
+      endDate: isoEndDate
     }
     const reportQuery = {
       taskUuid: taskUuid ? [taskUuid] : (tasks?.map(t => t.uuid) ?? []),
       pageSize: 0,
-      engagementDateStart: weekDays[0].toISOString(),
-      engagementDateEnd: weekDays[6].endOf("day").toISOString()
+      engagementDateStart: isoStartDate,
+      engagementDateEnd: isoEndDate
     }
     fetchEventsAndReports(eventQuery, reportQuery).then(response => {
       if (eventSeries !== null) {
@@ -172,23 +182,21 @@ const EventMatrix = ({
     includeTask ? [topLevelTask].concat(topLevelTask?.descendantTasks) : tasks
   ).filter(t => t.selectable)
   // if topLevelTask task is not in allTasks, add it at the top
-  if (includeTask && !allTasks.find(t => t.uuid === topLevelTask?.uuid)) {
+  if (includeTask && !hasTask(allTasks, topLevelTask)) {
     allTasks.unshift(topLevelTask)
   }
 
-  function isReportIncluded(report, dateToCheck, task, event?) {
+  function isReportIncluded(report, startDate, endDate, task, event?) {
     if (
       !(
-        moment(report.engagementDate)
-          .startOf("day")
-          .isSameOrBefore(dateToCheck) &&
-        moment(report.engagementDate).endOf("day").isSameOrAfter(dateToCheck)
+        moment(report.engagementDate).startOf("day").isBefore(endDate) &&
+        moment(report.engagementDate).endOf("day").isSameOrAfter(startDate)
       )
     ) {
       // Out of range
       return false
     }
-    if (!report.tasks?.find(t => t.uuid === task.uuid)) {
+    if (!hasTask(report.tasks, task)) {
       // Not related to the current task
       return false
     }
@@ -197,8 +205,8 @@ const EventMatrix = ({
       return true
     }
     if (
-      isEventIncluded(event, dateToCheck) &&
-      event.tasks?.find(t => t.uuid === task.uuid)
+      isEventIncluded(event, startDate, endDate) &&
+      hasTask(event.tasks, task)
     ) {
       // Already shown under the event
       return false
@@ -206,10 +214,10 @@ const EventMatrix = ({
     return true
   }
 
-  function isEventIncluded(event, dateToCheck) {
+  function isEventIncluded(event, startDate, endDate) {
     return (
-      moment(event.startDate).startOf("day").isSameOrBefore(dateToCheck) &&
-      moment(event.endDate).endOf("day").isSameOrAfter(dateToCheck)
+      moment(event.startDate).startOf("day").isBefore(endDate) &&
+      moment(event.endDate).endOf("day").isSameOrAfter(startDate)
     )
   }
 
@@ -224,15 +232,15 @@ const EventMatrix = ({
   function getEventHeight(event, task?) {
     let maxEventTasks = 0
     if (task) {
-      weekDays.forEach(dateToCheck => {
+      for (const dateToCheck of weekDays) {
         const eventReports =
           reports?.filter(
             r =>
-              isReportIncluded(r, dateToCheck, task) &&
+              isReportIncluded(r, dateToCheck, nextDay(dateToCheck), task) &&
               r.event?.uuid === event.uuid
           ) ?? []
         maxEventTasks = Math.max(maxEventTasks, eventReports.length)
-      })
+      }
     }
     // Ugly way to calculate the (max) height for this event
     return `${(maxEventTasks + 1) * 18 * 1.33 + maxEventTasks * 4 + 16}px`
@@ -244,8 +252,13 @@ const EventMatrix = ({
     const taskReports = task
       ? reports?.filter(
           r =>
-            isReportIncluded(r, dateToCheck, task, r.event) &&
-            r.tasks?.find(t => t.uuid === task.uuid)
+            isReportIncluded(
+              r,
+              dateToCheck,
+              nextDay(dateToCheck),
+              task,
+              r.event
+            ) && hasTask(r.tasks, task)
         )
       : []
     return (
@@ -261,14 +274,18 @@ const EventMatrix = ({
             const eventReports = task
               ? reports?.filter(
                   r =>
-                    isReportIncluded(r, dateToCheck, task) &&
-                    r.event?.uuid === event.uuid
+                    isReportIncluded(
+                      r,
+                      dateToCheck,
+                      nextDay(dateToCheck),
+                      task
+                    ) && r.event?.uuid === event.uuid
                 )
               : []
             const eventHeight = getEventHeight(event, task)
             return (
               <tr key={event.uuid} style={{ height: `${eventHeight}` }}>
-                {isEventIncluded(event, dateToCheck) && (
+                {isEventIncluded(event, dateToCheck, nextDay(dateToCheck)) && (
                   <td className="event-cell">
                     {(showEventTitle(event, dateToCheck) && (
                       <LinkTo
@@ -323,6 +340,46 @@ const EventMatrix = ({
     setStartDay(moment(startDay).add(7, "days"))
   }
 
+  function isEventSeriesIncluded(eventSeries: any) {
+    if (eventSeries?.status === Model.STATUS.ACTIVE) {
+      // Active eventSeries are always included
+      return true
+    }
+
+    // Inactive eventSeries are only shown if they have events
+    const endDay = moment(startDay).add(7, "days")
+    return !!events?.find(event => {
+      return (
+        event?.eventSeries?.uuid === eventSeries?.uuid &&
+        isEventIncluded(event, startDay, endDay)
+      )
+    })
+  }
+
+  function isTaskIncluded(task: any) {
+    if (
+      task?.status === Model.STATUS.ACTIVE ||
+      task?.uuid === topLevelTask?.uuid ||
+      hasTask(tasks, task)
+    ) {
+      // Active tasks, top-level task and assigned tasks are always included
+      return true
+    }
+
+    // Inactive tasks are only shown if they have events
+    if (events?.find(e => hasTask(e.tasks, task))) {
+      return true
+    }
+
+    //  or reports
+    const endDay = moment(startDay).add(7, "days")
+    return !!reports?.find(
+      r =>
+        isReportIncluded(r, startDay, endDay, task, r.event) &&
+        hasTask(r.tasks, task)
+    )
+  }
+
   let emptyMsg: string
   if (_isEmpty(events) && _isEmpty(reports)) {
     emptyMsg = "events or reports"
@@ -334,6 +391,10 @@ const EventMatrix = ({
   const emptyMsgComponent = emptyMsg ? (
     <em className="ms-2 text-info">No {emptyMsg} this week</em>
   ) : null
+
+  const includedEventSeries = eventSeries.filter(isEventSeriesIncluded)
+  const includedTasks = allTasks.filter(isTaskIncluded)
+
   return (
     <>
       <Messages error={fetchError} />
@@ -372,19 +433,19 @@ const EventMatrix = ({
                 </th>
               ))}
             </tr>
-            {(_isEmpty(eventSeries) && (
-              <tr>
+            {(_isEmpty(includedEventSeries) && (
+              <tr className="event-series-row">
                 <td colSpan={8}>No matching Event Series</td>
               </tr>
             )) ||
-              eventSeries.map(eventSerie => {
+              includedEventSeries.map(es => {
                 const eventSeriesEvents = events.filter(
-                  e => e.eventSeries?.uuid === eventSerie.uuid
+                  e => e.eventSeries?.uuid === es.uuid
                 )
                 return (
-                  <tr key={eventSerie.uuid}>
+                  <tr key={es.uuid} className="event-series-row">
                     <td>
-                      <LinkTo modelType="EventSeries" model={eventSerie} />
+                      <LinkTo modelType="EventSeries" model={es} />
                     </td>
                     <td>{getEvent(eventSeriesEvents, 0)}</td>
                     <td>{getEvent(eventSeriesEvents, 1)}</td>
@@ -406,19 +467,17 @@ const EventMatrix = ({
                 </th>
               ))}
             </tr>
-            {(_isEmpty(allTasks) && (
-              <tr>
+            {(_isEmpty(includedTasks) && (
+              <tr className="event-series-task-row">
                 <td colSpan={8}>
                   No matching {Settings.fields.task.shortLabel}
                 </td>
               </tr>
             )) ||
-              allTasks.map(task => {
-                const taskEvents = events.filter(e =>
-                  e.tasks?.find(t => t.uuid === task.uuid)
-                )
+              includedTasks.map(task => {
+                const taskEvents = events.filter(e => hasTask(e.tasks, task))
                 return (
-                  <tr key={task.uuid}>
+                  <tr key={task.uuid} className="event-series-task-row">
                     <td>
                       <BreadcrumbTrail
                         modelType="Task"

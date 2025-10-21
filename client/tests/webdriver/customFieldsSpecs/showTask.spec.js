@@ -10,6 +10,8 @@ const TASK_TEST_1_1_UUID = "33c87d55-9f90-4a23-903a-f7d176444de3"
 const TASK_TEST_1_1_1_UUID = "36d8b14c-40b2-4bbe-9d15-9b964381f549"
 const TASK_TEST_1_1_1_1_UUID = "c38c7c84-66cc-4978-9cf6-b07d10a50667"
 
+const TASK_12B_ASSIGNED_TASKS = ["1.2.B"]
+
 describe("Show task page", () => {
   beforeEach("Open the show task page", async () => {
     await ShowTask.openAsAdminUser(TASK_12B_UUID)
@@ -45,6 +47,59 @@ describe("Show task page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await (await ShowTask.getChildrenTasksField()).isExisting()).to.be
         .false
+    })
+  })
+
+  describe("When in the show page of a task with a matrix", () => {
+    it("Should see sync matrix on the 1.2.B Show page", async () => {
+      await ShowTask.openAsAdminUser(TASK_12B_UUID)
+      const syncMatrix = await ShowTask.getSyncMatrix()
+      await syncMatrix.waitForExist()
+      await syncMatrix.waitForDisplayed()
+
+      expect(await (await syncMatrix.$(".legend")).getText()).to.contain(
+        "Sync Matrix for EF 1 » EF 1.2 » 1.2.B"
+      )
+
+      const eventSeries = await ShowTask.getEventMatrixEventSeries()
+      // Additional eventSeries may have been created during the tests!
+      expect(eventSeries).to.have.lengthOf.at.least(1)
+      const eventSeriesText = (
+        await eventSeries.map(async es => await es.getText())
+      ).join(" ; ")
+      expect(eventSeriesText).to.include("NMI PDT")
+      expect(eventSeriesText).to.include("My active NMI test event")
+      expect(eventSeriesText).to.include("My inactive NMI test event")
+      expect(eventSeriesText).to.include("Inactive event series")
+      expect(eventSeriesText).to.include("My active test event")
+      expect(eventSeriesText).to.include("My inactive test event")
+
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(1)
+      const taskPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(taskPaths).to.deep.equal(TASK_12B_ASSIGNED_TASKS)
+
+      // Move to the previous period, the inactive eventSeries should no longer be shown
+      await ShowTask.gotoPreviousPeriod()
+      const eventSeriesPrev = await ShowTask.getEventMatrixEventSeries()
+      const eventSeriesPrevText = (
+        await eventSeriesPrev.map(async es => await es.getText())
+      ).join(" ; ")
+      expect(eventSeriesPrevText).to.include("NMI PDT")
+      expect(eventSeriesPrevText).to.not.include("My active NMI test event")
+      expect(eventSeriesPrevText).to.not.include("My inactive NMI test event")
+      expect(eventSeriesPrevText).to.not.include("Inactive event series")
+      expect(eventSeriesPrevText).to.not.include("My active test event")
+      expect(eventSeriesPrevText).to.not.include("My inactive test event")
+
+      const tasksPrev = await ShowTask.getEventMatrixTasks()
+      expect(tasksPrev.length).to.equal(1)
+      const tasksPrevPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(tasksPrevPaths).to.deep.equal(TASK_12B_ASSIGNED_TASKS)
     })
   })
 })

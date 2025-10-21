@@ -12,11 +12,19 @@ class MyEvents extends Page {
   }
 
   async getMyEventSeries() {
-    return browser.$("#my-event-series table tbody tr td:first-child")
+    const selector = "#my-event-series table tbody tr td:first-child"
+    const firstEventSeries = await browser.$(selector)
+    await firstEventSeries.waitForExist()
+    await firstEventSeries.waitForDisplayed()
+    return browser.$$(selector)
   }
 
   async getMyEvents() {
-    return browser.$("#my-events table tbody tr td:first-child")
+    const selector = "#my-events table tbody tr td:first-child"
+    const firstEvent = await browser.$(selector)
+    await firstEvent.waitForExist()
+    await firstEvent.waitForDisplayed()
+    return browser.$$(selector)
   }
 
   async selectEventsSummary() {

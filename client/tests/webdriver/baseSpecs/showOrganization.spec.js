@@ -30,6 +30,7 @@ const EF2_ASSIGNED_TASKS = [
   "EF 2 » 2.C",
   "EF 2 » 2.D"
 ]
+const EF2_2_ASSIGNED_TASKS = ["No matching Objective"]
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
 const LEADER_PERSON_TEXT = "CTR BECCABON, Rebecca"
@@ -79,7 +80,7 @@ describe("Show organization page", () => {
       expect(assignedTasksShortNames).to.have.members(EF2_ASSIGNED_TASKS)
     })
     it("Should see sync matrix on the EF2 Show page", async () => {
-      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      const syncMatrix = await ShowTask.getSyncMatrix()
       await syncMatrix.waitForExist()
       await syncMatrix.waitForDisplayed()
 
@@ -114,7 +115,7 @@ describe("Show organization page", () => {
 
     it("Should see sync matrix on the EF1 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF1_ORGANIZATION_UUID)
-      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      const syncMatrix = await ShowTask.getSyncMatrix()
       await syncMatrix.waitForExist()
       await syncMatrix.waitForDisplayed()
 
@@ -131,7 +132,7 @@ describe("Show organization page", () => {
     })
     it("Should see sync matrix on the EF1.1 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF1_1_ORGANIZATION_UUID)
-      const syncMatrix = await ShowOrganization.getSyncMatrix()
+      const syncMatrix = await ShowTask.getSyncMatrix()
       await syncMatrix.waitForExist()
       await syncMatrix.waitForDisplayed()
 
@@ -145,6 +146,56 @@ describe("Show organization page", () => {
         async task => await (await task.$("td:first-child")).getText()
       )
       expect(taskPaths).to.deep.equal(EF1_1_ASSIGNED_TASKS)
+    })
+    it("Should see sync matrix on the EF2.2 Show page", async () => {
+      await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
+      const syncMatrix = await ShowTask.getSyncMatrix()
+      await syncMatrix.waitForExist()
+      await syncMatrix.waitForDisplayed()
+
+      expect(await (await syncMatrix.$(".legend")).getText()).to.contain(
+        "Sync matrix for EF 2.2"
+      )
+
+      const eventSeries = await ShowTask.getEventMatrixEventSeries()
+      // Additional eventSeries may have been created during the tests!
+      expect(eventSeries).to.have.lengthOf.at.least(1)
+      const eventSeriesText = (
+        await eventSeries.map(async es => await es.getText())
+      ).join(" ; ")
+      expect(eventSeriesText).to.include("NMI PDT")
+      expect(eventSeriesText).to.include("My active NMI test event")
+      expect(eventSeriesText).to.include("My inactive NMI test event")
+      expect(eventSeriesText).to.include("Inactive event series")
+      expect(eventSeriesText).to.include("My active test event")
+      expect(eventSeriesText).to.include("My inactive test event")
+
+      const tasks = await ShowTask.getEventMatrixTasks()
+      expect(tasks.length).to.equal(1)
+      const taskPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(taskPaths).to.deep.equal(EF2_2_ASSIGNED_TASKS)
+
+      // Move to the previous period, the inactive eventSeries should no longer be shown
+      await ShowTask.gotoPreviousPeriod()
+      const eventSeriesPrev = await ShowTask.getEventMatrixEventSeries()
+      const eventSeriesPrevText = (
+        await eventSeriesPrev.map(async es => await es.getText())
+      ).join(" ; ")
+      expect(eventSeriesPrevText).to.include("NMI PDT")
+      expect(eventSeriesPrevText).to.not.include("My active NMI test event")
+      expect(eventSeriesPrevText).to.not.include("My inactive NMI test event")
+      expect(eventSeriesPrevText).to.not.include("Inactive event series")
+      expect(eventSeriesPrevText).to.not.include("My active test event")
+      expect(eventSeriesPrevText).to.not.include("My inactive test event")
+
+      const tasksPrev = await ShowTask.getEventMatrixTasks()
+      expect(tasksPrev.length).to.equal(1)
+      const tasksPrevPaths = await tasks.map(
+        async task => await (await task.$("td:first-child")).getText()
+      )
+      expect(tasksPrevPaths).to.deep.equal(EF2_2_ASSIGNED_TASKS)
     })
   })
 
@@ -332,7 +383,7 @@ describe("Show organization page", () => {
       ).to.contain("NMI PDT 2024-01")
     })
     it("We can go to the show page of event", async () => {
-      await (await ShowOrganization.getEvent(1)).click()
+      await (await ShowOrganization.getEvent(5)).click()
       await expect(await browser.getUrl()).to.include(
         "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
       )
