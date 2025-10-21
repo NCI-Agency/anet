@@ -96,7 +96,7 @@ test.serial("checking superuser permissions", async t => {
   const $locationLink = await getFromSearchResults(
     t,
     "General Hospital",
-    "General Hospital 47.571772,-52.741935",
+    "General Hospital",
     "locations"
   )
   await $locationLink.click()
@@ -291,7 +291,7 @@ test.serial("checking admin permissions", async t => {
   const $locationLink = await getFromSearchResults(
     t,
     "General Hospital",
-    "General Hospital 47.571772,-52.741935",
+    "General Hospital",
     "locations"
   )
   await $locationLink.click()

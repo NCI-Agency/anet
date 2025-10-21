@@ -241,13 +241,6 @@ export default class Location extends Model {
     if (typeof displayCallback === "function") {
       return displayCallback(this)
     }
-    if (utils.isNumeric(this.lat) && utils.isNumeric(this.lng)) {
-      const coordinate =
-        Settings?.fields?.location?.format === "MGRS"
-          ? convertLatLngToMGRS(this.lat, this.lng)
-          : `${this.lat},${this.lng}`
-      return `${this.name} ${coordinate}`
-    }
     return this.name
   }
 
