@@ -459,15 +459,6 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
         refetch={refetch}
       />
 
-      {(task?.uuid || !!eventSeries.length) && (
-        <Fieldset
-          id="syncMatrix"
-          title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
-        >
-          <EventMatrix taskUuid={task?.uuid} eventSeries={eventSeries} />
-        </Fieldset>
-      )}
-
       <Fieldset
         id="events"
         title={`Events for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
@@ -478,6 +469,15 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
           showEventSeries
         />
       </Fieldset>
+
+      {(task?.uuid || !!eventSeries.length) && (
+        <Fieldset
+          id="syncMatrix"
+          title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
+        >
+          <EventMatrix taskUuid={task?.uuid} eventSeries={eventSeries} />
+        </Fieldset>
+      )}
 
       <Fieldset title={`Reports for this ${Settings.fields.task.shortLabel}`}>
         <ReportCollection

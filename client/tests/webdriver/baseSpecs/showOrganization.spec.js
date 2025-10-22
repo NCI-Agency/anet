@@ -10,19 +10,23 @@ const EF1_1_ORGANIZATION_UUID = "04614b0f-7e8e-4bf1-8bc5-13abaffeab8a" // EF 1.1
 const EF2_2_ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
 const ORGANIZATION_WITH_AG_UUID = "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf" // EF 5.1
 const ORGANIZATION_EF2_SEARCH_STRING = "EF 2"
-const EF1_ASSIGNED_TASKS = [
-  "EF 1 » 1.1 » 1.1.A",
-  "EF 1 » 1.1 » 1.1.B",
-  "EF 1 » 1.1 » 1.1.C",
-  "EF 1 » EF 1.2 » 1.2.A",
-  "EF 1 » EF 1.2 » 1.2.B",
-  "EF 1 » EF 1.2 » 1.2.C",
-  "EF 1 » EF 1.2"
+const EF1_MATRIX_TASKS = [
+  "EF 1",
+  "»\n1.1",
+  "»\n1.1.A",
+  "»\n1.1.B",
+  "»\n1.1.C",
+  "»\nEF 1.2",
+  "»\n1.2.A",
+  "»\n1.2.B",
+  "»\n1.2.C"
 ]
-const EF1_1_ASSIGNED_TASKS = [
-  "EF 1 » 1.1 » 1.1.A",
-  "EF 1 » 1.1 » 1.1.B",
-  "EF 1 » 1.1 » 1.1.C"
+const EF1_1_MATRIX_TASKS = [
+  "EF 1",
+  "»\n1.1",
+  "»\n1.1.A",
+  "»\n1.1.B",
+  "»\n1.1.C"
 ]
 const EF2_ASSIGNED_TASKS = [
   "EF 2 » 2.A",
@@ -30,6 +34,7 @@ const EF2_ASSIGNED_TASKS = [
   "EF 2 » 2.C",
   "EF 2 » 2.D"
 ]
+const EF2_MATRIX_TASKS = ["EF 2", "»\n2.A", "»\n2.B", "»\n2.C", "»\n2.D"]
 const EF2_2_ASSIGNED_TASKS = ["No matching Objective"]
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
@@ -89,11 +94,11 @@ describe("Show organization page", () => {
       )
 
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(4)
+      expect(tasks.length).to.equal(EF2_MATRIX_TASKS.length)
       const taskPaths = await tasks.map(
         async task => await (await task.$("td:first-child")).getText()
       )
-      expect(taskPaths).to.deep.equal(EF2_ASSIGNED_TASKS)
+      expect(taskPaths).to.deep.equal(EF2_MATRIX_TASKS)
     })
     it("Should see assigned tasks on the Edit page", async () => {
       await (await ShowOrganization.getEditOrganizationButton()).click()
@@ -124,11 +129,11 @@ describe("Show organization page", () => {
       )
 
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(7)
+      expect(tasks.length).to.equal(EF1_MATRIX_TASKS.length)
       const taskPaths = await tasks.map(
         async task => await (await task.$("td:first-child")).getText()
       )
-      expect(taskPaths).to.deep.equal(EF1_ASSIGNED_TASKS)
+      expect(taskPaths).to.deep.equal(EF1_MATRIX_TASKS)
     })
     it("Should see sync matrix on the EF1.1 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF1_1_ORGANIZATION_UUID)
@@ -141,11 +146,11 @@ describe("Show organization page", () => {
       )
 
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(3)
+      expect(tasks.length).to.equal(EF1_1_MATRIX_TASKS.length)
       const taskPaths = await tasks.map(
         async task => await (await task.$("td:first-child")).getText()
       )
-      expect(taskPaths).to.deep.equal(EF1_1_ASSIGNED_TASKS)
+      expect(taskPaths).to.deep.equal(EF1_1_MATRIX_TASKS)
     })
     it("Should see sync matrix on the EF2.2 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)

@@ -17,6 +17,7 @@ const InactiveTaskModal = ({
   onSuccess,
   onCancel
 }: InactiveTaskModalProps) => {
+  const ascendantTaskUuids = new Set(currentTask ? [currentTask.uuid] : [])
   return (
     <Modal centered show={showModal} onHide={onCancel}>
       <Modal.Header closeButton>
@@ -32,7 +33,7 @@ const InactiveTaskModal = ({
                 key={task.uuid}
                 leaf={task}
                 ascendantObjects={task.ascendantTasks}
-                ascendantTask={currentTask}
+                ascendantTaskUuids={ascendantTaskUuids}
                 parentField="parentTask"
                 hideParents
               />

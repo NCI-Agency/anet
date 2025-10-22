@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import { buildTree } from "components/advancedSelectWidget/utils"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -13,7 +14,7 @@ import {
 } from "components/Page"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment/moment"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
@@ -25,9 +26,15 @@ const GET_TASKS = gql`
       shortName
       selectable
       status
+      parentTask {
+        uuid
+        shortName
+        status
+      }
       ascendantTasks {
         uuid
         shortName
+        status
         parentTask {
           uuid
         }
@@ -37,9 +44,15 @@ const GET_TASKS = gql`
         shortName
         selectable
         status
+        parentTask {
+          uuid
+          shortName
+          status
+        }
         ascendantTasks {
           uuid
           shortName
+          status
           parentTask {
             uuid
           }
@@ -96,6 +109,27 @@ const GET_EVENTS_AND_REPORTS = gql`
 
 const nextDay = date => moment(date).add(1, "day")
 const hasTask = (tasks, task) => !!tasks?.find(t => t.uuid === task?.uuid)
+const sortTasksAndAddLevel = (tasks, level = 0) => {
+  const tasksArray = Array.from(tasks.values())
+  tasksArray.sort((a, b) => {
+    return (
+      a.shortName.localeCompare(b.shortName) || a.uuid.localeCompare(b.uuid)
+    )
+  })
+  for (const task of tasksArray) {
+    task.level = level
+    if (task.children) {
+      task.children = sortTasksAndAddLevel(task.children, level + 1)
+    }
+  }
+  return tasksArray
+}
+const addTaskToList = (task, taskList) => {
+  taskList.push(task)
+  for (const childTask of task.children || []) {
+    addTaskToList(childTask, taskList)
+  }
+}
 
 interface EventMatrixProps {
   pageDispatchers?: PageDispatchersPropType
@@ -174,16 +208,42 @@ const EventMatrix = ({
     error,
     pageDispatchers
   })
+
+  const [allTasks, topLevelTaskUuids] = useMemo(() => {
+    if (done) {
+      return []
+    }
+    const topLevelTask = data.task
+    const topLevelTasks = topLevelTask ? [topLevelTask] : tasks || []
+
+    const treeMap = buildTree(
+      "ascendantTasks",
+      "descendantTasks",
+      "parentTask",
+      topLevelTasks
+    )
+    const rootLevelTasks = topLevelTask
+      ? topLevelTasks
+      : Object.values(treeMap).filter(t => _isEmpty(t.parents))
+    const rootLevelTaskUuids = new Set<string>(rootLevelTasks.map(t => t.uuid))
+    const allTasksUuids = new Set<string>(topLevelTasks.map(t => t.uuid))
+    const newRootTasks = topLevelTasks
+      // Add the root locations directly included in the items
+      .filter(t => rootLevelTaskUuids.has(t.uuid))
+      // Append the root locations not directly included in the items
+      .concat(rootLevelTasks.filter(t => !allTasksUuids.has(t.uuid)))
+      .map(t => treeMap[t.uuid])
+    const sortedTasksWithLevel = sortTasksAndAddLevel(newRootTasks)
+    // Now flatten the list
+    const allTasks = []
+    for (const task of sortedTasksWithLevel) {
+      addTaskToList(task, allTasks)
+    }
+    return [allTasks, rootLevelTaskUuids]
+  }, [data, done, tasks])
+
   if (done) {
     return result
-  }
-  const topLevelTask = data.task
-  const allTasks = (
-    includeTask ? [topLevelTask].concat(topLevelTask?.descendantTasks) : tasks
-  ).filter(t => t.selectable)
-  // if topLevelTask task is not in allTasks, add it at the top
-  if (includeTask && !hasTask(allTasks, topLevelTask)) {
-    allTasks.unshift(topLevelTask)
   }
 
   function isReportIncluded(report, startDate, endDate, task, event?) {
@@ -359,7 +419,7 @@ const EventMatrix = ({
   function isTaskIncluded(task: any) {
     if (
       task?.status === Model.STATUS.ACTIVE ||
-      task?.uuid === topLevelTask?.uuid ||
+      topLevelTaskUuids?.has(task?.uuid) ||
       hasTask(tasks, task)
     ) {
       // Active tasks, top-level task and assigned tasks are always included
@@ -373,6 +433,7 @@ const EventMatrix = ({
 
     //  or reports
     const endDay = moment(startDay).add(7, "days")
+
     return !!reports?.find(
       r =>
         isReportIncluded(r, startDay, endDay, task, r.event) &&
@@ -476,16 +537,23 @@ const EventMatrix = ({
             )) ||
               includedTasks.map(task => {
                 const taskEvents = events.filter(e => hasTask(e.tasks, task))
+                const hideParents = includeTask
+                  ? task.uuid !== taskUuid
+                  : !!task.parentTask?.uuid
+                const ascendantTasks = task.ascendantTasks || [task]
+                const ascendantTaskUuids = new Set(
+                  hideParents ? ascendantTasks.map(t => t.uuid) : [taskUuid]
+                )
                 return (
                   <tr key={task.uuid} className="event-series-task-row">
-                    <td>
+                    <td style={{ paddingLeft: `${task.level * 20}px` }}>
                       <BreadcrumbTrail
                         modelType="Task"
                         leaf={task}
-                        ascendantObjects={task.ascendantTasks}
+                        ascendantObjects={ascendantTasks}
                         parentField="parentTask"
-                        hideParents={includeTask && taskUuid !== task.uuid}
-                        ascendantTask={topLevelTask}
+                        hideParents={hideParents}
+                        ascendantTaskUuids={ascendantTaskUuids}
                       />
                     </td>
                     <td>{getEvent(taskEvents, 0, task)}</td>

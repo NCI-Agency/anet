@@ -226,9 +226,16 @@ const GQL_GET_ORGANIZATION = gql`
         uuid
         shortName
         selectable
+        status
+        parentTask {
+          uuid
+          shortName
+          status
+        }
         ascendantTasks {
           uuid
           shortName
+          status
           parentTask {
             uuid
           }
@@ -237,9 +244,16 @@ const GQL_GET_ORGANIZATION = gql`
           uuid
           shortName
           selectable
+          status
+          parentTask {
+            uuid
+            shortName
+            status
+          }
           ascendantTasks {
             uuid
             shortName
+            status
             parentTask {
               uuid
             }
@@ -679,15 +693,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           )}
         </Fieldset>
 
-        {(!!allTasks.length || !!allEventSeries.length) && (
-          <Fieldset
-            id="syncMatrix"
-            title={`Sync matrix for ${organization.shortName}`}
-          >
-            <EventMatrix tasks={allTasks} eventSeries={allEventSeries} />
-          </Fieldset>
-        )}
-
         {Settings.fields.organization.customFields && (
           <Fieldset title="Organization information" id="custom-fields">
             <ReadonlyCustomFields
@@ -698,12 +703,14 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
         )}
 
         <OrganizationLaydown organization={organization} refetch={refetch} />
+
         <Approvals
           relatedObject={organization}
           objectType="Organization"
           canEdit={canAdministrateOrg}
           refetch={refetch}
         />
+
         {organization.isTaskEnabled() && (
           <OrganizationTasks
             organization={organization}
@@ -714,6 +721,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
             }}
           />
         )}
+
         <Fieldset
           id="events"
           title={`Events hosted by ${organization.shortName}`}
@@ -725,6 +733,16 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
             showEventSeries
           />
         </Fieldset>
+
+        {(!!allTasks.length || !!allEventSeries.length) && (
+          <Fieldset
+            id="syncMatrix"
+            title={`Sync matrix for ${organization.shortName}`}
+          >
+            <EventMatrix tasks={allTasks} eventSeries={allEventSeries} />
+          </Fieldset>
+        )}
+
         <Fieldset id="reports" title={`Reports from ${organization.shortName}`}>
           <ReportCollection
             paginationKey={`r_${uuid}`}
@@ -755,6 +773,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           />
         </Fieldset>
       </div>
+
       <AssessmentResultsContainer
         entity={organization}
         entityType={Organization}
