@@ -183,7 +183,7 @@ const reportTour = (currentUser, navigate) => {
       },
       {
         title: "Recents",
-        content: `If you've written reports in the past, your recent selections of attendees, ${taskShortLabelPlural}, and locations will display to the right in a section called "Recents". You can click on one of the shortcuts to quickly add it to your report.`,
+        content: `If you've written reports in the past, your recent selections of attendees, ${taskShortLabelPlural} and locations will show up in the select pop-up. You can select them to quickly add them to your report.`,
         disableBeacon: true,
         target: "#fg-reportPeople",
         placement: "bottom-end"

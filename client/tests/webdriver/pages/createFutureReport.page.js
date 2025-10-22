@@ -22,6 +22,12 @@ class CreateFutureReport extends CreateReport {
     return (await this.getAttendeesFieldFormGroup()).$(`input[id="${attId}"]`)
   }
 
+  async getAttendeesFilter(filterIndex = 1) {
+    return browser.$(
+      `div[id="${attId}-popover"] .advanced-select-filters li:nth-child(${filterIndex}) button`
+    )
+  }
+
   async getAttendeesFieldAdvancedSelectFirstItem() {
     return browser.$(
       `div[id="${attId}-popover"] tbody tr:first-child td:nth-child(2)`
@@ -48,6 +54,12 @@ class CreateFutureReport extends CreateReport {
 
   async getTasksField() {
     return (await this.getTasksFieldFormGroup()).$(`input[id="${tskId}"]`)
+  }
+
+  async getTasksFilter(filterIndex = 1) {
+    return browser.$(
+      `div[id="${tskId}-popover"] .advanced-select-filters li:nth-child(${filterIndex}) button`
+    )
   }
 
   async getTasksFieldAdvancedSelectItem(rowNumber = 2) {

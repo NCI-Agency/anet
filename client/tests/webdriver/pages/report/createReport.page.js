@@ -1,6 +1,8 @@
 import moment from "moment"
 import * as cr from "../createReport.page"
 
+const SHORT_WAIT_MS = 1000
+
 class CreateReport extends cr.CreateReport {
   async getTitle() {
     return browser.$("h4.legend")
@@ -130,8 +132,27 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
-  async selectAttendeeByName(name) {
+  async getAttendeesFilters() {
+    return browser.$("#reportPeople-popover .advanced-select-filters")
+  }
+
+  async selectAttendeesFilter(filterIndex) {
+    const filter = await (
+      await this.getAttendeesFilters()
+    ).$(`li:nth-child(${filterIndex}) button`)
+    await filter.waitForClickable()
+    await filter.click()
+    await browser.pause(SHORT_WAIT_MS) // give the advanced select some time to apply the filter
     await (await this.getReportPeople()).click()
+  }
+
+  async selectAttendeeByName(name, filterIndex = null) {
+    await (await this.getReportPeople()).click()
+    if (filterIndex != null) {
+      // select filter
+      await (await this.getAttendeesFilters()).waitForDisplayed()
+      await this.selectAttendeesFilter(filterIndex)
+    }
     // wait for reportPeople table loader to disappear
     await (await this.getReportPeopleTable()).waitForDisplayed()
     let searchTerm = name
@@ -179,8 +200,27 @@ class CreateReport extends cr.CreateReport {
     )
   }
 
-  async selectTaskByName(name, rowNumber = 2) {
+  async getTasksFilters() {
+    return browser.$("#tasks-popover .advanced-select-filters")
+  }
+
+  async selectTasksFilter(filterIndex) {
+    const filter = await (
+      await this.getTasksFilters()
+    ).$(`li:nth-child(${filterIndex}) button`)
+    await filter.waitForClickable()
+    await filter.click()
+    await browser.pause(SHORT_WAIT_MS) // give the advanced select some time to apply the filter
     await (await this.getTasks()).click()
+  }
+
+  async selectTaskByName(name, rowNumber = 2, filterIndex = null) {
+    await (await this.getTasks()).click()
+    if (filterIndex != null) {
+      // select filter
+      await (await this.getTasksFilters()).waitForDisplayed()
+      await this.selectTasksFilter(filterIndex)
+    }
     // wait for tasks table loader to disappear
     await (await this.getTasksTable()).waitForDisplayed()
     await browser.keys(name)
@@ -291,19 +331,19 @@ class CreateReport extends cr.CreateReport {
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
       for (const at of fields.advisors) {
-        await this.selectAttendeeByName(at)
+        await this.selectAttendeeByName(at, 2)
       }
     }
 
     if (Array.isArray(fields.interlocutors) && fields.interlocutors.length) {
       for (const at of fields.interlocutors) {
-        await this.selectAttendeeByName(at)
+        await this.selectAttendeeByName(at, 2)
       }
     }
 
     if (Array.isArray(fields.tasks) && fields.tasks.length) {
       for (const t of fields.tasks) {
-        await this.selectTaskByName(t.name, t.rowNumber)
+        await this.selectTaskByName(t.name, t.rowNumber, 2)
       }
     }
 
