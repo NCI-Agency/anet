@@ -18,6 +18,8 @@ export const locationFields = `
   uuid
   name
   type
+  lat
+  lng
   ascendantLocations {
     uuid
     name

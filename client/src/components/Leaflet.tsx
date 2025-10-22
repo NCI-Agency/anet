@@ -29,6 +29,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
 import { Location } from "models"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Button } from "react-bootstrap"
 import { createPortal } from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
@@ -196,6 +197,7 @@ interface LeafletProps {
   setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
+  onSelectAnetLocation?: (loc: any) => void
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
@@ -221,7 +223,8 @@ const Leaflet = ({
   markers,
   setMarkerPopup,
   mapId: initialMapId,
-  onMapClick
+  onMapClick,
+  onSelectAnetLocation
 }: LeafletProps) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -317,6 +320,20 @@ const Leaflet = ({
     const newMarkerLayer = new MarkerClusterGroup().addTo(newMap)
     setMarkerLayer(newMarkerLayer)
 
+    const updateAnetLocationsVarsFromMap = () => {
+      const mapBounds = newMap.wrapLatLngBounds(newMap.getBounds())
+      const bounds = {
+        minLng: mapBounds._southWest.lng,
+        minLat: mapBounds._southWest.lat,
+        maxLng: mapBounds._northEast.lng,
+        maxLat: mapBounds._northEast.lat
+      }
+      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
+      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
+        setAnetLocationsVars({ bounds })
+      }
+    }
+
     // anetLocations layer
     const anetLocationsLayer = new MarkerClusterGroup({
       iconCreateFunction: cluster => {
@@ -339,20 +356,14 @@ const Leaflet = ({
       }
     })
     anetLocationsLayerRef.current = anetLocationsLayer
-    layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
-
-    const updateAnetLocationsVarsFromMap = () => {
-      const mapBounds = newMap.wrapLatLngBounds(newMap.getBounds())
-      const bounds = {
-        minLng: mapBounds._southWest.lng,
-        minLat: mapBounds._southWest.lat,
-        maxLng: mapBounds._northEast.lng,
-        maxLat: mapBounds._northEast.lat
-      }
-      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
-      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
-        setAnetLocationsVars({ bounds })
-      }
+    if (onSelectAnetLocation) {
+      // Always add the layer to the map
+      newMap.addLayer(anetLocationsLayer, "ANET Locations")
+      setAnetLocationsEnabled(true)
+      updateAnetLocationsVarsFromMap()
+    } else {
+      // Allow the user to show/hide the layer
+      layerControl.addOverlay(anetLocationsLayer, "ANET Locations")
     }
 
     newMap.on("overlayadd", e => {
@@ -414,6 +425,7 @@ const Leaflet = ({
             id: loc.uuid,
             contents: loc
           }
+
           layer.addLayer(
             createMarker(
               [loc.lat, loc.lng],
@@ -440,6 +452,7 @@ const Leaflet = ({
     anetLocationsEnabled,
     anetLocationsVars,
     markerLayer,
+    markers, // if the markers change, we also need to update the layer
     map,
     setLocationMarkerPopup
   ])
@@ -520,10 +533,21 @@ const Leaflet = ({
 
   function renderLocationMarkerPopupContents(location) {
     return (
-      <LinkTo
-        modelType="Location"
-        model={{ uuid: location?.uuid, name: location?.name }}
-      />
+      <div className="d-flex flex-column justify-content-center">
+        <LinkTo
+          modelType="Location"
+          model={{ uuid: location?.uuid, name: location?.name }}
+        />
+        {onSelectAnetLocation && (
+          <Button
+            onClick={() => onSelectAnetLocation(location)}
+            variant="primary"
+            className="mt-2"
+          >
+            Select this location
+          </Button>
+        )}
+      </div>
     )
   }
 }

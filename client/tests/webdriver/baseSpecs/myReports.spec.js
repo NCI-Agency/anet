@@ -88,9 +88,7 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 3, 1)
         ).getText()
-      ).to.equal(
-        "Location: General Hospital 47.571772,-52.741935 Point location"
-      )
+      ).to.equal("Location: General Hospital Point location")
       expect(
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 4, 1)

@@ -22,6 +22,7 @@ import CustomDateInput from "components/CustomDateInput"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import Leaflet, { ICON_TYPES } from "components/Leaflet"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -409,38 +410,65 @@ const EventForm = ({
                   dictProps={Settings.fields.event.location}
                   name="location"
                   component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("location", value, true)
-                  }}
                   widget={
-                    <AdvancedSingleSelect
-                      fieldName="location"
-                      placeholder={Settings.fields.event.location.placeholder}
-                      value={values.location}
-                      overlayColumns={["Name"]}
-                      overlayTable={HierarchicalLocationOverlayTable}
-                      restrictSelectableItems
-                      filterDefs={locationFilters}
-                      objectType={Location}
-                      fields={locationFields}
-                      valueKey="name"
-                      addon={LOCATIONS_ICON}
-                      pageSize={0}
-                      createEntityComponent={
-                        !canCreateLocation
-                          ? null
-                          : (searchTerms, setDoReset) => (
-                              <CreateNewLocation
-                                name={searchTerms}
-                                setFieldTouched={setFieldTouched}
-                                setFieldValue={setFieldValue}
-                                setDoReset={setDoReset}
-                              />
-                            )
-                      }
-                    />
+                    <>
+                      <AdvancedSingleSelect
+                        fieldName="location"
+                        placeholder={Settings.fields.event.location.placeholder}
+                        value={values.location}
+                        overlayColumns={["Name"]}
+                        overlayTable={HierarchicalLocationOverlayTable}
+                        restrictSelectableItems
+                        filterDefs={locationFilters}
+                        objectType={Location}
+                        fields={locationFields}
+                        valueKey="name"
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("location", value, true)
+                        }}
+                        addon={LOCATIONS_ICON}
+                        pageSize={0}
+                        createEntityComponent={
+                          !canCreateLocation
+                            ? null
+                            : (searchTerms, setDoReset) => (
+                                <CreateNewLocation
+                                  name={searchTerms}
+                                  setFieldTouched={setFieldTouched}
+                                  setFieldValue={setFieldValue}
+                                  setDoReset={setDoReset}
+                                />
+                              )
+                        }
+                      />
+                      <div className="mt-3">
+                        <Leaflet
+                          mapId="event-location"
+                          markers={
+                            values.location &&
+                            Location.hasCoordinates(values.location)
+                              ? [
+                                  {
+                                    id:
+                                      values.location.uuid ||
+                                      `${values.location.lat},${values.location.lng}`,
+                                    lat: Number(values.location.lat),
+                                    lng: Number(values.location.lng),
+                                    name: values.location.name,
+                                    icon: ICON_TYPES.DEFAULT
+                                  }
+                                ]
+                              : []
+                          }
+                          onSelectAnetLocation={(loc: any) => {
+                            setFieldTouched("location", true, false)
+                            setFieldValue("location", loc, true)
+                          }}
+                        />
+                      </div>
+                    </>
                   }
                 />
                 <DictionaryField

@@ -31,7 +31,7 @@ describe("Show event page", () => {
     await (await ShowEvent.getLocation()).waitForExist()
     await (await ShowEvent.getLocation()).waitForDisplayed()
     expect(await (await ShowEvent.getLocation()).getText()).to.equal(
-      "General Hospital 47.571772,-52.741935"
+      "General Hospital"
     )
     await (await ShowEvent.getEventSeries()).waitForExist()
     await (await ShowEvent.getEventSeries()).waitForDisplayed()

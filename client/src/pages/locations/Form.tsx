@@ -556,11 +556,11 @@ const LocationForm = ({
   function onSubmitSuccess(response, values, form) {
     const operation = edit ? "updateLocation" : "createLocation"
     const location = new Location({
+      ...values,
       uuid: response[operation].uuid
         ? response[operation].uuid
         : initialValues.uuid
     })
-    location.name = values.name
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })

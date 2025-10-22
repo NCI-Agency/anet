@@ -75,9 +75,7 @@ describe("My events page", () => {
       ).to.equal("Event Series this event belongs to: NMI PDT")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 9, 1)).getText()
-      ).to.equal(
-        "Location where the event takes place: General Hospital 47.571772,-52.741935"
-      )
+      ).to.equal("Location where the event takes place: General Hospital")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 10, 1)).getText()
       ).to.equal("Objectives: EF 1 » EF 1.2 » 1.2.B")
