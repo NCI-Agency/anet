@@ -34,7 +34,7 @@ import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Col, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router-dom"
@@ -75,10 +75,27 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle(data?.location?.name)
+  const location = useMemo(
+    () => new Location(data?.location ?? {}),
+    [data?.location]
+  )
+  const markers = useMemo(() => {
+    const marker = {
+      id: location.uuid || 0,
+      name: _escape(location.name) || "" // escape HTML in location name!
+    }
+    if (Location.hasCoordinates(location)) {
+      Object.assign(marker, {
+        lat: location.lat,
+        lng: location.lng
+      })
+    }
+    return [marker]
+  }, [location])
+  usePageTitle(location?.name)
   useEffect(() => {
-    setAttachments(data?.location?.attachments || [])
-  }, [data])
+    setAttachments(location?.attachments || [])
+  }, [location])
   if (done) {
     return result
   }
@@ -87,7 +104,6 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
       data.location.customFields
     )
   }
-  const location = new Location(data ? data.location : {})
   const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
@@ -299,7 +315,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
           </Fieldset>
         )}
 
-        {Location.hasCoordinates(location) && <Leaflet markers={[marker]} />}
+        {Location.hasCoordinates(location) && <Leaflet markers={markers} />}
       </div>
 
       <Approvals

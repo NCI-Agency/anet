@@ -10,7 +10,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
-import React from "react"
+import React, { useMemo } from "react"
 import Settings from "settings"
 
 const GQL_GET_LOCATION = gql`
@@ -39,6 +39,23 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
   const { data, error } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
+  const location = useMemo(
+    () => new Location(data?.location ?? {}),
+    [data?.location]
+  )
+  const markers = useMemo(() => {
+    const marker = {
+      id: location.uuid || 0,
+      name: _escape(location.name) || "" // escape HTML in location name!
+    }
+    if (Location.hasCoordinates(location)) {
+      Object.assign(marker, {
+        lat: location.lat,
+        lng: location.lng
+      })
+    }
+    return [marker]
+  }, [location])
 
   if (!data) {
     if (error) {
@@ -47,19 +64,7 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
     return null
   }
 
-  const location = new Location(data.location ? data.location : {})
   const label = Location.LOCATION_FORMAT_LABELS[Location.locationFormat]
-
-  const marker = {
-    id: location.uuid || 0,
-    name: _escape(location.name) || "" // escape HTML in location name!
-  }
-  if (Location.hasCoordinates(location)) {
-    Object.assign(marker, {
-      lat: location.lat,
-      lng: location.lng
-    })
-  }
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -130,7 +135,7 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
       </div>
 
       {Location.hasCoordinates(location) && (
-        <Leaflet markers={[marker]} mapId={`${uuid}`} />
+        <Leaflet markers={markers} mapId={`${uuid}`} />
       )}
     </div>
   )
