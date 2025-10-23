@@ -28,7 +28,7 @@ import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
 import { Location } from "models"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
 import { createPortal } from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
@@ -182,6 +182,16 @@ function createMarker(
 function wrapLng(lng) {
   // Wrap lng around the antimeridian
   return lng < 0 ? lng + 360.0 : lng - 360.0
+}
+
+function getExistingIds(layerGroup) {
+  const ids = new Set<string>()
+  layerGroup?.eachLayer((layer: any) => {
+    if (layer?.options?.id) {
+      ids.add(String(layer.options.id))
+    }
+  })
+  return ids
 }
 
 export interface MarkerPopupProps {
@@ -390,16 +400,6 @@ const Leaflet = ({
     return () => newMap.remove()
   }, [mapId])
 
-  function getExistingIds(layerGroup) {
-    const ids = new Set<string>()
-    layerGroup?.eachLayer((layer: any) => {
-      if (layer?.options?.id) {
-        ids.add(String(layer.options.id))
-      }
-    })
-    return ids
-  }
-
   useEffect(() => {
     if (!anetLocationsEnabled || !anetLocationsLayerRef.current) {
       return
@@ -452,7 +452,6 @@ const Leaflet = ({
     anetLocationsEnabled,
     anetLocationsVars,
     markerLayer,
-    markers, // if the markers change, we also need to update the layer
     map,
     setLocationMarkerPopup
   ])
@@ -482,7 +481,7 @@ const Leaflet = ({
     if (
       !doInitializeMarkerLayer &&
       markerLayer &&
-      JSON.stringify(prevMarkersRef.current) !== JSON.stringify(markers)
+      prevMarkersRef.current !== markers
     ) {
       // setTimeout is a workaround for "Uncaught DOMException: Failed to execute 'removeChild' on 'Node':
       // The node to be removed is no longer a child of this node." error
@@ -550,6 +549,40 @@ const Leaflet = ({
       </div>
     )
   }
+}
+
+interface LeafletWithSelectionProps {
+  mapId: string
+  location?: any
+  onSelectAnetLocation: (loc: any) => void
+}
+
+export const LeafletWithSelection = ({
+  mapId,
+  location,
+  onSelectAnetLocation
+}: LeafletWithSelectionProps) => {
+  const markers = useMemo(
+    () =>
+      location && Location.hasCoordinates(location)
+        ? [
+            {
+              id: location.uuid,
+              lat: Number(location.lat),
+              lng: Number(location.lng),
+              name: location.name
+            }
+          ]
+        : [],
+    [location]
+  )
+  return (
+    <Leaflet
+      mapId={mapId}
+      markers={markers}
+      onSelectAnetLocation={onSelectAnetLocation}
+    />
+  )
 }
 
 export default Leaflet

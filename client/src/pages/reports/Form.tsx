@@ -31,7 +31,7 @@ import {
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Leaflet, { ICON_TYPES } from "components/Leaflet"
+import { LeafletWithSelection } from "components/Leaflet"
 import { MessagesWithConflict } from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
@@ -752,24 +752,9 @@ const ReportForm = ({
                       />
                       {!locationDisabled && (
                         <div className="mt-3">
-                          <Leaflet
+                          <LeafletWithSelection
                             mapId="report-location"
-                            markers={
-                              values.location &&
-                              Location.hasCoordinates(values.location)
-                                ? [
-                                    {
-                                      id:
-                                        values.location.uuid ||
-                                        `${values.location.lat},${values.location.lng}`,
-                                      lat: Number(values.location.lat),
-                                      lng: Number(values.location.lng),
-                                      name: values.location.name,
-                                      icon: ICON_TYPES.DEFAULT
-                                    }
-                                  ]
-                                : []
-                            }
+                            location={values.location}
                             onSelectAnetLocation={(loc: any) => {
                               setFieldTouched("location", true, false)
                               setFieldValue("location", loc, true)

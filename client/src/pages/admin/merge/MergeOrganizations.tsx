@@ -39,8 +39,8 @@ import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
-  getLeafletMap,
   getOtherSide,
+  LeafletMap,
   MERGE_SIDES,
   mergedOrganizationIsValid,
   selectAllFields,
@@ -380,11 +380,11 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                       modelType="Location"
                       model={mergedOrganization.location}
                     />
-                    {getLeafletMap(
-                      "merged-organization",
-                      mergedOrganization.location,
-                      hideWhenEmpty
-                    )}
+                    <LeafletMap
+                      mapId="merged-location-map"
+                      location={mergedOrganization.location}
+                      hideWhenEmpty={hideWhenEmpty}
+                    />
                   </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -736,11 +736,11 @@ const OrganizationColumn = ({
             value={
               <>
                 <LinkTo modelType="Location" model={organization.location} />
-                {getLeafletMap(
-                  `merge-organization-map-${align}`,
-                  organization.location,
-                  hideWhenEmpty
-                )}
+                <LeafletMap
+                  mapId={`merge-location-map-${align}`}
+                  location={organization.location}
+                  hideWhenEmpty={hideWhenEmpty}
+                />
               </>
             }
             align={align}

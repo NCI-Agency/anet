@@ -8,7 +8,7 @@ import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Location } from "models"
-import React, { useCallback, useReducer } from "react"
+import React, { useCallback, useMemo, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
@@ -352,19 +352,30 @@ export function getActionButton(
 
 const HIDDEN_STYLE = { visibility: "hidden" }
 
-export function getLeafletMap(mapId, location, hideWhenEmpty) {
+interface LeafletMapProps {
+  mapId: string
+  location?: any
+  hideWhenEmpty?: boolean
+}
+
+export const LeafletMap = ({
+  mapId,
+  location,
+  hideWhenEmpty
+}: LeafletMapProps) => {
+  const markers = useMemo(
+    () => [
+      {
+        id: "marker-" + mapId,
+        name: _escape(location?.name) || "", // escape HTML in location name!
+        lat: Location.hasCoordinates(location) ? location.lat : null,
+        lng: Location.hasCoordinates(location) ? location.lng : null
+      }
+    ],
+    [mapId, location]
+  )
   return Location.hasCoordinates(location) ? (
-    <Leaflet
-      mapId={mapId}
-      markers={[
-        {
-          id: "marker-" + mapId,
-          name: _escape(location?.name) || "", // escape HTML in location name!
-          lat: Location.hasCoordinates(location) ? location.lat : null,
-          lng: Location.hasCoordinates(location) ? location.lng : null
-        }
-      ]}
-    />
+    <Leaflet mapId={mapId} markers={markers} />
   ) : (
     <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />
   )
