@@ -29,7 +29,7 @@ import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Button, Col, FormSelect, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -184,20 +184,6 @@ const LocationForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const marker = {
-          id: values.uuid || 0,
-          name: _escape(values.name) || "", // escape HTML in location name!
-          draggable: true,
-          autoPan: true,
-          onMove: (event, map) =>
-            updateCoordinateFields(map.wrapLatLng(event.target.getLatLng()))
-        }
-        if (Location.hasCoordinates(values)) {
-          Object.assign(marker, {
-            lat: parseFloat(values.lat),
-            lng: parseFloat(values.lng)
-          })
-        }
         const imageAttachments = attachmentList?.filter(a =>
           avatarMimeTypes.includes(a.mimeType)
         )
@@ -426,15 +412,17 @@ const LocationForm = ({
               </Fieldset>
 
               {values.type !== Location.LOCATION_TYPES.VIRTUAL_LOCATION && (
-                <>
-                  <h3>Drag the marker below to set the location</h3>
-                  <Leaflet
-                    markers={[marker]}
-                    onMapClick={(event, map) =>
-                      updateCoordinateFields(map.wrapLatLng(event.latlng))
-                    }
-                  />
-                </>
+                <LeafletMap
+                  location={values}
+                  onMove={(event, map) =>
+                    updateCoordinateFields(
+                      map.wrapLatLng(event.target.getLatLng())
+                    )
+                  }
+                  onMapClick={(event, map) =>
+                    updateCoordinateFields(map.wrapLatLng(event.latlng))
+                  }
+                />
               )}
 
               <ApprovalsDefinition
@@ -617,6 +605,38 @@ const LocationForm = ({
       setShowSimilarLocationsMessage(false)
     }
   }
+}
+
+interface LeafletMapProps {
+  location: any
+  onMove: (event, map) => void
+  onMapClick: (event, map) => void
+}
+
+const LeafletMap = ({ location, onMove, onMapClick }: LeafletMapProps) => {
+  const markers = useMemo(() => {
+    const marker = {
+      id: location.uuid || 0,
+      name: _escape(location.name) || "", // escape HTML in location name!
+      draggable: true,
+      autoPan: true,
+      onMove
+    }
+    if (Location.hasCoordinates(location)) {
+      Object.assign(marker, {
+        lat: Number(location.lat),
+        lng: Number(location.lng)
+      })
+    }
+    return [marker]
+  }, [location, onMove])
+
+  return (
+    <>
+      <h3>Drag the marker below to set the location</h3>
+      <Leaflet markers={markers} onMapClick={onMapClick} />
+    </>
+  )
 }
 
 export default LocationForm

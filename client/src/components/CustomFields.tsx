@@ -322,40 +322,76 @@ const GeoLocationField = ({
   ...fieldProps
 }: GeoLocationFieldProps) => {
   const { name, label, formikProps, ...otherFieldProps } = fieldProps
-  const fieldValue = Object.get(formikProps.values, name) || {}
-  const coordinates = {
-    lat: fieldValue?.lat,
-    lng: fieldValue?.lng,
-    displayedCoordinate:
-      fieldValue?.displayedCoordinate ||
-      convertLatLngToMGRS(fieldValue?.lat, fieldValue?.lng)
-  }
+  const [setFieldTouched, setFieldValue] = useMemo(
+    () => [formikProps.setFieldTouched, formikProps.setFieldValue],
+    [formikProps.setFieldTouched, formikProps.setFieldValue]
+  )
+  const fieldValue = useMemo(
+    () => Object.get(formikProps.values, name) || {},
+    [formikProps.values, name]
+  )
+  const coordinates = useMemo(
+    () => ({
+      lat: fieldValue?.lat,
+      lng: fieldValue?.lng,
+      displayedCoordinate:
+        fieldValue?.displayedCoordinate ||
+        convertLatLngToMGRS(fieldValue?.lat, fieldValue?.lng)
+    }),
+    [fieldValue]
+  )
   const labels = {
     [Location.LOCATION_FORMATS.LAT_LON]: `${label} (Lat/Lon)`,
     [Location.LOCATION_FORMATS.MGRS]: `${label} (MGRS)`
   }
-  const marker = {}
-  const leafletProps = {}
-  if (editable) {
-    Object.assign(marker, {
-      draggable: true,
-      autoPan: true,
-      onMove: (event, map) =>
-        updateCoordinateFields(map.wrapLatLng(event.target.getLatLng()))
-    })
-    Object.assign(leafletProps, {
-      onMapClick: (event, map) =>
-        updateCoordinateFields(map.wrapLatLng(event.latlng)),
-      onSelectAnetLocation: (loc: any) =>
-        updateCoordinateFields({ lat: loc.lat, lng: loc.lng })
-    })
-  }
-  if (Location.hasCoordinates(coordinates)) {
-    Object.assign(marker, {
-      lat: parseFloat(coordinates.lat),
-      lng: parseFloat(coordinates.lng)
-    })
-  }
+
+  const markers = useMemo(() => {
+    const marker = {}
+    if (editable) {
+      Object.assign(marker, {
+        draggable: true,
+        autoPan: true,
+        onMove: (event, map) =>
+          updateCoordinateFields(
+            map.wrapLatLng(event.target.getLatLng()),
+            name,
+            setFieldTouched,
+            setFieldValue
+          )
+      })
+    }
+    if (Location.hasCoordinates(coordinates)) {
+      Object.assign(marker, {
+        lat: Number(coordinates.lat),
+        lng: Number(coordinates.lng)
+      })
+    }
+    return [marker]
+  }, [editable, coordinates, name, setFieldTouched, setFieldValue])
+
+  const leafletProps = useMemo(() => {
+    const leafletProps = {}
+    if (editable) {
+      Object.assign(leafletProps, {
+        onMapClick: (event, map) =>
+          updateCoordinateFields(
+            map.wrapLatLng(event.latlng),
+            name,
+            setFieldTouched,
+            setFieldValue
+          ),
+        onSelectAnetLocation: (loc: any) =>
+          updateCoordinateFields(
+            { lat: loc.lat, lng: loc.lng },
+            name,
+            setFieldTouched,
+            setFieldValue
+          )
+      })
+    }
+    return leafletProps
+  }, [editable, name, setFieldTouched, setFieldValue])
+
   return (
     <>
       {!isCompact ? (
@@ -381,24 +417,24 @@ const GeoLocationField = ({
         <Row style={{ marginTop: "-1rem" }}>
           <Col sm={2} />
           <Col sm={7}>
-            <Leaflet markers={[marker]} mapId={name} {...leafletProps} />
+            <Leaflet markers={markers} mapId={name} {...leafletProps} />
           </Col>
         </Row>
       )}
     </>
   )
+}
 
-  function updateCoordinateFields(latLng) {
-    const parsedLat = parseCoordinate(latLng.lat)
-    const parsedLng = parseCoordinate(latLng.lng)
-    const parsedMgrs = convertLatLngToMGRS(parsedLat, parsedLng)
-    formikProps.setFieldTouched(`${name}.lat`, false, false)
-    formikProps.setFieldTouched(`${name}.lng`, false, false)
-    formikProps.setFieldTouched(`${name}.displayedCoordinate`, false, false)
-    formikProps.setFieldValue(`${name}.lat`, parsedLat)
-    formikProps.setFieldValue(`${name}.lng`, parsedLng)
-    formikProps.setFieldValue(`${name}.displayedCoordinate`, parsedMgrs)
-  }
+function updateCoordinateFields(latLng, name, setFieldTouched, setFieldValue) {
+  const parsedLat = parseCoordinate(latLng.lat)
+  const parsedLng = parseCoordinate(latLng.lng)
+  const parsedMgrs = convertLatLngToMGRS(parsedLat, parsedLng)
+  setFieldTouched(`${name}.lat`, false, false)
+  setFieldTouched(`${name}.lng`, false, false)
+  setFieldTouched(`${name}.displayedCoordinate`, false, false)
+  setFieldValue(`${name}.lat`, parsedLat)
+  setFieldValue(`${name}.lng`, parsedLng)
+  setFieldValue(`${name}.displayedCoordinate`, parsedMgrs)
 }
 
 interface ReadonlyGeoLocationFieldProps {
