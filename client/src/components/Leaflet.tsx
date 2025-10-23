@@ -551,6 +551,17 @@ const Leaflet = ({
   }
 }
 
+function renderSelectedLocationMarkerPopupContents(location) {
+  return (
+    <div className="d-flex flex-column justify-content-center">
+      <LinkTo
+        modelType="Location"
+        model={{ uuid: location?.uuid, name: location?.name }}
+      />
+    </div>
+  )
+}
+
 interface LeafletWithSelectionProps {
   mapId: string
   location?: any
@@ -562,6 +573,7 @@ export const LeafletWithSelection = ({
   location,
   onSelectAnetLocation
 }: LeafletWithSelectionProps) => {
+  const [markerPopup, setMarkerPopup] = useState<MarkerPopupProps>({})
   const markers = useMemo(
     () =>
       location && Location.hasCoordinates(location)
@@ -570,18 +582,26 @@ export const LeafletWithSelection = ({
               id: location.uuid,
               lat: Number(location.lat),
               lng: Number(location.lng),
-              name: location.name
+              contents: location
             }
           ]
         : [],
     [location]
   )
   return (
-    <Leaflet
-      mapId={mapId}
-      markers={markers}
-      onSelectAnetLocation={onSelectAnetLocation}
-    />
+    <>
+      <Leaflet
+        mapId={mapId}
+        markers={markers}
+        onSelectAnetLocation={onSelectAnetLocation}
+        setMarkerPopup={setMarkerPopup}
+      />
+      {markerPopup.container &&
+        createPortal(
+          renderSelectedLocationMarkerPopupContents(markerPopup.contents),
+          markerPopup.container
+        )}
+    </>
   )
 }
 
