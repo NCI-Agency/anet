@@ -31,6 +31,7 @@ import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
 import EventSearchResults from "components/search/EventSearchResults"
+import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
 import LocationSearchResults from "components/search/LocationSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
 import PeopleSearchResults from "components/search/PeopleSearchResults"
@@ -65,6 +66,7 @@ import { toast } from "react-toastify"
 import COMMUNITIES_ICON from "resources/communities.png"
 import DOWNLOAD_ICON from "resources/download.png"
 import EVENTS_ICON from "resources/events.png"
+import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -147,6 +149,11 @@ const SEARCH_ITEMS = {
     navTo: "events",
     iconImg: EVENTS_ICON,
     searchResultsComponent: EventSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.EVENT_SERIES]: {
+    navTo: "eventSeries",
+    iconImg: EVENT_SERIES_ICON,
+    searchResultsComponent: EventSeriesSearchResults
   }
 }
 
@@ -232,11 +239,13 @@ const Search = ({
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
   const [numAttachments, setNumAttachments] = useState(null)
   const [numEvents, setNumEvents] = useState(null)
+  const [numEventSeries, setNumEventSeries] = useState(null)
   const setNumResults = useMemo(
     () => ({
       [SEARCH_OBJECT_TYPES.ATTACHMENTS]: setNumAttachments,
       [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: setNumAuthorizationGroups,
       [SEARCH_OBJECT_TYPES.EVENTS]: setNumEvents,
+      [SEARCH_OBJECT_TYPES.EVENT_SERIES]: setNumEventSeries,
       [SEARCH_OBJECT_TYPES.LOCATIONS]: setNumLocations,
       [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: setNumOrganizations,
       [SEARCH_OBJECT_TYPES.PEOPLE]: setNumPeople,
@@ -271,7 +280,8 @@ const Search = ({
     numLocations,
     numReports,
     numAttachments,
-    numEvents
+    numEvents,
+    numEventSeries
   )
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
   const searchQueryParams = useMemo(
@@ -373,6 +383,7 @@ const Search = ({
       [SEARCH_OBJECT_TYPES.ATTACHMENTS]: numAttachments,
       [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: numAuthorizationGroups,
       [SEARCH_OBJECT_TYPES.EVENTS]: numEvents,
+      [SEARCH_OBJECT_TYPES.EVENT_SERIES]: numEventSeries,
       [SEARCH_OBJECT_TYPES.LOCATIONS]: numLocations,
       [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: numOrganizations,
       [SEARCH_OBJECT_TYPES.PEOPLE]: numPeople,
@@ -384,6 +395,7 @@ const Search = ({
       numAttachments,
       numAuthorizationGroups,
       numEvents,
+      numEventSeries,
       numLocations,
       numOrganizations,
       numPeople,
