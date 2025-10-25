@@ -7054,7 +7054,7 @@ __metadata:
     eslint-plugin-n: "npm:17.23.1"
     eslint-plugin-promise: "npm:7.2.1"
     eslint-plugin-react: "npm:7.37.5"
-    eslint-plugin-react-hooks: "npm:7.0.0"
+    eslint-plugin-react-hooks: "npm:7.0.1"
     eslint-webpack-plugin: "npm:5.0.2"
     express-session: "npm:1.18.2"
     file-saver: "npm:2.0.5"
@@ -7117,7 +7117,7 @@ __metadata:
     redux-persist: "npm:6.0.0"
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
-    selenium-webdriver: "npm:4.37.0"
+    selenium-webdriver: "npm:4.38.0"
     slate: "npm:0.118.1"
     slate-dom: "npm:0.118.1"
     slate-history: "npm:0.113.1"
@@ -10854,18 +10854,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-hooks@npm:7.0.0":
-  version: 7.0.0
-  resolution: "eslint-plugin-react-hooks@npm:7.0.0"
+"eslint-plugin-react-hooks@npm:7.0.1":
+  version: 7.0.1
+  resolution: "eslint-plugin-react-hooks@npm:7.0.1"
   dependencies:
     "@babel/core": "npm:^7.24.4"
     "@babel/parser": "npm:^7.24.4"
     hermes-parser: "npm:^0.25.1"
-    zod: "npm:^3.22.4 || ^4.0.0"
-    zod-validation-error: "npm:^3.0.3 || ^4.0.0"
+    zod: "npm:^3.25.0 || ^4.0.0"
+    zod-validation-error: "npm:^3.5.0 || ^4.0.0"
   peerDependencies:
     eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
-  checksum: 10c0/911c9efdd9b102ce2eabac247dff8c217ecb8d6972aaf3b7eecfb1cfc293d4d902766355993ff7a37a33c0abde3e76971f43bc1c8ff36d6c123310e5680d0423
+  checksum: 10c0/1e711d1a9d1fa9cfc51fa1572500656577201199c70c795c6a27adfc1df39e5c598f69aab6aa91117753d23cc1f11388579a2bed14921cf9a4efe60ae8618496
   languageName: node
   linkType: hard
 
@@ -17972,15 +17972,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"selenium-webdriver@npm:4.37.0":
-  version: 4.37.0
-  resolution: "selenium-webdriver@npm:4.37.0"
+"selenium-webdriver@npm:4.38.0":
+  version: 4.38.0
+  resolution: "selenium-webdriver@npm:4.38.0"
   dependencies:
     "@bazel/runfiles": "npm:^6.3.1"
     jszip: "npm:^3.10.1"
     tmp: "npm:^0.2.5"
     ws: "npm:^8.18.3"
-  checksum: 10c0/32b9115afca257476b91395ce88a61489359f1b125668e3a0113008b6b315b803208e16a8e99934613c5f488054aedbf62c1409c51cff4556ae546b327341860
+  checksum: 10c0/de7dffb60c8ad1fcacda0dda57d8b9cc17d965e74e8af67001f2585c2ac091d8b7d305cd93ddb1c6d3000a913a1959aaea6053e9e587762a8eaac598927fb68a
   languageName: node
   linkType: hard
 
@@ -20942,7 +20942,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-validation-error@npm:^3.0.3 || ^4.0.0":
+"zod-validation-error@npm:^3.5.0 || ^4.0.0":
   version: 4.0.2
   resolution: "zod-validation-error@npm:4.0.2"
   peerDependencies:
@@ -20951,7 +20951,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.4 || ^4.0.0":
+"zod@npm:^3.25.0 || ^4.0.0":
   version: 4.1.12
   resolution: "zod@npm:4.1.12"
   checksum: 10c0/b64c1feb19e99d77075261eaf613e0b2be4dfcd3551eff65ad8b4f2a079b61e379854d066f7d447491fcf193f45babd8095551a9d47973d30b46b6d8e2c46774
