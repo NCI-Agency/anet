@@ -8,8 +8,7 @@ import {
 } from "components/Page"
 import EventSearchResults from "components/search/EventSearchResults"
 import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
-import { EventSeries } from "models"
-import React from "react"
+import React, { useState } from "react"
 import { connect } from "react-redux"
 
 interface EventListPros {
@@ -24,9 +23,12 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
   })
   usePageTitle("Events")
 
-  if (done) {
-    return result
-  }
+  const [pagination, setPagination] = useState({
+    eventSeries: { pageNum: 0 },
+    events: { pageNum: 0 }
+  })
+
+  if (done) return result
 
   const queryParams = {
     pageSize: 10,
@@ -41,6 +43,14 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
         <EventSeriesSearchResults
           queryParams={queryParams}
           pageDispatchers={pageDispatchers}
+          paginationKey="eventSeries"
+          pagination={pagination}
+          setPagination={(key, pageNum) =>
+            setPagination(prev => ({
+              ...prev,
+              [key]: { pageNum }
+            }))
+          }
         />
       </Fieldset>
 
@@ -48,6 +58,14 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
         <EventSearchResults
           queryParams={queryParams}
           pageDispatchers={pageDispatchers}
+          paginationKey="events"
+          pagination={pagination}
+          setPagination={(key, pageNum) =>
+            setPagination(prev => ({
+              ...prev,
+              [key]: { pageNum }
+            }))
+          }
         />
       </Fieldset>
     </>
