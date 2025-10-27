@@ -28,7 +28,9 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
     events: { pageNum: 0 }
   })
 
-  if (done) return result
+  if (done) {
+    return result
+  }
 
   const queryParams = {
     pageSize: 10,
@@ -39,7 +41,7 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
 
   return (
     <>
-      <Fieldset title="Event Series">
+      <Fieldset title="Event Series" id="event-series">
         <EventSeriesSearchResults
           queryParams={queryParams}
           pageDispatchers={pageDispatchers}
@@ -54,7 +56,7 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
         />
       </Fieldset>
 
-      <Fieldset title="Events">
+      <Fieldset title="Events" id="events">
         <EventSearchResults
           queryParams={queryParams}
           pageDispatchers={pageDispatchers}

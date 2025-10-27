@@ -30,6 +30,9 @@ const ANET_OBJECT_TYPES = {
   },
   Events: {
     sampleFilters: ["Type"]
+  },
+  EventSeries: {
+    sampleFilters: []
   }
 }
 const COMMON_FILTER_TEXT = "Status"
@@ -65,7 +68,11 @@ describe("When using advanced search", () => {
   it("Should show a list of anet object types on toggle buttons in the popover", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
-      expect(await button.getText()).to.equal(await getObjectType(i))
+      const expectedText = (await getObjectType(i)).replace(
+        "EventSeries",
+        "Event Series"
+      )
+      expect(await button.getText()).to.equal(expectedText)
     }
   })
   it("Should show the common filter even when no object type selected", async () => {
