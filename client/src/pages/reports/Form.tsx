@@ -712,7 +712,6 @@ const ReportForm = ({
                   dictProps={Settings.fields.report.location}
                   name="location"
                   component={FieldHelper.SpecialField}
-                  disabled={locationDisabled}
                   widget={
                     <>
                       <AdvancedSingleSelect
@@ -737,6 +736,7 @@ const ReportForm = ({
                           setFieldValue("location", value, true)
                           setLocationUuid(value?.uuid)
                         }}
+                        disabled={locationDisabled}
                         createEntityComponent={
                           !canCreateLocation
                             ? null
