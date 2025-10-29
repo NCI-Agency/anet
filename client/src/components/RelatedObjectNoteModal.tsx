@@ -62,6 +62,7 @@ const RelatedObjectNoteModal = ({
         initialValues={note}
       >
         {({
+          values,
           isSubmitting,
           isValid,
           setFieldValue,
@@ -91,8 +92,8 @@ const RelatedObjectNoteModal = ({
                     objectType="Note"
                     onCancel={close}
                     onConfirm={() => {
-                      resetForm({ note, isSubmitting: true })
-                      onSubmit(note, { resetForm, setSubmitting }, true)
+                      resetForm({ values, isSubmitting: true })
+                      onSubmit(values, { resetForm, setSubmitting }, true)
                     }}
                   />
                   <Field
