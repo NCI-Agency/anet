@@ -7,6 +7,7 @@ import {
 } from "@blueprintjs/core"
 import API from "api"
 import classNames from "classnames"
+import Checkbox from "components/Checkbox"
 import Model from "components/Model"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
@@ -120,6 +121,7 @@ export interface AdvancedSelectProps {
   // Optional: GraphQL string of fields to return from search.
   disableCheckboxIfNullPath?: string
   fields?: string
+  showInclInactive?: boolean
   showDismiss?: boolean
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
@@ -153,6 +155,7 @@ const AdvancedSelect = ({
   queryParams,
   disableCheckboxIfNullPath,
   fields,
+  showInclInactive = true,
   showDismiss,
   handleAddItem,
   handleRemoveItem,
@@ -172,6 +175,7 @@ const AdvancedSelect = ({
     latestSelectedValueAsString.current
   )
   const [filterType, setFilterType] = useState(firstFilter) // by default use the first filter
+  const [inclInactive, setInclInactive] = useState(false)
   const [pageNum, setPageNum] = useState(0)
   const [results, setResults] = useState({})
   const [showOverlay, setShowOverlay] = useState(false)
@@ -205,6 +209,11 @@ const AdvancedSelect = ({
         if (searchTerms) {
           Object.assign(queryVars, { text: searchTerms + "*" })
         }
+        if (inclInactive) {
+          delete queryVars.status
+        } else {
+          queryVars.status = Model.STATUS.ACTIVE
+        }
         const thisRequest = (latestRequest.current = API.query(
           gql`
           query($query: ${resourceName}SearchQueryInput) {
@@ -235,6 +244,7 @@ const AdvancedSelect = ({
     [
       fields,
       filterType,
+      inclInactive,
       objectType.listName,
       objectType.resourceName,
       pageNum,
@@ -353,25 +363,27 @@ const AdvancedSelect = ({
               <Popover
                 popoverClassName="advanced-select-popover bp6-popover-content-sizing"
                 content={
-                  <div
-                    style={{
-                      position: showDismiss && "relative",
-                      padding: showDismiss && "10px"
-                    }}
-                  >
-                    {showDismiss && (
-                      <BlueprintButton
-                        icon="cross"
-                        variant="minimal"
-                        onClick={() => setDoReset(true)}
-                        className={BlueprintClasses.POPOVER_DISMISS}
-                        style={{
-                          position: "absolute",
-                          top: "5px",
-                          right: "5px",
-                          zIndex: 10
-                        }}
-                      />
+                  <div className="d-flex flex-column">
+                    {(showInclInactive || showDismiss) && (
+                      <div className="d-flex flex-row justify-content-end align-items-center">
+                        {showInclInactive && (
+                          <Checkbox
+                            id={`${fieldName}-inclInactive`}
+                            label={`incl. ${Model.humanNameOfStatus(Model.STATUS.INACTIVE)}`}
+                            checked={inclInactive}
+                            onChange={toggleInclInactive}
+                          />
+                        )}
+                        {showDismiss && (
+                          <BlueprintButton
+                            icon="cross"
+                            variant="minimal"
+                            onClick={() => setDoReset(true)}
+                            className={`"${BlueprintClasses.POPOVER_DISMISS} form-check`}
+                            style={{ zIndex: 10 }}
+                          />
+                        )}
+                      </div>
                     )}
                     <Row id={`${fieldName}-popover`} className="border-between">
                       {(showCreateEntityComponent && (
@@ -510,6 +522,11 @@ const AdvancedSelect = ({
       </Row>
     </>
   )
+
+  function toggleInclInactive() {
+    setPageNum(0)
+    setInclInactive(!inclInactive)
+  }
 
   function handleInteraction(nextShowOverlay, event) {
     // Note: these state updates are not being batched, order is therefore important

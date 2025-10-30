@@ -4,7 +4,7 @@ import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/Advanced
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
@@ -150,14 +150,12 @@ const AssignPersonModal = ({
     setError(newError)
   }, [person, position, removeUser])
 
-  const personSearchQuery = {
-    status: Model.STATUS.ACTIVE,
-    pendingVerification: false
-  }
   const personFilters = {
     allPersons: {
       label: "All",
-      queryVars: personSearchQuery
+      queryVars: {
+        pendingVerification: false
+      }
     }
   }
 

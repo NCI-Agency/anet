@@ -5,7 +5,6 @@ import Model, {
 } from "components/Model"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
-import utils from "utils"
 import * as yup from "yup"
 
 export const {
@@ -140,10 +139,6 @@ export default class Task extends Model {
     "uuid shortName longName parentTask { uuid shortName }" +
     " ascendantTasks { uuid shortName parentTask { uuid } }" +
     ` taskedOrganizations { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} } customFields`
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
 
   constructor(props) {
     super(Model.fillObject(props, Task.yupSchema))

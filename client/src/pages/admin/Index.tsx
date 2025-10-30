@@ -16,7 +16,7 @@ import {
   GENERAL_BANNER_VISIBILITY
 } from "components/GeneralBanner"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
@@ -111,10 +111,7 @@ const SPECIAL_FIELDS = {
         overlayRenderRow={OrganizationOverlayRow}
         filterDefs={{
           allOrganizations: {
-            label: "All organizations",
-            queryVars: {
-              status: Model.STATUS.ACTIVE
-            }
+            label: "All organizations"
           }
         }}
         objectType={Organization}
@@ -167,10 +164,7 @@ const SPECIAL_FIELDS = {
         overlayRenderRow={AuthorizationGroupOverlayRow}
         filterDefs={{
           allAuthorizationGroups: {
-            label: "All communities",
-            queryVars: {
-              status: Model.STATUS.ACTIVE
-            }
+            label: "All communities"
           }
         }}
         objectType={AuthorizationGroup}

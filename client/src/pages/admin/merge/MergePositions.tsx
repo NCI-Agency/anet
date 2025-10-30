@@ -473,7 +473,6 @@ function getPositionFilters(mergeState, align) {
     allPositions: {
       label: "All",
       queryVars: {
-        status: Position.STATUS.ACTIVE,
         organizationUuid: mergeState[getOtherSide(align)]?.organization?.uuid,
         type: mergeState[getOtherSide(align)]?.type
       }

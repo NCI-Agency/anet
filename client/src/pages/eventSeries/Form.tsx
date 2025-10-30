@@ -99,9 +99,7 @@ const EventSeriesForm = ({
         submitForm
       }) => {
         const isAdmin = currentUser?.isAdmin()
-        const ownerOrgSearchQuery = { status: Model.STATUS.ACTIVE }
-        const hostOrgSearchQuery = { status: Model.STATUS.ACTIVE }
-        const adminOrgSearchQuery = { status: Model.STATUS.ACTIVE }
+        const adminOrgSearchQuery = {}
         // Superusers can select parent organizations among the ones their position is administrating
         if (!isAdmin) {
           const orgsAdministratedUuids =
@@ -120,8 +118,7 @@ const EventSeriesForm = ({
         )
         const organizationFilters = {
           allOrganizations: {
-            label: "All organizations",
-            queryVars: { status: Model.STATUS.ACTIVE }
+            label: "All organizations"
           }
         }
 
@@ -200,7 +197,6 @@ const EventSeriesForm = ({
                       filterDefs={organizationFilters}
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
-                      queryParams={ownerOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
                     />
@@ -228,7 +224,6 @@ const EventSeriesForm = ({
                       filterDefs={organizationFilters}
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
-                      queryParams={hostOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
                     />

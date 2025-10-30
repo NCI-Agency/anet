@@ -1,7 +1,6 @@
 import { gql } from "@apollo/client"
 import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
-import utils from "utils"
 import * as yup from "yup"
 
 export default class EventSeries extends Model {
@@ -124,9 +123,5 @@ export default class EventSeries extends Model {
 
   filterClientSideFields(...additionalFields) {
     return EventSeries.filterClientSideFields(this, ...additionalFields)
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
   }
 }

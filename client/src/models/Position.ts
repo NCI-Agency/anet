@@ -7,7 +7,6 @@ import Model, {
 import pluralize from "pluralize"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
-import utils from "utils"
 import * as yup from "yup"
 
 export class PositionRole {
@@ -196,10 +195,6 @@ export default class Position extends Model {
     ${GRAPHQL_NOTES_FIELDS}
   `
 
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
   static humanNameOfType(type) {
     if (type === Position.TYPE.REGULAR) {
       return Settings.fields.regular.position.type
@@ -251,7 +246,7 @@ export default class Position extends Model {
   }
 
   static isActive(pos) {
-    return pos.status === Position.STATUS.ACTIVE
+    return pos.status === Model.STATUS.ACTIVE
   }
 
   toString() {

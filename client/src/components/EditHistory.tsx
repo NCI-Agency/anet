@@ -6,7 +6,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -620,25 +620,19 @@ function giveEachItemUuid(history) {
 
 function getSingleSelectParameters(historyEntityType) {
   if (historyEntityType === "person") {
-    const personSearchQuery = {
-      status: Model.STATUS.ACTIVE,
-      pendingVerification: false
-    }
-
     const personFilters = {
       allPersons: {
         label: "All",
-        queryVars: personSearchQuery
+        queryVars: {
+          pendingVerification: false
+        }
       }
     }
     return { ...PERSON_SINGLE_SELECT_PARAMETERS, filterDefs: personFilters }
   } else if (historyEntityType === "position") {
     const positionsFilters = {
       allPositions: {
-        label: "All",
-        queryVars: {
-          status: Position.STATUS.ACTIVE
-        }
+        label: "All"
       }
     }
     return {

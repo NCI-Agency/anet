@@ -5,7 +5,6 @@ import AppContext from "components/AppContext"
 import EmailAddressList from "components/EmailAddressList"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
 import { Field, Form } from "formik"
 import { Person } from "models"
 import React, { useContext } from "react"
@@ -55,7 +54,6 @@ export const EmailModal = ({
     allPeople: {
       label: "All people",
       queryVars: {
-        status: Model.STATUS.ACTIVE,
         emailNetwork: EMAIL_NETWORK
       }
     }

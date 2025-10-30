@@ -79,11 +79,9 @@ const LOCATION_TYPES_REGULARUSER =
 
 const locationFilters = {
   allLocations: {
-    label: "All locations",
-    queryVars: {}
+    label: "All locations"
   }
 }
-const locationSearchQuery = { status: Model.STATUS.ACTIVE }
 
 interface LocationFormProps {
   initialValues: any
@@ -359,7 +357,6 @@ const LocationForm = ({
                       overlayRenderRow={LocationOverlayRow}
                       filterDefs={locationFilters}
                       objectType={Location}
-                      queryParams={locationSearchQuery}
                       fields={Location.autocompleteQuery}
                       addon={LOCATIONS_ICON}
                     />

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react"
 import { Form } from "react-bootstrap"
 
 interface CheckboxProps {
+  id?: string
   checked?: boolean
   disabled?: boolean
   onChange?: (...args: unknown[]) => unknown
@@ -9,6 +10,7 @@ interface CheckboxProps {
 }
 
 const Checkbox = ({
+  id,
   checked = false,
   disabled,
   onChange,
@@ -24,7 +26,7 @@ const Checkbox = ({
   }, [checked])
 
   return (
-    <Form.Check className="form-check">
+    <Form.Check id={id} className="form-check">
       <Form.Check.Input
         className="checkbox"
         type="checkbox"

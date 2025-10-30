@@ -7,7 +7,7 @@ import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/Advanc
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -154,10 +154,7 @@ const MartImportedReportTable = ({
 
   const peopleFilters = {
     allPeople: {
-      label: "All people",
-      queryVars: {
-        status: Model.STATUS.ACTIVE
-      }
+      label: "All people"
     }
   }
 

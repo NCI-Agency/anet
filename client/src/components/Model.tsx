@@ -715,6 +715,14 @@ export default class Model {
       : this.constructor.pathForNew(query)
   }
 
+  static humanNameOfStatus(status) {
+    return utils.sentenceCase(status)
+  }
+
+  humanNameOfStatus() {
+    return Model.humanNameOfStatus(this.status)
+  }
+
   toString() {
     return this.name || this.uuid
   }

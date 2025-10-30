@@ -59,7 +59,6 @@ const AuthorizationGroupForm = ({
     allSuperusers: {
       label: "All superusers",
       queryVars: {
-        status: Model.STATUS.ACTIVE,
         type: [Position.TYPE.SUPERUSER],
         matchPersonName: true
       }

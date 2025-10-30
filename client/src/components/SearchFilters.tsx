@@ -167,24 +167,15 @@ export const searchFilters = function (includeAdminFilters) {
   const pendingApprovalOfWidgetFilters = authorWidgetFilters
   const authorPositionWidgetFilters = {
     all: {
-      label: "All",
-      queryVars: {}
+      label: "All"
     }
   }
   const attendeePositionWidgetFilters = {
     all: {
-      label: "All",
-      queryVars: {}
+      label: "All"
     }
   }
   const countryWidgetFilters = {
-    activeCountries: {
-      label: "Active countries",
-      queryVars: {
-        type: Location.LOCATION_TYPES.COUNTRY,
-        status: Model.STATUS.ACTIVE
-      }
-    },
     allCountries: {
       label: "All countries",
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
@@ -203,8 +194,7 @@ export const searchFilters = function (includeAdminFilters) {
 
   const eventSeriesFilters = {
     all: {
-      label: "All",
-      queryVars: {}
+      label: "All"
     }
   }
 

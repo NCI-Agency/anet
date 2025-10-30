@@ -88,24 +88,19 @@ const TaskForm = ({
 
   const taskedOrganizationsFilters = {
     allOrganizations: {
-      label: "All organizations",
-      queryVars: {
-        status: Model.STATUS.ACTIVE
-      }
+      label: "All organizations"
     }
   }
 
   const tasksFilters = {
     allObjectives: {
-      label: `All ${Settings.fields.task.longLabel}`,
-      queryVars: {}
+      label: `All ${Settings.fields.task.longLabel}`
     }
   }
   const positionsFilters = {
     allPositions: {
-      label: "All positions",
+      label: "All superuser positions",
       queryVars: {
-        status: Model.STATUS.ACTIVE,
         type: [Position.TYPE.SUPERUSER],
         matchPersonName: true
       }
@@ -159,7 +154,7 @@ const TaskForm = ({
         const isResponsibleForTask = edit
           ? currentUser?.isResponsibleForTask(values)
           : isResponsibleForParentTask
-        const taskSearchQuery = { status: Model.STATUS.ACTIVE }
+        const taskSearchQuery = {}
         // Superusers can select parent organizations among the ones their position is administrating
         if (!isAdmin) {
           const responsibleTasksUuids =

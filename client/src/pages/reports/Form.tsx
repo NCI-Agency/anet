@@ -411,18 +411,23 @@ const ReportForm = ({
           currentUser.position && currentUser.position.organization
 
         const locationFilters = Location.getReportLocationFilters()
+        const personSearchQuery = {
+          matchPositionName: true,
+          pendingVerification: false
+        }
         const reportPeopleFilters = {
           all: {
             label: "All",
-            queryVars: { matchPositionName: true, pendingVerification: false }
+            queryVars: {
+              ...personSearchQuery
+            }
           }
         }
         if (currentOrg) {
           reportPeopleFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
-              matchPositionName: true,
-              pendingVerification: false,
+              ...personSearchQuery,
               orgUuid: currentOrg.uuid
             }
           }
@@ -453,13 +458,14 @@ const ReportForm = ({
         })
 
         const tasksFilters = {}
+        const taskSearchQuery = { selectable: true }
 
         if (values.event?.uuid) {
           tasksFilters.assignedToEvent = {
             label: `Assigned to event ${values.event.name}`,
             queryVars: {
-              eventUuid: values.event.uuid,
-              selectable: true
+              ...taskSearchQuery,
+              eventUuid: values.event.uuid
             }
           }
         }
@@ -468,9 +474,9 @@ const ReportForm = ({
           tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: currentOrg.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -487,16 +493,19 @@ const ReportForm = ({
           tasksFilters.assignedToReportOrg = {
             label: `Assigned to ${primaryAdvisor.position.organization.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
 
         tasksFilters.allUnassignedTasks = {
           label: `All unassigned ${tasksLabel}`,
-          queryVars: { selectable: true, isAssigned: false }
+          queryVars: {
+            ...taskSearchQuery,
+            isAssigned: false
+          }
         }
 
         const eventFilters = Event.getReportEventFilters()
@@ -504,7 +513,9 @@ const ReportForm = ({
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
-            queryVars: { selectable: true }
+            queryVars: {
+              ...taskSearchQuery
+            }
           }
         }
 
@@ -934,10 +945,6 @@ const ReportForm = ({
                       }
                       filterDefs={reportPeopleFilters}
                       objectType={Person}
-                      queryParams={{
-                        status: Model.STATUS.ACTIVE,
-                        pendingVerification: false
-                      }}
                       fields={reportPeopleAutocompleteQuery}
                       addon={PEOPLE_ICON}
                     />
@@ -1004,7 +1011,6 @@ const ReportForm = ({
                         restrictSelectableItems
                         filterDefs={tasksFilters}
                         objectType={Task}
-                        queryParams={{ status: Model.STATUS.ACTIVE }}
                         fields={taskFields}
                         addon={TASKS_ICON}
                         pageSize={0}

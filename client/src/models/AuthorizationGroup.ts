@@ -31,10 +31,6 @@ export default class AuthorizationGroup extends Model {
 
   static autocompleteQuery = "uuid name description"
 
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
   constructor(props) {
     super(Model.fillObject(props, AuthorizationGroup.yupSchema))
   }
@@ -50,10 +46,6 @@ export default class AuthorizationGroup extends Model {
     let url = ["", "communities", "new"].join("/")
     url += utils.formatQueryString(query)
     return url
-  }
-
-  humanNameOfStatus() {
-    return AuthorizationGroup.humanNameOfStatus(this.status)
   }
 
   iconUrl() {

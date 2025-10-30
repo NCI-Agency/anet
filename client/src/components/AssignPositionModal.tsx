@@ -5,7 +5,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Position } from "models"
@@ -192,7 +192,6 @@ const AssignPositionModal = ({
   const newPosition = position ? new Position(position) : new Position()
 
   const positionSearchQuery = {
-    status: Model.STATUS.ACTIVE,
     type: [Position.TYPE.REGULAR]
   }
   if (currentUser.isAdmin()) {

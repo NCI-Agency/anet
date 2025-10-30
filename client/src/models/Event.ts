@@ -220,10 +220,6 @@ export default class Event extends Model {
       : Settings.dateFormats.forms.displayLong.date
   }
 
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
   static humanNameOfType(type) {
     return utils.sentenceCase(type)
   }

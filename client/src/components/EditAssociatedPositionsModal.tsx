@@ -6,7 +6,7 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
@@ -87,7 +87,6 @@ const EditAssociatedPositionsModal = ({
   const [error, setError] = useState(null)
 
   const positionSearchQuery = {
-    status: Model.STATUS.ACTIVE,
     matchPersonName: true
   }
   if (currentUser.isAdmin() === false) {

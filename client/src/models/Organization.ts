@@ -108,10 +108,6 @@ export default class Organization extends Model {
     `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
     ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
 
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
   static isTaskEnabled(shortName) {
     return !Settings.tasking_ORGs || Settings.tasking_ORGs.includes(shortName)
   }

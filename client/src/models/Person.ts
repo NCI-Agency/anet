@@ -259,14 +259,6 @@ export default class Person extends Model {
     super(Model.fillObject(props, Person.yupSchema))
   }
 
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
-  humanNameOfStatus() {
-    return Person.humanNameOfStatus(this.status)
-  }
-
   static isPendingVerification(person) {
     return person.pendingVerification
   }

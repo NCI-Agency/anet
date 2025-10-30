@@ -222,7 +222,7 @@ const PositionForm = ({
         const positionRoleButtons =
           isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
         const positionSuperuserTypeButtons = superUserTypeButtons
-        const orgSearchQuery = { status: Model.STATUS.ACTIVE }
+        const orgSearchQuery = {}
         if (isSuperuser) {
           orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
@@ -257,8 +257,7 @@ const PositionForm = ({
         )
         const organizationFilters = {
           allOrganizations: {
-            label: "All organizations",
-            queryVars: {}
+            label: "All organizations"
           }
         }
         const locationFilters = Location.getPositionLocationFilters()

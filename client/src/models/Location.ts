@@ -190,11 +190,7 @@ export default class Location extends Model {
   }
 
   static isActive(loc) {
-    return loc.status === Location.STATUS.ACTIVE
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
+    return loc.status === Model.STATUS.ACTIVE
   }
 
   static humanNameOfType(type) {
