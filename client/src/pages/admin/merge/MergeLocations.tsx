@@ -34,8 +34,8 @@ import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
-  getLeafletMap,
   getOtherSide,
+  LeafletMap,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -228,11 +228,11 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
                         displayedCoordinate: mergedLocation.displayedCoordinate
                       }}
                     />
-                    {getLeafletMap(
-                      "merged-location-map",
-                      mergedLocation,
-                      hideWhenEmpty
-                    )}
+                    <LeafletMap
+                      mapId="merged-location-map"
+                      location={mergedLocation}
+                      hideWhenEmpty={hideWhenEmpty}
+                    />
                   </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -549,11 +549,11 @@ const LocationColumn = ({
                     displayedCoordinate: location.displayedCoordinate
                   }}
                 />
-                {getLeafletMap(
-                  `merge-location-map-${align}`,
-                  location,
-                  hideWhenEmpty
-                )}
+                <LeafletMap
+                  mapId={`merge-location-map-${align}`}
+                  location={location}
+                  hideWhenEmpty={hideWhenEmpty}
+                />
               </>
             }
             align={align}
