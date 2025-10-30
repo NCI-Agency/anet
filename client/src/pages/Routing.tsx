@@ -70,6 +70,7 @@ import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import Settings from "settings"
+import EventsList from "./events/List"
 
 const Routing = () => {
   const { currentUser } = useContext(AppContext)
@@ -193,6 +194,7 @@ const Routing = () => {
         </Route>
       )}
       <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />
+      <Route path={PAGE_URLS.EVENTS} element={<EventsList />} />
       <Route path={PAGE_URLS.INSIGHTS}>
         <Route path=":insight" element={<InsightsShow />} />
       </Route>

@@ -27,6 +27,7 @@ import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
 import EventSearchResults from "components/search/EventSearchResults"
+import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
 import LocationSearchResults from "components/search/LocationSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
 import PeopleSearchResults from "components/search/PeopleSearchResults"
@@ -62,6 +63,7 @@ import { toast } from "react-toastify"
 import COMMUNITIES_ICON from "resources/communities.png"
 import DOWNLOAD_ICON from "resources/download.png"
 import EVENTS_ICON from "resources/events.png"
+import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -145,6 +147,7 @@ const Search = ({
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
   const [numAttachments, setNumAttachments] = useState(null)
   const [numEvents, setNumEvents] = useState(null)
+  const [numEventSeries, setNumEventSeries] = useState(null)
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
   const {
     loading,
@@ -239,6 +242,7 @@ const Search = ({
       setNumAttachments(0)
       setNumAuthorizationGroups(0)
       setNumEvents(0)
+      setNumEventSeries(0)
       setNumLocations(0)
       setNumOrganizations(0)
       setNumPeople(0)
@@ -255,6 +259,7 @@ const Search = ({
     setNumAttachments,
     setNumAuthorizationGroups,
     setNumEvents,
+    setNumEventSeries,
     setNumLocations,
     setNumOrganizations,
     setNumPeople,
@@ -282,6 +287,8 @@ const Search = ({
     queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && numAttachments > 0
   const hasEventsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && numEvents > 0
+  const hasEventSeriesResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.EVENT_SERIES) && numEventSeries > 0
 
   const resultObjectTypes = useMemo(() => {
     const types = []
@@ -308,6 +315,9 @@ const Search = ({
     }
     if (hasEventsResults) {
       types.push(SEARCH_OBJECT_TYPES.EVENTS)
+    }
+    if (hasEventSeriesResults) {
+      types.push(SEARCH_OBJECT_TYPES.EVENT_SERIES)
     }
     return types
   }, [
@@ -445,6 +455,15 @@ const Search = ({
                 {hasEventsResults && (
                   <Badge pill bg="secondary" className="float-end">
                     {numEvents}
+                  </Badge>
+                )}
+              </AnchorNavItem>
+              <AnchorNavItem to="eventSeries" disabled={!hasEventSeriesResults}>
+                <img src={EVENT_SERIES_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.EVENT_SERIES]}{" "}
+                {hasEventSeriesResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numEventSeries}
                   </Badge>
                 )}
               </AnchorNavItem>
@@ -761,6 +780,30 @@ const Search = ({
             queryParams={eventSearchQueryParams}
             setTotalCount={setNumEvents}
             paginationKey="SEARCH_events"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.EVENT_SERIES) && !withEmail && (
+        <Fieldset
+          id="eventSeries"
+          title={
+            <>
+              Event Series
+              {hasEventSeriesResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numEventSeries}
+                </Badge>
+              )}
+            </>
+          }
+        >
+          <EventSeriesSearchResults
+            pageDispatchers={pageDispatchers}
+            queryParams={eventSearchQueryParams}
+            setTotalCount={setNumEventSeries}
+            paginationKey="SEARCH_eventSeries"
             pagination={pagination}
             setPagination={setPagination}
           />
