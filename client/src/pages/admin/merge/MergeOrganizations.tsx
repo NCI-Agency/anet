@@ -399,6 +399,10 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                   <EmailAddressTable
                     label={Settings.fields.organization.emailAddresses.label}
                     emailAddresses={mergedOrganization.emailAddresses}
+                    mergeMode
+                    align={ALIGN_OPTIONS.CENTER}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -780,6 +784,10 @@ const OrganizationColumn = ({
               <EmailAddressTable
                 label={Settings.fields.organization.emailAddresses.label}
                 emailAddresses={organization.emailAddresses}
+                mergeMode
+                align={align}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
             }
             align={align}
