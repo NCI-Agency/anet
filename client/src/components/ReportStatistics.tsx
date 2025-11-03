@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AggregationWidgetContainer, {
@@ -76,27 +80,21 @@ const REPORT_FIELDS_FOR_STATISTICS = {
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        intent
-        engagementDate
+        ${gqlEntityFieldsMap.Report}
+        atmosphere
+        engagementStatus
+        customFields
         location {
-          uuid
-          name
+          ${gqlEntityFieldsMap.Location}
           lat
           lng
+          type
         }
-        atmosphere
-        state
-        engagementStatus
         tasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
-        customFields
       }
     }
   }

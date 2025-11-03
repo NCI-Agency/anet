@@ -1,3 +1,4 @@
+import { gqlPaginationFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -20,9 +21,7 @@ import utils from "utils"
 const GQL_GET_PENDINGEMAILS = gql`
   query ($pageNum: Int!, $pageSize: Int!) {
     pendingEmails(pageNum: $pageNum, pageSize: $pageSize) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         id
         toAddresses

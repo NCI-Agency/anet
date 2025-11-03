@@ -1,3 +1,4 @@
+import { gqlAdminSettingsFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { useEffect, useMemo, useRef } from "react"
@@ -7,10 +8,7 @@ import Version from "version"
 const GQL_POLLING_REQUEST = gql`
   query {
     projectVersion
-    adminSettings {
-      key
-      value
-    }
+    ${gqlAdminSettingsFields}
   }
 `
 

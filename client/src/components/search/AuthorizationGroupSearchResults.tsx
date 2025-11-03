@@ -1,9 +1,13 @@
+import {
+  gqlAuthorizationGroupMembersWithEmailNetworkFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import {
   CommonSearchResults,
-  GenericSearchResultsWithEmailProps,
-  GQL_EMAIL_ADDRESSES
+  GenericSearchResultsWithEmailProps
 } from "components/search/CommonSearchResults"
 import React from "react"
 
@@ -13,39 +17,12 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
     $emailNetwork: String
   ) {
     authorizationGroupList(query: $authorizationGroupQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        description
-        status
+        ${gqlEntityFieldsMap.AuthorizationGroup}
         distributionList
         forSensitiveInformation
-        authorizationGroupRelatedObjects {
-          relatedObjectType
-          relatedObjectUuid
-          relatedObject {
-            ... on Organization {
-              uuid
-              shortName
-              ${GQL_EMAIL_ADDRESSES}
-            }
-            ... on Person {
-              uuid
-              name
-              rank
-              ${GQL_EMAIL_ADDRESSES}
-            }
-            ... on Position {
-              uuid
-              type
-              name
-              ${GQL_EMAIL_ADDRESSES}
-            }
-          }
-        }
+        ${gqlAuthorizationGroupMembersWithEmailNetworkFields}
       }
     }
   }

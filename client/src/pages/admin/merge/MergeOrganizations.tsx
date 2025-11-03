@@ -1,3 +1,12 @@
+import {
+  gqlAllOrganizationFields,
+  gqlApprovalStepFields,
+  gqlAssessmentsFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Callout } from "@blueprintjs/core"
 import styled from "@emotion/styled"
@@ -20,9 +29,6 @@ import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -57,104 +63,44 @@ import Settings from "settings"
 import utils from "utils"
 
 const ALL_ORG_FIELDS = `
-  uuid
-  status
-  shortName
-  longName
-  profile
-  identificationCode
-  ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-  app6context
-  app6standardIdentity
-  app6symbolSet
-  app6hq
-  app6amplifier
-  app6entity
-  app6entityType
-  app6entitySubtype
-  app6sectorOneModifier
-  app6sectorTwoModifier
+  ${gqlAllOrganizationFields}
+  ${gqlEmailAddressesFields}
+  ${gqlEntityAvatarFields}
   parentOrg {
-    uuid
-    shortName
-    longName
-    identificationCode
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Organization}
   }
   ascendantOrgs {
-    uuid
+    ${gqlEntityFieldsMap.Organization}
     app6context
     app6standardIdentity
     app6symbolSet
     parentOrg {
-      uuid
+      ${gqlEntityFieldsMap.Organization}
     }
   }
   childrenOrgs {
-    uuid
-    shortName
-    longName
-    identificationCode
+    ${gqlEntityFieldsMap.Organization}
   }
   location {
-    uuid
-    name
+    ${gqlEntityFieldsMap.Location}
     lat
     lng
     type
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-  }
-  emailAddresses {
-    network
-    address
   }
   planningApprovalSteps {
-    uuid
-    name
-    approvers {
-      uuid
-      name
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-    }
+    ${gqlApprovalStepFields}
   }
   approvalSteps {
-    uuid
-    name
-    approvers {
-      uuid
-      name
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-    }
+    ${gqlApprovalStepFields}
   }
   administratingPositions {
-    uuid
-    name
-    code
-    type
-    role
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Position}
     person {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Person}
     }
   }
-  customFields
-  ${GRAPHQL_ASSESSMENTS_FIELDS}
-  ${GRAPHQL_NOTES_FIELDS}
+  ${gqlAssessmentsFields}
+  ${gqlNotesFields}
 `
 
 const GQL_GET_ORGANIZATION = gql`

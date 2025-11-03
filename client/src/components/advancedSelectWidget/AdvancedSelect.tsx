@@ -1,3 +1,4 @@
+import { gqlPaginationFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import {
   Button as BlueprintButton,
@@ -213,9 +214,7 @@ const AdvancedSelect = ({
         gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
-              pageNum
-              pageSize
-              totalCount
+              ${gqlPaginationFields}
               list {
                 ${fields}
               }

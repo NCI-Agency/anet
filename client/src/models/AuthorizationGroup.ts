@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import Model from "components/Model"
 import COMMUNITIES_ICON from "resources/communities.png"
 import utils from "utils"
@@ -29,7 +30,7 @@ export default class AuthorizationGroup extends Model {
     authorizationGroupRelatedObjects: yup.array().nullable().default([])
   })
 
-  static autocompleteQuery = "uuid name description"
+  static autocompleteQuery = gqlEntityFieldsMap.AuthorizationGroup
 
   constructor(props) {
     super(Model.fillObject(props, AuthorizationGroup.yupSchema))

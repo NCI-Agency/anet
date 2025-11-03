@@ -1,3 +1,7 @@
+import {
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import {
   Callout,
@@ -20,14 +24,11 @@ import { Button } from "react-bootstrap"
 const GET_PERSON_WITH_REPORTS = gql`
   query ($uuid: String!, $attendedReportsQuery: ReportSearchQueryInput!) {
     person(uuid: $uuid) {
-      uuid
-      name
+      ${gqlMinimalPersonFields}
       attendedReports(query: $attendedReportsQuery) {
         list {
-          uuid
-          engagementDate
+          ${gqlMinimalReportFields}
           duration
-          state
         }
       }
     }

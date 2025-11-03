@@ -1,3 +1,4 @@
+import { gqlPreferenceFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -25,17 +26,12 @@ const GQL_GET_PREFERENCES = gql`
   query ($preferenceQuery: PreferenceSearchQueryInput) {
     preferenceList(query: $preferenceQuery) {
       list {
-        uuid
-        name
-        type
-        category
-        description
-        defaultValue
-        allowedValues
+        ${gqlPreferenceFields}
       }
     }
   }
 `
+
 interface UserPreference {
   preference: { uuid: string }
   value: string

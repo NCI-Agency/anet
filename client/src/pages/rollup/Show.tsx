@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -51,31 +52,17 @@ const GQL_GET_REPORT_LIST = gql`
     reportList(query: $reportQuery) {
       totalCount
       list {
-        uuid
-        state
-        engagementDate
+        ${gqlEntityFieldsMap.Report}
         advisorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlEntityFieldsMap.Organization}
           ascendantOrgs {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlEntityFieldsMap.Organization}
           }
         }
         interlocutorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlEntityFieldsMap.Organization}
           ascendantOrgs {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlEntityFieldsMap.Organization}
           }
         }
       }

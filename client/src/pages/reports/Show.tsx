@@ -1,3 +1,16 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllReportFields,
+  gqlApprovalStepFields,
+  gqlAssessmentsFields,
+  gqlAuthorizedMembersFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields,
+  gqlReportCommentsFields,
+  gqlReportCommunitiesFields,
+  gqlReportSensitiveInformationFields,
+  gqlReportWorkflowFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
@@ -20,12 +33,7 @@ import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import ListItems from "components/ListItems"
 import Messages from "components/Messages"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS
-} from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
@@ -47,7 +55,7 @@ import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
-import { Attachment, Comment, Person, Position, Report, Task } from "models"
+import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useState } from "react"
@@ -62,251 +70,95 @@ import ReportPeople from "./ReportPeople"
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
     report(uuid: $uuid) {
-      uuid
-      intent
-      classification
-      engagementDate
-      duration
-      atmosphere
-      atmosphereDetails
-      keyOutcomes
-      reportText
-      nextSteps
-      cancelledReason
-      releasedAt
-      state
-      isSubscribed
-      updatedAt
+      ${gqlAllReportFields}
       location {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        type
       }
       authors {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
         position {
-          uuid
+          ${gqlEntityFieldsMap.Position}
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
             approvalSteps {
-              uuid
-              name
-              approvers {
-                uuid
-                name
-                person {
-                  uuid
-                  name
-                  rank
-                  ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-                }
-              }
+              ${gqlApprovalStepFields}
             }
           }
         }
       }
       reportPeople {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        status
-        author
-        primary
-        attendee
-        interlocutor
-        user
-        endOfTourDate
+        ${gqlEntityFieldsMap.ReportPerson}
         position {
-          uuid
-          name
-          type
-          role
-          code
-          status
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
           location {
-            uuid
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Location}
           }
         }
         previousPositions {
           startTime
           endTime
           position {
-            uuid
-            name
-            code
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Position}
             organization {
-              uuid
-              shortName
-              longName
-              identificationCode
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+              ${gqlEntityFieldsMap.Organization}
             }
             location {
-              uuid
-              name
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+              ${gqlEntityFieldsMap.Location}
             }
           }
         }
       }
       primaryAdvisor {
-        uuid
+        ${gqlEntityFieldsMap.Person}
       }
       primaryInterlocutor {
-        uuid
+        ${gqlEntityFieldsMap.Person}
       }
       tasks {
-        uuid
-        shortName
-        longName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
         taskedOrganizations {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        customFields
-      }
-      reportCommunities {
-        uuid
-        name
-        description
-      }
-      comments {
-        uuid
-        text
-        createdAt
-        updatedAt
-        author {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
       }
+      ${gqlReportCommunitiesFields}
+      ${gqlReportCommentsFields}
       interlocutorOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       advisorOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
-      workflow {
-        type
-        createdAt
-        step {
-          uuid
-          name
-          approvers {
-            uuid
-            name
-            person {
-              uuid
-              name
-              rank
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-          }
-        }
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
+      ${gqlReportWorkflowFields}
       approvalStep {
-        uuid
-        name
-        approvers {
-          uuid
-        }
-        nextStepUuid
+        ${gqlApprovalStepFields}
       }
-      reportSensitiveInformation {
-        uuid
-        text
-      }
-      authorizedMembers {
-        relatedObjectType
-        relatedObjectUuid
-        relatedObject {
-          ... on AuthorizationGroup {
-            uuid
-            name
-          }
-          ... on Organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Position {
-            uuid
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-      }
+      ${gqlReportSensitiveInformationFields}
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
       event {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Event}
         startDate
         endDate
       }
-      customFields
-      ${GRAPHQL_ASSESSMENTS_FIELDS}
-      ${GRAPHQL_NOTES_FIELDS}
+      ${gqlAuthorizedMembersFields}
+      ${gqlAssessmentsFields}
+      ${gqlNotesFields}
     }
   }
 `

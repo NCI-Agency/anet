@@ -1,3 +1,9 @@
+import {
+  gqlAllOrganizationFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import App6SymbolPreview from "components/App6SymbolPreview"
@@ -6,7 +12,7 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization } from "models"
@@ -22,65 +28,38 @@ import utils from "utils"
 
 const GQL_LOCATION_FIELDS = `
   fragment locationFields on Location {
-    uuid
-    name
+    ${gqlEntityFieldsMap.Location}
+    lat
+    lng
     type
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_ORGANIZATION_FIELDS = `
   fragment organizationFields on Organization {
-    uuid
-    shortName
-    longName
-    identificationCode
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Organization}
+    app6context
+    app6standardIdentity
+    app6symbolSet
   }
 `
 const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
-    uuid
-    name
-    rank
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    status
+    ${gqlEntityFieldsMap.Person}
   }
 `
 const GQL_POSITION_FIELDS = `
   fragment positionFields on Position {
-    uuid
-    name
-    code
-    status
-    type
-    role
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Position}
   }
 `
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
     organization(uuid: $uuid) {
-      ...organizationFields
-      status
-      profile
-      app6context
-      app6standardIdentity
-      app6symbolSet
-      app6hq
-      app6amplifier
-      app6entity
-      app6entityType
-      app6entitySubtype
-      app6sectorOneModifier
-      app6sectorTwoModifier
-      emailAddresses {
-        network
-        address
-      }
+      ${gqlAllOrganizationFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       location {
         ...locationFields
-        lat
-        lng
       }
       parentOrg {
         ...organizationFields
@@ -90,9 +69,6 @@ const GQL_GET_ORGANIZATION = gql`
       }
       ascendantOrgs(query: { status: ACTIVE }) {
         ...organizationFields
-        app6context
-        app6standardIdentity
-        app6symbolSet
         parentOrg {
           uuid
         }

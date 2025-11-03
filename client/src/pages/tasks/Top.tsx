@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -16,31 +20,21 @@ import Settings from "settings"
 const GQL_GET_TOP_LEVEL_TASKS = gql`
   query {
     taskList(query: { parentTaskUuid: "-1", pageSize: 0 }) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        shortName
-        longName
-        status
+        ${gqlEntityFieldsMap.Task}
         selectable
         parentTask {
-          uuid
-          shortName
-          longName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
         descendantTasks {
-          uuid
-          shortName
-          longName
-          status
+          ${gqlEntityFieldsMap.Task}
           selectable
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
       }

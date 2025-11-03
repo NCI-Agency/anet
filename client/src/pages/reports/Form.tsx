@@ -1,3 +1,9 @@
+import {
+  gqlEntityFieldsMap,
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields,
+  gqlReportSensitiveInformationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -35,8 +41,7 @@ import { LeafletWithSelection } from "components/Leaflet"
 import { MessagesWithConflict } from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
-  EXCLUDED_ASSESSMENT_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS
+  EXCLUDED_ASSESSMENT_FIELDS
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
@@ -90,21 +95,12 @@ const reportPeopleAutocompleteQuery = `
     startTime
     endTime
     position {
-      uuid
-      name
-      code
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Position}
       organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       location {
-        uuid
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Location}
       }
     }
   }
@@ -148,16 +144,12 @@ const GQL_GET_RECENTS = gql`
 const GQL_CREATE_REPORT = gql`
   mutation ($report: ReportInput!) {
     createReport(report: $report) {
-      uuid
+      ${gqlMinimalReportFields}
       updatedAt
-      state
       authors {
-        uuid
+        ${gqlMinimalPersonFields}
       }
-      reportSensitiveInformation {
-        uuid
-        text
-      }
+      ${gqlReportSensitiveInformationFields}
     }
   }
 `
@@ -168,16 +160,12 @@ const GQL_UPDATE_REPORT = gql`
       sendEditEmail: $sendEditEmail
       force: $force
     ) {
-      uuid
+      ${gqlMinimalReportFields}
       updatedAt
-      state
       authors {
-        uuid
+        ${gqlMinimalPersonFields}
       }
-      reportSensitiveInformation {
-        uuid
-        text
-      }
+      ${gqlReportSensitiveInformationFields}
     }
   }
 `

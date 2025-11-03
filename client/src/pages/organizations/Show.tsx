@@ -1,3 +1,14 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllOrganizationFields,
+  gqlApprovalStepFields,
+  gqlAssessmentsFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -19,12 +30,7 @@ import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS
-} from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   jumpToTop,
@@ -39,7 +45,7 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import _isEmpty from "lodash/isEmpty"
-import { Attachment, Location, Organization, Report } from "models"
+import { Location, Organization, Report } from "models"
 import { PositionRole } from "models/Position"
 import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
@@ -66,67 +72,40 @@ import OrganizationTasks from "./OrganizationTasks"
 
 const GQL_LOCATION_FIELDS = `
   fragment locationFields on Location {
-    uuid
-    name
+    ${gqlEntityFieldsMap.Location}
+    lat
+    lng
     type
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_ORGANIZATION_FIELDS = `
   fragment organizationFields on Organization {
-    uuid
-    shortName
-    longName
-    identificationCode
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Organization}
+    app6context
+    app6standardIdentity
+    app6symbolSet
   }
 `
 const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
-    uuid
-    name
-    rank
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    status
+    ${gqlEntityFieldsMap.Person}
   }
 `
 const GQL_POSITION_FIELDS = `
   fragment positionFields on Position {
-    uuid
-    name
-    code
-    status
+    ${gqlEntityFieldsMap.Position}
     type
     role
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
     organization(uuid: $uuid) {
-      ...organizationFields
-      status
-      isSubscribed
-      profile
-      app6context
-      app6standardIdentity
-      app6symbolSet
-      app6hq
-      app6amplifier
-      app6entity
-      app6entityType
-      app6entitySubtype
-      app6sectorOneModifier
-      app6sectorTwoModifier
-      updatedAt
-      emailAddresses {
-        network
-        address
-      }
+      ${gqlAllOrganizationFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       location {
         ...locationFields
-        lat
-        lng
       }
       parentOrg {
         ...organizationFields
@@ -136,9 +115,6 @@ const GQL_GET_ORGANIZATION = gql`
       }
       ascendantOrgs(query: { status: ACTIVE }) {
         ...organizationFields
-        app6context
-        app6standardIdentity
-        app6symbolSet
         parentOrg {
           uuid
         }
@@ -168,94 +144,57 @@ const GQL_GET_ORGANIZATION = gql`
         }
       }
       planningApprovalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            ...personFields
-          }
-        }
+        ${gqlApprovalStepFields}
       }
       approvalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            ...personFields
-          }
-        }
+        ${gqlApprovalStepFields}
       }
       tasks {
-        uuid
-        shortName
-        longName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
       }
       authorizationGroups {
-        uuid
-        name
-        description
+        ${gqlEntityFieldsMap.AuthorizationGroup}
       }
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
-      customFields
-      ${GRAPHQL_ASSESSMENTS_FIELDS}
-      ${GRAPHQL_NOTES_FIELDS}
+      ${gqlAssessmentsFields}
+      ${gqlNotesFields}
     }
 
     taskList(query: { taskedOrgUuid: [$uuid], orgRecurseStrategy: ${RECURSE_STRATEGY.CHILDREN}, pageSize: 0 }) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         selectable
-        status
         parentTask {
-          uuid
-          shortName
-          status
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
-          status
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
         descendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           selectable
-          status
           parentTask {
-            uuid
-            shortName
-            status
+            ${gqlEntityFieldsMap.Task}
           }
           ascendantTasks {
-            uuid
-            shortName
-            status
+            ${gqlEntityFieldsMap.Task}
             parentTask {
-              uuid
+              ${gqlEntityFieldsMap.Task}
             }
           }
         }
@@ -263,25 +202,17 @@ const GQL_GET_ORGANIZATION = gql`
     }
 
     eventSeriesList(query: { anyOrgUuid: [$uuid], pageSize: 0 }) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        status
-        description
+        ${gqlEntityFieldsMap.EventSeries}
         ownerOrg {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Organization}
         }
         hostOrg {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Organization}
         }
         adminOrg {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Organization}
         }
       }
     }

@@ -1,3 +1,7 @@
+import {
+  gqlAllAttachmentFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -32,7 +36,7 @@ import {
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
-import { Attachment, Location, Position } from "models"
+import { Location, Position } from "models"
 import { positionTour } from "pages/GuidedTour"
 import React, { useContext, useEffect, useState } from "react"
 import { Badge, Button, Col, Row } from "react-bootstrap"
@@ -47,12 +51,10 @@ const GQL_GET_POSITION = gql`
     position(uuid: $uuid) {
       ${Position.allFieldsQuery}
       authorizationGroups {
-        uuid
-        name
-        description
+        ${gqlEntityFieldsMap.AuthorizationGroup}
       }
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
     }
   }

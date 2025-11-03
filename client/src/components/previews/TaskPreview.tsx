@@ -1,10 +1,15 @@
+import {
+  gqlAllTaskFields,
+  gqlApprovalStepFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Task } from "models"
@@ -17,97 +22,43 @@ import utils from "utils"
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
     task(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      selectable
-      description
-      status
-      plannedCompletion
-      projectedCompletion
+      ${gqlAllTaskFields}
       taskedOrganizations {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       parentTask {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
       ascendantTasks {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
       childrenTasks {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
       }
       responsiblePositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
       planningApprovalSteps {
-        uuid
-        name
-        restrictedApproval
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
+        ${gqlApprovalStepFields}
       }
       approvalSteps {
-        uuid
-        name
-        restrictedApproval
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
+        ${gqlApprovalStepFields}
       }
-      customFields
     }
   }
 `

@@ -1,3 +1,7 @@
+import {
+  gqlMinimalReportFields,
+  gqlMinimalTaskFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
@@ -28,10 +32,9 @@ const GQL_GET_REPORT_LIST = gql`
     reportList(query: $reportQuery) {
       totalCount
       list {
-        uuid
+        ${gqlMinimalReportFields}
         tasks {
-          uuid
-          shortName
+          ${gqlMinimalTaskFields}
         }
       }
     }

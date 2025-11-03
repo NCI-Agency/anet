@@ -1,3 +1,8 @@
+import {
+  gqlAllAuthorizationGroupFields,
+  gqlAuthorizationGroupMembersWithEmailFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -9,7 +14,6 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -27,77 +31,23 @@ import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
-const GQL_EMAIL_ADDRESSES = `
-  emailAddresses {
-    network
-    address
-  }
-`
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String) {
     authorizationGroup(uuid: $uuid) {
-      uuid
-      name
-      description
-      status
-      distributionList
-      forSensitiveInformation
-      isSubscribed
+      ${gqlAllAuthorizationGroupFields}
       administrativePositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
-      authorizationGroupRelatedObjects {
-        relatedObjectType
-        relatedObjectUuid
-        relatedObject {
-          ... on Organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GQL_EMAIL_ADDRESSES}
-          }
-          ... on Person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GQL_EMAIL_ADDRESSES}
-          }
-          ... on Position {
-            uuid
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GQL_EMAIL_ADDRESSES}
-          }
-        }
-      }
+      ${gqlAuthorizationGroupMembersWithEmailFields}
     }
   }
 `

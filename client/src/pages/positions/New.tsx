@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -19,10 +20,7 @@ import PositionForm from "./Form"
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String!) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      identificationCode
+      ${gqlEntityFieldsMap.Organization}
     }
   }
 `

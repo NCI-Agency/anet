@@ -1,7 +1,12 @@
+import {
+  gqlAllPositionFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   yupEmailAddresses
 } from "components/Model"
 import pluralize from "pluralize"
@@ -105,94 +110,62 @@ export default class Position extends Model {
     .concat(Position.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery =
-    `uuid name code type role status ${GRAPHQL_ENTITY_AVATAR_FIELDS} location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
-    ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
-    ` person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
-
-  static allFieldsQuery = `
-    uuid
-    name
-    type
-    superuserType
-    role
-    status
-    isSubscribed
-    updatedAt
-    code
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    description
-    emailAddresses {
-      network
-      address
+  static autocompleteQuery = `
+    ${gqlEntityFieldsMap.Position}
+    location {
+      ${gqlEntityFieldsMap.Location}
     }
     organization {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
     person {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Person}
+    }
+  `
+
+  static allFieldsQuery = `
+    ${gqlAllPositionFields}
+    ${gqlEmailAddressesFields}
+    ${gqlEntityAvatarFields}
+    organization {
+      ${gqlEntityFieldsMap.Organization}
+    }
+    person {
+      ${gqlEntityFieldsMap.Person}
     }
     associatedPositions {
-      uuid
-      name
-      type
-      role
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Position}
       person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
       organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
     }
     previousPeople {
       startTime
       endTime
       person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
         previousPositions {
           startTime
           endTime
           position {
-            uuid
+            ${gqlEntityFieldsMap.Position}
           }
         }
       }
     }
     organizationsAdministrated {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
     location {
-      uuid
-      name
+      ${gqlEntityFieldsMap.Location}
       lat
       lng
       type
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
-    customFields
-    ${GRAPHQL_NOTES_FIELDS}
+    ${gqlNotesFields}
   `
 
   static humanNameOfType(type) {

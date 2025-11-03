@@ -1,10 +1,10 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -21,12 +21,9 @@ const GQL_GET_SUPERUSERS_AND_ADMINS = gql`
     organization(uuid: $uuid) {
       ascendantOrgs(query: { status: ACTIVE }) {
         administratingPositions {
-          uuid
+          ${gqlEntityFieldsMap.Position}
           person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Person}
           }
         }
       }
@@ -34,10 +31,7 @@ const GQL_GET_SUPERUSERS_AND_ADMINS = gql`
 
     personList(query: $personQuery) {
       list {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
     }
   }

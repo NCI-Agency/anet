@@ -1,3 +1,4 @@
+import { gqlAllAttachmentFields } from "constants/GraphQLDefinitions"
 import Model from "components/Model"
 import utils from "utils"
 import * as yup from "yup"
@@ -29,10 +30,7 @@ export default class Attachment extends Model {
     classification: yup.string().nullable().default(null)
   })
 
-  static basicFieldsQuery =
-    "uuid fileName caption description classification mimeType contentLength createdAt updatedAt"
-
-  static autocompleteQuery = Attachment.basicFieldsQuery
+  static autocompleteQuery = gqlAllAttachmentFields
 
   constructor(props) {
     super(Model.fillObject(props, Attachment.yupSchema))

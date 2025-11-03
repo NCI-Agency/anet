@@ -1,12 +1,17 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllOrganizationFields,
+  gqlApprovalStepFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { initInvisibleFields } from "components/CustomFields"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS
-} from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -14,7 +19,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
-import { Attachment, Organization } from "models"
+import { Organization } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -25,124 +30,61 @@ import OrganizationForm from "./Form"
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
     organization(uuid: $uuid) {
-      uuid
-      updatedAt
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      status
-      profile
-      app6context
-      app6standardIdentity
-      app6symbolSet
-      app6hq
-      app6amplifier
-      app6entity
-      app6entityType
-      app6entitySubtype
-      app6sectorOneModifier
-      app6sectorTwoModifier
-      emailAddresses {
-        network
-        address
-      }
+      ${gqlAllOrganizationFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       location {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
         type
       }
       parentOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
+        ${gqlEntityFieldsMap.Organization}
         ascendantOrgs {
-          uuid
+          ${gqlEntityFieldsMap.Organization}
           app6context
           app6standardIdentity
           app6symbolSet
           parentOrg {
-            uuid
-          }
+            ${gqlEntityFieldsMap.Organization}
+        }
         }
       }
       planningApprovalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-      }
-      administratingPositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        location {
-          uuid
-          name
-        }
-        organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
+        ${gqlApprovalStepFields}
       }
       approvalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
+        ${gqlApprovalStepFields}
+      }
+      administratingPositions {
+        ${gqlEntityFieldsMap.Position}
+        location {
+          ${gqlEntityFieldsMap.Location}
+        }
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        person {
+          ${gqlEntityFieldsMap.Person}
         }
       }
       tasks {
-        uuid
-        shortName
-        longName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
       }
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
+      ${gqlNotesFields}
     }
   }
 `

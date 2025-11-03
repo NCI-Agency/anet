@@ -1,3 +1,11 @@
+import {
+  gqlMinimalEventFields,
+  gqlMinimalLocationFields,
+  gqlMinimalOrganizationFields,
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import {
@@ -20,52 +28,37 @@ import { useNavigate } from "react-router-dom"
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
     eventList(query: $eventQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        type
-        name
+        ${gqlMinimalEventFields}
         startDate
         endDate
         location {
-          uuid
-          name
+          ${gqlMinimalLocationFields}
           lat
           lng
+          type
         }
         reports {
-          uuid
-          intent
+          ${gqlMinimalReportFields}
+          duration
           primaryAdvisor {
-            uuid
-            name
+            ${gqlMinimalPersonFields}
           }
           primaryInterlocutor {
-            uuid
-            name
+            ${gqlMinimalPersonFields}
           }
           advisorOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlMinimalOrganizationFields}
           }
           interlocutorOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlMinimalOrganizationFields}
           }
-          engagementDate
-          duration
-          state
           location {
-            uuid
-            name
+            ${gqlMinimalLocationFields}
             lat
             lng
+            type
           }
         }
       }

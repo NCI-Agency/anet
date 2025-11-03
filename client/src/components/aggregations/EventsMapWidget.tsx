@@ -63,10 +63,7 @@ const EventsMapWidget = ({
     return (
       <>
         <LinkTo modelType="Event" model={event} /> @{" "}
-        <LinkTo
-          modelType="Location"
-          model={{ uuid: event?.location?.uuid, name: event?.location?.name }}
-        />
+        <LinkTo modelType="Location" model={event?.location} />
       </>
     )
   }

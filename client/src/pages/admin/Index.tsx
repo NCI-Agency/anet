@@ -1,3 +1,7 @@
+import {
+  gqlAdminSettingsFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -16,7 +20,6 @@ import {
   GENERAL_BANNER_VISIBILITY
 } from "components/GeneralBanner"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
@@ -41,10 +44,7 @@ import { v4 as uuidv4 } from "uuid"
 
 const GQL_GET_ADMIN_SETTINGS = gql`
   query {
-    adminSettings {
-      key
-      value
-    }
+    ${gqlAdminSettingsFields}
   }
 `
 const GQL_SAVE_ADMIN_SETTINGS = gql`
@@ -77,10 +77,7 @@ const RECENT_ACTIVITIES = gql`
 
   fragment recentActivity on RecentUserActivity {
     user {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Person}
     }
     activity {
       time

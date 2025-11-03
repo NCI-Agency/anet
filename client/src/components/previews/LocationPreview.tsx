@@ -1,3 +1,7 @@
+import {
+  gqlAllLocationFields,
+  gqlEntityAvatarFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -5,7 +9,6 @@ import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
@@ -16,16 +19,8 @@ import Settings from "settings"
 const GQL_GET_LOCATION = gql`
   query ($uuid: String!) {
     location(uuid: $uuid) {
-      uuid
-      name
-      lat
-      lng
-      status
-      type
-      digram
-      trigram
-      description
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlAllLocationFields}
+      ${gqlEntityAvatarFields}
     }
   }
 `

@@ -1,3 +1,13 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllPersonFields,
+  gqlCustomSensitiveInformationFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields,
+  gqlUsersFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -5,9 +15,6 @@ import AppContext from "components/AppContext"
 import { initInvisibleFields } from "components/CustomFields"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -17,7 +24,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
-import { Attachment, Person } from "models"
+import { Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
@@ -29,50 +36,25 @@ import PersonForm from "./Form"
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
     person(uuid: $uuid) {
-      uuid
-      updatedAt
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      status
-      phoneNumber
-      pendingVerification
-      user
-      users {
-        uuid
-        domainUsername
-      }
-      biography
-      obsoleteCountry
+      ${gqlAllPersonFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
+      ${gqlUsersFields}
       country {
-        uuid
-        name
-      }
-      gender
-      endOfTourDate
-      code
-      emailAddresses {
-        network
-        address
+        ${gqlEntityFieldsMap.Location}
       }
       position {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Position}
         type
-        role
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlEntityFieldsMap.Organization}
         }
       }
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
-      customFields
-      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
-      ${GRAPHQL_NOTES_FIELDS}
+      ${gqlCustomSensitiveInformationFields}
+      ${gqlNotesFields}
     }
   }
 `

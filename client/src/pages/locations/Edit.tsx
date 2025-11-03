@@ -1,3 +1,4 @@
+import { gqlAllAttachmentFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -10,7 +11,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
-import { Attachment, Location } from "models"
+import { Location } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -23,7 +24,7 @@ const GQL_GET_LOCATION = gql`
     location(uuid: $uuid) {
       ${Location.allFieldsQuery}
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
     }
   }

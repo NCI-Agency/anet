@@ -1,9 +1,13 @@
+import {
+  gqlEmailAddressesFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import Checkbox from "components/Checkbox"
 import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -20,36 +24,17 @@ import Settings from "settings"
 const GQL_GET_PERSON_LIST = gql`
   query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        emailAddresses {
-          network
-          address
-        }
+        ${gqlEntityFieldsMap.Person}
+        ${gqlEmailAddressesFields}
         position {
-          uuid
-          name
-          type
-          role
-          code
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           location {
-            uuid
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Location}
           }
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
         }
       }

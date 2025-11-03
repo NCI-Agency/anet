@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import EventsMapWidget from "components/aggregations/EventsMapWidget"
@@ -12,20 +16,16 @@ import { connect } from "react-redux"
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
     eventList(query: $eventQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        type
-        name
+        ${gqlEntityFieldsMap.Event}
         startDate
         endDate
         location {
-          uuid
-          name
+          ${gqlEntityFieldsMap.Location}
           lat
           lng
+          type
         }
       }
     }

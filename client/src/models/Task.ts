@@ -1,8 +1,5 @@
-import Model, {
-  createCustomFieldsSchema,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  yupDate
-} from "components/Model"
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
+import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import * as yup from "yup"
@@ -135,10 +132,21 @@ export default class Task extends Model {
     .concat(Task.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery =
-    "uuid shortName longName parentTask { uuid shortName }" +
-    " ascendantTasks { uuid shortName parentTask { uuid } }" +
-    ` taskedOrganizations { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} } customFields`
+  static autocompleteQuery = `
+    ${gqlEntityFieldsMap.Task}
+    parentTask{
+      ${gqlEntityFieldsMap.Task}
+    }
+    ascendantTasks {
+      ${gqlEntityFieldsMap.Task}
+      parentTask {
+        ${gqlEntityFieldsMap.Task}
+      }
+    }
+    taskedOrganizations {
+      ${gqlEntityFieldsMap.Organization}
+    }
+  `
 
   constructor(props) {
     super(Model.fillObject(props, Task.yupSchema))

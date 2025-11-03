@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import ReportsMapWidget from "components/aggregations/ReportsMapWidget"
@@ -12,19 +16,14 @@ import { connect } from "react-redux"
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        intent
-        state
-        engagementDate
+        ${gqlEntityFieldsMap.Report}
         location {
-          uuid
-          name
+          ${gqlEntityFieldsMap.Location}
           lat
           lng
+          type
         }
       }
     }

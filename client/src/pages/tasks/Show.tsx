@@ -1,3 +1,11 @@
+import {
+  gqlAllTaskFields,
+  gqlApprovalStepFields,
+  gqlAssessmentsFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -17,11 +25,7 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, {
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS
-} from "components/Model"
+import Model from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -47,142 +51,73 @@ import utils from "utils"
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
     task(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      selectable
-      description
-      status
-      isSubscribed
-      updatedAt
-      plannedCompletion
-      projectedCompletion
+      ${gqlAllTaskFields}
       taskedOrganizations {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       parentTask {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
       ascendantTasks {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
       childrenTasks {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
       }
       descendantTasks {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         selectable
         parentTask {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
-        customFields
-        ${GRAPHQL_ASSESSMENTS_FIELDS}
-        ${GRAPHQL_NOTES_FIELDS}
+        ${gqlAssessmentsFields}
       }
       responsiblePositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
       planningApprovalSteps {
-        uuid
-        name
-        restrictedApproval
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
+        ${gqlApprovalStepFields}
       }
       approvalSteps {
-        uuid
-        name
-        restrictedApproval
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-      }
-      customFields
-      ${GRAPHQL_ASSESSMENTS_FIELDS}
-      ${GRAPHQL_NOTES_FIELDS}
+        ${gqlApprovalStepFields}
+     }
+      ${gqlAssessmentsFields}
+      ${gqlNotesFields}
     }
 
     eventSeriesList(query: { eventTaskUuid: [$uuid], pageSize: 0 }) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        status
-        description
+        ${gqlEntityFieldsMap.EventSeries}
         ownerOrg {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Organization}
         }
         hostOrg {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Organization}
         }
         adminOrg {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Organization}
         }
       }
     }

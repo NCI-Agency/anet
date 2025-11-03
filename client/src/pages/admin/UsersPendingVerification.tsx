@@ -1,10 +1,14 @@
+import {
+  gqlEmailAddressesFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -20,19 +24,11 @@ import { connect } from "react-redux"
 const GQL_GET_USERS_PENDING_VERIFICATION = gql`
   query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
         pendingVerification
-        emailAddresses {
-          network
-          address
-        }
+        ${gqlEmailAddressesFields}
       }
     }
   }

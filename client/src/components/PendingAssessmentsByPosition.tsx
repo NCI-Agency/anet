@@ -1,9 +1,12 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   PageDispatchersPropType,
   useBoilerplate,
@@ -23,50 +26,22 @@ import Settings from "settings"
 const GQL_GET_POSITION_LIST = gql`
   query($positionQuery: PositionSearchQueryInput) {
     positionList(query: $positionQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         associatedPositions {
-          uuid
-          name
-          code
-          type
-          role
-          status
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
           person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Person}
             ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
           }
         }
@@ -75,18 +50,14 @@ const GQL_GET_POSITION_LIST = gql`
             status: ACTIVE
           }
         ) {
-          uuid
-          shortName
-          longName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
           }
           ascendantTasks {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
             parentTask {
-              uuid
+              ${gqlEntityFieldsMap.Task}
             }
           }
           ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}

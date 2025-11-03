@@ -1,3 +1,9 @@
+import {
+  gqlAllPersonFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
@@ -17,25 +23,11 @@ import { connect } from "react-redux"
 const GQL_GET_SELF = gql`
   query {
     me {
-      uuid
-      updatedAt
-      name
-      rank
-      status
-      phoneNumber
-      pendingVerification
-      obsoleteCountry
+      ${gqlAllPersonFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       country {
-        uuid
-        name
-      }
-      gender
-      endOfTourDate
-      user
-      code
-      emailAddresses {
-        network
-        address
+        ${gqlEntityFieldsMap.Location}
       }
     }
   }

@@ -1,12 +1,16 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllPositionFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { initInvisibleFields } from "components/CustomFields"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS
-} from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -14,7 +18,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
-import { Attachment, Position } from "models"
+import { Position } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -25,56 +29,31 @@ import PositionForm from "./Form"
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
-      uuid
-      updatedAt
-      name
-      code
-      status
-      type
-      superuserType
-      role
-      description
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      emailAddresses {
-        network
-        address
-      }
+      ${gqlAllPositionFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       location {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
+        type
       }
       associatedPositions {
-        uuid
-        name
-        type
-        role
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
       organization {
-        uuid
-        shortName
-        longName
-        identificationCode
+        ${gqlEntityFieldsMap.Organization}
       }
       person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
+      ${gqlNotesFields}
     }
   }
 `

@@ -1,3 +1,9 @@
+import {
+  gqlAllPositionFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -5,7 +11,6 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { Location, Position } from "models"
 import moment from "moment"
@@ -16,68 +21,36 @@ import Settings from "settings"
 const GQL_GET_POSITION = gql`
   query ($uuid: String!) {
     position(uuid: $uuid) {
-      uuid
-      name
-      type
-      superuserType
-      role
-      status
-      code
-      description
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      emailAddresses {
-        network
-        address
-      }
+      ${gqlAllPositionFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
       associatedPositions {
-        uuid
-        name
-        type
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
       }
       previousPeople {
         startTime
         endTime
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
       location {
-        uuid
-        name
-        type
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        type
       }
     }
   }

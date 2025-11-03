@@ -1,10 +1,10 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import { Organization } from "models"
 import React from "react"
@@ -13,11 +13,7 @@ import ORGANIZATIONS_ICON from "resources/organizations.png"
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String!) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
   }
 `
@@ -25,11 +21,7 @@ const GQL_GET_ORGANIZATION = gql`
 const GQL_GET_ORGANIZATIONS = gql`
   query ($uuids: [String]) {
     organizations(uuids: $uuids) {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
   }
 `

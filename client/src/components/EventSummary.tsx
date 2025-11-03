@@ -1,8 +1,11 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -24,76 +27,47 @@ import Settings from "settings"
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
     eventList(query: $eventQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        type
-        name
+        ${gqlEntityFieldsMap.Event}
         startDate
         endDate
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        type
         ownerOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         adminOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         eventSeries {
-          uuid
-          name
+          ${gqlEntityFieldsMap.EventSeries}
         }
         location {
-          uuid
-          name
+          ${gqlEntityFieldsMap.Location}
           lat
           lng
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          type
         }
         tasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
           }
           ascendantTasks {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
             parentTask {
-              uuid
+              ${gqlEntityFieldsMap.Task}
             }
           }
         }
         organizations {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         people {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
     }
@@ -243,8 +217,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.location.label}: </strong>
-              <LinkTo modelType="Location" model={event.location} />
-              {"  "}
+              <LinkTo modelType="Location" model={event.location} />{" "}
               <Badge bg="secondary">
                 {Location.humanNameOfType(event.location.type)}
               </Badge>

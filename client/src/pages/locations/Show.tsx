@@ -1,3 +1,4 @@
+import { gqlAllAttachmentFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -33,7 +34,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
-import { Attachment, Location } from "models"
+import { Location } from "models"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Col, Row } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -46,7 +47,7 @@ const GQL_GET_LOCATION = gql`
     location(uuid: $uuid) {
       ${Location.allFieldsQuery}
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
     }
   }

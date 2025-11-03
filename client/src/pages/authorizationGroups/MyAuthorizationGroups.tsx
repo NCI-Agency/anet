@@ -1,9 +1,12 @@
+import {
+  gqlAuthorizationGroupMembersFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import Fieldset from "components/Fieldset"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -19,37 +22,10 @@ const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
       uuid
       position {
         authorizationGroupsAdministrated {
-          uuid
-          name
-          description
-          status
+          ${gqlEntityFieldsMap.AuthorizationGroup}
           distributionList
           forSensitiveInformation
-          authorizationGroupRelatedObjects {
-            relatedObjectType
-            relatedObjectUuid
-            relatedObject {
-              ... on Organization {
-                uuid
-                shortName
-                longName
-                identificationCode
-                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-              }
-              ... on Person {
-                uuid
-                name
-                rank
-                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-              }
-              ... on Position {
-                uuid
-                type
-                name
-                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-              }
-            }
-          }
+          ${gqlAuthorizationGroupMembersFields}
         }
       }
     }

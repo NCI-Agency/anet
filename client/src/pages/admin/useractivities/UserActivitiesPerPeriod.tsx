@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -12,7 +16,6 @@ import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Checkbox from "components/Checkbox"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
@@ -35,17 +38,11 @@ import utils from "utils"
 const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
   query ($userActivityQuery: UserActivitySearchQueryInput) {
     userActivityList(query: $userActivityQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         organizationUuid
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         visitedAt
         count
@@ -57,16 +54,11 @@ const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
 const GQL_GET_USER_ACTIVITY_LIST_BY_PERSON = gql`
   query ($userActivityQuery: UserActivitySearchQueryInput) {
     userActivityList(query: $userActivityQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         personUuid
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         visitedAt
         count
