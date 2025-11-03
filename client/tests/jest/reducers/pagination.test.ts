@@ -1,4 +1,3 @@
-import { REPORT_DRAFT } from "../../../src/constants"
 import * as types from "../../../src/constants/ActionTypes"
 import reducer from "../../../src/reducers/pagination"
 
@@ -12,7 +11,7 @@ describe("pagination reducer", () => {
       reducer(undefined, {
         type: types.SET_PAGINATION,
         payload: {
-          paginationKey: REPORT_DRAFT,
+          paginationKey: "REPORT_DRAFT",
           pageNum: 1
         }
       })
