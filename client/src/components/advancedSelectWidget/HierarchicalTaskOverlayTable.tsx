@@ -157,7 +157,6 @@ export const HierarchicalTaskOverlayTable = ({
           ) : (
             <Icon icon={IconNames.DOCUMENT} size={IconSize.STANDARD} />
           )}
-          <Icon icon={IconNames.STAR} size={12} />
           <span
             onClick={handleToggleSelection}
             style={{

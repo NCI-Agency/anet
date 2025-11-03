@@ -13,7 +13,6 @@ import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useCallback, useEffect, useState } from "react"
-import LOCATIONS_ICON from "resources/locations.png"
 
 export const locationFields = `
   ${gqlEntityFieldsMap.Location}
@@ -143,7 +142,6 @@ export const HierarchicalLocationOverlayTable = ({
               />
             </span>
           )}
-          <img src={LOCATIONS_ICON} style={{ width: 16 }} />
           <span
             onClick={handleToggleSelection}
             style={{

@@ -12,6 +12,45 @@ const HOVER_OPEN_DELAY = process.env.ANET_TEST_MODE === "true" ? 60000 : 500
 const TOP_LEVEL = 0
 const LinkToContext = React.createContext({ level: TOP_LEVEL })
 
+interface LinkToWithOptionalPreviewProps {
+  level: number
+  modelType: string
+  modelInstance: any
+  targetProps: object
+  linkComponent: React.JSX.Element
+  showPreview: boolean
+}
+
+const LinkToWithOptionalPreview = ({
+  level,
+  linkComponent,
+  modelInstance,
+  modelType,
+  targetProps,
+  showPreview
+}: LinkToWithOptionalPreviewProps) => (
+  <LinkToContext.Provider value={{ level: level + 1 }}>
+    {showPreview ? (
+      <ModelTooltip
+        tooltipContent={
+          <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
+        }
+        targetProps={targetProps}
+        popoverClassName="bp6-dark"
+        hoverCloseDelay={400}
+        hoverOpenDelay={HOVER_OPEN_DELAY}
+        portalClassName="linkto-model-preview-portal"
+        interactionKind={PopoverInteractionKind.HOVER}
+        boundary="viewport"
+      >
+        {linkComponent}
+      </ModelTooltip>
+    ) : (
+      linkComponent
+    )}
+  </LinkToContext.Provider>
+)
+
 interface LinkToProps {
   as?: React.ReactNode
   children?: React.ReactNode
@@ -99,37 +138,29 @@ const LinkTo = ({
     }
   }
 
+  const linkToClassName = button
+    ? null
+    : `link-to-entity link-to-${modelInstance.status ?? "UNKNOWN"}-entity`
   if (!isLink) {
-    if (showPreview) {
-      return (
-        <LinkToContext.Provider value={{ level: level + 1 }}>
-          <ModelTooltip
-            tooltipContent={
-              <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
-            }
-            targetProps={tooltipProps}
-            popoverClassName="bp6-dark"
-            hoverCloseDelay={400}
-            hoverOpenDelay={HOVER_OPEN_DELAY}
-            portalClassName="linkto-model-preview-portal"
-            interactionKind={PopoverInteractionKind.HOVER}
-            boundary="viewport"
-          >
-            <span style={{ cursor: "help", ...style }}>
-              {avatarComponent}
-              {modelInstance.toString(displayCallback)}
-              {children}
-            </span>
-          </ModelTooltip>
-        </LinkToContext.Provider>
-      )
-    }
+    const linkStyle = showPreview ? { cursor: "help", ...style } : null
+    const linkComponent = (
+      <div style={linkStyle} className={linkToClassName}>
+        <span>
+          {iconComponent}
+          {avatarComponent}
+          {children || modelInstance.toString(displayCallback)}
+        </span>
+      </div>
+    )
     return (
-      <span>
-        {avatarComponent}
-        {modelInstance.toString(displayCallback)}
-        {children}
-      </span>
+      <LinkToWithOptionalPreview
+        level={level}
+        modelType={modelType}
+        modelInstance={modelInstance}
+        targetProps={tooltipProps}
+        linkComponent={linkComponent}
+        showPreview={showPreview}
+      />
     )
   }
 
@@ -145,41 +176,24 @@ const LinkTo = ({
     to = model
   }
 
-  const LinkComponent = (
-    <LinkToComponent to={to} style={style} {...componentProps}>
-      <>
+  const linkComponent = (
+    <div className={linkToClassName}>
+      <LinkToComponent to={to} style={style} {...componentProps}>
         {iconComponent}
         {avatarComponent}
         {children || modelInstance.toString(displayCallback)}
-      </>
-    </LinkToComponent>
+      </LinkToComponent>
+    </div>
   )
-  if (showPreview && !button && level === TOP_LEVEL) {
-    // Show popover when hovering over link
-    return (
-      <LinkToContext.Provider value={{ level: level + 1 }}>
-        <ModelTooltip
-          tooltipContent={
-            <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
-          }
-          targetProps={tooltipProps}
-          popoverClassName="bp6-dark"
-          hoverCloseDelay={400}
-          hoverOpenDelay={HOVER_OPEN_DELAY}
-          portalClassName="linkto-model-preview-portal"
-          interactionKind={PopoverInteractionKind.HOVER}
-          boundary="viewport"
-        >
-          {LinkComponent}
-        </ModelTooltip>
-      </LinkToContext.Provider>
-    )
-  }
-  // Show regular link
   return (
-    <LinkToContext.Provider value={{ level: level + 1 }}>
-      {LinkComponent}
-    </LinkToContext.Provider>
+    <LinkToWithOptionalPreview
+      level={level}
+      modelType={modelType}
+      modelInstance={modelInstance}
+      targetProps={tooltipProps}
+      linkComponent={linkComponent}
+      showPreview={showPreview && !button && level === TOP_LEVEL}
+    />
   )
 }
 

@@ -562,10 +562,22 @@ table hr.attendee-divider {
   clear: both;
 }
 
-.inactive-task {
-  color: gray;
-  &:after {
-    content: " ∅";
+.link-to-entity {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.link-to-INACTIVE-entity {
+  & > span, & > a {
+    color: gray !important;
+    font-style: italic !important;
+    &.text-white {
+      color: lightgray !important;
+    }
+    &:after {
+      content: " ∅";
+    }
   }
 }
 
