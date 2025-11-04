@@ -68,7 +68,10 @@ const AttachmentCard = ({
   return (
     <div className="attachment-card" key={attachment.uuid}>
       <Card>
-        <div style={{ display: "grid" }} onClick={() => onClick?.(attachment)}>
+        <div
+          className="d-grid text-center"
+          onClick={() => onClick?.(attachment)}
+        >
           {divContents}
         </div>
         <Card.Body className="p-1 d-block">
