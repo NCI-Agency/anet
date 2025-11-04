@@ -1,6 +1,7 @@
 package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery;
@@ -34,6 +35,10 @@ public abstract class AbstractAttachmentSearcher
   protected void buildQuery(AttachmentSearchQuery query) {
     qb.addSelectClause(AttachmentDao.ATTACHMENT_FIELDS);
     qb.addFromClause("attachments");
+    if (WithStatus.Status.INACTIVE.equals(query.getStatus())) {
+      // Should never match
+      qb.addWhereClause("FALSE");
+    }
 
     if (query.getUser() != null && query.getSubscribed()) {
       // Should never match
