@@ -159,7 +159,7 @@ describe("Show report page", () => {
   describe("When on the show page of a report with reportCommunities", () => {
     it("We should see the reportCommunities", async () => {
       expect(await ShowReport.getReportCommunities()).to.equal(
-        "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization"
+        "Name Description\nEF 1.1\nThe complete EF 1.1 organisation\nEF 5\nThe complete EF 5 organization"
       )
     })
   })

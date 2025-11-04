@@ -19,11 +19,11 @@ const EXAMPLE_LOCATIONS = {
     fullName: "Merge Location Winner",
     latLon: "38.58809, -28.71611",
     status: "ACTIVE",
-    parentLocations: "Name Type\nPortugal Country",
+    parentLocations: "Name Type\nPortugal\nCountry",
     planningApprovalSteps:
-      "Step 1: Location planning approval for merge winner\nPerson Position\nOF-2 ELIZAWELL, Elizabeth EF 1.1 Advisor A",
+      "Step 1: Location planning approval for merge winner\nPerson Position\nOF-2 ELIZAWELL, Elizabeth\nEF 1.1 Advisor A",
     approvalSteps:
-      "Step 1: Location publication approval for merge winner\nPerson Position\nUnfilled EF 1.1 Advisor B"
+      "Step 1: Location publication approval for merge winner\nPerson Position\nUnfilled\nEF 1.1 Advisor B"
   },
   leftCountry: {
     search: "Andorra",
@@ -45,11 +45,11 @@ const EXAMPLE_LOCATIONS = {
     fullName: "Merge Location Loser",
     latLon: "-46.4035948, 51.69093",
     status: "ACTIVE",
-    parentLocations: "Name Type\nFrench Southern Territories Country",
+    parentLocations: "Name Type\nFrench Southern Territories\nCountry",
     planningApprovalSteps:
-      "Step 1: Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina EF 2.2 Advisor C",
+      "Step 1: Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina\nEF 2.2 Advisor C",
     approvalSteps:
-      "Step 1: Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin EF 2.2 Advisor D"
+      "Step 1: Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin\nEF 2.2 Advisor D"
   }
 }
 

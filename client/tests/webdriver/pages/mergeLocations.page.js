@@ -29,7 +29,7 @@ class MergeLocations extends Page {
 
   async getFirstItemFromAdvancedSelect() {
     return browser.$(
-      ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
+      ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) span"
     )
   }
 

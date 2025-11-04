@@ -455,6 +455,7 @@ describe("When creating/editing a community", () => {
           .parentElement()
           .parentElement()
           .parentElement()
+          .parentElement()
           .$("./td/button")
       ).click()
       // eslint-disable-next-line no-unused-expressions

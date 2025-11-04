@@ -73,7 +73,7 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 2)
         ).getText()
-      ).to.equal("(ANET Administrators)")
+      ).to.equal("(\nANET Administrators\n)")
       expect(
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 4)
@@ -83,12 +83,12 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 5)
         ).getText()
-      ).to.equal("(MoI | Ministry of Interior)")
+      ).to.equal("(\nMoI | Ministry of Interior\n)")
       expect(
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 3, 1)
         ).getText()
-      ).to.equal("Location: General Hospital Point location")
+      ).to.equal("Location:\nGeneral Hospital Point location")
       expect(
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 4, 1)
@@ -117,7 +117,9 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 8, 1)
         ).getText()
-      ).to.equal("Objectives: EF 1 » EF 1.2 » 1.2.AEF 1 » EF 1.2 » 1.2.B")
+      ).to.equal(
+        "Objectives:\nEF 1\n»\nEF 1.2\n»\n1.2.A\nEF 1\n»\nEF 1.2\n»\n1.2.B"
+      )
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (

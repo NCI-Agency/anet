@@ -59,7 +59,7 @@ class CreateAuthorizationGroup extends Page {
 
   async getRelatedObjectsTableEntry(relatedObjectText) {
     return (await this.getRelatedObjectsTable()).$(
-      `.//tr/td/span/a[text()="${relatedObjectText}"]`
+      `.//tr/td/span//a[text()="${relatedObjectText}"]`
     )
   }
 
@@ -79,7 +79,7 @@ class CreateAuthorizationGroup extends Page {
 
   async getAdministrativePositionsTableEntry(administrativePositionText) {
     return (await this.getAdministrativePositionsTable()).$(
-      `.//tr/td/span/a[text()="${administrativePositionText}"]`
+      `.//tr/td/span//a[text()="${administrativePositionText}"]`
     )
   }
 
@@ -107,7 +107,7 @@ class CreateAuthorizationGroup extends Page {
 
   async getAuthorizationGroupLink(authorizationGroupName) {
     return (await this.getMyAuthorizationGroups()).$(
-      `.//tr/td/span/a[text()="${authorizationGroupName}"]`
+      `.//tr/td/span//a[text()="${authorizationGroupName}"]`
     )
   }
 

@@ -32,7 +32,7 @@ const POSITION = "MOD-FO"
 const POSITION_VALUE_1 = "Chief of Staff - MoD"
 const POSITION_VALUE_2 = "Executive Assistant to the MoD"
 const POSITION_VALUE_3 = "Minister of Defense"
-const POSITION_COMPLETE_1 = `${POSITION_VALUE_1}`
+const POSITION_COMPLETE_1 = `${POSITION_VALUE_1}, MOD-FO-00002`
 const POSITION_COMPLETE_2 = `${POSITION_VALUE_2}`
 const POSITION_COMPLETE_3 = `${POSITION_VALUE_3}`
 

@@ -136,7 +136,7 @@ describe("When creating a report", () => {
     expect(reportUuid.length).to.equal(36)
     // Validate the reportCommunities
     expect(await ShowReport.getReportCommunities()).to.equal(
-      "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization"
+      "Name Description\nEF 1.1\nThe complete EF 1.1 organisation\nEF 5\nThe complete EF 5 organization"
     )
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.now, "author")

@@ -5,28 +5,28 @@ const EXAMPLE_TASKS = {
   childLeft: {
     search: "1.2.C",
     shortName: "1.2.C",
-    displayedName: "EF 1 » EF 1.2 » 1.2.C"
+    displayedName: "EF 1\n»\nEF 1.2\n»\n1.2.C"
   },
   parentRight: {
     search: "EF 1.2",
     shortName: "EF 1.2",
-    displayedName: "EF 1 » EF 1.2"
+    displayedName: "EF 1\n»\nEF 1.2"
   },
   validLeft: {
     search: "Merge Task 1",
     shortName: "Merge Task 1",
     longName: "Long Merge 1 Name",
     status: "ACTIVE",
-    displayedName: "TAAC » TAAC Air » Merge Task 1",
-    parentTask: "TAAC » TAAC Air"
+    displayedName: "TAAC\n»\nTAAC Air\n»\nMerge Task 1",
+    parentTask: "TAAC\n»\nTAAC Air"
   },
   validRight: {
     search: "Merge Task 2",
     shortName: "Merge Task 2",
     longName: "Long Merge 2 Name",
     status: "ACTIVE",
-    displayedName: "TAAC » TAAC Air » Merge Task 2",
-    parentTask: "TAAC » TAAC Air"
+    displayedName: "TAAC\n»\nTAAC Air\n»\nMerge Task 2",
+    parentTask: "TAAC\n»\nTAAC Air"
   }
 }
 

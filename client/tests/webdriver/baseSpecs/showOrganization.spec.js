@@ -29,10 +29,10 @@ const EF1_1_MATRIX_TASKS = [
   "»\n1.1.C"
 ]
 const EF2_ASSIGNED_TASKS = [
-  "EF 2 » 2.A",
-  "EF 2 » 2.B",
-  "EF 2 » 2.C",
-  "EF 2 » 2.D"
+  "EF 2\n»\n2.A",
+  "EF 2\n»\n2.B",
+  "EF 2\n»\n2.C",
+  "EF 2\n»\n2.D"
 ]
 const EF2_MATRIX_TASKS = ["EF 2", "»\n2.A", "»\n2.B", "»\n2.C", "»\n2.D"]
 const EF2_2_ASSIGNED_TASKS = ["No matching Objective"]
