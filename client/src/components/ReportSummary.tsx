@@ -258,10 +258,12 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           <Col md={12}>
             <span>
               <strong>{Settings.fields.report.location?.label}: </strong>
-              <LinkTo modelType="Location" model={report.location} />{" "}
-              <Badge bg="secondary">
-                {Location.humanNameOfType(report.location.type)}
-              </Badge>
+              <LinkTo modelType="Location" model={report.location}>
+                {`${Location.toString(report.location)} `}
+                <Badge bg="secondary">
+                  {Location.humanNameOfType(report.location.type)}
+                </Badge>
+              </LinkTo>
             </span>
           </Col>
         </Row>

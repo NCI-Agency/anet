@@ -371,15 +371,12 @@ const OrganizationForm = ({
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         values.location && (
-                          <>
-                            <LinkTo
-                              modelType="Location"
-                              model={values.location}
-                            />{" "}
-                            <Badge>
+                          <LinkTo modelType="Location" model={values.location}>
+                            {`${Location.toString(values.location)} `}
+                            <Badge bg="secondary">
                               {Location.humanNameOfType(values.location.type)}
                             </Badge>
-                          </>
+                          </LinkTo>
                         )
                       }
                     />

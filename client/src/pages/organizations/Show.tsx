@@ -552,15 +552,12 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
               field={{ name: "location" }}
               humanValue={
                 organization.location && (
-                  <>
-                    <LinkTo
-                      modelType="Location"
-                      model={organization.location}
-                    />{" "}
-                    <Badge>
+                  <LinkTo modelType="Location" model={organization.location}>
+                    {`${Location.toString(organization.location)} `}
+                    <Badge bg="secondary">
                       {Location.humanNameOfType(organization.location.type)}
                     </Badge>
-                  </>
+                  </LinkTo>
                 )
               }
             />

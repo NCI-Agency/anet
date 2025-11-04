@@ -116,12 +116,12 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
           dictProps={Settings.fields.position.location}
           value={
             position.location && (
-              <>
-                <LinkTo modelType="Location" model={position.location} />{" "}
-                <Badge>
+              <LinkTo modelType="Location" model={position.location}>
+                {`${Location.toString(position.location)} `}
+                <Badge bg="secondary">
                   {Location.humanNameOfType(position.location.type)}
                 </Badge>
-              </>
+              </LinkTo>
             )
           }
         />

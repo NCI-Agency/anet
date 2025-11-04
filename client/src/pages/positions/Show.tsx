@@ -270,12 +270,12 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                 field={{ name: "location" }}
                 humanValue={
                   position.location && (
-                    <>
-                      <LinkTo modelType="Location" model={position.location} />{" "}
-                      <Badge>
+                    <LinkTo modelType="Location" model={position.location}>
+                      {`${Location.toString(position.location)} `}
+                      <Badge bg="secondary">
                         {Location.humanNameOfType(position.location.type)}
                       </Badge>
-                    </>
+                    </LinkTo>
                   )
                 }
               />

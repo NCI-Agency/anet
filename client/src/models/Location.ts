@@ -201,11 +201,15 @@ export default class Location extends Model {
     return LOCATIONS_ICON
   }
 
-  toString(displayCallback) {
+  static toString(location, displayCallback) {
     if (typeof displayCallback === "function") {
-      return displayCallback(this)
+      return displayCallback(location)
     }
-    return this.name
+    return location?.name
+  }
+
+  toString(displayCallback) {
+    return Location.toString(this, displayCallback)
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

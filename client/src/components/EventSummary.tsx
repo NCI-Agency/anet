@@ -217,10 +217,12 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.location.label}: </strong>
-              <LinkTo modelType="Location" model={event.location} />{" "}
-              <Badge bg="secondary">
-                {Location.humanNameOfType(event.location.type)}
-              </Badge>
+              <LinkTo modelType="Location" model={event.location}>
+                {`${Location.toString(event.location)} `}
+                <Badge bg="secondary">
+                  {Location.humanNameOfType(event.location.type)}
+                </Badge>
+              </LinkTo>
             </span>
           </Col>
         </Row>
