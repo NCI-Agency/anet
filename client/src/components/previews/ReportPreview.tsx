@@ -358,8 +358,8 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
       </div>
       <h4>
         {report.isFuture()
-          ? "People who will attend to this planned engagement"
-          : "People attended in this engagement"}
+          ? "People who will be involved in this planned engagement"
+          : "People involved in this engagement"}
       </h4>
       <div className="preview-section">
         <ReportPeople report={report} disabled />
