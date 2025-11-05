@@ -9,6 +9,7 @@ import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
@@ -63,9 +64,10 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Location ${location.name}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`Location ${location.name}`}
+        status={location.status}
+      />
       <div className="preview-section">
         <div className="text-center">
           <EntityAvatarDisplay

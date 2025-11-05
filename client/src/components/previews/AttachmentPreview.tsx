@@ -7,6 +7,7 @@ import API from "api"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Attachment } from "models"
 import React from "react"
@@ -47,9 +48,7 @@ const AttachmentPreview = ({ className, uuid }: AttachmentPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Attachment ${attachment.caption}`}</h4>
-      </div>
+      <PreviewTitle title={`Attachment ${attachment.caption}`} />
       <div className="preview-section">
         <Row>
           <Col>

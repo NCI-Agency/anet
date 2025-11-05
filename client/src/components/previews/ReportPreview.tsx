@@ -12,6 +12,7 @@ import LinkTo from "components/LinkTo"
 import ListItems from "components/ListItems"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -167,7 +168,7 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
         </div>
       )}
 
-      <h4 className="ellipsized-text">Report {reportTitle}</h4>
+      <PreviewTitle title={`Report ${reportTitle}`} />
       <div className="preview-section">
         <PreviewField
           extraColForValue

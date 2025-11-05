@@ -9,6 +9,7 @@ import AuthorizationGroupMembersTable from "components/AuthorizationGroupMembers
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import PositionTable from "components/PositionTable"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import { AuthorizationGroup } from "models"
 import React from "react"
 import Settings from "settings"
@@ -34,7 +35,6 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
     }
   }
 `
-
 interface AuthorizationGroupPreviewProps {
   className?: string
   uuid?: string
@@ -59,9 +59,10 @@ const AuthorizationGroupPreview = ({
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Community ${authorizationGroup.name}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`Community ${authorizationGroup.name}`}
+        status={authorizationGroup.status}
+      />
       <div className="preview-section">
         <DictionaryField
           wrappedComponent={PreviewField}

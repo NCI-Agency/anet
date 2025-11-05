@@ -13,6 +13,7 @@ import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization } from "models"
@@ -129,9 +130,10 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Organization ${organization.shortName}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`Organization ${organization.shortName}`}
+        status={organization.status}
+      />
       <div className="preview-section">
         <div className="text-center">
           <EntityAvatarDisplay

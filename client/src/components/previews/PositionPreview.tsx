@@ -11,6 +11,7 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Location, Position } from "models"
 import moment from "moment"
@@ -78,9 +79,10 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Position ${position.name}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`Position ${position.name}`}
+        status={position.status}
+      />
       <div className="preview-section">
         <div className="text-center">
           <EntityAvatarDisplay

@@ -15,6 +15,7 @@ import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
 import UserTable from "components/UserTable"
@@ -98,9 +99,10 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`${person.rank} ${Person.militaryName(person.name)}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`${person.rank} ${Person.militaryName(person.name)}`}
+        status={person.status}
+      />
       <div className="preview-section">
         <Row>
           <Col>

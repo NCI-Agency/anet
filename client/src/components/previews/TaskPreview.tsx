@@ -11,6 +11,7 @@ import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Task } from "models"
 import moment from "moment"
@@ -87,9 +88,10 @@ const TaskPreview = ({ className, uuid }: TaskPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`${Settings.fields.task.shortLabel} ${task.shortName}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
+        status={task.status}
+      />
       <div className="preview-section">
         <DictionaryField
           wrappedComponent={PreviewField}
