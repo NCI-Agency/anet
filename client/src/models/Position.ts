@@ -222,8 +222,12 @@ export default class Position extends Model {
     return pos.status === Model.STATUS.ACTIVE
   }
 
+  static toString(position) {
+    return position?.name
+  }
+
   toString() {
-    return this.name
+    return Position.toString(this)
   }
 
   static convertType(type) {

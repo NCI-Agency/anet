@@ -16,6 +16,7 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import { Position } from "models"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -192,10 +193,10 @@ const BasePersonTable = ({
                   <LinkTo modelType="Person" model={person} />
                 </td>
                 <td>
-                  <LinkTo modelType="Position" model={person.position} />
-                  {person.position && person.position.code
-                    ? `, ${person.position.code}`
-                    : ""}
+                  <LinkTo modelType="Position" model={person.position}>
+                    {Position.toString(person.position)}
+                    {person.position?.code ? `, ${person.position.code}` : ""}
+                  </LinkTo>
                 </td>
                 <td>
                   <LinkTo

@@ -1,7 +1,7 @@
 import AttachmentImage from "components/Attachment/AttachmentImage"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
-import { Location, Task } from "models"
+import { Location, Position, Task } from "models"
 import moment from "moment"
 import React from "react"
 import { Badge } from "react-bootstrap"
@@ -149,8 +149,10 @@ export const TaskOverlayRow = (item: any) => (
 export const PositionOverlayRow = (item: any) => (
   <React.Fragment key={item.uuid}>
     <td>
-      <AsLink modelType="Position" model={item} />
-      {item.code ? `, ${item.code}` : ""}
+      <AsLink modelType="Position" model={item}>
+        {Position.toString(item)}
+        {item?.code ? `, ${item.code}` : ""}
+      </AsLink>
     </td>
     <td>
       <AsLink modelType="Organization" model={item.organization} />
@@ -185,8 +187,10 @@ export const PersonDetailedOverlayRow = (item: any, date) => {
         <AsLink modelType="Person" model={item} />
       </td>
       <td>
-        <AsLink modelType="Position" model={position} />
-        {position?.code ? `, ${position.code}` : ""}
+        <AsLink modelType="Position" model={position}>
+          {Position.toString(position)}
+          {position?.code ? `, ${position.code}` : ""}
+        </AsLink>
       </td>
       <td>
         <AsLink
