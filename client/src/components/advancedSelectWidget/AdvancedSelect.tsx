@@ -445,7 +445,7 @@ const AdvancedSelect = ({
                 placement="bottom"
                 modifiers={{
                   preventOverflow: {
-                    enabled: false
+                    enabled: true
                   },
                   hide: {
                     enabled: false
