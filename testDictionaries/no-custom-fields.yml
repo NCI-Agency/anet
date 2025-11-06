@@ -1048,8 +1048,6 @@ fields:
                   helpText: "Comment on bad translator subject vocabulary"
                   label: Vocabulary comments
                   widget: richTextEditor
-                  style:
-                    height: 100px
                 translatorOverallScore:
                   type: enum
                   label: Overall evaluation
@@ -1075,8 +1073,6 @@ fields:
                   helpText: "Comment on bad overall translator evaluation"
                   label: Overall comments
                   widget: richTextEditor
-                  style:
-                    height: 100px
             interpreter:
               label: Interpreter Questions
               description: Set of questions to assess the linguist in interpreter role
@@ -1126,8 +1122,6 @@ fields:
                   helpText: "Comment on bad interpreter subject vocabulary"
                   label: Vocabulary comments
                   widget: richTextEditor
-                  style:
-                    height: 100px
                 interpreterSubjectUnderstandingScore:
                   type: enum
                   helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
@@ -1154,8 +1148,6 @@ fields:
                   helpText: "Comment on bad interpreter subject understanding"
                   label: Subject understanding comments
                   widget: richTextEditor
-                  style:
-                    height: 100px
                 interpreterWorkEthicScore:
                   type: enum
                   helpText: "How was the interpreter’s work ethic?"
@@ -1182,8 +1174,6 @@ fields:
                   helpText: "Comment on bad interpreter work ethic"
                   label: Work ethic comments
                   widget: richTextEditor
-                  style:
-                    height: 100px
                 interpreterPostureScore:
                   type: enum
                   helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
@@ -1210,8 +1200,6 @@ fields:
                   helpText: "Comment on bad interpreter posture"
                   label: Posture comments
                   widget: richTextEditor
-                  style:
-                    height: 100px
                 interpreterRoleScore:
                   type: enum
                   helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
@@ -1238,8 +1226,6 @@ fields:
                   helpText: "Comment on bad interpreter role"
                   label: Role comment
                   widget: richTextEditor
-                  style:
-                    height: 100px
                 interpreterInterpretationOverallScore:
                   type: enum
                   label: Overall evaluation
@@ -1265,8 +1251,6 @@ fields:
                   helpText: "Comment on bad overall interpreter evaluation"
                   label: Overall evaluation comment
                   widget: richTextEditor
-                  style:
-                    height: 100px
         personOnceReportLinguistLin:
           label: Engagement assessment of linguist Guist, Lin
           recurrence: once
@@ -1302,8 +1286,6 @@ fields:
                 type: special_field
                 label: General remarks
                 widget: richTextEditor
-                style:
-                  height: 70px
         advisorOndemand:
           label: Ondemand assessment of advisor
           recurrence: ondemand
@@ -1316,8 +1298,6 @@ fields:
               type: special_field
               label: General remarks
               widget: richTextEditor
-              style:
-                height: 70px
         interlocutorMonthly:
           label: Monthly assessment of interlocutor
           recurrence: monthly
@@ -1344,8 +1324,6 @@ fields:
               type: special_field
               label: Text
               widget: richTextEditor
-              style:
-                height: 100px
         interlocutorQuarterly:
           label: Quarterly assessment of interlocutor
           recurrence: quarterly
@@ -1372,8 +1350,6 @@ fields:
               type: special_field
               label: Text
               widget: richTextEditor
-              style:
-                height: 100px
               validations:
                 - type: required
                   params: [You must provide Text]
@@ -1519,8 +1495,6 @@ fields:
               type: special_field
               label: Screening and vetting comment
               widget: richTextEditor
-              style:
-                height: 70px
         advisorQuarterlyNoWrite:
           label: Quarterly assessment of advisor, no write
           recurrence: quarterly
