@@ -1,6 +1,7 @@
 package mil.dds.anet.ws;
 
 import jakarta.xml.ws.Endpoint;
+import mil.dds.anet.ws.security.BasicAuthAuthorizationInterceptor;
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxws.EndpointImpl;
 import org.springframework.context.annotation.Bean;

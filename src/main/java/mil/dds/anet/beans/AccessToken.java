@@ -10,6 +10,8 @@ import java.util.Base64;
 
 public class AccessToken {
 
+  public static final int ACCESS_TOKEN_LENGTH = 32;
+
   private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 
   public enum TokenScope {

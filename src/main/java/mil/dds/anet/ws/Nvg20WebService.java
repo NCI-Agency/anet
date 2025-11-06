@@ -20,7 +20,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import mil.dds.anet.beans.AccessToken;
-import mil.dds.anet.beans.AccessToken.TokenScope;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -40,6 +39,8 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
+import mil.dds.anet.ws.security.WebServiceGrantedAuthority;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
 import nato.act.tide.wsdl.nvg20.ContentType;
 import nato.act.tide.wsdl.nvg20.ExtendedDataType;
@@ -285,32 +286,25 @@ public class Nvg20WebService implements NVGPortType2012 {
     final String accessToken =
         authentication instanceof BearerTokenAuthenticationToken bat ? bat.getToken()
             : nvgConfig.getAccessToken();
-    final AccessToken at = getAccessToken(accessToken);
-    if (isValidAccessToken(at)) {
+    final var principal = this.accessTokenDao.getAccessTokenPrincipal(accessToken);
+    if (principal.isPresent()) {
+      if (!principal.get().authorities().contains(WebServiceGrantedAuthority.NVG)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Scope mismatch");
+      }
       if (!App6Symbology.isValidApp6Version(nvgConfig.getApp6Version())) {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             "Invalid APP-6 version");
       }
+
       final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-      response.setNvg(makeNvg(at, nvgConfig, getTasksLabel(), getAllTasks(true)));
+      response.setNvg(makeNvg(principal.get(), nvgConfig, getTasksLabel(), getAllTasks(true)));
       return response;
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Must provide a valid Web Service Access Token");
   }
 
-  private AccessToken getAccessToken(String accessToken) {
-    if (accessToken != null && accessToken.length() == NvgConfig.ACCESS_TOKEN_LENGTH) {
-      return accessTokenDao.getByTokenValueAndScope(accessToken, TokenScope.NVG);
-    }
-    return null;
-  }
-
-  private boolean isValidAccessToken(AccessToken at) {
-    return at != null && at.isValid();
-  }
-
-  private NvgType makeNvg(AccessToken at, NvgConfig nvgConfig, String tasksLabel,
+  private NvgType makeNvg(AccessTokenPrincipal principal, NvgConfig nvgConfig, String tasksLabel,
       Map<String, String> tasks) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
@@ -337,7 +331,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     }
 
     final List<Report> reports =
-        getReportsByPeriod(at, start, end, nvgConfig.getExcludeTaskUuids());
+        getReportsByPeriod(principal, start, end, nvgConfig.getExcludeTaskUuids());
     contentTypeList.addAll(reports.stream().filter(this::hasLocationCoordinates)
         .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
             nvgConfig.isIncludeElementConfidentialityLabels(),
@@ -584,16 +578,15 @@ public class Nvg20WebService implements NVGPortType2012 {
     nvgPoint.setY(location.getLat());
   }
 
-  private List<Report> getReportsByPeriod(AccessToken at, final Instant start, final Instant end,
-      final List<String> excludeTaskUuids) {
+  private List<Report> getReportsByPeriod(AccessTokenPrincipal principal, final Instant start,
+      final Instant end, final List<String> excludeTaskUuids) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
     reportQuery.put("engagementDateEnd", end.toEpochMilli());
     reportQuery.put("notTaskUuid", excludeTaskUuids);
     final GraphQLRequest graphQLRequest =
         new GraphQLRequest("nvgData", REPORT_QUERY, null, Map.of("reportQuery", reportQuery));
-    final Map<String, Object> result =
-        graphQLResource.graphql(new AccessTokenPrincipal(at), graphQLRequest, null);
+    final Map<String, Object> result = graphQLResource.graphql(principal, graphQLRequest, null);
     @SuppressWarnings("unchecked")
     final Map<String, Object> data = (Map<String, Object>) result.get("data");
     final TypeReference<AnetBeanList<Report>> typeRef = new TypeReference<>() {};
@@ -606,7 +599,6 @@ public class Nvg20WebService implements NVGPortType2012 {
   private static class NvgConfig {
     private static final String NVG_CAPABILITIES_VERSION = "2.0.0";
     private static final String ACCESS_TOKEN_ID = "accessToken";
-    private static final int ACCESS_TOKEN_LENGTH = 32;
     private static final String APP6_VERSION_ID = "app6Version";
     private static final String DEFAULT_APP6_VERSION = App6Symbology.DEFAULT_APP6_VERSION;
     private static final String PAST_PERIOD_IN_DAYS_ID = "pastDays";
@@ -711,7 +703,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       inputType.setRequired(false);
       inputType.setType(InputTypeType.STRING);
       inputType.setName("Web Service Access Token");
-      inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
+      inputType.setLength(BigInteger.valueOf(AccessToken.ACCESS_TOKEN_LENGTH));
       final HelpType helpType = NVG_OF.createHelpType();
       helpType.setText("The web service access token required for authentication;"
           + " the token can be provided by the ANET administrator."

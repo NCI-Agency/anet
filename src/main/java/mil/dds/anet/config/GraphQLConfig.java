@@ -51,7 +51,7 @@ import mil.dds.anet.resources.SubscriptionResource;
 import mil.dds.anet.resources.SubscriptionUpdateResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.ws.AccessTokenPrincipal;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package mil.dds.anet.ws;
+package mil.dds.anet.ws.security;
 
 import org.apache.cxf.binding.soap.interceptor.SoapHeaderInterceptor;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;

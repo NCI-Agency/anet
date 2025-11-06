@@ -26,7 +26,7 @@ import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.SecurityUtils;
-import mil.dds.anet.ws.AccessTokenPrincipal;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.dataloader.DataLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
