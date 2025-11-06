@@ -5,8 +5,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class WebServiceGrantedAuthority {
 
   public final static String SCOPE_GRAPHQL = "SCOPE_GRAPHQL";
+  public final static String SCOPE_MCP = "SCOPE_MCP";
   public final static String SCOPE_NVG = "SCOPE_NVG";
 
   public static SimpleGrantedAuthority GRAPHQL = new SimpleGrantedAuthority(SCOPE_GRAPHQL);
   public static SimpleGrantedAuthority NVG = new SimpleGrantedAuthority(SCOPE_NVG);
+  public static SimpleGrantedAuthority MCP = new SimpleGrantedAuthority(SCOPE_MCP);
 }

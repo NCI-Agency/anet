@@ -172,6 +172,15 @@ dependencies {
 	// For EWS (uses javax.xml.ws.http.HTTPException)
 	implementation 'javax.xml.ws:jaxws-api:2.3.1'
 
+    // Dependencies for Spring AI
+
+    // implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // https://mvnrepository.com/artifact/org.springframework.ai/spring-ai-starter-mcp-server
+    implementation "org.springframework.ai:spring-ai-starter-mcp-server-webmvc:1.1.0-M4"
+
+    // Test ----------------------------
+
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:3.0.1'
@@ -183,6 +192,7 @@ dependencies {
 
 	testImplementation "org.junit.jupiter:junit-jupiter"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
 }
 
 configurations.all {

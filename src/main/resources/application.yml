@@ -2,6 +2,21 @@ logging:
   config: file:logback-spring.xml
 
 spring:
+
+  application:
+    name: ANET
+
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: anet-demo
+        version: 0.0.1
+        protocol: streamable
+        stdio: false
+        type: sync
+        #base-url: /mcp
+
   servlet:
     # Allow upload of large files
     multipart:
