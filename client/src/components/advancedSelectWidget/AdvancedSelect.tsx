@@ -11,7 +11,6 @@ import Checkbox from "components/Checkbox"
 import Model from "components/Model"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
-import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap"
@@ -189,33 +188,29 @@ const AdvancedSelect = ({
   const renderSelectedWithDelete = renderSelected
     ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
     : null
-  const [items, totalCount] =
-    results && results[filterType]
-      ? [results[filterType].list, results[filterType].totalCount]
-      : [[], 0]
+  const [items, totalCount] = [results?.list ?? [], results?.totalCount ?? 0]
 
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilter?.list) {
-        const resourceName = objectType.resourceName
-        const listName = selectedFilter?.listName || objectType.listName
-        const queryVars = { pageNum, pageSize }
-        if (latestQueryParams.current) {
-          Object.assign(queryVars, latestQueryParams.current)
-        }
-        if (selectedFilter?.queryVars) {
-          Object.assign(queryVars, selectedFilter?.queryVars)
-        }
-        if (searchTerms) {
-          Object.assign(queryVars, { text: searchTerms + "*" })
-        }
-        if (inclInactive) {
-          delete queryVars.status
-        } else {
-          queryVars.status = Model.STATUS.ACTIVE
-        }
-        const thisRequest = (latestRequest.current = API.query(
-          gql`
+      const resourceName = objectType.resourceName
+      const listName = selectedFilter?.listName || objectType.listName
+      const queryVars = { pageNum, pageSize }
+      if (latestQueryParams.current) {
+        Object.assign(queryVars, latestQueryParams.current)
+      }
+      if (selectedFilter?.queryVars) {
+        Object.assign(queryVars, selectedFilter?.queryVars)
+      }
+      if (searchTerms) {
+        Object.assign(queryVars, { text: searchTerms + "*" })
+      }
+      if (inclInactive) {
+        delete queryVars.status
+      } else {
+        queryVars.status = Model.STATUS.ACTIVE
+      }
+      const thisRequest = (latestRequest.current = API.query(
+        gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
               pageNum
@@ -227,29 +222,26 @@ const AdvancedSelect = ({
             }
           }
         `,
-          { query: queryVars }
-        ).then(data => {
-          // If this is true there's a newer request happening, stop everything
-          if (thisRequest !== latestRequest.current) {
-            return
-          }
-          setIsLoading(data[listName].totalCount !== 0)
-          setResults(oldResults => ({
-            ...oldResults,
-            [filterType]: data[listName]
-          }))
+        { query: queryVars }
+      ).then(data => {
+        // If this is true there's a newer request happening, stop everything
+        if (thisRequest !== latestRequest.current) {
+          return
+        }
+        setIsLoading(data[listName].totalCount !== 0)
+        setResults(oldResults => ({
+          ...oldResults,
+          ...data[listName]
         }))
-      }
+      }))
     },
     [
       fields,
-      filterType,
       inclInactive,
       objectType.listName,
       objectType.resourceName,
       pageNum,
       pageSize,
-      selectedFilter?.list,
       selectedFilter?.listName,
       selectedFilter?.queryVars
     ]
@@ -285,22 +277,6 @@ const AdvancedSelect = ({
       setFetchType(FETCH_TYPE.NONE)
     }
   }, [selectedValueAsString])
-
-  useEffect(() => {
-    // No need to fetch the data, it is already provided in the filter definition
-    if (selectedFilter.list) {
-      setIsLoading(!_isEmpty(selectedFilter.list))
-      setResults(oldResults => ({
-        ...oldResults,
-        [filterType]: {
-          list: selectedFilter.list,
-          pageNum,
-          pageSize,
-          totalCount: selectedFilter.list.length
-        }
-      }))
-    }
-  }, [filterType, pageNum, pageSize, selectedFilter?.list])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -571,13 +547,10 @@ const AdvancedSelect = ({
   }
 
   function changeFilterType(newFilterType) {
-    // When changing the filter type, only fetch the results if they were not fetched before
-    const filterResults = results[newFilterType]
-    const shouldFetchResults = _isEmpty(filterResults)
     setFilterType(newFilterType)
-    setPageNum(results && filterResults ? filterResults.pageNum : 0)
-    setIsLoading(shouldFetchResults)
-    setFetchType(shouldFetchResults ? FETCH_TYPE.NORMAL : FETCH_TYPE.NONE)
+    setPageNum(0)
+    setIsLoading(true)
+    setFetchType(FETCH_TYPE.NORMAL)
   }
 
   function goToPage(pageNum) {
