@@ -562,6 +562,31 @@ table hr.attendee-divider {
   clear: both;
 }
 
+.advanced-select-popover {
+  --bp6-popover-content-padding: 20px;
+  --bp6-popover-content-max-height: 47vh;
+  --advanced-select-popover-sticky-heading-height: calc(1.5rem + 0.125rem + var(--bp6-popover-content-padding));
+}
+
+.advanced-select-popover.bp6-popover.bp6-popover-content-sizing .bp6-popover-content {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.advanced-select-popover-sticky-heading {
+  position: sticky;
+  top: 0;
+  padding-top: var(--bp6-popover-content-padding);
+  background-color: white;
+}
+
+.advanced-select-popover-filters {
+  position: sticky;
+  top: var(--advanced-select-popover-sticky-heading-height);
+  max-height: calc(var(--bp6-popover-content-max-height) - (var(--advanced-select-popover-sticky-heading-height) + var(--bp6-popover-content-padding)));
+  background-color: white;
+}
+
 .link-to-entity {
   display: inline-flex;
   align-items: center;
@@ -1021,7 +1046,7 @@ header.searchPagination {
 .advanced-select-popover .bp6-popover-content {
   min-width: 400px;
   max-width: 90vw !important;
-  max-height: 47vh !important;
+  max-height: var(--bp6-popover-content-max-height) !important;
   overflow-y: scroll;
 }
 

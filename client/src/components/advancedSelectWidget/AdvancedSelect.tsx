@@ -49,7 +49,7 @@ const FilterAsNav = ({
   handleOnClick
 }: FilterAsNavProps) =>
   hasMultipleItems(items) && (
-    <Col md={4} className="d-none d-md-block">
+    <Col md={4} className="advanced-select-popover-filters d-none d-md-block">
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.entries(items).map(([filterType, filter]) => (
           <li
@@ -72,7 +72,7 @@ interface FilterAsDropdownProps {
 
 const FilterAsDropdown = ({ items, handleOnChange }: FilterAsDropdownProps) =>
   hasMultipleItems(items) && (
-    <Col className="d-xs-block d-md-none">
+    <Col className="advanced-select-popover-filters d-xs-block d-md-none">
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -340,7 +340,7 @@ const AdvancedSelect = ({
                 content={
                   <div className="d-flex flex-column">
                     {(showInclInactive || showDismiss) && (
-                      <div className="d-flex flex-row justify-content-end align-items-center">
+                      <div className="advanced-select-popover-sticky-heading d-flex flex-row justify-content-end align-items-center">
                         {showInclInactive && (
                           <Checkbox
                             id={`${fieldName}-inclInactive`}
