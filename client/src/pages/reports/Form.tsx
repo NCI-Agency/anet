@@ -431,6 +431,8 @@ const ReportForm = ({
               orgUuid: currentOrg.uuid
             }
           }
+        }
+        if (!_isEmpty(currentUser.position?.associatedPositions)) {
           reportPeopleFilters.myCounterparts = {
             label: "My counterparts",
             list: currentUser.position.associatedPositions
