@@ -10,6 +10,8 @@ import mil.dds.anet.graphql.outputtransformers.ResourceTransformers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +67,18 @@ public class GraphQLResource {
       @RequestBody GraphQLRequest requestBody,
       @RequestParam(name = "output", required = false) String ignoredOutput) {
     return ResourceTransformers.xlsxTransformer.apply(graphql(principal, requestBody, null));
+  }
+
+  public Map<String, Object> graphql(final GraphQLRequest requestBody,
+      final NativeWebRequest request) {
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+          "Must provide a valid Web Service Access Token");
+    }
+    return executor.execute((Principal) auth.getPrincipal(), this.graphQL,
+        getExecutorParams(requestBody, request));
   }
 
   public Map<String, Object> graphql(final Principal principal, final GraphQLRequest requestBody,

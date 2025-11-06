@@ -12,7 +12,10 @@ import java.util.Map;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.utils.ResponseUtils;
+import mil.dds.anet.views.UserActivityFilter;
 import mil.dds.anet.ws.GraphQLWebService;
+import mil.dds.anet.ws.security.BearerTokenAuthFilter;
+import mil.dds.anet.ws.security.BearerTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +29,14 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
@@ -43,6 +51,7 @@ public class SecurityConfig {
 
   private final AnetConfig anetConfig;
   private final AnetDictionary anetDictionary;
+  private final BearerTokenAuthFilter bearerTokenAuthFilter;
 
   private final ContentSecurityPolicy webServiceCsp = ContentSecurityPolicy.of(
       // default: block everything
@@ -72,9 +81,11 @@ public class SecurityConfig {
       // we supply images, load images through a data: URL, and get images from the map baseLayers
       CspDirective.of("img-src", CSP_SELF, "data:", "%3$s"));
 
-  public SecurityConfig(AnetConfig anetConfig, AnetDictionary anetDictionary) {
+  public SecurityConfig(AnetConfig anetConfig, AnetDictionary anetDictionary,
+      BearerTokenService bearerTokenService) {
     this.anetConfig = anetConfig;
     this.anetDictionary = anetDictionary;
+    this.bearerTokenAuthFilter = new BearerTokenAuthFilter(bearerTokenService);
   }
 
   /**
@@ -102,7 +113,10 @@ public class SecurityConfig {
   public SecurityFilterChain graphQLWebServiceFilterChain(HttpSecurity http) throws Exception {
     http
         // Only applies to GraphQL Web Service endpoint
-        .securityMatcher(GraphQLWebService.GRAPHQL_WEB_SERVICE).authorizeHttpRequests(authorize ->
+        .securityMatcher(GraphQLWebService.GRAPHQL_WEB_SERVICE)
+        // Insert bearer token authentication filter into the chain
+        .addFilterBefore(bearerTokenAuthFilter, BasicAuthenticationFilter.class)
+        .authorizeHttpRequests(authorize ->
         // Allow all GraphQL web service requests; service itself checks access
         authorize.anyRequest().permitAll());
 
@@ -125,28 +139,32 @@ public class SecurityConfig {
   }
 
   @Bean
+  public UserActivityFilter userActivityFilter() {
+    return new UserActivityFilter();
+  }
+
+  @Bean
   @Order(30)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests(authorize -> authorize
-        // These are public
-        .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,
-            AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH)
-        .permitAll()
-        // Block the default GraphQL endpoint
-        .requestMatchers(unusedGraphQLEndpoint).denyAll()
-        // The rest requires authentication
-        .anyRequest().authenticated()) // -
+
+    http.addFilterAfter(userActivityFilter(), AuthorizationFilter.class)
+        .authorizeHttpRequests(authorize -> authorize
+            .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,
+                AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH)
+            .permitAll().requestMatchers(unusedGraphQLEndpoint).denyAll().anyRequest()
+            .authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
         .oauth2Login(Customizer.withDefaults());
+
     if (anetConfig.getRedirectToHttps()) {
       http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
     }
-    // Configure CSP
+
     http.headers(headers -> headers
         .contentSecurityPolicy(csp -> csp.policyDirectives(String.format(defaultCsp.toString(),
-            getAuthServerUrl(), getGeoSearcherUrl(), getBaseLayersUrls()))));
-    // Configure Referrer Policy
-    http.headers(header -> header.referrerPolicy(rp -> rp.policy(SAME_ORIGIN)));
+            getAuthServerUrl(), getGeoSearcherUrl(), getBaseLayersUrls()))))
+        .headers(header -> header.referrerPolicy(rp -> rp.policy(SAME_ORIGIN)));
+
     return http.build();
   }
 
