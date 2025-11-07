@@ -28,6 +28,7 @@ interface TopBarProps {
   minimalHeader?: boolean
   toggleMenuAction?: (...args: unknown[]) => unknown
   handleSecurityBannerBottom: (...args: unknown[]) => unknown
+  toggleChatAction?: () => void
 }
 
 const TopBar = ({
@@ -35,7 +36,8 @@ const TopBar = ({
   resetPages,
   minimalHeader,
   toggleMenuAction,
-  handleSecurityBannerBottom
+  handleSecurityBannerBottom,
+  toggleChatAction
 }: TopBarProps) => {
   const { currentUser } = useContext(AppContext)
   const { appSettings } = useContext(PollingContext)
@@ -138,6 +140,7 @@ const TopBar = ({
           minimalHeader={minimalHeader}
           toggleMenuAction={toggleMenuAction}
           onHomeClick={resetPages}
+          toggleChatAction={toggleChatAction}
         />
       </div>
     </div>
