@@ -1,10 +1,12 @@
 import CreateButton from "components/CreateButton"
 import SearchBar from "components/SearchBar"
 import React from "react"
-import { Col, Container, Row } from "react-bootstrap"
+import { Button, Col, Container, Row } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import menuLogo from "resources/anet-menu.svg"
 import logo from "../../public/favicon/logo.svg"
+import { Icon } from "@blueprintjs/core"
+import { IconNames, IconSize } from "@blueprintjs/icons"
 
 const backgroundCss = {
   background: "#fff",
@@ -18,12 +20,14 @@ interface HeaderProps {
   minimalHeader?: boolean
   onHomeClick?: (...args: unknown[]) => unknown
   toggleMenuAction?: (...args: unknown[]) => unknown
+  toggleChatAction?: () => void
 }
 
 const Header = ({
   minimalHeader,
   onHomeClick,
-  toggleMenuAction
+  toggleMenuAction,
+  toggleChatAction
 }: HeaderProps) => (
   <header style={backgroundCss} className="header">
     <Container fluid>
@@ -55,8 +59,18 @@ const Header = ({
 
         {!minimalHeader && (
           <Col xs={3} sm={2} md={2} lg={1}>
-            <div style={{ paddingRight: 5 }} className="float-end">
+            <div style={{ paddingRight: 5 }} className="float-end d-flex flex-row gap-2">
               <CreateButton />
+              {toggleChatAction && (
+                <Icon
+                  icon={IconNames.CHAT}
+                  title="Toggle Chat"
+                  className="m-auto"
+                  onClick={toggleChatAction}
+                  color="#0071bc" size={IconSize.LARGE}
+                  style={{ cursor: "pointer" }}
+                />
+              )}
             </div>
           </Col>
         )}
