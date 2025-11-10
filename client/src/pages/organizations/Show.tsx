@@ -643,7 +643,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           <OrganizationTasks
             organization={organization}
             queryParams={{
-              status: Model.STATUS.ACTIVE,
               pageSize: 10,
               taskedOrgUuid: organization.uuid
             }}

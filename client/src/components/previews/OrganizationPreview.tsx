@@ -243,7 +243,6 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
         <OrganizationTasks
           organization={organization}
           queryParams={{
-            status: Model.STATUS.ACTIVE,
             pageSize: 10,
             taskedOrgUuid: organization.uuid
           }}
