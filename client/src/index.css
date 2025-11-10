@@ -835,6 +835,9 @@ div.locations-marker-cluster {
 .fc-timegrid-event.event-cancelled {
   border-color: #ec971f;
   background-color: #ec971f;
+  & > .fc-event-main {
+    color: black !important;
+  }
 }
 .fc-daygrid-event.event-approved,
 .fc-timegrid-event.event-approved {
@@ -891,6 +894,9 @@ div.locations-marker-cluster {
 .fc-timegrid-event.event-future-cancelled {
   border-color: #ec971f;
   background-color: #ec971f;
+  & > .fc-event-main {
+    color: black !important;
+  }
 }
 .fc-daygrid-event.event-future-approved,
 .fc-timegrid-event.event-future-approved {
