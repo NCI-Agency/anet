@@ -68,7 +68,12 @@ export const EmailModal = ({
 
   const personFields = `${Person.autocompleteQuery} emailAddresses(network: "${EMAIL_NETWORK}") { network address }`
   return (
-    <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
+    <Modal
+      backdrop="static"
+      centered
+      show={showEmailModal}
+      onHide={toggleEmailModal}
+    >
       <Form>
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>

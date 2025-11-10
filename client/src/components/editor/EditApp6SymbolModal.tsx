@@ -276,7 +276,13 @@ const EditApp6SymbolModal = ({
   }
 
   return (
-    <Modal centered show={showModal} onHide={onHide} size="xl">
+    <Modal
+      backdrop="static"
+      centered
+      show={showModal}
+      onHide={onHide}
+      size="xl"
+    >
       <Modal.Header closeButton>
         <Modal.Title>Edit APP-06 Symbol</Modal.Title>
       </Modal.Header>

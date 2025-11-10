@@ -587,7 +587,12 @@ const Search = ({
 
   function renderSaveModal() {
     return (
-      <Modal centered show={showSaveSearch} onHide={closeSaveModal}>
+      <Modal
+        backdrop="static"
+        centered
+        show={showSaveSearch}
+        onHide={closeSaveModal}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Save search</Modal.Title>
         </Modal.Header>
@@ -643,6 +648,7 @@ const Search = ({
   function renderExportModal() {
     return (
       <Modal
+        backdrop="static"
         centered
         show={showExportResults}
         onHide={closeExportResultsModal}

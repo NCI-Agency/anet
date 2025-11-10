@@ -67,6 +67,7 @@ const EditApprovalsModal = ({
         submitForm
       }) => (
         <Modal
+          backdrop="static"
           show={showModal}
           onHide={() => close(setFieldValue)}
           size="xl"

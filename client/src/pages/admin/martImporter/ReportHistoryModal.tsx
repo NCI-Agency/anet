@@ -19,7 +19,7 @@ const ReportHistoryModal = ({
   onCancel
 }: ReportHistoryModalProps) => {
   return (
-    <Modal centered show onHide={onCancel} size="xl">
+    <Modal backdrop="static" centered show onHide={onCancel} size="xl">
       <Modal.Header closeButton>
         <Modal.Title>{martImportedReport.report.intent}</Modal.Title>
       </Modal.Header>

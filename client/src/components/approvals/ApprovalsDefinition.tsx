@@ -101,6 +101,7 @@ const ApprovalsDefinition = ({
                 {addButtonLabel}
               </Button>
               <Modal
+                backdrop="static"
                 centered
                 show={showAddApprovalStepAlert}
                 onHide={hideAddApprovalStepAlert}
@@ -119,6 +120,7 @@ const ApprovalsDefinition = ({
                 </Modal.Footer>
               </Modal>
               <Modal
+                backdrop="static"
                 centered
                 show={showRemoveApprovalStepAlert}
                 onHide={hideRemoveApprovalStepAlert}

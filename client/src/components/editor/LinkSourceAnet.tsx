@@ -54,11 +54,11 @@ const LinkSourceAnet = ({
 
   return (
     <Modal
+      backdrop="static"
       centered
       size="lg"
       show={showModal}
       aria-labelledby="Link chooser"
-      backdrop
       backdropClassName="editor-link-chooser"
       className="editor-link-chooser"
       onHide={() => setShowModal(false)}

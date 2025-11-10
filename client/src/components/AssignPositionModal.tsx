@@ -215,7 +215,7 @@ const AssignPositionModal = ({
   }
 
   return (
-    <Modal centered show={showModal} onHide={closeModal}>
+    <Modal backdrop="static" centered show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
           Set position for{" "}

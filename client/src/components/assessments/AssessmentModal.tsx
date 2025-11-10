@@ -59,6 +59,7 @@ const AssessmentModal = ({
   )
   return (
     <Modal
+      backdrop="static"
       centered
       show={showModal}
       onHide={closeModal}

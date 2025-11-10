@@ -49,6 +49,7 @@ const RelatedObjectNoteModal = ({
 
   return (
     <Modal
+      backdrop="static"
       centered
       show={showModal}
       onHide={close}
