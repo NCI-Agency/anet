@@ -5,6 +5,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -12,6 +13,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
+import { Position } from "models"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
@@ -100,10 +102,10 @@ const HelpFetchSuperusers = ({
     personQuery: {
       pageSize: 0,
       pendingVerification: false,
-      positionType: "ADMINISTRATOR",
+      positionType: Position.TYPE.ADMINISTRATOR,
       sortBy: "NAME",
       sortOrder: "ASC",
-      status: "ACTIVE"
+      status: Model.STATUS.ACTIVE
     }
   })
 
