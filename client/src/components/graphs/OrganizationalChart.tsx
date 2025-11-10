@@ -69,10 +69,10 @@ const GQL_GET_CHART_DATA = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
-      childrenOrgs(query: { status: ACTIVE }) {
+      childrenOrgs {
         ${gqlEntityFieldsMap.Organization}
       }
-      descendantOrgs(query: { status: ACTIVE }) {
+      descendantOrgs {
         ${gqlEntityFieldsMap.Organization}
         app6context
         app6standardIdentity
@@ -84,7 +84,7 @@ const GQL_GET_CHART_DATA = gql`
         app6entitySubtype
         app6sectorOneModifier
         app6sectorTwoModifier
-        childrenOrgs(query: { status: ACTIVE }) {
+        childrenOrgs {
           ${gqlEntityFieldsMap.Organization}
         }
         ascendantOrgs {

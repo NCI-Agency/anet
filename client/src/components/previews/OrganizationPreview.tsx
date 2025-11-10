@@ -65,10 +65,10 @@ const GQL_GET_ORGANIZATION = gql`
       parentOrg {
         ...organizationFields
       }
-      childrenOrgs(query: { status: ACTIVE }) {
+      childrenOrgs {
         ...organizationFields
       }
-      ascendantOrgs(query: { status: ACTIVE }) {
+      ascendantOrgs {
         ...organizationFields
         parentOrg {
           uuid
