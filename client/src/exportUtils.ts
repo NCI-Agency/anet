@@ -338,48 +338,48 @@ const getEventFragment = (fields: string[] = []) => `
           fields,
           "ownerOrg",
           `ownerOrg {
-            ${shouldInclude(fields, "ownerOrg.uuid", "uuid")}
-            ${shouldInclude(fields, "ownerOrg.shortName", "shortName")}
-            ${shouldInclude(fields, "ownerOrg.longName", "longName")}
-            ${shouldInclude(fields, "ownerOrg.identificationCode", "identificationCode")}
+            uuid
+            shortName
+            longName
+            identificationCode
           }`
         )}
         ${shouldInclude(
           fields,
           "hostOrg",
           `hostOrg {
-            ${shouldInclude(fields, "hostOrg.uuid", "uuid")}
-            ${shouldInclude(fields, "hostOrg.shortName", "shortName")}
-            ${shouldInclude(fields, "hostOrg.longName", "longName")}
-            ${shouldInclude(fields, "hostOrg.identificationCode", "identificationCode")}
+            uuid
+            shortName
+            longName
+            identificationCode
           }`
         )}
         ${shouldInclude(
           fields,
           "adminOrg",
           `adminOrg {
-            ${shouldInclude(fields, "adminOrg.uuid", "uuid")}
-            ${shouldInclude(fields, "adminOrg.shortName", "shortName")}
-            ${shouldInclude(fields, "adminOrg.longName", "longName")}
-            ${shouldInclude(fields, "adminOrg.identificationCode", "identificationCode")}
+            uuid
+            shortName
+            longName
+            identificationCode
           }`
         )}
         ${shouldInclude(
           fields,
           "eventSeries",
           `eventSeries {
-            ${shouldInclude(fields, "eventSeries.uuid", "uuid")}
-            ${shouldInclude(fields, "eventSeries.name", "name")}
+            uuid
+            name
           }`
         )}
         ${shouldInclude(
           fields,
           "location",
           `location {
-            ${shouldInclude(fields, "location.uuid", "uuid")}
-            ${shouldInclude(fields, "location.name", "name")}
-            ${shouldInclude(fields, "location.lat", "lat")}
-            ${shouldInclude(fields, "location.lng", "lng")}
+            uuid
+            name
+            lat
+            lng
           }`
         )}
         ${shouldInclude(fields, "updatedAt")}
