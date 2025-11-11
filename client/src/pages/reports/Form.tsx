@@ -30,6 +30,7 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import { useChatBridge } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -227,6 +228,7 @@ const ReportForm = ({
 }: ReportFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
+  const { open: openChat, send: sendToChat, isReady } = useChatBridge()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -268,6 +270,12 @@ const ReportForm = ({
       autoSaveActive.current = false
     }
   })
+
+  useEffect(() => {
+    if (isReady) {
+      openChat()
+    }
+  }, [isReady, openChat])
 
   useEffect(() => {
     async function checkPotentiallyUnavailableLocation(
@@ -373,6 +381,17 @@ const ReportForm = ({
     reportPeople
   )
   let validateFieldDebounced
+
+  const AskAiForTranslate = () => {
+    console.log(isReady)
+    sendToChat({
+      application: "FACTOR",
+      businessObject: {
+        request: "Translate this text to english: " + initialValues.reportText
+      }
+    })
+  }
+
   return (
     <Formik
       enableReinitialize
@@ -1205,6 +1224,16 @@ const ReportForm = ({
                           Settings.fields.report.reportText?.placeholder
                         }
                       />
+                    }
+                    extraColElem={
+                      <Button
+                        type="button"
+                        variant="outline-primary"
+                        onClick={AskAiForTranslate}
+                        title="Translate to english"
+                      >
+                        Ask AI
+                      </Button>
                     }
                   />
 
