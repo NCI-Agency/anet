@@ -23,7 +23,6 @@ import {
   mapReadonlyCustomFieldToComp
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
-import EmailAddressTable from "components/EmailAddressTable"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -61,6 +60,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
 import utils from "utils"
+import MergeEmailAddresses from "./MergeEmailAddresses"
 
 const ALL_ORG_FIELDS = `
   ${gqlAllOrganizationFields}
@@ -342,10 +342,9 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.emailAddresses}
                 value={
-                  <EmailAddressTable
+                  <MergeEmailAddresses
                     label={Settings.fields.organization.emailAddresses.label}
                     emailAddresses={mergedOrganization.emailAddresses}
-                    mergeMode
                     align={ALIGN_OPTIONS.CENTER}
                     mergeState={mergeState}
                     dispatchMergeActions={dispatchMergeActions}
@@ -727,10 +726,9 @@ const OrganizationColumn = ({
             dictProps={Settings.fields.organization.emailAddresses}
             fieldName="emailAddresses"
             value={
-              <EmailAddressTable
+              <MergeEmailAddresses
                 label={Settings.fields.organization.emailAddresses.label}
                 emailAddresses={organization.emailAddresses}
-                mergeMode
                 align={align}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
