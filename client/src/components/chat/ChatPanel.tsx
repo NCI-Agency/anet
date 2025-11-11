@@ -1,0 +1,32 @@
+import { useChatBridge } from "components/chat/ChatBridge"
+import React from "react"
+
+const base = {
+  position: "relative",
+  flex: "0 0 auto",
+  overflow: "hidden",
+  transition: "width 0.3s ease",
+  width: 0,
+  borderLeft: "1px solid #ddd",
+  backgroundColor: "#f9f9f9",
+  zIndex: 10,
+  height: "100%"
+}
+const openStyle = { ...base, width: 350 }
+
+export default function ChatPanel() {
+  const { isOpen, setIframeEl } = useChatBridge()
+
+  return (
+    <div style={isOpen ? openStyle : base}>
+      <iframe
+        ref={setIframeEl}
+        src="https://127.0.0.1:7002/chat/index.html"
+        title="ChatGPT Panel"
+        style={{ width: "100%", height: "100%", border: "none" }}
+        sandbox="allow-scripts allow-same-origin allow-forms"
+        loading="lazy"
+      />
+    </div>
+  )
+}

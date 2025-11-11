@@ -1,4 +1,6 @@
 import AppContext from "components/AppContext"
+import { ChatBridgeProvider, useChatBridge } from "components/chat/ChatBridge"
+import ChatPanel from "components/chat/ChatPanel"
 import Navigation from "components/Nav"
 import PollingContext from "components/PollingContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
@@ -54,22 +56,6 @@ const loadingBar = {
   backgroundColor: "#29d"
 }
 
-const chatPanelContainer = {
-  position: "relative",
-  flex: "0 0 auto",
-  overflow: "hidden",
-  transition: "width 0.3s ease",
-  width: 0,
-  borderLeft: "1px solid #ddd",
-  backgroundColor: "#f9f9f9",
-  zIndex: 10,
-  height: "100%"
-}
-const chatPanelOpen = {
-  ...chatPanelContainer,
-  width: 350
-}
-
 interface ResponsiveLayoutProps {
   pageProps: {
     minimalHeader?: boolean
@@ -77,14 +63,18 @@ interface ResponsiveLayoutProps {
   }
 }
 
-const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
+function TopBarWithChat(props) {
+  const { toggle } = useChatBridge()
+  return <TopBar {...props} toggleChatAction={toggle} />
+}
+
+const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
   const location = useLocation()
   const { adminSettings, ...connectionInfo } = usePollingRequest()
   const { allOrganizations, currentUser } = useContext(AppContext)
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)
   const [securityBannerBottom, setSecurityBannerBottom] = useState(0)
-  const [isChatOpen, setIsChatOpen] = useState(false)
   useEffect(() => {
     // We want to hide the floating menu on navigation events
     setFloatingMenu(false)
@@ -132,14 +122,13 @@ const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
     <ResponsiveLayoutContext.Provider value={layoutContext}>
       <PollingContext.Provider value={pollingContext}>
         <div style={anetContainer} className="anet">
-          <TopBar
+          <TopBarWithChat
             handleTopbarHeight={handleTopbarHeight}
             minimalHeader={pageProps.minimalHeader}
             handleSecurityBannerBottom={handleSecurityBannerBottom}
             toggleMenuAction={() => {
               setFloatingMenu(!floatingMenu)
             }}
-            toggleChatAction={() => setIsChatOpen(!isChatOpen)}
           />
           <div style={contentContainer} className="content-container">
             <LoadingBar showFastActions style={loadingBar} />
@@ -166,19 +155,7 @@ const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
             >
               <Outlet />
             </Element>
-            <div style={isChatOpen ? chatPanelOpen : chatPanelContainer}>
-              <iframe
-                src="https://127.0.0.1:7002/chat/index.html"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  border: "none"
-                }}
-                title="ChatGPT Panel"
-                sandbox="allow-scripts allow-same-origin allow-forms"
-                loading="lazy"
-              />
-            </div>
+            <ChatPanel />
           </div>
         </div>
       </PollingContext.Provider>
@@ -192,6 +169,14 @@ const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
   function handleSecurityBannerBottom(securityBannerBottom) {
     setSecurityBannerBottom(securityBannerBottom)
   }
+}
+
+const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
+  return (
+    <ChatBridgeProvider>
+      <ResponsiveLayoutInner pageProps={pageProps} />
+    </ChatBridgeProvider>
+  )
 }
 
 const mapStateToProps = state => ({
