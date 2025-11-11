@@ -45,7 +45,6 @@ import SubNav from "components/SubNav"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
-import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
@@ -72,7 +71,6 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
-import Settings from "settings"
 import utils from "utils"
 
 // By default limit exports to the first 1000 results
@@ -104,9 +102,71 @@ const GQL_GET_SAVED_SEARCHES = gql`
 
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 10
+const SEARCH_ITEMS = {
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: {
+    navTo: "organizations",
+    iconImg: ORGANIZATIONS_ICON,
+    searchResultsComponent: OrganizationSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.PEOPLE]: {
+    navTo: "people",
+    iconImg: PEOPLE_ICON,
+    searchResultsComponent: PeopleSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.POSITIONS]: {
+    navTo: "positions",
+    iconImg: POSITIONS_ICON,
+    searchResultsComponent: PositionSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.TASKS]: {
+    navTo: "tasks",
+    iconImg: TASKS_ICON,
+    searchResultsComponent: TaskSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.LOCATIONS]: {
+    navTo: "locations",
+    iconImg: LOCATIONS_ICON,
+    searchResultsComponent: LocationSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.REPORTS]: {
+    navTo: "reports",
+    iconImg: REPORTS_ICON,
+    searchResultsComponent: ReportCollection
+  },
+  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: {
+    navTo: "authorizationGroups",
+    iconImg: COMMUNITIES_ICON,
+    searchResultsComponent: AuthorizationGroupSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.ATTACHMENTS]: {
+    navTo: "attachments",
+    iconName: IconNames.PAPERCLIP,
+    searchResultsComponent: AttachmentSearchResults
+  },
+  [SEARCH_OBJECT_TYPES.EVENTS]: {
+    navTo: "events",
+    iconImg: EVENTS_ICON,
+    searchResultsComponent: EventSearchResults
+  }
+}
 
 const sum = (...args) => {
-  return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
+  return args.reduce((prev, curr) => (curr === null ? prev : prev + curr), null)
+}
+
+const resetNumResults = (
+  searchQueryParamsChanged: boolean,
+  queryTypesChanged: boolean,
+  queryTypes: string[],
+  queryType: string,
+  setNumResults: (numResults: number) => void
+) => {
+  if (
+    searchQueryParamsChanged ||
+    (queryTypesChanged && !queryTypes.includes(queryType))
+  ) {
+    setNumResults(0)
+  }
 }
 
 const DEFAULT_RECIPIENTS = {
@@ -115,6 +175,34 @@ const DEFAULT_RECIPIENTS = {
   [SEARCH_OBJECT_TYPES.PEOPLE]: new Map(),
   [SEARCH_OBJECT_TYPES.POSITIONS]: new Map()
 }
+
+const resetRecipients = (
+  searchQueryParamsChanged: boolean,
+  queryTypesChanged: boolean,
+  queryTypes: string[],
+  recipients: object,
+  setRecipients: (recipients: object) => void
+) => {
+  const newRecipients = Object.entries(DEFAULT_RECIPIENTS).reduce(
+    (accum, [queryType, defaultRecipients]) => {
+      if (
+        searchQueryParamsChanged ||
+        (queryTypesChanged && !queryTypes.includes(queryType))
+      ) {
+        accum[queryType] = defaultRecipients
+      }
+      return accum
+    },
+    { ...recipients }
+  )
+  setRecipients(newRecipients)
+}
+
+const hasResults = (
+  queryTypes: string[],
+  queryType: string,
+  numResults: number
+) => queryTypes.includes(queryType) && numResults > 0
 
 interface SearchProps {
   pageDispatchers?: PageDispatchersPropType
@@ -144,6 +232,20 @@ const Search = ({
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
   const [numAttachments, setNumAttachments] = useState(null)
   const [numEvents, setNumEvents] = useState(null)
+  const setNumResults = useMemo(
+    () => ({
+      [SEARCH_OBJECT_TYPES.ATTACHMENTS]: setNumAttachments,
+      [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: setNumAuthorizationGroups,
+      [SEARCH_OBJECT_TYPES.EVENTS]: setNumEvents,
+      [SEARCH_OBJECT_TYPES.LOCATIONS]: setNumLocations,
+      [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: setNumOrganizations,
+      [SEARCH_OBJECT_TYPES.PEOPLE]: setNumPeople,
+      [SEARCH_OBJECT_TYPES.POSITIONS]: setNumPositions,
+      [SEARCH_OBJECT_TYPES.REPORTS]: setNumReports,
+      [SEARCH_OBJECT_TYPES.TASKS]: setNumTasks
+    }),
+    []
+  )
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
   const {
     loading,
@@ -171,7 +273,6 @@ const Search = ({
     numAttachments,
     numEvents
   )
-  const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
   const searchQueryParams = useMemo(
     () => getSearchQuery(searchQuery),
@@ -196,15 +297,6 @@ const Search = ({
     }),
     [searchQueryParams, pageSize]
   )
-  const eventSearchQueryParams = useMemo(
-    () => ({
-      ...searchQueryParams,
-      pageSize,
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    }),
-    [searchQueryParams, pageSize]
-  )
   const reportsSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
@@ -214,6 +306,17 @@ const Search = ({
     }),
     [searchQueryParams, pageSize]
   )
+  const getSearchQueryParams = (queryType: string) => {
+    switch (queryType) {
+      case SEARCH_OBJECT_TYPES.ATTACHMENTS:
+        return attachmentSearchQueryParams
+      case SEARCH_OBJECT_TYPES.REPORTS:
+        return reportsSearchQueryParams
+      default:
+        return genericSearchQueryParams
+    }
+  }
+
   const exportMaxResults = currentUser?.authorizationGroups
     ?.map(ag => ag.uuid)
     ?.includes(appSettings[UNLIMITED_EXPORTS_COMMUNITY])
@@ -227,98 +330,86 @@ const Search = ({
         : Object.keys(SEARCH_OBJECT_TYPES),
     [searchQuery.objectType]
   )
-  const latestQuery = useRef({ queryTypes, searchQueryParams })
-  const queryUnchanged = _isEqual(latestQuery.current, {
-    queryTypes,
+  const latestQueryTypes = useRef(queryTypes)
+  const queryTypesChanged = !_isEqual(latestQueryTypes.current, queryTypes)
+  const latestSearchQueryParams = useRef(searchQueryParams)
+  const searchQueryParamsChanged = !_isEqual(
+    latestSearchQueryParams.current,
     searchQueryParams
-  })
+  )
   useEffect(() => {
-    if (!queryUnchanged) {
-      latestQuery.current = { queryTypes, searchQueryParams }
-      setNumAttachments(0)
-      setNumAuthorizationGroups(0)
-      setNumEvents(0)
-      setNumLocations(0)
-      setNumOrganizations(0)
-      setNumPeople(0)
-      setNumPositions(0)
-      setNumReports(0)
-      setNumTasks(0)
-      setRecipients({ ...DEFAULT_RECIPIENTS })
+    if (searchQueryParamsChanged || queryTypesChanged) {
+      resetRecipients(
+        searchQueryParamsChanged,
+        queryTypesChanged,
+        queryTypes,
+        recipients,
+        setRecipients
+      )
+      for (const queryType in setNumResults) {
+        resetNumResults(
+          searchQueryParamsChanged,
+          queryTypesChanged,
+          queryTypes,
+          queryType,
+          setNumResults[queryType]
+        )
+      }
+      latestQueryTypes.current = queryTypes
+      latestSearchQueryParams.current = searchQueryParams
     }
   }, [
-    queryUnchanged,
-    queryTypes,
+    searchQueryParamsChanged,
     searchQueryParams,
+    queryTypesChanged,
+    queryTypes,
+    recipients,
     setRecipients,
-    setNumAttachments,
-    setNumAuthorizationGroups,
-    setNumEvents,
-    setNumLocations,
-    setNumOrganizations,
-    setNumPeople,
-    setNumPositions,
-    setNumReports,
-    setNumTasks
+    setNumResults
   ])
-  const hasOrganizationsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) &&
-    numOrganizations > 0
-  const hasPeopleResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && numPeople > 0
-  const hasPositionsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && numPositions > 0
-  const hasTasksResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && numTasks > 0
-  const hasLocationsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && numLocations > 0
-  const hasReportsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && numReports > 0
-  const hasAuthorizationGroupsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS) &&
-    numAuthorizationGroups > 0
-  const hasAttachmentsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && numAttachments > 0
-  const hasEventsResults =
-    queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && numEvents > 0
 
-  const resultObjectTypes = useMemo(() => {
-    const types = []
-    if (hasOrganizationsResults) {
-      types.push(SEARCH_OBJECT_TYPES.ORGANIZATIONS)
-    }
-    if (hasPeopleResults) {
-      types.push(SEARCH_OBJECT_TYPES.PEOPLE)
-    }
-    if (hasPositionsResults) {
-      types.push(SEARCH_OBJECT_TYPES.POSITIONS)
-    }
-    if (hasTasksResults) {
-      types.push(SEARCH_OBJECT_TYPES.TASKS)
-    }
-    if (hasLocationsResults) {
-      types.push(SEARCH_OBJECT_TYPES.LOCATIONS)
-    }
-    if (hasReportsResults) {
-      types.push(SEARCH_OBJECT_TYPES.REPORTS)
-    }
-    if (hasAuthorizationGroupsResults) {
-      types.push(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS)
-    }
-    if (hasEventsResults) {
-      types.push(SEARCH_OBJECT_TYPES.EVENTS)
-    }
-    return types
-  }, [
-    hasOrganizationsResults,
-    hasPeopleResults,
-    hasPositionsResults,
-    hasTasksResults,
-    hasReportsResults,
-    hasLocationsResults,
-    hasAuthorizationGroupsResults,
-    hasEventsResults
-  ])
+  const allResults = useMemo(
+    () => ({
+      [SEARCH_OBJECT_TYPES.ATTACHMENTS]: numAttachments,
+      [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: numAuthorizationGroups,
+      [SEARCH_OBJECT_TYPES.EVENTS]: numEvents,
+      [SEARCH_OBJECT_TYPES.LOCATIONS]: numLocations,
+      [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: numOrganizations,
+      [SEARCH_OBJECT_TYPES.PEOPLE]: numPeople,
+      [SEARCH_OBJECT_TYPES.POSITIONS]: numPositions,
+      [SEARCH_OBJECT_TYPES.REPORTS]: numReports,
+      [SEARCH_OBJECT_TYPES.TASKS]: numTasks
+    }),
+    [
+      numAttachments,
+      numAuthorizationGroups,
+      numEvents,
+      numLocations,
+      numOrganizations,
+      numPeople,
+      numPositions,
+      numReports,
+      numTasks
+    ]
+  )
+  const hasObjectResults = useMemo(() => {
+    return Object.entries(allResults).reduce(
+      (accum, [queryType, numResults]) => {
+        accum[queryType] = hasResults(queryTypes, queryType, numResults)
+        return accum
+      },
+      {}
+    )
+  }, [allResults, queryTypes])
+
+  const resultObjectTypes = useMemo(
+    () =>
+      Object.entries(hasObjectResults)
+        .filter(([, b]) => b)
+        .map(([queryType]) => queryType),
+    [hasObjectResults]
+  )
+
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -348,105 +439,25 @@ const Search = ({
           </Row>
           <Row style={{ paddingLeft: "2rem", marginBottom: "5px" }}>
             <Nav variant="pills" className="flex-column">
-              <AnchorNavItem
-                to="organizations"
-                disabled={!hasOrganizationsResults}
-              >
-                <img src={ORGANIZATIONS_ICON} alt="" /> Organizations{" "}
-                {hasOrganizationsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numOrganizations}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="people" disabled={!hasPeopleResults}>
-                <img src={PEOPLE_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}{" "}
-                {hasPeopleResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numPeople}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="positions" disabled={!hasPositionsResults}>
-                <img src={POSITIONS_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}{" "}
-                {hasPositionsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numPositions}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="tasks" disabled={!hasTasksResults}>
-                <img src={TASKS_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}{" "}
-                {hasTasksResults && (
-                  <Badge
-                    pill
-                    bg="secondary"
-                    className="float-end"
-                    style={{ marginLeft: "10px" }}
-                  >
-                    {numTasks}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="locations" disabled={!hasLocationsResults}>
-                <img src={LOCATIONS_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}{" "}
-                {hasLocationsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numLocations}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="reports" disabled={!hasReportsResults}>
-                <img src={REPORTS_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}{" "}
-                {hasReportsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numReports}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem
-                to="authorizationGroups"
-                disabled={!hasAuthorizationGroupsResults}
-              >
-                <img src={COMMUNITIES_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]}{" "}
-                {hasAuthorizationGroupsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numAuthorizationGroups}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="attachments" disabled={!hasAttachmentsResults}>
-                <Icon icon={IconNames.PAPERCLIP} />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.ATTACHMENTS]}{" "}
-                {hasAttachmentsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numAttachments}
-                  </Badge>
-                )}
-              </AnchorNavItem>
-
-              <AnchorNavItem to="events" disabled={!hasEventsResults}>
-                <img src={EVENTS_ICON} alt="" />{" "}
-                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.EVENTS]}{" "}
-                {hasEventsResults && (
-                  <Badge pill bg="secondary" className="float-end">
-                    {numEvents}
-                  </Badge>
-                )}
-              </AnchorNavItem>
+              {Object.entries(SEARCH_ITEMS).map(([queryType, searchItem]) => (
+                <AnchorNavItem
+                  key={queryType}
+                  to={searchItem.navTo}
+                  disabled={!hasObjectResults[queryType]}
+                >
+                  {searchItem.iconImg ? (
+                    <img src={searchItem.iconImg} alt="" />
+                  ) : (
+                    <Icon icon={searchItem.iconName} />
+                  )}
+                  {` ${SEARCH_OBJECT_LABELS[queryType]}`}
+                  {hasObjectResults[queryType] && (
+                    <Badge pill bg="secondary" className="float-end ms-1">
+                      {allResults[queryType]}
+                    </Badge>
+                  )}
+                </AnchorNavItem>
+              ))}
             </Nav>
           </Row>
         </Container>
@@ -536,235 +547,39 @@ const Search = ({
           <b>No search results found!</b>
         </Alert>
       )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) && (
-        <Fieldset
-          id="organizations"
-          title={
-            <>
-              Organizations
-              {hasOrganizationsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numOrganizations}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <OrganizationSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={genericSearchQueryParams}
-            setTotalCount={setNumOrganizations}
-            paginationKey="SEARCH_organizations"
-            pagination={pagination}
-            setPagination={setPagination}
-            allowSelection={withEmail}
-            updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.ORGANIZATIONS, r)
+      {Object.entries(SEARCH_ITEMS).map(([queryType, searchItem]) => {
+        if (!queryTypes.includes(queryType)) {
+          return null
+        }
+        const SearchResultsComponent = searchItem.searchResultsComponent
+        return (
+          <Fieldset
+            key={queryType}
+            id={searchItem.navTo}
+            title={
+              <>
+                {SEARCH_OBJECT_LABELS[queryType]}
+                {hasObjectResults[queryType] && (
+                  <Badge pill bg="secondary" className="ms-1">
+                    {allResults[queryType]}
+                  </Badge>
+                )}
+              </>
             }
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && (
-        <Fieldset
-          id="people"
-          title={
-            <>
-              People
-              {hasPeopleResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numPeople}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <PeopleSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={genericSearchQueryParams}
-            setTotalCount={setNumPeople}
-            paginationKey="SEARCH_people"
-            pagination={pagination}
-            setPagination={setPagination}
-            allowSelection={withEmail}
-            updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.PEOPLE, r)
-            }
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && (
-        <Fieldset
-          id="positions"
-          title={
-            <>
-              Positions
-              {hasPositionsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numPositions}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <PositionSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={genericSearchQueryParams}
-            setTotalCount={setNumPositions}
-            paginationKey="SEARCH_positions"
-            pagination={pagination}
-            setPagination={setPagination}
-            allowSelection={withEmail}
-            updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.POSITIONS, r)
-            }
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && !withEmail && (
-        <Fieldset
-          id="tasks"
-          title={
-            <>
-              {pluralize(taskShortLabel)}
-              {hasTasksResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numTasks}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <TaskSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={genericSearchQueryParams}
-            setTotalCount={setNumTasks}
-            paginationKey="SEARCH_tasks"
-            pagination={pagination}
-            setPagination={setPagination}
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && !withEmail && (
-        <Fieldset
-          id="locations"
-          title={
-            <>
-              Locations
-              {hasLocationsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numLocations}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <LocationSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={genericSearchQueryParams}
-            setTotalCount={setNumLocations}
-            paginationKey="SEARCH_locations"
-            pagination={pagination}
-            setPagination={setPagination}
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && !withEmail && (
-        <Fieldset
-          id="reports"
-          title={
-            <>
-              Reports
-              {hasReportsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numReports}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <ReportCollection
-            queryParams={reportsSearchQueryParams}
-            setTotalCount={setNumReports}
-            paginationKey="SEARCH_reports"
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS) && (
-        <Fieldset
-          id="authorizationGroups"
-          title={
-            <>
-              Communities
-              {hasAuthorizationGroupsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numAuthorizationGroups}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <AuthorizationGroupSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={genericSearchQueryParams}
-            setTotalCount={setNumAuthorizationGroups}
-            paginationKey="SEARCH_authorizationGroups"
-            pagination={pagination}
-            setPagination={setPagination}
-            allowSelection={withEmail}
-            updateRecipients={r =>
-              updateRecipients(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS, r)
-            }
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && !withEmail && (
-        <Fieldset
-          id="attachments"
-          title={
-            <>
-              Attachments
-              {hasAttachmentsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numAttachments}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <AttachmentSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={attachmentSearchQueryParams}
-            setTotalCount={setNumAttachments}
-            paginationKey="SEARCH_attachments"
-            pagination={pagination}
-            setPagination={setPagination}
-          />
-        </Fieldset>
-      )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && !withEmail && (
-        <Fieldset
-          id="events"
-          title={
-            <>
-              Events
-              {hasEventsResults && (
-                <Badge pill bg="secondary" className="ms-1">
-                  {numEvents}
-                </Badge>
-              )}
-            </>
-          }
-        >
-          <EventSearchResults
-            pageDispatchers={pageDispatchers}
-            queryParams={eventSearchQueryParams}
-            setTotalCount={setNumEvents}
-            paginationKey="SEARCH_events"
-            pagination={pagination}
-            setPagination={setPagination}
-          />
-        </Fieldset>
-      )}
+          >
+            <SearchResultsComponent
+              pageDispatchers={pageDispatchers}
+              queryParams={getSearchQueryParams(queryType)}
+              setTotalCount={setNumResults[queryType]}
+              paginationKey={`SEARCH_${searchItem.navTo}`}
+              pagination={pagination}
+              setPagination={setPagination}
+              allowSelection={withEmail}
+              updateRecipients={r => updateRecipients(queryType, r)}
+            />
+          </Fieldset>
+        )
+      })}
       {renderSaveModal()}
       {renderExportModal()}
     </div>
