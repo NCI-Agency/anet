@@ -904,6 +904,30 @@ div.locations-marker-cluster {
   background-color: #2965cc;
 }
 
+/* Colour indication of INACTIVE events in the EventCalendar */
+a.fc-event.event-INACTIVE {
+  border-color: #ec971f;
+  background-color: #ec971f;
+  & > .fc-event-main {
+    color: black !important;
+    font-style: italic !important;
+    & .fc-event-title:after {
+      content: " ∅";
+    }
+  }
+}
+
+tr.fc-event.event-INACTIVE {
+  color: gray !important;
+  font-style: italic !important;
+  & .fc-list-event-dot {
+    border-color: #ec971f !important;
+  }
+  & .fc-list-event-title > a:after {
+    content: " ∅";
+  }
+}
+
 .form-horizontal .label-align,
 .form-horizontal .form-label {
   text-align: right;

@@ -13,7 +13,6 @@ import {
   eventsToCalendarEvents
 } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
-import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType
@@ -98,7 +97,6 @@ const EventCalendar = ({
   function getEvents(fetchInfo, successCallback, failureCallback) {
     const eventQuery = {
       ...queryParams,
-      status: Model.STATUS.ACTIVE,
       pageSize: 0,
       startDate: moment(fetchInfo.start).startOf("day"),
       endDate: moment(fetchInfo.end).endOf("day")

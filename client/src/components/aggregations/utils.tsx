@@ -253,10 +253,12 @@ export function createCalendarEventFromEvent(event) {
   start.setSeconds(0, 0) // truncate at the minute part
   const end = new Date(event.endDate)
   end.setSeconds(0, 0) // truncate at the minute part
+  const classNames = [`event-${event.status ?? "UNKNOWN"}`]
   return {
     title,
     start,
     end,
+    classNames,
     url: Event.pathFor(event),
     extendedProps: { ...event },
     allDay: !Settings.eventsIncludeStartAndEndTime
