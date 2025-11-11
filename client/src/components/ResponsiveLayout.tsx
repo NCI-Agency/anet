@@ -1,3 +1,5 @@
+import { ChatBridgeProvider, useChatBridge } from "components/chat/ChatBridge"
+import ChatPanel from "components/chat/ChatPanel"
 import Navigation from "components/Nav"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import TopBar from "components/TopBar"
@@ -50,22 +52,6 @@ const loadingBar = {
   backgroundColor: "#29d"
 }
 
-const chatPanelContainer = {
-  position: "relative",
-  flex: "0 0 auto",
-  overflow: "hidden",
-  transition: "width 0.3s ease",
-  width: 0,
-  borderLeft: "1px solid #ddd",
-  backgroundColor: "#f9f9f9",
-  zIndex: 10,
-  height: "100%"
-}
-const chatPanelOpen = {
-  ...chatPanelContainer,
-  width: 350
-}
-
 interface ResponsiveLayoutProps {
   pageProps: {
     minimalHeader?: boolean
@@ -77,7 +63,12 @@ interface ResponsiveLayoutProps {
   children?: React.ReactNode
 }
 
-const ResponsiveLayout = ({
+function TopBarWithChat(props) {
+  const { toggle } = useChatBridge()
+  return <TopBar {...props} toggleChatAction={toggle} />
+}
+
+const ResponsiveLayoutInner = ({
   pageProps,
   sidebarData,
   children
@@ -86,7 +77,6 @@ const ResponsiveLayout = ({
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)
   const [securityBannerBottom, setSecurityBannerBottom] = useState(0)
-  const [isChatOpen, setIsChatOpen] = useState(false)
   useEffect(() => {
     // We want to hide the floating menu on navigation events
     showFloatingMenu(false)
@@ -103,14 +93,13 @@ const ResponsiveLayout = ({
       }}
     >
       <div style={anetContainer} className="anet">
-        <TopBar
+        <TopBarWithChat
           handleTopbarHeight={handleTopbarHeight}
           minimalHeader={pageProps.minimalHeader}
           handleSecurityBannerBottom={handleSecurityBannerBottom}
           toggleMenuAction={() => {
             showFloatingMenu(!floatingMenu)
           }}
-          toggleChatAction={() => setIsChatOpen(!isChatOpen)}
         />
         <div style={contentContainer} className="content-container">
           <LoadingBar showFastActions style={loadingBar} />
@@ -130,22 +119,14 @@ const ResponsiveLayout = ({
               </div>
             </div>
           )}
-          <Element name="mainViewport" id="main-viewport" style={{ flex: "1 1 auto", overflow: "auto" }}>
+          <Element
+            name="mainViewport"
+            id="main-viewport"
+            style={{ flex: "1 1 auto", overflow: "auto" }}
+          >
             {children}
           </Element>
-          <div style={isChatOpen ? chatPanelOpen : chatPanelContainer}>
-            <iframe
-              src="https://127.0.0.1:7002/chat/index.html"
-              style={{
-                width: "100%",
-                height: "100%",
-                border: "none"
-              }}
-              title="ChatGPT Panel"
-              sandbox="allow-scripts allow-same-origin allow-forms"
-              loading="lazy"
-            />
-          </div>
+          <ChatPanel />
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>
@@ -162,6 +143,14 @@ const ResponsiveLayout = ({
   function showFloatingMenu(floatingMenu) {
     setFloatingMenu(floatingMenu)
   }
+}
+
+const ResponsiveLayout = (props: ResponsiveLayoutProps) => {
+  return (
+    <ChatBridgeProvider>
+      <ResponsiveLayoutInner {...props} />
+    </ChatBridgeProvider>
+  )
 }
 
 export default ResponsiveLayout

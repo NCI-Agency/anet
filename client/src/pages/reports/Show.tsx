@@ -23,6 +23,7 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import { useChatBridge } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -210,6 +211,20 @@ interface ReportShowProps {
   setSearchQuery: (...args: unknown[]) => unknown
 }
 
+function stripHtml(input?: string) {
+  if (!input) {
+    return ""
+  }
+  return input
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function truncate(input: string, max = 20000) {
+  return input.length > max ? input.slice(0, max) + "…" : input
+}
+
 const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
@@ -221,6 +236,83 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   )
   const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
+  const { open: openChat, send: sendToChat, isReady } = useChatBridge()
+
+  type ChatSuggestion = {
+    label: string
+    prompt: string
+    icon?: string
+    iconColor?: string
+  }
+
+  function makeReportSuggestions(): ChatSuggestion[] {
+    return [
+      {
+        label: "Review",
+        prompt: `Review the report`,
+        icon: "check-circle",
+        iconColor: "#19aa28ff"
+      },
+      {
+        label: "Summarize",
+        prompt: "Summarize this report",
+        icon: "list-bullets",
+        iconColor: "#000000ff"
+      },
+      {
+        label: "Translate",
+        prompt: "Translate this report",
+        icon: "translate",
+        iconColor: "#1e90ff"
+      }
+    ]
+  }
+  function buildReportBusinessObject(report: Report) {
+    const plainText = truncate(stripHtml(report.reportText || ""))
+
+    const authors = report.authors?.map(a => a?.name).filter(Boolean) || []
+    const attendees =
+      report.reportPeople
+        ?.filter(rp => rp?.attendee)
+        .map(rp => rp?.name)
+        .filter(Boolean) || []
+    const tasks =
+      report.tasks
+        ?.map(t => t?.shortName || t?.longName || t?.uuid)
+        .filter(Boolean) || []
+    const keyOutcomes = Array.isArray(report.keyOutcomes)
+      ? report.keyOutcomes
+      : []
+    const nextSteps = Array.isArray(report.nextSteps) ? report.nextSteps : []
+
+    return {
+      title: report.intent || "",
+      description: plainText,
+      relatedContext: {
+        classification: report.classification,
+        engagementDate: report.engagementDate,
+        location: report.location?.name,
+        advisorOrg: report.advisorOrg?.shortName || report.advisorOrg?.longName,
+        interlocutorOrg:
+          report.interlocutorOrg?.shortName || report.interlocutorOrg?.longName,
+        authors,
+        attendees,
+        tasks,
+        keyOutcomes,
+        nextSteps
+      }
+    }
+  }
+
+  function sendReportContextToAI(report: Report) {
+    const businessObject = buildReportBusinessObject(report)
+    sendToChat({
+      application: "FACTOR",
+      businessObject,
+      suggestions: makeReportSuggestions()
+    })
+  }
+
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -325,6 +417,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const canEmail = !report.isDraft()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
+  // Initialize AI chat
+  sendReportContextToAI(report)
+
   return (
     <Formik
       enableReinitialize
@@ -341,6 +436,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 Email report
               </Button>
             )}
+            <Button
+              variant="outline-primary"
+              onClick={openChat}
+              title="Open AI chat panel"
+            >
+              Ask AI
+            </Button>
             <Button
               value="compactView"
               variant="primary"

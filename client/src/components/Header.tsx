@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames, IconSize } from "@blueprintjs/icons"
 import CreateButton from "components/CreateButton"
 import SearchBar from "components/SearchBar"
 import React from "react"
@@ -5,8 +7,6 @@ import { Button, Col, Container, Row } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import menuLogo from "resources/anet-menu.svg"
 import logo from "../../public/favicon/logo.svg"
-import { Icon } from "@blueprintjs/core"
-import { IconNames, IconSize } from "@blueprintjs/icons"
 
 const backgroundCss = {
   background: "#fff",
@@ -59,7 +59,10 @@ const Header = ({
 
         {!minimalHeader && (
           <Col xs={3} sm={2} md={2} lg={1}>
-            <div style={{ paddingRight: 5 }} className="float-end d-flex flex-row gap-2">
+            <div
+              style={{ paddingRight: 5 }}
+              className="float-end d-flex flex-row gap-2"
+            >
               <CreateButton />
               {toggleChatAction && (
                 <Icon
@@ -67,7 +70,8 @@ const Header = ({
                   title="Toggle Chat"
                   className="m-auto"
                   onClick={toggleChatAction}
-                  color="#0071bc" size={IconSize.LARGE}
+                  color="#0071bc"
+                  size={IconSize.LARGE}
                   style={{ cursor: "pointer" }}
                 />
               )}
