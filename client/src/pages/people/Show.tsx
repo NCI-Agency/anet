@@ -283,11 +283,13 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         <Fieldset>
           <Container fluid>
             <Row>
-              <Col md={6} className="text-center">
-                <EntityAvatarDisplay
-                  avatar={avatar}
-                  defaultAvatar={Person.relatedObjectType}
-                />
+              <Col md={6}>
+                <div className="text-center">
+                  <EntityAvatarDisplay
+                    avatar={avatar}
+                    defaultAvatar={Person.relatedObjectType}
+                  />
+                </div>
                 {leftColumnUnderAvatar}
               </Col>
               <Col md={6}>{rightColumn}</Col>
