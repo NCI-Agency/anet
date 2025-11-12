@@ -79,9 +79,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   List<ReportState> state;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean includeAllDrafts;
-  @GraphQLQuery
-  @GraphQLInputField
   List<EngagementStatus> engagementStatus;
   @GraphQLQuery
   @GraphQLInputField
@@ -284,14 +281,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.state = state;
   }
 
-  public Boolean getIncludeAllDrafts() {
-    return includeAllDrafts;
-  }
-
-  public void setIncludeAllDrafts(Boolean includeAllDrafts) {
-    this.includeAllDrafts = includeAllDrafts;
-  }
-
   public List<EngagementStatus> getEngagementStatus() {
     return engagementStatus;
   }
@@ -378,9 +367,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         engagementDayOfWeek, includeEngagementDayOfWeek, createdAtStart, createdAtEnd,
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         orgUuid, orgRecurseStrategy, locationUuid, locationRecurseStrategy, taskUuid,
-        pendingApprovalOf, state, includeAllDrafts, engagementStatus, cancelledReason,
-        authorPositionUuid, attendeePositionUuid, authorizationGroupUuid, sensitiveInfo,
-        classification, eventUuid, reportCommunityUuid, systemSearch);
+        pendingApprovalOf, state, engagementStatus, cancelledReason, authorPositionUuid,
+        attendeePositionUuid, authorizationGroupUuid, sensitiveInfo, classification, eventUuid,
+        reportCommunityUuid, systemSearch);
   }
 
   @Override
@@ -410,7 +399,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getNotTaskUuid(), other.getNotTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())
         && Objects.equals(getState(), other.getState())
-        && Objects.equals(getIncludeAllDrafts(), other.getIncludeAllDrafts())
         && Objects.equals(getEngagementStatus(), other.getEngagementStatus())
         && Objects.equals(getCancelledReason(), other.getCancelledReason())
         && Objects.equals(getAuthorPositionUuid(), other.getAuthorPositionUuid())

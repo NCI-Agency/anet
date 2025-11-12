@@ -314,13 +314,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       }
     }
 
-    if (!query.isSystemSearch() && (!AuthUtils.isAdmin(query.getUser())
-        || !Boolean.TRUE.equals(query.getIncludeAllDrafts()))) {
+    if (!query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
       // Apply a filter to restrict access to other's draft or rejected reports.
       // When the search is performed by the system (for instance by a worker, systemSearch = true),
       // do not apply this filter.
-      // Admins see all drafts/rejected when "include all drafts" is true,
-      // else admins and other users only ever see their own drafts/rejected (and all other reports)
+      // Admins see all drafts/rejected, other users only ever see their own drafts/rejected (and
+      // all other reports).
       qb.addWhereClause("((reports.state != :draftState AND reports.state != :rejectedState) OR ("
           + "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
           + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)))");

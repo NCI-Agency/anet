@@ -1504,7 +1504,6 @@ input ReportSearchQueryInput {
   engagementStatus: [EngagementStatus]
   eventUuid: String
   inMyReports: Boolean
-  includeAllDrafts: Boolean
   includeEngagementDayOfWeek: Boolean
   locationRecurseStrategy: RecurseStrategy
   locationUuid: [String]
