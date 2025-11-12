@@ -80,6 +80,13 @@ class MergePeople extends Page {
     )
   }
 
+  async getSingleSelectButton(side, text) {
+    return browser.$(
+      `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]` +
+        "/parent::div/following-sibling::small[1]/button"
+    )
+  }
+
   async getPreviousPositions(side) {
     const previousPositionsElements = await browser.$$(
       `//div[@id="${side}-merge-per-col"]//div[text()="Previous Positions"]/following-sibling::div//table//tbody//tr`
