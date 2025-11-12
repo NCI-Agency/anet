@@ -11,10 +11,12 @@ class SavedSearch extends Page {
     const reportsButton = await browser.$('.btn-group > button[value="TASKS"]')
     await reportsButton.waitForDisplayed()
     await reportsButton.click()
+    await browser.pause(1000) // wait for filters to be updated
 
     const addFilterButton = await browser.$("#addFilterDropdown")
     await addFilterButton.waitForDisplayed()
     await addFilterButton.click()
+    await browser.pause(1000) // wait for filters to be shown
 
     const withinOrganizationButton = await browser.$("a*=Within Organization")
     await withinOrganizationButton.waitForDisplayed()
@@ -72,6 +74,24 @@ class SavedSearch extends Page {
       return []
     }
     return toastMessages.map(async toastMessage => await toastMessage.getText())
+  }
+
+  async getDeleteSavedSearchButton() {
+    return browser.$(".btn-danger")
+  }
+
+  async getDeleteConfirmButton() {
+    return browser.$('//button[text()="Yes, I am sure"]')
+  }
+
+  async confirmDelete() {
+    await (await this.getDeleteConfirmButton()).waitForExist()
+    await (await this.getDeleteConfirmButton()).waitForDisplayed()
+    await (await this.getDeleteConfirmButton()).click()
+  }
+
+  async getNoSavedSearches() {
+    return browser.$("fieldset p.mb-0")
   }
 }
 
