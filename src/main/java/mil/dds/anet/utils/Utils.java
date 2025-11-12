@@ -78,16 +78,6 @@ public class Utils {
     }
   }
 
-  public static boolean uuidEqual(AbstractAnetBean a, AbstractAnetBean b) {
-    if (a == null && b == null) {
-      return true;
-    }
-    if (a == null || b == null) {
-      return false;
-    }
-    return Objects.equals(a.getUuid(), b.getUuid());
-  }
-
   public static <T extends AbstractAnetBean> T getByUuid(List<T> list, String uuid) {
     return list.stream().filter(el -> Objects.equals(uuid, el.getUuid())).findFirst().orElse(null);
   }
@@ -142,8 +132,7 @@ public class Utils {
   /**
    * Given a list of organizations and a topParentUuid, this function maps all of the organizations
    * to their highest parent within this list excluding the topParent. This can be used to check for
-   * loops, or to generate graphs/tables that bubble things up to their highest parent. This is used
-   * in the daily rollup graphs.
+   * loops.
    */
   public static Map<String, String> buildParentOrgMapping(List<Organization> orgs,
       @Nullable String topParentUuid) {
@@ -151,20 +140,6 @@ public class Utils {
     final Map<String, String> orgMap = orgs.stream().collect(HashMap::new,
         (m, v) -> m.put(v.getUuid(), v.getParentOrgUuid()), HashMap::putAll);
     return buildParentMapping(orgMap, topParentUuid);
-  }
-
-  public static Map<String, Organization> buildOrgToParentOrgMapping(List<Organization> orgs,
-      @Nullable String topParentUuid) {
-    final Map<String, Organization> orgToOrgMap =
-        orgs.stream().collect(Collectors.toMap(Organization::getUuid, Function.identity()));
-    // Can't use Collectors.toMap as parent may be null
-    final Map<String, String> orgMap = orgs.stream().collect(HashMap::new,
-        (m, v) -> m.put(v.getUuid(), v.getParentOrgUuid()), HashMap::putAll);
-    final Map<String, String> orgParentMap = buildParentMapping(orgMap, topParentUuid);
-    // Can't use Collectors.toMap as parent may be null
-    return orgs.stream().collect(HashMap::new,
-        (m, v) -> m.put(v.getUuid(), orgToOrgMap.get(orgParentMap.get(v.getUuid()))),
-        HashMap::putAll);
   }
 
   /**

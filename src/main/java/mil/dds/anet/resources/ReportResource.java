@@ -1,6 +1,5 @@
 package mil.dds.anet.resources;
 
-import freemarker.template.Template;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -9,12 +8,9 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +28,6 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
-import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -41,15 +36,11 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
-import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.RollupGraph.RollupGraphType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AssessmentDao;
 import mil.dds.anet.database.AssessmentDao.UpdateType;
 import mil.dds.anet.database.CommentDao;
@@ -58,7 +49,6 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.emails.DailyRollupEmail;
 import mil.dds.anet.emails.NewReportCommentEmail;
 import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
@@ -83,23 +73,19 @@ public class ReportResource {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final AnetConfig config;
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
-  private final AdminDao adminDao;
   private final CommentDao commentDao;
   private final AssessmentDao assessmentDao;
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
   private final ReportActionDao reportActionDao;
 
-  public ReportResource(AnetConfig config, AnetDictionary dict, AnetObjectEngine anetObjectEngine,
-      AdminDao adminDao, CommentDao commentDao, AssessmentDao assessmentDao,
-      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao) {
-    this.config = config;
+  public ReportResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
+      CommentDao commentDao, AssessmentDao assessmentDao, OrganizationDao organizationDao,
+      ReportDao reportDao, ReportActionDao reportActionDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
-    this.adminDao = adminDao;
     this.commentDao = commentDao;
     this.assessmentDao = assessmentDao;
     this.organizationDao = organizationDao;
@@ -764,93 +750,6 @@ public class ReportResource {
   }
 
   /**
-   * Get the daily rollup graph.
-   *
-   * @param start Start timestamp for the rollup period
-   * @param end end timestamp for the rollup period
-   * @param orgType The type of organization (ADVISOR or INTERLOCUTOR) that the chart should filter
-   *        on
-   * @param orgUuid if set then the parent advisor org to create the graph off of. All reports will
-   *        be by/about this org or a child org.
-   */
-  @GraphQLQuery(name = "rollupGraph")
-  public List<RollupGraph> getDailyRollupGraph(@GraphQLArgument(name = "startDate") Instant start,
-      @GraphQLArgument(name = "endDate") Instant end,
-      @GraphQLArgument(name = "orgType") RollupGraphType orgType,
-      @GraphQLArgument(name = "orgUuid") String orgUuid) {
-    @SuppressWarnings("unchecked")
-    final List<String> nonReportingOrgsShortNames =
-        (List<String>) dict.getDictionaryEntry("non_reporting_ORGs");
-    final Map<String, Organization> nonReportingOrgs =
-        getOrgsByShortNames(nonReportingOrgsShortNames);
-
-    final List<RollupGraph> dailyRollupGraph =
-        (orgUuid == null) ? reportDao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs)
-            : reportDao.getDailyRollupGraph(start, end, orgUuid, orgType, nonReportingOrgs);
-
-    dailyRollupGraph.sort(getRollupGraphComparator());
-
-    return dailyRollupGraph;
-  }
-
-  @GraphQLMutation(name = "emailRollup")
-  public Integer emailRollup(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "startDate") Instant start,
-      @GraphQLArgument(name = "endDate") Instant end,
-      @GraphQLArgument(name = "orgType") RollupGraphType orgType,
-      @GraphQLArgument(name = "orgUuid") String orgUuid,
-      @GraphQLArgument(name = "email") AnetEmail email) {
-    DailyRollupEmail action = new DailyRollupEmail();
-    action.setStartDate(start);
-    action.setEndDate(end);
-    action.setComment(email.getComment());
-    action.setOrgUuid(orgUuid);
-    action.setChartOrgType(orgType);
-    action.setSender(DaoUtils.getUserFromContext(context));
-
-    email.setAction(action);
-    AnetEmailWorker.sendEmailAsync(email);
-    // GraphQL mutations *have* to return something, we return an integer
-    return 1;
-  }
-
-  @GraphQLQuery(name = "showRollupEmail")
-  public String showRollupEmail(@GraphQLArgument(name = "startDate") Instant start,
-      @GraphQLArgument(name = "endDate") Instant end,
-      @GraphQLArgument(name = "orgType") RollupGraphType orgType,
-      @GraphQLArgument(name = "orgUuid") String orgUuid,
-      @GraphQLArgument(name = "showText", defaultValue = "false") Boolean showReportText) {
-    DailyRollupEmail action = new DailyRollupEmail();
-    action.setStartDate(start);
-    action.setEndDate(end);
-    action.setChartOrgType(orgType);
-    action.setOrgUuid(orgUuid);
-
-    final Map<String, Object> emailContext = new HashMap<>();
-    emailContext.put("context", engine.getContext());
-    emailContext.put("serverUrl", config.getServerUrl());
-    final var siteClassification = ConfidentialityRecord.getConfidentialityLabelForChoice(dict,
-        (String) dict.getDictionaryEntry("siteClassification"));
-    emailContext.put("SECURITY_BANNER_CLASSIFICATION",
-        ConfidentialityRecord.create(siteClassification).toString());
-    emailContext.put("SECURITY_BANNER_COLOR", siteClassification.get("color"));
-    emailContext.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
-    addConfigToContext(emailContext);
-
-    try {
-      final Template temp =
-          Utils.getFreemarkerConfig(this.getClass()).getTemplate(action.getTemplateName());
-      final StringWriter writer = new StringWriter();
-      // scan:ignore — false positive, we know which template we are processing
-      temp.process(action.buildContext(emailContext), writer);
-      return writer.toString();
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error composing email",
-          e);
-    }
-  }
-
-  /**
    * Gets aggregated data per organization for engagements attended and reports submitted for each
    * advisor in a given organization.
    *
@@ -903,73 +802,6 @@ public class ReportResource {
     }
     return result;
 
-  }
-
-  private Map<String, Organization> getOrgsByShortNames(List<String> orgShortNames) {
-    final Map<String, Organization> result = new HashMap<>();
-    for (final Organization organization : organizationDao.getOrgsByShortNames(orgShortNames)) {
-      result.put(organization.getUuid(), organization);
-    }
-    return result;
-  }
-
-  /**
-   * The comparator to be used when ordering the roll up graph results to ensure that any pinned
-   * organisation names are returned at the start of the list.
-   */
-  public static class RollupGraphComparator implements Comparator<RollupGraph> {
-
-    private final List<String> pinnedOrgNames;
-
-    /**
-     * Creates an instance of this comparator using the supplied pinned organisation names.
-     *
-     * @param pinnedOrgNames the pinned organisation names
-     */
-    public RollupGraphComparator(final List<String> pinnedOrgNames) {
-      this.pinnedOrgNames = pinnedOrgNames;
-    }
-
-    /**
-     * Compare the suppled objects, based on whether they are in the list of pinned org names and
-     * their short names.
-     *
-     * @param o1 the first object
-     * @param o2 the second object
-     * @return the result of the comparison.
-     */
-    @Override
-    public int compare(final RollupGraph o1, final RollupGraph o2) {
-
-      final int result;
-
-      if (o1.getOrg() != null && o2.getOrg() == null) {
-        result = -1;
-      } else if (o2.getOrg() != null && o1.getOrg() == null) {
-        result = 1;
-      } else if (o2.getOrg() == null && o1.getOrg() == null) {
-        result = 0;
-      } else if (pinnedOrgNames.contains(o1.getOrg().getShortName())) {
-        if (pinnedOrgNames.contains(o2.getOrg().getShortName())) {
-          result = pinnedOrgNames.indexOf(o1.getOrg().getShortName())
-              - pinnedOrgNames.indexOf(o2.getOrg().getShortName());
-        } else {
-          result = -1;
-        }
-      } else if (pinnedOrgNames.contains(o2.getOrg().getShortName())) {
-        result = 1;
-      } else {
-        final int c = o1.getOrg().getShortName().compareTo(o2.getOrg().getShortName());
-
-        if (c != 0) {
-          result = c;
-        } else {
-          result = o1.getOrg().getUuid().compareTo(o2.getOrg().getUuid());
-        }
-      }
-
-      return result;
-    }
   }
 
   @GraphQLMutation(name = "updateReportAssessments")
@@ -1086,25 +918,5 @@ public class ReportResource {
       // Don't provide too much information, just say it is "denied"
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
     }
-  }
-
-  private void addConfigToContext(Map<String, Object> context) {
-    context.put("dateFormatter", Utils.getDateFormatter(dict, "dateFormats.email.date"));
-    context.put("dateTimeFormatter",
-        Utils.getDateTimeFormatter(dict, "dateFormats.email.withTime"));
-    final boolean engagementsIncludeTimeAndDuration =
-        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
-    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
-    context.put("engagementDateFormatter", Utils.getEngagementDateFormatter(dict,
-        engagementsIncludeTimeAndDuration, "dateFormats.email.withTime", "dateFormats.email.date"));
-    @SuppressWarnings("unchecked")
-    final Map<String, Object> fields = (Map<String, Object>) dict.getDictionaryEntry("fields");
-    context.put("fields", fields);
-  }
-
-  private RollupGraphComparator getRollupGraphComparator() {
-    @SuppressWarnings("unchecked")
-    final List<String> pinnedOrgNames = (List<String>) dict.getDictionaryEntry("pinned_ORGs");
-    return new RollupGraphComparator(pinnedOrgNames);
   }
 }

@@ -812,7 +812,6 @@ type Mutation {
   deleteSavedSearch(uuid: String): Int
   deleteSubscription(uuid: String): Int
   emailReport(email: AnetEmailInput, uuid: String): Int
-  emailRollup(email: AnetEmailInput, endDate: Instant, orgType: RollupGraphType, orgUuid: String, startDate: Instant): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
@@ -1284,8 +1283,6 @@ type Query {
   recentActivities: RecentActivities
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
-  rollupGraph(endDate: Instant, orgType: RollupGraphType, orgUuid: String, startDate: Instant): [RollupGraph]
-  showRollupEmail(endDate: Instant, orgType: RollupGraphType, orgUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
   tasks(uuids: [String]): [Task]
@@ -1561,19 +1558,6 @@ enum ReportState {
   PENDING_APPROVAL
   PUBLISHED
   REJECTED
-}
-
-""""""
-type RollupGraph {
-  cancelled: Int!
-  org: Organization
-  published: Int!
-}
-
-""""""
-enum RollupGraphType {
-  ADVISOR
-  INTERLOCUTOR
 }
 
 """"""

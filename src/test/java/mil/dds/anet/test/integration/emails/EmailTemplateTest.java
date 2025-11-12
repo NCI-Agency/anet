@@ -9,7 +9,6 @@ import java.util.List;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
-import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
@@ -18,7 +17,6 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.emails.AnetEmailAction;
 import mil.dds.anet.emails.ApprovalNeededEmail;
-import mil.dds.anet.emails.DailyRollupEmail;
 import mil.dds.anet.emails.FutureEngagementUpdated;
 import mil.dds.anet.emails.NewReportCommentEmail;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
@@ -26,7 +24,6 @@ import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.emails.ReportRejectionEmail;
-import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
@@ -96,21 +93,6 @@ class EmailTemplateTest extends AbstractResourceTest {
     final Report report = getTestReport();
     final ApprovalNeededEmail action = new ApprovalNeededEmail();
     action.setReport(report);
-    assertActionCanBeSent(action);
-  }
-
-  @Test
-  void testDailyRollupTemplate() throws IOException, InterruptedException {
-    final Person person = getAdminBean();
-    final DailyRollupEmail action = new DailyRollupEmail();
-    action.setStartDate(Instant.now());
-    action.setEndDate(Instant.now());
-    action.setEndDate(Instant.now());
-    action.setSender(person);
-    // ANET Administrators
-    action.setOrgUuid("285fa226-05cb-46d3-9037-9de459f4beec");
-    action.setChartOrgType(RollupGraph.RollupGraphType.ADVISOR);
-    action.setComment("Test daily rollup email");
     assertActionCanBeSent(action);
   }
 
