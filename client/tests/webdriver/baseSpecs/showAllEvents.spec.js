@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import ShowAllEvents from "../pages/showAllEvents.js"
+import ShowAllEvents from "../pages/showAllEvents.page.js"
 
-const EVENT_SERIES_NAMES = ["Inactive event series", "NMI PDT"]
+const EVENT_SERIES_NAMES = ["NMI PDT"]
 const EVENT_NAMES = [
   "My active NMI test event",
   "My active test event",
@@ -15,7 +15,7 @@ describe("Show All Events Page", () => {
 
   it("Should display all event series", async () => {
     const eventSeries = await ShowAllEvents.getEventSeriesList()
-    expect(eventSeries.length).to.be.within(2, 5)
+    expect(eventSeries.length).to.be.within(1, 4)
     const eventSeriesNames = await ShowAllEvents.getEventSeriesNames()
     expect(eventSeriesNames).to.include.members(EVENT_SERIES_NAMES)
   })

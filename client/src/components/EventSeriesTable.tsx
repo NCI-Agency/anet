@@ -39,45 +39,81 @@ const GQL_GET_EVENTSERIES_LIST = gql`
 `
 
 interface EventSeriesTableProps {
+  queryParams?: any
+}
+
+const EventSeriesTable = (props: EventSeriesTableProps) => {
+  if (props.queryParams) {
+    return <PaginatedEventSeries {...props} />
+  }
+  return <BaseEventSeriesTable {...props} />
+}
+
+interface PaginatedEventSeriesProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
 }
 
-const EventSeriesTable = ({
+const PaginatedEventSeries = ({
   pageDispatchers,
-  queryParams
-}: EventSeriesTableProps) => {
+  queryParams,
+  ...otherProps
+}: PaginatedEventSeriesProps) => {
   const [pageNum, setPageNum] = useState(0)
   const eventSeriesQuery = { ...queryParams, pageNum }
   const { loading, error, data } = API.useApiQuery(GQL_GET_EVENTSERIES_LIST, {
     eventSeriesQuery
   })
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
+  const { done, result } = useBoilerplate({ loading, error, pageDispatchers })
   if (done) {
     return result
   }
 
-  const eventSeries = data
-    ? EventSeries.fromArray(data.eventSeriesList.list)
-    : []
-  if (_get(eventSeries, "length", 0) === 0) {
-    return <em>No event series found</em>
-  }
+  const { pageSize, pageNum: curPage, totalCount, list } = data.eventSeriesList
 
-  const { pageSize, pageNum: curPage, totalCount } = data.eventSeriesList
+  const eventSeries = EventSeries.fromArray(list)
+
+  return (
+    <BaseEventSeriesTable
+      eventSeries={eventSeries}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPageNum}
+      {...otherProps}
+    />
+  )
+}
+
+interface BaseEventSeriesTableProps {
+  eventSeries?: EventSeries[]
+  noEventSeriesMessage?: string
+  totalCount?: number
+  pageNum?: number
+  pageSize?: number
+  goToPage?: (...args: unknown[]) => unknown
+}
+
+const BaseEventSeriesTable = ({
+  eventSeries,
+  noEventSeriesMessage = "No event series found",
+  pageSize,
+  pageNum,
+  totalCount,
+  goToPage
+}: BaseEventSeriesTableProps) => {
+  if (_get(eventSeries, "length", 0) === 0) {
+    return <em>{noEventSeriesMessage}</em>
+  }
 
   return (
     <div>
       <UltimatePaginationTopDown
         className="float-end"
-        pageNum={curPage}
+        pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
-        goToPage={setPageNum}
+        goToPage={goToPage}
       >
         <Table striped hover responsive>
           <thead>

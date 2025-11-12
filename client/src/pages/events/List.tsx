@@ -1,4 +1,8 @@
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  setPagination
+} from "actions"
 import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
@@ -8,14 +12,27 @@ import {
 } from "components/Page"
 import EventSearchResults from "components/search/EventSearchResults"
 import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
-import React, { useState } from "react"
+import React from "react"
 import { connect } from "react-redux"
 
-interface EventListPros {
-  pageDispatchers?: PageDispatchersPropType
+const queryParams = {
+  pageSize: 10,
+  sortBy: "NAME",
+  sortOrder: "ASC",
+  status: "ACTIVE"
 }
 
-const EventsList = ({ pageDispatchers }: EventListPros) => {
+interface EventListProps {
+  pageDispatchers?: PageDispatchersPropType
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
+}
+
+const EventsList = ({
+  pageDispatchers,
+  pagination,
+  setPagination
+}: EventListProps) => {
   const { done, result } = useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -23,20 +40,8 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
   })
   usePageTitle("Events")
 
-  const [pagination, setPagination] = useState({
-    eventSeries: { pageNum: 0 },
-    events: { pageNum: 0 }
-  })
-
   if (done) {
     return result
-  }
-
-  const queryParams = {
-    pageSize: 10,
-    sortBy: "NAME",
-    sortOrder: "ASC",
-    status: "ACTIVE"
   }
 
   return (
@@ -47,12 +52,7 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
           pageDispatchers={pageDispatchers}
           paginationKey="eventSeries"
           pagination={pagination}
-          setPagination={(key, pageNum) =>
-            setPagination(prev => ({
-              ...prev,
-              [key]: { pageNum }
-            }))
-          }
+          setPagination={setPagination}
         />
       </Fieldset>
 
@@ -62,16 +62,24 @@ const EventsList = ({ pageDispatchers }: EventListPros) => {
           pageDispatchers={pageDispatchers}
           paginationKey="events"
           pagination={pagination}
-          setPagination={(key, pageNum) =>
-            setPagination(prev => ({
-              ...prev,
-              [key]: { pageNum }
-            }))
-          }
+          setPagination={setPagination}
         />
       </Fieldset>
     </>
   )
 }
 
-export default connect(null, mapPageDispatchersToProps)(EventsList)
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setPagination: (pageKey, pageNum) =>
+      dispatch(setPagination(pageKey, pageNum)),
+    ...pageDispatchers
+  }
+}
+
+const mapStateToProps = state => ({
+  pagination: state.pagination
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(EventsList)
