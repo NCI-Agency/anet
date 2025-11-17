@@ -16,6 +16,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LocationCollection from "components/LocationCollection"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
@@ -32,7 +33,6 @@ import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
 import EventSearchResults from "components/search/EventSearchResults"
 import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
-import LocationSearchResults from "components/search/LocationSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
 import PeopleSearchResults from "components/search/PeopleSearchResults"
 import PositionSearchResults from "components/search/PositionSearchResults"
@@ -128,7 +128,7 @@ const SEARCH_ITEMS = {
   [SEARCH_OBJECT_TYPES.LOCATIONS]: {
     navTo: "locations",
     iconImg: LOCATIONS_ICON,
-    searchResultsComponent: LocationSearchResults
+    searchResultsComponent: LocationCollection
   },
   [SEARCH_OBJECT_TYPES.REPORTS]: {
     navTo: "reports",
