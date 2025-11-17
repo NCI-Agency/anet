@@ -37,6 +37,7 @@ import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
 import EventSearchResults from "components/search/EventSearchResults"
+import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
 import PeopleSearchResults from "components/search/PeopleSearchResults"
 import PositionSearchResults from "components/search/PositionSearchResults"
@@ -152,12 +153,12 @@ const SEARCH_ITEMS = {
   [SEARCH_OBJECT_TYPES.EVENTS]: {
     navTo: "events",
     iconImg: EVENTS_ICON,
-    searchResultsComponent: EventSearchResults
+    searchResultsComponent: EventCollection
   },
   [SEARCH_OBJECT_TYPES.EVENT_SERIES]: {
     navTo: "eventSeries",
     iconImg: EVENT_SERIES_ICON,
-    searchResultsComponent: EventCollection
+    searchResultsComponent: EventSeriesSearchResults
   }
 }
 

@@ -43,7 +43,7 @@ const EventCollection = ({
   paginationKey,
   pagination,
   setPagination,
-  viewFormats = [FORMAT_TABLE, FORMAT_CALENDAR, FORMAT_MAP],
+  viewFormats = [FORMAT_TABLE, FORMAT_SUMMARY, FORMAT_CALENDAR, FORMAT_MAP],
   queryParams,
   setTotalCount,
   mapId,
