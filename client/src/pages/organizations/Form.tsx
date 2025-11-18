@@ -138,7 +138,7 @@ const OrganizationForm = ({
           ? currentUser &&
             currentUser.hasAdministrativePermissionsForOrganization(values)
           : canAdministrateParentOrg
-        const orgSearchQuery = { status: Model.STATUS.ACTIVE }
+        const orgSearchQuery = {}
         // Superusers can select parent organizations among the ones their position is administrating
         if (!isAdmin) {
           const orgsAdministratedUuids =
@@ -163,8 +163,7 @@ const OrganizationForm = ({
         )
         const tasksFilters = {
           allTasks: {
-            label: `All ${pluralize(Settings.fields.task.shortLabel)}`,
-            queryVars: {}
+            label: `All ${pluralize(Settings.fields.task.shortLabel)}`
           }
         }
         if (currentUser.position) {
@@ -178,8 +177,7 @@ const OrganizationForm = ({
 
         const organizationFilters = {
           allOrganizations: {
-            label: "All organizations",
-            queryVars: {}
+            label: "All organizations"
           }
         }
         const locationFilters = Location.getOrganizationLocationFilters()
@@ -373,15 +371,12 @@ const OrganizationForm = ({
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         values.location && (
-                          <>
-                            <LinkTo
-                              modelType="Location"
-                              model={values.location}
-                            />{" "}
-                            <Badge>
+                          <LinkTo modelType="Location" model={values.location}>
+                            {`${Location.toString(values.location)} `}
+                            <Badge bg="secondary">
                               {Location.humanNameOfType(values.location.type)}
                             </Badge>
-                          </>
+                          </LinkTo>
                         )
                       }
                     />
@@ -621,7 +616,6 @@ const OrganizationForm = ({
                             restrictSelectableItems
                             filterDefs={tasksFilters}
                             objectType={Task}
-                            queryParams={{ status: Model.STATUS.ACTIVE }}
                             fields={taskFields}
                             addon={TASKS_ICON}
                             pageSize={0}

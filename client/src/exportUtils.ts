@@ -1,3 +1,4 @@
+import { gqlPaginationFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
@@ -13,9 +14,7 @@ const getEmailAddresses = () => `
 const getOrganizationFragment = (fields: string[] = []) => `
   fragment organizations on Query {
     organizations: organizationList(query: $organizationQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "shortName")}
@@ -29,9 +28,7 @@ const getOrganizationFragment = (fields: string[] = []) => `
 const getPersonFragment = (fields: string[] = []) => `
   fragment people on Query {
     people: personList(query: $personQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "name")}
@@ -65,9 +62,7 @@ const getPersonFragment = (fields: string[] = []) => `
 const getPositionFragment = (fields: string[] = []) => `
   fragment positions on Query {
     positions: positionList(query: $positionQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "name")}
@@ -110,9 +105,7 @@ const getPositionFragment = (fields: string[] = []) => `
 const getTaskFragment = (fields: string[] = []) => `
   fragment tasks on Query {
     tasks: taskList(query: $taskQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "shortName")}
@@ -143,9 +136,7 @@ const getTaskFragment = (fields: string[] = []) => `
 const getLocationFragment = (fields: string[] = []) => `
   fragment locations on Query {
     locations: locationList(query: $locationQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "name")}
@@ -159,9 +150,7 @@ const getLocationFragment = (fields: string[] = []) => `
 const getReportFragment = (fields: string[] = []) => `
   fragment reports on Query {
     reports: reportList(query: $reportQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "intent")}
@@ -290,9 +279,7 @@ const getReportFragment = (fields: string[] = []) => `
 const getAuthorizationGroupFragment = (fields: string[] = []) => `
   fragment authorizationGroups on Query {
     communities: authorizationGroupList(query: $authorizationGroupQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "name")}
@@ -325,9 +312,7 @@ const getAuthorizationGroupFragment = (fields: string[] = []) => `
 const getEventFragment = (fields: string[] = []) => `
   fragment events on Query {
     events: eventList(query: $eventQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
         ${shouldInclude(fields, "type")}

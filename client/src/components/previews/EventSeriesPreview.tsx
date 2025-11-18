@@ -3,6 +3,7 @@ import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import { EventSeries } from "models"
 import React from "react"
 import Settings from "settings"
@@ -29,7 +30,10 @@ const EventSeriesPreview = ({ className, uuid }: EventSeriesPreviewProps) => {
   const eventSeriesTitle = eventSeries.name || `#${eventSeries.uuid}`
   return (
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
-      <h4 className="ellipsized-text">Event Series {eventSeriesTitle}</h4>
+      <PreviewTitle
+        title={`Event Series ${eventSeriesTitle}`}
+        status={eventSeries.status}
+      />
       <div className="preview-section">
         <div className="text-center">
           <EntityAvatarDisplay

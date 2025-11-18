@@ -411,11 +411,9 @@ const ColTitle = styled(Form.Group)`
   height: 39px;
 `
 
-function getLocationFilters() {
-  return {
-    activeLocations: {
-      label: "All locations"
-    }
+const locationFilters = {
+  allLocations: {
+    label: "All locations"
   }
 }
 
@@ -459,7 +457,7 @@ const LocationColumn = ({
           disabledValue={otherSide}
           overlayColumns={["Name"]}
           overlayRenderRow={LocationOverlayRow}
-          filterDefs={getLocationFilters()}
+          filterDefs={locationFilters}
           onChange={value => {
             value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))

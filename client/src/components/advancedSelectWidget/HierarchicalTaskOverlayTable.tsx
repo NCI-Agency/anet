@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
@@ -16,34 +17,26 @@ import React, { useCallback, useEffect, useState } from "react"
 export const taskFields = `
   ${Task.autocompleteQuery}
   ascendantTasks {
-    uuid
-    shortName
-    longName
+    ${gqlEntityFieldsMap.Task}
     parentTask {
-      uuid
+      ${gqlEntityFieldsMap.Task}
     }
     ascendantTasks {
-      uuid
-      shortName
-      longName
+      ${gqlEntityFieldsMap.Task}
       parentTask {
-        uuid
+        ${gqlEntityFieldsMap.Task}
       }
     }
   }
   descendantTasks {
-    uuid
-    shortName
-    longName
+    ${gqlEntityFieldsMap.Task}
     parentTask {
-      uuid
+      ${gqlEntityFieldsMap.Task}
     }
     ascendantTasks {
-      uuid
-      shortName
-      longName
+      ${gqlEntityFieldsMap.Task}
       parentTask {
-        uuid
+        ${gqlEntityFieldsMap.Task}
       }
     }
   }
@@ -164,7 +157,6 @@ export const HierarchicalTaskOverlayTable = ({
           ) : (
             <Icon icon={IconNames.DOCUMENT} size={IconSize.STANDARD} />
           )}
-          <Icon icon={IconNames.STAR} size={12} />
           <span
             onClick={handleToggleSelection}
             style={{

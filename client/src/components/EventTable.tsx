@@ -1,7 +1,10 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -19,34 +22,19 @@ import Settings from "settings"
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
     eventList(query: $eventQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        type
-        name
+        ${gqlEntityFieldsMap.Event}
         startDate
         endDate
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         eventSeries {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.EventSeries}
         }
         location {
-          uuid
-          name
-          lat
-          lng
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
       }
     }

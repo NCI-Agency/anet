@@ -6,7 +6,6 @@ import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import { MessagesWithConflict } from "components/Messages"
-import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import { FastField, Form, Formik } from "formik"
 import { Organization, Position } from "models"
@@ -46,7 +45,6 @@ const EditAdministratingPositionsModal = ({
     allSuperuserPositions: {
       label: "All superuser positions",
       queryVars: {
-        status: Model.STATUS.ACTIVE,
         type: [Position.TYPE.SUPERUSER],
         matchPersonName: true
       }

@@ -1,3 +1,7 @@
+import {
+  gqlAllTaskFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -19,27 +23,17 @@ const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       list {
-        uuid
-        longName
-        shortName
-        createdAt
-        updatedAt
-        customFields
+        ${gqlAllTaskFields}
         taskedOrganizations {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlEntityFieldsMap.Task}
         }
         parentTask {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
         allReports: reports {

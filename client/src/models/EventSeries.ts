@@ -1,7 +1,12 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllEventSeriesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model from "components/Model"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
-import utils from "utils"
 import * as yup from "yup"
 
 export default class EventSeries extends Model {
@@ -29,72 +34,34 @@ export default class EventSeries extends Model {
   })
 
   static autocompleteQuery = `
-    uuid
-    name
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.EventSeries}
     ownerOrg {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
     hostOrg {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
     adminOrg {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
   `
 
   static getEventSeriesQuery = gql`
     query ($uuid: String) {
       eventSeries(uuid: $uuid) {
-        uuid
-        status
-        name
-        description
-        isSubscribed
-        updatedAt
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlAllEventSeriesFields}
+        ${gqlEntityAvatarFields}
         ownerOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         adminOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         attachments {
-            uuid
-            fileName
-            caption
-            description
-            classification
-            mimeType
-            contentLength
-            createdAt
+          ${gqlAllAttachmentFields}
         }
       }
     }
@@ -124,9 +91,5 @@ export default class EventSeries extends Model {
 
   filterClientSideFields(...additionalFields) {
     return EventSeries.filterClientSideFields(this, ...additionalFields)
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
   }
 }

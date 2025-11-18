@@ -37,7 +37,7 @@ describe("Show task page", () => {
       expect(await (await ShowTask.getParentTaskField()).isExisting()).to.be
         .true
       expect(await (await ShowTask.getParentTask()).getText()).to.equal(
-        "EF 1 » EF 1.2"
+        "EF 1\n»\nEF 1.2"
       )
     })
   })

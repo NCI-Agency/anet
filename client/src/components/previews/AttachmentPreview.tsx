@@ -1,9 +1,13 @@
+import {
+  gqlAllAttachmentFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Attachment } from "models"
 import React from "react"
@@ -14,12 +18,9 @@ import utils from "utils"
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
     attachment(uuid: $uuid) {
-      ${Attachment.basicFieldsQuery}
+      ${gqlAllAttachmentFields}
       author {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
     }
   }
@@ -47,9 +48,7 @@ const AttachmentPreview = ({ className, uuid }: AttachmentPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Attachment ${attachment.caption}`}</h4>
-      </div>
+      <PreviewTitle title={`Attachment ${attachment.caption}`} />
       <div className="preview-section">
         <Row>
           <Col>

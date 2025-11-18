@@ -1,3 +1,8 @@
+import {
+  gqlAllReportFields,
+  gqlEntityFieldsMap,
+  gqlReportCommunitiesFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
@@ -5,9 +10,9 @@ import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import ListItems from "components/ListItems"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -20,126 +25,62 @@ import utils from "utils"
 const GQL_GET_REPORT = gql`
   query ($uuid: String!) {
     report(uuid: $uuid) {
-      uuid
-      intent
-      classification
-      engagementDate
-      duration
-      atmosphere
-      atmosphereDetails
-      keyOutcomes
-      nextSteps
-      cancelledReason
-      reportText
-      releasedAt
-      state
+      ${gqlAllReportFields}
       location {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        type
       }
       authors {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
       reportPeople {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        status
-        author
-        primary
-        attendee
-        interlocutor
+        ${gqlEntityFieldsMap.ReportPerson}
         position {
-          uuid
-          name
-          type
-          code
-          status
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
           location {
-            uuid
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Location}
           }
         }
         previousPositions {
           startTime
           endTime
           position {
-            uuid
-            name
-            code
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Position}
             organization {
-              uuid
-              shortName
-              longName
-              identificationCode
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+              ${gqlEntityFieldsMap.Organization}
             }
             location {
-              uuid
-              name
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+              ${gqlEntityFieldsMap.Location}
             }
           }
         }
       }
       tasks {
-        uuid
-        shortName
-        longName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
-          shortName
+            ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
         taskedOrganizations {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlEntityFieldsMap.Organization}
         }
-        customFields
       }
-      reportCommunities {
-        uuid
-        name
-        description
-      }
+      ${gqlReportCommunitiesFields}
       interlocutorOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       advisorOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
     }
   }
@@ -227,7 +168,7 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
         </div>
       )}
 
-      <h4 className="ellipsized-text">Report {reportTitle}</h4>
+      <PreviewTitle title={`Report ${reportTitle}`} />
       <div className="preview-section">
         <PreviewField
           extraColForValue

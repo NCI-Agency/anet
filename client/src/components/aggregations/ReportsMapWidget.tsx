@@ -76,10 +76,7 @@ const ReportsMapWidget = ({
         <b>Report:</b> <LinkTo modelType="Report" model={report} />
         <br />
         <b>Location:</b>{" "}
-        <LinkTo
-          modelType="Location"
-          model={{ uuid: report?.location?.uuid, name: report?.location?.name }}
-        />
+        <LinkTo modelType="Location" model={report?.location} />
         {report.engagementDate && (
           <>
             <br />

@@ -7,13 +7,6 @@ import React, { useEffect, useRef, useState } from "react"
 
 export const DEFAULT_PAGESIZE = 10
 
-export const GQL_EMAIL_ADDRESSES = `
-  emailAddresses(network: $emailNetwork) {
-    network
-    address
-  }
-`
-
 export interface GenericSearchResultsProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any

@@ -562,10 +562,47 @@ table hr.attendee-divider {
   clear: both;
 }
 
-.inactive-task {
-  color: gray;
-  &:after {
-    content: " ∅";
+.advanced-select-popover {
+  --bp6-popover-content-padding: 20px;
+  --bp6-popover-content-max-height: 47vh;
+  --advanced-select-popover-sticky-heading-height: calc(1.5rem + 0.125rem + var(--bp6-popover-content-padding));
+}
+
+.advanced-select-popover.bp6-popover.bp6-popover-content-sizing .bp6-popover-content {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.advanced-select-popover-sticky-heading {
+  position: sticky;
+  top: 0;
+  padding-top: var(--bp6-popover-content-padding);
+  background-color: white;
+}
+
+.advanced-select-popover-filters {
+  position: sticky;
+  top: var(--advanced-select-popover-sticky-heading-height);
+  max-height: calc(var(--bp6-popover-content-max-height) - (var(--advanced-select-popover-sticky-heading-height) + var(--bp6-popover-content-padding)));
+  background-color: white;
+}
+
+.link-to-entity {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.link-to-INACTIVE-entity {
+  & > span, & > a {
+    color: gray !important;
+    font-style: italic !important;
+    &.text-white {
+      color: lightgray !important;
+    }
+    &:after {
+      content: " ∅";
+    }
   }
 }
 
@@ -798,6 +835,9 @@ div.locations-marker-cluster {
 .fc-timegrid-event.event-cancelled {
   border-color: #ec971f;
   background-color: #ec971f;
+  & > .fc-event-main {
+    color: black !important;
+  }
 }
 .fc-daygrid-event.event-approved,
 .fc-timegrid-event.event-approved {
@@ -854,11 +894,38 @@ div.locations-marker-cluster {
 .fc-timegrid-event.event-future-cancelled {
   border-color: #ec971f;
   background-color: #ec971f;
+  & > .fc-event-main {
+    color: black !important;
+  }
 }
 .fc-daygrid-event.event-future-approved,
 .fc-timegrid-event.event-future-approved {
   border-color: #2965cc;
   background-color: #2965cc;
+}
+
+/* Colour indication of INACTIVE events in the EventCalendar */
+a.fc-event.event-INACTIVE {
+  border-color: #ec971f;
+  background-color: #ec971f;
+  & > .fc-event-main {
+    color: black !important;
+    font-style: italic !important;
+    & .fc-event-title:after {
+      content: " ∅";
+    }
+  }
+}
+
+tr.fc-event.event-INACTIVE {
+  color: gray !important;
+  font-style: italic !important;
+  & .fc-list-event-dot {
+    border-color: #ec971f !important;
+  }
+  & .fc-list-event-title > a:after {
+    content: " ∅";
+  }
 }
 
 .form-horizontal .label-align,
@@ -1009,7 +1076,7 @@ header.searchPagination {
 .advanced-select-popover .bp6-popover-content {
   min-width: 400px;
   max-width: 90vw !important;
-  max-height: 47vh !important;
+  max-height: var(--bp6-popover-content-max-height) !important;
   overflow-y: scroll;
 }
 

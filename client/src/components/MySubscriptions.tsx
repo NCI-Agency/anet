@@ -1,12 +1,14 @@
+import {
+  gqlPaginationFields,
+  gqlRelatedObjectFields,
+  gqlSubscriptionFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import {
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  OBJECT_TYPE_TO_MODEL
-} from "components/Model"
+import { OBJECT_TYPE_TO_MODEL } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -24,54 +26,11 @@ import { connect } from "react-redux"
 const GQL_GET_MY_SUBSCRIPTIONS = gql`
   query ($subscriptionsQuery: SubscriptionSearchQueryInput) {
     mySubscriptions(query: $subscriptionsQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        createdAt
-        updatedAt
-        subscribedObjectType
-        subscribedObjectUuid
+        ${gqlSubscriptionFields}
         subscribedObject {
-          ... on AuthorizationGroup {
-            name
-          }
-          ... on Event {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on EventSeries {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Location {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Organization {
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Person {
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Position {
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Report {
-            intent
-          }
-          ... on Task {
-            shortName
-            longName
-          }
+          ${gqlRelatedObjectFields}
         }
       }
     }

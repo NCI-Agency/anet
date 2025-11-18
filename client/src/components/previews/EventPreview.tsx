@@ -4,6 +4,7 @@ import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import { Event } from "models"
 import moment from "moment"
 import React from "react"
@@ -31,7 +32,7 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
   const eventTitle = event.name || `#${event.uuid}`
   return (
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
-      <h4 className="ellipsized-text">Event {eventTitle}</h4>
+      <PreviewTitle title={`Event ${eventTitle}`} status={event.status} />
       <div className="preview-section">
         <div className="text-center">
           <EntityAvatarDisplay

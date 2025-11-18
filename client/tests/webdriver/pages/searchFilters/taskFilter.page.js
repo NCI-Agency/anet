@@ -1,7 +1,7 @@
 import Page from "../page"
 
 class TaskFilter extends Page {
-  async openTaskFilter() {
+  async addTaskFilter() {
     const searchLink = await browser.$(
       ".search-popover-target.bp6-popover-target"
     )
@@ -31,16 +31,18 @@ class TaskFilter extends Page {
   }
 
   async getTaskCount() {
-    const openFilterButton = await browser.$("input[name='taskUuid']")
-    await openFilterButton.waitForDisplayed()
-    await openFilterButton.click()
-
     await browser.waitUntil(
       async () =>
         await (await browser.$("#taskUuid-popover tbody")).isDisplayed()
     )
     const taskRows = await browser.$$("#taskUuid-popover tbody > tr")
     return taskRows.length
+  }
+
+  async openTaskFilter() {
+    const openFilterButton = await browser.$("input[name='taskUuid']")
+    await openFilterButton.waitForDisplayed()
+    await openFilterButton.click()
   }
 
   async openAllCollapsedTasks() {
@@ -74,9 +76,6 @@ class TaskFilter extends Page {
   }
 
   async searchTasks(searchText) {
-    const openFilterButton = await browser.$("input[name='taskUuid']")
-    await openFilterButton.waitForDisplayed()
-    await openFilterButton.click()
     await browser.keys(searchText)
     await browser.pause(1000) // wait for the searchText to be processed
     await browser.waitUntil(
@@ -89,6 +88,11 @@ class TaskFilter extends Page {
     const closeButton = await browser.$(".bp6-icon.bp6-icon-cross")
     await closeButton.waitForDisplayed()
     await closeButton.click()
+  }
+
+  async clickInclInactiveCheckbox() {
+    const inclInactiveCheckbox = await browser.$("#taskUuid-inclInactive")
+    await inclInactiveCheckbox.click()
   }
 }
 

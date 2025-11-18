@@ -1,8 +1,14 @@
+import {
+  gqlBasicPersonFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlPreferenceFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -27,98 +33,53 @@ import "../components/D3Tooltip.css"
 const GQL_GET_APP_DATA = gql`
   query {
     me {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      status
-      pendingVerification
-      code
+      ${gqlBasicPersonFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       preferences {
         preference {
-          uuid
-          name
-          category
+          ${gqlPreferenceFields}
         }
         value
       }
-      emailAddresses {
-        network
-        address
-      }
       authorizationGroups {
-        uuid
+        ${gqlEntityFieldsMap.AuthorizationGroup}
       }
       position {
-        uuid
-        name
-        code
+        ${gqlEntityFieldsMap.Position}
         type
         superuserType
         role
-        status
         isApprover
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         authorizationGroupsAdministrated {
-          uuid
+          ${gqlEntityFieldsMap.AuthorizationGroup}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlEntityFieldsMap.Organization}
           descendantOrgs {
-            uuid
+            ${gqlEntityFieldsMap.Organization}
           }
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
         associatedPositions {
-          uuid
-          name
-          code
-          type
-          role
-          status
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
           location {
-            uuid
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Location}
           }
           person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Person}
             position {
-              uuid
-              name
-              type
-              role
-              code
-              status
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+              ${gqlEntityFieldsMap.Position}
               organization {
-                uuid
-                shortName
-                longName
-                identificationCode
+                ${gqlEntityFieldsMap.Organization}
               }
               location {
-                uuid
-                name
+                ${gqlEntityFieldsMap.Location}
               }
             }
             ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
@@ -129,52 +90,41 @@ const GQL_GET_APP_DATA = gql`
             status: ACTIVE
           }
         ) {
-          uuid
-          shortName
-          longName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
           }
           ascendantTasks {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
             parentTask {
-              uuid
+              ${gqlEntityFieldsMap.Task}
             }
           }
           descendantTasks {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
           ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
         }
         organizationsAdministrated {
-          uuid
+          ${gqlEntityFieldsMap.Organization}
           descendantOrgs {
-            uuid
+            ${gqlEntityFieldsMap.Organization}
           }
         }
         authorizationGroupsAdministrated {
-          uuid
+          ${gqlEntityFieldsMap.AuthorizationGroup}
         }
       }
       previousPositions {
         startTime
         endTime
         position {
-          uuid
-          name
-          code
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlEntityFieldsMap.Organization}
           }
           location {
-            uuid
-            name
+            ${gqlEntityFieldsMap.Location}
           }
         }
       }
@@ -188,12 +138,8 @@ const GQL_GET_APP_DATA = gql`
       }
     ) {
       list {
-        uuid
-        shortName
-        longName
-        identificationCode
+        ${gqlEntityFieldsMap.Organization}
         app6standardIdentity
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

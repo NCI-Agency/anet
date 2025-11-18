@@ -13,7 +13,7 @@ const INTERLOCUTORS_WITH_ASSESSMENTS = INTERLOCUTORS
 const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
 const ADVISORS_WITH_ASSESSMENTS = ["CIV GUIST, Lin"]
 
-const TASKS = ["EF 1 » EF 1.2 » 1.2.A", "EF 1 » EF 1.2 » 1.2.B"]
+const TASKS = ["EF 1\n»\nEF 1.2\n»\n1.2.A", "EF 1\n»\nEF 1.2\n»\n1.2.B"]
 const TASKS_WITH_ASSESSMENTS = TASKS
 
 const DEFAULT_REPORT_CLASSIFICATION = "DEMO USE ONLY"
@@ -163,7 +163,7 @@ describe("Show print report page", () => {
       for (const task of TASKS_WITH_ASSESSMENTS) {
         expect(displayedTasks).to.contain(task)
 
-        const taskShortName = task.split(" » ")?.pop()
+        const taskShortName = task.split("\n»\n")?.pop()
         const taskAssessment1Label =
           await ShowReport.getTaskEngagementAssessmentLabel(
             "tasks-assessments",

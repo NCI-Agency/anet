@@ -1,3 +1,7 @@
+import {
+  gqlMinimalOrganizationFields,
+  gqlMinimalReportFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
@@ -27,12 +31,9 @@ const GQL_GET_REPORT_LIST_BY_ORG = gql`
     reportList(query: $reportQuery) {
       totalCount
       list {
-        uuid
+        ${gqlMinimalReportFields}
         advisorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
+          ${gqlMinimalOrganizationFields}
         }
       }
     }
@@ -43,8 +44,7 @@ const GQL_GET_REPORT_LIST_BY_REASON = gql`
     reportList(query: $reportQuery) {
       totalCount
       list {
-        uuid
-        cancelledReason
+        ${gqlMinimalReportFields}
       }
     }
   }

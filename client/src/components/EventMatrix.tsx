@@ -1,3 +1,7 @@
+import {
+  gqlAllTaskFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -22,39 +26,26 @@ import Settings from "settings"
 const GET_TASKS = gql`
   query ($taskUuid: String, $includeTask: Boolean!) {
     task(uuid: $taskUuid) @include(if: $includeTask) {
-      uuid
-      shortName
-      selectable
-      status
+      ${gqlAllTaskFields}
       parentTask {
-        uuid
-        shortName
-        status
+        ${gqlEntityFieldsMap.Task}
       }
       ascendantTasks {
-        uuid
-        shortName
-        status
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
       descendantTasks {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
         selectable
-        status
         parentTask {
-          uuid
-          shortName
-          status
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
-          status
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
       }
@@ -70,17 +61,14 @@ const GET_EVENTS_AND_REPORTS = gql`
     eventList(query: $eventQuery) {
       totalCount
       list {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Event}
         startDate
         endDate
-        status
         eventSeries {
-          uuid
-          status
+          ${gqlEntityFieldsMap.EventSeries}
         }
         tasks {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
     }
@@ -88,19 +76,17 @@ const GET_EVENTS_AND_REPORTS = gql`
     reportList(query: $reportQuery) {
       totalCount
       list {
-        uuid
-        intent
-        engagementDate
+        ${gqlEntityFieldsMap.Report}
         event {
-          uuid
+          ${gqlEntityFieldsMap.Event}
           startDate
           endDate
           tasks {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
         tasks {
-          uuid
+          ${gqlEntityFieldsMap.Task}
         }
       }
     }

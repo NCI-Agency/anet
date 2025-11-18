@@ -21,7 +21,7 @@ class MergeTasks extends Page {
 
   async getItemFromAdvancedSelect(rowNumber = 1) {
     return browser.$(
-      `.advanced-select-popover table > tbody > tr:nth-child(${rowNumber}) > td:nth-child(2) > span`
+      `.advanced-select-popover table > tbody > tr:nth-child(${rowNumber}) > td:nth-child(2) span`
     )
   }
 

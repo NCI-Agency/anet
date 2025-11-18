@@ -279,7 +279,7 @@ describe("In new report page", () => {
         )
         const taskText = await task.getText()
         switch (taskText) {
-          case "EF 1 » EF 1.2 » 1.2.A":
+          case "EF 1\n»\nEF 1.2\n»\n1.2.A":
             expect(questions).to.have.length(3)
             expect(await questions[0].getAttribute("id")).to.match(
               /\.question1$/

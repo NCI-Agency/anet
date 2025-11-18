@@ -1,3 +1,11 @@
+import {
+  gqlAllPersonFields,
+  gqlCustomSensitiveInformationFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlUsersFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
@@ -21,8 +29,6 @@ import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -47,62 +53,25 @@ import utils from "utils"
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
     person(uuid: $uuid) {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      status
-      pendingVerification
-      phoneNumber
-      user
-      users {
-        uuid
-        domainUsername
-      }
-      biography
-      obsoleteCountry
+      ${gqlAllPersonFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
+      ${gqlUsersFields}
       country {
-        uuid
-        name
-      }
-      gender
-      endOfTourDate
-      code
-      emailAddresses {
-        network
-        address
+        ${gqlEntityFieldsMap.Location}
       }
       position {
-        uuid
-        name
-        type
-        role
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         associatedPositions {
-          uuid
-          name
-          type
-          role
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Person}
           }
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
         }
       }
@@ -110,13 +79,10 @@ const GQL_GET_PERSON = gql`
         startTime
         endTime
         position {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
         }
       }
-      customFields
-      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
+      ${gqlCustomSensitiveInformationFields}
     }
   }
 `

@@ -1,3 +1,9 @@
+import {
+  gqlAllOrganizationFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import App6SymbolPreview from "components/App6SymbolPreview"
@@ -6,7 +12,8 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model from "components/Model"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization } from "models"
@@ -22,77 +29,47 @@ import utils from "utils"
 
 const GQL_LOCATION_FIELDS = `
   fragment locationFields on Location {
-    uuid
-    name
+    ${gqlEntityFieldsMap.Location}
+    lat
+    lng
     type
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_ORGANIZATION_FIELDS = `
   fragment organizationFields on Organization {
-    uuid
-    shortName
-    longName
-    identificationCode
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Organization}
+    app6context
+    app6standardIdentity
+    app6symbolSet
   }
 `
 const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
-    uuid
-    name
-    rank
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    status
+    ${gqlEntityFieldsMap.Person}
   }
 `
 const GQL_POSITION_FIELDS = `
   fragment positionFields on Position {
-    uuid
-    name
-    code
-    status
-    type
-    role
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Position}
   }
 `
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
     organization(uuid: $uuid) {
-      ...organizationFields
-      status
-      profile
-      app6context
-      app6standardIdentity
-      app6symbolSet
-      app6hq
-      app6amplifier
-      app6entity
-      app6entityType
-      app6entitySubtype
-      app6sectorOneModifier
-      app6sectorTwoModifier
-      emailAddresses {
-        network
-        address
-      }
+      ${gqlAllOrganizationFields}
+      ${gqlEmailAddressesFields}
+      ${gqlEntityAvatarFields}
       location {
         ...locationFields
-        lat
-        lng
       }
       parentOrg {
         ...organizationFields
       }
-      childrenOrgs(query: { status: ACTIVE }) {
+      childrenOrgs {
         ...organizationFields
       }
-      ascendantOrgs(query: { status: ACTIVE }) {
+      ascendantOrgs {
         ...organizationFields
-        app6context
-        app6standardIdentity
-        app6symbolSet
         parentOrg {
           uuid
         }
@@ -153,9 +130,10 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Organization ${organization.shortName}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`Organization ${organization.shortName}`}
+        status={organization.status}
+      />
       <div className="preview-section">
         <div className="text-center">
           <EntityAvatarDisplay
@@ -220,12 +198,12 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
           dictProps={Settings.fields.organization.location}
           value={
             organization.location && (
-              <>
-                <LinkTo modelType="Location" model={organization.location} />{" "}
-                <Badge>
+              <LinkTo modelType="Location" model={organization.location}>
+                {`${Location.toString(organization.location)} `}
+                <Badge bg="secondary">
                   {Location.humanNameOfType(organization.location.type)}
                 </Badge>
-              </>
+              </LinkTo>
             )
           }
         />
@@ -265,7 +243,6 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
         <OrganizationTasks
           organization={organization}
           queryParams={{
-            status: Model.STATUS.ACTIVE,
             pageSize: 10,
             taskedOrgUuid: organization.uuid
           }}

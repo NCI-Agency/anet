@@ -6,7 +6,7 @@ import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
-import { Person } from "models"
+import { Person, Position } from "models"
 import pluralize from "pluralize"
 import React, { useContext } from "react"
 import { Badge, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
@@ -141,8 +141,12 @@ const ReportPeople = ({
           <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
-          {position?.uuid && <LinkTo modelType="Position" model={position} />}
-          {position?.code ? `, ${position.code}` : ""}
+          {position?.uuid && (
+            <LinkTo modelType="Position" model={position}>
+              {Position.toString(position)}
+              {position?.code ? `, ${position.code}` : ""}
+            </LinkTo>
+          )}
         </td>
         <td>
           <LinkTo

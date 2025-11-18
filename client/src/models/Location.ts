@@ -1,7 +1,12 @@
+import {
+  gqlAllLocationFields,
+  gqlApprovalStepFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   yupCoordinateSchema
 } from "components/Model"
 import { convertLatLngToMGRS } from "geoUtils"
@@ -124,63 +129,26 @@ export default class Location extends Model {
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = `uuid name type digram trigram ${GRAPHQL_ENTITY_AVATAR_FIELDS}`
+  static autocompleteQuery = gqlEntityFieldsMap.Location
 
   static allFieldsQuery = `
-    uuid
-    name
-    digram
-    trigram
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    description
-    type
-    lat
-    lng
-    status
-    isSubscribed
-    updatedAt
+    ${gqlAllLocationFields}
+    ${gqlEntityAvatarFields}
     planningApprovalSteps {
-      uuid
-      name
-      approvers {
-        uuid
-        name
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
+      ${gqlApprovalStepFields}
     }
     approvalSteps {
-      uuid
-      name
-      approvers {
-        uuid
-        name
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
+      ${gqlApprovalStepFields}
     }
     parentLocations {
-      uuid
-      name
+      ${gqlEntityFieldsMap.Location}
       type
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     childrenLocations {
-      uuid
-      name
+      ${gqlEntityFieldsMap.Location}
       type
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
-    customFields
-    ${GRAPHQL_NOTES_FIELDS}
+    ${gqlNotesFields}
   `
 
   static hasCoordinates(location) {
@@ -190,11 +158,7 @@ export default class Location extends Model {
   }
 
   static isActive(loc) {
-    return loc.status === Location.STATUS.ACTIVE
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
+    return loc.status === Model.STATUS.ACTIVE
   }
 
   static humanNameOfType(type) {
@@ -237,11 +201,15 @@ export default class Location extends Model {
     return LOCATIONS_ICON
   }
 
-  toString(displayCallback) {
+  static toString(location, displayCallback) {
     if (typeof displayCallback === "function") {
-      return displayCallback(this)
+      return displayCallback(location)
     }
-    return this.name
+    return location?.name
+  }
+
+  toString(displayCallback) {
+    return Location.toString(this, displayCallback)
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

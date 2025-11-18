@@ -1,3 +1,8 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAttachmentRelatedObjectsFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -11,7 +16,6 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -30,56 +34,10 @@ import utils from "utils"
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
     attachment(uuid: $uuid) {
-      ${Attachment.basicFieldsQuery}
+      ${gqlAllAttachmentFields}
+      ${gqlAttachmentRelatedObjectsFields}
       author {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      attachmentRelatedObjects {
-        relatedObject {
-          ... on AuthorizationGroup {
-            name
-          }
-          ... on Event {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on EventSeries {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Location {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Organization {
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Person {
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Position {
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Report {
-            intent
-          }
-          ... on Task {
-            shortName
-            longName
-          }
-        }
-        relatedObjectUuid
-        relatedObjectType
+        ${gqlEntityFieldsMap.Person}
       }
     }
   }

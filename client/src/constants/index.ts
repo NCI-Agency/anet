@@ -1,1 +1,0 @@
-export const REPORT_DRAFT = "REPORT_DRAFT"

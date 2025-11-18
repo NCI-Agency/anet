@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
@@ -213,14 +217,12 @@ interface LeafletProps {
 const NEARBY_LOCATIONS_GQL = gql`
   query ($bounds: BoundingBoxInput!) {
     locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
+        type
       }
     }
   }
@@ -533,10 +535,7 @@ const Leaflet = ({
   function renderLocationMarkerPopupContents(location) {
     return (
       <div className="d-flex flex-column justify-content-center">
-        <LinkTo
-          modelType="Location"
-          model={{ uuid: location?.uuid, name: location?.name }}
-        />
+        <LinkTo modelType="Location" model={location} />
         {onSelectAnetLocation && (
           <Button
             onClick={() => onSelectAnetLocation(location)}

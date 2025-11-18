@@ -1,43 +1,30 @@
+import {
+  gqlEmailAddressesForNetworkFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import PersonTable from "components/PersonTable"
 import {
   CommonSearchResults,
-  GenericSearchResultsWithEmailProps,
-  GQL_EMAIL_ADDRESSES
+  GenericSearchResultsWithEmailProps
 } from "components/search/CommonSearchResults"
 import React from "react"
 
 const GQL_GET_PERSON_LIST = gql`
   query ($personQuery: PersonSearchQueryInput, $emailNetwork: String) {
     personList(query: $personQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        ${GQL_EMAIL_ADDRESSES}
+        ${gqlEntityFieldsMap.Person}
+        ${gqlEmailAddressesForNetworkFields}
         position {
-          uuid
-          name
-          type
-          role
-          code
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           location {
-            uuid
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Location}
           }
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
         }
       }

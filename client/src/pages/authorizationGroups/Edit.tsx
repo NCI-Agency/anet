@@ -1,7 +1,11 @@
+import {
+  gqlAllAuthorizationGroupFields,
+  gqlAuthorizationGroupMembersFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -17,65 +21,20 @@ import AuthorizationGroupForm from "./Form"
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String!) {
     authorizationGroup(uuid: $uuid) {
-      uuid
-      updatedAt
-      name
-      description
-      status
-      distributionList
-      forSensitiveInformation
+      ${gqlAllAuthorizationGroupFields}
       administrativePositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
-      authorizationGroupRelatedObjects {
-        relatedObjectType
-        relatedObjectUuid
-        relatedObject {
-          ... on Organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Position {
-            uuid
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-      }
+      ${gqlAuthorizationGroupMembersFields}
     }
 
     reportList(query: { authorizationGroupUuid: [$uuid], pageSize: 1 }) {

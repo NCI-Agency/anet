@@ -1,3 +1,9 @@
+import {
+  gqlEntityFieldsMap,
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields,
+  gqlReportSensitiveInformationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -35,8 +41,7 @@ import { LeafletWithSelection } from "components/Leaflet"
 import { MessagesWithConflict } from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
-  EXCLUDED_ASSESSMENT_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS
+  EXCLUDED_ASSESSMENT_FIELDS
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
@@ -90,21 +95,12 @@ const reportPeopleAutocompleteQuery = `
     startTime
     endTime
     position {
-      uuid
-      name
-      code
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Position}
       organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       location {
-        uuid
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Location}
       }
     }
   }
@@ -148,16 +144,12 @@ const GQL_GET_RECENTS = gql`
 const GQL_CREATE_REPORT = gql`
   mutation ($report: ReportInput!) {
     createReport(report: $report) {
-      uuid
+      ${gqlMinimalReportFields}
       updatedAt
-      state
       authors {
-        uuid
+        ${gqlMinimalPersonFields}
       }
-      reportSensitiveInformation {
-        uuid
-        text
-      }
+      ${gqlReportSensitiveInformationFields}
     }
   }
 `
@@ -168,16 +160,12 @@ const GQL_UPDATE_REPORT = gql`
       sendEditEmail: $sendEditEmail
       force: $force
     ) {
-      uuid
+      ${gqlMinimalReportFields}
       updatedAt
-      state
       authors {
-        uuid
+        ${gqlMinimalPersonFields}
       }
-      reportSensitiveInformation {
-        uuid
-        text
-      }
+      ${gqlReportSensitiveInformationFields}
     }
   }
 `
@@ -411,21 +399,28 @@ const ReportForm = ({
           currentUser.position && currentUser.position.organization
 
         const locationFilters = Location.getReportLocationFilters()
+        const personSearchQuery = {
+          matchPositionName: true,
+          pendingVerification: false
+        }
         const reportPeopleFilters = {
           all: {
             label: "All",
-            queryVars: { matchPositionName: true, pendingVerification: false }
+            queryVars: {
+              ...personSearchQuery
+            }
           }
         }
         if (currentOrg) {
           reportPeopleFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
-              matchPositionName: true,
-              pendingVerification: false,
+              ...personSearchQuery,
               orgUuid: currentOrg.uuid
             }
           }
+        }
+        if (!_isEmpty(currentUser.position?.associatedPositions)) {
           reportPeopleFilters.myCounterparts = {
             label: "My counterparts",
             list: currentUser.position.associatedPositions
@@ -453,13 +448,14 @@ const ReportForm = ({
         })
 
         const tasksFilters = {}
+        const taskSearchQuery = { selectable: true }
 
         if (values.event?.uuid) {
           tasksFilters.assignedToEvent = {
             label: `Assigned to event ${values.event.name}`,
             queryVars: {
-              eventUuid: values.event.uuid,
-              selectable: true
+              ...taskSearchQuery,
+              eventUuid: values.event.uuid
             }
           }
         }
@@ -468,9 +464,9 @@ const ReportForm = ({
           tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: currentOrg.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -487,16 +483,19 @@ const ReportForm = ({
           tasksFilters.assignedToReportOrg = {
             label: `Assigned to ${primaryAdvisor.position.organization.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
 
         tasksFilters.allUnassignedTasks = {
           label: `All unassigned ${tasksLabel}`,
-          queryVars: { selectable: true, isAssigned: false }
+          queryVars: {
+            ...taskSearchQuery,
+            isAssigned: false
+          }
         }
 
         const eventFilters = Event.getReportEventFilters()
@@ -504,7 +503,9 @@ const ReportForm = ({
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
-            queryVars: { selectable: true }
+            queryVars: {
+              ...taskSearchQuery
+            }
           }
         }
 
@@ -934,10 +935,6 @@ const ReportForm = ({
                       }
                       filterDefs={reportPeopleFilters}
                       objectType={Person}
-                      queryParams={{
-                        status: Model.STATUS.ACTIVE,
-                        pendingVerification: false
-                      }}
                       fields={reportPeopleAutocompleteQuery}
                       addon={PEOPLE_ICON}
                     />
@@ -1004,7 +1001,6 @@ const ReportForm = ({
                         restrictSelectableItems
                         filterDefs={tasksFilters}
                         objectType={Task}
-                        queryParams={{ status: Model.STATUS.ACTIVE }}
                         fields={taskFields}
                         addon={TASKS_ICON}
                         pageSize={0}

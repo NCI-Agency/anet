@@ -262,6 +262,7 @@ export class CreateReport extends Page {
       .parentElement()
       .parentElement()
       .parentElement()
+      .parentElement()
       .$(`./following-sibling::tr[${i}]/td`)
   }
 
@@ -281,6 +282,7 @@ export class CreateReport extends Page {
 
   async getTaskAssessmentLabel(shortName, i) {
     return (await this.getTaskAssessment(shortName))
+      .parentElement()
       .parentElement()
       .parentElement()
       .parentElement()

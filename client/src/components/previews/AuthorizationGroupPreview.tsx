@@ -1,89 +1,40 @@
+import {
+  gqlAllAuthorizationGroupFields,
+  gqlAuthorizationGroupMembersWithEmailFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AuthorizationGroupMembersTable from "components/AuthorizationGroupMembersTable"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import PositionTable from "components/PositionTable"
+import { PreviewTitle } from "components/previews/PreviewTitle"
 import { AuthorizationGroup } from "models"
 import React from "react"
 import Settings from "settings"
 import utils from "utils"
 
-const GQL_EMAIL_ADDRESSES = `
-  emailAddresses {
-    network
-    address
-  }
-`
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String) {
     authorizationGroup(uuid: $uuid) {
-      uuid
-      name
-      description
-      status
-      distributionList
-      forSensitiveInformation
+      ${gqlAllAuthorizationGroupFields}
       administrativePositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
-      authorizationGroupRelatedObjects {
-        relatedObjectType
-        relatedObjectUuid
-        relatedObject {
-          ... on Organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GQL_EMAIL_ADDRESSES}
-          }
-          ... on Person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GQL_EMAIL_ADDRESSES}
-          }
-          ... on Position {
-            uuid
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GQL_EMAIL_ADDRESSES}
-          }
-        }
-      }
+      ${gqlAuthorizationGroupMembersWithEmailFields}
     }
   }
 `
-
 interface AuthorizationGroupPreviewProps {
   className?: string
   uuid?: string
@@ -108,9 +59,10 @@ const AuthorizationGroupPreview = ({
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`Community ${authorizationGroup.name}`}</h4>
-      </div>
+      <PreviewTitle
+        title={`Community ${authorizationGroup.name}`}
+        status={authorizationGroup.status}
+      />
       <div className="preview-section">
         <DictionaryField
           wrappedComponent={PreviewField}

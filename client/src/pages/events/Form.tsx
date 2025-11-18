@@ -139,9 +139,7 @@ const EventForm = ({
         const canCreateLocation =
           Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
 
-        const ownerOrgSearchQuery = { status: Model.STATUS.ACTIVE }
-        const hostOrgSearchQuery = { status: Model.STATUS.ACTIVE }
-        const adminOrgSearchQuery = { status: Model.STATUS.ACTIVE }
+        const adminOrgSearchQuery = {}
         const eventSeriesSearchQuery = {}
 
         // Superusers can select parent organizations among the ones their position is administrating
@@ -165,43 +163,39 @@ const EventForm = ({
         )
         const organizationFilters = {
           allOrganizations: {
-            label: "All organizations",
-            queryVars: { status: Model.STATUS.ACTIVE }
+            label: "All organizations"
           }
         }
 
         const peopleFilters = {
           allOrganizations: {
-            label: "All people",
-            queryVars: {
-              status: Model.STATUS.ACTIVE
-            }
+            label: "All people"
           }
         }
 
         const eventSeriesFilters = {
           allEventSeries: {
-            label: "All event series",
-            queryVars: {
-              status: Model.STATUS.ACTIVE
-            }
+            label: "All event series"
           }
         }
 
         const tasksFilters = {}
+        const taskSearchQuery = { selectable: true }
 
         tasksFilters.allTasks = {
           label: `All ${tasksLabel}`,
-          queryVars: { selectable: true }
+          queryVars: {
+            ...taskSearchQuery
+          }
         }
 
         if (values.ownerOrg) {
           tasksFilters.assignedToOwnerOrg = {
             label: `Assigned to ${values.ownerOrg.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: values.ownerOrg.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -210,9 +204,9 @@ const EventForm = ({
           tasksFilters.assignedToHostOrg = {
             label: `Assigned to ${values.hostOrg.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: values.hostOrg.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -225,9 +219,9 @@ const EventForm = ({
           tasksFilters.assignedToAdminOrg = {
             label: `Assigned to ${values.adminOrg.shortName}`,
             queryVars: {
+              ...taskSearchQuery,
               taskedOrgUuid: values.adminOrg.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
-              selectable: true
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -347,7 +341,6 @@ const EventForm = ({
                       filterDefs={organizationFilters}
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
-                      queryParams={ownerOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
                     />
@@ -373,8 +366,8 @@ const EventForm = ({
                       filterDefs={organizationFilters}
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
-                      queryParams={hostOrgSearchQuery}
                       valueKey="shortName"
+                      y
                       addon={ORGANIZATIONS_ICON}
                     />
                   }
@@ -570,7 +563,6 @@ const EventForm = ({
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
                       objectType={Organization}
-                      queryParams={{ status: Model.STATUS.ACTIVE }}
                       fields={Organization.autocompleteQuery}
                       addon={ORGANIZATIONS_ICON}
                     />
@@ -602,7 +594,6 @@ const EventForm = ({
                       overlayRenderRow={PersonSimpleOverlayRow}
                       filterDefs={peopleFilters}
                       objectType={Person}
-                      queryParams={{ status: Model.STATUS.ACTIVE }}
                       fields={Person.autocompleteQuery}
                       addon={PEOPLE_ICON}
                     />
@@ -637,7 +628,6 @@ const EventForm = ({
                         restrictSelectableItems
                         filterDefs={tasksFilters}
                         objectType={Task}
-                        queryParams={{ status: Model.STATUS.ACTIVE }}
                         fields={taskFields}
                         addon={TASKS_ICON}
                         pageSize={0}

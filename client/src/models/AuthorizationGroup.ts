@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import Model from "components/Model"
 import COMMUNITIES_ICON from "resources/communities.png"
 import utils from "utils"
@@ -29,11 +30,7 @@ export default class AuthorizationGroup extends Model {
     authorizationGroupRelatedObjects: yup.array().nullable().default([])
   })
 
-  static autocompleteQuery = "uuid name description"
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
+  static autocompleteQuery = gqlEntityFieldsMap.AuthorizationGroup
 
   constructor(props) {
     super(Model.fillObject(props, AuthorizationGroup.yupSchema))
@@ -50,10 +47,6 @@ export default class AuthorizationGroup extends Model {
     let url = ["", "communities", "new"].join("/")
     url += utils.formatQueryString(query)
     return url
-  }
-
-  humanNameOfStatus() {
-    return AuthorizationGroup.humanNameOfStatus(this.status)
   }
 
   iconUrl() {

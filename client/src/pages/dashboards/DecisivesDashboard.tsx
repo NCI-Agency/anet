@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
@@ -8,7 +9,7 @@ import {
 } from "actions"
 import API from "api"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -71,22 +72,17 @@ const GQL_GET_STATIC_DATA = gql`
   ) {
     positionList(query: $positionQuery) {
       list {
-        uuid
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
       }
     }
     locationList(query: $locationQuery) {
       list {
-        uuid
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Location}
       }
     }
     taskList(query: $taskQuery) {
       list {
-        uuid
-        shortName
+        ${gqlEntityFieldsMap.Task}
       }
     }
   }

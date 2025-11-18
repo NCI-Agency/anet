@@ -151,13 +151,6 @@ const PersonForm = ({
     }
   ]
   const countryFilters = {
-    activeCountries: {
-      label: "Active countries",
-      queryVars: {
-        type: Location.LOCATION_TYPES.COUNTRY,
-        status: Model.STATUS.ACTIVE
-      }
-    },
     allCountries: {
       label: "All countries",
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }

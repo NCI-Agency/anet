@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
@@ -12,26 +13,22 @@ import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useCallback, useEffect, useState } from "react"
-import LOCATIONS_ICON from "resources/locations.png"
 
 export const locationFields = `
-  uuid
-  name
-  type
+  ${gqlEntityFieldsMap.Location}
   lat
   lng
+  type
   ascendantLocations {
-    uuid
-    name
+    ${gqlEntityFieldsMap.Location}
     parentLocations {
-      uuid
+      ${gqlEntityFieldsMap.Location}
     }
   }
   descendantLocations {
-    uuid
-    name
+    ${gqlEntityFieldsMap.Location}
     parentLocations {
-      uuid
+      ${gqlEntityFieldsMap.Location}
     }
   }
 `
@@ -145,7 +142,6 @@ export const HierarchicalLocationOverlayTable = ({
               />
             </span>
           )}
-          <img src={LOCATIONS_ICON} style={{ width: 16 }} />
           <span
             onClick={handleToggleSelection}
             style={{

@@ -1,5 +1,5 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import * as Models from "models"
 import React, { useEffect, useState } from "react"
 
@@ -25,7 +25,7 @@ const LinkAnetEntity = ({
     let mounted = true
     const modelClass = Models[type]
     modelClass
-      ?.fetchByUuid(uuid, GRAPHQL_ENTITY_FIELDS)
+      ?.fetchByUuid(uuid, gqlEntityFieldsMap)
       .then(data => {
         if (mounted) {
           setEntity(data)

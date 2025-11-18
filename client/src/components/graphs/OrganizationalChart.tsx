@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -6,7 +7,6 @@ import API from "api"
 import App6Symbol from "components/App6Symbol"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -40,10 +40,7 @@ import utils from "utils"
 const GQL_GET_CHART_DATA = gql`
   query ($uuid: String!) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      identificationCode
+      ${gqlEntityFieldsMap.Organization}
       app6context
       app6standardIdentity
       app6symbolSet
@@ -54,39 +51,29 @@ const GQL_GET_CHART_DATA = gql`
       app6entitySubtype
       app6sectorOneModifier
       app6sectorTwoModifier
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       positions {
-        name
-        uuid
-        role
+        ${gqlEntityFieldsMap.Position}
         organization {
-          uuid
+          ${gqlEntityFieldsMap.Organization}
         }
         person {
-          uuid
-          name
-          rank
-          user
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
       }
       ascendantOrgs {
-        uuid
+        ${gqlEntityFieldsMap.Organization}
         app6context
         app6standardIdentity
         app6symbolSet
         parentOrg {
-          uuid
+          ${gqlEntityFieldsMap.Organization}
         }
       }
-      childrenOrgs(query: { status: ACTIVE }) {
-        uuid
+      childrenOrgs {
+        ${gqlEntityFieldsMap.Organization}
       }
-      descendantOrgs(query: { status: ACTIVE }) {
-        uuid
-        shortName
-        longName
-        identificationCode
+      descendantOrgs {
+        ${gqlEntityFieldsMap.Organization}
         app6context
         app6standardIdentity
         app6symbolSet
@@ -97,35 +84,29 @@ const GQL_GET_CHART_DATA = gql`
         app6entitySubtype
         app6sectorOneModifier
         app6sectorTwoModifier
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        childrenOrgs(query: { status: ACTIVE }) {
-          uuid
+        childrenOrgs {
+          ${gqlEntityFieldsMap.Organization}
         }
         ascendantOrgs {
-          uuid
+          ${gqlEntityFieldsMap.Organization}
           app6context
           app6standardIdentity
           app6symbolSet
           parentOrg {
-            uuid
+            ${gqlEntityFieldsMap.Organization}
           }
         }
         parentOrg {
-          uuid
+          ${gqlEntityFieldsMap.Organization}
         }
         positions {
-          name
-          uuid
+          ${gqlEntityFieldsMap.Position}
           role
           organization {
-            uuid
+            ${gqlEntityFieldsMap.Organization}
           }
           person {
-            uuid
-            name
-            rank
-            user
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Person}
           }
         }
       }

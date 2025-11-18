@@ -33,6 +33,7 @@ class ShowReport extends Page {
       .parentElement()
       .parentElement()
       .parentElement()
+      .parentElement()
       .$(`./following-sibling::tr[${i}]/td`)
   }
 
@@ -48,6 +49,7 @@ class ShowReport extends Page {
 
   async getTaskEngagementAssessmentLabel(id, shortName, i) {
     return (await this.getTaskEngagementAssessment(id, shortName))
+      .parentElement()
       .parentElement()
       .parentElement()
       .parentElement()

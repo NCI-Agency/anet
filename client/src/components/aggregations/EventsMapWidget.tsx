@@ -1,10 +1,17 @@
 import { AggregationWidgetPropType } from "components/aggregations/utils"
 import Leaflet, { ICON_TYPES, MarkerPopupProps } from "components/Leaflet"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useMemo, useState } from "react"
 import { createPortal } from "react-dom"
+
+const getIcon = event => {
+  return event.status === Model.STATUS.INACTIVE
+    ? ICON_TYPES.AMBER
+    : ICON_TYPES.GREEN
+}
 
 interface EventsMapWidgetProps extends AggregationWidgetPropType {
   width?: number
@@ -29,7 +36,7 @@ const EventsMapWidget = ({
       if (Location.hasCoordinates(event.location)) {
         markerArray.push({
           id: event.uuid,
-          icon: ICON_TYPES.GREEN,
+          icon: getIcon(event),
           lat: event.location.lat,
           lng: event.location.lng,
           contents: event
@@ -63,10 +70,7 @@ const EventsMapWidget = ({
     return (
       <>
         <LinkTo modelType="Event" model={event} /> @{" "}
-        <LinkTo
-          modelType="Location"
-          model={{ uuid: event?.location?.uuid, name: event?.location?.name }}
-        />
+        <LinkTo modelType="Location" model={event?.location} />
       </>
     )
   }

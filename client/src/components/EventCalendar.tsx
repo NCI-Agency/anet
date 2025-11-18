@@ -1,3 +1,11 @@
+import {
+  gqlMinimalEventFields,
+  gqlMinimalLocationFields,
+  gqlMinimalOrganizationFields,
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import {
@@ -5,7 +13,6 @@ import {
   eventsToCalendarEvents
 } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
-import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType
@@ -20,52 +27,37 @@ import { useNavigate } from "react-router-dom"
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
     eventList(query: $eventQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        type
-        name
+        ${gqlMinimalEventFields}
         startDate
         endDate
         location {
-          uuid
-          name
+          ${gqlMinimalLocationFields}
           lat
           lng
+          type
         }
         reports {
-          uuid
-          intent
+          ${gqlMinimalReportFields}
+          duration
           primaryAdvisor {
-            uuid
-            name
+            ${gqlMinimalPersonFields}
           }
           primaryInterlocutor {
-            uuid
-            name
+            ${gqlMinimalPersonFields}
           }
           advisorOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlMinimalOrganizationFields}
           }
           interlocutorOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
+            ${gqlMinimalOrganizationFields}
           }
-          engagementDate
-          duration
-          state
           location {
-            uuid
-            name
+            ${gqlMinimalLocationFields}
             lat
             lng
+            type
           }
         }
       }
@@ -105,7 +97,6 @@ const EventCalendar = ({
   function getEvents(fetchInfo, successCallback, failureCallback) {
     const eventQuery = {
       ...queryParams,
-      status: Model.STATUS.ACTIVE,
       pageSize: 0,
       startDate: moment(fetchInfo.start).startOf("day"),
       endDate: moment(fetchInfo.end).endOf("day")

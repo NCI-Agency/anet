@@ -63,28 +63,30 @@ describe("My events page", () => {
       ).to.equal("Type: Conference")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 5, 1)).getText()
-      ).to.equal("Owner Organization: EF 2.2")
+      ).to.equal("Owner Organization:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 6, 1)).getText()
-      ).to.equal("Host Organization: EF 2.2")
+      ).to.equal("Host Organization:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 7, 1)).getText()
-      ).to.equal("Admin Organization: EF 2.2")
+      ).to.equal("Admin Organization:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 8, 1)).getText()
-      ).to.equal("Event Series this event belongs to: NMI PDT")
+      ).to.equal("Event Series this event belongs to:\nNMI PDT")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 9, 1)).getText()
-      ).to.equal("Location where the event takes place: General Hospital")
+      ).to.equal(
+        "Location where the event takes place:\nGeneral Hospital Point location"
+      )
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 10, 1)).getText()
-      ).to.equal("Objectives: EF 1 » EF 1.2 » 1.2.B")
+      ).to.equal("Objectives:\nEF 1\n»\nEF 1.2\n»\n1.2.B")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 11, 1)).getText()
-      ).to.equal("Organizations attending: EF 2.2")
+      ).to.equal("Organizations attending:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 12, 1)).getText()
-      ).to.equal("People attending: CIV ERINSON, Erin")
+      ).to.equal("People attending:\nCIV ERINSON, Erin")
     })
     it("Should see a calendar of events", async () => {
       await MyEvents.selectEventsCalendar()

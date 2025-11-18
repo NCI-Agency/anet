@@ -1,6 +1,9 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import LocationTable from "components/LocationTable"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   CommonSearchResults,
   GenericSearchResultsProps
@@ -10,16 +13,12 @@ import React from "react"
 const GQL_GET_LOCATION_LIST = gql`
   query ($locationQuery: LocationSearchQueryInput) {
     locationList(query: $locationQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
         type
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

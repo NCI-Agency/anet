@@ -1,10 +1,16 @@
+import {
+  gqlAllPersonFields,
+  gqlAssessmentsFields,
+  gqlCustomSensitiveInformationFields,
+  gqlEmailAddressesFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields,
+  gqlUsersFields
+} from "constants/GraphQLDefinitions"
 import API from "api"
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate,
   yupEmailAddressesWithValidation
@@ -166,70 +172,42 @@ export default class Person extends Model {
     .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery =
-    `uuid name rank status user endOfTourDate ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
-    ` position { uuid name type role code status ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
-    ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
-    ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} } }`
+  static autocompleteQuery = `
+    ${gqlEntityFieldsMap.Person}
+    position {
+      ${gqlEntityFieldsMap.Position}
+      organization {
+        ${gqlEntityFieldsMap.Organization}
+      }
+      location {
+        ${gqlEntityFieldsMap.Location}
+      }
+    }
+  `
 
   static allFieldsQuery = `
-    uuid
-    name
-    rank
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    status
-    pendingVerification
-    phoneNumber
-    user
-    users {
-      uuid
-      domainUsername
-    }
-    biography
-    obsoleteCountry
+    ${gqlAllPersonFields}
+    ${gqlEmailAddressesFields}
+    ${gqlEntityAvatarFields}
+    ${gqlUsersFields}
     country {
-      uuid
-      name
-    }
-    gender
-    endOfTourDate
-    code
-    emailAddresses {
-      network
-      address
+      ${gqlEntityFieldsMap.Location}
     }
     position {
-      uuid
-      name
+      ${gqlEntityFieldsMap.Position}
       type
       superuserType
       role
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Organization}
       }
       associatedPositions {
-        uuid
-        name
-        type
-        role
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
       }
     }
@@ -237,34 +215,23 @@ export default class Person extends Model {
       startTime
       endTime
       position {
-        uuid
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Position}
         previousPeople {
           startTime
           endTime
           person {
-            uuid
+            ${gqlEntityFieldsMap.Person}
           }
         }
       }
     }
-    customFields
-    ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
-    ${GRAPHQL_ASSESSMENTS_FIELDS}
-    ${GRAPHQL_NOTES_FIELDS}
+    ${gqlCustomSensitiveInformationFields}
+    ${gqlAssessmentsFields}
+    ${gqlNotesFields}
   `
 
   constructor(props) {
     super(Model.fillObject(props, Person.yupSchema))
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
-  humanNameOfStatus() {
-    return Person.humanNameOfStatus(this.status)
   }
 
   static isPendingVerification(person) {

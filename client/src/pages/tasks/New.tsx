@@ -1,8 +1,8 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { initInvisibleFields } from "components/CustomFields"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -20,11 +20,7 @@ import TaskForm from "./Form"
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String!) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Organization}
     }
   }
 `
@@ -32,9 +28,7 @@ const GQL_GET_ORGANIZATION = gql`
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
     task(uuid: $uuid) {
-      uuid
-      shortName
-      longName
+      ${gqlEntityFieldsMap.Task}
     }
   }
 `

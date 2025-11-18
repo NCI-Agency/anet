@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
@@ -5,7 +6,6 @@ import { ApproverOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, FieldArray } from "formik"
 import { Position } from "models"
@@ -231,10 +231,9 @@ const ApprovalsDefinition = ({
               filterDefs={approversFilters}
               objectType={Position}
               queryParams={{
-                status: Model.STATUS.ACTIVE,
                 matchPersonName: true
               }}
-              fields={`uuid name code type person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`}
+              fields={`uuid name code type person { ${gqlEntityFieldsMap.Person} }`}
               addon={POSITIONS_ICON}
             />
           }

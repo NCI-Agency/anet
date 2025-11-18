@@ -16,7 +16,6 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import Model from "components/Model"
 import * as Models from "models"
 import pluralize from "pluralize"
 import React, { useCallback, useContext, useMemo, useState } from "react"
@@ -34,8 +33,7 @@ import Settings from "settings"
 
 const entityFilters = {
   allEntities: {
-    label: "All entities",
-    queryVars: {}
+    label: "All entities"
   }
 }
 
@@ -51,7 +49,7 @@ const widgetPropsReport = {
   overlayRenderRow: ReportDetailedOverlayRow,
   overlayColumns: [Settings.fields.report.intent?.label, "Author", "Updated"],
   filterDefs: entityFilters,
-  queryParams: {}, // allow any report, incl. one's own drafts
+  showInclInactive: false, // there are no INACTIVE reports
   fields: Models.Report.autocompleteQuery,
   addon: REPORTS_ICON
 }
@@ -62,7 +60,6 @@ const widgetPropsPeople = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
   queryParams: {
-    status: Model.STATUS.ACTIVE,
     pendingVerification: false
   },
   fields: Models.Person.autocompleteQuery,
@@ -74,7 +71,6 @@ const widgetPropsOrganization = {
   overlayRenderRow: OrganizationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Organization.autocompleteQuery,
   addon: ORGANIZATIONS_ICON
 }
@@ -84,7 +80,6 @@ const widgetPropsPosition = {
   overlayRenderRow: PositionOverlayRow,
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
@@ -99,7 +94,6 @@ const generateLocationFilters = (filter, _) => {
       locationFilters[index] = {
         label: Models.Location.humanNameOfType(element[1]),
         queryVars: {
-          status: Model.STATUS.ACTIVE,
           [filter.typeFilter.filterField]: element[1]
         }
       }
@@ -113,7 +107,6 @@ const widgetPropsLocation = {
   overlayRenderRow: LocationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: generateLocationFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Location.autocompleteQuery,
   addon: LOCATIONS_ICON
 }
@@ -123,7 +116,6 @@ const widgetPropsTask = {
   overlayRenderRow: TaskOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Task.autocompleteQuery,
   addon: TASKS_ICON
 }
@@ -133,7 +125,6 @@ const widgetPropsAuthorizationGroup = {
   overlayRenderRow: AuthorizationGroupOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.AuthorizationGroup.autocompleteQuery,
   addon: COMMUNITIES_ICON
 }
@@ -147,8 +138,7 @@ const generateAttachmentFilters = (_, currentUser) => {
       }
     },
     allAttachments: {
-      label: "All attachments",
-      queryVars: {}
+      label: "All attachments"
     }
   }
 }
@@ -158,7 +148,7 @@ const widgetPropsAttachment = {
   overlayRenderRow: AttachmentOverlayRow,
   overlayColumns: ["Content", "Caption", "Uploaded"],
   filterDefs: generateAttachmentFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
+  showInclInactive: false, // there are no INACTIVE attachments
   fields: Models.Attachment.autocompleteQuery,
   addon: <Icon icon={IconNames.PAPERCLIP} />
 }
@@ -168,7 +158,6 @@ const widgetPropsEvent = {
   overlayRenderRow: EventOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Event.autocompleteQuery,
   addon: EVENTS_ICON
 }
@@ -178,7 +167,6 @@ const widgetPropsEventSeries = {
   overlayRenderRow: EventSeriesOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.EventSeries.autocompleteQuery,
   addon: EVENT_SERIES_ICON
 }
@@ -317,6 +305,7 @@ const MultiTypeAdvancedSelectComponent = ({
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
         filterDefs={filterDefs}
+        showInclInactive={advancedSelectProps.showInclInactive}
         onChange={value => onConfirm(value, entityType)}
         objectType={advancedSelectProps.objectType}
         queryParams={advancedSelectProps.queryParams}

@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -7,7 +11,6 @@ import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/Advanc
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -28,19 +31,13 @@ import utils from "utils"
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
   query ($martImportedReportQuery: MartImportedReportSearchQueryInput) {
     martImportedReportList(query: $martImportedReportQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
         person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         report {
-          uuid
-          intent
+          ${gqlEntityFieldsMap.Report}
         }
         sequence
         state
@@ -154,10 +151,7 @@ const MartImportedReportTable = ({
 
   const peopleFilters = {
     allPeople: {
-      label: "All people",
-      queryVars: {
-        status: Model.STATUS.ACTIVE
-      }
+      label: "All people"
     }
   }
 

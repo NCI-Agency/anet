@@ -1,3 +1,10 @@
+import {
+  gqlMinimalLocationFields,
+  gqlMinimalOrganizationFields,
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import {
@@ -5,7 +12,6 @@ import {
   reportsToEvents
 } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
@@ -18,42 +24,27 @@ export const ATTENDEE_TYPE_INTERLOCUTOR = "interlocutor"
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        intent
+        ${gqlMinimalReportFields}
+        duration
         primaryAdvisor {
-          uuid
-          name
+          ${gqlMinimalPersonFields}
         }
         primaryInterlocutor {
-          uuid
-          name
+          ${gqlMinimalPersonFields}
         }
         advisorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlMinimalOrganizationFields}
         }
         interlocutorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlMinimalOrganizationFields}
         }
-        engagementDate
-        duration
-        state
         location {
-          uuid
-          name
+          ${gqlMinimalLocationFields}
           lat
           lng
+          type
         }
       }
     }

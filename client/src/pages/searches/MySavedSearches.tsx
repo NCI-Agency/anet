@@ -1,3 +1,4 @@
+import { gqlSavedSearchFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Checkbox, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -31,13 +32,7 @@ import utils from "utils"
 const GQL_GET_SAVED_SEARCHES = gql`
   query {
     savedSearches: mySearches {
-      uuid
-      name
-      objectType
-      query
-      displayInHomepage
-      priority
-      homepagePriority
+      ${gqlSavedSearchFields}
     }
   }
 `

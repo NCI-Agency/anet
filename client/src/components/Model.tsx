@@ -1,3 +1,7 @@
+import {
+  gqlAssessmentFields,
+  gqlNoteFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { convertMGRSToLatLng } from "geoUtils"
@@ -18,152 +22,17 @@ import * as yup from "yup"
 export const REPORT_RELATED_OBJECT_TYPE = "reports"
 export const REPORT_STATE_PUBLISHED = "PUBLISHED"
 
-export const GRAPHQL_ENTITY_AVATAR_FIELDS = `
-  entityAvatar {
-    attachmentUuid
-    applyCrop
-    cropLeft
-    cropTop
-    cropWidth
-    cropHeight
-  }
-`
-export const GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS = /* GraphQL */ `
-  customSensitiveInformation {
-    uuid
-    customFieldName
-    customFieldValue
-  }
-`
-
-export const GRAPHQL_ASSESSMENT_FIELDS = /* GraphQL */ `
-  uuid
-  createdAt
-  updatedAt
-  assessmentKey
-  assessmentValues
-  author {
-    uuid
-    name
-    rank
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-  }
-  assessmentRelatedObjects {
-    objectUuid
-    relatedObjectType
-    relatedObjectUuid
-    relatedObject {
-      ... on Organization {
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      ... on Person {
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      ... on Report {
-        intent
-        engagementDate
-        state
-      }
-      ... on Task {
-        shortName
-        longName
-      }
-    }
-  }
-`
-export const GRAPHQL_ASSESSMENTS_FIELDS = /* GraphQL */ `
-  assessments {
-    ${GRAPHQL_ASSESSMENT_FIELDS}
-  }
-`
-
-export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
-  uuid
-  createdAt
-  updatedAt
-  text
-  author {
-    uuid
-    name
-    rank
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-  }
-  noteRelatedObjects {
-    objectUuid
-    relatedObjectType
-    relatedObjectUuid
-    relatedObject {
-      ... on AuthorizationGroup {
-        name
-      }
-      ... on Location {
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      ... on Organization {
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      ... on Person {
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      ... on Position {
-        type
-        name
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-      ... on Report {
-        intent
-        engagementDate
-        state
-      }
-      ... on Task {
-        shortName
-        longName
-      }
-    }
-  }
-`
-export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
-  notes {
-    ${GRAPHQL_NOTE_FIELDS}
-  }
-`
-
-// Entity type --> GQL query
-export const GRAPHQL_ENTITY_FIELDS = {
-  Report: "uuid intent engagementDate",
-  Person: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
-  Organization: `uuid shortName ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
-  Position: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
-  Location: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
-  Task: "uuid shortName longName",
-  AuthorizationGroup: "uuid name description",
-  Attachment: "uuid caption mimeType contentLength",
-  Event: "uuid name",
-  EventSeries: "uuid name"
-}
-
 export const GQL_CREATE_ASSESSMENT = gql`
   mutation($assessment: AssessmentInput!) {
     createAssessment(assessment: $assessment) {
-      ${GRAPHQL_ASSESSMENT_FIELDS}
+      ${gqlAssessmentFields}
     }
   }
 `
 export const GQL_UPDATE_ASSESSMENT = gql`
   mutation($assessment: AssessmentInput!, $force: Boolean) {
     updateAssessment(assessment: $assessment, force: $force) {
-      ${GRAPHQL_ASSESSMENT_FIELDS}
+      ${gqlAssessmentFields}
     }
   }
 `
@@ -177,14 +46,14 @@ export const GQL_DELETE_ASSESSMENT = gql`
 export const GQL_CREATE_NOTE = gql`
   mutation($note: NoteInput!) {
     createNote(note: $note) {
-      ${GRAPHQL_NOTE_FIELDS}
+      ${gqlNoteFields}
     }
   }
 `
 export const GQL_UPDATE_NOTE = gql`
   mutation($note: NoteInput!, $force: Boolean) {
     updateNote(note: $note, force: $force) {
-      ${GRAPHQL_NOTE_FIELDS}
+      ${gqlNoteFields}
     }
   }
 `
@@ -713,6 +582,14 @@ export default class Model {
     return this.uuid
       ? this.constructor.pathFor(this, query)
       : this.constructor.pathForNew(query)
+  }
+
+  static humanNameOfStatus(status) {
+    return utils.sentenceCase(status)
+  }
+
+  humanNameOfStatus() {
+    return Model.humanNameOfStatus(this.status)
   }
 
   toString() {

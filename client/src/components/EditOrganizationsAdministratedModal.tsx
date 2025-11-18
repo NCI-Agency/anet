@@ -5,7 +5,6 @@ import { OrganizationOverlayRow } from "components/advancedSelectWidget/Advanced
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import { MessagesWithConflict } from "components/Messages"
-import Model from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import { FastField, Form, Formik } from "formik"
 import { Organization, Position } from "models"
@@ -38,10 +37,7 @@ const EditOrganizationsAdministratedModal = ({
 
   const organizationsFilters = {
     allOrganizations: {
-      label: "All organizations",
-      queryVars: {
-        status: Model.STATUS.ACTIVE
-      }
+      label: "All organizations"
     }
   }
 

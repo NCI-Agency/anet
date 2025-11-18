@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
@@ -6,7 +7,6 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
@@ -87,7 +87,6 @@ const EditAssociatedPositionsModal = ({
   const [error, setError] = useState(null)
 
   const positionSearchQuery = {
-    status: Model.STATUS.ACTIVE,
     matchPersonName: true
   }
   if (currentUser.isAdmin() === false) {
@@ -142,7 +141,7 @@ const EditAssociatedPositionsModal = ({
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           objectType={Position}
-                          fields={`uuid name code type person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} } organization { uuid shortName longName identificationCode }`}
+                          fields={`${gqlEntityFieldsMap.Position} person { ${gqlEntityFieldsMap.Person} } organization { ${gqlEntityFieldsMap.Organization} }`}
                           addon={POSITIONS_ICON}
                         />
                       }

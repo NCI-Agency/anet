@@ -1,6 +1,6 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
   REPORT_RELATED_OBJECT_TYPE,
   REPORT_STATE_PUBLISHED,
   yupDate
@@ -344,14 +344,15 @@ export default class Report extends Model {
     )
   }
 
-  static autocompleteQuery = `uuid intent authors { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
+  static autocompleteQuery = `
+    ${gqlEntityFieldsMap.Report}
+    authors {
+      ${gqlEntityFieldsMap.Person}
+    }
+  `
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
   }
 
   static isDraft(state) {

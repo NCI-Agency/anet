@@ -1,3 +1,10 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAssessmentsFields,
+  gqlCustomSensitiveInformationFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -23,10 +30,6 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -43,7 +46,7 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import UserTable from "components/UserTable"
 import _isEmpty from "lodash/isEmpty"
-import { Attachment, Person, Position } from "models"
+import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/GuidedTour"
 import React, { useContext, useEffect, useState } from "react"
@@ -66,88 +69,16 @@ import utils from "utils"
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
     person(uuid: $uuid) {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      status
-      pendingVerification
-      isSubscribed
-      updatedAt
-      phoneNumber
-      user
-      users {
-        uuid
-        domainUsername
-      }
-      biography
-      obsoleteCountry
-      country {
-        uuid
-        name
-      }
-      gender
-      endOfTourDate
-      code
-      emailAddresses {
-        network
-        address
-      }
-      position {
-        uuid
-        name
-        type
-        role
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        associatedPositions {
-          uuid
-          name
-          type
-          role
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-      }
-      previousPositions {
-        startTime
-        endTime
-        position {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
+      ${Person.allFieldsQuery}
       authorizationGroups {
-        uuid
-        name
-        description
+        ${gqlEntityFieldsMap.AuthorizationGroup}
       }
       attachments {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
       }
-      customFields
-      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
-      ${GRAPHQL_ASSESSMENTS_FIELDS}
-      ${GRAPHQL_NOTES_FIELDS}
+      ${gqlCustomSensitiveInformationFields}
+      ${gqlAssessmentsFields}
+      ${gqlNotesFields}
     }
   }
 `

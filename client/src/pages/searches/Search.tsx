@@ -1,3 +1,7 @@
+import {
+  gqlPreferenceFields,
+  gqlSavedSearchFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -78,11 +82,7 @@ export const UNLIMITED_EXPORTS_COMMUNITY = "UNLIMITED_EXPORTS_COMMUNITY"
 const GQL_GET_PREFERENCES = gql`
   query {
     preferences {
-      uuid
-      name
-      type
-      description
-      defaultValue
+      ${gqlPreferenceFields}
     }
   }
 `
@@ -97,8 +97,7 @@ const GQL_CREATE_SAVED_SEARCH = gql`
 const GQL_GET_SAVED_SEARCHES = gql`
   query {
     savedSearches: mySearches {
-      objectType
-      query
+      ${gqlSavedSearchFields}
     }
   }
 `

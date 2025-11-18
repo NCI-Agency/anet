@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
@@ -19,22 +23,16 @@ import Settings from "settings"
 const GQL_GET_TASK_LIST = gql`
   query ($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        shortName
-        longName
+        ${gqlEntityFieldsMap.Task}
         parentTask {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
         }
         ascendantTasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
+            ${gqlEntityFieldsMap.Task}
           }
         }
       }

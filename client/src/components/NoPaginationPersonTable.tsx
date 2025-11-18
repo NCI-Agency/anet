@@ -1,7 +1,7 @@
 import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
-import { Person } from "models"
+import { Person, Position } from "models"
 import React from "react"
 import { Table } from "react-bootstrap"
 
@@ -51,10 +51,10 @@ const NoPaginationPeopleTable = ({
                     )}
                   </td>
                   <td>
-                    <LinkTo modelType="Position" model={person.position} />
-                    {person.position && person.position.code
-                      ? `, ${person.position.code}`
-                      : ""}
+                    <LinkTo modelType="Position" model={person.position}>
+                      {Position.toString(person.position)}
+                      {person.position?.code ? `, ${person.position.code}` : ""}
+                    </LinkTo>
                   </td>
                   <td>
                     <LinkTo

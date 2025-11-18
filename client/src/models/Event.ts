@@ -1,5 +1,11 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAllEventFields,
+  gqlEntityAvatarFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS, yupDate } from "components/Model"
+import Model, { yupDate } from "components/Model"
 import moment from "moment"
 import EVENTS_ICON from "resources/events.png"
 import Settings from "settings"
@@ -58,139 +64,84 @@ export default class Event extends Model {
   })
 
   static autocompleteQuery = `
-    uuid
+    ${gqlEntityFieldsMap.Event}
     type
-    name
     startDate
     endDate
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     location {
-      uuid
-      name
+      ${gqlEntityFieldsMap.Location}
     }
    `
-
-  static getEventQuery = gql`
-    query ($uuid: String) {
-      event(uuid: $uuid) {
-        uuid
-        status
-        type
-        name
-        description
-        startDate
-        endDate
-        outcomes
-        isSubscribed
-        updatedAt
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        ownerOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        adminOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        eventSeries {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        location {
-          uuid
-          name
-          lat
-          lng
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        tasks {
-          uuid
-          shortName
-          longName
-          parentTask {
-            uuid
-            shortName
-          }
-          ascendantTasks {
-            uuid
-            shortName
-            parentTask {
-              uuid
-            }
-          }
-        }
-        organizations {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          location {
-            uuid
-            name
-            lat
-            lng
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-        people {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          position {
-            uuid
-            name
-            type
-            code
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            organization {
-              uuid
-              shortName
-              longName
-              identificationCode
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            location {
-              uuid
-              name
-              lat
-              lng
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-          }
-        }
-        attachments {
-            uuid
-            fileName
-            caption
-            description
-            classification
-            mimeType
-            contentLength
-            createdAt
-        }
-      }
-    }
-  `
 
   constructor(props) {
     super(Model.fillObject(props, Event.yupSchema))
   }
+
+  static getEventQuery = gql`
+    query ($uuid: String) {
+      event(uuid: $uuid) {
+        ${gqlAllEventFields}
+        ${gqlEntityAvatarFields}
+        ownerOrg {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        hostOrg {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        adminOrg {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        eventSeries {
+          ${gqlEntityFieldsMap.EventSeries}
+        }
+        location {
+          ${gqlEntityFieldsMap.Location}
+          lat
+          lng
+          type
+        }
+        tasks {
+          ${gqlEntityFieldsMap.Task}
+          parentTask {
+            ${gqlEntityFieldsMap.Task}
+          }
+          ascendantTasks {
+            ${gqlEntityFieldsMap.Task}
+            parentTask {
+              ${gqlEntityFieldsMap.Task}
+            }
+          }
+        }
+        organizations {
+          ${gqlEntityFieldsMap.Organization}
+          location {
+            ${gqlEntityFieldsMap.Location}
+            lat
+            lng
+            type
+          }
+        }
+        people {
+          ${gqlEntityFieldsMap.Person}
+          position {
+            ${gqlEntityFieldsMap.Position}
+            organization {
+              ${gqlEntityFieldsMap.Organization}
+            }
+            location {
+              ${gqlEntityFieldsMap.Location}
+              lat
+              lng
+              type
+            }
+          }
+        }
+        attachments {
+          ${gqlAllAttachmentFields}
+        }
+      }
+    }
+  `
 
   iconUrl() {
     return EVENTS_ICON
@@ -218,10 +169,6 @@ export default class Event extends Model {
     return Settings.eventsIncludeStartAndEndTime
       ? Settings.dateFormats.forms.displayLong.withTime
       : Settings.dateFormats.forms.displayLong.date
-  }
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
   }
 
   static humanNameOfType(type) {

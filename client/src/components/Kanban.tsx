@@ -98,8 +98,7 @@ const Column = ({ name, tasks }: ColumnProps) => {
         />
         <br />
         <br />
-        <strong>{Settings.fields.task.longLabel}</strong>
-        {"  "}
+        <strong>{Settings.fields.task.longLabel}</strong>{" "}
         <Button
           size="xs"
           onClick={() => setOpen(!open)}

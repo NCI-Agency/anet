@@ -1,3 +1,8 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields,
+  gqlReportWorkflowFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -5,7 +10,6 @@ import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import ListItems from "components/ListItems"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -24,94 +28,45 @@ import utils from "utils"
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        intent
-        engagementDate
+        ${gqlEntityFieldsMap.Report}
         duration
         keyOutcomes
         nextSteps
         cancelledReason
         atmosphere
         atmosphereDetails
-        state
+        updatedAt
         primaryAdvisor {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         primaryInterlocutor {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Person}
         }
         advisorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         interlocutorOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Organization}
         }
         location {
-          uuid
-          name
-          lat
-          lng
+          ${gqlEntityFieldsMap.Location}
           type
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         tasks {
-          uuid
-          shortName
+          ${gqlEntityFieldsMap.Task}
           parentTask {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
           }
           ascendantTasks {
-            uuid
-            shortName
+            ${gqlEntityFieldsMap.Task}
             parentTask {
-              uuid
+              ${gqlEntityFieldsMap.Task}
             }
           }
         }
-        workflow {
-          type
-          createdAt
-          step {
-            uuid
-            name
-            approvers {
-              uuid
-              name
-              person {
-                uuid
-                name
-                rank
-                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-              }
-            }
-          }
-          person {
-            uuid
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-        updatedAt
+        ${gqlReportWorkflowFields}
         attachments {
           uuid
         }
@@ -303,11 +258,12 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           <Col md={12}>
             <span>
               <strong>{Settings.fields.report.location?.label}: </strong>
-              <LinkTo modelType="Location" model={report.location} />
-              {"  "}
-              <Badge bg="secondary">
-                {Location.humanNameOfType(report.location.type)}
-              </Badge>
+              <LinkTo modelType="Location" model={report.location}>
+                {`${Location.toString(report.location)} `}
+                <Badge bg="secondary">
+                  {Location.humanNameOfType(report.location.type)}
+                </Badge>
+              </LinkTo>
             </span>
           </Col>
         </Row>

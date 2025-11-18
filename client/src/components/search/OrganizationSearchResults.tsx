@@ -1,10 +1,13 @@
+import {
+  gqlEmailAddressesForNetworkFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import {
   CommonSearchResults,
-  GenericSearchResultsWithEmailProps,
-  GQL_EMAIL_ADDRESSES
+  GenericSearchResultsWithEmailProps
 } from "components/search/CommonSearchResults"
 import React from "react"
 
@@ -14,20 +17,12 @@ const GQL_GET_ORGANIZATION_LIST = gql`
     $emailNetwork: String
   ) {
     organizationList(query: $organizationQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        shortName
-        longName
-        identificationCode
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        ${GQL_EMAIL_ADDRESSES}
+        ${gqlEntityFieldsMap.Organization}
+        ${gqlEmailAddressesForNetworkFields}
         location {
-          uuid
-          name
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Location}
         }
       }
     }

@@ -1,3 +1,4 @@
+import { gqlPaginationFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import {
   Button as BlueprintButton,
@@ -7,10 +8,10 @@ import {
 } from "@blueprintjs/core"
 import API from "api"
 import classNames from "classnames"
+import Checkbox from "components/Checkbox"
 import Model from "components/Model"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
-import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap"
@@ -48,7 +49,7 @@ const FilterAsNav = ({
   handleOnClick
 }: FilterAsNavProps) =>
   hasMultipleItems(items) && (
-    <Col md={4} className="d-none d-md-block">
+    <Col md={4} className="advanced-select-popover-filters d-none d-md-block">
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.entries(items).map(([filterType, filter]) => (
           <li
@@ -71,7 +72,7 @@ interface FilterAsDropdownProps {
 
 const FilterAsDropdown = ({ items, handleOnChange }: FilterAsDropdownProps) =>
   hasMultipleItems(items) && (
-    <Col className="d-xs-block d-md-none">
+    <Col className="advanced-select-popover-filters d-xs-block d-md-none">
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -120,6 +121,7 @@ export interface AdvancedSelectProps {
   // Optional: GraphQL string of fields to return from search.
   disableCheckboxIfNullPath?: string
   fields?: string
+  showInclInactive?: boolean
   showDismiss?: boolean
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
@@ -153,6 +155,7 @@ const AdvancedSelect = ({
   queryParams,
   disableCheckboxIfNullPath,
   fields,
+  showInclInactive = true,
   showDismiss,
   handleAddItem,
   handleRemoveItem,
@@ -172,6 +175,7 @@ const AdvancedSelect = ({
     latestSelectedValueAsString.current
   )
   const [filterType, setFilterType] = useState(firstFilter) // by default use the first filter
+  const [inclInactive, setInclInactive] = useState(false)
   const [pageNum, setPageNum] = useState(0)
   const [results, setResults] = useState({})
   const [showOverlay, setShowOverlay] = useState(false)
@@ -185,61 +189,58 @@ const AdvancedSelect = ({
   const renderSelectedWithDelete = renderSelected
     ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
     : null
-  const [items, totalCount] =
-    results && results[filterType]
-      ? [results[filterType].list, results[filterType].totalCount]
-      : [[], 0]
+  const [items, totalCount] = [results?.list ?? [], results?.totalCount ?? 0]
 
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilter?.list) {
-        const resourceName = objectType.resourceName
-        const listName = selectedFilter?.listName || objectType.listName
-        const queryVars = { pageNum, pageSize }
-        if (latestQueryParams.current) {
-          Object.assign(queryVars, latestQueryParams.current)
-        }
-        if (selectedFilter?.queryVars) {
-          Object.assign(queryVars, selectedFilter?.queryVars)
-        }
-        if (searchTerms) {
-          Object.assign(queryVars, { text: searchTerms + "*" })
-        }
-        const thisRequest = (latestRequest.current = API.query(
-          gql`
+      const resourceName = objectType.resourceName
+      const listName = selectedFilter?.listName || objectType.listName
+      const queryVars = { pageNum, pageSize }
+      if (latestQueryParams.current) {
+        Object.assign(queryVars, latestQueryParams.current)
+      }
+      if (selectedFilter?.queryVars) {
+        Object.assign(queryVars, selectedFilter?.queryVars)
+      }
+      if (searchTerms) {
+        Object.assign(queryVars, { text: searchTerms + "*" })
+      }
+      if (inclInactive) {
+        delete queryVars.status
+      } else {
+        queryVars.status = Model.STATUS.ACTIVE
+      }
+      const thisRequest = (latestRequest.current = API.query(
+        gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
-              pageNum
-              pageSize
-              totalCount
+              ${gqlPaginationFields}
               list {
                 ${fields}
               }
             }
           }
         `,
-          { query: queryVars }
-        ).then(data => {
-          // If this is true there's a newer request happening, stop everything
-          if (thisRequest !== latestRequest.current) {
-            return
-          }
-          setIsLoading(data[listName].totalCount !== 0)
-          setResults(oldResults => ({
-            ...oldResults,
-            [filterType]: data[listName]
-          }))
+        { query: queryVars }
+      ).then(data => {
+        // If this is true there's a newer request happening, stop everything
+        if (thisRequest !== latestRequest.current) {
+          return
+        }
+        setIsLoading(data[listName].totalCount !== 0)
+        setResults(oldResults => ({
+          ...oldResults,
+          ...data[listName]
         }))
-      }
+      }))
     },
     [
       fields,
-      filterType,
+      inclInactive,
       objectType.listName,
       objectType.resourceName,
       pageNum,
       pageSize,
-      selectedFilter?.list,
       selectedFilter?.listName,
       selectedFilter?.queryVars
     ]
@@ -275,22 +276,6 @@ const AdvancedSelect = ({
       setFetchType(FETCH_TYPE.NONE)
     }
   }, [selectedValueAsString])
-
-  useEffect(() => {
-    // No need to fetch the data, it is already provided in the filter definition
-    if (selectedFilter.list) {
-      setIsLoading(!_isEmpty(selectedFilter.list))
-      setResults(oldResults => ({
-        ...oldResults,
-        [filterType]: {
-          list: selectedFilter.list,
-          pageNum,
-          pageSize,
-          totalCount: selectedFilter.list.length
-        }
-      }))
-    }
-  }, [filterType, pageNum, pageSize, selectedFilter?.list])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -353,25 +338,27 @@ const AdvancedSelect = ({
               <Popover
                 popoverClassName="advanced-select-popover bp6-popover-content-sizing"
                 content={
-                  <div
-                    style={{
-                      position: showDismiss && "relative",
-                      padding: showDismiss && "10px"
-                    }}
-                  >
-                    {showDismiss && (
-                      <BlueprintButton
-                        icon="cross"
-                        variant="minimal"
-                        onClick={() => setDoReset(true)}
-                        className={BlueprintClasses.POPOVER_DISMISS}
-                        style={{
-                          position: "absolute",
-                          top: "5px",
-                          right: "5px",
-                          zIndex: 10
-                        }}
-                      />
+                  <div className="d-flex flex-column">
+                    {(showInclInactive || showDismiss) && (
+                      <div className="advanced-select-popover-sticky-heading d-flex flex-row justify-content-end align-items-center">
+                        {showInclInactive && (
+                          <Checkbox
+                            id={`${fieldName}-inclInactive`}
+                            label={`incl. ${Model.humanNameOfStatus(Model.STATUS.INACTIVE)}`}
+                            checked={inclInactive}
+                            onChange={toggleInclInactive}
+                          />
+                        )}
+                        {showDismiss && (
+                          <BlueprintButton
+                            icon="cross"
+                            variant="minimal"
+                            onClick={() => setDoReset(true)}
+                            className={`"${BlueprintClasses.POPOVER_DISMISS} form-check`}
+                            style={{ zIndex: 10 }}
+                          />
+                        )}
+                      </div>
                     )}
                     <Row id={`${fieldName}-popover`} className="border-between">
                       {(showCreateEntityComponent && (
@@ -458,7 +445,7 @@ const AdvancedSelect = ({
                 placement="bottom"
                 modifiers={{
                   preventOverflow: {
-                    enabled: false
+                    enabled: true
                   },
                   hide: {
                     enabled: false
@@ -511,6 +498,11 @@ const AdvancedSelect = ({
     </>
   )
 
+  function toggleInclInactive() {
+    setPageNum(0)
+    setInclInactive(!inclInactive)
+  }
+
   function handleInteraction(nextShowOverlay, event) {
     // Note: these state updates are not being batched, order is therefore important
     // Make sure the overlay is being closed when clicking outside of it,
@@ -554,13 +546,10 @@ const AdvancedSelect = ({
   }
 
   function changeFilterType(newFilterType) {
-    // When changing the filter type, only fetch the results if they were not fetched before
-    const filterResults = results[newFilterType]
-    const shouldFetchResults = _isEmpty(filterResults)
     setFilterType(newFilterType)
-    setPageNum(results && filterResults ? filterResults.pageNum : 0)
-    setIsLoading(shouldFetchResults)
-    setFetchType(shouldFetchResults ? FETCH_TYPE.NORMAL : FETCH_TYPE.NONE)
+    setPageNum(0)
+    setIsLoading(true)
+    setFetchType(FETCH_TYPE.NORMAL)
   }
 
   function goToPage(pageNum) {

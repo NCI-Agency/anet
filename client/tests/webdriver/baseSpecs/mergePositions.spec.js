@@ -5,7 +5,8 @@ import MergePositions from "../pages/mergePositions.page"
 const EXAMPLE_POSITIONS = {
   validLeft: {
     search: "merge one",
-    fullName: "Merge One",
+    name: "Merge One",
+    fullName: "Merge One, MOD-M1-HQ-00001",
     organization: "MoD | Ministry of Defense",
     type: "REGULAR",
     role: "Deputy",
@@ -27,7 +28,8 @@ const EXAMPLE_POSITIONS = {
   },
   validRight: {
     search: "merge two",
-    fullName: "Merge Two",
+    name: "Merge Two",
+    fullName: "Merge Two, MOD-M2-HQ-00001",
     organization: "MoD | Ministry of Defense",
     type: "REGULAR",
     role: "Leader",
@@ -45,7 +47,7 @@ const EXAMPLE_POSITIONS = {
   },
   occupiedRight: {
     search: "cost adder",
-    fullName: "Cost Adder - MoD"
+    fullName: "Cost Adder - MoD, MOD-Bud-00003"
   }
 }
 
@@ -107,7 +109,7 @@ describe("Merge positions page", () => {
     await browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.fullName,
+      EXAMPLE_POSITIONS.validLeft.name,
       "left",
       "Position Name"
     )
@@ -115,7 +117,7 @@ describe("Merge positions page", () => {
       await (
         await MergePositions.getColumnContent("left", "Position Name")
       ).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.name)
     expect(
       await (
         await MergePositions.getColumnContent("left", "Organization")
@@ -187,7 +189,7 @@ describe("Merge positions page", () => {
     await browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validRight.fullName,
+      EXAMPLE_POSITIONS.validRight.name,
       "right",
       "Position Name"
     )
@@ -195,7 +197,7 @@ describe("Merge positions page", () => {
       await (
         await MergePositions.getColumnContent("right", "Position Name")
       ).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
+    ).to.eq(EXAMPLE_POSITIONS.validRight.name)
     expect(
       await (
         await MergePositions.getColumnContent("right", "Organization")
@@ -249,7 +251,7 @@ describe("Merge positions page", () => {
     await browser.pause(500) // wait for the rendering of custom fields
 
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.fullName,
+      EXAMPLE_POSITIONS.validLeft.name,
       "mid",
       "Position Name"
     )
@@ -257,7 +259,7 @@ describe("Merge positions page", () => {
       await (
         await MergePositions.getColumnContent("mid", "Position Name")
       ).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.name)
     expect(
       await (
         await MergePositions.getColumnContent("mid", "Organization")
@@ -298,7 +300,7 @@ describe("Merge positions page", () => {
     await browser.pause(500) // wait for the rendering of custom fields
 
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validRight.fullName,
+      EXAMPLE_POSITIONS.validRight.name,
       "mid",
       "Position Name"
     )
@@ -306,7 +308,7 @@ describe("Merge positions page", () => {
       await (
         await MergePositions.getColumnContent("mid", "Position Name")
       ).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
+    ).to.eq(EXAMPLE_POSITIONS.validRight.name)
     expect(
       await (
         await MergePositions.getColumnContent("mid", "Organization")
@@ -347,7 +349,7 @@ describe("Merge positions page", () => {
       await MergePositions.getSelectButton("left", "Position Name")
     ).click()
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.fullName,
+      EXAMPLE_POSITIONS.validLeft.name,
       "mid",
       "Position Name"
     )
@@ -355,7 +357,7 @@ describe("Merge positions page", () => {
       await (
         await MergePositions.getColumnContent("mid", "Position Name")
       ).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.name)
 
     await (
       await MergePositions.getSelectButton("left", "Position Role")
@@ -390,7 +392,7 @@ describe("Merge positions page", () => {
     await (await MergePositions.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.fullName,
+      EXAMPLE_POSITIONS.validLeft.name,
       "mid",
       "Position Name"
     )

@@ -1,76 +1,32 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAttachmentRelatedObjectsFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import AttachmentTable from "components/Attachment/AttachmentTable"
 import Fieldset from "components/Fieldset"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { Attachment } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_ATTACHMENT_LIST = gql`
   query ($attachmentQuery: AttachmentSearchQueryInput) {
     attachmentList(query: $attachmentQuery) {
-      totalCount
-      pageNum
-      pageSize
+      ${gqlPaginationFields}
       list {
-        ${Attachment.basicFieldsQuery}
+        ${gqlAllAttachmentFields}
+        ${gqlAttachmentRelatedObjectsFields}
         author {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        attachmentRelatedObjects {
-          relatedObject {
-            ... on AuthorizationGroup {
-              name
-            }
-            ... on Event {
-              name
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            ... on EventSeries {
-              name
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            ... on Location {
-              name
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            ... on Organization {
-              shortName
-              longName
-              identificationCode
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            ... on Person {
-              name
-              rank
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            ... on Position {
-              type
-              name
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            ... on Report {
-              intent
-            }
-            ... on Task {
-              shortName
-              longName
-            }
-          }
-          relatedObjectUuid
-          relatedObjectType
+          ${gqlEntityFieldsMap.Person}
         }
       }
     }

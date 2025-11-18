@@ -1,9 +1,13 @@
+import {
+  gqlEmailAddressesFields,
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import Checkbox from "components/Checkbox"
 import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -12,6 +16,7 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import { Position } from "models"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -20,36 +25,17 @@ import Settings from "settings"
 const GQL_GET_PERSON_LIST = gql`
   query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        emailAddresses {
-          network
-          address
-        }
+        ${gqlEntityFieldsMap.Person}
+        ${gqlEmailAddressesFields}
         position {
-          uuid
-          name
-          type
-          role
-          code
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          ${gqlEntityFieldsMap.Position}
           location {
-            uuid
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Location}
           }
           organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            ${gqlEntityFieldsMap.Organization}
           }
         }
       }
@@ -207,10 +193,10 @@ const BasePersonTable = ({
                   <LinkTo modelType="Person" model={person} />
                 </td>
                 <td>
-                  <LinkTo modelType="Position" model={person.position} />
-                  {person.position && person.position.code
-                    ? `, ${person.position.code}`
-                    : ""}
+                  <LinkTo modelType="Position" model={person.position}>
+                    {Position.toString(person.position)}
+                    {person.position?.code ? `, ${person.position.code}` : ""}
+                  </LinkTo>
                 </td>
                 <td>
                   <LinkTo

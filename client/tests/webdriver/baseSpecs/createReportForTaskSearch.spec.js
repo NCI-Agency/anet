@@ -30,6 +30,7 @@ describe("When creating a report with tasks", () => {
       await CreateReport.getAllUnassignedTasksFilterButton()
     ).waitForDisplayed()
     await (await CreateReport.getAllUnassignedTasksFilterButton()).click()
+    await browser.pause(500)
     const task13C = (await CreateReport.getTasksTable()).$(
       `//span[contains(text(),"${testTask}")]`
     )

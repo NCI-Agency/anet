@@ -1,7 +1,11 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAttachmentRelatedObjectsFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -17,56 +21,10 @@ import AttachmentForm from "./Form"
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
     attachment(uuid: $uuid) {
-      ${Attachment.basicFieldsQuery}
-      attachmentRelatedObjects {
-        relatedObject {
-          ... on AuthorizationGroup {
-            name
-          }
-          ... on Event {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on EventSeries {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Location {
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Organization {
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Person {
-            name
-            rank
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Position {
-            type
-            name
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          ... on Report {
-            intent
-          }
-          ... on Task {
-            shortName
-            longName
-          }
-        }
-        relatedObjectUuid
-        relatedObjectType
-      }
+      ${gqlAllAttachmentFields}
+      ${gqlAttachmentRelatedObjectsFields}
       author {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        ${gqlEntityFieldsMap.Person}
       }
     }
   }

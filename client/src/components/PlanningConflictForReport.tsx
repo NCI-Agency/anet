@@ -1,3 +1,7 @@
+import {
+  gqlMinimalPersonFields,
+  gqlMinimalReportFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent, Spinner, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -10,18 +14,14 @@ import React from "react"
 const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
   query ($uuid: String, $attendedReportsQuery: ReportSearchQueryInput) {
     report(uuid: $uuid) {
-      uuid
-      engagementDate
+      ${gqlMinimalReportFields}
       duration
       attendees {
-        uuid
-        name
+        ${gqlMinimalPersonFields}
         attendedReports(query: $attendedReportsQuery) {
           list {
-            uuid
-            engagementDate
+            ${gqlMinimalReportFields}
             duration
-            state
           }
         }
       }

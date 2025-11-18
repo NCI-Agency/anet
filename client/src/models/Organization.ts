@@ -1,6 +1,6 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
   yupEmailAddresses
 } from "components/Model"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -104,13 +104,12 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery =
-    `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
-    ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
-
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
+  static autocompleteQuery = `
+    ${gqlEntityFieldsMap.Organization}
+    location {
+      ${gqlEntityFieldsMap.Location}
+    }
+  `
 
   static isTaskEnabled(shortName) {
     return !Settings.tasking_ORGs || Settings.tasking_ORGs.includes(shortName)

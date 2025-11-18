@@ -1,3 +1,10 @@
+import {
+  gqlAllTaskFields,
+  gqlApprovalStepFields,
+  gqlAssessmentsFields,
+  gqlEntityFieldsMap,
+  gqlNotesFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Callout } from "@blueprintjs/core"
 import styled from "@emotion/styled"
@@ -16,9 +23,6 @@ import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ASSESSMENTS_FIELDS,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -53,94 +57,46 @@ import Settings from "settings"
 import utils from "utils"
 
 const ALL_TASK_FIELDS = `
-  uuid
-  shortName
-  longName
-  selectable
-  description
-  status
-  plannedCompletion
-  projectedCompletion
+  ${gqlAllTaskFields}
   parentTask {
-    uuid
-    shortName
-    longName
+    ${gqlEntityFieldsMap.Task}
   }
   ascendantTasks {
-    uuid
-    shortName
+    ${gqlEntityFieldsMap.Task}
     parentTask {
-      uuid
+      ${gqlEntityFieldsMap.Task}
     }
   }
   descendantTasks {
-    uuid
-    shortName
-    longName
+    ${gqlEntityFieldsMap.Task}
     selectable
     parentTask {
-      uuid
+      ${gqlEntityFieldsMap.Task}
     }
     ascendantTasks {
-      uuid
-      shortName
+      ${gqlEntityFieldsMap.Task}
       parentTask {
-        uuid
+        ${gqlEntityFieldsMap.Task}
       }
     }
   }
   childrenTasks {
-    uuid
-    shortName
-    longName
+    ${gqlEntityFieldsMap.Task}
   }
   planningApprovalSteps {
-    uuid
-    name
-    approvers {
-      uuid
-      name
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-    }
+    ${gqlApprovalStepFields}
   }
   approvalSteps {
-    uuid
-    name
-    approvers {
-      uuid
-      name
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-    }
+    ${gqlApprovalStepFields}
   }
   responsiblePositions {
-    uuid
-    name
-    code
-    type
-    role
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    ${gqlEntityFieldsMap.Position}
     person {
-      uuid
-      name
-      rank
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      ${gqlEntityFieldsMap.Person}
     }
   }
-  customFields
-  ${GRAPHQL_ASSESSMENTS_FIELDS}
-  ${GRAPHQL_NOTES_FIELDS}
+  ${gqlAssessmentsFields}
+  ${gqlNotesFields}
 `
 
 const GQL_GET_TASK = gql`

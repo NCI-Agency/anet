@@ -40,7 +40,7 @@ export const SearchPopover = ({
       className="search-popover-target"
       modifiers={{
         preventOverflow: {
-          enabled: false
+          enabled: true
         },
         hide: {
           enabled: false

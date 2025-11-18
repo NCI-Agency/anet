@@ -5,9 +5,8 @@ import AppContext from "components/AppContext"
 import EmailAddressList from "components/EmailAddressList"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
 import { Field, Form } from "formik"
-import { Person } from "models"
+import { Person, Position } from "models"
 import React, { useContext } from "react"
 import { FormText, Modal } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
@@ -55,7 +54,6 @@ export const EmailModal = ({
     allPeople: {
       label: "All people",
       queryVars: {
-        status: Model.STATUS.ACTIVE,
         emailNetwork: EMAIL_NETWORK
       }
     }
@@ -173,8 +171,10 @@ const ToAnetUsersOverlayRow = (item: any) => (
       <LinkTo modelType="Person" model={item} isLink={false} />
     </td>
     <td>
-      <LinkTo modelType="Position" model={item.position} isLink={false} />
-      {item.position?.code ? `, ${item.position.code}` : ""}
+      <LinkTo modelType="Position" model={item.position}>
+        {Position.toString(item.position)}
+        {item.position?.code ? `, ${item.position.code}` : ""}
+      </LinkTo>
     </td>
     <td>
       <LinkTo

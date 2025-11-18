@@ -1,3 +1,4 @@
+import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -5,7 +6,6 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Position } from "models"
@@ -192,7 +192,6 @@ const AssignPositionModal = ({
   const newPosition = position ? new Position(position) : new Position()
 
   const positionSearchQuery = {
-    status: Model.STATUS.ACTIVE,
     type: [Position.TYPE.REGULAR]
   }
   if (currentUser.isAdmin()) {
@@ -281,7 +280,7 @@ const AssignPositionModal = ({
                     onChange={value => setPosition(value)}
                     objectType={Position}
                     valueKey="name"
-                    fields={`uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`}
+                    fields={`${gqlEntityFieldsMap.Position} type organization { ${gqlEntityFieldsMap.Organization} } person { ${gqlEntityFieldsMap.Person} }`}
                     addon={POSITIONS_ICON}
                   />
                 </FormGroup>
