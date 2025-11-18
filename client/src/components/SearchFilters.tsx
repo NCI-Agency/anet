@@ -38,13 +38,12 @@ import {
   PersonDetailedOverlayRow,
   PositionOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
-import AppContext from "components/AppContext"
 import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
 import { Event, EventSeries, Location, Person, Position, Report } from "models"
-import React, { useContext } from "react"
+import React from "react"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -149,7 +148,7 @@ const advancedSelectFilterEventSeriesProps = {
   addon: EVENT_SERIES_ICON
 }
 
-export const searchFilters = function (includeAdminFilters) {
+export const searchFilters = function () {
   const filters = {}
 
   const authorWidgetFilters = {
@@ -298,21 +297,6 @@ export const searchFilters = function (includeAdminFilters) {
         isDefault: true,
         props: {
           queryKey: "state"
-        }
-      }
-    }
-  }
-  if (includeAdminFilters) {
-    filters[SEARCH_OBJECT_TYPES.REPORTS].filters = {
-      ...filters[SEARCH_OBJECT_TYPES.REPORTS].filters,
-      "Include all Drafts?": {
-        component: RadioButtonFilter,
-        deserializer: deserializeRadioButtonFilter,
-        labelClass: "pt-0",
-        props: {
-          queryKey: "includeAllDrafts",
-          options: [true, false],
-          labels: ["Yes", "No"]
         }
       }
     }
@@ -867,8 +851,7 @@ export const SearchDescription = ({
   showPlaceholders,
   style
 }: SearchDescriptionProps) => {
-  const { currentUser } = useContext(AppContext)
-  const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
+  const ALL_FILTERS = searchFilters()
   const filterDefs =
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters
@@ -946,7 +929,7 @@ export const deserializeQueryParams = (
       return null
     })
   }
-  const ALL_FILTERS = searchFilters(true)
+  const ALL_FILTERS = searchFilters()
   const filterDefs =
     objType && SEARCH_OBJECT_TYPES[objType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[objType]].filters

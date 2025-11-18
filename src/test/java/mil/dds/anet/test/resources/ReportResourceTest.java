@@ -2620,19 +2620,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(erinsDraftReports.getTotalCount()).isOne();
     final Report erinsDraftReport = erinsDraftReports.getList().get(0);
 
-    // Even when including all drafts (or trying to)
-    draftsQuery.setIncludeAllDrafts(true);
-    AnetBeanList_Report erinsDraftReportsAgain =
-        withCredentials("erin", t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
-    assertThat(erinsDraftReportsAgain.getTotalCount()).isOne();
-    draftsQuery.setIncludeAllDrafts(false);
-
     // Erin's superuser should not be able to find it
     AnetBeanList_Report rebeccaDraftReports = withCredentials("rebecca",
         t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(rebeccaDraftReports.getTotalCount()).isZero();
 
-    // Admin should normally find only their own drafts
+    // Admin can find their own drafts
+    draftsQuery.setAuthorUuid(admin.getUuid());
     AnetBeanList_Report adminDraftReports = withCredentials(adminUser,
         t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(adminDraftReports.getTotalCount()).isEqualTo(2);
@@ -2640,8 +2634,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(adminDraftReports.getList())
         .noneMatch(report -> report.getUuid().equals(erinsDraftReport.getUuid()));
 
-    // Except when including all drafts
-    draftsQuery.setIncludeAllDrafts(true);
+    // Admin can find all drafts
+    draftsQuery.setAuthorUuid(null);
     AnetBeanList_Report allDraftReports = withCredentials(adminUser,
         t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(allDraftReports.getTotalCount()).isGreaterThan(1);

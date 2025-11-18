@@ -168,60 +168,63 @@ const MySavedSearches = ({
                 </tr>
               </thead>
               <tbody>
-                {searches.map((search, i) => (
-                  <DraggableRow
-                    itemType="SAVED_SEARCH_ROW"
-                    row={search}
-                    index={i}
-                    key={search.uuid}
-                    moveRow={moveRow}
-                    onDropRow={onDropRow}
-                    dragHandleProps={{}}
-                    asTableRow
-                  >
-                    <td style={{ paddingLeft: 0 }}>
-                      <Button
-                        className="text-start text-decoration-none"
-                        variant="link"
-                        onClick={() => showSearch(search)}
-                      >
-                        {deserializedQueries[search.uuid] && (
-                          <SearchDescription
-                            searchQuery={deserializedQueries[search.uuid]}
-                            showText
-                            style={{ pointerEvents: "none" }}
-                          />
-                        )}
-                      </Button>
-                    </td>
-                    <td style={{ paddingRight: 0 }}>
-                      <Button
-                        className="text-start text-decoration-none"
-                        variant="link"
-                        onClick={() => showSearch(search)}
-                      >
-                        {search.name}
-                      </Button>
-                    </td>
-                    <td className="text-center">
-                      <Checkbox
-                        checked={search.displayInHomepage}
-                        onChange={() => updateDisplayInHomepage(search)}
-                      />
-                    </td>
-                    <td className="text-start">
-                      <ConfirmDestructive
-                        onConfirm={() => onConfirmDelete(search.uuid)}
-                        objectType="search"
-                        objectDisplay={search.name}
-                        variant="danger"
-                        operation="delete"
-                      >
-                        <Icon icon={IconNames.TRASH} />
-                      </ConfirmDestructive>
-                    </td>
-                  </DraggableRow>
-                ))}
+                {searches.map((search, i) => {
+                  const deserializedQuery = deserializedQueries[search.uuid]
+                  return (
+                    <DraggableRow
+                      itemType="SAVED_SEARCH_ROW"
+                      row={search}
+                      index={i}
+                      key={search.uuid}
+                      moveRow={moveRow}
+                      onDropRow={onDropRow}
+                      dragHandleProps={{}}
+                      asTableRow
+                    >
+                      <td style={{ paddingLeft: 0 }}>
+                        <Button
+                          className="text-start text-decoration-none"
+                          variant="link"
+                          onClick={() => showSearch(deserializedQuery)}
+                        >
+                          {deserializedQuery && (
+                            <SearchDescription
+                              searchQuery={deserializedQuery}
+                              showText
+                              style={{ pointerEvents: "none" }}
+                            />
+                          )}
+                        </Button>
+                      </td>
+                      <td style={{ paddingRight: 0 }}>
+                        <Button
+                          className="text-start text-decoration-none"
+                          variant="link"
+                          onClick={() => showSearch(deserializedQuery)}
+                        >
+                          {search.name}
+                        </Button>
+                      </td>
+                      <td className="text-center">
+                        <Checkbox
+                          checked={search.displayInHomepage}
+                          onChange={() => updateDisplayInHomepage(search)}
+                        />
+                      </td>
+                      <td className="text-start">
+                        <ConfirmDestructive
+                          onConfirm={() => onConfirmDelete(search.uuid)}
+                          objectType="search"
+                          objectDisplay={search.name}
+                          variant="danger"
+                          operation="delete"
+                        >
+                          <Icon icon={IconNames.TRASH} />
+                        </ConfirmDestructive>
+                      </td>
+                    </DraggableRow>
+                  )
+                })}
               </tbody>
             </Table>
           </DndProvider>
@@ -230,21 +233,9 @@ const MySavedSearches = ({
     </Fieldset>
   )
 
-  function showSearch(search) {
-    if (search) {
-      const objType = SEARCH_OBJECT_TYPES[search.objectType]
-      const queryParams = utils.parseJsonSafe(search.query)
-      deserializeQueryParams(objType, queryParams, deserializeCallback)
-    }
-  }
-
-  function deserializeCallback(objectType, filters, text) {
+  function showSearch(deserializedSearch) {
     // We update the Redux state
-    setSearchQuery({
-      objectType,
-      filters,
-      text
-    })
+    setSearchQuery(deserializedSearch)
     navigate("/search")
   }
 

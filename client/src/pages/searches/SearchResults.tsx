@@ -11,7 +11,6 @@ import PositionSearchResults from "components/search/PositionSearchResults"
 import TaskSearchResults from "components/search/TaskSearchResults"
 import React, { useEffect, useMemo, useState } from "react"
 import { Badge } from "react-bootstrap"
-import utils from "utils"
 
 const DEFAULT_PAGESIZE = 10
 
@@ -50,8 +49,10 @@ const SearchResultsSection = ({
     return null
   }
 
-  const queryParams = utils.parseJsonSafe(searchQuery)
-  queryParams.pageSize = pageSize || DEFAULT_PAGESIZE
+  const queryParams = {
+    ...searchQuery,
+    pageSize: pageSize ?? DEFAULT_PAGESIZE
+  }
 
   const updateCount = count => {
     if (totalCount !== count) {
