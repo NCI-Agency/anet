@@ -3,12 +3,12 @@ package mil.dds.anet.config;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaException;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
-import com.networknt.schema.serialization.JsonNodeReader;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaLocation;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SchemaRegistryConfig;
+import com.networknt.schema.SpecificationVersion;
 import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,8 +17,8 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +30,9 @@ public class AnetDictionary {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private static final String SCHEMA_ID_PREFIX =
+      "https://raw.githubusercontent.com/NCI-Agency/anet/main/src/main/resources";
   private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final JsonNodeReader jsonNodeReader =
-      JsonNodeReader.builder().jsonMapper(yamlMapper).build();
   private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   private final AnetConfig config;
@@ -97,27 +97,27 @@ public class AnetDictionary {
 
   private boolean isValid(final Map<String, Object> dictionaryMap)
       throws IOException, IllegalArgumentException {
-    try (final InputStream inputStream = this.getClass().getResourceAsStream("/anet-schema.yml")) {
-      if (inputStream == null) {
-        logger.error("ANET schema [anet-schema.yml] not found");
-        throw new IOException("ANET schema [anet-schema.yml] not found");
-      } else {
-        final JsonSchemaFactory factory = JsonSchemaFactory
-            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
-            .jsonNodeReader(jsonNodeReader).build();
-        final JsonSchema schema = factory.getSchema(inputStream);
-        final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
-        final Set<ValidationMessage> errors = schema.validate(anetDictionary);
-        if (!errors.isEmpty()) {
-          for (ValidationMessage error : errors) {
-            logger.error("Dictionary error: {}", error.getMessage());
-          }
-          throw new IllegalArgumentException("Invalid dictionary in the configuration");
+    try {
+      final SchemaRegistryConfig schemaRegistryConfig =
+          SchemaRegistryConfig.builder().formatAssertionsEnabled(true).build();
+      final SchemaRegistry schemaRegistry = SchemaRegistry.withDefaultDialect(
+          SpecificationVersion.DRAFT_2019_09,
+          builder -> builder.schemaRegistryConfig(schemaRegistryConfig).schemaIdResolvers(
+              schemaIdResolvers -> schemaIdResolvers.mapPrefix(SCHEMA_ID_PREFIX, "classpath:/")));
+      final Schema schema =
+          schemaRegistry.getSchema(SchemaLocation.of(SCHEMA_ID_PREFIX + "/anet-schema.yml"));
+      schema.initializeValidators();
+      final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
+      final List<Error> errors = schema.validate(anetDictionary);
+      if (!errors.isEmpty()) {
+        for (final Error error : errors) {
+          logger.error("Dictionary error: {}", error);
         }
-        logger.atInfo().log("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
-        return true;
+        throw new IllegalArgumentException("Invalid dictionary in the configuration");
       }
-    } catch (final JsonSchemaException e) {
+      logger.atInfo().log("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
+      return true;
+    } catch (final Exception e) {
       logger.error("Malformed ANET schema", e);
     }
     return false;
