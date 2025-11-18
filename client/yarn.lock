@@ -7119,10 +7119,10 @@ __metadata:
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.37.0"
     slate: "npm:0.118.1"
-    slate-dom: "npm:0.118.1"
+    slate-dom: "npm:0.119.0"
     slate-history: "npm:0.113.1"
     slate-hyperscript: "npm:0.100.0"
-    slate-react: "npm:0.117.4"
+    slate-react: "npm:0.119.0"
     style-loader: "npm:4.0.0"
     sync-fetch: "npm:0.5.2"
     tap-xunit: "npm:2.4.1"
@@ -18290,9 +18290,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-dom@npm:0.118.1":
-  version: 0.118.1
-  resolution: "slate-dom@npm:0.118.1"
+"slate-dom@npm:0.119.0":
+  version: 0.119.0
+  resolution: "slate-dom@npm:0.119.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18303,7 +18303,7 @@ __metadata:
     tiny-invariant: "npm:1.3.1"
   peerDependencies:
     slate: ">=0.99.0"
-  checksum: 10c0/f6cfc02f75d984c437513285bfdeb2c5ea04a9b3152bf10e83d30a0312d41d2666173fbd4e7d756d64cce0da30c8fbf3619d5267bc5d0ea52c6b77505f2c30e6
+  checksum: 10c0/ce0485ebecb26221faa844a8e05ebb042d25396e27076b070d41067f4be38ea20fae95c79658a3c7e71d356cdf7ed34f0f45bad1ccd4deaea96dfc14c5b90993
   languageName: node
   linkType: hard
 
@@ -18329,9 +18329,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.117.4":
-  version: 0.117.4
-  resolution: "slate-react@npm:0.117.4"
+"slate-react@npm:0.119.0":
+  version: 0.119.0
+  resolution: "slate-react@npm:0.119.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18344,7 +18344,7 @@ __metadata:
     react-dom: ">=18.2.0"
     slate: ">=0.114.0"
     slate-dom: ">=0.116.0"
-  checksum: 10c0/d7bd7eaa7ce37bbf3c63a4aab67d1125d9e08f936b29faed8e8cd8c6dbcf7bcef9354c6028c5bba9b5fc9a3719e3017be322d0b69c788f953d7447b3c45c3770
+  checksum: 10c0/abb6c8155a11a8a9d26e34ced7605ab537ca77fe7d96f6c3acf40444319c9043dd2a7d9974cccdc1009c4521692cbd90f766e2ec8edc612fabda7a798c2c902b
   languageName: node
   linkType: hard
 
