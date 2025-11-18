@@ -587,9 +587,10 @@ async function getFromSearchResults(
   const $searchBarSubmit = await $("#searchBarSubmit")
   await $searchBarSubmit.click()
 
-  const $searchResultLinks = await $$(
-    "#" + searchResultsType + "-search-results td a"
-  )
+  const searchResultsIdentifier = ["locations"].includes(searchResultsType)
+    ? `.${searchResultsType.slice(0, -1)}-collection`
+    : `#${searchResultsType}-search-results`
+  const $searchResultLinks = await $$(`${searchResultsIdentifier} td a`)
 
   async function findLinkWithText(text) {
     for (const $link of $searchResultLinks) {
