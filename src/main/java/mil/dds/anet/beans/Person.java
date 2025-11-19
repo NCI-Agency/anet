@@ -264,7 +264,7 @@ public class Person extends AbstractEmailableAnetBean
     if (position != null) {
       return CompletableFuture.completedFuture(position);
     }
-    return engine().getPositionDao().getCurrentPositionForPerson(context, uuid).thenApply(o -> {
+    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid).thenApply(o -> {
       position = o;
       return o;
     });

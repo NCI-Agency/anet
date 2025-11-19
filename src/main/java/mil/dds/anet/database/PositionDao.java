@@ -123,19 +123,21 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     return new PersonPositionHistoryBatcher().getByForeignKeys(foreignKeys);
   }
 
-  class PositionsBatcher extends ForeignKeyBatcher<Position> {
-    private static final String SQL =
-        "/* batch.getCurrentPositionForPerson */ SELECT " + POSITION_FIELDS + " FROM positions "
-            + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> )";
+  class PrimaryPositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String SQL = "/* batch.getPrimaryPositionForPerson */ SELECT "
+        + POSITION_FIELDS + " FROM positions "
+        + "LEFT JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
+        + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> ) "
+        + "AND \"peoplePositions\".\"isPrimary\" IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL";
 
-    public PositionsBatcher() {
+    public PrimaryPositionsBatcher() {
       super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
           "positions_currentPersonUuid");
     }
   }
 
-  public List<List<Position>> getCurrentPersonForPosition(List<String> foreignKeys) {
-    return new PositionsBatcher().getByForeignKeys(foreignKeys);
+  public List<List<Position>> getPrimaryPersonForPosition(List<String> foreignKeys) {
+    return new PrimaryPositionsBatcher().getByForeignKeys(foreignKeys);
   }
 
   static class PositionSearchBatcher extends SearchQueryBatcher<Position, PositionSearchQuery> {
@@ -450,10 +452,10 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY, positionUuid);
   }
 
-  public CompletableFuture<Position> getCurrentPositionForPerson(GraphQLContext context,
+  public CompletableFuture<Position> getPrimaryPositionForPerson(GraphQLContext context,
       String personUuid) {
     return new ForeignKeyFetcher<Position>()
-        .load(context, FkDataLoaderKey.POSITION_CURRENT_POSITION_FOR_PERSON, personUuid)
+        .load(context, FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON, personUuid)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
