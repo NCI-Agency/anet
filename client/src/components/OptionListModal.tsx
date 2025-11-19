@@ -21,7 +21,7 @@ const OptionListModal = ({
   const [value, setValue] = useState("")
 
   return (
-    <Modal centered show={showModal} onHide={onCancel}>
+    <Modal backdrop="static" centered show={showModal} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>

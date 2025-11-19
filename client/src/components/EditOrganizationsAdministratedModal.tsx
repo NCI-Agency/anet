@@ -55,6 +55,7 @@ const EditOrganizationsAdministratedModal = ({
           Settings.fields.position.organizationsAdministrated
         return (
           <Modal
+            backdrop="static"
             centered
             show={showModal}
             onHide={() => close(setFieldValue)}

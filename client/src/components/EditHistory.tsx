@@ -122,6 +122,7 @@ function EditHistory({
         </Button>
       )}
       <Modal
+        backdrop="static"
         centered
         size="xl"
         show={showModal}

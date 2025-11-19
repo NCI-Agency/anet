@@ -307,7 +307,13 @@ const AccessTokenModal = ({
       onSubmit={onConfirm}
     >
       {({ isSubmitting, setFieldValue, setFieldTouched, submitForm }) => (
-        <Modal centered size="lg" show={show} onHide={() => setShow(false)}>
+        <Modal
+          backdrop="static"
+          centered
+          size="lg"
+          show={show}
+          onHide={() => setShow(false)}
+        >
           <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
           </Modal.Header>

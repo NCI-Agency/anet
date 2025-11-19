@@ -19,7 +19,7 @@ const InactiveTaskModal = ({
 }: InactiveTaskModalProps) => {
   const ascendantTaskUuids = new Set(currentTask ? [currentTask.uuid] : [])
   return (
-    <Modal centered show={showModal} onHide={onCancel}>
+    <Modal backdrop="static" centered show={showModal} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>Setting this task to inactive?</Modal.Title>
       </Modal.Header>

@@ -39,6 +39,7 @@ const EditAssociatedPositions = ({
         Edit Associated Positions
       </Button>
       <Modal
+        backdrop="static"
         centered
         size="xl"
         show={showModal}

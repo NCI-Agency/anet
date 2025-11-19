@@ -17,6 +17,7 @@ const SimpleModal = (props: SimpleModalProps) => {
       </span>
 
       <Modal
+        backdrop="static"
         centered
         size={props.size}
         show={showModal}

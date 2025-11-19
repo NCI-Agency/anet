@@ -105,7 +105,12 @@ const EditAssociatedPositionsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm }) => (
-        <Modal centered show={showModal} onHide={() => close(setFieldValue)}>
+        <Modal
+          backdrop="static"
+          centered
+          show={showModal}
+          onHide={() => close(setFieldValue)}
+        >
           <Modal.Header closeButton>
             <Modal.Title>Modify assigned counterparts</Modal.Title>
           </Modal.Header>

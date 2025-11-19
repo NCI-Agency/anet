@@ -69,7 +69,12 @@ const ApprovalStepModal = ({ action }: ApprovalStepModalProps) => {
       >
         <div className="workflow-step-name">{step.name}</div>
       </Button>
-      <Modal centered show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        backdrop="static"
+        centered
+        show={showModal}
+        onHide={() => setShowModal(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Approvers for {step.name}</Modal.Title>
         </Modal.Header>
