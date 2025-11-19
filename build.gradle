@@ -8,7 +8,7 @@ plugins {
 	id "com.github.node-gradle.node" version "7.1.0"
 	id "com.diffplug.spotless" version "8.0.0"
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "3.0.1"
-	id "org.beryx.runtime" version "2.0.0"
+	id "org.beryx.runtime" version "2.0.1"
 	id "com.netflix.nebula.rpm" version "12.1.1"
 	id "org.springframework.boot" version "3.5.6" apply false
 	id 'io.mateo.cxf-codegen' version '2.5.0'
@@ -203,7 +203,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.13"
+	toolVersion = "0.8.14"
 }
 
 jacocoTestReport {
@@ -731,7 +731,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '12.0.1'
+	toolVersion = '12.1.2'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {

@@ -82,6 +82,7 @@ class CreateOrganization extends Page {
   async openEditApp6Modal() {
     const editApp6Button = browser.$("#edit-app6-button")
     await editApp6Button.click()
+    await browser.pause(500) // wait for the modal to render
   }
 
   async closeEditApp6Modal() {
