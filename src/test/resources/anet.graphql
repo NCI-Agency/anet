@@ -840,7 +840,7 @@ type Mutation {
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
   mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
   publishReport(uuid: String): Int!
-  putPersonInPosition(person: PersonInput, uuid: String): Int!
+  putPersonInPosition(person: PersonInput, primary: Boolean = true, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
   reloadDictionary: String
   saveAdminSettings(settings: [AdminSettingInput]): Int
@@ -992,6 +992,7 @@ enum OrganizationSearchSortBy {
 
 """"""
 type Person {
+  additionalPositions: [Position]
   assessments: [Assessment]
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
@@ -1026,6 +1027,7 @@ type Person {
 
 """"""
 input PersonInput {
+  additionalPositions: [PositionInput]
   biography: String
   code: String
   country: LocationInput
@@ -1439,6 +1441,7 @@ input ReportInput {
 
 """"""
 type ReportPerson {
+  additionalPositions: [Position]
   assessments: [Assessment]
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
@@ -1477,6 +1480,7 @@ type ReportPerson {
 
 """"""
 input ReportPersonInput {
+  additionalPositions: [PositionInput]
   attendee: Boolean!
   author: Boolean!
   biography: String

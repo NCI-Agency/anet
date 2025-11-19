@@ -80,6 +80,8 @@ public class Person extends AbstractEmailableAnetBean
   // annotated below
   private Position position;
   // annotated below
+  private List<Position> additionalPositions;
+  // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
@@ -285,6 +287,28 @@ public class Person extends AbstractEmailableAnetBean
   public Position getPosition() {
     return position;
   }
+
+  @GraphQLQuery(name = "additionalPositions")
+  public CompletableFuture<List<Position>> loadAdditionalPositions(
+      @GraphQLRootContext GraphQLContext context) {
+    if (additionalPositions != null) {
+      return CompletableFuture.completedFuture(additionalPositions);
+    }
+    return engine().getPersonDao().getAdditionalPositionsForPerson(context, uuid).thenApply(o -> {
+      additionalPositions = o;
+      return o;
+    });
+  }
+
+  public List<Position> getAdditionalPositions() {
+    return additionalPositions;
+  }
+
+  @GraphQLInputField(name = "additionalPositions")
+  public void setAdditionalPositions(List<Position> additionalPositions) {
+    this.additionalPositions = additionalPositions;
+  }
+
 
   @GraphQLQuery(name = "previousPositions")
   public CompletableFuture<List<PersonPositionHistory>> loadPreviousPositions(

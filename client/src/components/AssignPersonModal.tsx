@@ -29,8 +29,8 @@ const GQL_DELETE_PERSON_FROM_POSITION = gql`
 `
 
 const GQL_PUT_PERSON_IN_POSITION = gql`
-  mutation ($uuid: String!, $person: PersonInput!) {
-    putPersonInPosition(uuid: $uuid, person: $person)
+  mutation ($uuid: String!, $person: PersonInput!, $primary: Boolean) {
+    putPersonInPosition(uuid: $uuid, person: $person, primary: $primary)
   }
 `
 
@@ -56,25 +56,28 @@ const AssignPersonModal = ({
 
   const [error, setError] = useState(null)
   const [person, setPerson] = useState(position && position.person)
-  const [doSave, setDoSave] = useState(false)
   const [removeUser, setRemoveUser] = useState(false)
 
-  const save = useCallback(() => {
-    let graphql, variables
-    if (person === null) {
-      graphql = GQL_DELETE_PERSON_FROM_POSITION
-      variables = {
-        uuid: position.uuid
+  const save = useCallback(
+    (person = null, primary = false) => {
+      let graphql, variables
+      if (person === null) {
+        graphql = GQL_DELETE_PERSON_FROM_POSITION
+        variables = {
+          uuid: position.uuid
+        }
+      } else {
+        graphql = GQL_PUT_PERSON_IN_POSITION
+        variables = {
+          uuid: position.uuid,
+          person: { uuid: person.uuid },
+          primary: primary
+        }
       }
-    } else {
-      graphql = GQL_PUT_PERSON_IN_POSITION
-      variables = {
-        uuid: position.uuid,
-        person: { uuid: person.uuid }
-      }
-    }
-    API.mutation(graphql, variables).then(onSuccess).catch(setError)
-  }, [position, person, onSuccess])
+      API.mutation(graphql, variables).then(onSuccess).catch(setError)
+    },
+    [position, person, onSuccess]
+  )
 
   useEffect(() => {
     if (!positionPropUnchanged) {
@@ -82,13 +85,6 @@ const AssignPersonModal = ({
       setPerson(position && position.person)
     }
   }, [positionPropUnchanged, position])
-
-  useEffect(() => {
-    if (doSave) {
-      setDoSave(false)
-      save()
-    }
-  }, [doSave, save])
 
   useEffect(() => {
     let newError = null
@@ -110,8 +106,8 @@ const AssignPersonModal = ({
               isLink={false}
             />
           </b>{" "}
-          position. By selecting them, their current position will be left
-          unfilled
+          position. By saving them as primary, their current position will be
+          left unfilled
           {person.position.type !== Position.TYPE.REGULAR ? (
             <>
               {" "}
@@ -131,6 +127,7 @@ const AssignPersonModal = ({
               <b>{Position.convertType(person.position.type)}</b>.
             </>
           )}
+          <b>You can also save as an additional position.</b>
         </>
       )
       newError = { message: errorMessage }
@@ -183,7 +180,7 @@ const AssignPersonModal = ({
                   onClick={() => {
                     if (Position.isRegular(latestPositionProp.current)) {
                       setPerson(null)
-                      setDoSave(true)
+                      save()
                     } else {
                       setRemoveUser(true)
                       setPerson(position.person)
@@ -273,13 +270,35 @@ const AssignPersonModal = ({
         >
           Cancel
         </Button>
+        {!_isEmpty(person?.position) && (
+          <Button
+            onClick={() => {
+              if (removeUser || !person) {
+                setPerson(null)
+                save()
+              } else if (
+                person.uuid !== latestPositionProp.current.person.uuid
+              ) {
+                save(person, false)
+              } else {
+                closeModal()
+              }
+              setRemoveUser(false)
+            }}
+            variant="primary"
+            className="save-button"
+            type="submit"
+          >
+            Save as Additional
+          </Button>
+        )}
         <Button
           onClick={() => {
             if (removeUser || !person) {
               setPerson(null)
-              setDoSave(true)
+              save(null, false)
             } else if (person.uuid !== latestPositionProp.current.person.uuid) {
-              setDoSave(true)
+              save(person, true)
             } else {
               closeModal()
             }
@@ -289,7 +308,7 @@ const AssignPersonModal = ({
           className="save-button"
           type="submit"
         >
-          Save
+          {!_isEmpty(person?.position) ? "Save as Primary" : "Save"}
         </Button>
       </Modal.Footer>
     </Modal>

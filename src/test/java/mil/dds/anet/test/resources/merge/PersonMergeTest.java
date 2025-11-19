@@ -81,8 +81,8 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(created.getName()).isEqualTo(testInput.getName());
 
     // Assign the loser into the position
-    Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(loser1), created.getUuid()));
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(loser1), true, created.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput testInput1 = PositionInput.builder().withType(PositionType.REGULAR)
@@ -210,8 +210,8 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(loser2).isNotNull();
     assertThat(loser2.getUuid()).isNotNull();
 
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(loser2), created.getUuid()));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(loser2), true, created.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     nrUpdated = withCredentials(adminUser,

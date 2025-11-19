@@ -75,4 +75,18 @@ describe("Show person page", () => {
         .false
     })
   })
+
+  describe("When on the show page of a person with additional positions", () => {
+    it("We should see a table with additional positions", async () => {
+      await ShowPerson.open(PERSON_WITH_AG_UUID)
+      await (await ShowPerson.getAdditionalPositionsTable()).waitForExist()
+      await (await ShowPerson.getAdditionalPositionsTable()).waitForDisplayed()
+      expect(
+        await (await ShowPerson.getAdditionalPositionsTable()).getText()
+      ).to.contain("EF 1.1 Advisor for Interagency Advising")
+      expect(
+        await (await ShowPerson.getAdditionalPositionsTable()).getText()
+      ).to.contain("EF 1.1 Advisor for Space Issues")
+    })
+  })
 })
