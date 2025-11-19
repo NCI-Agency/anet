@@ -435,6 +435,14 @@ const Navigation = ({
       >
         {Settings.fields.task.allTasksLabel}
       </SidebarLink>
+      <SidebarLink
+        id="events-nav"
+        linkTo="/events"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        Events
+      </SidebarLink>
 
       <SidebarLink
         id="daily-rollup-nav"

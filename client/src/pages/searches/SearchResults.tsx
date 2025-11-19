@@ -4,6 +4,7 @@ import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
 import EventSearchResults from "components/search/EventSearchResults"
+import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
 import LocationSearchResults from "components/search/LocationSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
 import PeopleSearchResults from "components/search/PeopleSearchResults"
@@ -23,7 +24,8 @@ const SEARCH_COMPONENTS = {
   [SEARCH_OBJECT_TYPES.REPORTS]: ReportCollection,
   [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: AuthorizationGroupSearchResults,
   [SEARCH_OBJECT_TYPES.ATTACHMENTS]: AttachmentSearchResults,
-  [SEARCH_OBJECT_TYPES.EVENTS]: EventSearchResults
+  [SEARCH_OBJECT_TYPES.EVENTS]: EventSearchResults,
+  [SEARCH_OBJECT_TYPES.EVENT_SERIES]: EventSeriesSearchResults
 }
 
 interface SearchResultsSectionProps {

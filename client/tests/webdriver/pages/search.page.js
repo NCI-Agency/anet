@@ -47,6 +47,10 @@ class Search extends Page {
     return browser.$("div#events #events-search-results")
   }
 
+  async getFoundEventSeriesTable() {
+    return browser.$("div#eventSeries #eventSeries-search-results")
+  }
+
   async linkOfPersonFound(name) {
     return (await this.getFoundPeopleTable()).$(
       `.//tbody/tr//a[contains(text(), "${name}")]`

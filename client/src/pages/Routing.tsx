@@ -23,6 +23,7 @@ import AuthorizationGroupShow from "pages/authorizationGroups/Show"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
 import EventEdit from "pages/events/Edit"
+import EventsList from "pages/events/List"
 import MyEvents from "pages/events/MyEvents"
 import EventNew from "pages/events/New"
 import EventShow from "pages/events/Show"
@@ -193,6 +194,7 @@ const Routing = () => {
         </Route>
       )}
       <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />
+      <Route path={PAGE_URLS.EVENTS} element={<EventsList />} />
       <Route path={PAGE_URLS.INSIGHTS}>
         <Route path=":insight" element={<InsightsShow />} />
       </Route>
