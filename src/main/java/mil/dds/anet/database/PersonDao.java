@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -34,6 +35,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PersonPreferenceMapper;
+import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
@@ -255,8 +257,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       }
       final StringBuilder sql = new StringBuilder("/* findByDomainUsername */ SELECT "
           + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS + "," + UserDao.USER_FIELDS
-          + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-          + "JOIN users ON people.uuid = users.\"personUuid\" "
+          + "FROM people JOIN users ON people.uuid = users.\"personUuid\" "
+          + "LEFT JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = people.uuid "
+          + "AND pp.\"endedAt\" IS NULL AND pp.\"isPrimary\" IS TRUE "
+          + "LEFT JOIN positions ON positions.uuid = pp.\"positionUuid\" "
           + "WHERE users.\"domainUsername\" = :domainUsername");
       if (activeUser) {
         sql.append(" AND people.user = :user AND people.status != :inactiveStatus");
@@ -599,6 +603,31 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       closeDbHandle(handle);
     }
   }
+
+  public CompletableFuture<List<Position>> getAdditionalPositionsForPerson(
+      @GraphQLRootContext GraphQLContext context, String personUuid) {
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.PERSON_PERSON_ADDITIONAL_POSITIONS, personUuid);
+  }
+
+  class PersonAdditionalPositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String SQL = "/* batch.getAdditionalPositionsForPerson */ SELECT "
+        + PositionDao.POSITION_FIELDS
+        + ", \"peoplePositions\".\"personUuid\" FROM \"peoplePositions\" "
+        + "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
+        + "WHERE \"peoplePositions\".\"personUuid\" IN ( <foreignKeys> ) "
+        + "AND \"peoplePositions\".\"isPrimary\" IS NOT TRUE AND \"peoplePositions\".\"endedAt\" IS NULL "
+        + "ORDER BY positions.name, positions.uuid";
+
+    public PersonAdditionalPositionsBatcher() {
+      super(PersonDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(), "personUuid");
+    }
+  }
+
+  public List<List<Position>> getPersonAdditionalPositions(List<String> foreignKeys) {
+    return new PersonDao.PersonAdditionalPositionsBatcher().getByForeignKeys(foreignKeys);
+  }
+
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(GraphQLContext context,
       String personUuid) {

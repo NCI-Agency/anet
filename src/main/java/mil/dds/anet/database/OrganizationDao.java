@@ -98,6 +98,7 @@ public class OrganizationDao
             + "AND \"peoplePositions\".\"positionUuid\" = positions.uuid "
             + "AND positions.\"organizationUuid\" = organizations.uuid "
             + "AND \"peoplePositions\".\"createdAt\" <= :when "
+            + "AND \"peoplePositions\".\"isPrimary\" IS TRUE "
             + "AND (\"peoplePositions\".\"endedAt\" IS NULL"
             + " OR \"peoplePositions\".\"endedAt\" > :when)";
 

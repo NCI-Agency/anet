@@ -502,6 +502,8 @@ fields:
     position:
       label: Current Position
       placeholder: Fill in the person's current position
+    additionalPositions:
+      label: Additional Positions
     prevPositions:
       label: Previous Positions
     emailAddresses:
@@ -875,6 +877,7 @@ fields:
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
+        - additionalPositions
         - prevPositions
         - user
         - users
@@ -916,6 +919,7 @@ fields:
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
+        - additionalPositions
         - prevPositions
         - phoneNumber
         - country
