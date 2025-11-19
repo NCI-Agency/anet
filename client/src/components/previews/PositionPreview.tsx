@@ -75,7 +75,6 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
   }
 
   const position = new Position(data.position ? data.position : {})
-  const assignedRole = Settings.fields.regular.person.name
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -184,7 +183,7 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
         )}
       </div>
 
-      <h4>{`Assigned ${assignedRole}`}</h4>
+      <h4>Assigned counterparts</h4>
       <div className="preview-section">
         <Table striped hover responsive>
           <thead>
@@ -201,9 +200,7 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
         </Table>
 
         {position.associatedPositions.length === 0 && (
-          <em>
-            {position.name} has no associated {assignedRole}
-          </em>
+          <em>{position.name} has no counterparts assigned</em>
         )}
       </div>
 

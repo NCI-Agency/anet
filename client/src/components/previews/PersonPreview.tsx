@@ -89,7 +89,6 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
 
   // The position for this person's counterparts
   const position = person.position
-  const assignedRole = Settings.fields.regular.person.name
 
   // User can always edit themselves
   // Admins can always edit anybody
@@ -223,13 +222,15 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
             ? renderPosition(position)
             : renderPositionBlankSlate(person)}
         </div>
-
-        {hasPosition && (
-          <div title={`Assigned ${assignedRole}`}>
-            {renderCounterparts(position)}
-          </div>
-        )}
       </div>
+
+      {hasPosition && (
+        <>
+          <h4>Assigned counterparts</h4>
+          <div className="preview-section">{renderCounterparts(position)}</div>
+        </>
+      )}
+
       <br />
       <h4>{Settings.fields.person.prevPositions?.label}</h4>
       <div className="preview-section">
@@ -256,45 +257,40 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
 
   function renderCounterparts(position) {
     return (
-      <Form.Group controlId="counterparts">
-        <Col sm={4}>
-          <Form.Label>Counterpart of</Form.Label>
-        </Col>
-        <Col sm={12}>
-          <Table striped hover responsive>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Organization</th>
+      <>
+        <Table striped hover responsive>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Organization</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Position.map(position.associatedPositions, assocPos => (
+              <tr key={assocPos.uuid}>
+                <td>
+                  {assocPos.person && (
+                    <LinkTo modelType="Person" model={assocPos.person} />
+                  )}
+                </td>
+                <td>
+                  <LinkTo modelType="Position" model={assocPos} />
+                </td>
+                <td>
+                  <LinkTo
+                    modelType="Organization"
+                    model={assocPos.organization}
+                  />
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {Position.map(position.associatedPositions, assocPos => (
-                <tr key={assocPos.uuid}>
-                  <td>
-                    {assocPos.person && (
-                      <LinkTo modelType="Person" model={assocPos.person} />
-                    )}
-                  </td>
-                  <td>
-                    <LinkTo modelType="Position" model={assocPos} />
-                  </td>
-                  <td>
-                    <LinkTo
-                      modelType="Organization"
-                      model={assocPos.organization}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          {position.associatedPositions.length === 0 && (
-            <em>{position.name} has no counterparts assigned</em>
-          )}
-        </Col>
-      </Form.Group>
+            ))}
+          </tbody>
+        </Table>
+        {position.associatedPositions.length === 0 && (
+          <em>{position.name} has no counterparts assigned</em>
+        )}
+      </>
     )
   }
   function renderPositionBlankSlate(person) {
