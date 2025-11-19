@@ -203,7 +203,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.13"
+	toolVersion = "0.8.14"
 }
 
 jacocoTestReport {
@@ -731,7 +731,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '12.0.1'
+	toolVersion = '12.1.2'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
