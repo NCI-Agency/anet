@@ -418,19 +418,6 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
   }
 
-  @Transactional
-  public List<Position> getEmptyPositions(PositionType type) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle
-          .createQuery("SELECT " + POSITION_FIELDS + " FROM positions "
-              + "WHERE \"currentPersonUuid\" IS NULL AND positions.type = :type")
-          .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
   @Override
   public AnetBeanList<Position> search(PositionSearchQuery query) {
     return new PostgresqlPositionSearcher(databaseHandler).runSearch(query);
