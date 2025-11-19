@@ -1,12 +1,9 @@
 package mil.dds.anet.database;
 
-import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
-
 import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.ApprovalStep;
@@ -29,12 +26,9 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.Handle;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
-import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,34 +163,6 @@ public class OrganizationDao
 
   public List<List<Position>> getAdministratingPositions(List<String> foreignKeys) {
     return new AdministratingPositionsBatcher().getByForeignKeys(foreignKeys);
-  }
-
-  public interface OrgListQueries {
-    @RegisterRowMapper(OrganizationMapper.class)
-    @SqlQuery("SELECT uuid AS organizations_uuid, uuid AS uuid"
-        + ", \"shortName\" AS \"organizations_shortName\""
-        + ", \"longName\" AS \"organizations_longName\", status AS organizations_status"
-        + ", \"identificationCode\" AS \"organizations_identificationCode\""
-        + ", \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
-        + ", \"createdAt\" AS \"organizations_createdAt\""
-        + ", \"updatedAt\" AS \"organizations_updatedAt\""
-        + ", \"locationUuid\" AS \"organizations_locationUuid\""
-        + " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
-    List<Organization> getOrgsByShortNames(
-        @BindList(value = "shortNames", onEmpty = NULL_STRING) List<String> shortNames);
-  }
-
-  @Transactional
-  public List<Organization> getOrgsByShortNames(List<String> shortNames) {
-    final Handle handle = getDbHandle();
-    try {
-      if (Utils.isEmptyOrNull(shortNames)) {
-        return Collections.emptyList();
-      }
-      return handle.attach(OrgListQueries.class).getOrgsByShortNames(shortNames);
-    } finally {
-      closeDbHandle(handle);
-    }
   }
 
   @Override
