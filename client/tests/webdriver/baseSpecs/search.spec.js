@@ -65,6 +65,13 @@ describe("When using search", () => {
     expect(await (await Search.getFoundEventTable()).isExisting()).to.equal(
       true
     )
+    // EventSeries
+    expect(
+      parseInt(await (await Search.getFoundCounter("eventSeries")).getText())
+    ).to.be.greaterThan(0)
+    expect(
+      await (await Search.getFoundEventSeriesTable()).isExisting()
+    ).to.equal(true)
   })
   it("Should not show results counters when searching in all entities and no results found", async () => {
     await Home.openAsSuperuser()
@@ -96,6 +103,12 @@ describe("When using search", () => {
     )
     expect(
       await (await Search.getFoundCounter("authorizationGroups")).isExisting()
+    ).to.equal(false)
+    expect(
+      await (await Search.getFoundCounter("events")).isExisting()
+    ).to.equal(false)
+    expect(
+      await (await Search.getFoundCounter("eventSeries")).isExisting()
     ).to.equal(false)
   })
 })

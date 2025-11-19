@@ -37,7 +37,7 @@ const EventSeriesSearchResults = (props: GenericSearchResultsProps) => (
     gqlQueryResultName="eventSeriesList"
     tableComponent={EventSeriesTable}
     tableResultsProp="eventSeries"
-    tableId="event-series-search-results"
+    tableId="eventSeries-search-results"
     {...props}
   />
 )

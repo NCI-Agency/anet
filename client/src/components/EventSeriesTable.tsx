@@ -86,6 +86,7 @@ const PaginatedEventSeries = ({
 }
 
 interface BaseEventSeriesTableProps {
+  id?: string
   eventSeries?: EventSeries[]
   noEventSeriesMessage?: string
   totalCount?: number
@@ -95,6 +96,7 @@ interface BaseEventSeriesTableProps {
 }
 
 const BaseEventSeriesTable = ({
+  id,
   eventSeries,
   noEventSeriesMessage = "No event series found",
   pageSize,
@@ -115,7 +117,7 @@ const BaseEventSeriesTable = ({
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table striped hover responsive>
+        <Table striped hover responsive id={id}>
           <thead>
             <tr>
               <th>{Settings.fields.eventSeries.name.label}</th>
