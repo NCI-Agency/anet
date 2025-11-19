@@ -12,9 +12,7 @@ import {
 import API from "api"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
-import { EmailModal } from "components/EmailModal"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
@@ -34,7 +32,6 @@ import {
   getSearchQuery,
   SearchQueryPropType
 } from "components/SearchFilters"
-import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Report, RollupGraph } from "models"
 import moment from "moment"
@@ -45,7 +42,6 @@ import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
-import utils from "utils"
 
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -67,39 +63,6 @@ const GQL_GET_REPORT_LIST = gql`
         }
       }
     }
-  }
-`
-
-const GQL_SHOW_ROLLUP_EMAIL = gql`
-  query (
-    $startDate: Instant!
-    $endDate: Instant!
-    $orgUuid: String
-    $orgType: RollupGraphType
-  ) {
-    showRollupEmail(
-      startDate: $startDate
-      endDate: $endDate
-      orgUuid: $orgUuid
-      orgType: $orgType
-    )
-  }
-`
-const GQL_EMAIL_ROLLUP = gql`
-  mutation (
-    $startDate: Instant!
-    $endDate: Instant!
-    $email: AnetEmailInput!
-    $orgUuid: String
-    $orgType: RollupGraphType
-  ) {
-    emailRollup(
-      startDate: $startDate
-      endDate: $endDate
-      email: $email
-      orgUuid: $orgUuid
-      orgType: $orgType
-    )
   }
 `
 
@@ -356,10 +319,6 @@ const RollupShow = ({
 }: RollupShowProps) => {
   const [period, setPeriod] = useState(ROLLUP_PERIODS[0])
   const [orgType, setOrgType] = useState(RollupGraph.TYPE.ADVISOR)
-  const [showEmailModal, setShowEmailModal] = useState(false)
-  const [saveSuccess, setSaveSuccess] = useState(null)
-  const [saveError, setSaveError] = useState(null)
-  const previewPlaceholderUrl = "/help"
   let queryParams
   if (searchQuery === DEFAULT_SEARCH_QUERY) {
     // when going from a different page to the rollup page, use the default
@@ -368,9 +327,6 @@ const RollupShow = ({
   } else {
     queryParams = getSearchQuery(searchQuery)
   }
-  const startDate = moment(queryParams.engagementDateStart)
-  const endDate = moment(queryParams.engagementDateEnd)
-  const { orgUuid } = queryParams
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: REPORT_SEARCH_PROPS,
@@ -424,8 +380,6 @@ const RollupShow = ({
 
   return (
     <div id="daily-rollup" style={flexStyle}>
-      <Messages error={saveError} success={saveSuccess} />
-
       <Fieldset
         title={
           <div style={{ float: "left" }}>
@@ -466,26 +420,6 @@ const RollupShow = ({
             </div>
           </div>
         }
-        action={
-          <>
-            <Button
-              id="print-rollup"
-              href={previewPlaceholderUrl}
-              target="rollup"
-              onClick={printPreview}
-              variant="outline-secondary"
-            >
-              Print
-            </Button>
-            <Button
-              id="email-rollup"
-              onClick={toggleEmailModal}
-              variant="primary"
-            >
-              Email rollup
-            </Button>
-          </>
-        }
         style={fieldsetStyle}
       >
         <MosaicLayout
@@ -495,13 +429,6 @@ const RollupShow = ({
           description={DESCRIPTION}
         />
       </Fieldset>
-      <Formik
-        enableReinitialize
-        onSubmit={onSubmitEmailRollup}
-        initialValues={{ to: "", comment: "", toAnetUsers: [] }}
-      >
-        {formikProps => renderEmailModal(formikProps)}
-      </Formik>
     </div>
   )
 
@@ -627,130 +554,6 @@ const RollupShow = ({
       deserializeCallback
     )
     return queryParams
-  }
-
-  function getDateStr() {
-    if (startDate.isSame(endDate, "day")) {
-      return `for ${startDate.format(
-        Settings.dateFormats.forms.displayShort.date
-      )}`
-    } else {
-      return `from ${startDate.format(
-        Settings.dateFormats.forms.displayShort.date
-      )} to ${endDate.format(Settings.dateFormats.forms.displayShort.date)}`
-    }
-  }
-
-  function getRollupStart() {
-    return moment(startDate).startOf("day")
-  }
-
-  function getRollupEnd() {
-    return moment(endDate).endOf("day")
-  }
-
-  function renderEmailModal(formikProps) {
-    const { isSubmitting, submitForm, setFieldValue } = formikProps
-    const toAnetUsers = formikProps.values.toAnetUsers || []
-    return (
-      <EmailModal
-        title={`Email rollup - ${getDateStr()}`}
-        footer={
-          <>
-            <Button
-              id="preview-rollup-email"
-              href={previewPlaceholderUrl}
-              target="rollup"
-              onClick={showPreview}
-              variant="outline-secondary"
-            >
-              Preview
-            </Button>
-            <Button
-              id="send-rollup-email"
-              variant="primary"
-              onClick={submitForm}
-              disabled={isSubmitting}
-            >
-              Send email
-            </Button>
-          </>
-        }
-        selectedUsers={toAnetUsers}
-        onChange={value => setFieldValue("toAnetUsers", value)}
-        showEmailModal={showEmailModal}
-        toggleEmailModal={toggleEmailModal}
-      />
-    )
-  }
-
-  function toggleEmailModal() {
-    setShowEmailModal(!showEmailModal)
-  }
-
-  function printPreview() {
-    showPreview(true)
-  }
-
-  function showPreview(print) {
-    const variables = {
-      startDate: getRollupStart().toISOString(),
-      endDate: getRollupEnd().toISOString(),
-      orgType,
-      orgUuid
-    }
-    return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
-      const rollupWindow = window.open("", "rollup")
-      const doc = rollupWindow.document
-      doc.clear()
-      doc.open()
-      doc.write(data.showRollupEmail)
-      doc.close()
-      if (print === true) {
-        rollupWindow.print()
-      }
-    })
-  }
-
-  function onSubmitEmailRollup(values, form) {
-    emailRollup(values, form)
-      .then(() => {
-        setSaveSuccess("Email successfully sent")
-        setSaveError(null)
-        setShowEmailModal(false)
-        form.resetForm() // Reset the email modal field values
-      })
-      .catch(error => {
-        setSaveSuccess(null)
-        setSaveError(error)
-        setShowEmailModal(false)
-        form.setSubmitting(false)
-      })
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  function emailRollup(values, form) {
-    const toEmails = utils.parseEmailAddresses(values.to)
-    const anetUsersEmails = values.toAnetUsers
-      ?.flatMap(u => u.emailAddresses)
-      ?.map(ea => ea.address)
-      ?.filter(Boolean)
-    if (!toEmails.isValid && !anetUsersEmails.length) {
-      return Promise.reject(new Error("No email addresses were selected"))
-    }
-    const emails = [...(toEmails.to || []), ...anetUsersEmails]
-    const emailDelivery = {
-      toAddresses: emails,
-      comment: values.comment
-    }
-    const variables = {
-      startDate: getRollupStart().toISOString(),
-      endDate: getRollupEnd().toISOString(),
-      orgType,
-      orgUuid,
-      email: emailDelivery
-    }
-    return API.mutation(GQL_EMAIL_ROLLUP, variables)
   }
 }
 

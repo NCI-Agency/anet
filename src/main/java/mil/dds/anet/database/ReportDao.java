@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
 import com.google.common.collect.ObjectArrays;
@@ -12,14 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
@@ -35,15 +32,10 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.RollupGraph.RollupGraphType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
-import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
@@ -58,13 +50,11 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
@@ -531,68 +521,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     }
   }
 
-  private Instant getRollupEngagmentStart(Instant start) {
-    String maxReportAgeStr =
-        engine().getAdminDao().getSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
-    if (maxReportAgeStr == null) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
-    }
-    try {
-      long maxReportAge = Long.parseLong(maxReportAgeStr);
-      return start.atZone(DaoUtils.getServerNativeZoneId()).minusDays(maxReportAge).toInstant();
-    } catch (NumberFormatException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Invalid Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS + ": "
-              + maxReportAgeStr);
-    }
-  }
-
-  /*
-   * Generates the Rollup Graph for a particular Organization Type, starting at the root of the org
-   * hierarchy
-   */
-  public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, RollupGraphType orgType,
-      Map<String, Organization> nonReportingOrgs) {
-    final List<Map<String, Object>> results = rollupQuery(start, end, orgType, null, false);
-    final Map<String, Organization> orgMap = engine().buildTopLevelOrgHash();
-
-    return generateRollupGraphFromResults(results, orgMap, nonReportingOrgs);
-  }
-
-  /*
-   * Generates a Rollup graph for a particular organization. Starting with a given parent
-   * Organization
-   */
-  public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, String parentOrgUuid,
-      RollupGraphType orgType, Map<String, Organization> nonReportingOrgs) {
-    List<Organization> orgList = null;
-    final Map<String, Organization> orgMap;
-    if (!parentOrgUuid.equals(Organization.DUMMY_ORG_UUID)) {
-      // doing this as two separate queries because I do need all the information about the
-      // organizations
-      OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
-      query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-      query.setPageSize(0);
-      orgList = engine().getOrganizationDao().search(query).getList();
-      Optional<Organization> parentOrg =
-          orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
-      if (parentOrg.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "No such organization with uuid " + parentOrgUuid);
-      }
-      orgMap = Utils.buildOrgToParentOrgMapping(orgList, parentOrgUuid);
-    } else {
-      orgMap = new HashMap<>(); // guaranteed to match no orgs!
-    }
-
-    final List<Map<String, Object>> results = rollupQuery(start, end, orgType, orgList,
-        parentOrgUuid.equals(Organization.DUMMY_ORG_UUID));
-
-    return generateRollupGraphFromResults(results, orgMap, nonReportingOrgs);
-  }
-
   /* Generates Advisor Report Insights for Organizations */
   @Transactional
   public List<Map<String, Object>> getAdvisorReportInsights(Instant start, Instant end,
@@ -724,110 +652,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     } finally {
       closeDbHandle(handle);
     }
-  }
-
-  /**
-   * Helper method that builds and executes the daily rollup query. Searching for just all reports
-   * and for reports in certain organizations.
-   *
-   * @param orgType the type of organization to be looking for
-   * @param orgs the list of orgs for whose reports to find, null means all
-   * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
-   */
-  @Transactional
-  public List<Map<String, Object>> rollupQuery(Instant start, Instant end, RollupGraphType orgType,
-      List<Organization> orgs, boolean missingOrgReports) {
-    final Handle handle = getDbHandle();
-    try {
-      String orgColumn = String.format("\"%s\"",
-          RollupGraphType.ADVISOR.equals(orgType) ? "advisorOrganizationUuid"
-              : "interlocutorOrganizationUuid");
-      final Map<String, Object> sqlArgs = new HashMap<>();
-      final Map<String, List<?>> listArgs = new HashMap<>();
-
-      StringBuilder sql = new StringBuilder();
-      sql.append("/* RollupQuery */ SELECT ").append(orgColumn)
-          .append(" as \"orgUuid\", state, count(*) AS count ");
-      sql.append("FROM reports WHERE ");
-
-      sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
-          + "AND \"engagementDate\" > :engagementDateStart ");
-      DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
-      DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-      DaoUtils.addInstantAsLocalDateTime(sqlArgs, "engagementDateStart",
-          getRollupEngagmentStart(start));
-
-      if (!Utils.isEmptyOrNull(orgs)) {
-        sql.append("AND ").append(orgColumn).append(" IN ( <orgUuids> ) ");
-        listArgs.put("orgUuids",
-            orgs.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toList()));
-      } else if (missingOrgReports) {
-        sql.append(" AND ").append(orgColumn).append(" IS NULL ");
-      }
-
-      sql.append("GROUP BY ").append(orgColumn).append(", state");
-
-      final Query q = handle.createQuery(sql.toString()).bindMap(sqlArgs);
-      for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
-        q.bindList(NULL_KEYWORD, listArg.getKey(), listArg.getValue());
-      }
-      return q.map(new MapMapper()).list();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  /*
-   * Given the results from the database on the number of reports grouped by organization And the
-   * map of each organization to the organization that their reports roll up to this method returns
-   * the final rollup graph information.
-   */
-  private List<RollupGraph> generateRollupGraphFromResults(List<Map<String, Object>> dbResults,
-      Map<String, Organization> orgMap, Map<String, Organization> nonReportingOrgs) {
-    final Map<String, Map<ReportState, Integer>> rollup = new HashMap<>();
-
-    for (Map<String, Object> result : dbResults) {
-      final String orgUuid = (String) result.get("orgUuid");
-      if (nonReportingOrgs.containsKey(orgUuid)) {
-        // Skip non-reporting organizations
-        continue;
-      }
-      final int count = ((Number) result.get("count")).intValue();
-      final ReportState state = ReportState.values()[(Integer) result.get("state")];
-
-      final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
-      Map<ReportState, Integer> orgBar =
-          rollup.computeIfAbsent(parentOrgUuid, k -> new HashMap<>());
-      orgBar.put(state, Utils.orIfNull(orgBar.get(state), 0) + count);
-    }
-
-    // Add all (top-level) organizations without any reports
-    for (final Map.Entry<String, Organization> entry : orgMap.entrySet()) {
-      final String orgUuid = entry.getKey();
-      if (nonReportingOrgs.containsKey(orgUuid)) {
-        // Skip non-reporting organizations
-        continue;
-      }
-      final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
-      if (!rollup.containsKey(parentOrgUuid)) {
-        final Map<ReportState, Integer> orgBar = new HashMap<>();
-        orgBar.put(ReportState.PUBLISHED, 0);
-        orgBar.put(ReportState.CANCELLED, 0);
-        rollup.put(parentOrgUuid, orgBar);
-      }
-    }
-
-    final List<RollupGraph> result = new LinkedList<>();
-    for (Map.Entry<String, Map<ReportState, Integer>> entry : rollup.entrySet()) {
-      Map<ReportState, Integer> values = entry.getValue();
-      RollupGraph bar = new RollupGraph();
-      bar.setOrg(orgMap.get(entry.getKey()));
-      bar.setPublished(Utils.orIfNull(values.get(ReportState.PUBLISHED), 0));
-      bar.setCancelled(Utils.orIfNull(values.get(ReportState.CANCELLED), 0));
-      result.add(bar);
-    }
-
-    return result;
   }
 
   class SelfIdBatcher extends IdBatcher<Report> {

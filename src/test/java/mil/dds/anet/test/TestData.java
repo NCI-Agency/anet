@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.mart.LogDto;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.test.client.AccessTokenInput;
@@ -29,20 +27,6 @@ import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TokenScope;
 
 public class TestData {
-
-  public static RollupGraph createRollupGraph() {
-    final RollupGraph rollupGraph = new RollupGraph();
-    rollupGraph.setCancelled(0);
-    rollupGraph.setOrg(createOrganization());
-    rollupGraph.setPublished(1);
-    return rollupGraph;
-  }
-
-  public static Organization createOrganization() {
-    final Organization org = new Organization();
-    org.setLongName("longName");
-    return org;
-  }
 
   public static Position getTestAdvisor() {
     final Position b = new Position();

@@ -69,7 +69,6 @@ import mil.dds.anet.test.client.ReportSearchQueryInput;
 import mil.dds.anet.test.client.ReportSearchSortBy;
 import mil.dds.anet.test.client.ReportSensitiveInformationInput;
 import mil.dds.anet.test.client.ReportState;
-import mil.dds.anet.test.client.RollupGraph;
 import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
@@ -113,8 +112,6 @@ public class ReportResourceTest extends AbstractResourceTest {
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
           + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText"
           + " createdAt updatedAt releasedAt customFields classification";
-  private static final String ROLLUP_FIELDS =
-      String.format("{ org { %1$s } published cancelled }", _ORGANIZATION_FIELDS);
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("{ %1$s parentTask { %1$s } }", _TASK_FIELDS);
@@ -1895,168 +1892,6 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void dailyRollupGraphNonReportingTest() {
-    final Person steve = getSteveSteveson();
-
-    final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
-        .withNextSteps("Check for a change in the rollup graph")
-        .withKeyOutcomes("Foobar the bazbiz")
-        .withReportPeople(getReportPeopleInput(
-            List.of(personToPrimaryReportAuthor(admin), personToPrimaryReportPerson(steve, true))))
-        .build();
-    final Report r1 =
-        withCredentials(adminUser, t -> mutationExecutor.createReport(FIELDS, rInput));
-    assertThat(r1).isNotNull();
-    assertThat(r1.getUuid()).isNotNull();
-
-    // Pull the daily rollup graph
-    Instant startDate =
-        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
-    Instant endDate =
-        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
-    final List<RollupGraph> startGraph = withCredentials(adminUser,
-        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
-
-    // Submit the report
-    try {
-      withCredentials(adminUser, t -> mutationExecutor.submitReport("", r1.getUuid()));
-      fail("Expected an Exception");
-    } catch (Exception expectedException) {
-      // OK
-    }
-
-    // Oops set the engagementDate.
-    r1.setEngagementDate(Instant.now());
-    r1.setDuration(50);
-    final Report updated = withCredentials(adminUser,
-        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(r1), true));
-    assertThat(updated).isNotNull();
-
-    // Re-submit the report, it should work.
-    int numRows = withCredentials(adminUser, t -> mutationExecutor.submitReport("", r1.getUuid()));
-    assertThat(numRows).isOne();
-
-    // Admin can approve his own reports.
-    numRows =
-        withCredentials(adminUser, t -> mutationExecutor.approveReport("", null, r1.getUuid()));
-    assertThat(numRows).isOne();
-
-    // Verify report is in APPROVED state.
-    final Report r2 = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, r1.getUuid()));
-    assertThat(r2.getState()).isEqualTo(ReportState.APPROVED);
-
-    // Admin can publish approved reports.
-    numRows = withCredentials(adminUser, t -> mutationExecutor.publishReport("", r2.getUuid()));
-    assertThat(numRows).isOne();
-
-    // Verify report is in PUBLISHED state.
-    final Report r3 = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, r2.getUuid()));
-    assertThat(r3.getState()).isEqualTo(ReportState.PUBLISHED);
-
-    // Check on the daily rollup graph now.
-    final List<RollupGraph> endGraph = withCredentials(adminUser,
-        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
-
-    final Organization org = admin.getPosition().getOrganization();
-    @SuppressWarnings("unchecked")
-    final List<String> nro = (List<String>) dict.getDictionaryEntry("non_reporting_ORGs");
-    // Admin's organization should have one more report PUBLISHED only if it is not in the
-    // non-reporting orgs
-    final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-    final String orgUuid = org.getUuid();
-    final Optional<RollupGraph> orgReportsStart = startGraph.stream()
-        .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-    final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
-    final Optional<RollupGraph> orgReportsEnd = endGraph.stream()
-        .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-    final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
-    assertThat(startCt).isEqualTo(endCt - diff);
-  }
-
-  @Test
-  void dailyRollupGraphReportingTest() {
-    final Person elizabeth = getElizabethElizawell();
-    final Person steve = getSteveSteveson();
-
-    final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
-        .withNextSteps("Check for a change in the rollup graph")
-        .withKeyOutcomes("Foobar the bazbiz").withReportPeople(getReportPeopleInput(List
-            .of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve, true))))
-        .build();
-    final Report r1 = withCredentials(getDomainUsername(elizabeth),
-        t -> mutationExecutor.createReport(FIELDS, rInput));
-    assertThat(r1).isNotNull();
-    assertThat(r1.getUuid()).isNotNull();
-
-    // Pull the daily rollup graph
-    final Instant startDate =
-        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
-    final Instant endDate =
-        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
-    final List<RollupGraph> startGraph = withCredentials(adminUser,
-        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
-
-    // Submit the report
-    try {
-      withCredentials(getDomainUsername(elizabeth),
-          t -> mutationExecutor.submitReport("", r1.getUuid()));
-      fail("Expected an Exception");
-    } catch (Exception expectedException) {
-      // OK
-    }
-
-    // Oops set the engagementDate.
-    r1.setEngagementDate(Instant.now());
-    r1.setDuration(115);
-    final Report updated = withCredentials(getDomainUsername(elizabeth),
-        t -> mutationExecutor.updateReport(FIELDS, false, getReportInput(r1), true));
-    assertThat(updated).isNotNull();
-
-    // Re-submit the report, it should work.
-    int numRows = withCredentials(getDomainUsername(elizabeth),
-        t -> mutationExecutor.submitReport("", r1.getUuid()));
-    assertThat(numRows).isOne();
-
-    // Approve report.
-    numRows = withCredentials("bob", t -> mutationExecutor.approveReport("", null, r1.getUuid()));
-    assertThat(numRows).isOne();
-
-    // Verify report is in APPROVED state.
-    final Report r2 = withCredentials(getDomainUsername(elizabeth),
-        t -> queryExecutor.report(FIELDS, r1.getUuid()));
-    assertThat(r2.getState()).isEqualTo(ReportState.APPROVED);
-
-    // Admin can publish approved reports.
-    numRows = withCredentials(adminUser, t -> mutationExecutor.publishReport("", r1.getUuid()));
-    assertThat(numRows).isOne();
-
-    // Verify report is in PUBLISHED state.
-    final Report r3 = withCredentials(getDomainUsername(elizabeth),
-        t -> queryExecutor.report(FIELDS, r1.getUuid()));
-    assertThat(r3.getState()).isEqualTo(ReportState.PUBLISHED);
-
-    // Check on the daily rollup graph now.
-    final List<RollupGraph> endGraph = withCredentials(adminUser,
-        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
-
-    final Organization org = admin.getPosition().getOrganization();
-    @SuppressWarnings("unchecked")
-    final List<String> nro = (List<String>) dict.getDictionaryEntry("non_reporting_ORGs");
-    // Elizabeth's organization should have one more report PUBLISHED only if it is not in the
-    // non-reporting orgs
-    final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-    final Organization po = org.getParentOrg();
-    final String orgUuid = po == null ? null : po.getUuid();
-    final Optional<RollupGraph> orgReportsStart = startGraph.stream()
-        .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-    final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
-    final Optional<RollupGraph> orgReportsEnd = endGraph.stream()
-        .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-    final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
-    assertThat(startCt).isEqualTo(endCt - diff);
-  }
-
-  @Test
   void testSensitiveInformationByAuthor() {
     final Person elizabeth = getElizabethElizawell();
     final ReportSensitiveInformationInput rsiInput = ReportSensitiveInformationInput.builder()
@@ -2254,8 +2089,6 @@ public class ReportResourceTest extends AbstractResourceTest {
   private void createTestReport() {
     final Person author = getJackJackson();
     final ReportPerson reportPerson = personToPrimaryReportAuthor(author);
-    final Position advisorPosition = author.getPosition();
-    final Organization advisorOrganization = advisorPosition.getOrganization();
 
     final Instant engagementDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
