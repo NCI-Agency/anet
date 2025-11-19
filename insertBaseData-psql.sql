@@ -315,8 +315,8 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 1.1 Advisor for Agriculture', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Old Inactive Advisor', 0, NULL, 0, 1, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor for Mining', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1.1 Advisor for Space Issues', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1.1 Advisor for Interagency Advising', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5e2414d2-b440-4e43-85b3-d1c10222cb5d', 'EF 1.1 Advisor for Space Issues', 0, NULL, 0, 0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('44ba17f5-fcf7-4743-a6b9-baf922b172c2', 'EF 1.1 Advisor for Interagency Advising', 0, NULL, 0, 0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('c829e8bc-959e-4e57-9e6f-0a8fc128145f', 'EF 1.1 Superuser', 2, 0, 1, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('525d6c4b-deaa-4218-b8fd-abfb7c81a4c2', 'EF 1.2 Advisor', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -1856,6 +1856,10 @@ INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query",
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
   ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- Give Creed some additional positions in EF 1.1
+INSERT INTO "peoplePositions" ("personUuid", "positionUuid", "createdAt", "isPrimary") VALUES
+  ('31cba227-f6c6-49e9-9483-fce441bea624', '5e2414d2-b440-4e43-85b3-d1c10222cb5d', CURRENT_TIMESTAMP, FALSE),
+  ('31cba227-f6c6-49e9-9483-fce441bea624', '44ba17f5-fcf7-4743-a6b9-baf922b172c2', CURRENT_TIMESTAMP, FALSE);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
