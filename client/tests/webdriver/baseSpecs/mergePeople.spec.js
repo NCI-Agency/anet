@@ -657,6 +657,70 @@ describe("Merge user with non-user", () => {
     ).to.eq(EXAMPLE_PEOPLE.userRight.gender)
   })
 
+  it("should be able to individually select email addresses", async () => {
+    // select all left
+    const selectAllEmailsLeftButton = await MergePeople.getSingleSelectButton(
+      "left",
+      "Email addresses"
+    )
+    await selectAllEmailsLeftButton.click()
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
+
+    // select all right
+    const selectAllEmailsRightButton = await MergePeople.getSingleSelectButton(
+      "right",
+      "Email addresses"
+    )
+    await selectAllEmailsRightButton.click()
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.userRight.email)
+
+    // select one on the left and keep one on the right
+    const selectOneEmailLeftButton = await (
+      await MergePeople.getColumnContent("left", "Email addresses")
+    ).$("button")
+    await selectOneEmailLeftButton.click()
+    const expectedEmail =
+      EXAMPLE_PEOPLE.validLeft.email +
+      "\n" +
+      EXAMPLE_PEOPLE.userRight.email.split("\n")[2]
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq(expectedEmail)
+
+    // remove the first email from the middle
+    const removeFirstEmailButton = await (
+      await MergePeople.getColumnContent("mid", "Email addresses")
+    ).$("button")
+    await removeFirstEmailButton.click()
+    const emailsRight = EXAMPLE_PEOPLE.userRight.email.split("\n")
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq(`${emailsRight[0]}\n${emailsRight[2]}`)
+
+    // remove the second email from the middle
+    const removeSecondEmailButton = await (
+      await MergePeople.getColumnContent("mid", "Email addresses")
+    ).$("button")
+    await removeSecondEmailButton.click()
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq("No email addresses available")
+  })
+
   it("Should be able to select all fields from left person", async () => {
     await (await MergePeople.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields

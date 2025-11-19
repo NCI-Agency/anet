@@ -13,7 +13,6 @@ import {
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditHistory from "components/EditHistory"
-import EmailAddressTable from "components/EmailAddressTable"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -53,6 +52,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
+import MergeEmailAddresses from "./MergeEmailAddresses"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -272,9 +272,12 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.emailAddresses}
                 value={
-                  <EmailAddressTable
+                  <MergeEmailAddresses
                     label={Settings.fields.person.emailAddresses.label}
                     emailAddresses={mergedPerson.emailAddresses}
+                    align={ALIGN_OPTIONS.CENTER}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -654,9 +657,12 @@ const PersonColumn = ({
             dictProps={Settings.fields.person.emailAddresses}
             fieldName="emailAddresses"
             value={
-              <EmailAddressTable
+              <MergeEmailAddresses
                 label={Settings.fields.person.emailAddresses.label}
                 emailAddresses={person.emailAddresses}
+                align={align}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
             }
             align={align}

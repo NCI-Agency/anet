@@ -14,7 +14,6 @@ import {
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositions from "components/EditAssociatedPositions"
 import EditHistory from "components/EditHistory"
-import EmailAddressTable from "components/EmailAddressTable"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -52,6 +51,7 @@ import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
+import MergeEmailAddresses from "./MergeEmailAddresses"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
@@ -258,9 +258,12 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.position.emailAddresses}
                 value={
-                  <EmailAddressTable
+                  <MergeEmailAddresses
                     label={Settings.fields.position.emailAddresses.label}
                     emailAddresses={mergedPosition.emailAddresses}
+                    align={ALIGN_OPTIONS.CENTER}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -660,9 +663,12 @@ const PositionColumn = ({
             dictProps={Settings.fields.position.emailAddresses}
             fieldName="emailAddresses"
             value={
-              <EmailAddressTable
+              <MergeEmailAddresses
                 label={Settings.fields.position.emailAddresses.label}
                 emailAddresses={position.emailAddresses}
+                align={align}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
             }
             align={align}
