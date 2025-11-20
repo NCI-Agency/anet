@@ -45,7 +45,7 @@ import {
   FormSelect,
   Row
 } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
@@ -95,6 +95,7 @@ const PersonForm = ({
   initialValues,
   notesComponent
 }: PersonFormProps) => {
+  const routerLocation = useLocation()
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
@@ -860,7 +861,8 @@ const PersonForm = ({
         if (!edit) {
           navigate(Person.pathForEdit(person), { replace: true })
         }
-        navigate(Person.pathFor(person), {
+        const nextUrl = routerLocation.state?.nextUrl || Person.pathFor(person)
+        navigate(nextUrl, {
           state: { success: "Person saved" }
         })
       }
