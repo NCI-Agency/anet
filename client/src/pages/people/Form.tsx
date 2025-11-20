@@ -832,14 +832,14 @@ const PersonForm = ({
       })
   }
 
-  function onSubmitSuccess(response, values, form) {
+  async function onSubmitSuccess(response, values, form) {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     if (onSaveRedirectToHome) {
       localStorage.clear()
       localStorage.newUser = "true"
-      loadAppData()
+      await loadAppData()
       navigate("/")
     } else {
       const updateOperation = forOnboarding ? "updateMe" : "updatePerson"
@@ -850,7 +850,7 @@ const PersonForm = ({
           : initialValues.uuid
       })
       if (Person.isEqual(currentUser, values)) {
-        loadAppData()
+        await loadAppData()
       }
       if (forOnboarding && !Settings.automaticallyAllowAllNewUsers) {
         navigate("/onboarding/show", {
