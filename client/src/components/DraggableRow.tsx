@@ -47,11 +47,21 @@ const DraggableRow = ({
     }
   })
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [{ isDragging: dragActive }, drag, preview] = useDrag({
+  const [{ isDragging: dragActive }, drag] = useDrag({
     type: itemType,
     item: { uuid: row.uuid, index },
     end: (item, monitor) => {
-      if (!monitor.didDrop()) {
+      if (!item) {
+        return
+      }
+
+      const initial = monitor.getInitialClientOffset()
+      const final = monitor.getClientOffset()
+      if (!initial || !final) {
+        return
+      }
+      // Ignore if there is no actual movement
+      if (initial.x === final.x && initial.y === final.y) {
         return
       }
       onDropRow(item.uuid, item.index)
