@@ -1,3 +1,7 @@
+import {
+  gqlEntityFieldsMap,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import LocationsMapWidget from "components/aggregations/LocationsMapWidget"
@@ -12,14 +16,12 @@ import { connect } from "react-redux"
 const GQL_GET_LOCATION_LIST = gql`
   query ($locationQuery: LocationSearchQueryInput) {
     locationList(query: $locationQuery) {
-      pageNum
-      pageSize
-      totalCount
+      ${gqlPaginationFields}
       list {
-        uuid
-        name
+        ${gqlEntityFieldsMap.Location}
         lat
         lng
+        type
       }
     }
   }
