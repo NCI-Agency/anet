@@ -14,6 +14,11 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EventCollection, {
+  FORMAT_CALENDAR,
+  FORMAT_MAP,
+  FORMAT_TABLE
+} from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -148,7 +153,7 @@ const SEARCH_ITEMS = {
   [SEARCH_OBJECT_TYPES.EVENTS]: {
     navTo: "events",
     iconImg: EVENTS_ICON,
-    searchResultsComponent: EventSearchResults
+    searchResultsComponent: EventCollection
   },
   [SEARCH_OBJECT_TYPES.EVENT_SERIES]: {
     navTo: "eventSeries",
