@@ -17,7 +17,7 @@ describe("Show person page", () => {
     })
     it("We can go to the show page of a community", async () => {
       await (await ShowPerson.getAuthorizationGroup(1)).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/communities/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
       )
     })
@@ -45,14 +45,14 @@ describe("Show person page", () => {
       )
 
       const editButton = await browser.$(".attachment-card .button-line a")
-      await expect(await editButton.getAttribute("href")).to.include(
+      expect(await editButton.getAttribute("href")).to.include(
         "/attachments/13318e42-a0a3-438f-8ed5-dc16b1ef17bc/edit"
       )
       await editAttachmentsButton.click()
     })
     it("We can go to the show page of Attachment", async () => {
       await (await ShowPerson.getImageClick()).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/attachments/13318e42-a0a3-438f-8ed5-dc16b1ef17bc"
       )
 

@@ -496,7 +496,7 @@ const TaskForm = ({
       })
   }
 
-  function onSubmitSuccess(response, values, form) {
+  async function onSubmitSuccess(response, values, form) {
     const operation = edit ? "updateTask" : "createTask"
     const task = new Task({
       uuid: response[operation].uuid
@@ -506,7 +506,7 @@ const TaskForm = ({
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    loadAppData()
+    await loadAppData()
     if (!edit) {
       navigate(Task.pathForEdit(task), { replace: true })
     }

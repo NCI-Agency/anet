@@ -72,13 +72,13 @@ const UserPreferences = ({
       })
   }
 
-  function onSubmitSuccess(values, form) {
+  async function onSubmitSuccess(values, form) {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess(`${title} saved`)
-    loadAppData()
+    await loadAppData()
     jumpToTop()
     if (typeof actionOnSubmit === "function") {
       actionOnSubmit()

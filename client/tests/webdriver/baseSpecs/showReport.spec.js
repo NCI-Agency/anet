@@ -124,14 +124,14 @@ describe("Show report page", () => {
       )
 
       const editButton = await browser.$(".attachment-card .button-line a")
-      await expect(await editButton.getAttribute("href")).to.include(
+      expect(await editButton.getAttribute("href")).to.include(
         "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d/edit"
       )
       await editAttachmentsButton.click()
     })
     it("We can go to the show page of Attachment", async () => {
       await (await ShowReport.getImageClick()).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
       )
     })

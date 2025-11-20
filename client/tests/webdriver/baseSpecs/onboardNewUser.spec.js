@@ -2,6 +2,8 @@ import { expect } from "chai"
 import moment from "moment"
 import OnboardPage from "../pages/onboard.page"
 
+const REPORT_URL = "/reports/59be259b-30b9-4d04-9e21-e8ceb58cbe9c"
+
 const ONBOARD_USER = {
   lastName: "Bonnsdottir",
   firstName: "Bonny",
@@ -18,7 +20,7 @@ const personDetails = {
 
 describe("Onboard new user login", () => {
   it("Should show onboard welcome", async () => {
-    await OnboardPage.openAsOnboardUser()
+    await OnboardPage.openAsOnboardUser(REPORT_URL)
     const welcomeText = "Welcome to ANET"
     await OnboardPage.waitForWelcomeMessage(welcomeText)
 
@@ -104,6 +106,12 @@ describe("Onboard new user login", () => {
     await (await OnboardPage.getLastName()).click()
     await browser.pause(500) // wait for the error message to disappear
     await OnboardPage.submitForm()
+  })
+
+  it("Should be redirected to the original URL", async () => {
+    await browser.pause(500) // wait for the page to load
+    // We should be redirected to the REPORT_URL
+    expect(await browser.getUrl()).to.include(REPORT_URL)
 
     await OnboardPage.logout()
   })
