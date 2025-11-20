@@ -62,9 +62,9 @@ describe("When checking the home page tiles", () => {
     it("should see the correct number of saved searches when logged in as admin", async () => {
       await Home.openAsAdminUser()
       // wait for the saved searches to be loaded
-      await (await Home.getSavedSearch()).waitForExist()
-      await (await Home.getSavedSearch()).waitForDisplayed()
-      const savedSearches = await Home.getSavedSearches()
+      await (await Home.getSavedSearches()).waitForExist()
+      await (await Home.getSavedSearches()).waitForDisplayed()
+      const savedSearches = await Home.getSavedSearchRows()
       expect(await savedSearches.length).to.eq(3)
       expect(await Home.getSavedSearchTitleText(savedSearches[0])).to.eq(
         SEARCH_TITLE_TEXTS[0]
