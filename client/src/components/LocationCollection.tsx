@@ -51,24 +51,22 @@ const LocationCollection = ({
         {showHeader && (
           <header>
             {viewFormats.length > 1 && (
-              <>
-                <ButtonToggleGroup
-                  value={viewFormat}
-                  onChange={setViewFormat}
-                  className="d-print-none"
-                >
-                  {viewFormats.includes(FORMAT_TABLE) && (
-                    <Button value={FORMAT_TABLE} variant="outline-secondary">
-                      Table
-                    </Button>
-                  )}
-                  {viewFormats.includes(FORMAT_MAP) && (
-                    <Button value={FORMAT_MAP} variant="outline-secondary">
-                      Map
-                    </Button>
-                  )}
-                </ButtonToggleGroup>
-              </>
+              <ButtonToggleGroup
+                value={viewFormat}
+                onChange={setViewFormat}
+                className="d-print-none"
+              >
+                {viewFormats.includes(FORMAT_TABLE) && (
+                  <Button value={FORMAT_TABLE} variant="outline-secondary">
+                    Table
+                  </Button>
+                )}
+                {viewFormats.includes(FORMAT_MAP) && (
+                  <Button value={FORMAT_MAP} variant="outline-secondary">
+                    Map
+                  </Button>
+                )}
+              </ButtonToggleGroup>
             )}
             {locationsFilter && (
               <div className="locations-filter">Filter: {locationsFilter}</div>
