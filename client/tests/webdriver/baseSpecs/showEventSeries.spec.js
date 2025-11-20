@@ -70,14 +70,14 @@ describe("When on the show page of an event series with attachment(s)", () => {
     )
 
     const editButton = await browser.$(".attachment-card .button-line a")
-    await expect(await editButton.getAttribute("href")).to.include(
+    expect(await editButton.getAttribute("href")).to.include(
       "/attachments/0df946d2-d565-4234-8c0d-0b30f486aacc/edit"
     )
     await editAttachmentsButton.click()
   })
   it("We can go to the show page of Attachment", async () => {
     await (await ShowEventSeries.getImageClick()).click()
-    await expect(await browser.getUrl()).to.include(
+    expect(await browser.getUrl()).to.include(
       "/attachments/0df946d2-d565-4234-8c0d-0b30f486aacc"
     )
   })
