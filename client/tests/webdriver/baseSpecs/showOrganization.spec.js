@@ -273,7 +273,7 @@ describe("Show organization page", () => {
     })
     it("We can go to the show page of a community", async () => {
       await (await ShowOrganization.getAuthorizationGroup(1)).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/communities/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
       )
     })
@@ -302,14 +302,14 @@ describe("Show organization page", () => {
       )
 
       const editButton = await browser.$(".attachment-card .button-line a")
-      await expect(await editButton.getAttribute("href")).to.include(
+      expect(await editButton.getAttribute("href")).to.include(
         "/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f/edit"
       )
       await editAttachmentsButton.click()
     })
     it("We can go to the show page of Attachment", async () => {
       await (await ShowOrganization.getImageClick()).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f"
       )
 
@@ -389,7 +389,7 @@ describe("Show organization page", () => {
     })
     it("We can go to the show page of event", async () => {
       await (await ShowOrganization.getEvent(5)).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
       )
     })
