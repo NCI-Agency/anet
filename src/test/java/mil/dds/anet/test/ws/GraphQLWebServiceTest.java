@@ -1,5 +1,7 @@
 package mil.dds.anet.test.ws;
 
+import static mil.dds.anet.test.ws.security.BearerToken.VALID_GRAPHQL_TOKEN;
+import static mil.dds.anet.test.ws.security.BearerToken.VALID_NVG_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,15 +14,15 @@ import java.util.Objects;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.ws.GraphQLWebService;
+import mil.dds.anet.ws.security.AccessTokenAuthentication;
+import mil.dds.anet.ws.security.BearerTokenService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 class GraphQLWebServiceTest extends AbstractResourceTest {
-
-  public static final String VALID_TOKEN = "Bearer W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf";
 
   private static final String REPORT_QUERY = // -
       "query ($uuid: String!) {" + // -
@@ -40,30 +42,25 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
   @Autowired
   private GraphQLWebService graphQLWebService;
 
-  @ParameterizedTest
-  @ValueSource(strings = { // -
-      "bogus", // wrong token
-      "Bearer 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn", // expired token
-      "Bearer XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv" // wrong scope
-  })
-  void testWithWrongToken(String authHeader) {
-    final GraphQLRequest graphQLRequest =
-        new GraphQLRequest(null, REPORT_QUERY, null, REPORT_QUERY_VARIABLES);
+  @Autowired
+  private BearerTokenService bearerTokenService;
 
-    try {
-      graphQLWebService.graphqlPostJson(graphQLRequest, authHeader);
-    } catch (Exception expectedException) {
-      assertThat(expectedException)
-          .hasMessage("403 FORBIDDEN \"Must provide a valid Web Service Access Token\"");
-    }
+  @AfterEach
+  void clearSecurity() {
+    SecurityContextHolder.clearContext();
+  }
+
+  private void setAuthentication(String bearerToken) {
+    var accessTokenAuthentication = createAccessTokenAuthentication(bearerToken);
+    SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
   }
 
   @Test
   void testWithValidToken() {
+    setAuthentication(VALID_GRAPHQL_TOKEN);
     final Map<String, Object> report =
         sendGraphQLRequest(REPORT_QUERY, REPORT_QUERY_VARIABLES, "report");
     assertThat(report).isNotNull().containsEntry("uuid", REPORT_UUID)
-        // Should not be able to retrieve sensitive information
         .containsEntry("reportSensitiveInformation", null);
   }
 
@@ -107,27 +104,35 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
         .isEmpty();
   }
 
+  private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {
+    var accessToken = bearerTokenService.getAccessPrincipalFromAuthHeader(bearerToken);
+    assertThat(accessToken.isEmpty()).isFalse();
+    return new AccessTokenAuthentication(accessToken.get());
+  }
+
   @Test
   void testIntrospectionWithWrongScope() {
     try {
-      graphQLWebService.graphqlPostJson(
-          new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null),
-          "Bearer XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv");
+      setAuthentication(VALID_NVG_TOKEN);
+      graphQLWebService
+
+          .graphqlPostJson(new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
     } catch (Exception expectedException) {
-      assertThat(expectedException)
-          .hasMessage("403 FORBIDDEN \"Must provide a valid Web Service Access Token\"");
+      assertThat(expectedException).hasMessage("Access Denied");
     }
   }
 
   @Test
   void testIntrospectionWithValidToken() {
-    final ResponseEntity<Map<String, Object>> result = graphQLWebService.graphqlPostJson(
-        new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null), VALID_TOKEN);
+    setAuthentication(VALID_GRAPHQL_TOKEN);
+    final ResponseEntity<Map<String, Object>> result = graphQLWebService
+        .graphqlPostJson(new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
     assertThat(result).isNotNull();
   }
 
   @Test
   void testMutation() {
+    setAuthentication(VALID_GRAPHQL_TOKEN);
     final String createReportMutation =
         "mutation ($report: ReportInput!) { createReport(report: $report) {"
             + " uuid state authors { uuid } reportSensitiveInformation { uuid text } } }";
@@ -144,12 +149,15 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
     assertThat(report).isNull();
   }
 
-  private Map<String, Object> sendGraphQLRequest(String createReportMutation,
-      Map<String, Object> variables, String value) {
-    final GraphQLRequest graphQLRequest =
-        new GraphQLRequest(null, createReportMutation, null, variables);
+  private Map<String, Object> sendGraphQLRequest(String query, Map<String, Object> variables,
+      String value) {
+    setAuthentication(VALID_GRAPHQL_TOKEN);
+
+    final GraphQLRequest graphQLRequest = new GraphQLRequest(null, query, null, variables);
+
     final ResponseEntity<Map<String, Object>> result =
-        graphQLWebService.graphqlPostJson(graphQLRequest, VALID_TOKEN);
+        graphQLWebService.graphqlPostJson(graphQLRequest);
+
     assertThat(result).isNotNull();
 
     @SuppressWarnings("unchecked")
