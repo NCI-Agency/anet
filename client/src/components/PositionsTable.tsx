@@ -26,7 +26,13 @@ const PositionsTable = ({ label, positions }: PositionsTableProps) => {
         {positions.map(pos => (
           <tr key={pos.uuid}>
             <td>
-              <LinkTo modelType="positions" model={pos} />
+              <LinkTo
+                modelType="Position"
+                model={pos}
+                className="position-name"
+              />{" "}
+              (
+              <LinkTo modelType="Organization" model={pos.organization} />)
             </td>
           </tr>
         ))}

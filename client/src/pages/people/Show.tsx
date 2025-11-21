@@ -74,6 +74,12 @@ const GQL_GET_PERSON = gql`
       authorizationGroups {
         ${gqlEntityFieldsMap.AuthorizationGroup}
       }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+      }
       attachments {
         ${gqlAllAttachmentFields}
       }

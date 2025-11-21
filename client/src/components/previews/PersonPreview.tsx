@@ -15,6 +15,7 @@ import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import PositionsTable from "components/PositionsTable"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
@@ -49,6 +50,12 @@ const GQL_GET_PERSON = gql`
           organization {
             ${gqlEntityFieldsMap.Organization}
           }
+        }
+      }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
         }
       }
       previousPositions {
@@ -219,9 +226,16 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
           className={!position || !position.uuid ? "warning" : undefined}
         >
           {hasPosition
-            ? renderPosition(position)
+            ? renderCurrentPosition(position)
             : renderPositionBlankSlate(person)}
         </div>
+      </div>
+      <h4>{Settings.fields.person.additionalPositions?.label}</h4>
+      <div className="preview-section">
+        <PositionsTable
+          label="Additional Positions"
+          positions={person.additionalPositions}
+        />
       </div>
 
       {hasPosition && (
@@ -239,7 +253,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
     </div>
   )
 
-  function renderPosition(position) {
+  function renderCurrentPosition(position) {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
