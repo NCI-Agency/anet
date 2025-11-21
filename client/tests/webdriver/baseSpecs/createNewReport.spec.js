@@ -25,7 +25,7 @@ const REPORT_FIELDS = {
     "The attendees' positions change based on the engagement date:\n" +
     "- when the engagement is in 2020 the attendees' positions are different from when the engagement is in 2021 or later\n" +
     "- when the engagement is before 2020, none of the attendees have a position\n" +
-    "- when saving the report, the advisor organization and interlocutor organization change, based on the primary attendees' current positions"
+    "- when saving the report, the advisor organization and interlocutor organization change, based on the primary attendees' primary positions"
 }
 const EXPECTED_DATA = {
   now: {
