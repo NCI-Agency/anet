@@ -6,7 +6,7 @@ import ShowPerson from "../pages/showPerson.page"
 const SOME_FIELDS = {
   currentPosition: {
     id: "position",
-    fieldLabel: "Current Position"
+    fieldLabel: "Primary Position"
   },
   previousPositions: {
     id: "prevPositions",
@@ -27,7 +27,7 @@ const SOME_FIELDS = {
 }
 
 const PRESET_DEFAULT_LABELS = [
-  "Current Position",
+  "Primary Position",
   "Previous Positions",
   "Phone",
   "Nationality",
@@ -38,7 +38,7 @@ const PRESET_DEFAULT_LABELS = [
 ]
 
 const PRESET_WITHOUT_SENSITIVE_LABELS = [
-  "Current Position",
+  "Primary Position",
   "Previous Positions",
   "Phone",
   "Nationality",
