@@ -500,7 +500,7 @@ fields:
     users:
       label: User accounts
     position:
-      label: Current Position
+      label: Primary Position
       placeholder: Fill in the person's current position
     additionalPositions:
       label: Additional Positions
