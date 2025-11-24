@@ -75,6 +75,7 @@ const EXAMPLE_PEOPLE = {
     previousPositions: [
       {
         name: "EF 1 Manager",
+        primary: "✔️",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],

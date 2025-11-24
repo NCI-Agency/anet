@@ -13,7 +13,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
-import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
@@ -21,7 +20,6 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
-import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
@@ -740,12 +738,12 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
-        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPerson(getPersonInput(person1))
-        .build();
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPrimary(true)
+        .withPerson(getPersonInput(person1)).build();
     final PersonPositionHistoryInput histInput2 =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
             .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
-            .withPerson(getPersonInput(person2)).build();
+            .withPrimary(true).withPerson(getPersonInput(person2)).build();
     prevPersons.add(histInput1);
     prevPersons.add(histInput2);
     final PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())
