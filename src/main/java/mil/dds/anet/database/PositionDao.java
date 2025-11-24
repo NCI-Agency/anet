@@ -128,7 +128,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         + POSITION_FIELDS + " FROM positions "
         + "LEFT JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
         + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> ) "
-        + "AND \"peoplePositions\".\"isPrimary\" IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL";
+        + "AND \"peoplePositions\".primary IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL";
 
     public PrimaryPositionsBatcher() {
       super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
@@ -214,7 +214,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         final Position currPos = handle.createQuery("/* positionSetPerson.find */ SELECT "
             + POSITION_FIELDS
             + " FROM \"peoplePositions\" pp INNER JOIN positions ON pp.\"positionUuid\" = positions.uuid"
-            + " WHERE \"personUuid\" = :personUuid AND \"isPrimary\" IS TRUE AND \"endedAt\" IS NULL")
+            + " WHERE \"personUuid\" = :personUuid AND \"primary\" IS TRUE AND \"endedAt\" IS NULL")
             .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
         if (currPos != null && currPos.getUuid().equals(positionUuid)) {
           // Attempt to put person in same primary position they already hold
@@ -267,10 +267,10 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       // And update the history
       final int nr = handle
           .createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"isPrimary\", \"createdAt\") "
-              + "VALUES (:positionUuid, :personUuid, :isPrimary, :createdAt)")
+              + "(\"positionUuid\", \"personUuid\", \"primary\", \"createdAt\") "
+              + "VALUES (:positionUuid, :personUuid, :primary, :createdAt)")
           .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("isPrimary", primary)
+          .bind("primary", primary)
           // Need to ensure this timestamp is greater than previous INSERT.
           .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
       // Evict this person from the domain users cache, as their position has changed
@@ -466,7 +466,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       Optional<Position> position = handle.createQuery("/* getCurrentPositionForPerson */ SELECT "
           + POSITION_FIELDS
           + " FROM positions INNER JOIN \"peoplePositions\" pp ON pp.\"positionUuid\" = positions.uuid"
-          + " WHERE pp.\"endedAt\" IS NULL AND pp.\"isPrimary\" IS TRUE AND pp.\"personUuid\" = :personUuid")
+          + " WHERE pp.\"endedAt\" IS NULL AND pp.primary IS TRUE AND pp.\"personUuid\" = :personUuid")
           .bind("personUuid", personUuid).map(new PositionMapper()).findFirst();
       return position.orElse(null);
     } finally {
@@ -706,12 +706,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       final int numRows =
           handle.execute("DELETE FROM \"peoplePositions\"  WHERE \"positionUuid\" = ?", posUuid);
       if (Utils.isEmptyOrNull(pos.getPreviousPeople())) {
-        personDao.updatePeoplePositions(posUuid, pos.getPersonUuid(), Instant.now(), null);
+        personDao.updatePeoplePositions(posUuid, pos.getPersonUuid(), Instant.now(), null, true);
       } else {
         // Add new history
         for (final PersonPositionHistory history : pos.getPreviousPeople()) {
           personDao.updatePeoplePositions(posUuid, history.getPersonUuid(), history.getStartTime(),
-              history.getEndTime());
+              history.getEndTime(), history.getPrimary());
         }
       }
       return numRows;

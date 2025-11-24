@@ -1,7 +1,7 @@
 import test from "../util/test.cjs"
 
 test.serial("Move someone in and out of a position", async t => {
-  t.plan(11)
+  t.plan(13)
 
   const {
     $,

@@ -16,6 +16,7 @@ public class PersonPositionHistoryMapper implements RowMapper<PersonPositionHist
     pph.setEndTime(MapperUtils.getInstantAsLocalDateTime(rs, "endedAt"));
     pph.setPositionUuid(rs.getString("positionUuid"));
     pph.setPersonUuid(rs.getString("personUuid"));
+    pph.setPrimary(rs.getBoolean("primary"));
     return pph;
   }
 

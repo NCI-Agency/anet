@@ -6906,9 +6906,9 @@
 		<dropIndex tableName="positions" indexName="UQ_CurrentPersonInPosition" />
 	</changeSet>
 
-	<changeSet id="add-isPrimary-column-to-peoplePositions" author="fdelcastillo">
+	<changeSet id="add-primary-column-to-peoplePositions" author="fdelcastillo">
 		<addColumn tableName="peoplePositions">
-			<column name="isPrimary" type="boolean" defaultValue="true" />
+			<column name="primary" type="boolean" defaultValue="true" />
 		</addColumn>
 	</changeSet>
 
@@ -6916,7 +6916,7 @@
 		<sql>
 			CREATE UNIQUE INDEX "UQ_PeoplePrimaryPosition"
 				ON "peoplePositions" ("personUuid")
-				WHERE "isPrimary" IS TRUE AND "endedAt" IS NULL;
+				WHERE "primary" IS TRUE AND "endedAt" IS NULL;
 		</sql>
 	</changeSet>
 

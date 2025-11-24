@@ -164,6 +164,7 @@ class ResourceUtilsTest {
 
         pph.setStartTime(toInstant(testItem[i++]));
         pph.setEndTime(toInstant(testItem[i++]));
+        pph.setPrimary(true);
         hist.add(pph);
       }
       logger.debug("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);

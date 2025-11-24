@@ -59,7 +59,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     if (!Utils.isEmptyOrNull(query.getOrgUuid()) || !Utils.isEmptyOrNull(query.getLocationUuid())
         || query.getMatchPositionName() || !Utils.isEmptyOrNull(query.getPositionType())) {
       qb.addFromClause("LEFT JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = people.uuid"
-          + " AND pp.\"isPrimary\" IS TRUE AND pp.\"endedAt\" IS NULL");
+          + " AND pp.primary IS TRUE AND pp.\"endedAt\" IS NULL");
       qb.addFromClause("LEFT JOIN positions ON positions.uuid = pp.\"positionUuid\"");
     }
 

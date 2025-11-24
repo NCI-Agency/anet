@@ -186,7 +186,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     final Person person = withCredentials(jackUser,
         t -> queryExecutor.person(fields, "31cba227-f6c6-49e9-9483-fce441bea624"));
     assertThat(person).isNotNull();
-    assertThat(person.getAuthorizationGroups()).hasSize(1);
+    assertThat(person.getAuthorizationGroups()).hasSize(2);
     assertThat(person.getAuthorizationGroups().get(0).getUuid())
         .isEqualTo(expectedAuthorizationGroupUuid);
 

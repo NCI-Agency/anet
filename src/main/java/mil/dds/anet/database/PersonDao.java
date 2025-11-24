@@ -259,7 +259,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS + "," + UserDao.USER_FIELDS
           + "FROM people JOIN users ON people.uuid = users.\"personUuid\" "
           + "LEFT JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = people.uuid "
-          + "AND pp.\"endedAt\" IS NULL AND pp.\"isPrimary\" IS TRUE "
+          + "AND pp.\"endedAt\" IS NULL AND pp.primary IS TRUE "
           + "LEFT JOIN positions ON positions.uuid = pp.\"positionUuid\" "
           + "WHERE users.\"domainUsername\" = :domainUsername");
       if (activeUser) {
@@ -616,7 +616,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + ", \"peoplePositions\".\"personUuid\" FROM \"peoplePositions\" "
         + "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
         + "WHERE \"peoplePositions\".\"personUuid\" IN ( <foreignKeys> ) "
-        + "AND \"peoplePositions\".\"isPrimary\" IS NOT TRUE AND \"peoplePositions\".\"endedAt\" IS NULL "
+        + "AND \"peoplePositions\".primary IS NOT TRUE AND \"peoplePositions\".\"endedAt\" IS NULL "
         + "ORDER BY positions.name, positions.uuid";
 
     public PersonAdditionalPositionsBatcher() {
@@ -686,12 +686,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final int numRows =
           handle.execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
       if (Utils.isEmptyOrNull(p.getPreviousPositions())) {
-        updatePeoplePositions(DaoUtils.getUuid(p.getPosition()), personUuid, Instant.now(), null);
+        updatePeoplePositions(DaoUtils.getUuid(p.getPosition()), personUuid, Instant.now(), null,
+            true);
       } else {
         // Store the history as given
         for (final PersonPositionHistory history : p.getPreviousPositions()) {
           updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
-              history.getEndTime());
+              history.getEndTime(), history.getPrimary());
         }
       }
       return numRows;
@@ -742,17 +743,17 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   @Transactional
   protected void updatePeoplePositions(final String positionUuid, final String personUuid,
-      final Instant startTime, final Instant endTime) {
+      final Instant startTime, final Instant endTime, boolean primary) {
     final Handle handle = getDbHandle();
     try {
       if (positionUuid != null && personUuid != null) {
         handle
             .createUpdate("INSERT INTO \"peoplePositions\" "
-                + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
-                + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+                + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\", \"primary\") "
+                + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt, :primary)")
             .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
             .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
-            .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+            .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).bind("primary", primary).execute();
       }
     } finally {
       closeDbHandle(handle);

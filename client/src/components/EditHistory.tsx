@@ -142,7 +142,12 @@ function EditHistory({
           >
             {({ values, setFieldValue, setValues }) => {
               // Get overlapping items' indexes, e.g.[ [0,1], [2,3] ] means 0th and 1st overlaps, 2nd and 3rd overlaps
-              const overlapArrays = getOverlappingDateIndexes(values.history)
+              // Only check overlapping for primary positions
+              const overlapArrays = getOverlappingDateIndexes(
+                values.history.filter(
+                  previousPosition => previousPosition.primary
+                )
+              )
               // Flatten the above array for getting unique indexes, e.g. [[0, 1], [0,2]] => [0,1,2]
               const overlappingIndexesSet = new Set(overlapArrays.flat())
               const invalidDateIndexesSet = new Set(
@@ -232,7 +237,6 @@ function EditHistory({
                             idx === values.history.length - 1 &&
                             item[historyEntityType]?.uuid ===
                               currentlyOccupyingEntity.uuid
-
                           if (isCurrent) {
                             item.endTime = null
                           }
@@ -250,13 +254,9 @@ function EditHistory({
                               )}
                             >
                               <Fieldset
-                                title={`${idx + 1}-) ${
-                                  item[historyEntityType].name
-                                } ${
-                                  isCurrent
-                                    ? `(Current ${historyEntityType})`
-                                    : ""
-                                }`}
+                                title={`${idx + 1}-) ${item[historyEntityType].name} ${
+                                  values.history[idx].primary ? "✔️" : ""
+                                } ${isCurrent ? `(Current ${historyEntityType})` : ""}`}
                                 action={
                                   !isCurrent && (
                                     <RemoveButton
