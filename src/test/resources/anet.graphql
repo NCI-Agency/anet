@@ -1034,8 +1034,10 @@ input PersonInput {
 type PersonPositionHistory {
   createdAt: Instant
   endTime: Instant
+  endTime2: Instant
   person: Person
   position: Position
+  primary: Boolean
   startTime: Instant
   updatedAt: Instant
 }
@@ -1044,8 +1046,10 @@ type PersonPositionHistory {
 input PersonPositionHistoryInput {
   createdAt: Instant
   endTime: Instant
+  endTime2: Instant
   person: PersonInput
   position: PositionInput
+  primary: Boolean
   startTime: Instant
   updatedAt: Instant
 }
