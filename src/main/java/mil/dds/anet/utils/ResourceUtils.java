@@ -19,71 +19,78 @@ public class ResourceUtils {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  public static void validateHistoryInput(final String uuid,
+  public static void validateHistoryInput(final String personUuid,
       final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
-      final String relationUuid) {
-    // Check if uuid is null
-    if (uuid == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uuid cannot be null.");
+      final String personCurrentPrimaryPositionUUid) {
+    // Check if personUuid is null
+    if (personUuid == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person Uuid cannot be null.");
     }
-
+    // If there is a current primary position for this person there has to be history
     if (Utils.isEmptyOrNull(previousPositions)) {
-      if (relationUuid != null) {
+      if (personCurrentPrimaryPositionUUid != null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "History should not be empty.");
       }
+      // No previous positions do nothing
       return;
     }
 
-    boolean seenNullEndTime = false;
+    boolean seenPrimaryPositionNullEndTime = false;
     for (final PersonPositionHistory pph : previousPositions) {
       // Check if start time is null
       if (pph.getStartTime() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time cannot be empty.");
       }
 
-      if (pph.getEndTime() == null) {
+      // Check start time and end time make sense
+      if (pph.getEndTime() != null && pph.getEndTime().isBefore(pph.getStartTime())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "End time cannot before start time.");
+      }
+
+      // These checks apply for primary positions
+      if (pph.getPrimary() && pph.getEndTime() == null) {
+
         // Check if end time is null more than once
-        if (seenNullEndTime) {
+        if (seenPrimaryPositionNullEndTime) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "There cannot be more than one history entry without an end time.");
+              "There cannot be more than one primary position history entry without an end time.");
         }
-        if (relationUuid == null) {
+
+        if (personCurrentPrimaryPositionUUid == null) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "History entry must have an end time.");
+              "Based on history there must be a current primary position");
         } else {
           final String uuidToCheck =
               DaoUtils.getUuid(checkPerson ? pph.getPosition() : pph.getPerson());
-          final String message =
-              checkPerson ? "Last history entry must be identical to person's current position."
-                  : "Last history entry must be identical to position's current person.";
-          if (!relationUuid.equals(uuidToCheck)) {
+          final String message = checkPerson
+              ? "Last primary position history entry must be identical to person's current position."
+              : "Last primary position history entry must be identical to position's current person.";
+          if (!personCurrentPrimaryPositionUUid.equals(uuidToCheck)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
           }
         }
-        seenNullEndTime = true;
-      } else {
-        // Check if end time is before start time
-        if (pph.getEndTime().isBefore(pph.getStartTime())) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "End time cannot before start time.");
-        }
+
+        seenPrimaryPositionNullEndTime = true;
       }
     }
 
     // If has relation and there is no last entry in history
-    if (relationUuid != null && !seenNullEndTime) {
+    if (personCurrentPrimaryPositionUUid != null && !seenPrimaryPositionNullEndTime) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "There should be a history entry without an end time.");
+          "There should be a primary position history entry without an end time.");
     }
 
-    // Check for conflicts
-    final int historySize = previousPositions.size();
+    // Check for conflicts in primary positions
+    List<PersonPositionHistory> primaryPositions =
+        previousPositions.stream().filter(PersonPositionHistory::getPrimary).toList();
+    final int historySize = primaryPositions.size();
     for (int i = 0; i < historySize; i++) {
-      final PersonPositionHistory pph = previousPositions.get(i);
+      final PersonPositionHistory pph = primaryPositions.get(i);
       for (int j = i + 1; j < historySize; j++) {
-        if (overlap(pph, previousPositions.get(j))) {
+        if (overlap(pph, primaryPositions.get(j))) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "History entries should not overlap.");
+              "Primary Positions History entries should not overlap.");
         }
       }
     }
