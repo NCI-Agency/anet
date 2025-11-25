@@ -68,6 +68,18 @@ fieldset {
   width: 100%;
 }
 
+fieldset.saved-searches {
+  background: unset;
+  box-shadow: unset;
+  padding: 0;
+  & div[draggable] {
+    background-color: white;
+    margin-bottom: 1.5rem;
+    padding: 1.75em;
+    box-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
+  }
+}
+
 fieldset.custom-array-field {
   background: unset;
   box-shadow: unset;
