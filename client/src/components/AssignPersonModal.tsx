@@ -106,7 +106,7 @@ const AssignPersonModal = ({
               isLink={false}
             />
           </b>{" "}
-          position. By saving them as primary, their current position will be
+          position. By saving them as primary, their primary position will be
           left unfilled
           {person.position.type !== Position.TYPE.REGULAR ? (
             <>
@@ -233,7 +233,7 @@ const AssignPersonModal = ({
                   <tr>
                     <th>Rank</th>
                     <th>Name</th>
-                    <th>Current Position</th>
+                    <th>Current Primary Position</th>
                   </tr>
                 </thead>
                 <tbody>
