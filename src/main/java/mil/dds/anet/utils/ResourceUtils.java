@@ -64,7 +64,7 @@ public class ResourceUtils {
           final String uuidToCheck =
               DaoUtils.getUuid(checkPerson ? pph.getPosition() : pph.getPerson());
           final String message = checkPerson
-              ? "Last primary position history entry must be identical to person's current position."
+              ? "Last primary position history entry must be identical to person's current primary position."
               : "Last primary position history entry must be identical to position's current person.";
           if (!personCurrentPrimaryPositionUUid.equals(uuidToCheck)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
