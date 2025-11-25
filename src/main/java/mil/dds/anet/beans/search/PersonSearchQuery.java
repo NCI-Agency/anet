@@ -55,7 +55,7 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   @GraphQLInputField
   Boolean hasBiography;
 
-  // Find people whose current position is of the given type
+  // Find people whose current primary position is of the given type
   @GraphQLQuery
   @GraphQLInputField
   List<PositionType> positionType;

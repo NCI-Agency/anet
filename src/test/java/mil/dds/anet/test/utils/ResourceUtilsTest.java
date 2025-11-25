@@ -36,7 +36,7 @@ class ResourceUtilsTest {
     // - Start time cannot be empty.
     // - There cannot be more than one history entry without an end time.
     // - History entry must have an end time. (if there is no current relation)
-    // - Last history entry must be identical to person's current position. (checkPerson)
+    // - Last history entry must be identical to person's primary position. (checkPerson)
     // - Last history entry must be identical to position's current person. (not checkPerson)
     // - End time cannot before start time.
     // - There should be a history entry without an end time. (if there is a current relation)
