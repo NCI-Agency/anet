@@ -1,0 +1,7 @@
+# Retrieves all admin settings
+query AdminSettings {
+  adminSettings {
+    key
+    value
+  }
+}
