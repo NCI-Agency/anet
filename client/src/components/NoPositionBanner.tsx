@@ -9,8 +9,8 @@ const css = {
 
 const NoPositionBanner = () => (
   <div className="banner" style={css}>
-    You haven't been assigned to an active position. Contact your organization's
-    superuser to be added.
+    You do not have a primary position assigned. Please contact your
+    organization's superuser(s) to be assigned to one.
   </div>
 )
 
