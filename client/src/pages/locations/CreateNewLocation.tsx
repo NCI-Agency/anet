@@ -9,6 +9,8 @@ import Settings from "settings"
 
 interface CreateNewLocationProps {
   name?: string
+  lat?: number
+  lng?: number
   setFieldTouched: (...args: unknown[]) => unknown
   setFieldValue: (...args: unknown[]) => unknown
   setDoReset: (...args: unknown[]) => unknown
@@ -16,11 +18,13 @@ interface CreateNewLocationProps {
 
 const CreateNewLocation = ({
   name,
+  lat,
+  lng,
   setFieldTouched,
   setFieldValue,
   setDoReset
 }: CreateNewLocationProps) => {
-  const location = new Location({ name })
+  const location = new Location({ name, lat, lng })
   // mutates the object
   initInvisibleFields(location, Settings.fields.location.customFields)
   return (

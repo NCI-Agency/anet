@@ -479,105 +479,104 @@ const Leaflet = ({
      *
      * It works fine as long as map container is fully visible on screen.
      */
-  if (!map || !markerLayer || (!onMapClick && !allowCreateLocation)) {
-    return
-  }
+    if (!map || !markerLayer || (!onMapClick && !allowCreateLocation)) {
+      return
+    }
 
-  // Timeout used to distinguish single click vs double click
-  let clickTimeout = null
+    // Timeout used to distinguish single click vs double click
+    let clickTimeout = null
 
-  const handleSingleClick = (event) => {
-    const { latlng } = event || {}
+    const handleSingleClick = event => {
+      const { latlng } = event || {}
 
-    if (allowCreateLocation && latlng) {
-      let marker = createLocationMarkerRef.current
+      if (allowCreateLocation && latlng) {
+        let marker = createLocationMarkerRef.current
 
-      if (!marker) {
-        const popupContainer = document.createElement("div")
-        popupContainer.style.width = "220px"
+        if (!marker) {
+          const popupContainer = document.createElement("div")
+          popupContainer.style.width = "220px"
 
-        const coordsDiv = document.createElement("div")
-        coordsDiv.style.marginBottom = "8px"
-        popupContainer.appendChild(coordsDiv)
-        createLocationCoordsRef.current = coordsDiv
+          const coordsDiv = document.createElement("div")
+          coordsDiv.style.marginBottom = "8px"
+          popupContainer.appendChild(coordsDiv)
+          createLocationCoordsRef.current = coordsDiv
 
-        const button = document.createElement("button")
-        button.type = "button"
-        button.className = "btn btn-sm btn-primary"
-        button.textContent = "Create a new Location here"
-        button.addEventListener("click", e => {
-          e.preventDefault()
-          e.stopPropagation()
-          if (onCreateLocation && marker) {
-            const { lat, lng } = marker.getLatLng()
-            onCreateLocation({ lat, lng })
-          }
-          marker && marker.closePopup()
-        })
-        popupContainer.appendChild(button)
+          const button = document.createElement("button")
+          button.type = "button"
+          button.className = "btn btn-sm btn-primary"
+          button.textContent = "Create a new Location here"
+          button.addEventListener("click", e => {
+            e.preventDefault()
+            e.stopPropagation()
+            if (onCreateLocation && marker) {
+              const { lat, lng } = marker.getLatLng()
+              onCreateLocation({ lat, lng })
+            }
+            marker && marker.closePopup()
+          })
+          popupContainer.appendChild(button)
 
-        marker = new Marker(latlng, {
-          icon: ICON_TYPES.DEFAULT,
-          draggable: false,
-          autoPan: true
-        }).bindPopup(popupContainer)
+          marker = new Marker(latlng, {
+            icon: ICON_TYPES.DEFAULT,
+            draggable: false,
+            autoPan: true
+          }).bindPopup(popupContainer)
 
-        markerLayer.addLayer(marker)
-        createLocationMarkerRef.current = marker
-      } else {
-        marker.setLatLng(latlng)
+          markerLayer.addLayer(marker)
+          createLocationMarkerRef.current = marker
+        } else {
+          marker.setLatLng(latlng)
+        }
+
+        if (createLocationCoordsRef.current) {
+          createLocationCoordsRef.current.textContent = `Lat: ${latlng.lat.toFixed(6)}, Lng: ${latlng.lng.toFixed(6)}`
+        }
+
+        marker.openPopup()
       }
 
-      if (createLocationCoordsRef.current) {
-        createLocationCoordsRef.current.textContent =
-          `Lat: ${latlng.lat.toFixed(6)}, Lng: ${latlng.lng.toFixed(6)}`
+      if (onMapClick) {
+        onMapClick(event, map)
       }
-
-      marker.openPopup()
     }
 
-    if (onMapClick) {
-      onMapClick(event, map)
+    const clickHandler = event => {
+      // Every click resets the timer
+      // But only the last isolated click fires handleSingleClick
+      if (clickTimeout != null) {
+        window.clearTimeout(clickTimeout)
+      }
+      clickTimeout = window.setTimeout(() => {
+        handleSingleClick(event)
+        clickTimeout = null
+      }, 500)
     }
-  }
 
-  const clickHandler = (event) => {
-    // Every click resets the timer
-    // But only the last isolated click fires handleSingleClick
-    if (clickTimeout != null) {
-      window.clearTimeout(clickTimeout)
+    const dblClickHandler = () => {
+      // If a double click happens, cancel the pending single click handler
+      if (clickTimeout != null) {
+        window.clearTimeout(clickTimeout)
+        clickTimeout = null
+      }
     }
-    clickTimeout = window.setTimeout(() => {
-      handleSingleClick(event)
-      clickTimeout = null
-    }, 500)
-  }
 
-  const dblClickHandler = () => {
-    // If a double click happens, cancel the pending single click handler
-    if (clickTimeout != null) {
-      window.clearTimeout(clickTimeout)
-      clickTimeout = null
+    map.on("click", clickHandler)
+    map.on("dblclick", dblClickHandler)
+
+    return () => {
+      if (clickTimeout != null) {
+        window.clearTimeout(clickTimeout)
+      }
+      map.off("click", clickHandler)
+      map.off("dblclick", dblClickHandler)
+
+      if (createLocationMarkerRef.current) {
+        markerLayer.removeLayer(createLocationMarkerRef.current)
+        createLocationMarkerRef.current = null
+        createLocationCoordsRef.current = null
+      }
     }
-  }
-
-  map.on("click", clickHandler)
-  map.on("dblclick", dblClickHandler)
-
-  return () => {
-    if (clickTimeout != null) {
-      window.clearTimeout(clickTimeout)
-    }
-    map.off("click", clickHandler)
-    map.off("dblclick", dblClickHandler)
-
-    if (createLocationMarkerRef.current) {
-      markerLayer.removeLayer(createLocationMarkerRef.current)
-      createLocationMarkerRef.current = null
-      createLocationCoordsRef.current = null
-    }
-  }
-}, [allowCreateLocation, map, markerLayer, onCreateLocation, onMapClick])
+  }, [allowCreateLocation, map, markerLayer, onCreateLocation, onMapClick])
 
   useEffect(() => {
     if (
