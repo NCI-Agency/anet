@@ -8,7 +8,7 @@ import {
 import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import Settings from "settings"
 
 interface OnboardingNewProps {
@@ -16,6 +16,7 @@ interface OnboardingNewProps {
 }
 
 const OnboardingNew = ({ pageDispatchers }: OnboardingNewProps) => {
+  const routerLocation = useLocation()
   useBoilerplate({
     pageProps: PAGE_PROPS_MIN_HEAD,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -44,7 +45,9 @@ const OnboardingNew = ({ pageDispatchers }: OnboardingNewProps) => {
   )
 
   function onCreateAccountClick() {
-    navigate("/onboarding/edit")
+    navigate("/onboarding/edit", {
+      state: routerLocation.state
+    })
   }
 }
 

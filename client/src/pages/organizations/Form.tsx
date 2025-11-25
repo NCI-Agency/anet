@@ -680,7 +680,7 @@ const OrganizationForm = ({
       })
   }
 
-  function onSubmitSuccess(response, values, form) {
+  async function onSubmitSuccess(response, values, form) {
     const operation = edit ? "updateOrganization" : "createOrganization"
     const organization = new Organization({
       uuid: response[operation].uuid
@@ -690,7 +690,7 @@ const OrganizationForm = ({
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    loadAppData()
+    await loadAppData()
     if (!edit) {
       navigate(Organization.pathForEdit(organization), { replace: true })
     }

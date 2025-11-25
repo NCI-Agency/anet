@@ -31,14 +31,14 @@ describe("Show location page", () => {
       )
 
       const editButton = await browser.$(".attachment-card .button-line a")
-      await expect(await editButton.getAttribute("href")).to.include(
+      expect(await editButton.getAttribute("href")).to.include(
         "/attachments/f7cd5b02-ef73-4ee8-814b-c5a7a916685d/edit"
       )
       await editAttachmentsButton.click()
     })
     it("We can go to the show page of Attachment", async () => {
       await (await ShowLocation.getImageClick()).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/attachments/f7cd5b02-ef73-4ee8-814b-c5a7a916685d"
       )
     })
@@ -150,7 +150,7 @@ describe("Show location page", () => {
     })
     it("We can go to the show page of event", async () => {
       await (await ShowLocation.getEvent(1)).click()
-      await expect(await browser.getUrl()).to.include(
+      expect(await browser.getUrl()).to.include(
         "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
       )
     })

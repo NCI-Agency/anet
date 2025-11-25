@@ -393,14 +393,14 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
       })
   }
 
-  function onSubmitSuccess(response, values, form) {
+  async function onSubmitSuccess(response, values, form) {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess("Admin settings saved")
     jumpToTop()
-    loadAppData()
+    await loadAppData()
     refetch()
   }
 
