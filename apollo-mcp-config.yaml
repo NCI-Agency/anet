@@ -1,0 +1,22 @@
+endpoint: "http://host.docker.internal:8080/graphqlWebService"
+headers:
+  Authorization: "Bearer W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf"
+logging:
+  level: debug
+transport:
+  type: streamable_http
+schema:
+  source: local
+  path: /data/anet.graphql
+operations:
+  source: local
+  paths:
+    - /data/operations
+custom_scalars: /data/apollo-mcp-custom-scalars.json
+introspection:
+  execute:
+    enabled: true
+  introspect:
+    enabled: true
+  search:
+    enabled: true
