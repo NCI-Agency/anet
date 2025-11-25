@@ -1,0 +1,64 @@
+# Retrieves recent reports
+query RecentReports(
+  # The start date from which to retrieve reports
+  $startDate: Instant
+  # The end date until which to retrieve reports
+  $endDate: Instant
+  # The uuid's of tasks that should be excluded
+  $excludeTaskUuids: [String]
+) {
+  reportList(query: {
+    pageSize: 0
+    state: [APPROVED, PUBLISHED]
+    sortBy: ENGAGEMENT_DATE
+    sortOrder: DESC
+    engagementDateStart: $startDate
+    engagementDateEnd: $endDate
+    notTaskUuid: $excludeTaskUuids
+  }) {
+    totalCount
+    list {
+      uuid
+      state
+      intent
+      engagementDate
+      duration
+      keyOutcomes
+      nextSteps
+      classification
+      updatedAt
+      primaryAdvisor {
+        uuid
+        name
+        rank
+      }
+      primaryInterlocutor {
+        uuid
+        name
+        rank
+      }
+      advisorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      interlocutorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      location {
+        uuid
+        name
+        lat
+        lng
+        type
+      }
+      tasks {
+        uuid
+      }
+    }
+  }
+}
