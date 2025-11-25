@@ -1,0 +1,56 @@
+# Searches for reports matching text
+query SearchReports(
+  # The text to match in the report
+  $text: String
+) {
+  reportList(query: {
+    pageSize: 0
+    state: [APPROVED, PUBLISHED]
+    text: $text
+  }) {
+    totalCount
+    list {
+      uuid
+      state
+      intent
+      engagementDate
+      duration
+      keyOutcomes
+      nextSteps
+      classification
+      updatedAt
+      primaryAdvisor {
+        uuid
+        name
+        rank
+      }
+      primaryInterlocutor {
+        uuid
+        name
+        rank
+      }
+      advisorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      interlocutorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      location {
+        uuid
+        name
+        lat
+        lng
+        type
+      }
+      tasks {
+        uuid
+      }
+    }
+  }
+}
