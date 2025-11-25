@@ -264,6 +264,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         prompt: "Translate this report",
         icon: "translate",
         iconColor: "#1e90ff"
+      },
+      {
+        label: "Latest report",
+        prompt: "Get the latest report",
+        icon: "arrow-up",
+        iconColor: "#1e90ff",
       }
     ]
   }
@@ -307,7 +313,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   function sendReportContextToAI(report: Report) {
     const businessObject = buildReportBusinessObject(report)
     sendToChat({
-      application: "FACTOR",
+      application: "ANET",
       businessObject,
       suggestions: makeReportSuggestions()
     })

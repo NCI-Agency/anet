@@ -379,7 +379,7 @@ const ReportForm = ({
   const AskAiForTranslate = () => {
     console.log(isReady)
     sendToChat({
-      application: "FACTOR",
+      application: "ANET",
       businessObject: {
         request: "Translate this text to english: " + initialValues.reportText
       }
