@@ -21,6 +21,7 @@ const EXAMPLE_PEOPLE = {
     previousPositions: [
       {
         name: "Chief of Merge People Test 1",
+        primary: "✔️",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],
@@ -48,6 +49,7 @@ const EXAMPLE_PEOPLE = {
     previousPositions: [
       {
         name: "Chief of Merge People Test 2",
+        primary: "✔️",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],
