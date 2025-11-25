@@ -658,7 +658,7 @@ fields:
       label: User accounts
     position:
       label: Primary Position
-      placeholder: Fill in the person's current position
+      placeholder: Fill in the person's primary position
     additionalPositions:
       label: Additional Positions
     prevPositions:
