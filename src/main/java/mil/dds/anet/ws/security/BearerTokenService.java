@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BearerTokenService {
 
-  private static final String BEARER_PREFIX = "Bearer ";
+  public static final String BEARER_PREFIX = "Bearer ";
 
   private final AccessTokenDao accessTokenDao;
 
