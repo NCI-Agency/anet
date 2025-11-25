@@ -582,10 +582,11 @@ const ReportForm = ({
 
             {showAssignedPositionWarning && (
               <div className="alert alert-warning" style={alertStyle}>
-                You cannot submit a report: you are not assigned to a position.
+                You cannot submit a report: you do not have a primary position
+                assigned.
                 <br />
-                Please contact your organization's superuser(s) and request to
-                be assigned to a position.
+                Please contact your organization's superuser(s) to be assigned
+                to one.
                 <br />
                 If you are unsure, you can also contact the support team{" "}
                 {supportEmailMessage}.
