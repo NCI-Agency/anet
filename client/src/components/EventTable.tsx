@@ -91,17 +91,18 @@ const PaginatedEvents = ({
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
-      if (setPagination && paginationKey) {
-        setPagination(paginationKey, 0)
+      if (paginationKey) {
+        setPagination?.(paginationKey, 0)
       }
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
 
-  const eventQuery = Object.assign({}, queryParams, {
+  const eventQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
 
   const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
@@ -114,9 +115,7 @@ const PaginatedEvents = ({
 
   const totalCount = done ? null : data?.eventList?.totalCount
   useEffect(() => {
-    if (setTotalCount) {
-      setTotalCount(totalCount ?? 0)
-    }
+    setTotalCount?.(totalCount)
   }, [setTotalCount, totalCount])
 
   if (done) {
@@ -129,8 +128,8 @@ const PaginatedEvents = ({
   }
 
   function setPage(newPageNum: number) {
-    if (setPagination && paginationKey) {
-      setPagination(paginationKey, newPageNum)
+    if (paginationKey) {
+      setPagination?.(paginationKey, 0)
     }
     setPageNum(newPageNum)
   }
