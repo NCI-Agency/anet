@@ -341,7 +341,7 @@ const AdvancedSelect = ({
                   <div className="d-flex flex-column">
                     {(showInclInactive || showDismiss) && (
                       <div className="advanced-select-popover-sticky-heading d-flex flex-row justify-content-end align-items-center">
-                        {showInclInactive && (
+                        {showInclInactive && !showCreateEntityComponent && (
                           <Checkbox
                             id={`${fieldName}-inclInactive`}
                             label={`incl. ${Model.humanNameOfStatus(Model.STATUS.INACTIVE)}`}
