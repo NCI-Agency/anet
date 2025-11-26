@@ -259,7 +259,7 @@ const PersonForm = ({
                 <Row>
                   {edit && (
                     /* Col contains the avatar and edit button */
-                    <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                    <Col lg={4} xl={3} className="text-center">
                       <EntityAvatarComponent
                         initialAvatar={initialValues.entityAvatar}
                         relatedObjectType="people"

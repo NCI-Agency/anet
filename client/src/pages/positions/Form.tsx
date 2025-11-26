@@ -279,7 +279,7 @@ const PositionForm = ({
               <Fieldset>
                 <Row>
                   {edit && (
-                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                    <Col lg={4} xl={3} className="text-center">
                       <EntityAvatarComponent
                         initialAvatar={initialValues.entityAvatar}
                         relatedObjectType={Position.relatedObjectType}
@@ -290,7 +290,7 @@ const PositionForm = ({
                       />
                     </Col>
                   )}
-                  <Col sm={12} md={12} lg={8} xl={8}>
+                  <Col lg={edit && 8} xl={edit && 9}>
                     <DictionaryField
                       wrappedComponent={Field}
                       dictProps={Settings.fields.position.name}

@@ -254,7 +254,7 @@ const EventForm = ({
               <Fieldset>
                 <Row>
                   {edit && (
-                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                    <Col lg={4} xl={3} className="text-center">
                       <EntityAvatarComponent
                         initialAvatar={initialValues.entityAvatar}
                         relatedObjectType="events"
@@ -266,8 +266,8 @@ const EventForm = ({
                     </Col>
                   )}
                   <Col
-                    lg={8}
-                    xl={8}
+                    lg={edit && 8}
+                    xl={edit && 9}
                     className="d-flex flex-column justify-content-center"
                   >
                     <FormGroup>
