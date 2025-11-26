@@ -46,7 +46,7 @@ const LocationMap = ({
   height,
   marginBottom
 }: LocationMapProps) => {
-  const locationQuery = Object.assign({}, queryParams, { pageSize: 0 })
+  const locationQuery = { ...queryParams, pageSize: 0 }
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
     locationQuery
   })
@@ -55,11 +55,11 @@ const LocationMap = ({
     error,
     pageDispatchers
   })
+
   const totalCount = done ? null : data?.locationList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
 
   if (done) {
     return result

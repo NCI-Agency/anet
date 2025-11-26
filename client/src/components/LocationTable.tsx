@@ -69,23 +69,24 @@ const LocationTableWithQuery = ({
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    (queryParamsUnchanged && pagination?.[paginationKey!]?.pageNum) ?? 0
+    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
   )
 
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
-      if (setPagination && paginationKey) {
-        setPagination(paginationKey, 0)
+      if (paginationKey) {
+        setPagination?.(paginationKey, 0)
       }
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
 
-  const locationQuery = Object.assign({}, queryParams, {
+  const locationQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
 
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
     locationQuery
@@ -98,9 +99,7 @@ const LocationTableWithQuery = ({
 
   const totalCount = done ? null : data?.locationList?.totalCount
   useEffect(() => {
-    if (setTotalCount) {
-      setTotalCount(totalCount)
-    }
+    setTotalCount?.(totalCount)
   }, [setTotalCount, totalCount])
 
   if (done) {

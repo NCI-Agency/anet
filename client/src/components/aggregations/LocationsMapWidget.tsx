@@ -25,7 +25,7 @@ const LocationsMapWidget = ({
       return []
     }
     const markerArray = []
-    values.forEach(location => {
+    for (const location of values) {
       if (Location.hasCoordinates(location)) {
         markerArray.push({
           id: location.uuid,
@@ -35,7 +35,7 @@ const LocationsMapWidget = ({
           contents: location
         })
       }
-    })
+    }
     return markerArray
   }, [values])
 
