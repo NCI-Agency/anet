@@ -692,11 +692,6 @@ generateClientCodeConf {
 			graphQLScalarTypeStaticField: "mil.dds.anet.graphql.DateTimeMapper.GraphQLInstant"
 		],
 		[
-			graphQLTypeName: "Base64String",
-			javaType: "byte[]",
-			graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeBase64String.GraphQLBase64String"
-		],
-		[
 			graphQLTypeName: "Long",
 			javaType: "java.lang.Long",
 			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.GraphQLLong"
