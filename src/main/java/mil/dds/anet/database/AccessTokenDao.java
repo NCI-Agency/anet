@@ -2,10 +2,11 @@ package mil.dds.anet.database;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import mil.dds.anet.beans.AccessToken;
-import mil.dds.anet.beans.AccessToken.TokenScope;
 import mil.dds.anet.database.mappers.AccessTokenMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.jdbi.v3.core.Handle;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,21 +63,32 @@ public class AccessTokenDao extends AbstractDao {
   }
 
   @Transactional
-  public AccessToken getByTokenValueAndScope(String tokenValue, TokenScope scope) {
+  protected AccessToken getByTokenValue(String tokenValue) {
     final Handle handle = getDbHandle();
     try {
       final String tokenHash = AccessToken.computeTokenHash(tokenValue);
       try {
-        return handle.createQuery("/* getAccessTokenByValue */ "
-            + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash AND scope = :scope")
-            .bind("tokenHash", tokenHash).bind("scope", DaoUtils.getEnumId(scope))
-            .map(new AccessTokenMapper()).one();
+        return handle
+            .createQuery("/* getAccessTokenByValue */ "
+                + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash")
+            .bind("tokenHash", tokenHash).map(new AccessTokenMapper()).one();
       } catch (IllegalStateException e) {
         return null;
       }
     } finally {
       closeDbHandle(handle);
     }
+  }
+
+  @Transactional
+  public Optional<AccessTokenPrincipal> getAccessTokenPrincipal(String tokenValue) {
+    if (tokenValue != null && tokenValue.length() == AccessToken.ACCESS_TOKEN_LENGTH) {
+      final AccessToken dbAccessToken = this.getByTokenValue(tokenValue);
+      if (dbAccessToken != null && dbAccessToken.isValid()) {
+        return Optional.of(new AccessTokenPrincipal(dbAccessToken));
+      }
+    }
+    return Optional.empty();
   }
 
   @Transactional

@@ -1,6 +1,7 @@
 package mil.dds.anet.ws;
 
 import jakarta.xml.ws.Endpoint;
+import mil.dds.anet.ws.security.AuthorizationHeaderInterceptor;
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxws.EndpointImpl;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +21,7 @@ public class CxfConfig {
   @Bean
   public Endpoint nvg20Endpoint() {
     EndpointImpl endpoint = new EndpointImpl(bus, nvg20WebService);
-    endpoint.getInInterceptors().add(new BasicAuthAuthorizationInterceptor());
+    endpoint.getInInterceptors().add(new AuthorizationHeaderInterceptor());
     endpoint.publish("/nvg/20");
     return endpoint;
   }
