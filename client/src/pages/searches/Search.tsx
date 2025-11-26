@@ -14,11 +14,7 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import EventCollection, {
-  FORMAT_CALENDAR,
-  FORMAT_MAP,
-  FORMAT_TABLE
-} from "components/EventCollection"
+import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -35,7 +31,6 @@ import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
-import EventSearchResults from "components/search/EventSearchResults"
 import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
 import LocationSearchResults from "components/search/LocationSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
