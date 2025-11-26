@@ -68,12 +68,14 @@ const GQL_GET_EVENT_LIST = gql`
 interface EventCalendarProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
   attendeeType: string
 }
 
 const EventCalendar = ({
   pageDispatchers: { showLoading, hideLoading },
   queryParams,
+  setTotalCount,
   attendeeType
 }: EventCalendarProps) => {
   const navigate = useNavigate()
@@ -125,12 +127,14 @@ const EventCalendar = ({
     }
     prevEventQuery.current = eventQuery
     prevAttendeeType.current = attendeeType
+    setTotalCount?.(null)
     // Store API promise to use in optimised case
     showLoading()
     apiPromise.current = API.query(GQL_GET_EVENT_LIST, {
       eventQuery
     }).then(data => {
       const events = data ? data.eventList.list : []
+      setTotalCount?.(data?.eventList?.totalCount)
       const results = eventsToCalendarEvents(
         events,
         attendeeType === ATTENDEE_TYPE_INTERLOCUTOR

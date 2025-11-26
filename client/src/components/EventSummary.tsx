@@ -14,9 +14,10 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Event, Location } from "models"
 import moment from "moment"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -77,15 +78,38 @@ const GQL_GET_EVENT_LIST = gql`
 interface EventSummaryProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
+  paginationKey?: string
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
   showEventSeries?: boolean
 }
 
 const EventSummary = ({
   pageDispatchers,
   queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination,
   showEventSeries
 }: EventSummaryProps) => {
-  const [pageNum, setPageNum] = useState(0)
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
+  )
+
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      if (paginationKey) {
+        setPagination?.(paginationKey, 0)
+      }
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+
   const eventQuery = {
     ...queryParams,
     pageNum
@@ -98,25 +122,36 @@ const EventSummary = ({
     error,
     pageDispatchers
   })
+
+  const totalCount = done ? null : data?.eventList?.totalCount
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
+
   if (done) {
     return result
   }
 
-  const { totalCount = 0, list: events = [] } = data.eventList
+  const { pageSize, pageNum: curPage, list: events } = data.eventList
   if (_get(events, "length", 0) === 0) {
     return <em>No events found</em>
   }
 
-  const { pageSize } = data.eventList
+  function setPage(newPageNum: number) {
+    if (paginationKey) {
+      setPagination?.(paginationKey, 0)
+    }
+    setPageNum(newPageNum)
+  }
 
   return (
     <div>
       <UltimatePaginationTopDown
         className="float-end"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={setPageNum}
+        pageSize={setPagination && pageSize}
+        pageNum={setPagination && curPage}
+        totalCount={setPagination && totalCount}
+        goToPage={setPagination && setPage}
       >
         {events.map(event => (
           <EventSummaryRow
