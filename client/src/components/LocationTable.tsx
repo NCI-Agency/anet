@@ -13,8 +13,9 @@ import {
 import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEqual from "lodash/isEqual"
 import { Location } from "models"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
@@ -32,30 +33,61 @@ const GQL_GET_LOCATION_LIST = gql`
   }
 `
 
+const DEFAULT_PAGESIZE = 10
+
 interface LocationTableProps {
-  // query variables for locations, when query & pagination wanted:
+  pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
+  paginationKey?: string
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
+  id?: string
+  showDelete?: boolean
+  onDelete?: (...args: unknown[]) => unknown
 }
 
 const LocationTable = (props: LocationTableProps) => {
-  if (props.queryParams) {
-    return <PaginatedLocations {...props} />
+  const { queryParams } = props
+  if (queryParams) {
+    return <LocationTableWithQuery {...props} />
   }
   return <BaseLocationTable {...props} />
 }
 
-interface PaginatedLocationsProps {
-  pageDispatchers?: PageDispatchersPropType
-  queryParams?: any
-}
-
-const PaginatedLocations = ({
-  queryParams,
+const LocationTableWithQuery = ({
   pageDispatchers,
-  ...otherProps
-}: PaginatedLocationsProps) => {
-  const [pageNum, setPageNum] = useState(0)
-  const locationQuery = Object.assign({}, queryParams, { pageNum })
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination,
+  id,
+  showDelete,
+  onDelete
+}: LocationTableProps) => {
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
+  )
+
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      if (paginationKey) {
+        setPagination?.(paginationKey, 0)
+      }
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+
+  const locationQuery = {
+    ...queryParams,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  }
+
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
     locationQuery
   })
@@ -64,25 +96,39 @@ const PaginatedLocations = ({
     error,
     pageDispatchers
   })
+
+  const totalCount = done ? null : data?.locationList?.totalCount
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
+
   if (done) {
     return result
   }
 
-  const {
-    pageSize,
-    pageNum: curPage,
-    totalCount,
-    list: locations
-  } = data.locationList
+  const paginatedLocations = data ? data.locationList : []
+  const { pageSize, pageNum: curPage, list: locations } = paginatedLocations
+  if (_get(locations, "length", 0) === 0) {
+    return <em>No locations found</em>
+  }
+
+  function setPage(newPageNum: number) {
+    if (setPagination && paginationKey) {
+      setPagination(paginationKey, newPageNum)
+    }
+    setPageNum(newPageNum)
+  }
 
   return (
     <BaseLocationTable
+      id={id}
+      showDelete={showDelete}
+      onDelete={onDelete}
       locations={locations}
-      pageSize={pageSize}
-      pageNum={curPage}
-      totalCount={totalCount}
-      goToPage={setPageNum}
-      {...otherProps}
+      pageSize={setPagination && pageSize}
+      pageNum={setPagination && curPage}
+      totalCount={setPagination && totalCount}
+      goToPage={setPagination && setPage}
     />
   )
 }

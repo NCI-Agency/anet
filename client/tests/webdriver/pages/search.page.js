@@ -34,7 +34,7 @@ class Search extends Page {
   }
 
   async getFoundLocationTable() {
-    return browser.$("div#locations #locations-search-results")
+    return browser.$("div#locations .location-collection")
   }
 
   async getFoundAuthorizationGroupTable() {
