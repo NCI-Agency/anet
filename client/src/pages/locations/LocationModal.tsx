@@ -24,6 +24,7 @@ const LocationModal = ({
 
   return (
     <Modal backdrop="static" centered size="xl" show={show} onHide={onHide}>
+      <Modal.Header closeButton />
       <Modal.Body>
         <CreateNewLocation
           name={name}

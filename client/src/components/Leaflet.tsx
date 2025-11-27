@@ -31,6 +31,9 @@ import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
+import GeoLocation from "components/GeoLocation"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
+import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
@@ -170,7 +173,7 @@ function createMarker(
   } else if (m.contents) {
     const popupDiv = Object.assign(document.createElement("div"), {
       id: m.id,
-      style: "width: 200px;"
+      style: "width: 250px;"
     })
     marker.bindPopup(() => {
       setPopup?.({ container: popupDiv, contents: m.contents })
@@ -267,7 +270,8 @@ const Leaflet = ({
   const [anetLocationsVars, setAnetLocationsVars] = useState({})
 
   const createLocationMarkerRef = useRef<Marker | null>(null)
-  const createLocationCoordsRef = useRef<HTMLDivElement | null>(null)
+  const [createLocationMarkerPopup, setCreateLocationMarkerPopup] =
+    useState<MarkerPopupProps>({})
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -479,7 +483,7 @@ const Leaflet = ({
      *
      * It works fine as long as map container is fully visible on screen.
      */
-    if (!map || !markerLayer || (!onMapClick && !allowCreateLocation)) {
+    if (!map || (!onMapClick && !allowCreateLocation)) {
       return
     }
 
@@ -490,54 +494,27 @@ const Leaflet = ({
       const { latlng } = event || {}
 
       if (allowCreateLocation && latlng) {
+        const parsedLat = parseCoordinate(latlng.lat)
+        const parsedLng = parseCoordinate(latlng.lng)
         let marker = createLocationMarkerRef.current
 
-        if (!marker) {
-          const popupContainer = document.createElement("div")
-          popupContainer.style.width = "220px"
-
-          const coordsDiv = document.createElement("div")
-          coordsDiv.style.marginBottom = "8px"
-          popupContainer.appendChild(coordsDiv)
-          createLocationCoordsRef.current = coordsDiv
-
-          const button = document.createElement("button")
-          button.type = "button"
-          button.className = "btn btn-sm btn-primary"
-          button.textContent = "Create a new Location here"
-          button.addEventListener("click", e => {
-            e.preventDefault()
-            e.stopPropagation()
-            if (onCreateLocation && marker) {
-              const { lat, lng } = marker.getLatLng()
-              onCreateLocation({ lat, lng })
-            }
-            marker && marker.closePopup()
-          })
-          popupContainer.appendChild(button)
-
-          marker = new Marker(latlng, {
-            icon: ICON_TYPES.DEFAULT,
-            draggable: false,
-            autoPan: true
-          }).bindPopup(popupContainer)
-
-          markerLayer.addLayer(marker)
+        if (_isEmpty(marker)) {
+          marker = createMarker(
+            latlng,
+            { contents: { lat: parsedLat, lng: parsedLng }, autoPan: true },
+            setCreateLocationMarkerPopup,
+            map
+          )
+          map.addLayer(marker)
           createLocationMarkerRef.current = marker
         } else {
           marker.setLatLng(latlng)
         }
 
-        if (createLocationCoordsRef.current) {
-          createLocationCoordsRef.current.textContent = `Lat: ${latlng.lat.toFixed(6)}, Lng: ${latlng.lng.toFixed(6)}`
-        }
-
         marker.openPopup()
       }
 
-      if (onMapClick) {
-        onMapClick(event, map)
-      }
+      onMapClick?.(event, map)
     }
 
     const clickHandler = event => {
@@ -571,12 +548,11 @@ const Leaflet = ({
       map.off("dblclick", dblClickHandler)
 
       if (createLocationMarkerRef.current) {
-        markerLayer.removeLayer(createLocationMarkerRef.current)
+        map.removeLayer(createLocationMarkerRef.current)
         createLocationMarkerRef.current = null
-        createLocationCoordsRef.current = null
       }
     }
-  }, [allowCreateLocation, map, markerLayer, onCreateLocation, onMapClick])
+  }, [allowCreateLocation, map, onCreateLocation, onMapClick])
 
   useEffect(() => {
     if (
@@ -628,6 +604,13 @@ const Leaflet = ({
           renderLocationMarkerPopupContents(locationMarkerPopup.contents),
           locationMarkerPopup.container
         )}
+      {createLocationMarkerPopup.container &&
+        createPortal(
+          renderCreateLocationMarkerPopupContents(
+            createLocationMarkerPopup.contents
+          ),
+          createLocationMarkerPopup.container
+        )}
     </>
   )
 
@@ -644,6 +627,39 @@ const Leaflet = ({
             Select this location
           </Button>
         )}
+      </div>
+    )
+  }
+
+  function renderCreateLocationMarkerPopupContents(location) {
+    return (
+      <div className="d-flex flex-column justify-content-center">
+        <div className="mb-2">
+          {Location.LOCATION_FORMAT_LABELS[Location.locationFormat]}:
+          <GeoLocation
+            coordinates={{
+              lat: location.lat,
+              lng: location.lng,
+              displayedCoordinate: convertLatLngToMGRS(
+                location.lat,
+                location.lng
+              )
+            }}
+            showAllFormatsInfo={false}
+          />
+        </div>
+        <Button
+          onClick={() => {
+            if (map._isFullscreen) {
+              map.toggleFullscreen()
+            }
+            onCreateLocation(location)
+          }}
+          variant="primary"
+          className="mt-2"
+        >
+          Create a new location here
+        </Button>
       </div>
     )
   }

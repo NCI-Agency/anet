@@ -76,6 +76,7 @@ interface BaseGeoLocationProps {
   displayType?:
     | GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD
     | GEO_LOCATION_DISPLAY_TYPE.GENERIC
+  showAllFormatsInfo: boolean
 }
 
 export const BaseGeoLocation = ({
@@ -89,7 +90,8 @@ export const BaseGeoLocation = ({
   setFieldValue,
   setFieldTouched,
   isSubmitting = false,
-  displayType = GEO_LOCATION_DISPLAY_TYPE.GENERIC
+  displayType = GEO_LOCATION_DISPLAY_TYPE.GENERIC,
+  showAllFormatsInfo = true
 }: BaseGeoLocationProps) => {
   const CoordinatesFormField =
     locationFormat === Location.LOCATION_FORMATS.MGRS
@@ -104,11 +106,13 @@ export const BaseGeoLocation = ({
           labels={labels}
           coordinates={coordinates}
         />
-        <AllFormatsInfo
-          name={name}
-          coordinates={coordinates}
-          setLocationFormat={setLocationFormat}
-        />
+        {showAllFormatsInfo && (
+          <AllFormatsInfo
+            name={name}
+            coordinates={coordinates}
+            setLocationFormat={setLocationFormat}
+          />
+        )}
       </ReadonlyGeoLocation>
     )
 

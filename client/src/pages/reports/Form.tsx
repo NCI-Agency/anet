@@ -775,7 +775,7 @@ const ReportForm = ({
                               setFieldValue("location", loc, true)
                               setLocationUuid(loc.uuid)
                             }}
-                            allowCreateLocation
+                            allowCreateLocation={canCreateLocation}
                             onCreateLocation={({ lat, lng }) => {
                               setNewLocationCoords({ lat, lng })
                               setShowCreateLocationModal(true)
