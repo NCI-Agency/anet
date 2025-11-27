@@ -312,10 +312,8 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
               <strong>{Settings.fields.event.people.label}:</strong>{" "}
               {event.people.map((person, i) => (
                 <React.Fragment key={person.uuid}>
-                  {i > 0 && (
-                    <img src={PEOPLE_ICON} alt="★" className="ms-1 me-1" />
-                  )}
-                  <LinkTo modelType="Person" model={person} />
+                  {i > 0 && <span className="px-1">|</span>}
+                  <LinkTo modelType="Person" model={person} showIcon={false} />
                 </React.Fragment>
               ))}
             </span>
