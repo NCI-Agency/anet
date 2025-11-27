@@ -211,9 +211,13 @@ export default class Person extends Model {
         }
       }
     }
+    additionalPositions {
+      ${gqlEntityFieldsMap.Position}
+    }
     previousPositions {
       startTime
       endTime
+      primary
       position {
         ${gqlEntityFieldsMap.Position}
         previousPeople {

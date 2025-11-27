@@ -1,7 +1,7 @@
 import test from "../util/test.cjs"
 
 test.serial("Move someone in and out of a position", async t => {
-  t.plan(11)
+  t.plan(13)
 
   const {
     $,
@@ -150,15 +150,29 @@ test.serial("Move someone in and out of a position", async t => {
   const $lastRow = $previousPositionsRows.pop()
   const [
     /* eslint-disable no-unused-vars */ $positionCell1 /* eslint-enable no-unused-vars */,
+    $statusCell1,
     $datesCell1
   ] = await $lastRow.findElements(By.css("td"))
+  const statusCell1Text = await $statusCell1.getText()
+  t.is(
+    statusCell1Text.trim(),
+    "✔️",
+    "Status cell does not contain the expected check icon"
+  )
   const datesCell1Text = await $datesCell1.getText()
   t.regex(datesCell1Text, /[0-9a-f\s]+-[\s]?/i, "Last cell has no end date")
   const $beforeLastRow = $previousPositionsRows.pop()
   const [
     /* eslint-disable no-unused-vars */ $positionCell2 /* eslint-enable no-unused-vars */,
+    $statusCell2,
     $datesCell2
   ] = await $beforeLastRow.findElements(By.css("td"))
+  const statusCell2Text = await $statusCell2.getText()
+  t.is(
+    statusCell2Text.trim(),
+    "✔️",
+    "Status cell does not contain the expected check icon"
+  )
   const datesCell2Text = await $datesCell2.getText()
   t.regex(
     datesCell2Text,
@@ -456,7 +470,7 @@ test.serial("Update permissions while changing positions", async t => {
   await personInputField.click()
   // Wait for transition
   await t.context.driver.sleep(mediumWaitMs)
-  // Find desired position from the list and click on the name.
+  // Find desired person from the list and click on the name.
   for (let i = 0; i < 4; i++) {
     const listItems = await t.context.driver.findElements(By.css("td"))
     for (const item of listItems) {
@@ -479,10 +493,18 @@ test.serial("Update permissions while changing positions", async t => {
       }
     }
   }
-  $saveButton = await t.context.driver.findElement(
-    By.xpath('//button[text()="Save"]')
+  // Verify the option to save as additional position exists
+  const $saveButtonAdditional = await t.context.driver.findElement(
+    By.xpath('//button[text()="Save as Additional"]')
   )
-  // Click on the save button
+  await t.context.driver.wait(
+    until.elementIsVisible($saveButtonAdditional),
+    mediumWaitMs
+  )
+  // Click on the save as primary button
+  $saveButton = await t.context.driver.findElement(
+    By.xpath('//button[text()="Save as Primary"]')
+  )
   await $saveButton.click()
   // Wait for the transition
   await t.context.driver.sleep(mediumWaitMs)

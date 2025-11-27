@@ -94,7 +94,7 @@ public class PositionResource {
     final Position created = dao.insert(pos);
 
     if (pos.getPersonUuid() != null) {
-      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid());
+      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid(), true);
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
@@ -178,7 +178,7 @@ public class PositionResource {
             AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPersonUuid(),
                 existing, user);
           } else if (!Objects.equals(pos.getPersonUuid(), existing.getPersonUuid())) {
-            dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid());
+            dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid(), true);
             AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), existing,
                 user);
           }
@@ -226,7 +226,8 @@ public class PositionResource {
   @GraphQLMutation(name = "putPersonInPosition")
   public int putPersonInPosition(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String positionUuid,
-      @GraphQLArgument(name = "person") Person person) {
+      @GraphQLArgument(name = "person") Person person,
+      @GraphQLArgument(name = "primary", defaultValue = "true") boolean primary) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position pos = dao.getByUuid(positionUuid);
     if (pos == null) {
@@ -234,7 +235,7 @@ public class PositionResource {
     }
     AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid());
 
-    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
+    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid, primary);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
     return numRows;
   }
