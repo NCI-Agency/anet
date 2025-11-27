@@ -70,6 +70,7 @@ import {
 } from "models"
 import moment from "moment"
 import CreateNewLocation from "pages/locations/CreateNewLocation"
+import LocationModal from "pages/locations/LocationModal"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
@@ -241,6 +242,9 @@ const ReportForm = ({
     initialValues?.engagementDate
   )
   const [visitBan, setVisitBan] = useState(false)
+
+  const [showCreateLocationModal, setShowCreateLocationModal] = useState(false)
+  const [newLocationCoords, setNewLocationCoords] = useState(null)
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -559,6 +563,16 @@ const ReportForm = ({
                 onSubmit(values, { resetForm, setSubmitting }, true)
               }}
             />
+            <LocationModal
+              show={showCreateLocationModal}
+              onHide={() => {
+                setShowCreateLocationModal(false)
+                setNewLocationCoords(null)
+              }}
+              coords={newLocationCoords}
+              setFieldTouched={setFieldTouched}
+              setFieldValue={setFieldValue}
+            />
 
             {showAssignedPositionWarning && (
               <div className="alert alert-warning" style={alertStyle}>
@@ -760,6 +774,11 @@ const ReportForm = ({
                               setFieldTouched("location", true, false)
                               setFieldValue("location", loc, true)
                               setLocationUuid(loc.uuid)
+                            }}
+                            allowCreateLocation={canCreateLocation}
+                            onCreateLocation={({ lat, lng }) => {
+                              setNewLocationCoords({ lat, lng })
+                              setShowCreateLocationModal(true)
                             }}
                           />
                         </div>

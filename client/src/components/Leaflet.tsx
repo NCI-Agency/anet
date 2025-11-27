@@ -31,6 +31,9 @@ import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
+import GeoLocation from "components/GeoLocation"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
+import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
@@ -170,7 +173,7 @@ function createMarker(
   } else if (m.contents) {
     const popupDiv = Object.assign(document.createElement("div"), {
       id: m.id,
-      style: "width: 200px;"
+      style: "width: 250px;"
     })
     marker.bindPopup(() => {
       setPopup?.({ container: popupDiv, contents: m.contents })
@@ -212,6 +215,8 @@ interface LeafletProps {
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
   onSelectAnetLocation?: (loc: any) => void
+  allowCreateLocation?: boolean
+  onCreateLocation?: (coords: { lat: number; lng: number }) => void
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
@@ -236,7 +241,9 @@ const Leaflet = ({
   setMarkerPopup,
   mapId: initialMapId,
   onMapClick,
-  onSelectAnetLocation
+  onSelectAnetLocation,
+  allowCreateLocation,
+  onCreateLocation
 }: LeafletProps) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -261,6 +268,10 @@ const Leaflet = ({
   const anetLocationsLayerRef = useRef(null)
   const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
   const [anetLocationsVars, setAnetLocationsVars] = useState({})
+
+  const createLocationMarkerRef = useRef<Marker | null>(null)
+  const [createLocationMarkerPopup, setCreateLocationMarkerPopup] =
+    useState<MarkerPopupProps>({})
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -472,12 +483,76 @@ const Leaflet = ({
      *
      * It works fine as long as map container is fully visible on screen.
      */
-    if (map && onMapClick) {
-      const clickHandler = event => onMapClick(event, map)
-      map.on("click", clickHandler)
-      return () => map.off("click", clickHandler)
+    if (!map || (!onMapClick && !allowCreateLocation)) {
+      return
     }
-  }, [onMapClick, map])
+
+    // Timeout used to distinguish single click vs double click
+    let clickTimeout = null
+
+    const handleSingleClick = event => {
+      const { latlng } = event || {}
+
+      if (allowCreateLocation && latlng) {
+        const parsedLat = parseCoordinate(latlng.lat)
+        const parsedLng = parseCoordinate(latlng.lng)
+        let marker = createLocationMarkerRef.current
+
+        if (_isEmpty(marker)) {
+          marker = createMarker(
+            latlng,
+            { contents: { lat: parsedLat, lng: parsedLng }, autoPan: true },
+            setCreateLocationMarkerPopup,
+            map
+          )
+          map.addLayer(marker)
+          createLocationMarkerRef.current = marker
+        } else {
+          marker.setLatLng(latlng)
+        }
+
+        marker.openPopup()
+      }
+
+      onMapClick?.(event, map)
+    }
+
+    const clickHandler = event => {
+      // Every click resets the timer
+      // But only the last isolated click fires handleSingleClick
+      if (clickTimeout != null) {
+        window.clearTimeout(clickTimeout)
+      }
+      clickTimeout = window.setTimeout(() => {
+        handleSingleClick(event)
+        clickTimeout = null
+      }, 500)
+    }
+
+    const dblClickHandler = () => {
+      // If a double click happens, cancel the pending single click handler
+      if (clickTimeout != null) {
+        window.clearTimeout(clickTimeout)
+        clickTimeout = null
+      }
+    }
+
+    map.on("click", clickHandler)
+    map.on("dblclick", dblClickHandler)
+
+    return () => {
+      if (clickTimeout != null) {
+        window.clearTimeout(clickTimeout)
+      }
+      map.off("click", clickHandler)
+      map.off("dblclick", dblClickHandler)
+
+      if (createLocationMarkerRef.current) {
+        map.removeLayer(createLocationMarkerRef.current)
+        createLocationMarkerRef.current = null
+      }
+    }
+  }, [allowCreateLocation, map, onCreateLocation, onMapClick])
 
   useEffect(() => {
     if (
@@ -529,6 +604,13 @@ const Leaflet = ({
           renderLocationMarkerPopupContents(locationMarkerPopup.contents),
           locationMarkerPopup.container
         )}
+      {createLocationMarkerPopup.container &&
+        createPortal(
+          renderCreateLocationMarkerPopupContents(
+            createLocationMarkerPopup.contents
+          ),
+          createLocationMarkerPopup.container
+        )}
     </>
   )
 
@@ -545,6 +627,39 @@ const Leaflet = ({
             Select this location
           </Button>
         )}
+      </div>
+    )
+  }
+
+  function renderCreateLocationMarkerPopupContents(location) {
+    return (
+      <div className="d-flex flex-column justify-content-center">
+        <div className="mb-2">
+          {Location.LOCATION_FORMAT_LABELS[Location.locationFormat]}:
+          <GeoLocation
+            coordinates={{
+              lat: location.lat,
+              lng: location.lng,
+              displayedCoordinate: convertLatLngToMGRS(
+                location.lat,
+                location.lng
+              )
+            }}
+            showAllFormatsInfo={false}
+          />
+        </div>
+        <Button
+          onClick={() => {
+            if (map._isFullscreen) {
+              map.toggleFullscreen()
+            }
+            onCreateLocation(location)
+          }}
+          variant="primary"
+          className="mt-2"
+        >
+          Create a new location here
+        </Button>
       </div>
     )
   }
@@ -565,12 +680,16 @@ interface LeafletWithSelectionProps {
   mapId: string
   location?: any
   onSelectAnetLocation: (loc: any) => void
+  allowCreateLocation?: boolean
+  onCreateLocation?: (coords: { lat: number; lng: number }) => void
 }
 
 export const LeafletWithSelection = ({
   mapId,
   location,
-  onSelectAnetLocation
+  onSelectAnetLocation,
+  allowCreateLocation,
+  onCreateLocation
 }: LeafletWithSelectionProps) => {
   const [markerPopup, setMarkerPopup] = useState<MarkerPopupProps>({})
   const markers = useMemo(
@@ -594,6 +713,8 @@ export const LeafletWithSelection = ({
         markers={markers}
         onSelectAnetLocation={onSelectAnetLocation}
         setMarkerPopup={setMarkerPopup}
+        allowCreateLocation={allowCreateLocation}
+        onCreateLocation={onCreateLocation}
       />
       {markerPopup.container &&
         createPortal(
