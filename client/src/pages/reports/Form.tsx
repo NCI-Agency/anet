@@ -28,7 +28,7 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import { useChatBridge } from "components/chat/ChatBridge"
+import { ChatSuggestion, useChatBridge } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -191,6 +191,20 @@ const GQL_GET_EVENT_COUNT = gql`
 `
 const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
 
+function stripHtml(input?: string) {
+  if (!input) {
+    return ""
+  }
+  return input
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function truncate(input: string, max = 20000) {
+  return input.length > max ? input.slice(0, max) + "…" : input
+}
+
 interface ReportFormProps {
   pageDispatchers?: PageDispatchersPropType
   initialValues: any
@@ -226,6 +240,7 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  const latestValuesRef = useRef<any>(initialValues)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
@@ -255,6 +270,86 @@ const ReportForm = ({
     dirty: false,
     values: {}
   })
+
+  function buildReportBusinessObject(report: Report) {
+    const plainText = truncate(stripHtml(report.reportText || ""))
+
+    const authors = report.authors?.map(a => a?.name).filter(Boolean) || []
+    const attendees =
+      report.reportPeople
+        ?.filter(rp => rp?.attendee)
+        .map(rp => rp?.name)
+        .filter(Boolean) || []
+    const tasks =
+      report.tasks
+        ?.map(t => t?.shortName || t?.longName || t?.uuid)
+        .filter(Boolean) || []
+    const keyOutcomes = Array.isArray(report.keyOutcomes)
+      ? report.keyOutcomes
+      : []
+    const nextSteps = Array.isArray(report.nextSteps) ? report.nextSteps : []
+
+    return {
+      title: report.intent || "",
+      description: plainText,
+      relatedContext: {
+        classification: report.classification,
+        engagementDate: report.engagementDate,
+        location: report.location?.name,
+        advisorOrg: report.advisorOrg?.shortName || report.advisorOrg?.longName,
+        interlocutorOrg:
+          report.interlocutorOrg?.shortName || report.interlocutorOrg?.longName,
+        authors,
+        attendees,
+        tasks,
+        keyOutcomes,
+        nextSteps
+      }
+    }
+  }
+
+  function makeSuggestions(): ChatSuggestion[] {
+    return [
+      {
+        label: "Derive key outcomes",
+        prompt: "Derive key outcomes from the report information",
+        icon: "lightbulb",
+        iconColor: "yellow"
+      },
+      {
+        label: "Suggest next steps",
+        prompt: "Suggest next steps based on the report information",
+        icon: "lightbulb",
+        iconColor: "yellow"
+      }
+    ]
+  }
+
+  function sendReportContextToAI(report: any) {
+    const businessObject = buildReportBusinessObject(report)
+    sendToChat(businessObject, makeSuggestions())
+  }
+
+  useEffect(() => {
+    if (!isReady) {
+      return
+    }
+
+    const intervalId = window.setInterval(() => {
+      const currentValues = latestValuesRef.current
+      if (!currentValues) {
+        return
+      }
+
+      sendReportContextToAI(currentValues)
+    }, 5000)
+    sendReportContextToAI(latestValuesRef.current)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [isReady, sendToChat])
+
   const autoSaveActive = useRef(true)
   useEffect(() => {
     autoSaveActive.current = true
@@ -264,12 +359,6 @@ const ReportForm = ({
       autoSaveActive.current = false
     }
   })
-
-  useEffect(() => {
-    if (isReady) {
-      openChat()
-    }
-  }, [isReady, openChat])
 
   useEffect(() => {
     async function checkPotentiallyUnavailableLocation(
@@ -376,16 +465,6 @@ const ReportForm = ({
   )
   let validateFieldDebounced
 
-  const AskAiForTranslate = () => {
-    console.log(isReady)
-    sendToChat({
-      application: "ANET",
-      businessObject: {
-        request: "Translate this text to english: " + initialValues.reportText
-      }
-    })
-  }
-
   return (
     <Formik
       enableReinitialize
@@ -405,6 +484,7 @@ const ReportForm = ({
         resetForm,
         setSubmitting
       }) => {
+        latestValuesRef.current = values
         // need up-to-date copies of these in the autosave handler
         Object.assign(autoSaveSettings.current, { dirty, values, touched })
         if (autoSaveActive.current && !autoSaveSettings.current.timeoutId) {
@@ -1204,16 +1284,6 @@ const ReportForm = ({
                         Settings.fields.report.reportText?.placeholder
                       }
                     />
-                  }
-                  extraColElem={
-                    <Button
-                      type="button"
-                      variant="outline-primary"
-                      onClick={AskAiForTranslate}
-                      title="Translate to english"
-                    >
-                      Ask AI
-                    </Button>
                   }
                 />
 
