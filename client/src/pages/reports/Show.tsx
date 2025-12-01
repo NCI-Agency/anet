@@ -25,7 +25,7 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import { useChatBridge } from "components/chat/ChatBridge"
+import { ChatSuggestion, useChatBridge } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -238,14 +238,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   )
   const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
-  const { open: openChat, send: sendToChat, isReady } = useChatBridge()
-
-  type ChatSuggestion = {
-    label: string
-    prompt: string
-    icon?: string
-    iconColor?: string
-  }
+  const { open: openChat, send: sendToChat } = useChatBridge()
 
   function makeReportSuggestions(): ChatSuggestion[] {
     return [
@@ -271,7 +264,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         label: "Latest report",
         prompt: "Get the latest report",
         icon: "arrow-up",
-        iconColor: "#1e90ff",
+        iconColor: "#1e90ff"
       }
     ]
   }
@@ -314,11 +307,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   function sendReportContextToAI(report: Report) {
     const businessObject = buildReportBusinessObject(report)
-    sendToChat({
-      application: "ANET",
-      businessObject,
-      suggestions: makeReportSuggestions()
-    })
+    sendToChat(businessObject, makeReportSuggestions())
   }
 
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
