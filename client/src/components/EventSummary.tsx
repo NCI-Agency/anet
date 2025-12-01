@@ -16,14 +16,18 @@ import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Event, Location } from "models"
+import { PositionRole } from "models/Position"
 import moment from "moment"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+
+const ROLES = Object.keys(PositionRole)
+const RANKS = Settings.fields.person.ranks.map(rank => rank.value)
+const PEOPLE_ATTENDING_LIMIT = 5
 
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
@@ -173,6 +177,30 @@ interface EventSummaryRowProps {
 const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
   event = new Event(event)
 
+  const sortedAttendees = (event.people || [])
+    .slice()
+    .sort((a, b) => {
+      const roleDiff = ROLES.indexOf(b.role) - ROLES.indexOf(a.role)
+      if (roleDiff !== 0) {
+        return roleDiff
+      }
+
+      const rankDiff = RANKS.indexOf(b.rank) - RANKS.indexOf(a.rank)
+      if (rankDiff !== 0) {
+        return rankDiff
+      }
+
+      const nameA = a.name || ""
+      const nameB = b.name || ""
+      const nameDiff = nameA.localeCompare(nameB)
+      if (nameDiff !== 0) {
+        return nameDiff
+      }
+
+      return a.uuid.localeCompare(b.uuid)
+    })
+    .slice(0, PEOPLE_ATTENDING_LIMIT)
+
   return (
     <Container fluid className="event-summary">
       <Row>
@@ -310,7 +338,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.people.label}:</strong>{" "}
-              {event.people.map((person, i) => (
+              {sortedAttendees.map((person, i) => (
                 <React.Fragment key={person.uuid}>
                   {i > 0 && <span className="px-1">|</span>}
                   <LinkTo modelType="Person" model={person} showIcon={false} />
