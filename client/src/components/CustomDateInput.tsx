@@ -74,10 +74,8 @@ const CustomDateInput = ({
   const timePickerProps = !withTime
     ? undefined
     : {
-        selectAllOnFocus: true
-        // FIXME: clicking a time arrow immediately closes the dialog;
-        // see https://github.com/palantir/blueprint/issues/3474
-        // showArrowButtons: true
+        selectAllOnFocus: true,
+        showArrowButtons: true
       }
   const inputValue = value ? moment(value).toISOString() : null
   return (
