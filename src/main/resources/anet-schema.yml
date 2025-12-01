@@ -924,7 +924,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [status, firstName, lastName, position, additionalPositions, prevPositions, users,
+        required: [status, firstName, lastName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
@@ -939,6 +939,8 @@ properties:
           additionalPositions:
             "$ref": "#/$defs/labeledField"
           prevPositions:
+            "$ref": "#/$defs/labeledField"
+          prevAdditionalPositions:
             "$ref": "#/$defs/labeledField"
           user:
             "$ref": "#/$defs/inputField"
