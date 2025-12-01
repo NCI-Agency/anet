@@ -16,8 +16,7 @@ export interface GenericSearchResultsProps {
   setPagination?: (...args: unknown[]) => unknown
 }
 
-export interface GenericSearchResultsWithEmailProps
-  extends GenericSearchResultsProps {
+export interface GenericSearchResultsWithEmailProps extends GenericSearchResultsProps {
   allowSelection?: boolean
   updateRecipients?: (...args: unknown[]) => unknown
 }
