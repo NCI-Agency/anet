@@ -31,7 +31,7 @@ java {
 boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.1.4"
 String jdbi3Version = "3.50.0"
-String poiVersion = "5.5.0"
+String poiVersion = "5.5.1"
 String simplejavamailVersion = "8.12.6"
 String springShellVersion = "3.4.1"
 String psqlPushDataPath = "/var/tmp"
@@ -726,7 +726,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '12.1.2'
+	toolVersion = '12.2.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
