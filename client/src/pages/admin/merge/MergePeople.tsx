@@ -29,6 +29,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionsTable from "components/PositionsTable"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
 import UserTable from "components/UserTable"
@@ -256,6 +257,20 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="position"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.additionalPositions}
+                value={
+                  <PositionsTable
+                    label="Additional Positions"
+                    positions={mergedPerson.additionalPositions}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="additionalPositions"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -658,6 +673,30 @@ const PersonColumn = ({
             action={() => {
               dispatchMergeActions(
                 setAMergedField("position", person.position, align)
+              )
+            }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.additionalPositions}
+            fieldName="additionalPositions"
+            value={
+              <PositionsTable
+                label="Additional Positions"
+                positions={person.additionalPositions}
+              />
+            }
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "additionalPositions",
+                  person.additionalPositions,
+                  align
+                )
               )
             }}
             mergeState={mergeState}

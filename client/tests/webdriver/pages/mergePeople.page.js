@@ -94,8 +94,7 @@ class MergePeople extends Page {
     return await previousPositionsElements.map(async elem => {
       return {
         name: await (await elem.$$("td"))[0].getText(),
-        primary: await (await elem.$$("td"))[1].getText(),
-        date: await (await elem.$$("td"))[2].getText()
+        date: await (await elem.$$("td"))[1].getText()
       }
     })
   }
