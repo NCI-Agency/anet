@@ -319,19 +319,15 @@ const Leaflet = ({
     )
     newMap.addControl(new FullScreen({ position: "topleft" }))
     if (searchProvider) {
-      const gsc = new GeoSearchControl({
-        provider: searchProvider,
-        marker: {
-          icon: iconSearch,
-          draggable: false
-        }
-      })
-      setTimeout(() => {
-        // workaround for preventing the marker from moving when search icon is clicked
-        // https://github.com/smeijer/leaflet-geosearch/issues/169#issuecomment-458573562
-        gsc.getContainer().onclick = e => e.stopPropagation()
-      })
-      gsc.addTo(newMap)
+      newMap.addControl(
+        GeoSearchControl({
+          provider: searchProvider,
+          marker: {
+            icon: iconSearch,
+            draggable: false
+          }
+        })
+      )
     }
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
     layerControl.addTo(newMap)
