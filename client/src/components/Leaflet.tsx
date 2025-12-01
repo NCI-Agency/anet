@@ -15,8 +15,11 @@ import {
   Point,
   TileLayer
 } from "leaflet"
+import "leaflet/dist/leaflet.css"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
+import { FullScreen } from "leaflet.fullscreen"
+import "leaflet.fullscreen/dist/Control.FullScreen.css"
 import {
   EsriProvider,
   GeoSearchControl,
@@ -25,12 +28,9 @@ import {
 import "leaflet-geosearch/assets/css/leaflet.css"
 import { GestureHandling } from "leaflet-gesture-handling"
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
-import "leaflet.fullscreen"
-import "leaflet.fullscreen/Control.FullScreen.css"
 import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
-import "leaflet/dist/leaflet.css"
 import GeoLocation from "components/GeoLocation"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _isEmpty from "lodash/isEmpty"
@@ -306,9 +306,7 @@ const Leaflet = ({
       {
         zoomControl: true,
         gestureHandling: true,
-        worldCopyJump: true,
-        fullscreenControl: true,
-        fullscreenControlOptions: { position: "topleft" }
+        worldCopyJump: true
       },
       Settings.imagery.mapOptions.leafletOptions,
       Settings.imagery.mapOptions.crs && {
@@ -319,6 +317,7 @@ const Leaflet = ({
       Settings.imagery.mapOptions.homeView.location,
       Settings.imagery.mapOptions.homeView.zoomLevel
     )
+    newMap.addControl(new FullScreen({ position: "topleft" }))
     if (searchProvider) {
       const gsc = new GeoSearchControl({
         provider: searchProvider,
