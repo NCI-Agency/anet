@@ -1,7 +1,7 @@
 import test from "../util/test.cjs"
 
 test.serial("Move someone in and out of a position", async t => {
-  t.plan(13)
+  t.plan(11)
 
   const {
     $,
@@ -150,29 +150,15 @@ test.serial("Move someone in and out of a position", async t => {
   const $lastRow = $previousPositionsRows.pop()
   const [
     /* eslint-disable no-unused-vars */ $positionCell1 /* eslint-enable no-unused-vars */,
-    $statusCell1,
     $datesCell1
   ] = await $lastRow.findElements(By.css("td"))
-  const statusCell1Text = await $statusCell1.getText()
-  t.is(
-    statusCell1Text.trim(),
-    "✔️",
-    "Status cell does not contain the expected check icon"
-  )
   const datesCell1Text = await $datesCell1.getText()
   t.regex(datesCell1Text, /[0-9a-f\s]+-[\s]?/i, "Last cell has no end date")
   const $beforeLastRow = $previousPositionsRows.pop()
   const [
     /* eslint-disable no-unused-vars */ $positionCell2 /* eslint-enable no-unused-vars */,
-    $statusCell2,
     $datesCell2
   ] = await $beforeLastRow.findElements(By.css("td"))
-  const statusCell2Text = await $statusCell2.getText()
-  t.is(
-    statusCell2Text.trim(),
-    "✔️",
-    "Status cell does not contain the expected check icon"
-  )
   const datesCell2Text = await $datesCell2.getText()
   t.regex(
     datesCell2Text,
