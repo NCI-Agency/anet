@@ -225,7 +225,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   const extraColElems = {
     position: getPositionActions(),
-    prevPositions: getPreviousPositionsActions()
+    prevPositions: getPreviousPositionsActions(),
+    prevAdditionalPositions: getPreviousPositionsActions()
   }
 
   // Keys of fields which should span over 2 columns
@@ -524,6 +525,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         />
       ),
       prevPositions: getPrevPositionsHumanValue(),
+      prevAdditionalPositions: getPrevAdditionalPositionsHumanValue(),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
@@ -645,7 +647,19 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   }
 
   function getPrevPositionsHumanValue() {
-    return <PreviousPositions history={person.previousPositions} />
+    return (
+      <PreviousPositions
+        history={person.previousPositions.filter(pp => pp.primary)}
+      />
+    )
+  }
+
+  function getPrevAdditionalPositionsHumanValue() {
+    return (
+      <PreviousPositions
+        history={person.previousPositions.filter(pp => !pp.primary)}
+      />
+    )
   }
 
   function renderCounterparts(position) {
