@@ -9,12 +9,19 @@ import React, {
   useState
 } from "react"
 
+export type ChatSuggestion = {
+  label: string
+  prompt: string
+  icon?: string
+  iconColor?: string
+}
+
 type ChatBridgeContextType = {
   isOpen: boolean
   open: () => void
   close: () => void
   toggle: () => void
-  send: (payload: any) => void
+  send: (businessObject: any, suggestions: ChatSuggestion[]) => void
   setIframeEl: (el: HTMLIFrameElement | null) => void
   isReady: boolean
   origin?: string
@@ -35,7 +42,6 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const [targetOrigin, setTargetOrigin] = useState(undefined)
   const [isReady, setIsReady] = useState(false)
   const [iframeOrigin, setIframeOrigin] = useState(undefined)
-
   const queue = useRef<any[]>([])
 
   useEffect(() => {
@@ -47,8 +53,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         setIframeOrigin(ev.origin)
       }
 
-      const type = typeof ev.data === "string" ? ev.data : ev.data?.type
-      if (type === "ready" || type === "PONG") {
+      if (typeof ev.data === "string" && ev.data === "ready") {
         setIsReady(true)
       }
     }
@@ -117,7 +122,12 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   }, [])
 
   const send = useCallback(
-    payload => {
+    (context, suggestions) => {
+      const payload = {
+        application: "ANET",
+        businessObject: context || {},
+        suggestions: suggestions || []
+      }
       if (!iframeEl || !isReady) {
         queue.current.push(payload)
         return
