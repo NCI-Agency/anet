@@ -21,7 +21,6 @@ function PreviousPositions({
       <thead>
         <tr>
           <th>Position</th>
-          <th>Primary</th>
           <th>Dates</th>
           {action && <th>Action</th>}
         </tr>
@@ -32,7 +31,6 @@ function PreviousPositions({
             <td>
               <LinkTo modelType="Position" model={pp.position} />
             </td>
-            <td>{pp.primary ? "✔️" : ""}</td>
             <td>
               {moment(pp.startTime).format(
                 Settings.dateFormats.forms.displayShort.date
