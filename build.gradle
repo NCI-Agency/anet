@@ -726,7 +726,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '12.1.2'
+	toolVersion = '12.2.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
