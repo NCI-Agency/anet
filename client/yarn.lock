@@ -7232,11 +7232,11 @@ __metadata:
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.38.0"
-    slate: "npm:0.118.1"
+    slate: "npm:0.120.0"
     slate-dom: "npm:0.119.0"
     slate-history: "npm:0.113.1"
     slate-hyperscript: "npm:0.100.0"
-    slate-react: "npm:0.119.0"
+    slate-react: "npm:0.120.0"
     style-loader: "npm:4.0.0"
     sync-fetch: "npm:0.5.2"
     tap-xunit: "npm:2.4.1"
@@ -12904,13 +12904,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^10.0.3":
-  version: 10.1.3
-  resolution: "immer@npm:10.1.3"
-  checksum: 10c0/b3929022c1999935c9c5e9491fce20d883c15a04072628056f3b8c51a63ac0876d1c1f25cec146e325c30c906bc7f15a636c29ed53156f0a3049150f152df4c8
-  languageName: node
-  linkType: hard
-
 "immutability-helper@npm:^3.1.1":
   version: 3.1.1
   resolution: "immutability-helper@npm:3.1.1"
@@ -18442,9 +18435,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.119.0":
-  version: 0.119.0
-  resolution: "slate-react@npm:0.119.0"
+"slate-react@npm:0.120.0":
+  version: 0.120.0
+  resolution: "slate-react@npm:0.120.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18456,18 +18449,15 @@ __metadata:
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
     slate: ">=0.114.0"
-    slate-dom: ">=0.116.0"
-  checksum: 10c0/abb6c8155a11a8a9d26e34ced7605ab537ca77fe7d96f6c3acf40444319c9043dd2a7d9974cccdc1009c4521692cbd90f766e2ec8edc612fabda7a798c2c902b
+    slate-dom: ">=0.119.0"
+  checksum: 10c0/12ddd34de61991fb9b1d0981f654be05cbde5f057edd93d53a2a4ef44c442920e7b0e70dad4a9a28f2c950ddbaee8718ea21e6d2b1064fe904c8bf1159d9451f
   languageName: node
   linkType: hard
 
-"slate@npm:0.118.1":
-  version: 0.118.1
-  resolution: "slate@npm:0.118.1"
-  dependencies:
-    immer: "npm:^10.0.3"
-    tiny-warning: "npm:^1.0.3"
-  checksum: 10c0/5004e3cb455317755057158d5a9ff9913539d1222135a2012af7ef7788cf330f074d8423d16e5f1899fd77ad2286ec03975cf929f1f8fcf80a24c99d99758a52
+"slate@npm:0.120.0":
+  version: 0.120.0
+  resolution: "slate@npm:0.120.0"
+  checksum: 10c0/af83b41f2b076444eb441e4d8747f1d629a7a555b5234adf79cc12ea37b517a35722e779270a421eaec803b04b805a0a6f284e31f9da2b063b097ba99a4c9ecb
   languageName: node
   linkType: hard
 
@@ -19325,7 +19315,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-warning@npm:^1.0.2, tiny-warning@npm:^1.0.3":
+"tiny-warning@npm:^1.0.2":
   version: 1.0.3
   resolution: "tiny-warning@npm:1.0.3"
   checksum: 10c0/ef8531f581b30342f29670cb41ca248001c6fd7975ce22122bd59b8d62b4fc84ad4207ee7faa95cde982fa3357cd8f4be650142abc22805538c3b1392d7084fa
