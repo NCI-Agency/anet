@@ -49,7 +49,7 @@ public class ResourceUtils {
       }
 
       // These checks apply for primary positions
-      if (pph.getPrimary() && pph.getEndTime() == null) {
+      if (Boolean.TRUE.equals(pph.getPrimary()) && pph.getEndTime() == null) {
 
         // Check if end time is null more than once
         if (seenPrimaryPositionNullEndTime) {
@@ -82,8 +82,8 @@ public class ResourceUtils {
     }
 
     // Check for conflicts in primary positions
-    List<PersonPositionHistory> primaryPositions =
-        previousPositions.stream().filter(PersonPositionHistory::getPrimary).toList();
+    final List<PersonPositionHistory> primaryPositions =
+        previousPositions.stream().filter(pp -> Boolean.TRUE.equals(pp.getPrimary())).toList();
     final int historySize = primaryPositions.size();
     for (int i = 0; i < historySize; i++) {
       final PersonPositionHistory pph = primaryPositions.get(i);
