@@ -2432,9 +2432,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.37.2":
-  version: 0.37.2
-  resolution: "@graphiql/react@npm:0.37.2"
+"@graphiql/react@npm:^0.37.3":
+  version: 0.37.3
+  resolution: "@graphiql/react@npm:0.37.3"
   dependencies:
     "@graphiql/toolkit": "npm:^0.11.3"
     "@radix-ui/react-dialog": "npm:^1.1"
@@ -2448,7 +2448,7 @@ __metadata:
     jsonc-parser: "npm:^3.3.1"
     markdown-it: "npm:^14.1.0"
     monaco-editor: "npm:0.52.2"
-    monaco-graphql: "npm:^1.7.2"
+    monaco-graphql: "npm:^1.7.3"
     prettier: "npm:^3.5.3"
     set-value: "npm:^4.1.0"
     zustand: "npm:^5"
@@ -2457,7 +2457,7 @@ __metadata:
     react: ^18 || ^19
     react-compiler-runtime: 19.1.0-rc.1
     react-dom: ^18 || ^19
-  checksum: 10c0/6c20baf15aa6bcc5520efae1de13160e90aa1cb540ee65cdde60c4b5cbef4a7ebe27bc01a6c6759a488067aea4b4c427fa4ed7ee29efecb112eff410208b4f26
+  checksum: 10c0/48b48d977805e23238bcd49370e57890b80ffd6b6889f28c7031303b35a5da66019e7330b6e46c666088e3d13eaee44f477ebfd0f407ac9c11af953c47cb1bec
   languageName: node
   linkType: hard
 
@@ -7298,7 +7298,7 @@ __metadata:
     formik: "npm:2.4.9"
     geographiclib-mgrs: "npm:1.0.4"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:5.2.1"
+    graphiql: "npm:5.2.2"
     graphql: "npm:16.12.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -7317,7 +7317,7 @@ __metadata:
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.2"
     leaflet-gesture-handling: "npm:1.2.2"
-    leaflet.fullscreen: "npm:5.0.0"
+    leaflet.fullscreen: "npm:5.1.0"
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
@@ -12428,19 +12428,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:5.2.1":
-  version: 5.2.1
-  resolution: "graphiql@npm:5.2.1"
+"graphiql@npm:5.2.2":
+  version: 5.2.2
+  resolution: "graphiql@npm:5.2.2"
   dependencies:
     "@graphiql/plugin-doc-explorer": "npm:^0.4.1"
     "@graphiql/plugin-history": "npm:^0.4.1"
-    "@graphiql/react": "npm:^0.37.2"
+    "@graphiql/react": "npm:^0.37.3"
     react-compiler-runtime: "npm:19.1.0-rc.1"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/e264bf9e354f72724268b250fecd5690bd6ee84a17cd66060e325e1e48639aa6060c6452d8fd0b845b00197e5366b10bbda411123b508e7d282ad246b28d2f79
+  checksum: 10c0/2f0cd35ef1b9e1fd6b7aa2929fac5be20da4b140915338af518f746771241edba07172e8be1960ee283b5be75abc8471dc7144cf47cb0835b5e70f9ac6620462
   languageName: node
   linkType: hard
 
@@ -14743,12 +14743,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.fullscreen@npm:5.0.0":
-  version: 5.0.0
-  resolution: "leaflet.fullscreen@npm:5.0.0"
+"leaflet.fullscreen@npm:5.1.0":
+  version: 5.1.0
+  resolution: "leaflet.fullscreen@npm:5.1.0"
   peerDependencies:
     leaflet: ^1.7.0 || >=2.0.0-alpha.1
-  checksum: 10c0/6177bb0e06ffc71bd98577f5d9c14c43cd207bd2ffad26af82c4f9c65c5ab2a1980239ccefa520151745bec2eec5691cfe460def825b91e8ba735473bcf5507d
+  checksum: 10c0/f583851fcc6e05ab5bce3bc184f6326c73c70e3eff55dea746e674921d6e3eaf3dcb2c045a0b60adf5d91e05a70fe16af8d748eab74aaece8f5111aaa83b98c8
   languageName: node
   linkType: hard
 
@@ -15661,17 +15661,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-graphql@npm:^1.7.2":
-  version: 1.7.2
-  resolution: "monaco-graphql@npm:1.7.2"
+"monaco-graphql@npm:^1.7.3":
+  version: 1.7.3
+  resolution: "monaco-graphql@npm:1.7.3"
   dependencies:
     graphql-language-service: "npm:^5.5.0"
     picomatch-browser: "npm:^2.2.6"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
-    monaco-editor: ">= 0.20.0 < 1"
+    monaco-editor: ">= 0.20.0 < 0.53"
     prettier: ^2.8.0 || ^3.0.0
-  checksum: 10c0/6a0de634c2d97df91d292ca8f19a7cf84dbc06f7b8b1fc46b07fd1a4fd6c37fde480b605f684d92749804ffeb717277f639ad508421091c70cb8f8c65f39fffd
+  checksum: 10c0/8cf88abbebc989202d99707fc7592e7306cda9a43ecdb74ef486cbd57efb888578f52b134a2ca0fe3a81f9ca884c06f947ff6cbc5db8694b10874a85b3ea47cd
   languageName: node
   linkType: hard
 
