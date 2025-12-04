@@ -14,15 +14,18 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Event, Location } from "models"
+import { PositionRole } from "models/Position"
 import moment from "moment"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import ORGANIZATIONS_ICON from "resources/organizations.png"
-import PEOPLE_ICON from "resources/people.png"
-import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+
+const ROLES = Object.keys(PositionRole)
+const RANKS = Settings.fields.person.ranks.map(rank => rank.value)
+const PEOPLE_ATTENDING_LIMIT = 5
 
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
@@ -68,6 +71,9 @@ const GQL_GET_EVENT_LIST = gql`
         }
         people {
           ${gqlEntityFieldsMap.Person}
+          position {
+            role
+          }
         }
       }
     }
@@ -77,15 +83,38 @@ const GQL_GET_EVENT_LIST = gql`
 interface EventSummaryProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
+  paginationKey?: string
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
   showEventSeries?: boolean
 }
 
 const EventSummary = ({
   pageDispatchers,
   queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination,
   showEventSeries
 }: EventSummaryProps) => {
-  const [pageNum, setPageNum] = useState(0)
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
+  )
+
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      if (paginationKey) {
+        setPagination?.(paginationKey, 0)
+      }
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+
   const eventQuery = {
     ...queryParams,
     pageNum
@@ -98,25 +127,36 @@ const EventSummary = ({
     error,
     pageDispatchers
   })
+
+  const totalCount = done ? null : data?.eventList?.totalCount
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
+
   if (done) {
     return result
   }
 
-  const { totalCount = 0, list: events = [] } = data.eventList
+  const { pageSize, pageNum: curPage, list: events } = data.eventList
   if (_get(events, "length", 0) === 0) {
     return <em>No events found</em>
   }
 
-  const { pageSize } = data.eventList
+  function setPage(newPageNum: number) {
+    if (paginationKey) {
+      setPagination?.(paginationKey, 0)
+    }
+    setPageNum(newPageNum)
+  }
 
   return (
     <div>
       <UltimatePaginationTopDown
         className="float-end"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={setPageNum}
+        pageSize={setPagination && pageSize}
+        pageNum={setPagination && curPage}
+        totalCount={setPagination && totalCount}
+        goToPage={setPagination && setPage}
       >
         {events.map(event => (
           <EventSummaryRow
@@ -138,9 +178,27 @@ interface EventSummaryRowProps {
 const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
   event = new Event(event)
 
+  const sortedAttendees = (event.people || [])
+    .slice()
+    .sort(
+      (a, b) =>
+        // highest position role first
+        ROLES.indexOf(b.position?.role) - ROLES.indexOf(a.position?.role) ||
+        // when these are equal, highest rank first
+        RANKS.indexOf(b.rank) - RANKS.indexOf(a.rank) ||
+        // when these are also equal, sort alphabetically on name
+        a.name?.localeCompare(b.name) ||
+        // last resort: sort by uuid
+        a.uuid.localeCompare(b.uuid)
+    )
+    .slice(0, PEOPLE_ATTENDING_LIMIT)
+
+  const separator = (
+    <span className="border-start border-2 d-inline-block align-middle ms-2 me-1 pt-2 pb-3" />
+  )
   return (
     <Container fluid className="event-summary">
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <span>
             <strong>{Settings.fields.event.name.label}: </strong>
@@ -148,7 +206,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </span>
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <span>
             <strong>{Settings.fields.event.type.label}: </strong>
@@ -156,7 +214,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </span>
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <strong>{Settings.fields.event.startDate.label}: </strong>
           <Badge bg="secondary" className="engagement-date">
@@ -164,7 +222,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </Badge>
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <strong>{Settings.fields.event.endDate.label}: </strong>
           <Badge bg="secondary" className="engagement-date">
@@ -173,7 +231,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Col>
       </Row>
       {!_isEmpty(event.ownerOrg) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.ownerOrg.label}: </strong>
@@ -183,7 +241,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.hostOrg) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.hostOrg.label}: </strong>
@@ -193,7 +251,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.adminOrg) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.adminOrg.label}: </strong>
@@ -203,7 +261,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {showEventSeries && !_isEmpty(event.eventSeries) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.eventSeries.label}: </strong>
@@ -213,7 +271,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.location) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.location.label}: </strong>
@@ -228,15 +286,13 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.tasks) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.tasks.label}:</strong>{" "}
               {event.tasks.map((task, i) => (
                 <React.Fragment key={task.uuid}>
-                  {i > 0 && (
-                    <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />
-                  )}
+                  {i > 0 && separator}
                   <BreadcrumbTrail
                     modelType="Task"
                     leaf={task}
@@ -250,20 +306,18 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.organizations) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.organizations.label}:</strong>{" "}
               {event.organizations.map((organization, i) => (
                 <React.Fragment key={organization.uuid}>
-                  {i > 0 && (
-                    <img
-                      src={ORGANIZATIONS_ICON}
-                      alt="★"
-                      className="ms-1 me-1"
-                    />
-                  )}
-                  <LinkTo modelType="Organization" model={organization} />
+                  {i > 0 && separator}
+                  <LinkTo
+                    modelType="Organization"
+                    model={organization}
+                    showIcon={false}
+                  />
                 </React.Fragment>
               ))}
             </span>
@@ -271,18 +325,22 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.people) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.people.label}:</strong>{" "}
-              {event.people.map((person, i) => (
+              {sortedAttendees.map((person, i) => (
                 <React.Fragment key={person.uuid}>
-                  {i > 0 && (
-                    <img src={PEOPLE_ICON} alt="★" className="ms-1 me-1" />
-                  )}
-                  <LinkTo modelType="Person" model={person} />
+                  {i > 0 && separator}
+                  <LinkTo modelType="Person" model={person} showIcon={false} />
                 </React.Fragment>
               ))}
+              {event.people.length > PEOPLE_ATTENDING_LIMIT && (
+                <>
+                  {separator}
+                  <em>and more…</em>
+                </>
+              )}
             </span>
           </Col>
         </Row>

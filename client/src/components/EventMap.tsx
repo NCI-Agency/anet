@@ -10,7 +10,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import React from "react"
+import React, { useEffect } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_EVENT_LIST = gql`
@@ -35,6 +35,7 @@ const GQL_GET_EVENT_LIST = gql`
 interface EventMapProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
   // pass mapId explicitly when you have more than one map on a page (else the default is fine):
   mapId: string
   width?: number | string
@@ -45,6 +46,7 @@ interface EventMapProps {
 const EventMap = ({
   pageDispatchers,
   queryParams,
+  setTotalCount,
   mapId = "events",
   width,
   height,
@@ -59,6 +61,12 @@ const EventMap = ({
     error,
     pageDispatchers
   })
+
+  const totalCount = done ? null : data?.eventList?.totalCount
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
+
   if (done) {
     return result
   }
