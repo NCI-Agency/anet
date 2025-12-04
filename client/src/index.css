@@ -1350,7 +1350,9 @@ header.searchPagination {
 }
 
 #fg-position .col-sm-3,
-#fg-prevPositions .col-sm-3 {
+#fg-additionalPositions .col-sm-3,
+#fg-prevPositions .col-sm-3,
+#fg-prevAdditionalPositions .col-sm-3 {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -1358,7 +1360,9 @@ header.searchPagination {
 }
 
 #fg-position .col-sm-3 > *,
-#fg-prevPositions .col-sm-3 > * {
+#fg-additionalPosition .col-sm-3 > *,
+#fg-prevPositions .col-sm-3 > *,
+#fg-prevAdditionalPositions .col-sm-3 > * {
   margin-left: 10px;
 }
 
