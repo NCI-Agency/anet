@@ -692,7 +692,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         // Store the history as given
         for (final PersonPositionHistory history : p.getPreviousPositions()) {
           updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
-              history.getEndTime(), history.getPrimary());
+              history.getEndTime(), Boolean.TRUE.equals(history.getPrimary()));
         }
       }
       return numRows;
