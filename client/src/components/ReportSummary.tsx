@@ -21,7 +21,6 @@ import moment from "moment"
 import pluralize from "pluralize"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
-import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
 
@@ -164,6 +163,9 @@ interface ReportSummaryRowProps {
 const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
   report = new Report(report)
   const className = `report-${report.getStateForClassName()}`
+  const separator = (
+    <span className="border-start border-2 d-inline-block align-middle ms-2 me-1 pt-2 pb-3" />
+  )
 
   return (
     <Container fluid className="report-summary">
@@ -316,9 +318,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
               <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
               {report.tasks.map((task, i) => (
                 <React.Fragment key={task.uuid}>
-                  {i > 0 && (
-                    <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />
-                  )}
+                  {i > 0 && separator}
                   <BreadcrumbTrail
                     modelType="Task"
                     leaf={task}
