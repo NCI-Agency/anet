@@ -198,7 +198,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
   )
   return (
     <Container fluid className="event-summary">
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <span>
             <strong>{Settings.fields.event.name.label}: </strong>
@@ -206,7 +206,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </span>
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <span>
             <strong>{Settings.fields.event.type.label}: </strong>
@@ -214,7 +214,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </span>
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <strong>{Settings.fields.event.startDate.label}: </strong>
           <Badge bg="secondary" className="engagement-date">
@@ -222,7 +222,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </Badge>
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <strong>{Settings.fields.event.endDate.label}: </strong>
           <Badge bg="secondary" className="engagement-date">
@@ -231,7 +231,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Col>
       </Row>
       {!_isEmpty(event.ownerOrg) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.ownerOrg.label}: </strong>
@@ -241,7 +241,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.hostOrg) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.hostOrg.label}: </strong>
@@ -251,7 +251,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.adminOrg) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.adminOrg.label}: </strong>
@@ -261,7 +261,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {showEventSeries && !_isEmpty(event.eventSeries) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.eventSeries.label}: </strong>
@@ -271,7 +271,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.location) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.location.label}: </strong>
@@ -286,7 +286,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.tasks) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.tasks.label}:</strong>{" "}
@@ -306,7 +306,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.organizations) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.organizations.label}:</strong>{" "}
@@ -325,7 +325,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         </Row>
       )}
       {!_isEmpty(event.people) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.people.label}:</strong>{" "}

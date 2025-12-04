@@ -220,7 +220,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
         </>
       )}
 
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.engagementDate && (
             <Badge bg="secondary" className="engagement-date">
@@ -231,7 +231,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           )}
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           <LinkTo modelType="Person" model={report.primaryAdvisor} />
           <span>
@@ -256,7 +256,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
         </Col>
       </Row>
       {!_isEmpty(report.location) && (
-        <Row>
+        <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.report.location?.label}: </strong>
@@ -270,7 +270,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           </Col>
         </Row>
       )}
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.intent && (
             <span>
@@ -280,7 +280,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           )}
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.keyOutcomes && (
             <span>
@@ -290,7 +290,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           )}
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.nextSteps && (
             <span>
@@ -300,7 +300,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           )}
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.atmosphere && (
             <span>
@@ -311,7 +311,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           )}
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.tasks.length > 0 && (
             <span>
@@ -331,7 +331,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           )}
         </Col>
       </Row>
-      <Row>
+      <Row className="my-1">
         <Col md={12}>
           {report.attachments.length > 0 && (
             <span>
