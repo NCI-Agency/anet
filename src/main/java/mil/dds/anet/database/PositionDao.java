@@ -711,7 +711,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         // Add new history
         for (final PersonPositionHistory history : pos.getPreviousPeople()) {
           personDao.updatePeoplePositions(posUuid, history.getPersonUuid(), history.getStartTime(),
-              history.getEndTime(), history.getPrimary());
+              history.getEndTime(), Boolean.TRUE.equals(history.getPrimary()));
         }
       }
       return numRows;
