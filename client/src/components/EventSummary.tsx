@@ -21,8 +21,6 @@ import moment from "moment"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import ORGANIZATIONS_ICON from "resources/organizations.png"
-import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
 const ROLES = Object.keys(PositionRole)
@@ -73,6 +71,9 @@ const GQL_GET_EVENT_LIST = gql`
         }
         people {
           ${gqlEntityFieldsMap.Person}
+          position {
+            role
+          }
         }
       }
     }
@@ -179,28 +180,22 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
 
   const sortedAttendees = (event.people || [])
     .slice()
-    .sort((a, b) => {
-      const roleDiff = ROLES.indexOf(b.role) - ROLES.indexOf(a.role)
-      if (roleDiff !== 0) {
-        return roleDiff
-      }
-
-      const rankDiff = RANKS.indexOf(b.rank) - RANKS.indexOf(a.rank)
-      if (rankDiff !== 0) {
-        return rankDiff
-      }
-
-      const nameA = a.name || ""
-      const nameB = b.name || ""
-      const nameDiff = nameA.localeCompare(nameB)
-      if (nameDiff !== 0) {
-        return nameDiff
-      }
-
-      return a.uuid.localeCompare(b.uuid)
-    })
+    .sort(
+      (a, b) =>
+        // highest position role first
+        ROLES.indexOf(b.position?.role) - ROLES.indexOf(a.position?.role) ||
+        // when these are equal, highest rank first
+        RANKS.indexOf(b.rank) - RANKS.indexOf(a.rank) ||
+        // when these are also equal, sort alphabetically on name
+        a.name?.localeCompare(b.name) ||
+        // last resort: sort by uuid
+        a.uuid.localeCompare(b.uuid)
+    )
     .slice(0, PEOPLE_ATTENDING_LIMIT)
 
+  const separator = (
+    <span className="border-start border-2 d-inline-block align-middle ms-2 me-1 pt-2 pb-3" />
+  )
   return (
     <Container fluid className="event-summary">
       <Row>
@@ -297,9 +292,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
               <strong>{Settings.fields.event.tasks.label}:</strong>{" "}
               {event.tasks.map((task, i) => (
                 <React.Fragment key={task.uuid}>
-                  {i > 0 && (
-                    <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />
-                  )}
+                  {i > 0 && separator}
                   <BreadcrumbTrail
                     modelType="Task"
                     leaf={task}
@@ -319,14 +312,12 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
               <strong>{Settings.fields.event.organizations.label}:</strong>{" "}
               {event.organizations.map((organization, i) => (
                 <React.Fragment key={organization.uuid}>
-                  {i > 0 && (
-                    <img
-                      src={ORGANIZATIONS_ICON}
-                      alt="★"
-                      className="ms-1 me-1"
-                    />
-                  )}
-                  <LinkTo modelType="Organization" model={organization} />
+                  {i > 0 && separator}
+                  <LinkTo
+                    modelType="Organization"
+                    model={organization}
+                    showIcon={false}
+                  />
                 </React.Fragment>
               ))}
             </span>
@@ -340,10 +331,16 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
               <strong>{Settings.fields.event.people.label}:</strong>{" "}
               {sortedAttendees.map((person, i) => (
                 <React.Fragment key={person.uuid}>
-                  {i > 0 && <span className="px-1">|</span>}
+                  {i > 0 && separator}
                   <LinkTo modelType="Person" model={person} showIcon={false} />
                 </React.Fragment>
               ))}
+              {event.people.length > PEOPLE_ATTENDING_LIMIT && (
+                <>
+                  {separator}
+                  <em>and more…</em>
+                </>
+              )}
             </span>
           </Col>
         </Row>
