@@ -142,7 +142,12 @@ function EditHistory({
           >
             {({ values, setFieldValue, setValues }) => {
               // Get overlapping items' indexes, e.g.[ [0,1], [2,3] ] means 0th and 1st overlaps, 2nd and 3rd overlaps
-              const overlapArrays = getOverlappingDateIndexes(values.history)
+              // Only check overlapping for primary positions
+              const overlapArrays = getOverlappingDateIndexes(
+                values.history.filter(
+                  previousPosition => previousPosition.primary
+                )
+              )
               // Flatten the above array for getting unique indexes, e.g. [[0, 1], [0,2]] => [0,1,2]
               const overlappingIndexesSet = new Set(overlapArrays.flat())
               const invalidDateIndexesSet = new Set(
@@ -157,20 +162,28 @@ function EditHistory({
                 )
               )
               const hasCurrent = !_isEmpty(currentlyOccupyingEntity)
-              const lastItem = values.history[values.history.length - 1]
-              // For last item to be valid:
-              // 1- If there is no currently occupying entity
+              // Get last primary position
+              const lastItem = values.history.filter(h => h.primary)[
+                values.history.length - 1
+              ]
+              // Validate:
+              // 1- No last primary position -> valid
+              // 2- If there is no currently occupying entity
               //    a- The end time of last item shouldn't be null
-              // 2- If there is a currently occupying entity
+              // 3- If there is a currently occupying entity
               //    a- The last entity should be same with currently occupying
               //    b- The end time of last entity should be null or undefined ( meaning continuing range)
               const validWhenNoOccupant =
-                !hasCurrent && (!lastItem || lastItem?.endTime)
+                !lastItem ||
+                !lastItem.primary ||
+                (!hasCurrent && (!lastItem || lastItem?.endTime))
               const validWhenOccupant =
-                hasCurrent &&
-                currentlyOccupyingEntity?.uuid ===
-                  lastItem?.[historyEntityType]?.uuid &&
-                lastItem?.endTime == null
+                !lastItem ||
+                !lastItem.primary ||
+                (hasCurrent &&
+                  currentlyOccupyingEntity?.uuid ===
+                    lastItem?.[historyEntityType]?.uuid &&
+                  lastItem?.endTime == null)
               const validLastItem = validWhenNoOccupant || validWhenOccupant
 
               return (
@@ -232,7 +245,6 @@ function EditHistory({
                             idx === values.history.length - 1 &&
                             item[historyEntityType]?.uuid ===
                               currentlyOccupyingEntity.uuid
-
                           if (isCurrent) {
                             item.endTime = null
                           }
@@ -250,13 +262,7 @@ function EditHistory({
                               )}
                             >
                               <Fieldset
-                                title={`${idx + 1}-) ${
-                                  item[historyEntityType].name
-                                } ${
-                                  isCurrent
-                                    ? `(Current ${historyEntityType})`
-                                    : ""
-                                }`}
+                                title={`${idx + 1}-) ${values.history[idx].primary ? "✔️" : ""} ${item[historyEntityType].name} ${isCurrent ? `(Current ${historyEntityType})` : ""}`}
                                 action={
                                   !isCurrent && (
                                     <RemoveButton

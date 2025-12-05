@@ -40,6 +40,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionsTable from "components/PositionsTable"
 import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
@@ -72,6 +73,12 @@ const GQL_GET_PERSON = gql`
       ${Person.allFieldsQuery}
       authorizationGroups {
         ${gqlEntityFieldsMap.AuthorizationGroup}
+      }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
       }
       attachments {
         ${gqlAllAttachmentFields}
@@ -218,7 +225,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   const extraColElems = {
     position: getPositionActions(),
-    prevPositions: getPreviousPositionsActions()
+    prevPositions: getPreviousPositionsActions(),
+    prevAdditionalPositions: getPreviousPositionsActions()
   }
 
   // Keys of fields which should span over 2 columns
@@ -510,7 +518,14 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           Settings.dateFormats.forms.displayShort.date
         ),
       position: getPositionHumanValue(),
+      additionalPositions: (
+        <PositionsTable
+          label="Additional Positions"
+          positions={person.additionalPositions}
+        />
+      ),
       prevPositions: getPrevPositionsHumanValue(),
+      prevAdditionalPositions: getPrevAdditionalPositionsHumanValue(),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
@@ -632,7 +647,19 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   }
 
   function getPrevPositionsHumanValue() {
-    return <PreviousPositions history={person.previousPositions} />
+    return (
+      <PreviousPositions
+        history={person.previousPositions.filter(pp => pp.primary)}
+      />
+    )
+  }
+
+  function getPrevAdditionalPositionsHumanValue() {
+    return (
+      <PreviousPositions
+        history={person.previousPositions.filter(pp => !pp.primary)}
+      />
+    )
   }
 
   function renderCounterparts(position) {

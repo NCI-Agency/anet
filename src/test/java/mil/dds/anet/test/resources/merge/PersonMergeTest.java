@@ -81,8 +81,8 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(created.getName()).isEqualTo(testInput.getName());
 
     // Assign the loser into the position
-    Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(loser1), created.getUuid()));
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(loser1), true, created.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput testInput1 = PositionInput.builder().withType(PositionType.REGULAR)
@@ -110,11 +110,12 @@ class PersonMergeTest extends AbstractResourceTest {
     final PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
-        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1).build();
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPrimary(true)
+        .withPosition(posInput1).build();
     final PersonPositionHistoryInput hist2 =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
             .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
-            .withPosition(posInput2).build();
+            .withPrimary(true).withPosition(posInput2).build();
 
     final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
     historyList.add(hist1);
@@ -210,8 +211,8 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(loser2).isNotNull();
     assertThat(loser2.getUuid()).isNotNull();
 
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.putPersonInPosition("", getPersonInput(loser2), created.getUuid()));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(loser2), true, created.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     nrUpdated = withCredentials(adminUser,
