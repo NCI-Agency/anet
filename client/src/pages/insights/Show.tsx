@@ -7,6 +7,7 @@ import {
 } from "actions"
 import FilterableAdvisorReportsTable from "components/AdvisorReports/FilterableAdvisorReportsTable"
 import AppContext from "components/AppContext"
+import CadenceDashboard from "components/CadenceDashboard"
 import CancelledEngagementReports from "components/CancelledEngagementReports"
 import Fieldset from "components/Fieldset"
 import FutureEngagementsByLocation from "components/FutureEngagementsByLocation"
@@ -39,6 +40,7 @@ export const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
 export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 export const ADVISOR_REPORTS = "advisor-reports"
+export const CADENCE_DASHBOARD = "cadence-dashboard"
 
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS,
@@ -47,7 +49,8 @@ export const INSIGHTS = [
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
   PENDING_ASSESSMENTS_BY_POSITION,
-  ADVISOR_REPORTS
+  ADVISOR_REPORTS,
+  CADENCE_DASHBOARD
 ]
 
 const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
@@ -102,6 +105,12 @@ export const INSIGHT_DETAILS = {
     component: FilterableAdvisorReportsTable,
     navTitle: `${Settings.fields.advisor.person.name} Reports`,
     title: `${Settings.fields.advisor.person.name} Reports`
+  },
+  [CADENCE_DASHBOARD]: {
+    searchProps: DEFAULT_SEARCH_PROPS,
+    component: CadenceDashboard,
+    navTitle: `Candence Dashboard`,
+    title: `Cadence Dashboard`
   }
 }
 
@@ -190,7 +199,8 @@ const InsightsShow = ({
       hasPendingAssessments: true,
       ...orgQuery
     },
-    [ADVISOR_REPORTS]: {}
+    [ADVISOR_REPORTS]: {},
+    [CADENCE_DASHBOARD]: {}
   }
   let queryParams
   if (searchQuery === DEFAULT_SEARCH_QUERY) {

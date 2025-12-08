@@ -6,9 +6,12 @@ import {
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { AuthorizationGroupOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import AuthorizationGroupMembersTable from "components/AuthorizationGroupMembersTable"
 import DictionaryField from "components/DictionaryField"
+import EngagementsBetweenCommunitiesMatrix from "components/EngagementsBetweenCommunitiesMatrix"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -28,6 +31,7 @@ import { AuthorizationGroup } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import COMMUNITIES_ICON from "resources/communities.png"
 import Settings from "settings"
 import utils from "utils"
 
@@ -64,6 +68,10 @@ const AuthorizationGroupShow = ({
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state?.success
   const [stateError, setStateError] = useState(routerLocation.state?.error)
+  const [
+    matrixAuthorizationGroupInterlocutors,
+    setMatrixAuthorizationGroupInterlocutors
+  ] = useState(undefined)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
     { uuid }
@@ -107,6 +115,28 @@ const AuthorizationGroupShow = ({
       <FindObjectsButton objectLabel="Community" searchText={searchText} />
     </>
   )
+
+  const handleChangeAuthorizationGroupInterlocutors = async selected => {
+    if (!selected) {
+      setMatrixAuthorizationGroupInterlocutors(null)
+      return
+    }
+
+    const uuid = selected.uuid
+
+    try {
+      const result = await API.client.query({
+        query: GQL_GET_AUTHORIZATION_GROUP,
+        variables: { uuid },
+        fetchPolicy: "network-only"
+      })
+      if (result?.data?.authorizationGroup) {
+        setMatrixAuthorizationGroupInterlocutors(result.data.authorizationGroup)
+      }
+    } catch (err) {
+      console.error("Failed to fetch authorization group", err)
+    }
+  }
 
   return (
     <div>
@@ -220,6 +250,37 @@ const AuthorizationGroupShow = ({
             }}
             mapId="reportsWithSensitiveInformation"
           />
+        </Fieldset>
+        <Fieldset
+          id="engagementsBetweenCommunitiesMatrix"
+          title={`Engagements matrix for ${authorizationGroup.name}`}
+        >
+          <label
+            htmlFor="authorizationGroup"
+            style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}
+          >
+            Select the community with interlocutors
+          </label>
+          <AdvancedSingleSelect
+            fieldName="authorizationGroup"
+            placeholder={Settings.fields.authorizationGroup.placeholder}
+            value={matrixAuthorizationGroupInterlocutors}
+            overlayColumns={["Name"]}
+            overlayRenderRow={AuthorizationGroupOverlayRow}
+            objectType={AuthorizationGroup}
+            fields={AuthorizationGroup.autocompleteQuery}
+            valueKey="name"
+            addon={COMMUNITIES_ICON}
+            onChange={handleChangeAuthorizationGroupInterlocutors}
+          />
+          {authorizationGroup && matrixAuthorizationGroupInterlocutors && (
+            <EngagementsBetweenCommunitiesMatrix
+              authorizationGroupAdvisors={authorizationGroup}
+              authorizationGroupInterlocutors={
+                matrixAuthorizationGroupInterlocutors
+              }
+            />
+          )}
         </Fieldset>
       </div>
     </div>
