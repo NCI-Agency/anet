@@ -55,7 +55,7 @@ const AssignPersonModal = ({
   )
 
   const [error, setError] = useState(null)
-  const [person, setPerson] = useState(position && position.person)
+  const [person, setPerson] = useState(position?.person)
   const [removeUser, setRemoveUser] = useState(false)
 
   const save = useCallback(
@@ -71,80 +71,92 @@ const AssignPersonModal = ({
         variables = {
           uuid: position.uuid,
           person: { uuid: person.uuid },
-          primary: primary
+          primary
         }
       }
       API.mutation(graphql, variables).then(onSuccess).catch(setError)
     },
-    [position, person, onSuccess]
+    [position, onSuccess]
   )
 
   useEffect(() => {
     if (!positionPropUnchanged) {
       latestPositionProp.current = position
-      setPerson(position && position.person)
+      setPerson(position?.person)
     }
   }, [positionPropUnchanged, position])
 
   useEffect(() => {
-    let newError = null
+    const personWillBeRemoved = (
+      <>
+        <b>
+          <LinkTo modelType="Person" model={person} isLink={false} />
+        </b>{" "}
+        is currently assigned to the{" "}
+        <b>
+          <LinkTo
+            modelType="Position"
+            model={person?.position}
+            isLink={false}
+          />
+        </b>{" "}
+        position. By saving them as primary, their primary position will be left
+        unfilled
+      </>
+    )
+    const permissionsWillBeConvertedToRegularType = (
+      <>
+        and the position's permissions will be converted from{" "}
+        <b>{Position.convertType(person?.position?.type)}</b> to{" "}
+        <b>{Settings.fields.regular.position.type}</b>.
+      </>
+    )
+    const permissionsWillBeConvertedFromOldTypeToCurrentType = (
+      <>
+        Furthermore, permissions of the <b>{position?.name}</b> position will be
+        converted from <b>{Position.convertType(position?.type)}</b> to{" "}
+        <b>{Position.convertType(person?.position?.type)}</b>.
+      </>
+    )
+    const positionPermissionsWillBeConvertedToRegularType = (
+      <>
+        If you save, permissions of the <b>{position.name}</b> position will be
+        converted from <b>{Position.convertType(position.type)}</b> to{" "}
+        <b>{Settings.fields.regular.position.type}</b>.
+      </>
+    )
+
+    let errorMessage
     if (
       !_isEmpty(person) &&
       !_isEmpty(person.position) &&
       person.position.uuid !== position.uuid
     ) {
-      const errorMessage = (
+      errorMessage = (
         <>
-          <b>
-            <LinkTo modelType="Person" model={person} isLink={false} />
-          </b>{" "}
-          is currently assigned to the{" "}
-          <b>
-            <LinkTo
-              modelType="Position"
-              model={person.position}
-              isLink={false}
-            />
-          </b>{" "}
-          position. By saving them as primary, their primary position will be
-          left unfilled
-          {person.position.type !== Position.TYPE.REGULAR ? (
+          {personWillBeRemoved}
+          {!Position.isRegular(person.position) ? (
             <>
               {" "}
-              and the position's permissions will be converted from{" "}
-              <b>{Position.convertType(person.position.type)}</b> to{" "}
-              <b>{Settings.fields.regular.position.type}</b>.
+              {permissionsWillBeConvertedToRegularType}
+              {position.type !== person.position.type && (
+                <> {permissionsWillBeConvertedFromOldTypeToCurrentType}</>
+              )}{" "}
+              <b>You can also save as an additional position.</b>
             </>
           ) : (
             <>.</>
           )}
-          {position.type !== person.position.type && (
-            <>
-              {" "}
-              Furthermore, permissions of the <b>{position.name}</b> position
-              will be converted from{" "}
-              <b>{Position.convertType(position.type)}</b> to{" "}
-              <b>{Position.convertType(person.position.type)}</b>.
-            </>
-          )}
-          <b>You can also save as an additional position.</b>
         </>
       )
-      newError = { message: errorMessage }
     } else if (
       !Position.isRegular(latestPositionProp.current) &&
       (removeUser || !person)
     ) {
-      const errorMessage = (
-        <>
-          If you save, permissions of the <b>{position.name}</b> position will
-          be converted from <b>{Position.convertType(position.type)}</b> to{" "}
-          <b>{Settings.fields.regular.position.type}</b>.
-        </>
-      )
-      newError = { message: errorMessage }
+      errorMessage = positionPermissionsWillBeConvertedToRegularType
     }
-    setError(newError)
+
+    setError(errorMessage ? { message: errorMessage } : null)
   }, [person, position, removeUser])
 
   const personFilters = {
@@ -227,7 +239,7 @@ const AssignPersonModal = ({
                 </FormGroup>
               </Col>
             </Row>
-            {person && person.uuid && (
+            {person?.uuid && (
               <Table striped hover responsive>
                 <thead>
                   <tr>
@@ -318,6 +330,7 @@ const AssignPersonModal = ({
     // Reset state before closing (cancel)
     setPerson(position.person)
     setRemoveUser(false)
+    setError(null)
     onCancel()
   }
 }
