@@ -327,6 +327,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           <AssignPositionModal
             showModal={showAssignPositionModal}
             person={person}
+            currentPosition={person?.position}
+            primary
             onCancel={() => hideAssignPositionModal(false)}
             onSuccess={() => hideAssignPositionModal(true)}
           />
@@ -519,7 +521,11 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       additionalPositions: (
         <PositionsTable
           label={Settings.fields.person.additionalPositions?.label}
+          person={person}
           positions={person.additionalPositions}
+          canEditPosition={canEditPosition}
+          canAssignPosition={canAssignPosition}
+          updateCallback={refetch}
         />
       ),
       prevPositions: getPrevPositionsHumanValue(),

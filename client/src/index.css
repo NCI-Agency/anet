@@ -1360,10 +1360,21 @@ header.searchPagination {
 }
 
 #fg-position .col-sm-3 > *,
-#fg-additionalPosition .col-sm-3 > *,
+#fg-additionalPositions .col-sm-3 > *,
 #fg-prevPositions .col-sm-3 > *,
 #fg-prevAdditionalPositions .col-sm-3 > * {
   margin-left: 10px;
+}
+
+#fg-additionalPositions .col-sm-8 {
+  padding-right: 0;
+  & td.w-25,
+  & span.w-25 {
+    padding-right: 0;
+    & .col-sm-3 {
+      padding-right: calc(var(--bs-gutter-x)*0.5);
+    }
+  }
 }
 
 #fg-prevPositions .col-sm-8,

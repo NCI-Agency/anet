@@ -37,13 +37,15 @@ const GQL_DELETE_PERSON_FROM_POSITION = gql`
 `
 
 const GQL_PUT_PERSON_IN_POSITION = gql`
-  mutation ($uuid: String!, $person: PersonInput!) {
-    putPersonInPosition(uuid: $uuid, person: $person)
+  mutation ($uuid: String!, $person: PersonInput!, $primary: Boolean) {
+    putPersonInPosition(uuid: $uuid, person: $person, primary: $primary)
   }
 `
 
 interface AssignPositionModalProps {
   person: any
+  currentPosition: any
+  primary?: boolean
   showModal?: boolean
   onCancel: (...args: unknown[]) => unknown
   onSuccess: (...args: unknown[]) => unknown
@@ -51,6 +53,8 @@ interface AssignPositionModalProps {
 
 const AssignPositionModal = ({
   person,
+  currentPosition,
+  primary = true,
   showModal,
   onCancel,
   onSuccess
@@ -64,130 +68,127 @@ const AssignPositionModal = ({
   )
 
   const [error, setError] = useState(null)
-  const [position, setPosition] = useState(person && person.position)
-  const [doSave, setDoSave] = useState(false)
+  const [position, setPosition] = useState(currentPosition)
+  useEffect(() => {
+    setPosition(currentPosition)
+  }, [currentPosition])
+
   const [removeUser, setRemoveUser] = useState(false)
 
-  const save = useCallback(() => {
-    let graphql, variables
-    if (position === null) {
-      graphql = GQL_DELETE_PERSON_FROM_POSITION
-      variables = {
-        uuid: person.position.uuid
+  const save = useCallback(
+    (position = null, primary = false) => {
+      let graphql, variables
+      if (position === null) {
+        graphql = GQL_DELETE_PERSON_FROM_POSITION
+        variables = {
+          uuid: currentPosition?.uuid
+        }
+      } else {
+        graphql = GQL_PUT_PERSON_IN_POSITION
+        variables = {
+          uuid: position.uuid,
+          person: { uuid: latestPersonProp.current.uuid },
+          primary
+        }
       }
-    } else {
-      graphql = GQL_PUT_PERSON_IN_POSITION
-      variables = {
-        uuid: position.uuid,
-        person: { uuid: person.uuid }
-      }
-    }
-    API.mutation(graphql, variables).then(onSuccess).catch(setError)
-  }, [position, person, onSuccess])
+      API.mutation(graphql, variables).then(onSuccess).catch(setError)
+    },
+    [currentPosition, onSuccess]
+  )
 
   useEffect(() => {
     if (!personPropUnchanged) {
       latestPersonProp.current = person
-      setPosition(person && person.position)
+      setPosition(currentPosition)
     }
-  }, [personPropUnchanged, person])
+  }, [personPropUnchanged, person, currentPosition])
 
   useEffect(() => {
-    if (doSave) {
-      setDoSave(false)
-      save()
-    }
-  }, [doSave, save])
+    const personWillBeRemoved = (
+      <li>
+        This position is currently held by{" "}
+        <b>
+          <LinkTo modelType="Person" model={position?.person} isLink={false} />
+        </b>
+        . By selecting this position, they will be removed.
+      </li>
+    )
+    const permissionsWillBeConvertedToRegularType = (
+      <li>
+        Permissions of the <b>{currentPosition?.name}</b> position will be
+        converted from <b>{Position.convertType(currentPosition?.type)}</b> to{" "}
+        <b>{Settings.fields.regular.position.type}</b>.
+      </li>
+    )
+    const permissionsWillBeConvertedFromOldTypeToCurrentType = (
+      <li>
+        Permissions of the{" "}
+        <b>
+          <LinkTo modelType="Position" model={position} isLink={false} />
+        </b>{" "}
+        position will be converted from{" "}
+        <b>{Position.convertType(position?.type)}</b> to{" "}
+        <b>{Position.convertType(currentPosition?.type)}</b>.{" "}
+      </li>
+    )
+    const permissionsWillBeConvertedToCurrentPositionType = (
+      <li>
+        Permissions of the <b>{position?.name}</b> position will be converted to{" "}
+        <b>{Position.convertType(currentPosition?.type)}</b>.
+      </li>
+    )
 
-  useEffect(() => {
-    let newError = null
-    if (
-      !_isEmpty(position) &&
-      !_isEmpty(position.person) &&
-      position.person.uuid !== person.uuid
-    ) {
-      const errorMessage = (
-        <>
-          This position is currently held by{" "}
-          <b>
-            <LinkTo modelType="Person" model={position.person} isLink={false} />
-          </b>
-          . By selecting this position, they will be removed.
-          {person.position.type !== position.type ? (
-            <>
-              {" "}
-              Permissions of the{" "}
-              <b>
-                <LinkTo modelType="Position" model={position} isLink={false} />
-              </b>{" "}
-              position will be converted from{" "}
-              <b>{Position.convertType(position.type)}</b> to{" "}
-              <b>{Position.convertType(person.position.type)}</b>.
-              {person.position.type !== Position.TYPE.REGULAR && (
-                <>
-                  {" "}
-                  Furthermore, permissions of the
-                  <b>{person.position.name}</b> position will be converted from{" "}
-                  <b>{Position.convertType(person.position.type)}</b> to{" "}
-                  <b>{Settings.fields.regular.position.type}</b>.
-                </>
-              )}
-            </>
-          ) : (
-            person.position.type !== Position.TYPE.REGULAR && (
-              <>
-                {" "}
-                Permissions of the <b>{person.position.name}</b> position will
-                be converted from{" "}
-                <b>{Position.convertType(person.position.type)}</b> to{" "}
-                <b>{Settings.fields.regular.position.type}</b>.
-              </>
-            )
-          )}
-        </>
-      )
-      newError = { message: errorMessage }
-    } else if (
-      position !== null &&
-      position.name !== person.position.name &&
-      _isEmpty(position.person) &&
-      !_isEmpty(person.position) &&
-      person.position.type !== Position.TYPE.REGULAR
-    ) {
-      const errorMessage = (
-        <>
-          Permissions of the <b>{person.position.name}</b> position will be
-          converted from <b>{Position.convertType(person.position.type)}</b> to{" "}
-          <b>{Settings.fields.regular.position.type}</b>
-          {person.position.type !== Position.TYPE.REGULAR ? (
-            <>
-              {" "}
-              and permissions of the <b>{position.name}</b> position will be
-              converted to <b>{Position.convertType(person.position.type)}</b>.
-            </>
-          ) : (
-            <>.</>
-          )}
-        </>
-      )
-      newError = { message: errorMessage }
-    } else if (
-      !Position.isRegular(latestPersonProp.current.position) &&
-      !_isEmpty(person.position) &&
-      (removeUser || !position)
-    ) {
-      const errorMessage = (
-        <>
-          If you save, permissions of the <b>{person.position.name}</b> position
-          will be converted from{" "}
-          <b>{Position.convertType(person.position.type)}</b> to{" "}
-          <b>{Settings.fields.regular.position.type}</b>.
-        </>
-      )
-      newError = { message: errorMessage }
+    let errorMessage
+    const positionOccupiedByDifferentPerson =
+      !_isEmpty(position?.person) &&
+      position.person.uuid !== latestPersonProp.current.uuid
+    if (positionOccupiedByDifferentPerson) {
+      errorMessage = personWillBeRemoved
     }
-    setError(newError)
-  }, [position, person, removeUser])
+
+    if (primary && !_isEmpty(currentPosition)) {
+      if (positionOccupiedByDifferentPerson) {
+        if (!Position.isRegular(currentPosition)) {
+          errorMessage = (
+            <>
+              {errorMessage}
+              {permissionsWillBeConvertedToRegularType}
+            </>
+          )
+        }
+        if (currentPosition.type !== position.type) {
+          errorMessage = (
+            <>
+              {errorMessage}
+              {permissionsWillBeConvertedFromOldTypeToCurrentType}
+            </>
+          )
+        }
+      } else if (
+        !!position &&
+        position.uuid !== currentPosition?.uuid &&
+        _isEmpty(position.person) &&
+        !Position.isRegular(currentPosition)
+      ) {
+        errorMessage = permissionsWillBeConvertedToRegularType
+        if (!Position.isRegular(currentPosition)) {
+          errorMessage = (
+            <>
+              {errorMessage}
+              {permissionsWillBeConvertedToCurrentPositionType}
+            </>
+          )
+        }
+      } else if (
+        !Position.isRegular(currentPosition) &&
+        (removeUser || !position)
+      ) {
+        errorMessage = <>{permissionsWillBeConvertedToRegularType}</>
+      }
+    }
+
+    setError(errorMessage ? { message: <ul>{errorMessage}</ul> } : null)
+  }, [position, currentPosition, primary, removeUser])
 
   const newPosition = position ? new Position(position) : new Position()
 
@@ -229,19 +230,19 @@ const AssignPositionModal = ({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {person.position.uuid && (
+        {currentPosition?.uuid && (
           <div style={{ textAlign: "center" }}>
             {!removeUser && (
               <>
                 <Button
                   variant="danger"
                   onClick={() => {
-                    if (Position.isRegular(latestPersonProp.current.position)) {
+                    if (Position.isRegular(currentPosition)) {
                       setPosition(null)
-                      setDoSave(true)
+                      save()
                     } else {
                       setRemoveUser(true)
-                      setPosition(person.position)
+                      setPosition(currentPosition)
                     }
                   }}
                   className="remove-person-from-position"
@@ -251,7 +252,7 @@ const AssignPositionModal = ({
                   from{" "}
                   <LinkTo
                     modelType="Position"
-                    model={person.position}
+                    model={currentPosition}
                     isLink={false}
                   />
                 </Button>
@@ -302,7 +303,7 @@ const AssignPositionModal = ({
                     <td>
                       {newPosition.person ? (
                         newPosition.person.name
-                      ) : newPosition.uuid === person.position.uuid ? (
+                      ) : newPosition.uuid === currentPosition?.uuid ? (
                         person.name
                       ) : (
                         <i>Unfilled</i>
@@ -333,13 +334,12 @@ const AssignPositionModal = ({
           onClick={() => {
             if (removeUser || !position) {
               setPosition(null)
-              setDoSave(true)
+              save()
             } else if (
-              position.person !== undefined &&
-              position.person !== null &&
-              position.person !== latestPersonProp.current.name
+              !!position.person &&
+              position.person.uuid !== latestPersonProp.current.uuid
             ) {
-              setDoSave(true)
+              save(position, primary)
             } else {
               closeModal()
             }
@@ -355,8 +355,9 @@ const AssignPositionModal = ({
 
   function closeModal() {
     // Reset state before closing (cancel)
-    setPosition(person.position)
+    setPosition(currentPosition)
     setRemoveUser(false)
+    setError(null)
     onCancel()
   }
 }
