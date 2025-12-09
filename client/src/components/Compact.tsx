@@ -302,7 +302,7 @@ const CompactTable = ({ className, children }: CompactTableProps) => {
     <CompactTableS className={className}>
       <thead>
         <tr>
-          <EmptySpaceTdS colSpan={2} />
+          <EmptySpaceTdS />
         </tr>
       </thead>
       <tbody>
@@ -314,7 +314,7 @@ const CompactTable = ({ className, children }: CompactTableProps) => {
       </tbody>
       <tfoot>
         <tr>
-          <EmptySpaceTdS colSpan={2} />
+          <EmptySpaceTdS />
         </tr>
       </tfoot>
     </CompactTableS>
