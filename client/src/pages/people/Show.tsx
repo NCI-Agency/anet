@@ -588,7 +588,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           key="change-position-overlay"
           placement="top"
           overlay={
-            <Tooltip id="change-position-tooltip">Change Position</Tooltip>
+            <Tooltip id="change-position-tooltip">
+              Change Primary Position
+            </Tooltip>
           }
         >
           <Button
@@ -606,7 +608,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           key="assign-position-overlay"
           placement="top"
           overlay={
-            <Tooltip id="assign-position-tooltip">Assign a position</Tooltip>
+            <Tooltip id="assign-position-tooltip">
+              Assign a Primary Position
+            </Tooltip>
           }
         >
           <Button onClick={() => setShowAssignPositionModal(true)}>
