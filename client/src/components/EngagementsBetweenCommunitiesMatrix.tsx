@@ -95,7 +95,9 @@ const EngagementsBetweenCommunitiesMatrix = ({
         e.advisor?.relatedObjectUuid === advisorEntityUuid &&
         e.interlocutor?.relatedObjectUuid === interlocutorEntityUuid
     )
-    if (!match) return null
+    if (!match) {
+      return null
+    }
     const report = new Report({
       uuid: match.reportUuid,
       intent: moment(match.engagementDate).format(
@@ -156,7 +158,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
           >
             <tbody>
               <tr id="event-series-table-header" className="table-primary">
-                <th></th>
+                <th />
                 {advisorEntities.map(advisorEntity => (
                   <th
                     key={advisorEntity.relatedObjectUuid}

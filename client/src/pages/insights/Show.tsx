@@ -109,7 +109,7 @@ export const INSIGHT_DETAILS = {
   [CADENCE_DASHBOARD]: {
     searchProps: DEFAULT_SEARCH_PROPS,
     component: CadenceDashboard,
-    navTitle: `Candence Dashboard`,
+    navTitle: `Cadence Dashboard`,
     title: `Cadence Dashboard`
   }
 }

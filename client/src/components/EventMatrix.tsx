@@ -4,6 +4,8 @@ import {
   gqlPreferenceFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { buildTree } from "components/advancedSelectWidget/utils"
 import AppContext from "components/AppContext"
@@ -21,11 +23,8 @@ import _isEmpty from "lodash/isEmpty"
 import moment from "moment/moment"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Button, Table } from "react-bootstrap"
-import { Simulate } from "react-dom/test-utils"
 import { connect } from "react-redux"
 import Settings from "settings"
-
-import load = Simulate.load
 
 const GQL_GET_PREFERENCES = gql`
   query {
@@ -145,7 +144,7 @@ const EventMatrix = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const { currentUser, appSettings } = useContext(AppContext)
   const [periodLengthInDays, setPeriodLengthInDays] = useState<number>(5)
-  const [startDay, setStartDay] = useState(moment())
+  const [periodStartDay, setPeriodStartDay] = useState(moment().startOf("day"))
   const [periodDays, setPeriodDays] = useState([])
   const [events, setEvents] = useState([])
   const [reports, setReports] = useState([])
@@ -178,17 +177,16 @@ const EventMatrix = ({
   }, [currentUser])
 
   function shiftPeriod(days: number) {
-    setStartDay(prev => moment(prev).add(days, "days"))
+    setPeriodStartDay(prev => moment(prev).add(days, "days"))
   }
 
   useEffect(() => {
     const period = []
-    period.push(moment(startDay).startOf("day"))
-    for (let i = 1; i < periodLengthInDays; i++) {
-      period.push(moment(startDay).add(i, "days"))
+    for (let i = 0; i < periodLengthInDays; i++) {
+      period.push(moment(periodStartDay).add(i, "days"))
     }
     setPeriodDays(period)
-  }, [startDay, periodLengthInDays])
+  }, [periodStartDay, periodLengthInDays])
 
   useEffect(() => {
     async function fetchEventsAndReports(eventQuery, reportQuery) {
@@ -206,28 +204,11 @@ const EventMatrix = ({
       return
     }
 
-    const utcStart = new Date(
-      Date.UTC(
-        periodDays[0].year(),
-        periodDays[0].month(),
-        periodDays[0].date(),
-        periodDays[0].hour(),
-        periodDays[0].minute(),
-        periodDays[0].second()
-      )
-    )
-    const utcEnd = new Date(
-      Date.UTC(
-        periodDays[periodLengthInDays - 1].endOf("day").year(),
-        periodDays[periodLengthInDays - 1].endOf("day").month(),
-        periodDays[periodLengthInDays - 1].endOf("day").date(),
-        periodDays[periodLengthInDays - 1].endOf("day").hour(),
-        periodDays[periodLengthInDays - 1].endOf("day").minute(),
-        periodDays[periodLengthInDays - 1].endOf("day").second()
-      )
-    )
-    const isoStartDate = utcStart.toISOString()
-    const isoEndDate = utcEnd.toISOString()
+    const isoStartDate = periodDays[0].startOf("day").toISOString()
+    const isoEndDate = moment(periodDays[periodLengthInDays - 1])
+      .endOf("day")
+      .toISOString()
+
     const eventQuery = {
       pageSize: 0,
       startDate: isoStartDate,
@@ -335,10 +316,10 @@ const EventMatrix = ({
   }
 
   function showEventTitle(event, dateToCheck) {
-    // True if event starts on this date, or it is the first day of the week
+    // True if event starts on this date, or it is the first day of the period
     return (
       moment(event.startDate).startOf("day").isSame(dateToCheck) ||
-      dateToCheck.isSame(startDay)
+      dateToCheck.isSame(periodStartDay)
     )
   }
 
@@ -359,9 +340,9 @@ const EventMatrix = ({
     return `${(maxEventTasks + 1) * 18 * 1.33 + maxEventTasks * 4 + 16}px`
   }
 
-  function getEvent(events, dayOfWeek, task?) {
+  function getEvent(events, dayOfPeriod, task?) {
     // Get the date
-    const dateToCheck = periodDays[dayOfWeek]
+    const dateToCheck = periodDays[dayOfPeriod]
     const taskReports = task
       ? reports?.filter(
           r =>
@@ -379,7 +360,7 @@ const EventMatrix = ({
         responsive
         borderless
         hover
-        id={dayOfWeek}
+        id={dayOfPeriod}
         className="event-matrix-cell mb-0"
       >
         <tbody>
@@ -452,11 +433,11 @@ const EventMatrix = ({
     }
 
     // Inactive eventSeries are only shown if they have events
-    const endDay = moment(startDay).add(periodLengthInDays, "days")
+    const endDay = moment(periodStartDay).add(periodLengthInDays, "days")
     return !!events?.find(event => {
       return (
         event?.eventSeries?.uuid === eventSeries?.uuid &&
-        isEventIncluded(event, startDay, endDay)
+        isEventIncluded(event, periodStartDay, endDay)
       )
     })
   }
@@ -477,11 +458,11 @@ const EventMatrix = ({
     }
 
     //  or reports
-    const endDay = moment(startDay).add(7, "days")
+    const endDay = moment(periodStartDay).add(7, "days")
 
     return !!reports?.find(
       r =>
-        isReportIncluded(r, startDay, endDay, task, r.event) &&
+        isReportIncluded(r, periodStartDay, endDay, task, r.event) &&
         hasTask(r.tasks, task)
     )
   }
@@ -495,7 +476,7 @@ const EventMatrix = ({
     emptyMsg = "reports"
   }
   const emptyMsgComponent = emptyMsg ? (
-    <em className="ms-2 text-info">No {emptyMsg} this week</em>
+    <em className="ms-2 text-info">No {emptyMsg} this period</em>
   ) : null
 
   const includedEventSeries = eventSeries.filter(isEventSeriesIncluded)
@@ -521,23 +502,24 @@ const EventMatrix = ({
             <label className="form-label">Start Day</label>
             <input
               type="date"
-              value={startDay.format("YYYY-MM-DD")}
-              onChange={e => setStartDay(moment(e.target.value))}
+              value={periodStartDay.format("YYYY-MM-DD")}
+              onChange={e => setPeriodStartDay(moment(e.target.value))}
               className="form-control"
             />
           </div>
           <Button
             id="previous-period"
             variant="outline-secondary"
-            onClick={() => shiftPeriod(periodLengthInDays)}
+            onClick={() => shiftPeriod(-periodLengthInDays)}
           >
-            -{periodLengthInDays} days
+            <Icon icon={IconNames.FAST_BACKWARD} />-{periodLengthInDays} days
           </Button>
           <Button
             id="previous-week"
             variant="outline-secondary"
             onClick={() => shiftPeriod(-7)}
           >
+            <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
             -1 week
           </Button>
           <Button
@@ -545,6 +527,7 @@ const EventMatrix = ({
             variant="outline-secondary"
             onClick={() => shiftPeriod(-1)}
           >
+            <Icon icon={IconNames.CHEVRON_LEFT} />
             -1 day
           </Button>
           <Button
@@ -552,6 +535,7 @@ const EventMatrix = ({
             variant="outline-secondary"
             onClick={() => shiftPeriod(1)}
           >
+            <Icon icon={IconNames.CHEVRON_RIGHT} />
             +1 day
           </Button>
           <Button
@@ -559,6 +543,7 @@ const EventMatrix = ({
             variant="outline-secondary"
             onClick={() => shiftPeriod(7)}
           >
+            <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
             +1 week
           </Button>
           <Button
@@ -566,7 +551,7 @@ const EventMatrix = ({
             variant="outline-secondary"
             onClick={() => shiftPeriod(periodLengthInDays)}
           >
-            +{periodLengthInDays} days
+            <Icon icon={IconNames.FAST_FORWARD} />+{periodLengthInDays} days
           </Button>
 
           {emptyMsgComponent}
@@ -587,17 +572,19 @@ const EventMatrix = ({
             <tbody>
               <tr id="event-series-table-header" className="table-primary">
                 <th>Event Series</th>
-                {periodDays.map(weekDay => (
-                  <th key={weekDay} style={{ minWidth: "120px" }}>
-                    {weekDay.format("YYYY-MM-DD")}
+                {periodDays.map(periodDay => (
+                  <th key={periodDay} style={{ minWidth: "120px" }}>
+                    {periodDay.format("YYYY-MM-DD")}
                     <br />
-                    {weekDay.format("dddd")}
+                    {periodDay.format("dddd")}
                   </th>
                 ))}
               </tr>
               {_isEmpty(includedEventSeries) ? (
                 <tr className="event-series-row">
-                  <td colSpan={8}>No matching Event Series</td>
+                  <td colSpan={periodDays.length + 1}>
+                    No matching Event Series
+                  </td>
                 </tr>
               ) : (
                 includedEventSeries.map(es => {
@@ -608,9 +595,11 @@ const EventMatrix = ({
                     <tr key={es.uuid} className="event-series-row">
                       <td
                         style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis"
+                          minWidth: "200px",
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          verticalAlign: "top"
                         }}
                       >
                         <LinkTo modelType="EventSeries" model={es} />
@@ -622,20 +611,19 @@ const EventMatrix = ({
                   )
                 })
               )}
-
               <tr id="tasks-table-header" className="table-primary">
                 <th>{Settings.fields.task.shortLabel}</th>
-                {periodDays.map(weekDay => (
-                  <th key={weekDay} style={{ width: "12%" }}>
-                    {weekDay.format("YYYY-MM-DD")}
+                {periodDays.map(periodDay => (
+                  <th key={periodDay} style={{ minWidth: "120px" }}>
+                    {periodDay.format("YYYY-MM-DD")}
                     <br />
-                    {weekDay.format("dddd")}
+                    {periodDay.format("dddd")}
                   </th>
                 ))}
               </tr>
               {_isEmpty(includedTasks) ? (
                 <tr className="event-series-task-row">
-                  <td colSpan={8}>
+                  <td colSpan={periodDays.length + 1}>
                     No matching {Settings.fields.task.shortLabel}
                   </td>
                 </tr>
@@ -652,7 +640,15 @@ const EventMatrix = ({
 
                   return (
                     <tr key={task.uuid} className="event-series-task-row">
-                      <td style={{ paddingLeft: `${task.level * 20}px` }}>
+                      <td
+                        style={{
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          paddingLeft: `${task.level * 20}px`,
+                          verticalAlign: "top"
+                        }}
+                      >
                         <BreadcrumbTrail
                           modelType="Task"
                           leaf={task}
@@ -662,7 +658,6 @@ const EventMatrix = ({
                           ascendantTaskUuids={ascendantTaskUuids}
                         />
                       </td>
-
                       {periodDays.map((_, idx) => (
                         <td key={idx}>{getEvent(taskEvents, idx, task)}</td>
                       ))}

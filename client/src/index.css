@@ -1382,6 +1382,14 @@ div[id*='fg-entityAssessment'] {
 
 td.event-cell {
   background-color: var(--anet-blue) !important;
+  vertical-align: top;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 2.7em;
+  padding: 0.25rem;
+  height: 100%; /* <-- ensures it fills the row */
+  box-sizing: border-box; /* ensures padding doesn’t shrink it */
 }
 
 div.event-report-cell {
