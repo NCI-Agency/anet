@@ -265,7 +265,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 dictProps={Settings.fields.person.additionalPositions}
                 value={
                   <PositionsTable
-                    label="Additional Positions"
+                    label={Settings.fields.person.additionalPositions?.label}
                     positions={mergedPerson.additionalPositions}
                   />
                 }
@@ -685,7 +685,7 @@ const PersonColumn = ({
             fieldName="additionalPositions"
             value={
               <PositionsTable
-                label="Additional Positions"
+                label={Settings.fields.person.additionalPositions?.label}
                 positions={person.additionalPositions}
               />
             }

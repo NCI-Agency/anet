@@ -518,7 +518,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       position: getPositionHumanValue(),
       additionalPositions: (
         <PositionsTable
-          label="Additional Positions"
+          label={Settings.fields.person.additionalPositions?.label}
           positions={person.additionalPositions}
         />
       ),
