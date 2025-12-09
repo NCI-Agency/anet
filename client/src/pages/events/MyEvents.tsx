@@ -3,7 +3,6 @@ import AppContext from "components/AppContext"
 import EventCollection from "components/EventCollection"
 import EventSeriesTable from "components/EventSeriesTable"
 import Fieldset from "components/Fieldset"
-import { AnchorNavItem } from "components/Nav"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -11,9 +10,7 @@ import {
   usePageTitle
 } from "components/Page"
 import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
-import SubNav from "components/SubNav"
 import React, { useContext, useMemo } from "react"
-import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
 
 interface MyEventsProps {
@@ -49,19 +46,6 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
 
   return (
     <div>
-      <SubNav subnavElemId="events-nav">
-        <span id="style-nav">
-          <Nav className="flex-column">
-            <Nav.Item>
-              <AnchorNavItem to="eventSeries">Event Series</AnchorNavItem>
-            </Nav.Item>
-            <Nav.Item>
-              <AnchorNavItem to="events">Events</AnchorNavItem>
-            </Nav.Item>
-          </Nav>
-        </span>
-      </SubNav>
-
       {renderEventSeriesSection()}
       {renderEventsSection()}
     </div>

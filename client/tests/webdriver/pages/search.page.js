@@ -44,7 +44,7 @@ class Search extends Page {
   }
 
   async getFoundEventTable() {
-    return browser.$("div#events #events-search-results")
+    return browser.$("div#events .event-collection")
   }
 
   async getFoundEventSeriesTable() {

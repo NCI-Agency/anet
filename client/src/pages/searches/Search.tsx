@@ -14,6 +14,7 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LocationCollection from "components/LocationCollection"
@@ -31,7 +32,6 @@ import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
 import AuthorizationGroupSearchResults from "components/search/AuthorizationGroupSearchResults"
-import EventSearchResults from "components/search/EventSearchResults"
 import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
 import OrganizationSearchResults from "components/search/OrganizationSearchResults"
 import PeopleSearchResults from "components/search/PeopleSearchResults"
@@ -148,7 +148,7 @@ const SEARCH_ITEMS = {
   [SEARCH_OBJECT_TYPES.EVENTS]: {
     navTo: "events",
     iconImg: EVENTS_ICON,
-    searchResultsComponent: EventSearchResults
+    searchResultsComponent: EventCollection
   },
   [SEARCH_OBJECT_TYPES.EVENT_SERIES]: {
     navTo: "eventSeries",

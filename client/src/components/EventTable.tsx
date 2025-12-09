@@ -12,9 +12,10 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEqual from "lodash/isEqual"
 import { Event } from "models"
 import moment from "moment/moment"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
@@ -41,9 +42,18 @@ const GQL_GET_EVENT_LIST = gql`
   }
 `
 
+const DEFAULT_PAGESIZE = 10
+
 interface EventTableProps {
   // query variables for events, when query & pagination wanted:
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
+  paginationKey?: string
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
+  id?: string
+  events?: any[]
+  showEventSeries?: boolean
 }
 
 const EventTable = (props: EventTableProps) => {
@@ -56,15 +66,44 @@ const EventTable = (props: EventTableProps) => {
 interface PaginatedEventsProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
+  showStatus?: boolean
+  paginationKey?: string
+  pagination?: any
+  setPagination?: (...args: unknown[]) => unknown
 }
 
 const PaginatedEvents = ({
   pageDispatchers,
   queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination,
   ...otherProps
 }: PaginatedEventsProps) => {
-  const [pageNum, setPageNum] = useState(0)
-  const eventQuery = { ...queryParams, pageNum }
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    (queryParamsUnchanged && pagination?.[paginationKey]?.pageNum) ?? 0
+  )
+
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      if (paginationKey) {
+        setPagination?.(paginationKey, 0)
+      }
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+
+  const eventQuery = {
+    ...queryParams,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  }
+
   const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
   })
@@ -73,24 +112,35 @@ const PaginatedEvents = ({
     error,
     pageDispatchers
   })
+
+  const totalCount = done ? null : data?.eventList?.totalCount
+  useEffect(() => {
+    setTotalCount?.(totalCount)
+  }, [setTotalCount, totalCount])
+
   if (done) {
     return result
   }
 
-  const {
-    pageSize,
-    pageNum: curPage,
-    totalCount,
-    list: events
-  } = data.eventList
+  const { pageSize, pageNum: curPage, list: events } = data.eventList
+  if (_get(events, "length", 0) === 0) {
+    return <em>No events found</em>
+  }
+
+  function setPage(newPageNum: number) {
+    if (paginationKey) {
+      setPagination?.(paginationKey, 0)
+    }
+    setPageNum(newPageNum)
+  }
 
   return (
     <BaseEventTable
       events={events}
-      pageSize={pageSize}
-      pageNum={curPage}
-      totalCount={totalCount}
-      goToPage={setPageNum}
+      pageSize={setPagination && pageSize}
+      pageNum={setPagination && curPage}
+      totalCount={setPagination && totalCount}
+      goToPage={setPagination && setPage}
       {...otherProps}
     />
   )
