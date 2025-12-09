@@ -233,7 +233,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
       <h4>{Settings.fields.person.additionalPositions?.label}</h4>
       <div className="preview-section">
         <PositionsTable
-          label="Additional Positions"
+          label={Settings.fields.person.additionalPositions?.label}
           positions={person.additionalPositions}
         />
       </div>
