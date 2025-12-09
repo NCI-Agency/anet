@@ -6791,6 +6791,14 @@
 		</insert>
 	</changeSet>
 
+	<changeSet id="create-sync-matrix-period-preference" author="fdelcastillo">
+		<sql>
+			INSERT INTO "preferences" ("uuid", "name", "description", "type", "category", "defaultValue", "allowedValues", "createdAt", "updatedAt") VALUES
+			(${uuid_function}, 'SYNC_MATRIX_PERIOD', 'Synchronization matrix period in days', 'number', 'sync-matrix', '20', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		</sql>
+	</changeSet>
+
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
