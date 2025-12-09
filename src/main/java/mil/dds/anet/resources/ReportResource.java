@@ -28,6 +28,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.EngagementInformation;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -38,6 +39,7 @@ import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.EngagementsBetweenCommunitiesSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -876,6 +878,15 @@ public class ReportResource {
 
     return assessments.size();
   }
+
+  @GraphQLQuery(name = "getEngagementsBetweenCommunities")
+  public List<EngagementInformation> getEngagementsBetweenCommunities(
+      @GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") EngagementsBetweenCommunitiesSearchQuery query) {
+    return reportDao.getEngagementsBetweenCommunities(query.getAdvisorAuthorizationGroupUuid(),
+        query.getInterlocutorAuthorizationGroupUuid(), query.getPlannedEngagements());
+  }
+
 
   private boolean checkReportPersonOrTask(Report r, GenericRelatedObject groReport,
       GenericRelatedObject groPersonOrTask) {

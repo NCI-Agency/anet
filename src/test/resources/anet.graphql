@@ -457,10 +457,28 @@ input EmailAddressInput {
 }
 
 """"""
+type EngagementInformation {
+  advisor: GenericRelatedObject
+  createdAt: Instant
+  engagementDate: Instant
+  interlocutor: GenericRelatedObject
+  reportUuid: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
 enum EngagementStatus {
   CANCELLED
   FUTURE
   HAPPENED
+}
+
+""""""
+input EngagementsBetweenCommunitiesSearchQueryInput {
+  advisorAuthorizationGroupUuid: String
+  interlocutorAuthorizationGroupUuid: String
+  plannedEngagements: Boolean!
 }
 
 """"""
@@ -1261,6 +1279,7 @@ type Query {
   eventList(query: EventSearchQueryInput): AnetBeanList_Event
   eventSeries(uuid: String): EventSeries
   eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
+  getEngagementsBetweenCommunities(query: EngagementsBetweenCommunitiesSearchQueryInput): [EngagementInformation]
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   locations(uuids: [String]): [Location]
