@@ -1366,6 +1366,14 @@ header.searchPagination {
   margin-left: 10px;
 }
 
+#fg-prevPositions .col-sm-8,
+#fg-prevAdditionalPositions .col-sm-8 {
+  padding-right: 0;
+  & div.w-100 {
+    padding-right: calc(var(--bs-gutter-x)*0.5);
+  }
+}
+
 div[id*='fg-entityAssessment'] {
   margin-bottom: 1rem;
 }
