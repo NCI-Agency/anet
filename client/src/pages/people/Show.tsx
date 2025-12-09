@@ -224,9 +224,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   )
 
   const extraColElems = {
-    position: getPositionActions(),
-    prevPositions: getPreviousPositionsActions(),
-    prevAdditionalPositions: getPreviousPositionsActions()
+    position: getPositionActions()
   }
 
   // Keys of fields which should span over 2 columns
@@ -633,27 +631,12 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     )
   }
 
-  function getPreviousPositionsActions() {
-    return isAdmin ? (
-      <OverlayTrigger
-        key="edit-history-overlay"
-        placement="top"
-        overlay={<Tooltip id="edit-history-tooltip">Edit history</Tooltip>}
-      >
-        <Button
-          onClick={() => setShowHistoryModal(true)}
-          className="edit-history"
-        >
-          <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
-        </Button>
-      </OverlayTrigger>
-    ) : null
-  }
-
   function getPrevPositionsHumanValue() {
     return (
       <PreviousPositions
         history={person.previousPositions.filter(pp => pp.primary)}
+        canEditHistory={isAdmin}
+        action={() => setShowHistoryModal(true)}
       />
     )
   }
@@ -662,6 +645,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     return (
       <PreviousPositions
         history={person.previousPositions.filter(pp => !pp.primary)}
+        canEditHistory={isAdmin}
+        action={() => setShowHistoryModal(true)}
       />
     )
   }
