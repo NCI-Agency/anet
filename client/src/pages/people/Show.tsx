@@ -641,6 +641,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     return (
       <PreviousPositions
         history={person.previousPositions.filter(pp => pp.primary)}
+        showPrimaryFlag={false}
         canEditHistory={isAdmin}
         action={() => setShowHistoryModal(true)}
       />
@@ -651,6 +652,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     return (
       <PreviousPositions
         history={person.previousPositions.filter(pp => !pp.primary)}
+        showPrimaryFlag={false}
         canEditHistory={isAdmin}
         action={() => setShowHistoryModal(true)}
       />
