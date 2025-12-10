@@ -191,8 +191,6 @@ configurations.all {
 	// Also exclude XML API's to avoid (Eclipse) warnings like
 	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
 	exclude group: 'xml-apis'
-	// For Spring:
-	exclude module: 'commons-logging'
 }
 
 test {
