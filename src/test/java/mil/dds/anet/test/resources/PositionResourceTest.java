@@ -83,7 +83,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Assign a person into the position
     Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(jack), true, created1.getUuid()));
+        getPersonInput(jack), null, true, created1.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     Position currPos =
@@ -105,7 +105,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final Position stevesCurrentPosition = steve.getPosition();
     assertThat(stevesCurrentPosition).isNotNull();
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(steve), true, created1.getUuid()));
+        getPersonInput(steve), null, true, created1.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify that the Steve is in created1 position
@@ -128,7 +128,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put steve back in his old position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(steve), true, stevesCurrentPosition.getUuid()));
+        getPersonInput(steve), null, true, stevesCurrentPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos = withCredentials(jackUser,
@@ -184,7 +184,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // put the interlocutor in a tashkil
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(roger), true, tashkil.getUuid()));
+        getPersonInput(roger), null, true, tashkil.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // assign the tashkil to the position
@@ -248,7 +248,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put jack back in his old position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(jack), true, jacksOldPosition.getUuid()));
+        getPersonInput(jack), null, true, jacksOldPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos =
@@ -258,7 +258,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put roger back in his old position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(roger), true, rogersOldPosition.getUuid()));
+        getPersonInput(roger), null, true, rogersOldPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos = withCredentials(adminUser,
@@ -303,7 +303,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(stevesCurrPos).isNotNull();
 
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(steve), true, created.getUuid()));
+        getPersonInput(steve), null, true, created.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     Position interlocutorPos =
@@ -313,7 +313,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Put steve back in his originial position
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(steve), true, stevesCurrPos.getUuid()));
+        getPersonInput(steve), null, true, stevesCurrPos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Ensure the old position is now empty
@@ -868,7 +868,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Give this position to Jak as additional
     Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(jack), false, newPosition.getUuid()));
+        getPersonInput(jack), null, false, newPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Reload Jack to check his additional position was set
