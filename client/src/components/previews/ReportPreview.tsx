@@ -1,6 +1,7 @@
 import {
   gqlAllReportFields,
   gqlEntityFieldsMap,
+  gqlPreviousPositionsFields,
   gqlReportCommunitiesFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -47,8 +48,7 @@ const GQL_GET_REPORT = gql`
           }
         }
         previousPositions {
-          startTime
-          endTime
+          ${gqlPreviousPositionsFields}
           position {
             ${gqlEntityFieldsMap.Position}
             organization {

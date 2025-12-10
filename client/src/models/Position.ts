@@ -3,7 +3,9 @@ import {
   gqlEmailAddressesFields,
   gqlEntityAvatarFields,
   gqlEntityFieldsMap,
-  gqlNotesFields
+  gqlNotesFields,
+  gqlPreviousPeopleFields,
+  gqlPreviousPositionsFields
 } from "constants/GraphQLDefinitions"
 import Model, {
   createCustomFieldsSchema,
@@ -143,14 +145,11 @@ export default class Position extends Model {
       }
     }
     previousPeople {
-      startTime
-      endTime
-      primary
+      ${gqlPreviousPeopleFields}
       person {
         ${gqlEntityFieldsMap.Person}
         previousPositions {
-          startTime
-          endTime
+          ${gqlPreviousPositionsFields}
           position {
             ${gqlEntityFieldsMap.Position}
           }

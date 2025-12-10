@@ -6,6 +6,8 @@ import {
   gqlEntityAvatarFields,
   gqlEntityFieldsMap,
   gqlNotesFields,
+  gqlPreviousPeopleFields,
+  gqlPreviousPositionsFields,
   gqlUsersFields
 } from "constants/GraphQLDefinitions"
 import API from "api"
@@ -218,14 +220,11 @@ export default class Person extends Model {
       }
     }
     previousPositions {
-      startTime
-      endTime
-      primary
+      ${gqlPreviousPositionsFields}
       position {
         ${gqlEntityFieldsMap.Position}
         previousPeople {
-          startTime
-          endTime
+          ${gqlPreviousPeopleFields}
           person {
             ${gqlEntityFieldsMap.Person}
           }

@@ -1,4 +1,8 @@
-import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
+import {
+  gqlEntityFieldsMap,
+  gqlPreviousPeopleFields,
+  gqlPreviousPositionsFields
+} from "constants/GraphQLDefinitions"
 import {
   PersonSimpleOverlayRow,
   PositionOverlayRow
@@ -34,7 +38,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
     cb(newEntry)
   },
   objectType: Person,
-  fields: `${gqlEntityFieldsMap.Person} position { ${gqlEntityFieldsMap.Position} } previousPositions { startTime endTime position { uuid } }`,
+  fields: `${gqlEntityFieldsMap.Person} position { ${gqlEntityFieldsMap.Position} } previousPositions { ${gqlPreviousPositionsFields} position { uuid } }`,
   addon: PEOPLE_ICON
 }
 
@@ -52,7 +56,7 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
     cb(newEntry)
   },
   objectType: Position,
-  fields: `${gqlEntityFieldsMap.Position} organization { ${gqlEntityFieldsMap.Organization} } person { ${gqlEntityFieldsMap.Person} } previousPeople { startTime endTime person { uuid } }`,
+  fields: `${gqlEntityFieldsMap.Position} organization { ${gqlEntityFieldsMap.Organization} } person { ${gqlEntityFieldsMap.Person} } previousPeople { ${gqlPreviousPeopleFields} person { uuid } }`,
   addon: POSITIONS_ICON
 }
 
@@ -61,6 +65,7 @@ const INVALID_ENTRY_STYLE = { borderRadius: "4px", backgroundColor: "#F2DEDE" }
 interface EditHistoryProps {
   history1: any[]
   history2?: any[]
+  showPrimaryFlag?: boolean
   initialHistory?: any[]
   setHistory: (...args: unknown[]) => unknown
   historyEntityType?: string
@@ -78,6 +83,7 @@ interface EditHistoryProps {
 function EditHistory({
   history1,
   history2 = null,
+  showPrimaryFlag = true,
   initialHistory = null,
   setHistory,
   historyEntityType = "person",
@@ -193,6 +199,7 @@ function EditHistory({
                       <Col md={4}>
                         <HistoryComp
                           history={history1}
+                          showPrimaryFlag={showPrimaryFlag}
                           action={item => (
                             <Button
                               variant="outline-secondary"
@@ -262,7 +269,7 @@ function EditHistory({
                               )}
                             >
                               <Fieldset
-                                title={`${idx + 1}-) ${values.history[idx].primary ? "✔️" : ""} ${item[historyEntityType].name} ${isCurrent ? `(Current ${historyEntityType})` : ""}`}
+                                title={`${idx + 1}-) ${showPrimaryFlag && values.history[idx].primary ? "✔️ " : ""}${item[historyEntityType].name}${isCurrent ? ` (Current ${historyEntityType})` : ""}`}
                                 action={
                                   !isCurrent && (
                                     <RemoveButton
