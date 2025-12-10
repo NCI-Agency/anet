@@ -6,6 +6,7 @@ import {
   gqlAuthorizedMembersFields,
   gqlEntityFieldsMap,
   gqlNotesFields,
+  gqlPreviousPositionsFields,
   gqlReportCommunitiesFields,
   gqlReportSensitiveInformationFields
 } from "constants/GraphQLDefinitions"
@@ -54,8 +55,7 @@ const GQL_GET_REPORT = gql`
           }
         }
         previousPositions {
-          startTime
-          endTime
+          ${gqlPreviousPositionsFields}
           position {
             ${gqlEntityFieldsMap.Position}
             organization {
