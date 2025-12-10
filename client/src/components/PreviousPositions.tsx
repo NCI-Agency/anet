@@ -9,12 +9,14 @@ import Settings from "settings"
 
 interface PreviousPositionsProps {
   history?: any[]
+  showPrimaryFlag?: boolean
   canEditHistory?: boolean
   action?: (...args: unknown[]) => unknown
 }
 
 function PreviousPositions({
   history: previousPositions,
+  showPrimaryFlag = true,
   canEditHistory,
   action
 }: PreviousPositionsProps) {
@@ -33,13 +35,14 @@ function PreviousPositions({
           {previousPositions.map((pp, idx) => (
             <tr key={idx} id={`previousPosition_${idx}`}>
               <td>
+                {showPrimaryFlag && pp.primary && "✔️ "}
                 <LinkTo modelType="Position" model={pp.position} />
               </td>
               <td>
                 {moment(pp.startTime).format(
                   Settings.dateFormats.forms.displayShort.date
                 )}{" "}
-                - &nbsp;
+                -{" "}
                 {pp.endTime &&
                   moment(pp.endTime).format(
                     Settings.dateFormats.forms.displayShort.date

@@ -2,6 +2,7 @@ import {
   gqlEntityFieldsMap,
   gqlMinimalPersonFields,
   gqlMinimalReportFields,
+  gqlPreviousPositionsFields,
   gqlReportSensitiveInformationFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -93,8 +94,7 @@ import ReportPeople, {
 const reportPeopleAutocompleteQuery = `
   ${Person.autocompleteQuery}
   previousPositions {
-    startTime
-    endTime
+    ${gqlPreviousPositionsFields}
     position {
       ${gqlEntityFieldsMap.Position}
       organization {
