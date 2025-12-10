@@ -637,11 +637,12 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     updatedChildOrg.setParentOrg(createdParentOrg);
     // Set superuser as responsible for the parent organization
     createdParentOrg.setAdministratingPositions(List.of(superuserPosition));
-    succeedUpdateOrganization(adminUser, getOrganizationInput(createdParentOrg));
+    final Organization updatedChildOrgWithParent =
+        succeedUpdateOrganization(adminUser, getOrganizationInput(createdParentOrg));
     // Now superuser can set the parent organization as null
-    updatedChildOrg.setParentOrg(null);
+    updatedChildOrgWithParent.setParentOrg(null);
     final Organization updatedChildOrg2 = succeedUpdateOrganization(getDomainUsername(superuser),
-        getOrganizationInput(updatedChildOrg));
+        getOrganizationInput(updatedChildOrgWithParent));
 
     final OrganizationInput newParentOrg =
         OrganizationInput.builder().withShortName("New Parent Organization 4")
