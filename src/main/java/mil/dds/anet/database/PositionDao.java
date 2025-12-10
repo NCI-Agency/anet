@@ -194,75 +194,98 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int setPersonInPosition(String personUuid, String positionUuid, boolean primary) {
+  public int setPersonInPosition(String personUuid, String positionUuid, boolean primary,
+      String previousPositionUuid) {
     final Handle handle = getDbHandle();
     try {
+      // Get new position data from database (we need its type)
+      final Position newPos = getByUuid(positionUuid);
+      if (newPos == null) {
+        return 0;
+      }
+
+      final Position currPos;
+      if (primary) {
+        // Find out if person already holds a primary position (we also need its type later on)
+        currPos = handle.createQuery("/* positionSetPerson.find */ SELECT " + POSITION_FIELDS
+            + " FROM positions INNER JOIN \"peoplePositions\" pp"
+            + " ON pp.\"positionUuid\" = positions.uuid"
+            + " AND pp.\"personUuid\" = positions.\"currentPersonUuid\""
+            + " WHERE \"currentPersonUuid\" = :personUuid AND pp.\"primary\" IS TRUE AND pp.\"endedAt\" IS NULL")
+            .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
+      } else if (previousPositionUuid != null) {
+        // Find out if this person actually holds that position
+        currPos = handle.createQuery("/* positionSetPerson.find */ SELECT " + POSITION_FIELDS
+            + " FROM positions INNER JOIN \"peoplePositions\" pp"
+            + " ON pp.\"positionUuid\" = positions.uuid"
+            + " AND pp.\"personUuid\" = positions.\"currentPersonUuid\""
+            + " WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid AND pp.\"endedAt\" IS NULL")
+            .bind("personUuid", personUuid).bind("positionUuid", previousPositionUuid)
+            .map(new PositionMapper()).findFirst().orElse(null);
+      } else {
+        currPos = null;
+      }
+      if (currPos != null && currPos.getUuid().equals(positionUuid)) {
+        // Attempt to put person in same position they already hold
+        return 0;
+      }
+
       // If the position is already assigned to another person, remove the person from the position
       removePersonFromPosition(positionUuid);
       // Get timestamp *after* remove to preserve correct order
       final Instant now = Instant.now();
 
-      if (primary) {
-        // We are changing the primary position
-        // Get new position data from database (we need its type)
-        final Position newPos = getByUuid(positionUuid);
-        if (newPos == null) {
-          return 0;
-        }
+      if (currPos != null) {
+        // If this person is in a position already, we need to remove them.
+        final String sql =
+            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+                + "(SELECT * FROM \"peoplePositions\" WHERE \"personUuid\" = :personUuid"
+                + " AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+                + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" "
+                + "AND t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" "
+                + "AND t.\"createdAt\" = \"peoplePositions\".\"createdAt\" "
+                + "AND \"peoplePositions\".\"endedAt\" IS NULL";
+        handle.createUpdate(sql).bind("personUuid", personUuid)
+            .bind("positionUuid", currPos.getUuid()).bind("endedAt", DaoUtils.asLocalDateTime(now))
+            .execute();
 
-        // Find out if person already holds a primary position (we also need its type later on)
-        final Position currPos = handle.createQuery("/* positionSetPerson.find */ SELECT "
-            + POSITION_FIELDS
-            + " FROM \"peoplePositions\" pp INNER JOIN positions ON pp.\"positionUuid\" = positions.uuid"
-            + " WHERE \"personUuid\" = :personUuid AND \"primary\" IS TRUE AND \"endedAt\" IS NULL")
-            .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
-        if (currPos != null && currPos.getUuid().equals(positionUuid)) {
-          // Attempt to put person in same primary position they already hold
-          return 0;
-        }
-
-        if (currPos != null) {
-          // If this person is in a primary position already, we need to remove them.
-          final String sql =
-              "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-                  + "(SELECT * FROM \"peoplePositions\" WHERE \"personUuid\" = :personUuid"
-                  + " AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-                  + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
-                  + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" "
-                  + "AND t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" "
-                  + "AND t.\"createdAt\" = \"peoplePositions\".\"createdAt\" "
-                  + "AND \"peoplePositions\".\"endedAt\" IS NULL";
-          handle.createUpdate(sql).bind("personUuid", personUuid)
-              .bind("positionUuid", currPos.getUuid())
-              .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
-
+        if (primary) {
           handle
-              .createUpdate("/* positionSetPerson.remove1 */ UPDATE positions "
+              .createUpdate("/* positionSetPerson.remove1a */ UPDATE positions "
                   + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
-                  + "WHERE \"currentPersonUuid\" = :personUuid")
+                  + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
               .bind("type", DaoUtils.getEnumId(revokePrivilege(currPos)))
               .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
-              .execute();
+              .bind("positionUuid", currPos.getUuid()).execute();
+        } else {
+          handle
+              .createUpdate("/* positionSetPerson.remove1b */ UPDATE positions "
+                  + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
+                  + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
+              .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+              .bind("positionUuid", currPos.getUuid()).execute();
         }
+      }
+
+      if (primary) {
         // Now put the person in their new position keeping the privileges (it is the primary
         // position)
-        handle.createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
+        handle.createUpdate("/* positionSetPerson.set1a */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid, type = :type, \"updatedAt\" = :updatedAt "
             + "WHERE uuid = :positionUuid").bind("personUuid", personUuid)
             .bind("type", DaoUtils.getEnumId(keepPrivilege(newPos, currPos)))
             .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
             .execute();
       } else {
-        // Just assign person to position without keeping the privileges (it is an additional
-        // position)
+        // Just assign person to position ignoring the privileges (it is an additional position)
         handle
-            .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
+            .createUpdate("/* positionSetPerson.set1b */ UPDATE positions "
                 + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
                 + "WHERE uuid = :positionUuid")
             .bind("personUuid", personUuid).bind("updatedAt", DaoUtils.asLocalDateTime(now))
             .bind("positionUuid", positionUuid).execute();
       }
-
 
       // And update the history
       final int nr = handle
