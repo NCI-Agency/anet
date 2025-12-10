@@ -840,7 +840,7 @@ type Mutation {
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
   mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
   publishReport(uuid: String): Int!
-  putPersonInPosition(person: PersonInput, primary: Boolean = true, uuid: String): Int!
+  putPersonInPosition(person: PersonInput, previousPositionUuid: String, primary: Boolean = true, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
   reloadDictionary: String
   saveAdminSettings(settings: [AdminSettingInput]): Int
