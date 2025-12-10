@@ -37,8 +37,18 @@ const GQL_DELETE_PERSON_FROM_POSITION = gql`
 `
 
 const GQL_PUT_PERSON_IN_POSITION = gql`
-  mutation ($uuid: String!, $person: PersonInput!, $primary: Boolean) {
-    putPersonInPosition(uuid: $uuid, person: $person, primary: $primary)
+  mutation (
+    $uuid: String!
+    $person: PersonInput!
+    $primary: Boolean
+    $previousPositionUuid: String
+  ) {
+    putPersonInPosition(
+      uuid: $uuid
+      person: $person
+      primary: $primary
+      previousPositionUuid: $previousPositionUuid
+    )
   }
 `
 
@@ -88,7 +98,8 @@ const AssignPositionModal = ({
         variables = {
           uuid: position.uuid,
           person: { uuid: latestPersonProp.current.uuid },
-          primary
+          primary,
+          previousPositionUUid: currentPosition?.uuid
         }
       }
       API.mutation(graphql, variables).then(onSuccess).catch(setError)
@@ -335,13 +346,8 @@ const AssignPositionModal = ({
             if (removeUser || !position) {
               setPosition(null)
               save()
-            } else if (
-              !!position.person &&
-              position.person.uuid !== latestPersonProp.current.uuid
-            ) {
-              save(position, primary)
             } else {
-              closeModal()
+              save(position, primary)
             }
             setRemoveUser(false)
           }}
