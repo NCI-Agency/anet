@@ -40,6 +40,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionsTable from "components/PositionsTable"
 import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
@@ -72,6 +73,12 @@ const GQL_GET_PERSON = gql`
       ${Person.allFieldsQuery}
       authorizationGroups {
         ${gqlEntityFieldsMap.AuthorizationGroup}
+      }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
       }
       attachments {
         ${gqlAllAttachmentFields}
@@ -217,8 +224,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   )
 
   const extraColElems = {
-    position: getPositionActions(),
-    prevPositions: getPreviousPositionsActions()
+    position: getPositionActions()
   }
 
   // Keys of fields which should span over 2 columns
@@ -321,6 +327,8 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           <AssignPositionModal
             showModal={showAssignPositionModal}
             person={person}
+            currentPosition={person?.position}
+            primary
             onCancel={() => hideAssignPositionModal(false)}
             onSuccess={() => hideAssignPositionModal(true)}
           />
@@ -510,7 +518,18 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           Settings.dateFormats.forms.displayShort.date
         ),
       position: getPositionHumanValue(),
+      additionalPositions: (
+        <PositionsTable
+          label={Settings.fields.person.additionalPositions?.label}
+          person={person}
+          positions={person.additionalPositions}
+          canEditPosition={canEditPosition}
+          canAssignPosition={canAssignPosition}
+          updateCallback={refetch}
+        />
+      ),
       prevPositions: getPrevPositionsHumanValue(),
+      prevAdditionalPositions: getPrevAdditionalPositionsHumanValue(),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
@@ -573,7 +592,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           key="change-position-overlay"
           placement="top"
           overlay={
-            <Tooltip id="change-position-tooltip">Change Position</Tooltip>
+            <Tooltip id="change-position-tooltip">
+              Change Primary Position
+            </Tooltip>
           }
         >
           <Button
@@ -591,7 +612,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           key="assign-position-overlay"
           placement="top"
           overlay={
-            <Tooltip id="assign-position-tooltip">Assign a position</Tooltip>
+            <Tooltip id="assign-position-tooltip">
+              Assign a Primary Position
+            </Tooltip>
           }
         >
           <Button onClick={() => setShowAssignPositionModal(true)}>
@@ -614,25 +637,26 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     )
   }
 
-  function getPreviousPositionsActions() {
-    return isAdmin ? (
-      <OverlayTrigger
-        key="edit-history-overlay"
-        placement="top"
-        overlay={<Tooltip id="edit-history-tooltip">Edit history</Tooltip>}
-      >
-        <Button
-          onClick={() => setShowHistoryModal(true)}
-          className="edit-history"
-        >
-          <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
-        </Button>
-      </OverlayTrigger>
-    ) : null
+  function getPrevPositionsHumanValue() {
+    return (
+      <PreviousPositions
+        history={person.previousPositions.filter(pp => pp.primary)}
+        showPrimaryFlag={false}
+        canEditHistory={isAdmin}
+        action={() => setShowHistoryModal(true)}
+      />
+    )
   }
 
-  function getPrevPositionsHumanValue() {
-    return <PreviousPositions history={person.previousPositions} />
+  function getPrevAdditionalPositionsHumanValue() {
+    return (
+      <PreviousPositions
+        history={person.previousPositions.filter(pp => !pp.primary)}
+        showPrimaryFlag={false}
+        canEditHistory={isAdmin}
+        action={() => setShowHistoryModal(true)}
+      />
+    )
   }
 
   function renderCounterparts(position) {

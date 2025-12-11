@@ -6,7 +6,7 @@ import ShowPerson from "../pages/showPerson.page"
 const SOME_FIELDS = {
   currentPosition: {
     id: "position",
-    fieldLabel: "Current Position"
+    fieldLabel: "Primary Position"
   },
   previousPositions: {
     id: "prevPositions",
@@ -27,7 +27,7 @@ const SOME_FIELDS = {
 }
 
 const PRESET_DEFAULT_LABELS = [
-  "Current Position",
+  "Primary Position",
   "Previous Positions",
   "Phone",
   "Nationality",
@@ -38,7 +38,7 @@ const PRESET_DEFAULT_LABELS = [
 ]
 
 const PRESET_WITHOUT_SENSITIVE_LABELS = [
-  "Current Position",
+  "Primary Position",
   "Previous Positions",
   "Phone",
   "Nationality",
@@ -123,7 +123,7 @@ describe("Show person page", () => {
       await (await ShowPerson.getSelectAllButton()).click()
       await (await ShowPerson.getLeftColumnNumber()).setValue(4)
       // Left column contains 2 additional fields name and avatar
-      expect((await ShowPerson.getLeftTableFields()).length).to.equal(6)
+      expect((await ShowPerson.getLeftTableFields()).length).to.equal(4)
     })
     it("Should return to the show person page when detailed view button clicked", async () => {
       await (await ShowPerson.getDetailedViewButton()).click()

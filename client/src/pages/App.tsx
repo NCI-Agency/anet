@@ -3,7 +3,8 @@ import {
   gqlEmailAddressesFields,
   gqlEntityAvatarFields,
   gqlEntityFieldsMap,
-  gqlPreferenceFields
+  gqlPreferenceFields,
+  gqlPreviousPositionsFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
@@ -116,8 +117,7 @@ const GQL_GET_APP_DATA = gql`
         }
       }
       previousPositions {
-        startTime
-        endTime
+        ${gqlPreviousPositionsFields}
         position {
           ${gqlEntityFieldsMap.Position}
           organization {
