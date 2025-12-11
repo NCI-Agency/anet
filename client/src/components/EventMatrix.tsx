@@ -315,14 +315,6 @@ const EventMatrix = ({
     )
   }
 
-  function showEventTitle(event, dateToCheck) {
-    // True if event starts on this date, or it is the first day of the period
-    return (
-      moment(event.startDate).startOf("day").isSame(dateToCheck) ||
-      dateToCheck.isSame(periodStartDay)
-    )
-  }
-
   function getEventHeight(event, task?) {
     let maxEventTasks = 0
     if (task) {
@@ -381,16 +373,13 @@ const EventMatrix = ({
               <tr key={event.uuid} style={{ height: `${eventHeight}` }}>
                 {isEventIncluded(event, dateToCheck, nextDay(dateToCheck)) && (
                   <td className="event-cell">
-                    {(showEventTitle(event, dateToCheck) && (
-                      <LinkTo
-                        className="ms-2 text-white fw-bolder ellipsized-text"
-                        modelType="Event"
-                        model={event}
-                        tooltipProps={{ className: "mw-100" }}
-                      />
-                    )) || (
-                      <span className="fw-bolder ellipsized-text">&nbsp;</span>
-                    )}
+                    <LinkTo
+                      className="ms-2 text-white fw-bolder ellipsized-text"
+                      modelType="Event"
+                      model={event}
+                      tooltipProps={{ className: "mw-100" }}
+                    />
+                    <span className="fw-bolder ellipsized-text">&nbsp;</span>
                     {eventReports?.map(report => (
                       <div
                         key={report.uuid}
@@ -571,9 +560,32 @@ const EventMatrix = ({
           >
             <tbody>
               <tr id="event-series-table-header" className="table-primary">
-                <th>Event Series</th>
+                <th
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    left: 0,
+                    zIndex: 30,
+                    background: "#cfe2ff"
+                  }}
+                >
+                  Event Series
+                </th>
                 {periodDays.map(periodDay => (
-                  <th key={periodDay} style={{ minWidth: "120px" }}>
+                  <th
+                    key={periodDay}
+                    style={{
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 10,
+                      background: "#cfe2ff",
+                      minWidth: "200px",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      verticalAlign: "top"
+                    }}
+                  >
                     {periodDay.format("YYYY-MM-DD")}
                     <br />
                     {periodDay.format("dddd")}
@@ -595,6 +607,10 @@ const EventMatrix = ({
                     <tr key={es.uuid} className="event-series-row">
                       <td
                         style={{
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 10,
+                          background: "#cfe2ff",
                           minWidth: "200px",
                           whiteSpace: "normal",
                           wordBreak: "break-word",
@@ -612,9 +628,31 @@ const EventMatrix = ({
                 })
               )}
               <tr id="tasks-table-header" className="table-primary">
-                <th>{Settings.fields.task.shortLabel}</th>
+                <th
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    left: 0,
+                    zIndex: 30,
+                    background: "#cfe2ff"
+                  }}
+                >
+                  {Settings.fields.task.shortLabel}
+                </th>
                 {periodDays.map(periodDay => (
-                  <th key={periodDay} style={{ minWidth: "120px" }}>
+                  <th
+                    key={periodDay}
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 20, // slightly below top-left corner cell
+                      background: "#cfe2ff",
+                      minWidth: "120px",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word"
+                    }}
+                  >
                     {periodDay.format("YYYY-MM-DD")}
                     <br />
                     {periodDay.format("dddd")}
@@ -642,6 +680,10 @@ const EventMatrix = ({
                     <tr key={task.uuid} className="event-series-task-row">
                       <td
                         style={{
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 10,
+                          background: "#cfe2ff",
                           whiteSpace: "normal",
                           wordBreak: "break-word",
                           overflowWrap: "break-word",

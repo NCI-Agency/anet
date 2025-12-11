@@ -1404,20 +1404,56 @@ td.task-report-cell {
 
 table.event-matrix {
   table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
 }
 
 table.event-matrix > :not(caption) > * > * {
-  padding: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ccc;
+  white-space: normal;
+  word-break: break-word;
 }
 
 table.event-matrix tr.table-primary {
   border-top: 1.25rem solid white;
 }
 
-table.event-matrix-cell {
-  table-layout: fixed;
-  border-collapse: separate;
-  border-spacing: 0 0.25rem;
+.matrix-container {
+  display: flex;
+  margin-top: 20px;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: calc(100vh - 500px);
+}
+
+.matrix-scroll-container {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+table.event-matrix.header-table {
+  position: sticky;
+  top: 0;
+  background: #cfe2ff;
+  z-index: 50;
+}
+
+table.event-matrix.body-table td:first-child {
+  position: sticky;
+  left: 0;
+  background: #cfe2ff;
+  z-index: 40;
+}
+
+table.event-matrix.header-table th:first-child {
+  left: 0;
+  z-index: 60;
+}
+
+table.event-matrix.body-table td[colspan] {
+  text-align: center;
+  background: #f9f9f9;
 }
 
 @media screen and (max-width: 768px) {

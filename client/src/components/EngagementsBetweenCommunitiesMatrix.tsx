@@ -8,7 +8,6 @@ import { Report } from "models"
 import AuthorizationGroup from "models/AuthorizationGroup"
 import moment from "moment/moment"
 import React, { useEffect, useRef, useState } from "react"
-import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
 
@@ -62,22 +61,47 @@ const EngagementsBetweenCommunitiesMatrix = ({
         setFetchError(error)
       }
     }
+
+    const typeOrder = { organizations: 1, positions: 2, people: 3 }
+
+    const getSortableName = obj => {
+      const ro = obj?.relatedObject
+      if (!ro) {
+        return ""
+      }
+      return obj.relatedObjectType === "organizations"
+        ? ro.shortName || ""
+        : ro.name || ""
+    }
+
+    const sortRelatedObjects = arr =>
+      arr.slice().sort((a, b) => {
+        const typeCompare =
+          (typeOrder[a.relatedObjectType] ?? 999) -
+          (typeOrder[b.relatedObjectType] ?? 999)
+        if (typeCompare !== 0) {
+          return typeCompare
+        }
+        return getSortableName(a).localeCompare(getSortableName(b))
+      })
+
     if (authorizationGroupAdvisors && authorizationGroupInterlocutors) {
-      setAdvisorEntities(
+      const sortedAdvisorEntities = sortRelatedObjects(
         authorizationGroupAdvisors.authorizationGroupRelatedObjects
       )
-      setInterlocutorEntities(
+      const sortedInterlocutorEntities = sortRelatedObjects(
         authorizationGroupInterlocutors.authorizationGroupRelatedObjects
       )
-      const getEngagementsBetweenCommunitiesQuery = {
+      setAdvisorEntities(sortedAdvisorEntities)
+      setInterlocutorEntities(sortedInterlocutorEntities)
+
+      const query = {
         advisorAuthorizationGroupUuid: authorizationGroupAdvisors.uuid,
         interlocutorAuthorizationGroupUuid:
           authorizationGroupInterlocutors.uuid,
-        plannedEngagements: plannedEngagements
+        plannedEngagements
       }
-      fetchEngagementsBetweenCommunities(
-        getEngagementsBetweenCommunitiesQuery
-      ).then(response => {
+      fetchEngagementsBetweenCommunities(query).then(response => {
         setEngagementsBetweenCommunities(
           response.getEngagementsBetweenCommunities
         )
@@ -104,22 +128,13 @@ const EngagementsBetweenCommunitiesMatrix = ({
         Settings.dateFormats.forms.displayShort.date
       )
     })
-    return (
-      <>
-        <LinkTo modelType="Report" model={report} />
-      </>
-    )
+    return <LinkTo modelType="Report" model={report} />
   }
 
   return (
     <>
       <Messages error={fetchError} />
-      <div
-        style={{
-          display: "flex",
-          marginTop: "1rem"
-        }}
-      >
+      <div style={{ display: "flex", marginTop: "1rem" }}>
         <div style={{ textAlign: "left" }}>
           <label
             htmlFor="dashboard-type"
@@ -131,7 +146,6 @@ const EngagementsBetweenCommunitiesMatrix = ({
           >
             Dashboard Type
           </label>
-
           <select
             id="dashboard-type"
             value={plannedEngagements ? "planned" : "recent"}
@@ -144,82 +158,78 @@ const EngagementsBetweenCommunitiesMatrix = ({
           </select>
         </div>
       </div>
-      <div style={{ clear: "both", marginTop: "1rem" }}>
-        <div
-          ref={scrollContainerRef}
-          style={{ overflowX: "auto", whiteSpace: "nowrap", width: "100%" }}
-        >
-          <Table
-            className="event-matrix"
-            responsive
-            hover
-            id="events-matrix"
+      <div className="matrix-container">
+        <div ref={scrollContainerRef} className="matrix-scroll-container">
+          <div
+            className="matrix-table-wrapper"
             style={{ minWidth: `${advisorEntities.length * 300}px` }}
           >
-            <tbody>
-              <tr id="event-series-table-header" className="table-primary">
-                <th />
-                {advisorEntities.map(advisorEntity => (
+            <table className="event-matrix header-table">
+              <thead>
+                <tr>
                   <th
-                    key={advisorEntity.relatedObjectUuid}
                     style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis"
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 10,
+                      background: "#cfe2ff",
+                      minWidth: "200px",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      verticalAlign: "top"
                     }}
-                  >
-                    <LinkTo
-                      modelType={advisorEntity.relatedObjectType}
-                      model={{
-                        uuid: advisorEntity.relatedObjectUuid,
-                        ...advisorEntity.relatedObject
-                      }}
-                    />
-                  </th>
-                ))}
-              </tr>
-              {_isEmpty(interlocutorEntities) ? (
-                <tr className="event-series-row">
-                  <td colSpan={8}>No interlocutor entities</td>
-                </tr>
-              ) : (
-                interlocutorEntities.map(interlocutorEntity => {
-                  return (
-                    <tr
-                      key={interlocutorEntity.relatedObjectUuid}
-                      className="event-series-row"
-                    >
-                      <td
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis"
+                  />
+                  {advisorEntities.map(a => (
+                    <th key={a.relatedObjectUuid}>
+                      <LinkTo
+                        modelType={a.relatedObjectType}
+                        model={{
+                          uuid: a.relatedObjectUuid,
+                          ...a.relatedObject
                         }}
-                      >
+                      />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            </table>
+            <table className="event-matrix body-table">
+              <tbody>
+                {_isEmpty(interlocutorEntities) ? (
+                  <tr>
+                    <td colSpan={advisorEntities.length + 1}>
+                      No interlocutor entities
+                    </td>
+                  </tr>
+                ) : (
+                  interlocutorEntities.map(i => (
+                    <tr key={i.relatedObjectUuid}>
+                      <td>
                         <LinkTo
-                          modelType={interlocutorEntity.relatedObjectType}
+                          modelType={i.relatedObjectType}
                           model={{
-                            uuid: interlocutorEntity.relatedObjectUuid,
-                            ...interlocutorEntity.relatedObject
+                            uuid: i.relatedObjectUuid,
+                            ...i.relatedObject
                           }}
                         />
                       </td>
-                      {advisorEntities.map(advisorEntity => (
+                      {advisorEntities.map(a => (
                         <td
-                          key={`${interlocutorEntity.relatedObjectUuid}-${advisorEntity.relatedObjectUuid}`}
+                          key={`${i.relatedObjectUuid}-${a.relatedObjectUuid}`}
                         >
                           {getEngagement(
-                            advisorEntity.relatedObjectUuid,
-                            interlocutorEntity.relatedObjectUuid
+                            a.relatedObjectUuid,
+                            i.relatedObjectUuid
                           )}
                         </td>
                       ))}
                     </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </Table>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </>
