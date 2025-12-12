@@ -104,7 +104,7 @@ jobs:
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
       if: always()
     - name: Upload test results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: server-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/server-test-results.xml
@@ -158,14 +158,14 @@ jobs:
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
       if: always()
     - name: Upload client log
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.client-tests }}-client-log for ${{ steps.strip-slashes.outputs.dictionary }}
         path: logs/clientLog.log
         if-no-files-found: ignore
       if: always()
     - name: Upload test results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
