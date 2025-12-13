@@ -135,7 +135,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:2.0.0'
+	implementation 'com.networknt:json-schema-validator:2.0.1'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
@@ -174,7 +174,7 @@ dependencies {
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:3.0.1'
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:3.1'
 	testImplementation "org.springframework.boot:spring-boot-starter-test"
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
@@ -724,7 +724,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '12.2.0'
+	toolVersion = '12.3.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
