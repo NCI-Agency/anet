@@ -1846,10 +1846,10 @@ INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "stat
   (1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
 -- Add Saved Searches
-INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query", "displayInHomepage", "priority", "homepagePriority") VALUES
-  ('7665adc2-c753-45b6-a335-1df5f35ede0f', 'Admins', 1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"ACTIVE","positionType":"ADMINISTRATOR"}', true, 0, 1),
-  ('0c6bbbcb-cb19-4dd8-9704-13c67670591d', 'Kabul reports', 0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"state":["APPROVED","PUBLISHED"],"status":"ACTIVE","locationUuid":["e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c"],"locationRecurseStrategy":"CHILDREN"}', true, 1, 2),
-  ('fea7ebc5-2acd-4c5a-997e-3ed3daf0ab49', 'EF 1 Objectives', 2, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"ACTIVE","taskedOrgUuid":["9a35caa7-a095-4963-ac7b-b784fde4d583"],"orgRecurseStrategy":"CHILDREN"}', true, 2, 3);
+INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query", "displayInHomepage", "priority", "homepagePriority", "createdAt", "updatedAt") VALUES
+  ('7665adc2-c753-45b6-a335-1df5f35ede0f', 'Admins', 1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"ACTIVE","positionType":"ADMINISTRATOR"}', true, 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('0c6bbbcb-cb19-4dd8-9704-13c67670591d', 'Kabul reports', 0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"state":["APPROVED","PUBLISHED"],"status":"ACTIVE","locationUuid":["e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c"],"locationRecurseStrategy":"CHILDREN"}', true, 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('fea7ebc5-2acd-4c5a-997e-3ed3daf0ab49', 'EF 1 Objectives', 2, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"ACTIVE","taskedOrgUuid":["9a35caa7-a095-4963-ac7b-b784fde4d583"],"orgRecurseStrategy":"CHILDREN"}', true, 2, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Specific preferences values for Jack
 INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "createdAt", "updatedAt") VALUES
