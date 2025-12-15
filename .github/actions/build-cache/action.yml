@@ -17,7 +17,7 @@ runs:
       distribution: "zulu"
       java-version: 17
   - name: Cache gradle
-    uses: actions/cache@v4
+    uses: actions/cache@v5
     with:
       path: |
         ~/.gradle/caches
@@ -33,7 +33,7 @@ runs:
     run: echo "dir=$(./gradlew -q yarn_cache_dir |& tail -1)" >> $GITHUB_OUTPUT
     shell: bash
   - name: Cache yarn and node_modules
-    uses: actions/cache@v4
+    uses: actions/cache@v5
     with:
       path: |
         ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -43,7 +43,7 @@ runs:
       restore-keys: |
         ${{ runner.os }}-yarn-
   - name: Cache build
-    uses: actions/cache@v4
+    uses: actions/cache@v5
     with:
       path: ./build
       key: ${{ runner.os }}-build-${{ github.ref }}
