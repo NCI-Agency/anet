@@ -25,6 +25,7 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import ObjectHistory from "components/ObjectHistory"
 import OrganizationTable from "components/OrganizationTable"
 import {
   jumpToTop,
@@ -176,6 +177,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
           }
         }
       />
+      <ObjectHistory objectUuid={position.uuid} />
     </>
   )
 

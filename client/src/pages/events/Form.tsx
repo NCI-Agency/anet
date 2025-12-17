@@ -29,6 +29,7 @@ import NavigationWarning from "components/NavigationWarning"
 import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
 import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -173,6 +174,7 @@ const EventForm = ({
               Save Event
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
         const organizationFilters = {
