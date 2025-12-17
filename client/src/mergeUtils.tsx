@@ -356,25 +356,34 @@ interface LeafletMapProps {
   mapId: string
   location?: any
   hideWhenEmpty?: boolean
+  mode?: "both" | "marker" | "shape"
 }
 
 export const LeafletMap = ({
   mapId,
   location,
-  hideWhenEmpty
+  hideWhenEmpty,
+  mode = "both"
 }: LeafletMapProps) => {
-  const shapes = location.geoJson ? [location.geoJson] : []
-  const markers = Location.hasCoordinates(location)
-    ? [
-        {
-          id: "marker-" + mapId,
-          name: _escape(location?.name) || "", // escape HTML in location name!
-          lat: Location.hasCoordinates(location) ? location.lat : null,
-          lng: Location.hasCoordinates(location) ? location.lng : null
-        }
-      ]
-    : []
-  return shapes.length + markers.length > 0 ? (
+  const showMarker = mode === "both" || mode === "marker"
+  const showShape = mode === "both" || mode === "shape"
+
+  const shapes = showShape && location.geoJson ? [location.geoJson] : []
+  const markers =
+    showMarker && Location.hasCoordinates(location)
+      ? [
+          {
+            id: "marker-" + mapId,
+            name: _escape(location?.name) || "",
+            lat: location.lat,
+            lng: location.lng
+          }
+        ]
+      : []
+
+  const hasContent = shapes.length + markers.length > 0
+
+  return hasContent ? (
     <Leaflet mapId={mapId} markers={markers} shapes={shapes} />
   ) : (
     <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />
