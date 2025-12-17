@@ -91,7 +91,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(EventSeries obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "eventSeries.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(EventSeries obj, boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "eventSeries.uuid", isDelete);
   }
 }

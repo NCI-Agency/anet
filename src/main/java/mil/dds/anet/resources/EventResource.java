@@ -14,9 +14,9 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -29,12 +29,15 @@ public class EventResource {
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final EventDao dao;
 
-  public EventResource(AnetDictionary dict, AnetObjectEngine engine, EventDao dao) {
+  public EventResource(AnetDictionary dict, AnetObjectEngine engine, AuditTrailDao auditTrailDao,
+      EventDao dao) {
     this.dict = dict;
     this.engine = engine;
     this.dao = dao;
+    this.auditTrailDao = auditTrailDao;
   }
 
   public static boolean hasPermission(final Person user, final String orgUuid) {
@@ -77,7 +80,8 @@ public class EventResource {
         : Utils.sanitizeHtml(event.getDescription()));
     final Event created = dao.insert(event);
 
-    AnetAuditLogger.log("Event {} created by {}", created, user);
+    // Log the change
+    auditTrailDao.logCreate(user, EventDao.TABLE_NAME, created);
     return created;
   }
 
@@ -148,10 +152,11 @@ public class EventResource {
           oldPerson -> dao.removePersonFromEvent(DaoUtils.getUuid(oldPerson), event));
     }
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, EventDao.TABLE_NAME, event);
     // Update any subscriptions
-    dao.updateSubscriptions(event);
+    dao.updateSubscriptions(event, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Event {} updated by {}", event, user);
     return numRows;
   }
 

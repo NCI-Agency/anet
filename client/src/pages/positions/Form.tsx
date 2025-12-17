@@ -26,6 +26,7 @@ import LinkTo from "components/LinkTo"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
@@ -253,6 +254,7 @@ const PositionForm = ({
               Save Position
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
         const organizationFilters = {

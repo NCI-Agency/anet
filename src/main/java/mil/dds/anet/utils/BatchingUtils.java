@@ -9,6 +9,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.AuditTrail;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
@@ -30,6 +31,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.SavedSearch;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.User;
@@ -85,6 +87,11 @@ public final class BatchingUtils {
             (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getApprovalStepDao().getApprovers(foreignKeys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.ASSESSMENTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Assessment>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getAssessmentDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ASSESSMENT_ASSESSMENT_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
@@ -97,6 +104,11 @@ public final class BatchingUtils {
             (BatchLoader<String, List<Assessment>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getAssessmentDao().getAssessments(foreignKeys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.ATTACHMENTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Attachment>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getAttachmentDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
@@ -108,6 +120,11 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Attachment>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getAttachmentDao().getAttachments(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.AUDIT_TRAIL.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, AuditTrail>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getAuditTrailDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.AUTHORIZATION_GROUPS.toString(),
         DataLoaderFactory.newDataLoader(
@@ -139,7 +156,7 @@ public final class BatchingUtils {
                 () -> engine.getEmailAddressDao().getEmailAddressesForRelatedObjects(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.ENTITY_AVATAR.toString(),
+    dataLoaderRegistry.register(IdDataLoaderKey.ENTITY_AVATARS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, EntityAvatar>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getEntityAvatarDao().getByIds(keys), dispatcherService),
@@ -184,6 +201,11 @@ public final class BatchingUtils {
             (BatchLoader<ImmutablePair<String, LocationSearchQuery>, List<Location>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getLocationDao().getLocationsBySearch(foreignKeys),
                     dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.NOTES.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Note>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getNoteDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
@@ -343,6 +365,11 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Task>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.SAVED_SEARCHES.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, SavedSearch>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getSavedSearchDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
         DataLoaderFactory.newDataLoader(

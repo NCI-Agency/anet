@@ -9,6 +9,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { MessagesWithConflict } from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
@@ -76,14 +77,17 @@ const AttachmentForm = ({
       }) => {
         const { iconSize, iconImage } = utils.getAttachmentIconDetails(values)
         const action = (
-          <Button
-            key="submit"
-            variant="primary"
-            onClick={submitForm}
-            disabled={isSubmitting}
-          >
-            Save Attachment
-          </Button>
+          <>
+            <Button
+              key="submit"
+              variant="primary"
+              onClick={submitForm}
+              disabled={isSubmitting}
+            >
+              Save Attachment
+            </Button>
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
+          </>
         )
 
         return (

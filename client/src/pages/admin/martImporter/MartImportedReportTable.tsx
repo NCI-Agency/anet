@@ -156,238 +156,236 @@ const MartImportedReportTable = ({
   }
 
   return (
-    <>
-      <Fieldset
-        title="MART reports imported"
-        action={
-          <div className="flot-end d-flex align-items-center gap-3">
-            {!selectedReportUuid && (
-              <div className="d-flex flex-column">
-                Filter by author:
-                <AdvancedSingleSelect
-                  fieldName="author"
-                  placeholder="Select an author to filter on"
-                  value={selectedAuthor}
-                  overlayColumns={[
-                    "Name",
-                    "Position",
-                    "Location",
-                    "Organization"
-                  ]}
-                  overlayRenderRow={PersonDetailedOverlayRow}
-                  filterDefs={peopleFilters}
-                  onChange={handleAuthorChange}
-                  objectType={Person}
-                  valueKey="name"
-                  fields={Person.autocompleteQuery}
-                  addon={PEOPLE_ICON}
-                />
-              </div>
-            )}
-            <div>
-              Filter by state:
-              <FormSelect
-                value={selectedState}
-                onChange={e => handleStateFilterChange(e.target.value)}
-              >
-                {FILTER_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </FormSelect>
+    <Fieldset
+      title="MART reports imported"
+      action={
+        <div className="float-end d-flex flex-column align-items-start gap-3 flex-md-row flex-md-wrap align-items-md-center">
+          {!selectedReportUuid && (
+            <div className="d-flex flex-column">
+              Filter by author:
+              <AdvancedSingleSelect
+                fieldName="author"
+                placeholder="Select an author to filter on"
+                value={selectedAuthor}
+                overlayColumns={[
+                  "Name",
+                  "Position",
+                  "Location",
+                  "Organization"
+                ]}
+                overlayRenderRow={PersonDetailedOverlayRow}
+                filterDefs={peopleFilters}
+                onChange={handleAuthorChange}
+                objectType={Person}
+                valueKey="name"
+                fields={Person.autocompleteQuery}
+                addon={PEOPLE_ICON}
+              />
             </div>
-            <div>
-              Sort by:
-              <FormSelect
-                value={sortBy}
-                onChange={e => handleSortByChange(e.target.value)}
-              >
-                <option value="SEQUENCE">Sequence</option>
-                <option value="SUBMITTED_AT">Submitted Date</option>
-                <option value="RECEIVED_AT">Received Date</option>
-              </FormSelect>
-            </div>
-            <div>
-              Order:
-              <FormSelect
-                value={sortOrder}
-                onChange={e => handleSortOrderChange(e.target.value)}
-              >
-                <option value="ASC">Ascending</option>
-                <option value="DESC">Descending</option>
-              </FormSelect>
-            </div>
-            <div>
-              Number per page:
-              <FormSelect
-                defaultValue={pageSize}
-                onChange={e =>
-                  handlePageSizeChange(
-                    parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
-                  )
-                }
-              >
-                {PAGESIZES.map(size => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
+          )}
+          <div>
+            Filter by state:
+            <FormSelect
+              value={selectedState}
+              onChange={e => handleStateFilterChange(e.target.value)}
+            >
+              {FILTER_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </FormSelect>
           </div>
-        }
-      >
-        {_isEmpty(martImportedReports) ? (
-          <em>No mart reports imported found</em>
-        ) : (
-          <UltimatePaginationTopDown
-            componentClassName="searchPagination"
-            className="float-end"
-            pageNum={pageNum}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            goToPage={setPageNum}
-          >
-            <Table striped hover responsive>
-              <thead>
-                <tr>
-                  <th>Sequence</th>
-                  <th>Sent by MART</th>
-                  <th>Received by ANET</th>
-                  <th>Received</th>
-                  <th>Submitted</th>
-                  {!selectedReportUuid && <th>Author</th>}
-                  {!selectedReportUuid && <th>Report</th>}
-                  <th>Errors</th>
-                </tr>
-              </thead>
-              <tbody>
-                {martImportedReports.map((martImportedReport, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{martImportedReport.sequence}</td>
-                      <td>
-                        {moment(martImportedReport.submittedAt).format(
-                          Settings.dateFormats.forms.displayLong.withTime
-                        )}
-                      </td>
-                      <td>
-                        {moment(martImportedReport.receivedAt).format(
-                          Settings.dateFormats.forms.displayLong.withTime
-                        )}
-                      </td>
-                      <td>
+          <div>
+            Sort by:
+            <FormSelect
+              value={sortBy}
+              onChange={e => handleSortByChange(e.target.value)}
+            >
+              <option value="SEQUENCE">Sequence</option>
+              <option value="SUBMITTED_AT">Submitted Date</option>
+              <option value="RECEIVED_AT">Received Date</option>
+            </FormSelect>
+          </div>
+          <div>
+            Order:
+            <FormSelect
+              value={sortOrder}
+              onChange={e => handleSortOrderChange(e.target.value)}
+            >
+              <option value="ASC">Ascending</option>
+              <option value="DESC">Descending</option>
+            </FormSelect>
+          </div>
+          <div>
+            Number per page:
+            <FormSelect
+              defaultValue={pageSize}
+              onChange={e =>
+                handlePageSizeChange(
+                  Number.parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
+                )
+              }
+            >
+              {PAGESIZES.map(size => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </FormSelect>
+          </div>
+        </div>
+      }
+    >
+      {_isEmpty(martImportedReports) ? (
+        <em>No mart reports imported found</em>
+      ) : (
+        <UltimatePaginationTopDown
+          componentClassName="searchPagination"
+          className="float-end"
+          pageNum={pageNum}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          goToPage={setPageNum}
+        >
+          <Table striped hover responsive>
+            <thead>
+              <tr>
+                <th>Sequence</th>
+                <th>Sent by MART</th>
+                <th>Received by ANET</th>
+                <th>Received</th>
+                <th>Submitted</th>
+                {!selectedReportUuid && <th>Author</th>}
+                {!selectedReportUuid && <th>Report</th>}
+                <th>Errors</th>
+              </tr>
+            </thead>
+            <tbody>
+              {martImportedReports.map((martImportedReport, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{martImportedReport.sequence}</td>
+                    <td>
+                      {moment(martImportedReport.submittedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
+                      )}
+                    </td>
+                    <td>
+                      {moment(martImportedReport.receivedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
+                      )}
+                    </td>
+                    <td>
+                      <Icon
+                        icon={
+                          martImportedReport.state !== "NOT_RECEIVED"
+                            ? IconNames.TICK
+                            : IconNames.CROSS
+                        }
+                        className={
+                          martImportedReport.state !== "NOT_RECEIVED"
+                            ? "text-success"
+                            : "text-danger"
+                        }
+                      />
+                    </td>
+                    <td>
+                      {martImportedReport.state !== "NOT_RECEIVED" && (
                         <Icon
                           icon={
-                            martImportedReport.state !== "NOT_RECEIVED"
+                            martImportedReport.state === "SUBMITTED_OK"
                               ? IconNames.TICK
-                              : IconNames.CROSS
+                              : martImportedReport.state ===
+                                  "SUBMITTED_WARNINGS"
+                                ? IconNames.WARNING_SIGN
+                                : IconNames.CROSS
                           }
                           className={
-                            martImportedReport.state !== "NOT_RECEIVED"
+                            martImportedReport.state === "SUBMITTED_OK"
                               ? "text-success"
-                              : "text-danger"
+                              : martImportedReport.state ===
+                                  "SUBMITTED_WARNINGS"
+                                ? "text-warning"
+                                : "text-danger"
                           }
                         />
-                      </td>
-                      <td>
-                        {martImportedReport.state !== "NOT_RECEIVED" && (
-                          <Icon
-                            icon={
-                              martImportedReport.state === "SUBMITTED_OK"
-                                ? IconNames.TICK
-                                : martImportedReport.state ===
-                                    "SUBMITTED_WARNINGS"
-                                  ? IconNames.WARNING_SIGN
-                                  : IconNames.CROSS
-                            }
-                            className={
-                              martImportedReport.state === "SUBMITTED_OK"
-                                ? "text-success"
-                                : martImportedReport.state ===
-                                    "SUBMITTED_WARNINGS"
-                                  ? "text-warning"
-                                  : "text-danger"
-                            }
-                          />
-                        )}
-                      </td>
-                      {!selectedReportUuid && (
-                        <>
-                          <td>
-                            <div className="d-flex align-items-center gap-2 justify-content-between px-2">
-                              <LinkTo
-                                modelType="Person"
-                                model={martImportedReport.person}
-                              />
-                              {martImportedReport.person && (
-                                <OverlayTrigger
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip>
-                                      Filter all entries by this author
-                                    </Tooltip>
-                                  }
-                                >
-                                  <Icon
-                                    icon={IconNames.SEARCH}
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() =>
-                                      handleAuthorChange(
-                                        martImportedReport.person
-                                      )
-                                    }
-                                  />
-                                </OverlayTrigger>
-                              )}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex align-items-center gap-2 justify-content-between px-2">
-                              <LinkTo
-                                modelType="Report"
-                                model={martImportedReport.report}
-                                displayCallback={displayCallback}
-                              />
-                              {martImportedReport.report && (
-                                <OverlayTrigger
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip>
-                                      Show the import history for this report
-                                    </Tooltip>
-                                  }
-                                >
-                                  <Icon
-                                    icon={IconNames.HISTORY}
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() =>
-                                      onSelectReport?.(martImportedReport)
-                                    }
-                                  />
-                                </OverlayTrigger>
-                              )}
-                            </div>
-                          </td>
-                        </>
                       )}
-                      <td>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: martImportedReport.errors
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
-          </UltimatePaginationTopDown>
-        )}
-      </Fieldset>
-    </>
+                    </td>
+                    {!selectedReportUuid && (
+                      <>
+                        <td>
+                          <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                            <LinkTo
+                              modelType="Person"
+                              model={martImportedReport.person}
+                            />
+                            {!selectedAuthor && martImportedReport.person && (
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={
+                                  <Tooltip>
+                                    Filter all entries by this author
+                                  </Tooltip>
+                                }
+                              >
+                                <Icon
+                                  icon={IconNames.SEARCH}
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() =>
+                                    handleAuthorChange(
+                                      martImportedReport.person
+                                    )
+                                  }
+                                />
+                              </OverlayTrigger>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                            <LinkTo
+                              modelType="Report"
+                              model={martImportedReport.report}
+                              displayCallback={displayCallback}
+                            />
+                            {martImportedReport.report && (
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={
+                                  <Tooltip>
+                                    Show the import history for this report
+                                  </Tooltip>
+                                }
+                              >
+                                <Icon
+                                  icon={IconNames.HISTORY}
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() =>
+                                    onSelectReport?.(martImportedReport)
+                                  }
+                                />
+                              </OverlayTrigger>
+                            )}
+                          </div>
+                        </td>
+                      </>
+                    )}
+                    <td>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: martImportedReport.errors
+                        }}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </Table>
+        </UltimatePaginationTopDown>
+      )}
+    </Fieldset>
   )
 }
 

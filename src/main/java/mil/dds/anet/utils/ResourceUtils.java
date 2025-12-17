@@ -1,7 +1,9 @@
 package mil.dds.anet.utils;
 
+import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +11,9 @@ import java.util.Objects;
 import java.util.Set;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,19 @@ public class ResourceUtils {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  public static List<Position> getAllUserPositions(final GraphQLContext context, final Person user,
+      final Position userPrimaryPosition) {
+    final List<Position> userAdditionalPositions = user.loadAdditionalPositions(context).join();
+    final List<Position> allUserPositions = new ArrayList<>();
+    if (userPrimaryPosition != null) {
+      allUserPositions.add(userPrimaryPosition);
+    }
+    if (userAdditionalPositions != null) {
+      allUserPositions.addAll(userAdditionalPositions);
+    }
+    return allUserPositions;
+  }
 
   public static void validateHistoryInput(final String entityUuid,
       final List<PersonPositionHistory> personPositionHistory,

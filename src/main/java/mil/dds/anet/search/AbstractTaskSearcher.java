@@ -51,7 +51,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getTaskDao().getSubscriptionUpdate(null)));
+          engine().getTaskDao().getSubscriptionUpdate(null, false)));
     }
 
     if (!Utils.isEmptyOrNull(query.getTaskedOrgUuid())) {

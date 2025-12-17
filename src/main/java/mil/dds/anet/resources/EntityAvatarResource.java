@@ -4,8 +4,12 @@ import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.time.Instant;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.RelatableObject;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
@@ -13,9 +17,9 @@ import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.AbstractAnetBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,9 +27,14 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class EntityAvatarResource {
 
+  private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final EntityAvatarDao entityAvatarDao;
 
-  public EntityAvatarResource(EntityAvatarDao entityAvatarDao) {
+  public EntityAvatarResource(AnetObjectEngine engine, AuditTrailDao auditTrailDao,
+      EntityAvatarDao entityAvatarDao) {
+    this.engine = engine;
+    this.auditTrailDao = auditTrailDao;
     this.entityAvatarDao = entityAvatarDao;
   }
 
@@ -47,8 +56,11 @@ public class EntityAvatarResource {
 
     final int numRows = entityAvatarDao.upsert(entityAvatar);
     if (numRows > 0) {
-      AnetAuditLogger.log("Avatar for entity {} of type {} created or updated by {}",
-          entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), user);
+      // Log the change
+      final RelatableObject relatedObject =
+          entityAvatar.loadRelatedObject(engine.getContext()).join();
+      auditTrailDao.logUpdate(user, Instant.now(), entityAvatar.getRelatedObjectType(),
+          (AbstractAnetBean) relatedObject, "avatar has been set");
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -68,14 +80,17 @@ public class EntityAvatarResource {
       @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
       @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final EntityAvatar existing = entityAvatarDao.getByRelatedObjectUuid(relatedObjectUuid);
 
     // Check if user is authorized to manipulate avatars for this relatedObjectUuid
     assertPermission(user, relatedObjectType, relatedObjectUuid);
 
     int numRows = entityAvatarDao.delete(relatedObjectType, relatedObjectUuid);
     if (numRows > 0) {
-      AnetAuditLogger.log("Avatar for entity {} of type {} deleted by {}", relatedObjectUuid,
-          relatedObjectType, user);
+      // Log the change
+      final RelatableObject relatedObject = existing.loadRelatedObject(engine.getContext()).join();
+      auditTrailDao.logDelete(user, relatedObjectType, (AbstractAnetBean) relatedObject,
+          "avatar has been deleted");
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows

@@ -4,6 +4,7 @@ import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
@@ -24,7 +25,9 @@ public class MartImportedReportsResource {
   @GraphQLQuery(name = "martImportedReportList")
   public AnetBeanList<MartImportedReport> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") MartImportedReportSearchQuery query) {
-    AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+    query.setUser(user);
     return martImportedReportDao.search(query);
   }
 

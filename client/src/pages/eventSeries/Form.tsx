@@ -11,6 +11,7 @@ import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
@@ -114,6 +115,7 @@ const EventSeriesForm = ({
               Save Event Series
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
         const organizationFilters = {

@@ -1,6 +1,5 @@
 package mil.dds.anet.search;
 
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -24,11 +23,10 @@ public abstract class AbstractSubscriptionUpdateSearcher
 
   @Transactional
   @Override
-  public AnetBeanList<SubscriptionUpdate> runSearch(SubscriptionUpdateSearchQuery query,
-      Person user) {
+  public AnetBeanList<SubscriptionUpdate> runSearch(SubscriptionUpdateSearchQuery query) {
     final Handle handle = getDbHandle();
     try {
-      buildQuery(query, user);
+      buildQuery(query);
       return qb.buildAndRun(handle, query, new SubscriptionUpdateMapper());
     } finally {
       closeDbHandle(handle);
@@ -37,13 +35,9 @@ public abstract class AbstractSubscriptionUpdateSearcher
 
   @Override
   protected void buildQuery(SubscriptionUpdateSearchQuery query) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void buildQuery(SubscriptionUpdateSearchQuery query, Person user) {
     qb.addSelectClause(SubscriptionUpdateDao.SUBSCRIPTION_UPDATE_FIELDS);
     qb.addFromClause("\"subscriptionUpdates\"");
-    final Position position = DaoUtils.getPosition(user);
+    final Position position = DaoUtils.getPosition(query.getUser());
     qb.addWhereClause(
         "\"subscriptionUpdates\".\"subscriptionUuid\" IN ( SELECT uuid FROM subscriptions "
             + "  WHERE subscriptions.\"subscriberUuid\" = :positionUuid )");

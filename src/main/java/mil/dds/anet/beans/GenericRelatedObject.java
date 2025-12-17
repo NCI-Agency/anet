@@ -95,7 +95,7 @@ public class GenericRelatedObject extends AbstractAnetBean {
   @GraphQLQuery(name = "relatedObject")
   public CompletableFuture<RelatableObject> loadRelatedObject(
       @GraphQLRootContext GraphQLContext context) {
-    if (relatedObject != null) {
+    if (relatedObject != null || relatedObjectType == null || relatedObjectUuid == null) {
       return CompletableFuture.completedFuture(relatedObject);
     }
     return new UuidFetcher<>()
@@ -120,5 +120,10 @@ public class GenericRelatedObject extends AbstractAnetBean {
   @Override
   public int hashCode() {
     return Objects.hash(objectUuid, relatedObjectType, relatedObjectUuid);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("entity %s of type %s", getRelatedObjectUuid(), getRelatedObjectType());
   }
 }

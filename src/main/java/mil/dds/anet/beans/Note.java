@@ -13,7 +13,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Note extends AbstractAnetBean {
+public class Note extends AbstractAnetBean implements RelatableObject {
 
   @GraphQLQuery
   @GraphQLInputField

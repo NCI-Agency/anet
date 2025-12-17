@@ -1,5 +1,6 @@
 package mil.dds.anet.threads;
 
+import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -17,13 +18,14 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,13 +35,15 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false} and ${anet.automatically-inactivate-users:false}")
 public class AccountDeactivationWorker extends AbstractWorker {
 
+  private final AuditTrailDao auditTrailDao;
   private final PersonDao dao;
   private final PositionDao positionDao;
 
-  public AccountDeactivationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, PersonDao dao,
-      PositionDao positionDao) {
+  public AccountDeactivationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
+      AuditTrailDao auditTrailDao, PersonDao dao, PositionDao positionDao) {
     super(dict, jobHistoryDao,
         "Deactivation Warning Worker waking up to check for Future Account Deactivations");
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
     this.positionDao = positionDao;
   }
@@ -148,18 +152,20 @@ public class AccountDeactivationWorker extends AbstractWorker {
   }
 
   private void deactivateAccount(Person p) {
-    AnetAuditLogger.log(
-        "Person {} status set to inactive by system because the End-of-Tour date has been reached",
-        p);
     p.setStatus(Status.INACTIVE);
+    auditTrailDao.logUpdate(null, Instant.now(), PersonDao.TABLE_NAME, p,
+        "person has been set to inactive by the system because their End-of-Tour date has been reached");
 
     final Position userPrimaryPosition = DaoUtils.getPosition(p);
-    final int numPositions =
-        positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition);
+    final List<Position> allUserPositions =
+        ResourceUtils.getAllUserPositions(engine().getContext(), p, userPrimaryPosition);
+    int numPositions = positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition);
     if (numPositions > 0) {
-      AnetAuditLogger.log(
-          "Person {} removed from {} position(s) by system because they are now inactive", p,
-          numPositions);
+      // Log the change
+      auditTrailDao.logUpdate(null, Instant.now(), PersonDao.TABLE_NAME, p, String.format(
+          "person has been removed from %s position(s) by the system because they are now inactive",
+          numPositions),
+          String.format("from position(s) %s", Joiner.on(", ").join(allUserPositions)));
     }
 
     // Update

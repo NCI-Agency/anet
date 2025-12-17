@@ -16,6 +16,7 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import ObjectHistory from "components/ObjectHistory"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -97,6 +98,7 @@ const AttachmentShow = ({ pageDispatchers }: AttachmentShowProps) => {
         </LinkTo>
       )}
       <FindObjectsButton objectLabel="Attachment" searchText={searchText} />
+      <ObjectHistory objectUuid={attachment.uuid} />
     </>
   )
 

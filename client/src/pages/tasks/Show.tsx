@@ -26,6 +26,7 @@ import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -223,6 +224,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
           }
         }
       />
+      <ObjectHistory objectUuid={task.uuid} />
     </>
   )
 

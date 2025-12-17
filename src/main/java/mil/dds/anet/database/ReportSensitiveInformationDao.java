@@ -4,6 +4,7 @@ import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.AuditTrail;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
@@ -81,7 +82,8 @@ public class ReportSensitiveInformationDao
           .bindBean(rsi).bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
           .bind("reportUuid", report.getUuid()).execute();
-      AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
+      AnetAuditLogger.log(AuditTrail.getCreateInstance(user, TABLE_NAME, rsi, null,
+          String.format("linked to report %s", report)));
       return rsi;
     } finally {
       closeDbHandle(handle);
@@ -104,7 +106,8 @@ public class ReportSensitiveInformationDao
       if (Utils.isEmptyHtml(rsi.getText())) {
         numRows = handle.createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
             + TABLE_NAME + "\" WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
-        AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
+        AnetAuditLogger.log(AuditTrail.getDeleteInstance(user, TABLE_NAME, rsi, null,
+            String.format("unlinked from report %s", report)));
       } else {
         // Update relevant fields, but do not allow the reportUuid to be updated by the query!
         rsi.setUpdatedAt(Instant.now());
@@ -113,7 +116,8 @@ public class ReportSensitiveInformationDao
                 + " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
             .bindBean(rsi).bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
             .execute();
-        AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
+        AnetAuditLogger.log(AuditTrail.getUpdateInstance(user, TABLE_NAME, rsi, null,
+            String.format("linked to report %s", report)));
       }
       return numRows;
     } finally {
@@ -136,7 +140,8 @@ public class ReportSensitiveInformationDao
         .thenApply(l -> {
           ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
           if (rsi != null) {
-            AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
+            AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null, "user retrieved row",
+                String.format("linked to report %s", report), user, TABLE_NAME, rsi));
           } else {
             rsi = new ReportSensitiveInformation();
           }

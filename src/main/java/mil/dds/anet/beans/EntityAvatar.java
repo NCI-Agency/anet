@@ -1,11 +1,15 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,6 +38,8 @@ public class EntityAvatar extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private Integer cropHeight;
+  // see below
+  private RelatableObject relatedObject;
 
   @Override
   @JsonIgnore
@@ -87,6 +93,18 @@ public class EntityAvatar extends AbstractAnetBean {
 
   public void setRelatedObjectUuid(String relatedObjectUuid) {
     this.relatedObjectUuid = relatedObjectUuid;
+  }
+
+  public CompletableFuture<RelatableObject> loadRelatedObject(GraphQLContext context) {
+    if (relatedObject != null) {
+      return CompletableFuture.completedFuture(relatedObject);
+    }
+    return new UuidFetcher<>()
+        .load(context, IdDataLoaderKey.valueOfTableName(relatedObjectType), relatedObjectUuid)
+        .thenApply(o -> {
+          relatedObject = (RelatableObject) o;
+          return relatedObject;
+        });
   }
 
   public String getAttachmentUuid() {

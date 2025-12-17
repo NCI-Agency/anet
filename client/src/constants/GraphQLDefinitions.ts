@@ -466,6 +466,20 @@ export const gqlApprovalStepFields = `
   }
 `
 
+export const gqlAuditTrailFields = `
+  uuid
+  createdAt
+  updateType
+  objectUuid
+  updateDescription
+  updateDetails
+  relatedObjectType
+  relatedObjectUuid
+  person {
+    ${gqlEntityFieldsMap.Person}
+  }
+`
+
 export const gqlAttachmentRelatedObjectsFields = `
   attachmentRelatedObjects {
     relatedObjectUuid

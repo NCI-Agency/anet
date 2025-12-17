@@ -12,6 +12,7 @@ import Messages from "components/Messages"
 import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
 import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -96,6 +97,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
         </LinkTo>
       )}
       <FindObjectsButton objectLabel="Event" searchText={searchText} />
+      <ObjectHistory objectUuid={event.uuid} />
     </>
   )
 

@@ -32,6 +32,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -389,6 +390,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           }
         }
       />
+      <ObjectHistory objectUuid={organization.uuid} />
     </>
   )
 
