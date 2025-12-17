@@ -87,7 +87,7 @@ public abstract class AbstractPositionSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getPositionDao().getSubscriptionUpdate(null)));
+          engine().getPositionDao().getSubscriptionUpdate(null, false)));
     }
 
     qb.addInClause("types", "positions.type", query.getType());

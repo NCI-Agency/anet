@@ -24,6 +24,7 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
@@ -55,6 +56,9 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
 
   @Autowired
   private JobHistoryDao jobHistoryDao;
+
+  @Autowired
+  private AuditTrailDao auditTrailDao;
 
   @Autowired
   private ApprovalStepDao approvalStepDao;
@@ -107,7 +111,8 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
     allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
 
     emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
-    reportPublicationWorker = new ReportPublicationWorker(dict, jobHistoryDao, reportDao);
+    reportPublicationWorker =
+        new ReportPublicationWorker(dict, jobHistoryDao, auditTrailDao, reportDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
 
     // Flush all reports from previous tests

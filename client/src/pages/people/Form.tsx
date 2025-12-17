@@ -23,6 +23,7 @@ import { MessagesWithConflict } from "components/Messages"
 import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
@@ -237,6 +238,9 @@ const PersonForm = ({
               {saveText}
             </Button>
             {notesComponent}
+            {edit && !forOnboarding && (
+              <ObjectHistory objectUuid={values.uuid} />
+            )}
           </>
         )
 

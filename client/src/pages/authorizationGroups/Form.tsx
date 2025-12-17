@@ -10,6 +10,7 @@ import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
@@ -95,14 +96,17 @@ const AuthorizationGroupForm = ({
         submitForm
       }) => {
         const action = (
-          <Button
-            key="submit"
-            variant="primary"
-            onClick={submitForm}
-            disabled={isSubmitting}
-          >
-            Save Community
-          </Button>
+          <>
+            <Button
+              key="submit"
+              variant="primary"
+              onClick={submitForm}
+              disabled={isSubmitting}
+            >
+              Save Community
+            </Button>
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
+          </>
         )
         return (
           <div>

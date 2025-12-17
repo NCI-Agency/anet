@@ -2,8 +2,8 @@ package mil.dds.anet.database.mappers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import mil.dds.anet.beans.search.SavedSearch;
-import mil.dds.anet.beans.search.SavedSearch.SearchObjectType;
+import mil.dds.anet.beans.SavedSearch;
+import mil.dds.anet.beans.SavedSearch.SearchObjectType;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 

@@ -21,8 +21,8 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
@@ -42,13 +42,15 @@ public class TaskResource {
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final TaskDao dao;
   private final ApprovalStepDao approvalStepDao;
 
-  public TaskResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, TaskDao dao,
-      ApprovalStepDao approvalStepDao) {
+  public TaskResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
+      AuditTrailDao auditTrailDao, TaskDao dao, ApprovalStepDao approvalStepDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
     this.approvalStepDao = approvalStepDao;
   }
@@ -133,7 +135,8 @@ public class TaskResource {
     DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, created.getUuid(),
         t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
-    AnetAuditLogger.log("Task {} created by {}", created, user);
+    // Log the change
+    auditTrailDao.logCreate(user, TaskDao.TABLE_NAME, created);
     return created;
   }
 
@@ -198,8 +201,10 @@ public class TaskResource {
       if ((t.getStatus() == Status.INACTIVE && existing.getStatus() != Status.INACTIVE)
           || parentChangedToInactive) {
         final int updatedDescendants = dao.inactivateDescendantTasks(t.getUuid());
-        AnetAuditLogger.log("Task {} set to INACTIVE, updated {} descendants", t,
-            updatedDescendants);
+        // Log the change
+        auditTrailDao.logUpdate(user, TaskDao.TABLE_NAME, t,
+            "task has been set to inactive, updated its descendants",
+            String.format("updated %d descendants", updatedDescendants));
       }
 
       // Update positions:
@@ -231,10 +236,11 @@ public class TaskResource {
       DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, t.getUuid(),
           t.customSensitiveInformationKey(), t.getCustomSensitiveInformation());
 
+      // Log the change
+      final String auditTrailUuid = auditTrailDao.logUpdate(user, TaskDao.TABLE_NAME, t);
       // Update any subscriptions
-      dao.updateSubscriptions(t);
+      dao.updateSubscriptions(t, auditTrailUuid, false);
 
-      AnetAuditLogger.log("Task {} updated by {}", t, user);
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;
     } catch (UnableToExecuteStatementException e) {
@@ -277,10 +283,12 @@ public class TaskResource {
           "Couldn't process merge operation, error occurred while updating merged task relation information.");
     }
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, TaskDao.TABLE_NAME, winnerTask,
+        "a task has been merged into it", String.format("merged task %s", loserTask));
     // Update any subscriptions
-    dao.updateSubscriptions(winnerTask);
+    dao.updateSubscriptions(winnerTask, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Task {} merged into {} by {}", loserTask, winnerTask, user);
     return numberOfAffectedRows;
   }
 

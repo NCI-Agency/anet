@@ -1,6 +1,5 @@
 package mil.dds.anet.search;
 
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -23,10 +22,10 @@ public abstract class AbstractSubscriptionSearcher extends
 
   @Transactional
   @Override
-  public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query, Person user) {
+  public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query) {
     final Handle handle = getDbHandle();
     try {
-      buildQuery(query, user);
+      buildQuery(query);
       return qb.buildAndRun(handle, query, new SubscriptionMapper());
     } finally {
       closeDbHandle(handle);
@@ -35,13 +34,9 @@ public abstract class AbstractSubscriptionSearcher extends
 
   @Override
   protected void buildQuery(SubscriptionSearchQuery query) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void buildQuery(SubscriptionSearchQuery query, Person user) {
     qb.addSelectClause(SubscriptionDao.SUBSCRIPTION_FIELDS);
     qb.addFromClause("subscriptions");
-    final Position position = DaoUtils.getPosition(user);
+    final Position position = DaoUtils.getPosition(query.getUser());
     qb.addStringEqualsClause("positionUuid", "subscriptions.\"subscriberUuid\"",
         DaoUtils.getUuid(position));
     addOrderByClauses(qb, query);

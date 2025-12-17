@@ -69,7 +69,7 @@ public class EntityAvatarDao extends AbstractDao {
   public int delete(final String relatedObjectType, final String relatedObjectUuid) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createUpdate("/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" "
+      return handle.createUpdate("/* deleteEntityAvatar */ DELETE FROM \"entityAvatars\" "
           + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
           .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
           .execute();

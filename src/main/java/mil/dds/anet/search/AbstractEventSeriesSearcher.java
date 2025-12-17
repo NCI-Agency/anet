@@ -44,7 +44,7 @@ public abstract class AbstractEventSeriesSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getEventSeriesDao().getSubscriptionUpdate(null)));
+          engine().getEventSeriesDao().getSubscriptionUpdate(null, false)));
     }
 
     if (!Utils.isEmptyOrNull(query.getOwnerOrgUuid())) {

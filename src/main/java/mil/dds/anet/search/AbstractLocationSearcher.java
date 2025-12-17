@@ -76,7 +76,7 @@ public abstract class AbstractLocationSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getLocationDao().getSubscriptionUpdate(null)));
+          engine().getLocationDao().getSubscriptionUpdate(null, false)));
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
