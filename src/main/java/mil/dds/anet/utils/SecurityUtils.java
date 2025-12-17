@@ -9,6 +9,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.UserDao;
@@ -92,6 +93,8 @@ public class SecurityUtils {
       person.setEndOfTourDate(null);
     }
     dao.updateAuthenticationDetails(person);
+    final AuditTrailDao auditTrailDao = ApplicationContextProvider.getEngine().getAuditTrailDao();
+    auditTrailDao.logUpdate(person, PersonDao.TABLE_NAME, person, "person has been (re)activated");
     return person;
   }
 
@@ -126,6 +129,9 @@ public class SecurityUtils {
       emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
           List.of(emailAddress));
     }
+    final AuditTrailDao auditTrailDao = ApplicationContextProvider.getEngine().getAuditTrailDao();
+    auditTrailDao.logCreate(person, PersonDao.TABLE_NAME, person,
+        "person signed in for the first time");
     return person;
   }
 

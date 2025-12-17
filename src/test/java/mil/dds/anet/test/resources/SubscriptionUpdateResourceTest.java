@@ -45,8 +45,9 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
           + " ... on Location { uuid } ... on Organization { uuid }"
           + " ... on Person { uuid } ... on Position { uuid }"
           + " ... on Report { uuid } ... on Task { uuid }"
-          + " ... on AuthorizationGroup { uuid } ... on Event { uuid } } subscription "
-          + SUBSCRIPTION_FIELDS + " }";
+          + " ... on AuthorizationGroup { uuid } ... on Event { uuid } } subscription {"
+          + " __typename " // ugly work-around for issue in the graphql-java-generator
+          + _SUBSCRIPTION_FIELDS + " } }";
 
   private final Map<String, Consumer<String>> UPDATERS = Map.of( //
       LocationDao.TABLE_NAME, this::updateLocation, //

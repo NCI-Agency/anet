@@ -14,8 +14,8 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -27,9 +27,11 @@ import org.springframework.web.server.ResponseStatusException;
 @GraphQLApi
 public class AuthorizationGroupResource {
 
+  private final AuditTrailDao auditTrailDao;
   private final AuthorizationGroupDao dao;
 
-  public AuthorizationGroupResource(AuthorizationGroupDao dao) {
+  public AuthorizationGroupResource(AuditTrailDao auditTrailDao, AuthorizationGroupDao dao) {
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -62,7 +64,8 @@ public class AuthorizationGroupResource {
     // Add administrative positions
     dao.addAdministrativePositions(a.getUuid(), a.getAdministrativePositions());
 
-    AnetAuditLogger.log("AuthorizationGroup {} created by {}", a, user);
+    // Log the change
+    auditTrailDao.logCreate(user, AuthorizationGroupDao.TABLE_NAME, a);
     return a;
   }
 
@@ -102,10 +105,12 @@ public class AuthorizationGroupResource {
               List.of(DaoUtils.getUuid(oldPosition))));
     }
 
+    // Log the change
+    final String auditTrailUuid =
+        auditTrailDao.logUpdate(user, AuthorizationGroupDao.TABLE_NAME, a);
     // Update any subscriptions
-    dao.updateSubscriptions(a);
+    dao.updateSubscriptions(a, auditTrailUuid, false);
 
-    AnetAuditLogger.log("AuthorizationGroup {} updated by {}", a, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }

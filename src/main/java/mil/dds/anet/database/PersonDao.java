@@ -20,6 +20,7 @@ import javax.cache.Cache.Entry;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
+import mil.dds.anet.beans.AuditTrail;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
@@ -622,7 +623,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           handle.createUpdate(
               "/* updatePersonBiography */ UPDATE people SET biography = NULL WHERE uuid = :uuid")
               .bind("uuid", p.getUuid()).execute();
-          AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
+          AnetAuditLogger.log(AuditTrail.getUpdateInstance(null, TABLE_NAME, p,
+              "has an empty html biography, set to null by the system"));
           evictFromCache(p);
         }
       }
@@ -632,8 +634,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj, boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid", isDelete);
   }
 
   public String clearCache() {

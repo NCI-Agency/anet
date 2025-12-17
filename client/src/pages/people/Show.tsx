@@ -32,6 +32,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -213,6 +214,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           }
         }
       />
+      <ObjectHistory objectUuid={person.uuid} />
     </>
   )
 

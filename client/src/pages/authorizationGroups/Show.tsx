@@ -14,6 +14,7 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -105,6 +106,7 @@ const AuthorizationGroupShow = ({
         </LinkTo>
       )}
       <FindObjectsButton objectLabel="Community" searchText={searchText} />
+      <ObjectHistory objectUuid={authorizationGroup.uuid} />
     </>
   )
 
