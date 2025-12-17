@@ -246,8 +246,28 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
                       mapId="merged-location-map"
                       location={mergedLocation}
                       hideWhenEmpty={hideWhenEmpty}
+                      mode="marker"
                     />
                   </>
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
+                label="Shape (GeoJSON)"
+                fieldName="geoJson"
+                value={
+                  mergedLocation.geoJson ? (
+                    <LeafletMap
+                      mapId="merged-shape-map"
+                      location={mergedLocation}
+                      hideWhenEmpty={hideWhenEmpty}
+                      mode="shape"
+                    />
+                  ) : (
+                    <em>No shape defined</em>
+                  )
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
@@ -565,6 +585,7 @@ const LocationColumn = ({
                   mapId={`merge-location-map-${align}`}
                   location={location}
                   hideWhenEmpty={hideWhenEmpty}
+                  mode="marker"
                 />
               </>
             }
@@ -579,6 +600,35 @@ const LocationColumn = ({
               )
               dispatchMergeActions(setAMergedField("lat", location.lat, align))
               dispatchMergeActions(setAMergedField("lng", location.lng, align))
+            }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
+            label="Shape (GeoJSON)"
+            fieldName="geoJson"
+            value={
+              <>
+                {location.geoJson ? (
+                  <LeafletMap
+                    mapId={`merge-shape-map-${align}`}
+                    location={location}
+                    hideWhenEmpty={hideWhenEmpty}
+                    mode="shape"
+                  />
+                ) : (
+                  <em>No shape defined</em>
+                )}
+              </>
+            }
+            align={align}
+            action={() => {
+              if (location.geoJson) {
+                dispatchMergeActions(
+                  setAMergedField("geoJson", location.geoJson, align)
+                )
+              }
             }}
             mergeState={mergeState}
             autoMerge
