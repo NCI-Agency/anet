@@ -7,8 +7,10 @@ import DictionaryField from "components/DictionaryField"
 import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -75,6 +77,7 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
     eventSeriesUuid: uuid
   }
 
+  const searchText = eventSeries.name
   const action = (
     <>
       {canAdministrateOrg && (
@@ -88,6 +91,8 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
           Edit
         </LinkTo>
       )}
+      <FindObjectsButton objectLabel="EventSeries" searchText={searchText} />
+      <ObjectHistory objectUuid={eventSeries.uuid} />
     </>
   )
 

@@ -30,6 +30,11 @@ public class SubscriptionUpdate extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private boolean isNote;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String auditTrailUuid;
+  // annotated below
+  private AuditTrail auditTrail;
 
   @Override
   @JsonIgnore
@@ -127,6 +132,26 @@ public class SubscriptionUpdate extends AbstractAnetBean {
     this.isNote = isNote;
   }
 
+  public String getAuditTrailUuid() {
+    return auditTrailUuid;
+  }
+
+  public void setAuditTrailUuid(String auditTrailUuid) {
+    this.auditTrailUuid = auditTrailUuid;
+  }
+
+  @GraphQLQuery(name = "auditTrail")
+  public CompletableFuture<AuditTrail> loadAuditTrail(@GraphQLRootContext GraphQLContext context) {
+    if (auditTrail != null) {
+      return CompletableFuture.completedFuture(auditTrail);
+    }
+    return new UuidFetcher<AuditTrail>().load(context, IdDataLoaderKey.AUDIT_TRAIL, auditTrailUuid)
+        .thenApply(o -> {
+          auditTrail = o;
+          return auditTrail;
+        });
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || o.getClass() != this.getClass()) {
@@ -137,7 +162,8 @@ public class SubscriptionUpdate extends AbstractAnetBean {
         && Objects.equals(s.getSubscriptionUuid(), getSubscriptionUuid())
         && Objects.equals(s.getUpdatedObjectType(), updatedObjectType)
         && Objects.equals(s.getUpdatedObjectUuid(), updatedObjectUuid)
-        && Objects.equals(s.getIsNote(), isNote) && Objects.equals(s.getCreatedAt(), createdAt);
+        && Objects.equals(s.getIsNote(), isNote) && Objects.equals(s.getCreatedAt(), createdAt)
+        && Objects.equals(s.getAuditTrailUuid(), auditTrailUuid);
   }
 
   @Override

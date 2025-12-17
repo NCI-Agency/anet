@@ -29,13 +29,14 @@ import mil.dds.anet.test.client.Task;
 
 public abstract class SubscriptionTestHelper extends AbstractResourceTest {
 
-  protected static final String SUBSCRIPTION_FIELDS =
-      "{ uuid createdAt updatedAt subscriber { uuid }"
+  protected static final String _SUBSCRIPTION_FIELDS =
+      "uuid createdAt updatedAt subscriber { uuid }"
           + " subscribedObjectType subscribedObjectUuid subscribedObject {"
           + " ... on AuthorizationGroup { uuid } ... on Event { uuid }"
           + " ... on Location { uuid } ... on Organization { uuid }"
           + " ... on Person { uuid } ... on Position { uuid }"
-          + " ... on Report { uuid } ... on Task { uuid } } }";
+          + " ... on Report { uuid } ... on Task { uuid } }";
+  protected static final String SUBSCRIPTION_FIELDS = "{ " + _SUBSCRIPTION_FIELDS + " }";
 
   public static final Map<String, String> SUBSCRIPTION_TESTS = Map.of(
       // Location: Antarctica

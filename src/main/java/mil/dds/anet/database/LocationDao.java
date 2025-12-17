@@ -219,8 +219,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   // TODO: Don't delete any location if any references exist.
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "locations.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj, boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "locations.uuid", isDelete);
   }
 
   class LocationSearchBatcher extends SearchQueryBatcher<Location, LocationSearchQuery> {

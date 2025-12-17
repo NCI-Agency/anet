@@ -193,6 +193,7 @@ configurations.all {
 }
 
 test {
+	systemProperty "user.timezone", "UTC"
 	useJUnitPlatform()
 	jacoco {
 		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
@@ -266,7 +267,7 @@ project.group = "ncia"
 
 application {
 	mainClass = "mil.dds.anet.AnetApplication"
-	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib", "-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"]
+	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib", "-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts", "-Duser.timezone=UTC"]
 }
 
 String dbLoc = run.environment['ANET_DB_SERVER']

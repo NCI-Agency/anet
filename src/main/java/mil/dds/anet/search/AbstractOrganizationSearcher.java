@@ -49,7 +49,7 @@ public abstract class AbstractOrganizationSearcher extends
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getOrganizationDao().getSubscriptionUpdate(null)));
+          engine().getOrganizationDao().getSubscriptionUpdate(null, false)));
     }
 
     qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());

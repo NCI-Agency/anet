@@ -130,7 +130,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getReportDao().getSubscriptionUpdate(null)));
+          engine().getReportDao().getSubscriptionUpdate(null, false)));
     }
 
     // We do not store status in reports as we consider them all ACTIVE. Hence, we want to return

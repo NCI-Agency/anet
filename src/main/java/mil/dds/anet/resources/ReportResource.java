@@ -25,6 +25,7 @@ import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
+import mil.dds.anet.beans.AuditTrail;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.GenericRelatedObject;
@@ -42,6 +43,7 @@ import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AssessmentDao;
 import mil.dds.anet.database.AssessmentDao.UpdateType;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -73,6 +75,7 @@ public class ReportResource {
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final CommentDao commentDao;
   private final AssessmentDao assessmentDao;
   private final OrganizationDao organizationDao;
@@ -80,10 +83,11 @@ public class ReportResource {
   private final ReportActionDao reportActionDao;
 
   public ReportResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
-      CommentDao commentDao, AssessmentDao assessmentDao, OrganizationDao organizationDao,
-      ReportDao reportDao, ReportActionDao reportActionDao) {
+      AuditTrailDao auditTrailDao, CommentDao commentDao, AssessmentDao assessmentDao,
+      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
+    this.auditTrailDao = auditTrailDao;
     this.commentDao = commentDao;
     this.assessmentDao = assessmentDao;
     this.organizationDao = organizationDao;
@@ -178,7 +182,8 @@ public class ReportResource {
     DaoUtils.saveCustomSensitiveInformation(author, ReportDao.TABLE_NAME, created.getUuid(),
         r.customSensitiveInformationKey(), r.getCustomSensitiveInformation());
 
-    AnetAuditLogger.log("Report {} created by author {} ", created, author);
+    // Log the change
+    auditTrailDao.logCreate(author, ReportDao.TABLE_NAME, created);
     return created;
   }
 
@@ -352,10 +357,11 @@ public class ReportResource {
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
         r.customSensitiveInformationKey(), r.getCustomSensitiveInformation());
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(editor, ReportDao.TABLE_NAME, r);
     // Update any subscriptions
-    reportDao.updateSubscriptions(r);
+    reportDao.updateSubscriptions(r, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Report {} updated by {}", r, editor);
     // Return the report in the response; used in autoSave by the client form
     return existing;
   }
@@ -386,8 +392,9 @@ public class ReportResource {
         break;
       case PUBLISHED:
         // Must be an admin
-        AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
-            report.getUuid(), editor);
+        AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+            "attempt to edit published report, forbidden", null, editor, ReportDao.TABLE_NAME,
+            report));
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot edit a published report");
       default:
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unknown report state");
@@ -450,7 +457,8 @@ public class ReportResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No records updated");
     }
 
-    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
+    // Log the change
+    auditTrailDao.logUpdate(user, ReportDao.TABLE_NAME, r, "report has been submitted");
     // GraphQL mutations *have* to return something, we return the report
     return numRows;
   }
@@ -505,10 +513,12 @@ public class ReportResource {
       commentDao.insert(comment1);
     }
 
+    // Log the change
+    final String auditTrailUuid =
+        auditTrailDao.logUpdate(approver, ReportDao.TABLE_NAME, r, "report has been approved");
     // Update any subscriptions
-    reportDao.updateSubscriptions(r);
+    reportDao.updateSubscriptions(r, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
     return numRows;
   }
@@ -573,7 +583,10 @@ public class ReportResource {
     commentDao.insert(reason1);
 
     sendReportRejectEmail(r, approver, reason1);
-    AnetAuditLogger.log("report {} has requested changes by {}", r.getUuid(), approver);
+
+    // Log the change
+    auditTrailDao.logUpdate(approver, ReportDao.TABLE_NAME, r,
+        "report changes have been requested");
     // GraphQL mutations *have* to return something
     return numRows;
   }
@@ -609,10 +622,12 @@ public class ReportResource {
           "Couldn't process report publication");
     }
 
+    // Log the change
+    final String auditTrailUuid =
+        auditTrailDao.logUpdate(user, ReportDao.TABLE_NAME, r, "report has been published");
     // Update any subscriptions
-    reportDao.updateSubscriptions(r);
+    reportDao.updateSubscriptions(r, auditTrailUuid, false);
 
-    AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
     // GraphQL mutations *have* to return something
     return numRows;
   }
@@ -649,7 +664,8 @@ public class ReportResource {
     }
 
     // TODO: Do we need to send email?
-    AnetAuditLogger.log("report {} was unpublished by {}", r.getUuid(), unpublisher);
+    // Log the change
+    auditTrailDao.logUpdate(unpublisher, ReportDao.TABLE_NAME, r, "report has been unpublished");
     // GraphQL mutations *have* to return something
     return numRows;
   }
@@ -718,10 +734,11 @@ public class ReportResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process report delete");
     }
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logDelete(user, ReportDao.TABLE_NAME, report);
     // Update any subscriptions
-    reportDao.updateSubscriptions(report);
+    reportDao.updateSubscriptions(report, auditTrailUuid, true);
 
-    AnetAuditLogger.log("Report {} deleted by {}", reportUuid, user);
     return numRows;
   }
 

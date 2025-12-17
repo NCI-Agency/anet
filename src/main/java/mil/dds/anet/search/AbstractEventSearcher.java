@@ -47,7 +47,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getEventDao().getSubscriptionUpdate(null)));
+          engine().getEventDao().getSubscriptionUpdate(null, false)));
     }
 
     if (!Utils.isEmptyOrNull(query.getEventSeriesUuid())) {

@@ -46,6 +46,7 @@ import Model, {
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -549,6 +550,7 @@ const ReportForm = ({
               {submitText}
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)

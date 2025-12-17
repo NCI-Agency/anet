@@ -23,6 +23,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
@@ -30,7 +31,6 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
@@ -70,10 +70,13 @@ public class AttachmentResource {
   public static final String IMAGE_SVG_XML = "image/svg+xml";
 
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final AttachmentDao dao;
 
-  public AttachmentResource(AnetObjectEngine anetObjectEngine, AttachmentDao dao) {
+  public AttachmentResource(AnetObjectEngine anetObjectEngine, AuditTrailDao auditTrailDao,
+      AttachmentDao dao) {
     this.engine = anetObjectEngine;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -103,7 +106,10 @@ public class AttachmentResource {
 
     attachment.setAuthorUuid(DaoUtils.getUuid(user));
     attachment = dao.insert(attachment);
-    AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
+
+    // Log the change
+    auditTrailDao.logCreate(user, AttachmentDao.TABLE_NAME, attachment, null,
+        String.format("linked to %s", attachment.getAttachmentRelatedObjects()));
     return DaoUtils.getUuid(attachment);
   }
 
@@ -203,7 +209,9 @@ public class AttachmentResource {
           }, null);
     }
 
-    AnetAuditLogger.log("Attachment {} updated by {}", DaoUtils.getUuid(attachment), user);
+    // Log the change
+    auditTrailDao.logUpdate(user, AttachmentDao.TABLE_NAME, attachment, null,
+        String.format("linked to %s", attachment.getAttachmentRelatedObjects()));
     return DaoUtils.getUuid(attachment);
   }
 
@@ -222,7 +230,10 @@ public class AttachmentResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process attachment delete");
     }
-    AnetAuditLogger.log("Attachment {} deleted by {}", attachmentUuid, user);
+
+    // Log the change
+    auditTrailDao.logDelete(user, AttachmentDao.TABLE_NAME, existing, null,
+        String.format("unlinked from %s", existing.getAttachmentRelatedObjects()));
     return numRows;
   }
 
