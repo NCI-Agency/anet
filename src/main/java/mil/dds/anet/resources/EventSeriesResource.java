@@ -10,9 +10,9 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSeriesSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -24,10 +24,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class EventSeriesResource {
 
   private final AnetDictionary dict;
+  private final AuditTrailDao auditTrailDao;
   private final EventSeriesDao dao;
 
-  public EventSeriesResource(AnetDictionary dict, EventSeriesDao dao) {
+  public EventSeriesResource(AnetDictionary dict, AuditTrailDao auditTrailDao, EventSeriesDao dao) {
     this.dict = dict;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -72,7 +74,8 @@ public class EventSeriesResource {
 
     final EventSeries created = dao.insert(eventSeries);
 
-    AnetAuditLogger.log("Event Series {} created by {}", created, user);
+    // Log the change
+    auditTrailDao.logCreate(user, EventSeriesDao.TABLE_NAME, created);
     return created;
   }
 
@@ -96,10 +99,12 @@ public class EventSeriesResource {
           "Couldn't process event series update");
     }
 
+    // Log the change
+    final String auditTrailUuid =
+        auditTrailDao.logUpdate(user, EventSeriesDao.TABLE_NAME, eventSeries);
     // Update any subscriptions
-    dao.updateSubscriptions(eventSeries);
+    dao.updateSubscriptions(eventSeries, auditTrailUuid, false);
 
-    AnetAuditLogger.log("EventSeries {} updated by {}", eventSeries, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }

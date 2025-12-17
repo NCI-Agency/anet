@@ -36,6 +36,7 @@ import ListItems from "components/ListItems"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import ObjectHistory from "components/ObjectHistory"
 import {
   AnchorLink,
   jumpToTop,
@@ -365,6 +366,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 }
               }
             />
+            <ObjectHistory objectUuid={report.uuid} />
           </>
         )
 
@@ -952,7 +954,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         {renderRejectButton(warnApproveOwnReport, "Request changes", () =>
           rejectReport(values.approvalComment)
         )}
-        <div className="right-button">
+        <div className="right-button d-flex">
           <LinkTo modelType="Report" model={report} edit button>
             Edit {reportType}
           </LinkTo>

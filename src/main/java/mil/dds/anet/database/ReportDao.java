@@ -1083,7 +1083,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj, boolean isDelete) {
     final boolean isParam = (obj != null);
     if (isParam && !Set.of(ReportState.APPROVED, ReportState.PUBLISHED, ReportState.CANCELLED)
         .contains(obj.getState())) {
@@ -1092,7 +1092,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     // update report; this also adds the param
     final SubscriptionUpdateGroup update =
-        getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid");
+        getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid", isDelete);
     // update reportPeople
     update.getStmts()
         .add(new SubscriptionUpdateStatement("people",

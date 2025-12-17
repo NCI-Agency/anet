@@ -96,7 +96,7 @@ const RelatedObjectNotes = ({
         backdrop={false}
         style={{ zIndex: "1200", marginTop: topbarOffset }}
       >
-        <Offcanvas.Header closeButton>
+        <Offcanvas.Header closeButton className="border-top">
           <Offcanvas.Title>Notes</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
