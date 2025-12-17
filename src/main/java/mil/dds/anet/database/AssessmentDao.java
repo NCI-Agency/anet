@@ -5,6 +5,7 @@ import static mil.dds.anet.utils.PendingAssessmentsHelper.JSON_ASSESSMENT_RECURR
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -82,9 +83,7 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
   @Override
   public Assessment insert(Assessment obj) {
     DaoUtils.setInsertFields(obj);
-    final Assessment assessment = insertInternal(obj);
-    updateSubscriptions(1, assessment);
-    return assessment;
+    return insertInternal(obj);
   }
 
   @Override
@@ -108,9 +107,7 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
   @Override
   public int update(Assessment obj) {
     DaoUtils.setUpdateFields(obj);
-    final int numRows = updateInternal(obj);
-    updateSubscriptions(numRows, obj);
-    return numRows;
+    return updateInternal(obj);
   }
 
   @Override
@@ -131,10 +128,6 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
   @Transactional
   @Override
   public int delete(String uuid) {
-    final Assessment assessment = getByUuid(uuid);
-    assessment.loadAssessmentRelatedObjects(engine().getContext()).join();
-    DaoUtils.setUpdateFields(assessment);
-    updateSubscriptions(1, assessment);
     return deleteInternal(uuid);
   }
 
@@ -529,17 +522,16 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
         .collect(Collectors.toSet());
   }
 
-  private void updateSubscriptions(int numRows, Assessment obj) {
-    if (numRows > 0) {
-      final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj);
-      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
-      for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
-        subscriptionDao.updateSubscriptions(subscriptionUpdate);
-      }
+  @Transactional
+  public void updateSubscriptions(Assessment obj, String auditTrailUuid, boolean isDelete) {
+    final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj, isDelete);
+    final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
+    for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
+      subscriptionDao.updateSubscriptions(subscriptionUpdate, auditTrailUuid);
     }
   }
 
-  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Assessment obj) {
+  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Assessment obj, boolean isDelete) {
     final String paramTpl = "assessmentRelatedObject%1$d";
     final List<SubscriptionUpdateGroup> updates = new ArrayList<>();
     final ListIterator<GenericRelatedObject> iter =
@@ -551,7 +543,7 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
           AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(true,
               gro.getRelatedObjectUuid(), gro.getRelatedObjectType(), param);
       updates.add(new SubscriptionUpdateGroup(gro.getRelatedObjectType(),
-          gro.getRelatedObjectUuid(), obj.getUpdatedAt(), stmt, true));
+          gro.getRelatedObjectUuid(), isDelete ? Instant.now() : obj.getUpdatedAt(), stmt, true));
     }
     return updates;
   }

@@ -1,4 +1,5 @@
 import {
+  gqlEntityFieldsMap,
   gqlPaginationFields,
   gqlRelatedObjectFields,
   gqlSubscriptionFields,
@@ -7,15 +8,15 @@ import {
 import { gql } from "@apollo/client"
 import API from "api"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { OBJECT_TYPE_TO_MODEL } from "components/Model"
+import { AUDIT_TRAIL_UPDATE_TYPE_DESCRIPTION } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
@@ -38,10 +39,31 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             ${gqlRelatedObjectFields}
           }
         }
+        auditTrail {
+          uuid
+          createdAt
+          updateType
+          objectUuid
+          updateDescription
+          updateDetails
+          relatedObjectType
+          relatedObjectUuid
+          person {
+            ${gqlEntityFieldsMap.Person}
+          }
+          relatedObject {
+            ${gqlRelatedObjectFields}
+          }
+        }
       }
     }
   }
 `
+
+const SPECIAL_MODELS = {
+  assessments: "an Assessment",
+  notes: "a Note"
+}
 
 interface MySubscriptionUpdatesProps {
   forceRefetch?: boolean
@@ -106,105 +128,120 @@ const MySubscriptionUpdates = ({
           />
 
           <Table striped hover responsive className="subscriptionUpdates_table">
-            <thead>
-              <tr>
-                <th />
-                <th>Subscription</th>
-                <th>Updated</th>
-                <th>Through</th>
-              </tr>
-            </thead>
             <tbody>
               {(_get(subscriptionUpdates, "length", 0) === 0 && (
                 <tr>
-                  <td colSpan={4}>nothing to show…</td>
+                  <td colSpan={2}>nothing to show…</td>
                 </tr>
               )) ||
                 subscriptionUpdates.map(subscriptionUpdate => {
                   const subscription = subscriptionUpdate.subscription
-                  const subscribedObjectType =
-                    OBJECT_TYPE_TO_MODEL[subscription.subscribedObjectType]
-                  let linkToSubscription
-                  if (subscription.subscribedObject) {
-                    linkToSubscription = (
-                      <LinkTo
-                        modelType={subscribedObjectType}
-                        model={{
-                          uuid: subscription.subscribedObjectUuid,
-                          ...subscription.subscribedObject
-                        }}
-                      />
-                    )
-                  } else {
-                    linkToSubscription = (
-                      <LinkTo
-                        componentClass="span"
-                        modelType={subscribedObjectType}
-                        model={{
-                          uuid: subscription.subscribedObjectUuid
-                        }}
-                      >
-                        [object was deleted]
-                      </LinkTo>
-                    )
-                  }
-                  const updatedObjectType =
-                    OBJECT_TYPE_TO_MODEL[subscriptionUpdate.updatedObjectType]
-                  let linkToUpdatedObject
-                  if (subscriptionUpdate.updatedObject) {
-                    linkToUpdatedObject = (
-                      <LinkTo
-                        modelType={updatedObjectType}
-                        model={{
-                          uuid: subscriptionUpdate.updatedObjectUuid,
-                          ...subscriptionUpdate.updatedObject
-                        }}
-                      />
-                    )
-                  } else {
-                    linkToUpdatedObject = (
-                      <LinkTo
-                        componentClass="span"
-                        modelType={updatedObjectType}
-                        model={{
-                          uuid: subscriptionUpdate.updatedObjectUuid
-                        }}
-                      >
-                        [object was deleted]
-                      </LinkTo>
-                    )
-                  }
-                  if (subscriptionUpdate.isNote) {
-                    linkToUpdatedObject = (
-                      <span>{linkToUpdatedObject} Note/Assessment</span>
-                    )
-                  }
+                  const at = subscriptionUpdate.auditTrail
                   const key = `${subscriptionUpdate.createdAt}:${subscription.uuid}`
                   return (
-                    <tr key={key}>
-                      <td>
-                        <SubscriptionIcon
-                          subscribedObjectType={
-                            subscription.subscribedObjectType
-                          }
-                          subscribedObjectUuid={
-                            subscription.subscribedObjectUuid
-                          }
-                          isSubscribed
-                          updatedAt={null}
-                          refetch={() => {
-                            refetch()
-                            if (typeof refetchCallback === "function") {
-                              refetchCallback()
+                    <React.Fragment key={key}>
+                      <tr>
+                        <td>
+                          <SubscriptionIcon
+                            subscribedObjectType={
+                              subscription.subscribedObjectType
                             }
-                          }}
-                          setError={error => setSaveError(error)}
-                        />
-                      </td>
-                      <td>{linkToSubscription}</td>
-                      <td>{moment(subscriptionUpdate.createdAt).fromNow()}</td>
-                      <td>{linkToUpdatedObject}</td>
-                    </tr>
+                            subscribedObjectUuid={
+                              subscription.subscribedObjectUuid
+                            }
+                            isSubscribed
+                            updatedAt={null}
+                            refetch={() => {
+                              refetch()
+                              if (typeof refetchCallback === "function") {
+                                refetchCallback()
+                              }
+                            }}
+                            setError={error => setSaveError(error)}
+                          />
+                        </td>
+                        <td>
+                          {"Your subscription to "}
+                          <RelatedObjectDisplay
+                            relatedObjectType={
+                              subscription.subscribedObjectType
+                            }
+                            relatedObjectUuid={
+                              subscription.subscribedObjectUuid
+                            }
+                            relatedObject={subscription.subscribedObject}
+                          />
+                          {" was updated "}
+                          {moment(subscriptionUpdate.createdAt).fromNow()},
+                          {" because "}
+                          {at ? (
+                            <>
+                              {at.relatedObjectType ===
+                                subscription.subscribedObjectType &&
+                              at.relatedObjectUuid ===
+                                subscription.subscribedObjectUuid ? (
+                                "it"
+                              ) : (
+                                <RelatedObjectDisplay
+                                  relatedObjectType={at.relatedObjectType}
+                                  relatedObjectUuid={at.relatedObjectUuid}
+                                  relatedObject={at.relatedObject}
+                                  specialModels={SPECIAL_MODELS}
+                                />
+                              )}
+                              {" was "}
+                              <b>
+                                {
+                                  AUDIT_TRAIL_UPDATE_TYPE_DESCRIPTION[
+                                    at.updateType
+                                  ]
+                                }
+                              </b>
+                              {at.objectUuid && (
+                                <>
+                                  {" by "}
+                                  <RelatedObjectDisplay
+                                    relatedObjectType="people"
+                                    relatedObjectUuid={at.objectUuid}
+                                    relatedObject={at.person}
+                                  />
+                                </>
+                              )}
+                              {at.updateDescription && (
+                                <>: {at.updateDescription}</>
+                              )}
+                              {at.updateDetails && (
+                                <>, with details: {at.updateDetails}</>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {" "}
+                              {subscriptionUpdate.isNote ? (
+                                <>
+                                  of a <b>note/assessment</b> on it
+                                </>
+                              ) : (
+                                <>
+                                  of a <b>change</b> to{" "}
+                                  <RelatedObjectDisplay
+                                    relatedObjectType={
+                                      subscriptionUpdate.updatedObjectType
+                                    }
+                                    relatedObjectUuid={
+                                      subscriptionUpdate.updatedObjectUuid
+                                    }
+                                    relatedObject={
+                                      subscriptionUpdate.updatedObject
+                                    }
+                                  />
+                                </>
+                              )}
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   )
                 })}
             </tbody>

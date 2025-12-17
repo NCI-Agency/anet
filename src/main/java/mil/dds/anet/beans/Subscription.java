@@ -11,7 +11,7 @@ import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Subscription extends AbstractAnetBean {
+public class Subscription extends AbstractAnetBean implements RelatableObject {
 
   // annotated below
   private ForeignObjectHolder<Position> subscriber = new ForeignObjectHolder<>();

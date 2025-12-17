@@ -1,6 +1,7 @@
 import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
 import AccessTokensList from "pages/admin/accessTokens/Index"
+import AuditTrailTable from "pages/admin/auditTrail/Index"
 import AdminIndex from "pages/admin/Index"
 import MartImporterShow from "pages/admin/martImporter/Show"
 import MergeLocations from "pages/admin/merge/MergeLocations"
@@ -184,6 +185,7 @@ const Routing = () => {
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
             <Route path="overTime" element={<UserActivitiesOverTime />} />
           </Route>
+          <Route path="auditTrail" element={<AuditTrailTable />} />
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
           {Settings.featureMartGuiEnabled && (

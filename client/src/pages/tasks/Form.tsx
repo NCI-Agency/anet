@@ -23,6 +23,7 @@ import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -173,6 +174,7 @@ const TaskForm = ({
               Save {Settings.fields.task.shortLabel}
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
         return (
