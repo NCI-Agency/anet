@@ -4,9 +4,6 @@ import static mil.dds.anet.utils.ResourceUtils.getAllowedClassifications;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.function.Function;
@@ -73,6 +70,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = SpringTestConfig.class,
     useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
@@ -101,8 +101,8 @@ public abstract class AbstractResourceTest {
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
   protected static final String adminUser = "arthur";
   protected static final String jackUser = "jack";
@@ -341,7 +341,7 @@ public abstract class AbstractResourceTest {
     try {
       final String jsonString = ignoringMapper.writeValueAsString(object);
       return ignoringMapper.readValue(jsonString, clazz);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       logger.error("conversion to input type failed", e);
       return null;
     }

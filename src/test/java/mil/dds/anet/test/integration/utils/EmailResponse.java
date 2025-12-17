@@ -1,11 +1,11 @@
 package mil.dds.anet.test.integration.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * This class provides a wrapper for the email data (from the fake SMTP server response) Warning:
@@ -29,30 +29,29 @@ public class EmailResponse {
 
   /**
    * Parse a response from the SMTP server.
-   * 
+   *
    * @param responseData The JSON object received from the server
    */
   public EmailResponse(final JsonNode responseData) {
-    this.from =
-        Optional.ofNullable(responseData.get("from")).map(x -> new ToFromData(x)).orElse(null);
-    this.to = Optional.ofNullable(responseData.get("to")).map(x -> new ToFromData(x)).orElse(null);
-    this.cc = Optional.ofNullable(responseData.get("cc")).map(x -> new ToFromData(x)).orElse(null);
+    this.from = Optional.ofNullable(responseData.get("from")).map(ToFromData::new).orElse(null);
+    this.to = Optional.ofNullable(responseData.get("to")).map(ToFromData::new).orElse(null);
+    this.cc = Optional.ofNullable(responseData.get("cc")).map(ToFromData::new).orElse(null);
     this.replyTo =
-        Optional.ofNullable(responseData.get("replyTo")).map(x -> new ToFromData(x)).orElse(null);
+        Optional.ofNullable(responseData.get("replyTo")).map(ToFromData::new).orElse(null);
 
     this.subject =
-        Optional.ofNullable(responseData.get("subject")).map(x -> x.asText()).orElse(null);
-    this.text = Optional.ofNullable(responseData.get("text")).map(x -> x.asText()).orElse(null);
+        Optional.ofNullable(responseData.get("subject")).map(JsonNode::asString).orElse(null);
+    this.text = Optional.ofNullable(responseData.get("text")).map(JsonNode::asString).orElse(null);
     this.textAsHtml =
-        Optional.ofNullable(responseData.get("textAsHtml")).map(x -> x.asText()).orElse(null);
-    this.date = Optional.ofNullable(responseData.get("date")).map(x -> Instant.parse(x.asText()))
+        Optional.ofNullable(responseData.get("textAsHtml")).map(JsonNode::asString).orElse(null);
+    this.date = Optional.ofNullable(responseData.get("date")).map(x -> Instant.parse(x.asString()))
         .orElse(null);
     this.attachments =
         Optional.ofNullable(responseData.get("attachments")).map(x -> (ArrayNode) x).orElse(null);
     this.messageId =
-        Optional.ofNullable(responseData.get("messageId")).map(x -> x.asText()).orElse(null);
+        Optional.ofNullable(responseData.get("messageId")).map(JsonNode::asString).orElse(null);
     this.isHtml =
-        Optional.ofNullable(responseData.get("html")).map(x -> x.asBoolean()).orElse(null);
+        Optional.ofNullable(responseData.get("html")).map(x -> x.asBoolean(false)).orElse(false);
     this.header = responseData.get("headers");
     this.headerLines =
         Optional.ofNullable(responseData.get("headerLines")).map(x -> (ArrayNode) x).orElse(null);
@@ -68,12 +67,12 @@ public class EmailResponse {
 
     public ToFromData(final JsonNode node) {
       final ArrayNode valueArray = (ArrayNode) node.get("value");
-      this.values = new ArrayList<ValueData>();
+      this.values = new ArrayList<>();
       for (int i = 0; valueArray != null && i < valueArray.size(); i++) {
         this.values.add(new ValueData(valueArray.get(i)));
       }
-      this.html = node.get("html").asText();
-      this.text = node.get("text").asText();
+      this.html = node.get("html").asString();
+      this.text = node.get("text").asString();
     }
 
     /**
@@ -84,8 +83,8 @@ public class EmailResponse {
       public final String name;
 
       public ValueData(final JsonNode node) {
-        this.address = node.get("address").asText();
-        this.name = node.get("name").asText();
+        this.address = node.get("address").asString();
+        this.name = node.get("name").asString();
       }
     }
   }

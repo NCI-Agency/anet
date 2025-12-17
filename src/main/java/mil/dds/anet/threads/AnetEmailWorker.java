@@ -1,7 +1,5 @@
 package mil.dds.anet.threads;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import graphql.GraphQLContext;
 import jakarta.mail.Authenticator;
@@ -42,6 +40,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @ConditionalOnExpression("not ${anet.no-workers:false}")
@@ -218,7 +218,7 @@ public class AnetEmailWorker extends AbstractWorker {
       String jobSpec = mapper.writeValueAsString(email);
       dao.createPendingEmail(jobSpec);
       // the worker thread will pick this up eventually.
-    } catch (JsonProcessingException jsonError) {
+    } catch (JacksonException jsonError) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error sending email",
           jsonError);
     }

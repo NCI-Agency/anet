@@ -4,8 +4,6 @@ import static mil.dds.anet.test.ws.security.BearerToken.VALID_GRAPHQL_TOKEN;
 import static mil.dds.anet.test.ws.security.BearerToken.VALID_NVG_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.introspection.IntrospectionQueryBuilder;
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import java.util.List;
@@ -21,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 class GraphQLWebServiceTest extends AbstractResourceTest {
 

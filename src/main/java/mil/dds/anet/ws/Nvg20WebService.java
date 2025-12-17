@@ -1,7 +1,5 @@
 package mil.dds.anet.ws;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import jakarta.jws.WebService;
 import jakarta.xml.bind.JAXBElement;
@@ -80,6 +78,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @WebService(serviceName = "NvgService", targetNamespace = "urn:nato:common:wsdl:nvg20",

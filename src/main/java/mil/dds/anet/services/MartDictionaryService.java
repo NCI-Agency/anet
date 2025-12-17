@@ -1,8 +1,5 @@
 package mil.dds.anet.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -26,6 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class MartDictionaryService implements IMartDictionaryService {
@@ -195,7 +195,7 @@ public class MartDictionaryService implements IMartDictionaryService {
   }
 
   private List<Map<String, Object>> exportMunicipalitiesToMartDictionary(Location municipalityGroup)
-      throws JsonProcessingException {
+      throws JacksonException {
     final List<Map<String, Object>> result = new ArrayList<>();
     final LocationSearchQuery query = new LocationSearchQuery();
     query.setType(LocationType.MUNICIPALITY);
@@ -236,7 +236,7 @@ public class MartDictionaryService implements IMartDictionaryService {
   }
 
   private void addCustomFields(String dictionaryEntry, Map<String, Object> location,
-      Location anetLocation) throws JsonProcessingException {
+      Location anetLocation) throws JacksonException {
     final ObjectMapper objectMapper = new ObjectMapper();
     final String customFields = anetLocation.getCustomFields();
     if (!Utils.isEmptyOrNull(customFields)) {
@@ -244,7 +244,7 @@ public class MartDictionaryService implements IMartDictionaryService {
       for (final String customField : getCustomFieldsFromDictionary(dictionaryEntry)) {
         final JsonNode customFieldNode = jsonNode.get(customField);
         if (customFieldNode != null) {
-          location.put(customField, customFieldNode.asText());
+          location.put(customField, customFieldNode.asString());
         }
       }
     }

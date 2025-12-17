@@ -1,14 +1,14 @@
 package mil.dds.anet.test.integration.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 public class AnetTestConfiguration {
   private static final HashMap<String, Object> config;
@@ -17,7 +17,7 @@ public class AnetTestConfiguration {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   static {
-    final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    final ObjectMapper yamlMapper = new YAMLMapper();
     final URL configUrl =
         AnetTestConfiguration.class.getResource("/integration/anet-integrationtest.yml");
     final File configFile = new File(configUrl.getFile());
@@ -38,8 +38,8 @@ public class AnetTestConfiguration {
       final File configFile) {
     try {
       return yamlMapper.readValue(configFile, HashMap.class);
-    } catch (final IOException e) {
-      logger.error("Failed to read integration test configuration. Reason: " + e.getMessage());
+    } catch (final JacksonException e) {
+      logger.error("Failed to read integration test configuration. Reason: {}", e.getMessage());
       return null;
     }
   }

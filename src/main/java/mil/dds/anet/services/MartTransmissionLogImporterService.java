@@ -1,9 +1,5 @@
 package mil.dds.anet.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -17,15 +13,19 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
 
 @Component
 public class MartTransmissionLogImporterService implements IMartTransmissionLogImporterService {
 
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+  private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+      .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
 
   private final MartImportedReportDao martImportedReportDao;
 

@@ -2,11 +2,6 @@ package mil.dds.anet.utils;
 
 import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.json.JsonSanitizer;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
@@ -46,6 +41,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class Utils {
 
@@ -66,7 +66,7 @@ public class Utils {
   /**
    * Crude method to check whether a uuid is purely integer, in which case it is probably a legacy
    * id; used for backwards-compatibility only.
-   * 
+   *
    * @param uuid the uuid to check
    * @return the integer value of the uuid, or null if it isn't
    */
@@ -286,7 +286,7 @@ public class Utils {
   }
 
   public static String sanitizeJson(String dictKey, String inputJson, boolean isAssessment)
-      throws JsonProcessingException {
+      throws JacksonException {
     @SuppressWarnings("unchecked")
     final Map<String, Map<String, Object>> fieldsDefinition =
         (Map<String, Map<String, Object>>) ApplicationContextProvider.getDictionary()
@@ -297,7 +297,7 @@ public class Utils {
   }
 
   public static String sanitizeJson(Map<String, String> typeDefs, String inputJson)
-      throws JsonProcessingException {
+      throws JacksonException {
     if (inputJson == null) {
       // `JsonSanitizer.sanitize(null)` would return `"null"` in this case,
       // but we prefer plain `null`
@@ -397,7 +397,7 @@ public class Utils {
         final JsonNode newValue;
         if (TYPE_RICH_TEXT.equals(typeDef)) {
           newValue = entry.getValue().isNull() ? null
-              : objectNode.textNode(sanitizeHtml(entry.getValue().asText()));
+              : objectNode.stringNode(sanitizeHtml(entry.getValue().asString()));
         } else {
           newValue = entry.getValue();
         }
@@ -408,8 +408,8 @@ public class Utils {
       final ArrayNode arrayNode = (ArrayNode) jsonNode;
       for (int i = 0; i < arrayNode.size(); i++) {
         final JsonNode arrayElement = arrayNode.get(i);
-        if (arrayElement.isTextual()) {
-          arrayNode.set(i, arrayNode.textNode(sanitizeHtml(arrayElement.asText())));
+        if (arrayElement.isString()) {
+          arrayNode.set(i, arrayNode.stringNode(sanitizeHtml(arrayElement.asString())));
         } else {
           internalSanitizeJsonForHtml(typeDefs, parentKey, arrayElement);
         }
@@ -418,7 +418,7 @@ public class Utils {
   }
 
   public static JsonNode parseJsonSafe(String dictKey, String inputJson, boolean isAssessment)
-      throws JsonProcessingException {
+      throws JacksonException {
     final String sanitizedJson = Utils.sanitizeJson(dictKey, inputJson, isAssessment);
     return sanitizedJson == null ? null : mapper.readTree(sanitizedJson);
   }
@@ -432,7 +432,7 @@ public class Utils {
 
   /**
    * Check for empty HTML.
-   * 
+   *
    * @param s string
    * @return true if string renders to 'empty' HTML, i.e. just whitespace
    */
@@ -447,7 +447,7 @@ public class Utils {
 
   /**
    * Check for empty or null string.
-   * 
+   *
    * @param s string
    * @return true if string is null or empty
    */
@@ -457,7 +457,7 @@ public class Utils {
 
   /**
    * Check for empty or null collection.
-   * 
+   *
    * @param c collection
    * @return true if collection is null or empty
    */
@@ -533,7 +533,7 @@ public class Utils {
 
   /**
    * Checks whether an email address is allowed according to a list of allowed domains.
-   * 
+   *
    * @param email The email address to check
    * @param allowedDomainNames The list of allowed domain names (wildcards allowed)
    * @return Whether the email is allowed
@@ -549,7 +549,7 @@ public class Utils {
 
   /**
    * Checks whether an email address is ignored according to a list of ignored domains.
-   * 
+   *
    * @param email The email address to check
    * @param ignoredDomainNames The list of ignored domain names (wildcards allowed)
    * @return Whether the email is ignored

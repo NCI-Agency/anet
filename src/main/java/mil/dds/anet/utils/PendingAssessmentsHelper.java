@@ -1,7 +1,5 @@
 package mil.dds.anet.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
@@ -41,6 +39,8 @@ import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 public class PendingAssessmentsHelper {
 
@@ -465,18 +465,18 @@ public class PendingAssessmentsHelper {
             final JsonNode recurrence = assessmentJson.get(JSON_ASSESSMENT_RECURRENCE);
             final JsonNode periodStart = assessmentJson.get(JSON_ASSESSMENT_PERIOD_START);
             if (periodStart != null && recurrence != null && shouldAddRecurrence(recurrenceSet,
-                Recurrence.valueOfRecurrence(recurrence.asText()))) {
+                Recurrence.valueOfRecurrence(recurrence.asString()))) {
               // __periodStart is stored in the database as a zone-agnostic date string yyyy-mm-dd
               final LocalDate periodStartDate =
-                  DateTimeFormatter.ISO_LOCAL_DATE.parse(periodStart.asText(), LocalDate::from);
+                  DateTimeFormatter.ISO_LOCAL_DATE.parse(periodStart.asString(), LocalDate::from);
               final Instant periodStartInstant =
                   periodStartDate.atStartOfDay(DaoUtils.getServerNativeZoneId()).toInstant();
-              assessmentsByRecurrence.compute(Recurrence.valueOfRecurrence(recurrence.asText()),
+              assessmentsByRecurrence.compute(Recurrence.valueOfRecurrence(recurrence.asString()),
                   (r, currentValue) -> (currentValue == null
                       || periodStartInstant.isAfter(currentValue)) ? periodStartInstant
                           : currentValue);
             }
-          } catch (JsonProcessingException ignored) {
+          } catch (JacksonException ignored) {
             // Invalid JSON, skip it
           }
         });

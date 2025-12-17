@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
@@ -24,6 +23,7 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
 
 @Component
 public class CustomSensitiveInformationDao
@@ -151,7 +151,7 @@ public class CustomSensitiveInformationDao
             checkAndUpdate(user, userAuthorizationGroupUuids, relatedObjectType, relatedObjectUuid,
                 csi);
           }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
           // Audit and ignore
           AnetAuditLogger.log("Person {} tried to insert CustomSensitiveInformation {}"
               + " with invalid JSON, refused", user, csi);

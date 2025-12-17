@@ -1,6 +1,5 @@
 package mil.dds.anet.views;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -16,6 +15,7 @@ import mil.dds.anet.beans.Note;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableAnetBean {
 
@@ -109,7 +109,7 @@ public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableA
   public void checkAndFixCustomFields() {
     try {
       setCustomFields(Utils.sanitizeJson(customFieldsKey(), getCustomFields(), false));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       setCustomFields(null);
       logger.error("Unable to process Json, customFields payload discarded", e);
     }
