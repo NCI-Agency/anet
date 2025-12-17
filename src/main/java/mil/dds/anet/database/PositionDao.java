@@ -521,8 +521,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "positions.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj, boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "positions.uuid", isDelete);
   }
 
   @Transactional

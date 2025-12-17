@@ -8,6 +8,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.AnetObjectEngine;
@@ -21,10 +22,10 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
@@ -39,13 +40,15 @@ public class PersonResource {
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final PersonDao dao;
   private final PersonPreferenceDao personPreferenceDao;
 
-  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, PersonDao dao,
-      PersonPreferenceDao personPreferenceDao) {
+  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
+      AuditTrailDao auditTrailDao, PersonDao dao, PersonPreferenceDao personPreferenceDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
     this.personPreferenceDao = personPreferenceDao;
   }
@@ -116,7 +119,8 @@ public class PersonResource {
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
         p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
 
-    AnetAuditLogger.log("Person {} created by {}", created, user);
+    // Log the change
+    auditTrailDao.logCreate(user, PersonDao.TABLE_NAME, created);
     return created;
   }
 
@@ -178,25 +182,36 @@ public class PersonResource {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
         engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
+        // Log the change
+        auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+            "person has been assigned a position",
+            String.format("to position %s", p.getPosition()));
       } else if (existingPos != null && positionUuid == null) {
         // Remove this person from their position.
         AuthUtils.assertSuperuser(user);
         engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
+        // Log the change
+        auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+            "person has been removed from a position",
+            String.format("from position %s", existingPos));
       } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
         engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
+        // Log the change
+        auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+            "person's position has been updated",
+            String.format("from position %s to %s", existingPos, p.getPosition()));
       }
     }
 
     // If person changed to inactive, update the status
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
-      AnetAuditLogger.log("Person {} set to inactive", p);
       dao.updateAuthenticationDetails(p);
+      // Log the change
+      auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+          "person has been set to inactive");
     }
 
     // Automatically remove people from a position if they are inactive.
@@ -208,9 +223,11 @@ public class PersonResource {
           // Otherwise needs to be at least superuser
           AuthUtils.assertSuperuser(user);
         }
-        AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
-            p, user);
         engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
+        // Log the change
+        auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+            "person has been removed from a position because they are now inactive",
+            String.format("from position %s", existingPos));
       }
     }
 
@@ -232,10 +249,11 @@ public class PersonResource {
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
         p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
     // Update any subscriptions
-    dao.updateSubscriptions(p);
+    dao.updateSubscriptions(p, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
@@ -256,8 +274,13 @@ public class PersonResource {
           "At least one of the positions in the history is occupied for the specified period.");
     }
 
+    existing.loadPreviousPositions(engine.getContext()).join();
     final int numRows = dao.updatePersonHistory(p);
-    AnetAuditLogger.log("History updated for person {} by {}", p, user);
+
+    // Log the change
+    auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+        "position history has been updated",
+        String.format("from %s to %s", existing.getPreviousPositions(), p.getPreviousPositions()));
     return numRows;
   }
 
@@ -282,7 +305,10 @@ public class PersonResource {
       }
       totalRows += numRows;
     }
-    AnetAuditLogger.log("Person preferences updated by {}", user);
+
+    // Log the change
+    auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, user,
+        "preferences have been updated");
     return totalRows;
   }
 
@@ -325,11 +351,18 @@ public class PersonResource {
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
     }
 
+    // Log the change
+    final String auditTrailUuid;
+    if (isApproved) {
+      auditTrailUuid = auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, person,
+          "person has been allowed access");
+    } else {
+      auditTrailUuid = auditTrailDao.logDelete(user, PersonDao.TABLE_NAME, person,
+          "person has been denied access");
+    }
     // Update any subscriptions
-    dao.updateSubscriptions(person);
+    dao.updateSubscriptions(person, auditTrailUuid, !isApproved);
 
-    AnetAuditLogger.log("Person {} " + (isApproved ? "approved" : "deleted") + " by {}", person,
-        user);
     return numRows;
   }
 
@@ -381,7 +414,11 @@ public class PersonResource {
     engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
         p.getEmailAddresses());
 
-    AnetAuditLogger.log("Person {} updated by themselves", p);
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
+    // Update any subscriptions
+    dao.updateSubscriptions(p, auditTrailUuid, false);
+
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
@@ -425,10 +462,12 @@ public class PersonResource {
           "Couldn't process merge operation, error occurred while updating merged person relation information.");
     }
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, winner,
+        "a person has been merged into it", String.format("merged person %s", loser));
     // Update any subscriptions
-    dao.updateSubscriptions(winner);
+    dao.updateSubscriptions(winner, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }

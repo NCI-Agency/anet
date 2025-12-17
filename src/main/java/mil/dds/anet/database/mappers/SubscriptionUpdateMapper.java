@@ -16,6 +16,7 @@ public class SubscriptionUpdateMapper implements RowMapper<SubscriptionUpdate> {
     s.setUpdatedObjectType(rs.getString("subscriptionUpdates_updatedObjectType"));
     s.setUpdatedObjectUuid(rs.getString("subscriptionUpdates_updatedObjectUuid"));
     s.setIsNote(rs.getBoolean("subscriptionUpdates_isNote"));
+    s.setAuditTrailUuid(rs.getString("subscriptionUpdates_auditTrailUuid"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));
