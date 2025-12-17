@@ -612,7 +612,12 @@ interface LeafletMapProps {
   shapes?: string[]
 }
 
-const LeafletMap = ({ location, onMove, onMapClick, shapes }: LeafletMapProps) => {
+const LeafletMap = ({
+  location,
+  onMove,
+  onMapClick,
+  shapes
+}: LeafletMapProps) => {
   const markers = useMemo(() => {
     const marker = {
       id: location.uuid || 0,

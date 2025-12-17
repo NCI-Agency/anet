@@ -78,8 +78,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     try {
       return handle.createUpdate("/* updateLocation */ UPDATE locations "
           + "SET name = :name, type = :type, description = :description, status = :status, lat = :lat, lng = :lng, "
-          + "\"geoJson\" = :geoJson, "
-          + "digram = :digram, trigram = :trigram, "
+          + "\"geoJson\" = :geoJson, " + "digram = :digram, trigram = :trigram, "
           + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
           .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(l.getStatus()))

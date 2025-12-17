@@ -131,9 +131,14 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
         )}
       </div>
 
-      {!location.geoJson || Location.hasCoordinates(location) && (
-        <Leaflet markers={markers} shapes={[location.geoJson]} mapId={`${uuid}`} />
-      )}
+      {!location.geoJson ||
+        (Location.hasCoordinates(location) && (
+          <Leaflet
+            markers={markers}
+            shapes={[location.geoJson]}
+            mapId={`${uuid}`}
+          />
+        ))}
 
       {location.geoJson && (
         <Leaflet shapes={[location.geoJson]} mapId={`${uuid}`} />
