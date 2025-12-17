@@ -368,7 +368,7 @@ export const LeafletMap = ({
   const showMarker = mode === "both" || mode === "marker"
   const showShape = mode === "both" || mode === "shape"
 
-  const shapes = showShape && location.geoJson ? [location.geoJson] : []
+  const shapes = showShape && location?.geoJson ? [location.geoJson] : []
   const markers =
     showMarker && Location.hasCoordinates(location)
       ? [

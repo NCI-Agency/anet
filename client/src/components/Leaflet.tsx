@@ -53,7 +53,6 @@ import MARKER_ICON_SEARCH from "resources/leaflet/marker-icon-search.svg"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
 import Settings from "settings"
-import { number, string } from "yup"
 
 export const DEFAULT_MAP_STYLE = {
   width: "100%",
@@ -602,18 +601,44 @@ const Leaflet = ({
    * Handle assigned shapes (GeoJSON strings)
    */
   useEffect(() => {
+    if (!map) {
+      return
+    }
+
     const groupLayer = shapeGroupLayerRef.current
     groupLayer.clearLayers()
-    if (shapes && shapes.length > 0 && map) {
+
+    if (shapes && shapes.length > 0) {
       shapes.forEach(shape => {
         const geoJsonObject = JSON.parse(shape)
         const geoJsonLayer = geoJSON(geoJsonObject)
         geoJsonLayer.addTo(groupLayer)
       })
-      // Set map bounds (navigate) to include all shapes
-      map.fitBounds(groupLayer.getBounds())
     }
-  }, [shapes, map])
+
+    // Create a temporary FeatureGroup to combine shape and marker layers
+    const combinedGroup = new FeatureGroup()
+    if (groupLayer.getLayers().length > 0) {
+      combinedGroup.addLayer(groupLayer)
+    }
+    // Add only one instance of each marker (no wrapped copies)
+    if (markerLayer && markerLayer.getLayers().length > 0) {
+      markerLayer.getLayers().forEach(layer => {
+        const latlng = layer.getLatLng?.()
+        if (!latlng) {
+          return
+        }
+        if (latlng.lng > -180 && latlng.lng < 180) {
+          combinedGroup.addLayer(layer)
+        }
+      })
+    }
+
+    const bounds = combinedGroup.getBounds()
+    if (bounds.isValid()) {
+      map.fitBounds(bounds)
+    }
+  }, [shapes, map, markerLayer])
 
   return (
     <>
