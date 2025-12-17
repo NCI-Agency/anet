@@ -130,8 +130,3 @@ anet:
   # Don't start the workers in the test profile
   no-workers: true
 
-# Not actually used by us, but needed for the default configuration bean used for testing
-graphql:
-  endpoint:
-    url: ""
-
