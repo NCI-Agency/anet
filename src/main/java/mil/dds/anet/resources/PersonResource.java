@@ -103,7 +103,7 @@ public class PersonResource {
 
     if (DaoUtils.getUuid(created.getPosition()) != null) {
       engine.getPositionDao().setPersonInPosition(created.getUuid(),
-          DaoUtils.getUuid(created.getPosition()));
+          DaoUtils.getUuid(created.getPosition()), true, null);
     }
 
     if (AuthUtils.isAdmin(user)) {
@@ -177,7 +177,7 @@ public class PersonResource {
       if (existingPos == null && positionUuid != null) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
+        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null && positionUuid == null) {
         // Remove this person from their position.
@@ -187,7 +187,7 @@ public class PersonResource {
       } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
+        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       }
     }

@@ -32,12 +32,14 @@ async function getPosition(user, uuid) {
           previousPeople {
             startTime
             endTime
+            primary
             person {
               uuid
               name
               previousPositions {
                 startTime
                 endTime
+                primary
               }
             }
           }

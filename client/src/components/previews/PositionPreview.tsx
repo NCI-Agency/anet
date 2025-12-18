@@ -2,7 +2,8 @@ import {
   gqlAllPositionFields,
   gqlEmailAddressesFields,
   gqlEntityAvatarFields,
-  gqlEntityFieldsMap
+  gqlEntityFieldsMap,
+  gqlPreviousPeopleFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
@@ -14,7 +15,7 @@ import LinkTo from "components/LinkTo"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Location, Position } from "models"
-import moment from "moment"
+import PreviousPeople from "pages/positions/PreviousPeople"
 import React from "react"
 import { Badge, Table } from "react-bootstrap"
 import Settings from "settings"
@@ -41,8 +42,7 @@ const GQL_GET_POSITION = gql`
         }
       }
       previousPeople {
-        startTime
-        endTime
+        ${gqlPreviousPeopleFields}
         person {
           ${gqlEntityFieldsMap.Person}
         }
@@ -206,33 +206,7 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
 
       <h4>Previous position holders</h4>
       <div className="preview-section">
-        <Table striped hover responsive>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Dates</th>
-            </tr>
-          </thead>
-          <tbody>
-            {position.previousPeople.map((pp, idx) => (
-              <tr key={idx} id={`previousPerson_${idx}`}>
-                <td>
-                  <LinkTo modelType="Person" model={pp.person} />
-                </td>
-                <td>
-                  {moment(pp.startTime).format(
-                    Settings.dateFormats.forms.displayShort.date
-                  )}{" "}
-                  - &nbsp;
-                  {pp.endTime &&
-                    moment(pp.endTime).format(
-                      Settings.dateFormats.forms.displayShort.date
-                    )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <PreviousPeople history={position.previousPeople} />
       </div>
     </div>
   )
