@@ -140,10 +140,17 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
         <Col md={4} id="mid-merge-loc-col">
           <MidColTitle>
             {getActionButton(
-              () =>
+              () => {
                 dispatchMergeActions(
                   selectAllFields(location1, MERGE_SIDES.LEFT)
-                ),
+                )
+                dispatchMergeActions(
+                  setAMergedField("lat", location1.lat, MERGE_SIDES.LEFT)
+                )
+                dispatchMergeActions(
+                  setAMergedField("lng", location1.lng, MERGE_SIDES.LEFT)
+                )
+              },
               MERGE_SIDES.LEFT,
               mergeState,
               null,
@@ -152,10 +159,17 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
             )}
             <h4 style={{ margin: "0" }}>Merged Location</h4>
             {getActionButton(
-              () =>
+              () => {
                 dispatchMergeActions(
                   selectAllFields(location2, MERGE_SIDES.RIGHT)
-                ),
+                )
+                dispatchMergeActions(
+                  setAMergedField("lat", location2.lat, MERGE_SIDES.RIGHT)
+                )
+                dispatchMergeActions(
+                  setAMergedField("lng", location2.lng, MERGE_SIDES.RIGHT)
+                )
+              },
               MERGE_SIDES.RIGHT,
               mergeState,
               null,
