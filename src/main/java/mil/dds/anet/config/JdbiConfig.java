@@ -7,8 +7,10 @@ import org.jdbi.v3.core.ConnectionFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.CaseStrategy;
 import org.jdbi.v3.core.mapper.MapMappers;
+import org.jdbi.v3.postgres.PostgresPlugin;
 import org.jdbi.v3.spring.EnableJdbiRepositories;
 import org.jdbi.v3.spring.SpringConnectionFactory;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +24,9 @@ public class JdbiConfig {
   public Jdbi jdbi(DataSource dataSource) {
     final ConnectionFactory cf = new SpringConnectionFactory(dataSource);
     final Jdbi jdbi = Jdbi.create(cf);
-    // Auto-register (a.o.) the SqlObjectPlugin
-    jdbi.installPlugins();
+    // Register our plugins
+    jdbi.installPlugin(new PostgresPlugin());
+    jdbi.installPlugin(new SqlObjectPlugin());
     // Don't map column names to lowercase
     jdbi.getConfig(MapMappers.class).setCaseChange(CaseStrategy.NOP);
     return jdbi;
