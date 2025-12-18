@@ -1,9 +1,5 @@
 package mil.dds.anet.database.mappers;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.invoke.MethodHandles;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -16,6 +12,9 @@ import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 public class MapperUtils {
 
@@ -25,9 +24,8 @@ public class MapperUtils {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static ObjectMapper getDefaultMapper() {
-    return new ObjectMapper().registerModule(new JavaTimeModule())
-        .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
-        .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+    return JsonMapper.builder().disable(DateTimeFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS,
+        DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS).build();
   }
 
   public static void setCommonBeanFields(AbstractAnetBean bean, ResultSet rs, String tableName)

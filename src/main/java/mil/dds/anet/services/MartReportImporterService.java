@@ -2,10 +2,6 @@ package mil.dds.anet.services;
 
 import static mil.dds.anet.resources.AttachmentResource.IMAGE_SVG_XML;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.borewit.sanitize.SVGSanitizer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +51,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
 
 @Component
 public class MartReportImporterService implements IMartReportImporterService {
@@ -62,9 +62,9 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
 
-  private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+  private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+      .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
 
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
@@ -232,7 +232,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     return AttachmentResource.getAllowedMimeTypes().contains(mimeType);
   }
 
-  private ReportDto getReportInfo(String reportJson) throws JsonProcessingException {
+  private ReportDto getReportInfo(String reportJson) throws JacksonException {
     try {
       final ReportDto report = ignoringMapper.readValue(reportJson, ReportDto.class);
       if (report.getSubmittedAt() == null) {
@@ -243,7 +243,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       }
       logger.debug("Found report with UUID={}", report.getUuid());
       return report;
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       logger.error("Invalid JSON format", e);
       throw e;
     }

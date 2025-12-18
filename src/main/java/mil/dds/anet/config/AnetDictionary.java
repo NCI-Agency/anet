@@ -1,8 +1,5 @@
 package mil.dds.anet.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaLocation;
@@ -23,6 +20,10 @@ import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @Component
 public class AnetDictionary {
@@ -32,8 +33,8 @@ public class AnetDictionary {
 
   private static final String SCHEMA_ID_PREFIX =
       "https://raw.githubusercontent.com/NCI-Agency/anet/main/src/main/resources";
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
+  private static final ObjectMapper yamlMapper = new YAMLMapper();
+  private static final ObjectMapper jsonMapper = new JsonMapper();
 
   private final AnetConfig config;
 
@@ -76,7 +77,7 @@ public class AnetDictionary {
   }
 
   // This method is called from AnetCheckCommand
-  public boolean checkDictionary() throws IOException {
+  public boolean checkDictionary() {
     return this.isValid(this.getDictionary());
   }
 
@@ -95,8 +96,7 @@ public class AnetDictionary {
     return elem;
   }
 
-  private boolean isValid(final Map<String, Object> dictionaryMap)
-      throws IOException, IllegalArgumentException {
+  private boolean isValid(final Map<String, Object> dictionaryMap) throws IllegalArgumentException {
     try {
       final SchemaRegistryConfig schemaRegistryConfig =
           SchemaRegistryConfig.builder().formatAssertionsEnabled(true).build();

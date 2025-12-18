@@ -1,8 +1,6 @@
 package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.io.IOException;
@@ -15,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @Configuration
 @ConfigurationProperties(prefix = "anet")
@@ -24,7 +24,7 @@ public class AnetConfig {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+  private static final ObjectMapper yamlMapper = new YAMLMapper();
 
   private final Object versionLock = new Object();
 

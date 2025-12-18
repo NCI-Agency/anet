@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -48,11 +46,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";
-  private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+      .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
 
   @Autowired
   protected AnetConfig config;
@@ -351,7 +353,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
   }
 
   private EmailMessage createTransmissionLogMockEmail(long maxSequence)
-      throws ServiceLocalException, IOException {
+      throws ServiceLocalException {
     final AttachmentCollection attachmentCollection = Mockito.mock(AttachmentCollection.class);
     final EmailMessage emailMessageMock = Mockito.mock();
 

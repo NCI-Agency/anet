@@ -2,13 +2,13 @@ package mil.dds.anet.test.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
 
 public class UtilsTest {
 
@@ -145,7 +145,7 @@ public class UtilsTest {
   }
 
   @Test
-  void testSanitizeJson() throws JsonProcessingException {
+  void testSanitizeJson() throws JacksonException {
     final List<InOut> testCases = getJsonTestCases();
     final Map<String, String> typeDefs = Map.of("bool", "boolean", "html", "rich_text");
     // With the proper typeDefs, the HTML in the JSON should be sanitized
@@ -162,7 +162,7 @@ public class UtilsTest {
   }
 
   @Test
-  void testNoSanitizeJson() throws JsonProcessingException {
+  void testNoSanitizeJson() throws JacksonException {
     final InOut testCase = getCombinedJsonTestCaseNoSanitize();
     final Map<String, String> typeDefs = Map.of();
     // Without typeDefs, the HTML in the JSON should *not* be sanitized
@@ -170,7 +170,7 @@ public class UtilsTest {
   }
 
   @Test
-  void testSanitizeJsonWithNestedFields() throws JsonProcessingException {
+  void testSanitizeJsonWithNestedFields() throws JacksonException {
     final Map<String, String> typeDefs = Map.of("html", "rich_text", "arrayField.html", "rich_text",
         "arrayField.subArrayField.html", "rich_text");
     final String jsonFormat = "{%1$s,\"arrayField\":[{%1$s,\"subArrayField\":[{%1$s}]}]}";
@@ -178,7 +178,7 @@ public class UtilsTest {
   }
 
   @Test
-  void testSanitizeJsonWithNestedQuestions() throws JsonProcessingException {
+  void testSanitizeJsonWithNestedQuestions() throws JacksonException {
     final Map<String, String> typeDefs =
         Map.of("html", "rich_text", "questionSets.topLevel.questions.html", "rich_text",
             "questionSets.topLevel.questionSets.nestedLevel.questions.html", "rich_text");
@@ -188,7 +188,7 @@ public class UtilsTest {
   }
 
   private void testSanitizeJsonWithNesting(Map<String, String> typeDefs,
-      String jsonFormatWithHtmlFields) throws JsonProcessingException {
+      String jsonFormatWithHtmlFields) throws JacksonException {
     final String htmlFieldFormat = "\"html\":\"%1$s\"";
     final String jsonFormat = String.format(jsonFormatWithHtmlFields, htmlFieldFormat);
     final InOut combinedHtmlTestCase = getCombinedHtmlTestCase();

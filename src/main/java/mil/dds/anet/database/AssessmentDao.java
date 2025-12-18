@@ -2,9 +2,6 @@ package mil.dds.anet.database;
 
 import static mil.dds.anet.utils.PendingAssessmentsHelper.JSON_ASSESSMENT_RECURRENCE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
@@ -42,6 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @Component
 public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?>> {
@@ -482,10 +482,10 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
       }
       final ObjectNode objectNode = (ObjectNode) jsonNode;
       final JsonNode recurrence = objectNode.get(JSON_ASSESSMENT_RECURRENCE);
-      if (!recurrenceString.equals(recurrence.asText())) {
+      if (!recurrenceString.equals(recurrence.asString())) {
         throw new IllegalArgumentException("Invalid recurrence in assessment contents");
       }
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new IllegalArgumentException("Invalid assessment contents");
     }
   }

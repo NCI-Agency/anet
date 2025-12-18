@@ -1,6 +1,5 @@
 package mil.dds.anet.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
 
 public class ResourceUtils {
 
@@ -115,7 +115,7 @@ public class ResourceUtils {
     try {
       a.setAssessmentValues(
           Utils.sanitizeJson(a.getAssessmentKey(), a.getAssessmentValues(), true));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       a.setAssessmentValues(null);
       logger.error("Unable to process Json, payload discarded", e);
     }

@@ -2,10 +2,6 @@ package mil.dds.anet.test.integration.utils;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -29,6 +25,9 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This class provides a wrapper for the fake SMTP server's API.
@@ -79,7 +78,7 @@ public class FakeSmtpServer {
 
   /**
    * Retrieves all emails from the server.
-   * 
+   *
    * @return All emails from the server
    * @throws IOException If the request fails
    * @throws InterruptedException If the wait timer fails
@@ -92,7 +91,7 @@ public class FakeSmtpServer {
 
   /**
    * Retrieves all emails from the server according to a filter.
-   * 
+   *
    * @param queryFilter The filter to use
    * @return All filtered emails from the server
    * @throws IOException If the request fails
@@ -109,7 +108,7 @@ public class FakeSmtpServer {
 
   /**
    * Clears all emails from the server.
-   * 
+   *
    * @throws Exception If the request or wait timer fails
    */
   public void clearEmailServer() throws Exception {
@@ -127,7 +126,7 @@ public class FakeSmtpServer {
   }
 
   private static List<EmailResponse> parseServeResponse(final String serverResponse)
-      throws JsonMappingException, JsonProcessingException {
+      throws JacksonException {
     final ObjectMapper mapper = new ObjectMapper();
     final JsonNode response = mapper.readTree(serverResponse);
     final List<EmailResponse> emails = new ArrayList<EmailResponse>();
@@ -158,7 +157,7 @@ public class FakeSmtpServer {
 
   /**
    * Sends an email to the server Warning: The server does not support the BCC field.
-   * 
+   *
    * @param to 'To' address
    * @param from 'From' address
    * @param replyTo 'ReplyTo' address
