@@ -78,7 +78,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     try {
       return handle.createUpdate("/* updateLocation */ UPDATE locations "
           + "SET name = :name, type = :type, description = :description, status = :status, lat = :lat, lng = :lng, "
-          + "\"geoJson\" = :geoJson, " + "digram = :digram, trigram = :trigram, "
+          + "digram = :digram, trigram = :trigram, "
           + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
           .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(l.getStatus()))
@@ -87,6 +87,20 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
       closeDbHandle(handle);
     }
   }
+
+  public int updateGeoJson(String uuid, String geoJson, Instant updatedAt) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* updateLocationGeoJsonOnly */ UPDATE locations "
+              + "SET \"geoJson\" = :geoJson, \"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
+          .bind("uuid", uuid).bind("geoJson", geoJson)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt)).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
 
   @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
@@ -102,7 +116,15 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     final GraphQLContext context = engine().getContext();
 
     // Update location
+    final String mergedGeoJson =
+        existingWinnerLoc.getGeoJson() != null ? existingWinnerLoc.getGeoJson()
+            : existingLoserLoc.getGeoJson();
+
     update(winnerLocation);
+
+    if (mergedGeoJson != null) {
+      updateGeoJson(winnerLocationUuid, mergedGeoJson, Instant.now());
+    }
 
     // Update approvalSteps (note that this may fail if reports are currently pending at one of the
     // approvalSteps that are going to be deleted):

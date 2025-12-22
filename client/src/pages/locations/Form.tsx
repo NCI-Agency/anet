@@ -607,19 +607,14 @@ const LocationForm = ({
 
 interface LeafletMapProps {
   location: any
-  geoJson?: string
   onMove: (event, map) => void
   onMapClick: (event, map) => void
 }
 
-const LeafletMap = ({
-  location,
-  geoJson,
-  onMove,
-  onMapClick
-}: LeafletMapProps) => {
-  const shapes = useMemo(() => (geoJson ? [geoJson] : []), [geoJson])
-  const markers = useMemo(() => {
+const LeafletMap = ({ location, onMove, onMapClick }: LeafletMapProps) => {
+  const { shapes, markers } = useMemo(() => {
+    const shapes = location?.geoJson ? [location.geoJson] : []
+
     const marker = {
       id: location.uuid || 0,
       name: _escape(location.name) || "", // escape HTML in location name!
@@ -633,7 +628,8 @@ const LeafletMap = ({
         lng: Number(location.lng)
       })
     }
-    return [marker]
+
+    return { shapes, markers: [marker] }
   }, [location, onMove])
 
   return (
