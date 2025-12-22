@@ -411,7 +411,6 @@ const LocationForm = ({
               {values.type !== Location.LOCATION_TYPES.VIRTUAL_LOCATION && (
                 <LeafletMap
                   location={values}
-                  geoJson={values.geoJson}
                   onMove={(event, map) =>
                     updateCoordinateFields(
                       map.wrapLatLng(event.target.getLatLng())
@@ -613,7 +612,9 @@ interface LeafletMapProps {
 
 const LeafletMap = ({ location, onMove, onMapClick }: LeafletMapProps) => {
   const { shapes, markers } = useMemo(() => {
-    const shapes = location?.geoJson ? [location.geoJson] : []
+    const shapes = location?.geoJson
+      ? [{ id: location.uuid || 0, geoJson: location.geoJson }]
+      : []
 
     const marker = {
       id: location.uuid || 0,

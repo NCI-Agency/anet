@@ -378,9 +378,10 @@ export const LeafletMap = ({
     if (!showShape) {
       return []
     }
-    const geoJson = location?.geoJson
-    return geoJson ? [geoJson] : []
-  }, [showShape, location?.geoJson])
+    return location?.geoJson
+      ? [{ id: location.uuid, geoJson: location?.geoJson }]
+      : []
+  }, [showShape, location])
 
   const markers = useMemo(() => {
     if (!showMarker) {
@@ -398,7 +399,7 @@ export const LeafletMap = ({
         lng: location.lng
       }
     ]
-  }, [showMarker, location])
+  }, [showMarker, location, mapId])
 
   return !_isEmpty(markers) || !_isEmpty(shapes) ? (
     <Leaflet mapId={mapId} markers={markers} shapes={shapes} />

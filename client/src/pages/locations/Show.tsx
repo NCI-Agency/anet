@@ -82,20 +82,22 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   )
 
   const { shapes, markers } = useMemo(() => {
-    const shapes = location?.geoJson ? [location.geoJson] : []
+    const shapes = location?.geoJson
+      ? [{ id: location.uuid || 0, geoJson: location.geoJson }]
+      : []
 
-    const marker = {
-      id: location.uuid || 0,
-      name: _escape(location.name) || "" // escape HTML in location name!
-    }
-    if (Location.hasCoordinates(location)) {
-      Object.assign(marker, {
-        lat: location.lat,
-        lng: location.lng
-      })
-    }
+    const markers = Location.hasCoordinates(location)
+      ? [
+          {
+            id: location.uuid || 0,
+            name: _escape(location.name) || "", // escape HTML in location name!
+            lat: location.lat,
+            lng: location.lng
+          }
+        ]
+      : []
 
-    return { shapes, markers: [marker] }
+    return { shapes, markers }
   }, [location])
   usePageTitle(location?.name)
   useEffect(() => {
@@ -321,10 +323,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
         )}
 
         {(!_isEmpty(markers) || !_isEmpty(shapes)) && (
-          <Leaflet
-            markers={Location.hasCoordinates(location) ? markers : []}
-            shapes={shapes}
-          />
+          <Leaflet markers={markers} shapes={shapes} />
         )}
       </div>
 
