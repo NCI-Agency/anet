@@ -174,8 +174,16 @@ const MergeTasks = ({ pageDispatchers }: MergeTasksProps) => {
         <Col md={4} id="mid-merge-task-col">
           <MidColTitle>
             {getActionButton(
-              () =>
-                dispatchMergeActions(selectAllFields(task1, MERGE_SIDES.LEFT)),
+              () => {
+                dispatchMergeActions(selectAllFields(task1, MERGE_SIDES.LEFT))
+                dispatchMergeActions(
+                  setAMergedField(
+                    "ascendantTasks",
+                    task1.ascendantTasks,
+                    MERGE_SIDES.LEFT
+                  )
+                )
+              },
               MERGE_SIDES.LEFT,
               mergeState,
               null,
@@ -184,8 +192,16 @@ const MergeTasks = ({ pageDispatchers }: MergeTasksProps) => {
             )}
             <h4 style={{ margin: "0" }}>Merged {taskShortLabel}</h4>
             {getActionButton(
-              () =>
-                dispatchMergeActions(selectAllFields(task2, MERGE_SIDES.RIGHT)),
+              () => {
+                dispatchMergeActions(selectAllFields(task2, MERGE_SIDES.RIGHT))
+                dispatchMergeActions(
+                  setAMergedField(
+                    "ascendantTasks",
+                    task2.ascendantTasks,
+                    MERGE_SIDES.RIGHT
+                  )
+                )
+              },
               MERGE_SIDES.RIGHT,
               mergeState,
               null,

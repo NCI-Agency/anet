@@ -130,10 +130,23 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
         <Col md={4} id="mid-merge-per-col">
           <MidColTitle>
             {getActionButton(
-              () =>
+              () => {
+                dispatchMergeActions(selectAllFields(person1, MERGE_SIDES.LEFT))
                 dispatchMergeActions(
-                  selectAllFields(person1, MERGE_SIDES.LEFT)
-                ),
+                  setAMergedField(
+                    "pendingVerification",
+                    person1.pendingVerification,
+                    MERGE_SIDES.LEFT
+                  )
+                )
+                dispatchMergeActions(
+                  setAMergedField(
+                    "obsoleteCountry",
+                    person1.obsoleteCountry,
+                    MERGE_SIDES.LEFT
+                  )
+                )
+              },
               MERGE_SIDES.LEFT,
               mergeState,
               null,
@@ -142,10 +155,25 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
             )}
             <h4 style={{ margin: "0" }}>Merged Person</h4>
             {getActionButton(
-              () =>
+              () => {
                 dispatchMergeActions(
                   selectAllFields(person2, MERGE_SIDES.RIGHT)
-                ),
+                )
+                dispatchMergeActions(
+                  setAMergedField(
+                    "pendingVerification",
+                    person2.pendingVerification,
+                    MERGE_SIDES.RIGHT
+                  )
+                )
+                dispatchMergeActions(
+                  setAMergedField(
+                    "obsoleteCountry",
+                    person2.obsoleteCountry,
+                    MERGE_SIDES.RIGHT
+                  )
+                )
+              },
               MERGE_SIDES.RIGHT,
               mergeState,
               null,
@@ -193,7 +221,14 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.user}
-                value={utils.formatBoolean(mergedPerson.user, true)}
+                value={
+                  <>
+                    {utils.formatBoolean(mergedPerson.user, true)}
+                    {mergedPerson.user && mergedPerson.pendingVerification && (
+                      <em>pending verification</em>
+                    )}
+                  </>
+                }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="user"
                 mergeState={mergeState}
@@ -560,6 +595,25 @@ const PersonColumn = ({
             action={() => {
               dispatchMergeActions(setAMergedField("name", person.name, align))
               dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.user}
+            fieldName="user"
+            value={
+              <>
+                {utils.formatBoolean(person.user)}
+                {person.user && person.pendingVerification && (
+                  <em>pending verification</em>
+                )}
+              </>
+            }
+            align={align}
+            action={() => {
+              dispatchMergeActions(setAMergedField("user", person.user, align))
               dispatchMergeActions(
                 setAMergedField(
                   "pendingVerification",
@@ -569,19 +623,10 @@ const PersonColumn = ({
               )
             }}
             mergeState={mergeState}
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.person.user}
-            fieldName="user"
-            value={utils.formatBoolean(person.user)}
-            align={align}
-            action={() => {
-              dispatchMergeActions(setAMergedField("user", person.user, align))
-            }}
-            mergeState={mergeState}
-            autoMerge
+            autoMerge={
+              person.user === otherSide?.user &&
+              person.pendingVerification === otherSide?.pendingVerification
+            }
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -743,7 +788,10 @@ const PersonColumn = ({
               )
             }}
             mergeState={mergeState}
-            autoMerge
+            autoMerge={
+              person.country?.uuid === otherSide?.country?.uuid &&
+              person.obsoleteCountry === otherSide?.obsoleteCountry
+            }
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField

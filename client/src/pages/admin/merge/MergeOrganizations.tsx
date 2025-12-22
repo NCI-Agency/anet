@@ -204,10 +204,20 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
         <Col md={4} id="mid-merge-org-col">
           <MidColTitle>
             {getActionButton(
-              () =>
+              () => {
                 dispatchMergeActions(
                   selectAllFields(organization1, MERGE_SIDES.LEFT)
-                ),
+                )
+                app6fieldsList.forEach(fieldName => {
+                  dispatchMergeActions(
+                    setAMergedField(
+                      fieldName,
+                      organization1[combinedApp6SymbologyField][fieldName],
+                      MERGE_SIDES.RIGHT
+                    )
+                  )
+                })
+              },
               MERGE_SIDES.LEFT,
               mergeState,
               null,
@@ -216,10 +226,20 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
             )}
             <h4 style={{ margin: "0" }}>Merged Organization</h4>
             {getActionButton(
-              () =>
+              () => {
                 dispatchMergeActions(
                   selectAllFields(organization2, MERGE_SIDES.RIGHT)
-                ),
+                )
+                app6fieldsList.forEach(fieldName => {
+                  dispatchMergeActions(
+                    setAMergedField(
+                      fieldName,
+                      organization2[combinedApp6SymbologyField][fieldName],
+                      MERGE_SIDES.RIGHT
+                    )
+                  )
+                })
+              },
               MERGE_SIDES.RIGHT,
               mergeState,
               null,
