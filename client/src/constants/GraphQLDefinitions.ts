@@ -107,6 +107,7 @@ export const gqlBasicLocationFields = `
 export const gqlAllLocationFields = `
   ${gqlBasicLocationFields}
   description
+  geoJson
   customFields
 `
 

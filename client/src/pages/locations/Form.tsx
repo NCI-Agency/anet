@@ -611,7 +611,11 @@ interface LeafletMapProps {
 }
 
 const LeafletMap = ({ location, onMove, onMapClick }: LeafletMapProps) => {
-  const markers = useMemo(() => {
+  const { shapes, markers } = useMemo(() => {
+    const shapes = location?.geoJson
+      ? [{ id: location.uuid || 0, geoJson: location.geoJson }]
+      : []
+
     const marker = {
       id: location.uuid || 0,
       name: _escape(location.name) || "", // escape HTML in location name!
@@ -625,13 +629,14 @@ const LeafletMap = ({ location, onMove, onMapClick }: LeafletMapProps) => {
         lng: Number(location.lng)
       })
     }
-    return [marker]
+
+    return { shapes, markers: [marker] }
   }, [location, onMove])
 
   return (
     <>
       <h3>Drag the marker below to set the location</h3>
-      <Leaflet markers={markers} onMapClick={onMapClick} />
+      <Leaflet markers={markers} shapes={shapes} onMapClick={onMapClick} />
     </>
   )
 }
