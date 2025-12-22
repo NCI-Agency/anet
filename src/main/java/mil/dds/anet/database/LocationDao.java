@@ -59,9 +59,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     final Handle handle = getDbHandle();
     try {
       handle.createUpdate(
-          "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, \"geoJson\", digram, trigram, "
+          "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, digram, trigram, "
               + "\"createdAt\", \"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :description, :status, "
-              + ":lat, :lng, :geoJson, :digram, :trigram, :createdAt, :updatedAt, :customFields)")
+              + ":lat, :lng, :digram, :trigram, :createdAt, :updatedAt, :customFields)")
           .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(l.getStatus()))

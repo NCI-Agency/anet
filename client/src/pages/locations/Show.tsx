@@ -80,6 +80,10 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     () => new Location(data?.location ?? {}),
     [data?.location]
   )
+  const shapes = useMemo(
+    () => (location.geoJson ? [location.geoJson] : []),
+    [location.geoJson]
+  )
   const markers = useMemo(() => {
     const marker = {
       id: location.uuid || 0,
@@ -316,10 +320,10 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
           </Fieldset>
         )}
 
-        {(Location.hasCoordinates(location) || location.geoJson) && (
+        {(Location.hasCoordinates(location) || shapes) && (
           <Leaflet
             markers={Location.hasCoordinates(location) ? markers : []}
-            shapes={location.geoJson ? [location.geoJson] : []}
+            shapes={shapes}
           />
         )}
       </div>

@@ -20,11 +20,12 @@ const LocationsMapWidget = ({
   ...otherWidgetProps // eslint-disable-line @typescript-eslint/no-unused-vars
 }: LocationsMapWidgetProps) => {
   const [markerPopup, setMarkerPopup] = useState<MarkerPopupProps>({})
-  const markers = useMemo(() => {
+  const [markers, shapes] = useMemo(() => {
     if (!values.length) {
       return []
     }
     const markerArray = []
+    const shapesArray = []
     for (const location of values) {
       if (Location.hasCoordinates(location)) {
         markerArray.push({
@@ -35,11 +36,15 @@ const LocationsMapWidget = ({
           contents: location
         })
       }
+
+      if (location.geoJson) {
+        shapesArray.push(location.geoJson)
+      }
     }
-    return markerArray
+    return [markerArray, shapesArray]
   }, [values])
 
-  if (_isEmpty(markers)) {
+  if (_isEmpty(markers) && _isEmpty(shapes)) {
     return whenUnspecified
   }
 
@@ -47,6 +52,7 @@ const LocationsMapWidget = ({
     <div className="non-scrollable">
       <Leaflet
         markers={markers}
+        shapes={shapes}
         setMarkerPopup={setMarkerPopup}
         width={width}
         height={height}
