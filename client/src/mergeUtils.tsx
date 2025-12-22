@@ -352,34 +352,53 @@ export function getActionButton(
 
 const HIDDEN_STYLE = { visibility: "hidden" }
 
+export enum LeafletMode {
+  marker = "marker",
+  shapes = "shapes",
+  both = "both"
+}
+
 interface LeafletMapProps {
   mapId: string
   location?: any
   hideWhenEmpty?: boolean
-  mode?: "both" | "marker" | "shape"
+  mode?: LeafletMode
 }
 
 export const LeafletMap = ({
   mapId,
   location,
   hideWhenEmpty,
-  mode = "both"
+  mode = LeafletMode.both
 }: LeafletMapProps) => {
-  const showMarker = mode === "both" || mode === "marker"
-  const showShape = mode === "both" || mode === "shape"
+  const showMarker = mode === LeafletMode.both || mode === LeafletMode.marker
+  const showShape = mode === LeafletMode.both || mode === LeafletMode.shapes
 
-  const shapes = showShape && location?.geoJson ? [location.geoJson] : []
-  const markers =
-    showMarker && Location.hasCoordinates(location)
-      ? [
-          {
-            id: "marker-" + mapId,
-            name: _escape(location?.name) || "",
-            lat: location.lat,
-            lng: location.lng
-          }
-        ]
-      : []
+  const shapes = useMemo(() => {
+    if (!showShape) {
+      return []
+    }
+    const geoJson = location?.geoJson
+    return geoJson ? [geoJson] : []
+  }, [showShape, location?.geoJson])
+
+  const markers = useMemo(() => {
+    if (!showMarker) {
+      return []
+    }
+    if (!Location.hasCoordinates(location)) {
+      return []
+    }
+
+    return [
+      {
+        id: "marker-" + mapId,
+        name: _escape(location?.name) || "", // escape HTML in location name!
+        lat: location.lat,
+        lng: location.lng
+      }
+    ]
+  }, [showMarker, location])
 
   const hasContent = shapes.length + markers.length > 0
 

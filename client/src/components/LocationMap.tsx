@@ -22,6 +22,7 @@ const GQL_GET_LOCATION_LIST = gql`
         lat
         lng
         type
+        geoJson
       }
     }
   }

@@ -36,6 +36,7 @@ import useMergeObjects, {
   getActionButton,
   getOtherSide,
   LeafletMap,
+  LeafletMode,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -246,7 +247,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
                       mapId="merged-location-map"
                       location={mergedLocation}
                       hideWhenEmpty={hideWhenEmpty}
-                      mode="marker"
+                      mode={LeafletMode.marker}
                     />
                   </>
                 }
@@ -263,7 +264,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
                       mapId="merged-shape-map"
                       location={mergedLocation}
                       hideWhenEmpty={hideWhenEmpty}
-                      mode="shape"
+                      mode={LeafletMode.shapes}
                     />
                   ) : (
                     <em>No shape defined</em>
@@ -585,7 +586,7 @@ const LocationColumn = ({
                   mapId={`merge-location-map-${align}`}
                   location={location}
                   hideWhenEmpty={hideWhenEmpty}
-                  mode="marker"
+                  mode={LeafletMode.marker}
                 />
               </>
             }
@@ -615,7 +616,7 @@ const LocationColumn = ({
                     mapId={`merge-shape-map-${align}`}
                     location={location}
                     hideWhenEmpty={hideWhenEmpty}
-                    mode="shape"
+                    mode={LeafletMode.shapes}
                   />
                 ) : (
                   <em>No shape defined</em>

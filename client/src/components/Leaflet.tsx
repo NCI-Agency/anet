@@ -597,9 +597,7 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
-  /**
-   * Handle assigned shapes (GeoJSON strings)
-   */
+  // Handle assigned shapes (GeoJSON strings)
   useEffect(() => {
     if (!map) {
       return
@@ -608,7 +606,7 @@ const Leaflet = ({
     const groupLayer = shapeGroupLayerRef.current
     groupLayer.clearLayers()
 
-    if (shapes && shapes.length > 0) {
+    if (!_isEmpty(shapes)) {
       shapes.forEach(shape => {
         const geoJsonObject = JSON.parse(shape)
         const geoJsonLayer = geoJSON(geoJsonObject)

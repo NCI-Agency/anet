@@ -13,6 +13,7 @@ import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
+import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useMemo } from "react"
 import Settings from "settings"
@@ -131,18 +132,15 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
         )}
       </div>
 
-      {!location.geoJson ||
+      {!_isEmpty(markers) ||
+        location.geoJson ||
         (Location.hasCoordinates(location) && (
           <Leaflet
             markers={markers}
-            shapes={[location.geoJson]}
+            shapes={location.geoJson ? [location.geoJson] : []}
             mapId={`${uuid}`}
           />
         ))}
-
-      {location.geoJson && (
-        <Leaflet shapes={[location.geoJson]} mapId={`${uuid}`} />
-      )}
     </div>
   )
 }
