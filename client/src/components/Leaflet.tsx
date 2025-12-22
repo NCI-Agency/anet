@@ -237,7 +237,7 @@ interface LeafletProps {
   marginBottom?: number | string
   markers?: any[]
   setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
-  shapes?: string[]
+  shapes?: any[]
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
   onSelectAnetLocation?: (loc: any) => void
@@ -245,7 +245,7 @@ interface LeafletProps {
   onCreateLocation?: (coords: { lat: number; lng: number }) => void
 }
 
-const NEARBY_LOCATIONS_GQL = gql`
+const GET_ANET_LOCATIONS_GQL = gql`
   query ($bounds: BoundingBoxInput!) {
     locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
       ${gqlPaginationFields}
@@ -443,7 +443,7 @@ const Leaflet = ({
     }
 
     const getAnetLocations = async () =>
-      await API.query(NEARBY_LOCATIONS_GQL, anetLocationsVars)
+      await API.query(GET_ANET_LOCATIONS_GQL, anetLocationsVars)
 
     getAnetLocations()
       .then(rows => {
@@ -631,9 +631,14 @@ const Leaflet = ({
 
     if (!_isEmpty(shapes)) {
       shapes.forEach(shape => {
-        const geoJsonObject = JSON.parse(shape)
-        const geoJsonLayer = geoJSON(geoJsonObject, { interactive: false })
-        geoJsonLayer.addTo(groupLayer)
+        try {
+          const geoJsonObject = JSON.parse(shape.geoJson)
+          const geoJsonLayer = geoJSON(geoJsonObject, {
+            id: shape.id,
+            interactive: false
+          })
+          geoJsonLayer.addTo(groupLayer)
+        } catch {}
       })
     }
 

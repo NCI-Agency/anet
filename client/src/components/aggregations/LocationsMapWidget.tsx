@@ -38,7 +38,7 @@ const LocationsMapWidget = ({
       }
 
       if (location.geoJson) {
-        shapesArray.push(location.geoJson)
+        shapesArray.push({ id: location.uuid, geoJson: location.geoJson })
       }
     }
     return [markerArray, shapesArray]
