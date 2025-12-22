@@ -259,6 +259,19 @@ const GET_ANET_LOCATIONS_GQL = gql`
   }
 `
 
+const GET_ANET_COUNTRIES_GQL = gql`
+  query {
+    locationList(query: { type: COUNTRY, status: ACTIVE, pageSize: 0 }) {
+      ${gqlPaginationFields}
+      list {
+        ${gqlEntityFieldsMap.Location}
+        type
+        geoJson
+      }
+    }
+  }
+`
+
 const Leaflet = ({
   width = DEFAULT_MAP_STYLE.width,
   height = DEFAULT_MAP_STYLE.height,
@@ -296,6 +309,9 @@ const Leaflet = ({
   const anetLocationsLayerRef = useRef(null)
   const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
   const [anetLocationsVars, setAnetLocationsVars] = useState({})
+
+  const anetCountriesLayerRef = useRef(null)
+  const [anetCountriesEnabled, setAnetCountriesEnabled] = useState(false)
 
   const createLocationMarkerRef = useRef<Marker | null>(null)
   const [createLocationMarkerPopup, setCreateLocationMarkerPopup] =
@@ -431,6 +447,24 @@ const Leaflet = ({
       }
     })
 
+    // anetCountries layer
+    const anetCountriesLayer = new FeatureGroup()
+    anetCountriesLayerRef.current = anetCountriesLayer
+    // Allow the user to show/hide the layer
+    layerControl.addOverlay(anetCountriesLayer, "ANET Countries")
+
+    newMap.on("overlayadd", e => {
+      if (e.layer === anetCountriesLayer) {
+        setAnetCountriesEnabled(true)
+      }
+    })
+    newMap.on("overlayremove", e => {
+      if (e.layer === anetCountriesLayer) {
+        setAnetCountriesEnabled(false)
+        anetCountriesLayer.clearLayers()
+      }
+    })
+
     setDoInitializeMarkerLayer(true)
 
     // Destroy map when done
@@ -492,6 +526,41 @@ const Leaflet = ({
     map,
     setLocationMarkerPopup
   ])
+
+  useEffect(() => {
+    if (!anetCountriesEnabled || !anetCountriesLayerRef.current) {
+      return
+    }
+
+    const getAnetCountries = async () => await API.query(GET_ANET_COUNTRIES_GQL)
+
+    getAnetCountries()
+      .then(rows => {
+        const anetCountries = rows?.locationList?.list || []
+        const layer = anetCountriesLayerRef.current
+
+        const existingIds = getExistingIds(shapeGroupLayerRef.current)
+
+        layer.clearLayers()
+        anetCountries?.forEach((country: any) => {
+          if (!country.geoJson || existingIds.has(country.uuid)) {
+            return
+          }
+
+          try {
+            const geoJsonObject = JSON.parse(country.geoJson)
+            const geoJsonLayer = geoJSON(geoJsonObject, {
+              id: country.uuid,
+              interactive: false,
+              color: "#00d8ff",
+              opacity: 0.1
+            })
+            geoJsonLayer.addTo(layer)
+          } catch {}
+        })
+      })
+      .catch(() => {})
+  }, [anetCountriesEnabled])
 
   useEffect(() => {
     /*
