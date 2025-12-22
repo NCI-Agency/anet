@@ -12,6 +12,7 @@ import {
   FeatureGroup,
   geoJSON,
   Icon,
+  LatLngBounds,
   Map,
   Marker,
   Point,
@@ -188,9 +189,31 @@ function createMarker(
   return marker
 }
 
-function wrapLng(lng) {
+function wrapLng(lng: number) {
   // Wrap lng around the antimeridian
-  return lng < 0 ? lng + 360.0 : lng - 360.0
+  return lng < 0 ? lng + 360 : lng - 360
+}
+
+function unwrapLng(lng: number) {
+  // Unwrap lng around the antimeridian
+  if (lng < -180) {
+    return lng + 360
+  } else if (lng > 180) {
+    return lng - 360
+  } else {
+    return lng
+  }
+}
+
+function getUnwrappedLayerBounds(layerBounds: LatLngBounds) {
+  if (layerBounds?.isValid()) {
+    const southWest = layerBounds.getSouthWest()
+    southWest.lng = unwrapLng(southWest.lng)
+    const northEast = layerBounds.getNorthEast()
+    northEast.lng = unwrapLng(northEast.lng)
+    return new LatLngBounds(southWest, northEast)
+  }
+  return layerBounds
 }
 
 function getExistingIds(layerGroup) {
@@ -214,12 +237,12 @@ interface LeafletProps {
   marginBottom?: number | string
   markers?: any[]
   setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
+  shapes?: string[]
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
   onSelectAnetLocation?: (loc: any) => void
   allowCreateLocation?: boolean
   onCreateLocation?: (coords: { lat: number; lng: number }) => void
-  shapes?: string[]
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
@@ -609,32 +632,22 @@ const Leaflet = ({
     if (!_isEmpty(shapes)) {
       shapes.forEach(shape => {
         const geoJsonObject = JSON.parse(shape)
-        const geoJsonLayer = geoJSON(geoJsonObject)
+        const geoJsonLayer = geoJSON(geoJsonObject, { interactive: false })
         geoJsonLayer.addTo(groupLayer)
       })
     }
 
-    // Create a temporary FeatureGroup to combine shape and marker layers
-    const combinedGroup = new FeatureGroup()
-    if (groupLayer.getLayers().length > 0) {
-      combinedGroup.addLayer(groupLayer)
-    }
-    // Add only one instance of each marker (no wrapped copies)
-    if (markerLayer && markerLayer.getLayers().length > 0) {
-      markerLayer.getLayers().forEach(layer => {
-        const latlng = layer.getLatLng?.()
-        if (!latlng) {
-          return
-        }
-        if (latlng.lng > -180 && latlng.lng < 180) {
-          combinedGroup.addLayer(layer)
-        }
-      })
-    }
-
-    const bounds = combinedGroup.getBounds()
-    if (bounds.isValid()) {
-      map.fitBounds(bounds)
+    // Try to combine groupLayer bounds with (unwrapped) markerLayer bounds
+    const groupLayerBounds = groupLayer.getBounds()
+    if (groupLayerBounds?.isValid()) {
+      const unwrappedMarkerLayerBounds = getUnwrappedLayerBounds(
+        markerLayer.getBounds()
+      )
+      map.fitBounds(
+        unwrappedMarkerLayerBounds?.isValid()
+          ? groupLayerBounds.extend(unwrappedMarkerLayerBounds)
+          : groupLayerBounds
+      )
     }
   }, [shapes, map, markerLayer])
 

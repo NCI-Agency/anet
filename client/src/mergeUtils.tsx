@@ -400,9 +400,7 @@ export const LeafletMap = ({
     ]
   }, [showMarker, location])
 
-  const hasContent = shapes.length + markers.length > 0
-
-  return hasContent ? (
+  return !_isEmpty(markers) || !_isEmpty(shapes) ? (
     <Leaflet mapId={mapId} markers={markers} shapes={shapes} />
   ) : (
     <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />

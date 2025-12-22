@@ -40,7 +40,10 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
     () => new Location(data?.location ?? {}),
     [data?.location]
   )
-  const markers = useMemo(() => {
+
+  const { shapes, markers } = useMemo(() => {
+    const shapes = location?.geoJson ? [location.geoJson] : []
+
     const marker = {
       id: location.uuid || 0,
       name: _escape(location.name) || "" // escape HTML in location name!
@@ -51,7 +54,8 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
         lng: location.lng
       })
     }
-    return [marker]
+
+    return { shapes, markers: [marker] }
   }, [location])
 
   if (!data) {
@@ -133,13 +137,9 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
       </div>
 
       {!_isEmpty(markers) ||
-        location.geoJson ||
+        !_isEmpty(shapes) ||
         (Location.hasCoordinates(location) && (
-          <Leaflet
-            markers={markers}
-            shapes={location.geoJson ? [location.geoJson] : []}
-            mapId={`${uuid}`}
-          />
+          <Leaflet markers={markers} shapes={shapes} mapId={`${uuid}`} />
         ))}
     </div>
   )

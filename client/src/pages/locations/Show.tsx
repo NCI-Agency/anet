@@ -80,11 +80,10 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     () => new Location(data?.location ?? {}),
     [data?.location]
   )
-  const shapes = useMemo(
-    () => (location.geoJson ? [location.geoJson] : []),
-    [location.geoJson]
-  )
-  const markers = useMemo(() => {
+
+  const { shapes, markers } = useMemo(() => {
+    const shapes = location?.geoJson ? [location.geoJson] : []
+
     const marker = {
       id: location.uuid || 0,
       name: _escape(location.name) || "" // escape HTML in location name!
@@ -95,7 +94,8 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
         lng: location.lng
       })
     }
-    return [marker]
+
+    return { shapes, markers: [marker] }
   }, [location])
   usePageTitle(location?.name)
   useEffect(() => {
@@ -320,7 +320,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
           </Fieldset>
         )}
 
-        {(Location.hasCoordinates(location) || shapes) && (
+        {(!_isEmpty(markers) || !_isEmpty(shapes)) && (
           <Leaflet
             markers={Location.hasCoordinates(location) ? markers : []}
             shapes={shapes}
