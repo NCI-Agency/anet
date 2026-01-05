@@ -16,7 +16,7 @@ public class NewReportCommentEmail implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-    return "New Comment on your ANET Report";
+    return "New comment on your ANET report";
   }
 
   @Override
