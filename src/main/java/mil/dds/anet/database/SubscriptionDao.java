@@ -15,10 +15,12 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
+import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
+import mil.dds.anet.database.mappers.SubscriptionUpdateMapper;
 import mil.dds.anet.emails.SubscriptionUpdateEmail;
 import mil.dds.anet.search.pg.PostgresqlSubscriptionSearcher;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -222,37 +224,43 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, SubscriptionSearc
           params.putAll(stmt.params);
         }
       }
-      final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
+      final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " ) RETURNING"
+          + SubscriptionUpdateDao.SUBSCRIPTION_UPDATE_FIELDS;
       logger.info(
           "Inserting subscription updates: sql={}, createdAt={}, updatedObjectType={}, "
               + "updatedObjectUuid={}, isNote={}, auditTrailUuid={}, params={}",
           sqlSuf, subscriptionUpdate.getUpdatedAt(), subscriptionUpdate.getObjectType(),
           subscriptionUpdate.getObjectUuid(), subscriptionUpdate.isNote(), auditTrailUuid, params);
 
-      final int rowNum = handle.createUpdate(sqlPre + sqlSuf)
+      final List<SubscriptionUpdate> subscriptionUpdates = handle.createQuery(sqlPre + sqlSuf)
           .bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.getUpdatedAt()))
           .bind("updatedObjectType", subscriptionUpdate.getObjectType())
           .bind("updatedObjectUuid", subscriptionUpdate.getObjectUuid())
           .bind("isNote", subscriptionUpdate.isNote()).bind("auditTrailUuid", auditTrailUuid)
-          .bindMap(params).execute();
-      sendEmailToSubscribers(subscriptionUpdate);
-      return rowNum;
+          .bindMap(params).map(new SubscriptionUpdateMapper()).list();
+      sendEmailToSubscribers(subscriptionUpdates);
+      return subscriptionUpdates.size();
     } finally {
       closeDbHandle(handle);
     }
   }
 
-  private void sendEmailToSubscribers(SubscriptionUpdateGroup subscriptionUpdate) {
-    final List<Person> subscribers =
-        getSubscribedPeople(subscriptionUpdate.getObjectType(), subscriptionUpdate.getObjectUuid());
-    if (!subscribers.isEmpty()) {
-      final List<String> addresses = getEmailAddressesBasedOnPreference(subscribers,
+  private void sendEmailToSubscribers(List<SubscriptionUpdate> subscriptionUpdates) {
+    final GraphQLContext context = engine().getContext();
+    for (final SubscriptionUpdate subscriptionUpdate : subscriptionUpdates) {
+      final Subscription subscription = subscriptionUpdate.loadSubscription(context).join();
+      final Position subscribedPosition = subscription.loadSubscriber(context).join();
+      final Person subscriber = subscribedPosition.loadPerson(context).join();
+      final List<String> addresses = getEmailAddressesBasedOnPreference(List.of(subscriber),
           PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
       if (!addresses.isEmpty()) {
         final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
-        action.setUpdatedObjectType(subscriptionUpdate.getObjectType());
-        action.setUpdatedObjectUuid(subscriptionUpdate.getObjectUuid());
-        action.setIsNote(subscriptionUpdate.isNote());
+        action.setSubscriptionUuid(subscriptionUpdate.getSubscriptionUuid());
+        action.setUpdatedObjectType(subscriptionUpdate.getUpdatedObjectType());
+        action.setUpdatedObjectUuid(subscriptionUpdate.getUpdatedObjectUuid());
+        action.setAuditTrailUuid(subscriptionUpdate.getAuditTrailUuid());
+        action.setIsNote(subscriptionUpdate.getIsNote());
+        action.setCreatedAt(subscriptionUpdate.getCreatedAt());
         final AnetEmail email = new AnetEmail();
         email.setAction(action);
         email.setToAddresses(addresses);
@@ -260,7 +268,6 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, SubscriptionSearc
       }
     }
   }
-
 
   @Transactional
   public boolean isSubscribedObject(GraphQLContext context, String subscribedObjectUuid) {

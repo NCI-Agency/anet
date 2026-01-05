@@ -436,4 +436,9 @@ public class Position extends AbstractEmailableAnetBean
   public String toString() {
     return String.format("[uuid:%s name:%s orgUuid:%s]", uuid, name, getOrganizationUuid());
   }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
+  }
 }
