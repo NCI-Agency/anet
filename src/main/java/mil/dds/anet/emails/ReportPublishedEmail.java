@@ -14,7 +14,7 @@ public class ReportPublishedEmail implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-    return "ANET Report Approved";
+    return "ANET report approved";
   }
 
   @Override
