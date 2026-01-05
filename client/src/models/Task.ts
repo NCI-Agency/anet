@@ -164,7 +164,7 @@ export default class Task extends Model {
     if (typeof displayCallback === "function") {
       return displayCallback(this)
     }
-    return `${this.shortName}`
+    return this.shortName
   }
 
   getAssessmentsConfig() {
