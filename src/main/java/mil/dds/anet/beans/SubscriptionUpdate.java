@@ -77,8 +77,8 @@ public class SubscriptionUpdate extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  public void setSubscriptionUuid(String subscriberUuid) {
-    this.subscription = new ForeignObjectHolder<>(subscriberUuid);
+  public void setSubscriptionUuid(String subscriptionUuid) {
+    this.subscription = new ForeignObjectHolder<>(subscriptionUuid);
   }
 
   @JsonIgnore
