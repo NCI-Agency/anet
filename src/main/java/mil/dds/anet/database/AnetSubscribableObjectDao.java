@@ -20,17 +20,23 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
     super(databaseHandler);
   }
 
-  public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj, boolean isDelete);
+  public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj, String auditTrailUuid,
+      boolean isDelete);
+
+  public SubscriptionUpdateGroup getSubscriptionUpdate(T obj, boolean isDelete) {
+    return getSubscriptionUpdate(obj, null, isDelete);
+  }
 
   @Transactional
   public void updateSubscriptions(T obj, String auditTrailUuid, boolean isDelete) {
-    final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj, isDelete);
+    final SubscriptionUpdateGroup subscriptionUpdate =
+        getSubscriptionUpdate(obj, auditTrailUuid, isDelete);
     final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
     subscriptionDao.updateSubscriptions(subscriptionUpdate, auditTrailUuid);
   }
 
   protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractSubscribableAnetBean obj,
-      String tableName, String paramName, boolean isDelete) {
+      String tableName, String auditTrailUuid, String paramName, boolean isDelete) {
     final boolean isParam = (obj != null);
     final String uuid = isParam ? obj.getUuid() : null;
     final SubscriptionUpdateStatement update =
@@ -46,7 +52,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
     } else {
       updatedAt = obj.getUpdatedAt();
     }
-    return new SubscriptionUpdateGroup(tableName, uuid, updatedAt, update);
+    return new SubscriptionUpdateGroup(tableName, uuid, auditTrailUuid, updatedAt, update);
   }
 
   protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(boolean isParam,

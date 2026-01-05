@@ -299,7 +299,8 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Event obj, boolean isDelete) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "events.uuid", isDelete);
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Event obj, String auditTrailUuid,
+      boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "events.uuid", isDelete);
   }
 }
