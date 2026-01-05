@@ -913,4 +913,9 @@ public class Report extends AbstractCustomizableAnetBean
   public String toString() {
     return String.format("[uuid:%s, intent:%s]", uuid, intent);
   }
+
+  @Override
+  public String getObjectLabel() {
+    return Objects.requireNonNullElse(getIntent(), "None");
+  }
 }
