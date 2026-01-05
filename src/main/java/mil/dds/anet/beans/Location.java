@@ -353,4 +353,9 @@ public class Location extends AbstractCustomizableAnetBean
     return String.format("(%s) - %s [%f, %f]", uuid, name, lat, lng);
   }
 
+  @Override
+  public String getObjectLabel() {
+    return getName();
+  }
+
 }

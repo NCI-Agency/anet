@@ -664,8 +664,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj, boolean isDelete) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid", isDelete);
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj, String auditTrailUuid,
+      boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "people.uuid", isDelete);
   }
 
   public String clearCache() {
