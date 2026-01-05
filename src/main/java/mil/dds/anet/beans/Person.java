@@ -8,12 +8,14 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -499,6 +501,13 @@ public class Person extends AbstractEmailableAnetBean
   public String toString() {
     // Only use the uuid, no personal information
     return String.format("[uuid:%s]", uuid);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    final List<String> labelParts = Arrays.asList(getRank(), getName());
+    return labelParts.stream().filter(s -> !Utils.isEmptyOrNull(s))
+        .collect(Collectors.joining(" "));
   }
 
   public static Person createWithUuid(String uuid) {
