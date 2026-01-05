@@ -247,7 +247,7 @@ interface LeafletProps {
 
 const GET_ANET_LOCATIONS_GQL = gql`
   query ($bounds: BoundingBoxInput!) {
-    locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
+    locationList(query: { boundingBox: $bounds, status: ACTIVE, pageSize: 0 }) {
       ${gqlPaginationFields}
       list {
         ${gqlEntityFieldsMap.Location}
