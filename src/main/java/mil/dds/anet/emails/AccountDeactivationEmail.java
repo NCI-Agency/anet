@@ -14,7 +14,7 @@ public class AccountDeactivationEmail implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-    return "ANET Account Inactivation";
+    return "ANET account inactivation";
   }
 
   @Override
