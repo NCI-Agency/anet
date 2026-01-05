@@ -265,14 +265,16 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   @Transactional
   public void updateSubscriptions(Note obj, String auditTrailUuid, boolean isDelete) {
-    final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj, isDelete);
+    final List<SubscriptionUpdateGroup> subscriptionUpdates =
+        getSubscriptionUpdates(obj, auditTrailUuid, isDelete);
     final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
     for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
       subscriptionDao.updateSubscriptions(subscriptionUpdate, auditTrailUuid);
     }
   }
 
-  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj, boolean isDelete) {
+  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj, String auditTrailUuid,
+      boolean isDelete) {
     final String paramTpl = "noteRelatedObject%1$d";
     final List<SubscriptionUpdateGroup> updates = new ArrayList<>();
     final ListIterator<GenericRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
@@ -282,8 +284,9 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       final SubscriptionUpdateStatement stmt =
           AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(true,
               nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);
-      updates.add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(),
-          nro.getRelatedObjectUuid(), isDelete ? Instant.now() : obj.getUpdatedAt(), stmt, true));
+      updates
+          .add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(), nro.getRelatedObjectUuid(),
+              auditTrailUuid, isDelete ? Instant.now() : obj.getUpdatedAt(), stmt, true));
     }
     return updates;
   }
