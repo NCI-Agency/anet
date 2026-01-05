@@ -1,24 +1,11 @@
-<html>
+<html lang="en">
 <head>
-<style type="text/css">
-  body {
-    font-family: Arial, Helvetica, SourceSansPro-Regular;
-    color: #000000;
-    font-size: 11px
-  }
-  h1 {
-    font-size: 20px
-  }
-  h2 {
-    font-size: 16px;
-  }
-  a {
-    color:#0072BD;
-  }
-</style>
+  <style>
+    <#include "common/emailStyle.css" parse="false">
+  </style>
 </head>
 <body>
-<p style="font-size:12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+<#include "common/securityBanner.ftlh">
 
 <p>Dear ${advisor.name},</p>
 
@@ -58,13 +45,6 @@
 
 <p>Please create your periodic assessment(s).</p>
 
-<p>ANET Support Team
-<#if SUPPORT_EMAIL_ADDR??>
-  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
-</#if></p>
-
-<p>The email is automatically sent by ANET. If you no longer wish to receive these emails you can adjust your <a href="${serverUrl}/preferences"><em><strong>notification preferences</strong></em></a></p>
-
-
+<#include "common/notificationFooter.ftlh">
 </body>
 </html>
