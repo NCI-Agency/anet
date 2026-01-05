@@ -6,10 +6,12 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.M2mBatchParams;
@@ -17,6 +19,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
@@ -513,5 +516,15 @@ public class Organization extends AbstractEmailableAnetBean
   public String toString() {
     return String.format("[uuid:%s shortName:%s longName:%s identificationCode:%s]", uuid,
         shortName, longName, identificationCode);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    final Boolean excludeIdentificationCode = (Boolean) ApplicationContextProvider.getDictionary()
+        .getDictionaryEntry("fields.organization.identificationCode.exclude");
+    final List<String> labelParts = Arrays.asList(getShortName(), getLongName(),
+        Boolean.TRUE.equals(excludeIdentificationCode) ? null : getIdentificationCode());
+    return labelParts.stream().filter(s -> !Utils.isEmptyOrNull(s))
+        .collect(Collectors.joining(" | "));
   }
 }
