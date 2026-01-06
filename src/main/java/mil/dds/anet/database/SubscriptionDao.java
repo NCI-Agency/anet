@@ -6,7 +6,6 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -18,19 +17,14 @@ import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
-import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.database.mappers.SubscriptionUpdateMapper;
 import mil.dds.anet.emails.SubscriptionUpdateEmail;
 import mil.dds.anet.search.pg.PostgresqlSubscriptionSearcher;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -55,32 +49,6 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, SubscriptionSearc
   @Override
   public Subscription getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
-  }
-
-  public List<Person> getSubscribedPeople(String subscribedObjectType,
-      String subscribedObjectUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      if (Utils.isEmptyOrNull(subscribedObjectType) || Utils.isEmptyOrNull(subscribedObjectUuid)) {
-        return Collections.emptyList();
-      }
-      return handle.attach(SubscriptionListQueries.class).getSubscribedPeople(subscribedObjectType,
-          subscribedObjectUuid);
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  public interface SubscriptionListQueries {
-    @RegisterRowMapper(PersonMapper.class)
-    @SqlQuery("SELECT p.uuid AS people_uuid, p.name AS people_name FROM subscriptions s "
-        + " INNER JOIN positions pos ON s.\"subscriberUuid\" = pos.uuid "
-        + " INNER JOIN people p ON pos.\"currentPersonUuid\" = p.uuid "
-        + " WHERE \"subscribedObjectType\" = :subscribedObjectType"
-        + " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
-    List<Person> getSubscribedPeople(
-        @Bind(value = "subscribedObjectType") String subscribedObjectType,
-        @Bind(value = "subscribedObjectUuid") String subscribedObjectUuid);
   }
 
   @Transactional
