@@ -148,7 +148,9 @@ const advancedSelectFilterEventSeriesProps = {
   addon: EVENT_SERIES_ICON
 }
 
-export const searchFilters = function () {
+export const searchFilters = function (
+  eventTypes?: Array<string | { code: string }>
+) {
   const filters = {}
 
   const authorWidgetFilters = {
@@ -714,12 +716,11 @@ export const searchFilters = function () {
       }
     }
   }
-  const eventTypeOptions = [
-    Event.EVENT_TYPES.EXERCISE,
-    Event.EVENT_TYPES.CONFERENCE,
-    Event.EVENT_TYPES.VISIT_BAN,
-    Event.EVENT_TYPES.OTHER
-  ]
+
+  const eventTypeOptions = Settings.fields.report.event?.filter || []
+  const eventTypeLabels = eventTypeOptions.map(code =>
+    Event.humanNameOfType ? Event.humanNameOfType(code) : code
+  )
 
   filters[SEARCH_OBJECT_TYPES.EVENTS] = {
     filters: {
@@ -730,7 +731,7 @@ export const searchFilters = function () {
         props: {
           queryKey: "type",
           options: eventTypeOptions,
-          labels: eventTypeOptions.map(lt => Event.humanNameOfType(lt))
+          labels: eventTypeLabels
         }
       },
       [Settings.fields.event.eventSeries.label]: {

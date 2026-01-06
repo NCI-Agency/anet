@@ -22,13 +22,6 @@ export default class Event extends Model {
     return "Event"
   }
 
-  static EVENT_TYPES = {
-    OTHER: "OTHER",
-    CONFERENCE: "CONFERENCE",
-    EXERCISE: "EXERCISE",
-    VISIT_BAN: "VISIT_BAN"
-  }
-
   static schema = {}
 
   static yupSchema = yup.object().shape({
@@ -36,7 +29,11 @@ export default class Event extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
-    type: yup.string().required().default(""),
+    type: yup
+      .string()
+      .nullable()
+      .required("Event type is required")
+      .default(null),
     name: yup.string().required().default(""),
     description: yup.string().default(""),
     startDate: yupDate.required().default(null),
