@@ -367,7 +367,6 @@ const EventForm = ({
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
                       valueKey="shortName"
-                      y
                       addon={ORGANIZATIONS_ICON}
                     />
                   }
