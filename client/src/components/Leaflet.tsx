@@ -373,7 +373,7 @@ const Leaflet = ({
         })
       )
     }
-    const layerControl = new Control.Layers({}, {}, { collapsed: false })
+    const layerControl = new Control.Layers({}, {}, { collapsed: true })
     layerControl.addTo(newMap)
     shapeGroupLayerRef.current.addTo(newMap)
     addLayers(newMap, layerControl)
