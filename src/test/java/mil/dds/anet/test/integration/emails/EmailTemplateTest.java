@@ -195,7 +195,7 @@ class EmailTemplateTest extends AbstractResourceTest {
     final int nrOfEmailsOnServer = emailServer.requestAllEmailsFromServer().size();
 
     // Put message in db
-    reportDao.sendEmailToReportPeople(action, List.of(getAdminBean()));
+    reportDao.sendEmailToReportPeople(action, List.of(admin.getUuid()));
     assertThat(emailDao.getAll()).hasSize(nrOfEmailsInDb + 1);
 
     // Send message to mail server

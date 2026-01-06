@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import mil.dds.anet.beans.AnetEmail;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.SubscriptionUpdate;
@@ -120,9 +119,9 @@ public class SubscriptionUpdateDao
     for (final SubscriptionUpdate subscriptionUpdate : subscriptionUpdates) {
       final Subscription subscription = subscriptionUpdate.loadSubscription(context).join();
       final Position subscribedPosition = subscription.loadSubscriber(context).join();
-      final Person subscriber = subscribedPosition.loadPerson(context).join();
-      final List<String> addresses = getEmailAddressesBasedOnPreference(List.of(subscriber),
-          PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
+      final List<String> addresses =
+          getEmailAddressesBasedOnPreference(List.of(subscribedPosition.getPersonUuid()),
+              PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
       if (!addresses.isEmpty()) {
         final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
         action.setSubscriptionUuid(subscriptionUpdate.getSubscriptionUuid());
