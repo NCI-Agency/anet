@@ -45,12 +45,7 @@ import Model, {
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
-import {
-  jumpToTop,
-  mapPageDispatchersToProps,
-  PageDispatchersPropType,
-  useBoilerplate
-} from "components/Page"
+import { jumpToTop } from "components/Page"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
@@ -75,7 +70,6 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Collapse, Form as FormBS } from "react-bootstrap"
-import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import COMMUNITIES_ICON from "resources/communities.png"
@@ -107,41 +101,6 @@ const reportPeopleAutocompleteQuery = `
   }
 `
 
-const GQL_GET_RECENTS = gql`
-  query($taskQuery: TaskSearchQueryInput) {
-    locationList(
-      query: {
-        pageSize: 6
-        status: ACTIVE
-        inMyReports: true
-        sortBy: RECENT
-        sortOrder: DESC
-      }
-    ) {
-      list {
-        ${locationFields}
-      }
-    }
-    personList(
-      query: {
-        pageSize: 6
-        status: ACTIVE
-        inMyReports: true
-        sortBy: RECENT
-        sortOrder: DESC
-      }
-    ) {
-      list {
-        ${reportPeopleAutocompleteQuery}
-      }
-    }
-    taskList(query: $taskQuery) {
-      list {
-        ${Task.autocompleteQuery}
-      }
-    }
-  }
-`
 const GQL_CREATE_REPORT = gql`
   mutation ($report: ReportInput!) {
     createReport(report: $report) {
@@ -191,7 +150,6 @@ const GQL_GET_EVENT_COUNT = gql`
 const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
 
 interface ReportFormProps {
-  pageDispatchers?: PageDispatchersPropType
   initialValues: any
   title?: string
   edit?: boolean
@@ -212,7 +170,6 @@ function getEventMaxDate(eventEndDate?: Date) {
 }
 
 const ReportForm = ({
-  pageDispatchers,
   edit = false,
   title = "",
   initialValues,
@@ -295,8 +252,6 @@ const ReportForm = ({
   }, [engagementDate, locationUuid])
 
   const recentTasksVarCommon = {
-    pageSize: 6,
-    status: Model.STATUS.ACTIVE,
     selectable: true,
     sortBy: "RECENT",
     sortOrder: "DESC"
@@ -310,17 +265,6 @@ const ReportForm = ({
       ...recentTasksVarCommon,
       inMyReports: true
     }
-  }
-  const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS, {
-    taskQuery: recentTasksVarUser
-  })
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  if (done) {
-    return result
   }
   const submitText = "Save Report"
   const tasksLabel = pluralize(Settings.fields.task.shortLabel)
@@ -337,15 +281,6 @@ const ReportForm = ({
   const canCreateLocation =
     Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
   const classificationButtons = utils.getConfidentialityLabelChoices()
-
-  let recents = []
-  if (data) {
-    recents = {
-      locations: data.locationList.list,
-      persons: data.personList.list,
-      tasks: data.taskList.list
-    }
-  }
 
   const isAuthor = initialValues.reportPeople?.some(
     a => a.author && Person.isEqual(currentUser, a)
@@ -402,12 +337,30 @@ const ReportForm = ({
         const currentOrg =
           currentUser.position && currentUser.position.organization
 
-        const locationFilters = Location.getReportLocationFilters()
+        const locationFilters = {
+          recentLocations: {
+            label: "Recent locations",
+            queryVars: {
+              inMyReports: true,
+              sortBy: "RECENT",
+              sortOrder: "DESC"
+            }
+          },
+          ...Location.getReportLocationFilters()
+        }
         const personSearchQuery = {
           matchPositionName: true,
           pendingVerification: false
         }
         const reportPeopleFilters = {
+          recentAttendees: {
+            label: "Recent attendees",
+            queryVars: {
+              inMyReports: true,
+              sortBy: "RECENT",
+              sortOrder: "DESC"
+            }
+          },
           all: {
             label: "All",
             queryVars: {
@@ -453,6 +406,13 @@ const ReportForm = ({
 
         const tasksFilters = {}
         const taskSearchQuery = { selectable: true }
+        tasksFilters.recentTasks = {
+          label: `Recent ${tasksLabel}`,
+          queryVars: {
+            ...taskSearchQuery,
+            ...recentTasksVarUser
+          }
+        }
 
         if (values.event?.uuid) {
           tasksFilters.assignedToEvent = {
@@ -799,25 +759,6 @@ const ReportForm = ({
                           date due to a visit ban!
                         </Button>
                       ) : undefined}
-                      <FieldHelper.FieldShortcuts
-                        title="Recent Locations"
-                        shortcuts={
-                          !values.event?.uuid &&
-                          recents.locations.filter(
-                            l => values.location?.uuid !== l.uuid
-                          )
-                        }
-                        fieldName="location"
-                        objectType={Location}
-                        curValue={values.location}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value, true)
-                          setLocationUuid(value?.uuid)
-                        }}
-                        handleAddItem={FieldHelper.handleSingleSelectAddItem}
-                      />
                     </>
                   }
                 />
@@ -958,31 +899,6 @@ const ReportForm = ({
                       addon={PEOPLE_ICON}
                     />
                   }
-                  extraColElem={
-                    <>
-                      <FieldHelper.FieldShortcuts
-                        title="Recent attendees"
-                        shortcuts={recents.persons.filter(
-                          ra =>
-                            !values.reportPeople?.find(
-                              person => person.uuid === ra.uuid
-                            )
-                        )}
-                        fieldName="reportPeople"
-                        objectType={Person}
-                        curValue={values.reportPeople}
-                        onChange={value => {
-                          updateReportPeople(
-                            setFieldValue,
-                            setFieldTouched,
-                            "reportPeople",
-                            value
-                          )
-                        }}
-                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
-                      />
-                    </>
-                  }
                 />
               </Fieldset>
 
@@ -1024,27 +940,6 @@ const ReportForm = ({
                         addon={TASKS_ICON}
                         pageSize={0}
                       />
-                    }
-                    extraColElem={
-                      <>
-                        <FieldHelper.FieldShortcuts
-                          title={`Recent ${tasksLabel}`}
-                          shortcuts={recents.tasks.filter(
-                            rt =>
-                              !values.tasks?.find(task => task.uuid === rt.uuid)
-                          )}
-                          fieldName="tasks"
-                          objectType={Task}
-                          curValue={values.tasks}
-                          onChange={value => {
-                            // validation will be done by setFieldValue
-                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                            setFieldValue("tasks", value, true)
-                            setReportTasks(value)
-                          }}
-                          handleAddItem={FieldHelper.handleMultiSelectAddItem}
-                        />
-                      </>
                     }
                   />
                 </Fieldset>
@@ -1794,4 +1689,5 @@ const cancelledReasonOptions = [
     label: "Cancelled due to Network / Connectivity Issues"
   }
 ]
-export default connect(null, mapPageDispatchersToProps)(ReportForm)
+
+export default ReportForm
