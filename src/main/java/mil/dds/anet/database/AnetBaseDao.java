@@ -1,9 +1,7 @@
 package mil.dds.anet.database;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
@@ -103,11 +101,8 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
 
   }
 
-  public List<String> getEmailAddressesBasedOnPreference(List<? extends Person> people,
+  protected List<String> getEmailAddressesBasedOnPreference(List<String> peopleUuids,
       String preferenceName, String preferenceCategory) {
-    final List<String> peopleUuids =
-        people.stream().map(Person::getUuid).collect(Collectors.toList());
-
     // Returns email addresses of the people that opted for this preference (or when the preference
     // default value is TRUE)
     final Handle handle = getDbHandle();
