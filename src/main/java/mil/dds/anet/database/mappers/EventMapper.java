@@ -14,7 +14,7 @@ public class EventMapper implements RowMapper<Event> {
   public Event map(ResultSet r, StatementContext ctx) throws SQLException {
     Event event = new Event();
     MapperUtils.setCustomizableBeanFields(event, r, "events");
-    event.setType(Event.EventType.valueOfCode(r.getString("events_type")));
+    event.setType(r.getString("events_type"));
     event.setName(r.getString("events_name"));
     event.setStatus(MapperUtils.getEnumIdx(r, "events_status", Event.Status.class));
     event.setDescription(r.getString("events_description"));
