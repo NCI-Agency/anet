@@ -36,9 +36,9 @@ public abstract class AbstractWorker {
     final String className = this.getClass().getSimpleName();
     logger.debug("Starting {}: {}", className, startMessage);
     final RunStatus runStatus = new RunStatus();
-    BatchingUtils batchingUtils = null;
+    final BatchingUtils batchingUtils = new BatchingUtils(engine(), true, true);
     try {
-      batchingUtils = startDispatcher(runStatus);
+      startDispatcher(batchingUtils, runStatus);
       final GraphQLContext context = GraphQLContext.newContext().of( // -
           "dataLoaderRegistry", batchingUtils.getDataLoaderRegistry(), // -
           "principal", Person.SYSTEM_USER).build();
@@ -49,9 +49,7 @@ public abstract class AbstractWorker {
       logger.error("Exception in run()", e);
     } finally {
       runStatus.setDone(true);
-      if (batchingUtils != null) {
-        batchingUtils.shutdown();
-      }
+      batchingUtils.shutdown();
     }
     logger.debug("Ending {}", className);
   }
@@ -73,8 +71,7 @@ public abstract class AbstractWorker {
     }
   }
 
-  private BatchingUtils startDispatcher(final RunStatus runStatus) {
-    final BatchingUtils batchingUtils = new BatchingUtils(engine(), true, true);
+  private void startDispatcher(final BatchingUtils batchingUtils, final RunStatus runStatus) {
     final Runnable dispatcher = () -> {
       while (!runStatus.isDone()) {
         // Wait a while, giving other threads the chance to do some work
@@ -97,7 +94,6 @@ public abstract class AbstractWorker {
       }
     };
     Executors.newSingleThreadExecutor().execute(dispatcher);
-    return batchingUtils;
   }
 
   protected AnetObjectEngine engine() {

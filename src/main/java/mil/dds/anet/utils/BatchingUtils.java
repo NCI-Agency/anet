@@ -67,19 +67,10 @@ public final class BatchingUtils {
 
   /**
    * Call this when you're done with this batcher; it shuts down the thread pool being used (which
-   * may free up some resources). If you don't call this yourself, eventually it will be done
-   * through {@link #finalize()}, but that might be delayed.
+   * may free up some resources).
    */
   public void shutdown() {
     dispatcherService.shutdown();
-  }
-
-  @Override
-  @Deprecated(since = "9")
-  @SuppressWarnings("checkstyle:NoFinalizer")
-  protected void finalize() throws Throwable {
-    shutdown();
-    super.finalize();
   }
 
   private void registerDataLoaders(AnetObjectEngine engine) {
