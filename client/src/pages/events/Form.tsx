@@ -29,7 +29,12 @@ import NavigationWarning from "components/NavigationWarning"
 import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
 import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
-import { jumpToTop } from "components/Page"
+import {
+  jumpToTop,
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -47,6 +52,7 @@ import CreateNewLocation from "pages/locations/CreateNewLocation"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Button, Col, FormGroup, FormSelect, Row } from "react-bootstrap"
+import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -56,6 +62,15 @@ import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
+
+const GQL_EVENT_TYPES = gql`
+  query {
+    eventTypes {
+      code
+      status
+    }
+  }
+`
 
 const GQL_CREATE_EVENT = gql`
   mutation ($event: EventInput!) {
@@ -71,14 +86,8 @@ const GQL_UPDATE_EVENT = gql`
   }
 `
 
-const EVENT_TYPES = [
-  Event.EVENT_TYPES.CONFERENCE,
-  Event.EVENT_TYPES.EXERCISE,
-  Event.EVENT_TYPES.VISIT_BAN,
-  Event.EVENT_TYPES.OTHER
-]
-
 interface EventFormProps {
+  pageDispatchers?: PageDispatchersPropType
   initialValues: any
   title?: string
   edit?: boolean
@@ -86,6 +95,7 @@ interface EventFormProps {
 }
 
 const EventForm = ({
+  pageDispatchers,
   edit = false,
   title = "",
   initialValues,
@@ -117,6 +127,19 @@ const EventForm = ({
       label: "Inactive"
     }
   ]
+
+  const { loading, error, data } = API.useApiQuery(GQL_EVENT_TYPES)
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+  const activeEventTypes = (data?.eventTypes ?? []).filter(
+    t => t.status === "ACTIVE"
+  )
 
   return (
     <Formik
@@ -453,19 +476,33 @@ const EventForm = ({
                   dictProps={Settings.fields.event.type}
                   name="type"
                   component={FieldHelper.SpecialField}
-                  onChange={event => {
-                    // validation will be done by setFieldValue
-                    setFieldValue("type", event.target.value, true)
-                  }}
                   widget={
-                    <FormSelect className="location-type-form-group form-control">
-                      <option value="">Please select an event type</option>
-                      {EVENT_TYPES.map(type => (
-                        <option key={type} value={type}>
-                          {Event.humanNameOfType(type)}
-                        </option>
-                      ))}
-                    </FormSelect>
+                    <>
+                      {!activeEventTypes.length ? (
+                        <div className="text-danger mt-2">
+                          Could not load event types
+                        </div>
+                      ) : (
+                        <FormSelect
+                          className="location-type-form-group form-control"
+                          name="type"
+                          value={values.type || ""}
+                          onChange={e => {
+                            setFieldTouched("type", true, false)
+                            setFieldValue("type", e.target.value, true)
+                          }}
+                          disabled={loading || !!error}
+                        >
+                          {activeEventTypes.map(t => (
+                            <option key={t.code} value={t.code}>
+                              {Event.humanNameOfType
+                                ? Event.humanNameOfType(t.code)
+                                : t.code}
+                            </option>
+                          ))}
+                        </FormSelect>
+                      )}
+                    </>
                   }
                 />
                 <DictionaryField
@@ -752,4 +789,4 @@ const EventForm = ({
   }
 }
 
-export default EventForm
+export default connect(null, mapPageDispatchersToProps)(EventForm)
