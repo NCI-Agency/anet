@@ -23,38 +23,9 @@ public class Event extends EventSeries {
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
 
-  public enum EventType {
-    CONFERENCE("CONFERENCE"), // -
-    EXERCISE("EXERCISE"), // -
-    VISIT_BAN("VISIT_BAN"), // -
-    OTHER("OTHER"); // -
-
-    private static final Map<String, Event.EventType> BY_CODE = new HashMap<>();
-    static {
-      for (final Event.EventType e : values()) {
-        BY_CODE.put(e.code, e);
-      }
-    }
-
-    public static Event.EventType valueOfCode(String code) {
-      return BY_CODE.get(code);
-    }
-
-    private final String code;
-
-    EventType(String code) {
-      this.code = code;
-    }
-
-    @Override
-    public String toString() {
-      return code;
-    }
-  }
-
   @GraphQLQuery
   @GraphQLInputField
-  EventType type;
+  String type;
   @GraphQLQuery
   @GraphQLInputField
   Instant startDate;
@@ -207,11 +178,11 @@ public class Event extends EventSeries {
     return people;
   }
 
-  public EventType getType() {
+  public String getType() {
     return type;
   }
 
-  public void setType(EventType type) {
+  public void setType(String type) {
     this.type = type;
   }
 
