@@ -193,11 +193,17 @@ configurations.all {
 	exclude group: 'xml-apis'
 }
 
+def suppressWarningsJvmArgs = [
+  "--sun-misc-unsafe-memory-access=allow", // For Netty 4.1
+  "--enable-native-access=ALL-UNNAMED" // For JLine 3
+]
+
 test {
 	useJUnitPlatform()
 	jacoco {
 		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
 	}
+	jvmArgs = suppressWarningsJvmArgs
 }
 
 jacoco {
@@ -267,7 +273,7 @@ project.group = "ncia"
 
 application {
 	mainClass = "mil.dds.anet.AnetApplication"
-	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib", "-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"]
+	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib", "-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"] + suppressWarningsJvmArgs
 }
 
 String dbLoc = run.environment['ANET_DB_SERVER']
