@@ -1856,6 +1856,13 @@ INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "creat
   ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+INSERT INTO "eventTypes" (code, status, "createdAt", "updatedAt") VALUES
+  ('CONFERENCE', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('EXERCISE', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('VISIT_BAN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('FESTIVAL', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('OTHER', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
 -- authorizationGroups currently have no links

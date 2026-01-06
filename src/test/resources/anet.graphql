@@ -512,7 +512,7 @@ type Event {
   startDate: Instant
   status: Status
   tasks: [Task]
-  type: EventType
+  type: String
   updatedAt: Instant
   uuid: String
 }
@@ -537,7 +537,7 @@ input EventInput {
   startDate: Instant
   status: Status
   tasks: [TaskInput]
-  type: EventType
+  type: String
   updatedAt: Instant
   uuid: String
 }
@@ -632,14 +632,6 @@ input EventSeriesSearchQueryInput {
 enum EventSeriesSearchSortBy {
   CREATED_AT
   NAME
-}
-
-""""""
-enum EventType {
-  CONFERENCE
-  EXERCISE
-  OTHER
-  VISIT_BAN
 }
 
 """"""
