@@ -24,8 +24,8 @@ apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport
 apply plugin: 'io.spring.dependency-management'
 
 java {
-	sourceCompatibility = 17
-	targetCompatibility = 17
+	sourceCompatibility = 21
+	targetCompatibility = 21
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
