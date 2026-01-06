@@ -273,7 +273,7 @@ const ReportForm = ({
       if (engagementDate && locationUuid) {
         const eventQuery = {
           pageSize: 1,
-          type: Event.EVENT_TYPES.VISIT_BAN,
+          type: "VISIT_BAN",
           locationUuid,
           includeDate: getEventMinDate(engagementDate)
         }

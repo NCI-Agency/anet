@@ -1,5 +1,7 @@
+import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
+import API from "api"
 import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DictionaryField from "components/DictionaryField"
@@ -22,6 +24,15 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
+
+const GQL_EVENT_TYPES = gql`
+  query {
+    eventTypes {
+      code
+      status
+    }
+  }
+`
 
 interface CustomToggleProps {
   onClick: (...args: unknown[]) => unknown
@@ -96,7 +107,12 @@ const AdvancedSearch = ({
   const [filters, setFilters] = useState(
     searchQuery.filters ? searchQuery.filters.slice() : []
   )
-  const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
+
+  const { loading, error, data } = API.useApiQuery(GQL_EVENT_TYPES)
+  const activeEventTypes = (data?.eventTypes ?? []).filter(
+    t => t.status === "ACTIVE"
+  )
+  const ALL_FILTERS = searchFilters(activeEventTypes)
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
     searchObjectTypes,
     ALL_FILTERS

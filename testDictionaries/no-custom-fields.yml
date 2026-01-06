@@ -480,7 +480,7 @@ fields:
     event:
       label: Event
       placeholder: Was the engagement part of an event?
-      filter: [CONFERENCE, EXERCISE, VISIT_BAN, OTHER]
+      filter: [CONFERENCE, EXERCISE, VISIT_BAN, FESTIVAL, OTHER]
     reportCommunities:
       label: Communities of interest
       placeholder: Search for Communities…
