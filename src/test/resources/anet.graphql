@@ -798,6 +798,7 @@ type Mutation {
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createEvent(event: EventInput): Event
   createEventSeries(eventSeries: EventSeriesInput): EventSeries
+  createEventType(code: String): EventType
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
   createOrUpdateEntityAvatar(entityAvatar: EntityAvatarInput): Int

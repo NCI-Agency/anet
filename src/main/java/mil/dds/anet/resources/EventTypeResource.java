@@ -28,10 +28,32 @@ public class EventTypeResource {
     return dao.getAll();
   }
 
+  @GraphQLMutation(name = "createEventType")
+  public EventType createEventType(@GraphQLArgument(name = "code") String code) {
+    final String normalizedCode = code == null ? "" : code.toUpperCase();
+    if (normalizedCode.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "EVENT_TYPE_CODE_REQUIRED");
+    }
+
+    if (dao.getByCode(normalizedCode) != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "EVENT_TYPE_ALREADY_EXISTS");
+    }
+
+    EventType et = new EventType();
+    et.setCode(normalizedCode);
+    et.setStatus(Status.ACTIVE);
+
+    dao.insert(et);
+    return et;
+  }
+
   @GraphQLMutation(name = "updateEventTypeStatus")
-  public int updateStatus(
-      @GraphQLArgument(name = "code") String code,
+  public int updateStatus(@GraphQLArgument(name = "code") String code,
       @GraphQLArgument(name = "status") Status status) {
+
+    if (dao.getByCode(code) == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EVENT_TYPE_NOT_FOUND");
+    }
     return dao.updateStatus(code, status);
   }
 
