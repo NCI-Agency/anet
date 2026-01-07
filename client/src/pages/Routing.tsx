@@ -71,6 +71,7 @@ import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import Settings from "settings"
+import ConfigureEventTypesShow from "./admin/configureEventTypes/Show"
 
 const Routing = () => {
   const { currentUser } = useContext(AppContext)
@@ -186,6 +187,10 @@ const Routing = () => {
           </Route>
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
+          <Route
+            path="configureEventTypes"
+            element={<ConfigureEventTypesShow />}
+          />
           {Settings.featureMartGuiEnabled && (
             <Route path="martImporter" element={<MartImporterShow />} />
           )}

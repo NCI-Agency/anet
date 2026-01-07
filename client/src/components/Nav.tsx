@@ -518,6 +518,13 @@ const Navigation = ({
                 >
                   Web service access tokens
                 </SidebarLink>
+                <SidebarLink
+                  id="configure-event-types"
+                  linkTo="/admin/configureEventTypes"
+                  handleOnClick={resetPages}
+                >
+                  Configure event types
+                </SidebarLink>
                 {Settings.featureMartGuiEnabled && (
                   <SidebarLink
                     id="mart-imported-reports"
