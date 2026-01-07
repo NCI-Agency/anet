@@ -813,6 +813,7 @@ type Mutation {
   deleteAssessment(uuid: String): Int
   deleteAttachment(uuid: String): Int
   deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
+  deleteEventType(code: String): Int!
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
   deletePerson(uuid: String): Int

@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import {
@@ -42,6 +43,12 @@ const GQL_UPDATE_EVENT_TYPE_STATUS = gql`
   }
 `
 
+const GQL_DELETE_EVENT_TYPE = gql`
+  mutation ($code: String!) {
+    deleteEventType(code: $code)
+  }
+`
+
 interface EventTypeTableProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -72,6 +79,9 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
       code,
       status: newStatus
     })
+    toast.success(
+      `Event type ${newStatus === Model.STATUS.ACTIVE ? "activated" : "deactivated"} successfully`
+    )
     refetch()
   }
 
@@ -100,6 +110,33 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
       }
     } finally {
       setShowAddModal(false)
+      refetch()
+    }
+  }
+
+  const deleteEventType = async (code: string) => {
+    try {
+      await API.mutation(GQL_DELETE_EVENT_TYPE, { code })
+      toast.success("Event type deleted successfully")
+      refetch()
+    } catch (error: any) {
+      const gqlError = error?.graphQLErrors?.[0]
+      const reason =
+        gqlError?.extensions?.exception?.reason ??
+        gqlError?.message ??
+        error?.message
+
+      switch (reason) {
+        case "EVENT_TYPE_IN_USE":
+          toast.warn("This event type is in use and cannot be deleted.")
+          break
+        case "EVENT_TYPE_NOT_FOUND":
+          toast.error("Event type not found.")
+          break
+        default:
+          toast.error("Could not delete event type.")
+      }
+    } finally {
       refetch()
     }
   }
@@ -135,6 +172,7 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
                 <th>Created At</th>
                 <th>Updated At</th>
                 <th>Actions</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -172,6 +210,16 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
                         ? "Deactivate"
                         : "Activate"}
                     </Button>
+                  </td>
+                  <td>
+                    <ConfirmDestructive
+                      onConfirm={() => deleteEventType(eventType.code)}
+                      operation="delete"
+                      objectType="event type"
+                      objectDisplay={eventType.code}
+                      variant="outline-danger"
+                      buttonLabel="Delete"
+                    />
                   </td>
                 </tr>
               ))}
