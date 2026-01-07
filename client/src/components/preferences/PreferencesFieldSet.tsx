@@ -44,7 +44,8 @@ interface PreferencesFieldsetProps {
   onSubmit: (
     values: Record<string, any>,
     formikBag: any,
-    refetch?: (variables?: any) => any
+    refetch?: (variables?: any) => any,
+    preferences?: object[]
   ) => void
   title?: string
   actionLabel?: string
@@ -156,7 +157,7 @@ const PreferencesFieldset = ({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values, form) => onSubmit(values, form, refetch)}
+      onSubmit={(values, form) => onSubmit(values, form, refetch, preferences)}
       enableReinitialize
       validate={vals => {
         const errors = {}
