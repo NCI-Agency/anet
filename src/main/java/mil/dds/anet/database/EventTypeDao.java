@@ -80,6 +80,29 @@ public class EventTypeDao {
     }
   }
 
+  public boolean isInUse(String code) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery("/* eventTypeInUse */ SELECT 1 FROM events WHERE type = :code LIMIT 1")
+          .bind("code", code).mapTo(Integer.class).findOne().isPresent();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public int delete(String code) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate(
+              "/* deleteEventType */ DELETE FROM \"" + TABLE_NAME + "\" WHERE \"code\" = :code")
+          .bind("code", code).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   private Handle getDbHandle() {
     return databaseHandler.getHandle();
   }

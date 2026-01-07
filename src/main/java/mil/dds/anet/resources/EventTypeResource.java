@@ -57,4 +57,20 @@ public class EventTypeResource {
     return dao.updateStatus(code, status);
   }
 
+  @GraphQLMutation(name = "deleteEventType")
+  public int deleteEventType(@GraphQLArgument(name = "code") String code) {
+    if (dao.getByCode(code) == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EVENT_TYPE_NOT_FOUND");
+    }
+    if (dao.isInUse(code)) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "EVENT_TYPE_IN_USE");
+    }
+
+    final int numRows = dao.delete(code);
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EVENT_TYPE_NOT_FOUND");
+    }
+    return numRows;
+  }
+
 }
