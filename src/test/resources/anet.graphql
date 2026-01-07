@@ -635,6 +635,14 @@ enum EventSeriesSearchSortBy {
 }
 
 """"""
+type EventType {
+  code: String
+  createdAt: Instant
+  status: Status
+  updatedAt: Instant
+}
+
+""""""
 type GenericRelatedObject {
   objectUuid: String
   relatedObject: RelatableObject
@@ -832,6 +840,7 @@ type Mutation {
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput, force: Boolean = false): Int
   updateEvent(event: EventInput, force: Boolean = false): Int
   updateEventSeries(eventSeries: EventSeriesInput, force: Boolean = false): Int
+  updateEventTypeStatus(code: String, status: Status): Int!
   updateLocation(force: Boolean = false, location: LocationInput): Int
   updateMe(force: Boolean = false, person: PersonInput): Int
   updateNote(force: Boolean = false, note: NoteInput): Note
@@ -1262,6 +1271,7 @@ type Query {
   eventList(query: EventSearchQueryInput): AnetBeanList_Event
   eventSeries(uuid: String): EventSeries
   eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
+  eventTypes: [EventType]
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   locations(uuids: [String]): [Location]
