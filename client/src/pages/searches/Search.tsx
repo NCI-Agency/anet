@@ -274,15 +274,15 @@ const Search = ({
     numPositions,
     numAuthorizationGroups
   )
-  const numResults = sum(
+  const numResultsThatCanBeExported = sum(
     numResultsThatCanBeEmailed,
     numTasks,
     numLocations,
     numReports,
-    numAttachments,
     numEvents,
     numEventSeries
   )
+  const numResults = sum(numResultsThatCanBeExported, numAttachments)
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
   const searchQueryParams = useMemo(
     () => getSearchQuery(searchQuery),
@@ -496,7 +496,7 @@ const Search = ({
             </span>
           </OverlayTrigger>
         )}
-        {numResults > 0 && (
+        {numResultsThatCanBeExported > 0 && (
           <>
             <Dropdown id="dropdown-custom-1">
               <Dropdown.Toggle variant="outline-secondary">

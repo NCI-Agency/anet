@@ -367,7 +367,47 @@ const getEventFragment = (fields: string[] = []) => `
             lng
           }`
         )}
-        ${shouldInclude(fields, "updatedAt")}
+      }
+    }
+  }
+`
+const getEventSeriesFragment = (fields: string[] = []) => `
+  fragment eventSeries on Query {
+    eventSeries: eventSeriesList(query: $eventSeriesQuery) {
+      ${gqlPaginationFields}
+      list {
+        ${shouldInclude(fields, "uuid")}
+        ${shouldInclude(fields, "name")}
+        ${shouldInclude(
+          fields,
+          "ownerOrg",
+          `ownerOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "hostOrg",
+          `hostOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
+        ${shouldInclude(
+          fields,
+          "adminOrg",
+          `adminOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }`
+        )}
       }
     }
   }
@@ -391,7 +431,8 @@ const buildGqlGetDataQuery = ({
   taskFields = [],
   locationFields = [],
   authorizationGroupFields = [],
-  eventFields = []
+  eventFields = [],
+  eventSeriesFields = []
 }) => {
   const fragments = [
     getOrganizationFragment(organizationFields),
@@ -401,7 +442,8 @@ const buildGqlGetDataQuery = ({
     getLocationFragment(locationFields),
     getReportFragment(reportFields),
     getAuthorizationGroupFragment(authorizationGroupFields),
-    getEventFragment(eventFields)
+    getEventFragment(eventFields),
+    getEventSeriesFragment(eventSeriesFields)
   ]
 
   return gql`
@@ -422,6 +464,8 @@ const buildGqlGetDataQuery = ({
       $authorizationGroupQuery: AuthorizationGroupSearchQueryInput
       $includeEvents: Boolean!
       $eventQuery: EventSearchQueryInput
+      $includeEventSeries: Boolean!
+      $eventSeriesQuery: EventSeriesSearchQueryInput
       $emailNetwork: String
     ) {
       ...organizations @include(if: $includeOrganizations)
@@ -432,6 +476,7 @@ const buildGqlGetDataQuery = ({
       ...reports @include(if: $includeReports)
       ...authorizationGroups @include(if: $includeAuthorizationGroups)
       ...events @include(if: $includeEvents)
+      ...eventSeries @include(if: $includeEventSeries)
     }
     ${fragments.join("\n")}
   `
@@ -459,6 +504,9 @@ export const exportResults = (
     SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS
   )
   const includeEvents = queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS)
+  const includeEventSeries = queryTypes.includes(
+    SEARCH_OBJECT_TYPES.EVENT_SERIES
+  )
 
   const organizationsFields = getExportPreference(
     "ORGANIZATIONS",
@@ -474,6 +522,7 @@ export const exportResults = (
     CATEGORY_EXPORT
   )
   const eventsFields = getExportPreference("EVENTS", CATEGORY_EXPORT)
+  const eventSeriesFields = getExportPreference("EVENT_SERIES", CATEGORY_EXPORT)
 
   const organizationQuery = !includeOrganizations
     ? {}
@@ -539,6 +588,14 @@ export const exportResults = (
         sortBy: "NAME",
         sortOrder: "DESC"
       }
+  const eventSeriesQuery = !includeEventSeries
+    ? {}
+    : {
+        ...searchQueryParams,
+        pageSize: maxNumberResults,
+        sortBy: "NAME",
+        sortOrder: "DESC"
+      }
   const { emailNetwork } = searchQueryParams
   const variables = {
     includeOrganizations,
@@ -552,11 +609,13 @@ export const exportResults = (
     includeLocations,
     locationQuery,
     includeReports,
-    includeEvents,
     reportQuery,
     includeAuthorizationGroups,
     authorizationGroupQuery,
+    includeEvents,
     eventQuery,
+    includeEventSeries,
+    eventSeriesQuery,
     emailNetwork
   }
 
@@ -568,7 +627,8 @@ export const exportResults = (
     locationFields: locationsFields,
     reportFields: reportsFields,
     authorizationGroupFields: authorizationGroupsFields,
-    eventFields: eventsFields
+    eventFields: eventsFields,
+    eventSeriesFields
   })
 
   return API.queryExport(gqlQuery, variables, exportType, contentType)

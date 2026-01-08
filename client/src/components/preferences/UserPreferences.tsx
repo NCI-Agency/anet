@@ -43,9 +43,7 @@ const UserPreferences = ({
     />
   )
 
-  function onSubmit(values, form) {
-    const preferences = []
-
+  function onSubmit(values, form, _, preferences) {
     Object.entries(values).forEach(([key, value]) => {
       // See if the logged user has a value for this preference
       const currentUserPreference = currentUser.preferences.find(
@@ -53,18 +51,24 @@ const UserPreferences = ({
       )
       if (currentUserPreference) {
         currentUserPreference.value = String(value)
-        preferences.push(currentUserPreference)
       } else {
         // Need to create the preference for this user
-        preferences.push({
-          preference: { uuid: key },
+        const preference = preferences.find(p => p.uuid === key)
+        currentUser.preferences.push({
+          preference: {
+            uuid: key,
+            category: preference?.category,
+            name: preference?.name
+          },
           person: { uuid: currentUser.uuid },
           value: String(value)
         })
       }
     })
 
-    return API.mutation(GQL_UPDATE_PERSON_PREFERENCES, { preferences })
+    return API.mutation(GQL_UPDATE_PERSON_PREFERENCES, {
+      preferences: currentUser.preferences
+    })
       .then(() => onSubmitSuccess(values, form))
       .catch(error => {
         handleError(error)
