@@ -9,7 +9,10 @@ import {
   Control,
   CRS,
   DivIcon,
+  FeatureGroup,
+  geoJSON,
   Icon,
+  LatLngBounds,
   Map,
   Marker,
   Point,
@@ -186,9 +189,31 @@ function createMarker(
   return marker
 }
 
-function wrapLng(lng) {
+function wrapLng(lng: number) {
   // Wrap lng around the antimeridian
-  return lng < 0 ? lng + 360.0 : lng - 360.0
+  return lng < 0 ? lng + 360 : lng - 360
+}
+
+function unwrapLng(lng: number) {
+  // Unwrap lng around the antimeridian
+  if (lng < -180) {
+    return lng + 360
+  } else if (lng > 180) {
+    return lng - 360
+  } else {
+    return lng
+  }
+}
+
+function getUnwrappedLayerBounds(layerBounds: LatLngBounds) {
+  if (layerBounds?.isValid()) {
+    const southWest = layerBounds.getSouthWest()
+    southWest.lng = unwrapLng(southWest.lng)
+    const northEast = layerBounds.getNorthEast()
+    northEast.lng = unwrapLng(northEast.lng)
+    return new LatLngBounds(southWest, northEast)
+  }
+  return layerBounds
 }
 
 function getExistingIds(layerGroup) {
@@ -212,6 +237,7 @@ interface LeafletProps {
   marginBottom?: number | string
   markers?: any[]
   setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
+  shapes?: any[]
   mapId?: string
   onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
   onSelectAnetLocation?: (loc: any) => void
@@ -219,9 +245,9 @@ interface LeafletProps {
   onCreateLocation?: (coords: { lat: number; lng: number }) => void
 }
 
-const NEARBY_LOCATIONS_GQL = gql`
+const GET_ANET_LOCATIONS_GQL = gql`
   query ($bounds: BoundingBoxInput!) {
-    locationList(query: { boundingBox: $bounds, pageSize: 0 }) {
+    locationList(query: { boundingBox: $bounds, status: ACTIVE, pageSize: 0 }) {
       ${gqlPaginationFields}
       list {
         ${gqlEntityFieldsMap.Location}
@@ -233,12 +259,26 @@ const NEARBY_LOCATIONS_GQL = gql`
   }
 `
 
+const GET_ANET_COUNTRIES_GQL = gql`
+  query {
+    locationList(query: { type: COUNTRY, status: ACTIVE, pageSize: 0 }) {
+      ${gqlPaginationFields}
+      list {
+        ${gqlEntityFieldsMap.Location}
+        type
+        geoJson
+      }
+    }
+  }
+`
+
 const Leaflet = ({
   width = DEFAULT_MAP_STYLE.width,
   height = DEFAULT_MAP_STYLE.height,
   marginBottom = DEFAULT_MAP_STYLE.marginBottom,
   markers,
   setMarkerPopup,
+  shapes,
   mapId: initialMapId,
   onMapClick,
   onSelectAnetLocation,
@@ -264,10 +304,14 @@ const Leaflet = ({
     useState<MarkerPopupProps>({})
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef(null)
+  const shapeGroupLayerRef = useRef(new FeatureGroup())
 
   const anetLocationsLayerRef = useRef(null)
   const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
   const [anetLocationsVars, setAnetLocationsVars] = useState({})
+
+  const anetCountriesLayerRef = useRef(null)
+  const [anetCountriesEnabled, setAnetCountriesEnabled] = useState(false)
 
   const createLocationMarkerRef = useRef<Marker | null>(null)
   const [createLocationMarkerPopup, setCreateLocationMarkerPopup] =
@@ -329,8 +373,9 @@ const Leaflet = ({
         })
       )
     }
-    const layerControl = new Control.Layers({}, {}, { collapsed: false })
+    const layerControl = new Control.Layers({}, {}, { collapsed: true })
     layerControl.addTo(newMap)
+    shapeGroupLayerRef.current.addTo(newMap)
     addLayers(newMap, layerControl)
 
     setMap(newMap)
@@ -402,6 +447,24 @@ const Leaflet = ({
       }
     })
 
+    // anetCountries layer
+    const anetCountriesLayer = new FeatureGroup()
+    anetCountriesLayerRef.current = anetCountriesLayer
+    // Allow the user to show/hide the layer
+    layerControl.addOverlay(anetCountriesLayer, "ANET Countries")
+
+    newMap.on("overlayadd", e => {
+      if (e.layer === anetCountriesLayer) {
+        setAnetCountriesEnabled(true)
+      }
+    })
+    newMap.on("overlayremove", e => {
+      if (e.layer === anetCountriesLayer) {
+        setAnetCountriesEnabled(false)
+        anetCountriesLayer.clearLayers()
+      }
+    })
+
     setDoInitializeMarkerLayer(true)
 
     // Destroy map when done
@@ -414,7 +477,7 @@ const Leaflet = ({
     }
 
     const getAnetLocations = async () =>
-      await API.query(NEARBY_LOCATIONS_GQL, anetLocationsVars)
+      await API.query(GET_ANET_LOCATIONS_GQL, anetLocationsVars)
 
     getAnetLocations()
       .then(rows => {
@@ -463,6 +526,41 @@ const Leaflet = ({
     map,
     setLocationMarkerPopup
   ])
+
+  useEffect(() => {
+    if (!anetCountriesEnabled || !anetCountriesLayerRef.current) {
+      return
+    }
+
+    const getAnetCountries = async () => await API.query(GET_ANET_COUNTRIES_GQL)
+
+    getAnetCountries()
+      .then(rows => {
+        const anetCountries = rows?.locationList?.list || []
+        const layer = anetCountriesLayerRef.current
+
+        const existingIds = getExistingIds(shapeGroupLayerRef.current)
+
+        layer.clearLayers()
+        anetCountries?.forEach((country: any) => {
+          if (!country.geoJson || existingIds.has(country.uuid)) {
+            return
+          }
+
+          try {
+            const geoJsonObject = JSON.parse(country.geoJson)
+            const geoJsonLayer = geoJSON(geoJsonObject, {
+              id: country.uuid,
+              interactive: false,
+              color: "#00d8ff",
+              opacity: 0.1
+            })
+            geoJsonLayer.addTo(layer)
+          } catch {}
+        })
+      })
+      .catch(() => {})
+  }, [anetCountriesEnabled])
 
   useEffect(() => {
     /*
@@ -590,6 +688,42 @@ const Leaflet = ({
     width,
     widthPropUnchanged
   ])
+
+  // Handle assigned shapes (GeoJSON strings)
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    const groupLayer = shapeGroupLayerRef.current
+    groupLayer.clearLayers()
+
+    if (!_isEmpty(shapes)) {
+      shapes.forEach(shape => {
+        try {
+          const geoJsonObject = JSON.parse(shape.geoJson)
+          const geoJsonLayer = geoJSON(geoJsonObject, {
+            id: shape.id,
+            interactive: false
+          })
+          geoJsonLayer.addTo(groupLayer)
+        } catch {}
+      })
+    }
+
+    // Try to combine groupLayer bounds with (unwrapped) markerLayer bounds
+    const groupLayerBounds = groupLayer.getBounds()
+    if (groupLayerBounds?.isValid()) {
+      const unwrappedMarkerLayerBounds = getUnwrappedLayerBounds(
+        markerLayer.getBounds()
+      )
+      map.fitBounds(
+        unwrappedMarkerLayerBounds?.isValid()
+          ? groupLayerBounds.extend(unwrappedMarkerLayerBounds)
+          : groupLayerBounds
+      )
+    }
+  }, [shapes, map, markerLayer])
 
   return (
     <>

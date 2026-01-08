@@ -73,6 +73,7 @@ export default class Location extends Model {
         .transform(value => value || null)
         .default(null),
       description: yup.string().nullable().default(""),
+      geoJson: yup.string().nullable().optional().default(null),
       status: yup
         .string()
         .required()
@@ -214,7 +215,8 @@ export default class Location extends Model {
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
     "childrenLocations",
-    "displayedCoordinate"
+    "displayedCoordinate",
+    "geoJson"
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {

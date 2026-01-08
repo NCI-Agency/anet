@@ -13,6 +13,7 @@ import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
+import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useMemo } from "react"
 import Settings from "settings"
@@ -39,18 +40,24 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
     () => new Location(data?.location ?? {}),
     [data?.location]
   )
-  const markers = useMemo(() => {
-    const marker = {
-      id: location.uuid || 0,
-      name: _escape(location.name) || "" // escape HTML in location name!
-    }
-    if (Location.hasCoordinates(location)) {
-      Object.assign(marker, {
-        lat: location.lat,
-        lng: location.lng
-      })
-    }
-    return [marker]
+
+  const { shapes, markers } = useMemo(() => {
+    const shapes = location?.geoJson
+      ? [{ id: location.uuid || 0, geoJson: location.geoJson }]
+      : []
+
+    const markers = Location.hasCoordinates(location)
+      ? [
+          {
+            id: location.uuid || 0,
+            name: _escape(location.name) || "", // escape HTML in location name!
+            lat: location.lat,
+            lng: location.lng
+          }
+        ]
+      : []
+
+    return { shapes, markers }
   }, [location])
 
   if (!data) {
@@ -131,8 +138,8 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
         )}
       </div>
 
-      {Location.hasCoordinates(location) && (
-        <Leaflet markers={markers} mapId={`${uuid}`} />
+      {(!_isEmpty(markers) || !_isEmpty(shapes)) && (
+        <Leaflet markers={markers} shapes={shapes} mapId={`${uuid}`} />
       )}
     </div>
   )
