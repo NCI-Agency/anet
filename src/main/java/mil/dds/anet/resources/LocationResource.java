@@ -17,9 +17,9 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -33,11 +33,14 @@ public class LocationResource {
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final LocationDao dao;
 
-  public LocationResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, LocationDao dao) {
+  public LocationResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
+      AuditTrailDao auditTrailDao, LocationDao dao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -119,7 +122,8 @@ public class LocationResource {
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, created.getUuid(),
         l.customSensitiveInformationKey(), l.getCustomSensitiveInformation());
 
-    AnetAuditLogger.log("Location {} created by {}", created, user);
+    // Log the change
+    auditTrailDao.logCreate(user, LocationDao.TABLE_NAME, created);
     return created;
   }
 
@@ -164,10 +168,11 @@ public class LocationResource {
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, l.getUuid(),
         l.customSensitiveInformationKey(), l.getCustomSensitiveInformation());
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, LocationDao.TABLE_NAME, l);
     // Update any subscriptions
-    dao.updateSubscriptions(l);
+    dao.updateSubscriptions(l, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Location {} updated by {}", l, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
@@ -206,10 +211,13 @@ public class LocationResource {
           "Couldn't process merge operation, error occurred while updating merged location relation information.");
     }
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, LocationDao.TABLE_NAME,
+        winnerLocation, "a location has been merged into it",
+        String.format("merged location %s", loserLocation));
     // Update any subscriptions
-    dao.updateSubscriptions(winnerLocation);
+    dao.updateSubscriptions(winnerLocation, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Location {} merged into {} by {}", loserLocation, winnerLocation, user);
     return numRows;
   }
 
