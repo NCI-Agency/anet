@@ -109,10 +109,8 @@ const AdvancedSearch = ({
   )
 
   const { loading, error, data } = API.useApiQuery(GQL_EVENT_TYPES)
-  const activeEventTypes = (data?.eventTypes ?? []).filter(
-    t => t.status === "ACTIVE"
-  )
-  const ALL_FILTERS = searchFilters(activeEventTypes)
+  const eventTypes = data?.eventTypes ?? []
+  const ALL_FILTERS = searchFilters(eventTypes)
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
     searchObjectTypes,
     ALL_FILTERS
