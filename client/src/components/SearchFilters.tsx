@@ -717,7 +717,9 @@ export const searchFilters = function (
     }
   }
 
-  const eventTypeOptions = Settings.fields.report.event?.filter || []
+  const eventTypeOptions = (eventTypes ?? []).map(type =>
+    typeof type === "string" ? type : type.code
+  )
   const eventTypeLabels = eventTypeOptions.map(code =>
     Event.humanNameOfType ? Event.humanNameOfType(code) : code
   )
@@ -867,6 +869,7 @@ const SearchFilterDisplay = ({
 
 interface SearchDescriptionProps {
   searchQuery?: SearchQueryPropType
+  eventTypes?: Array<string | { code: string }>
   showText?: boolean
   showPlaceholders?: boolean
   style?: any
@@ -874,11 +877,12 @@ interface SearchDescriptionProps {
 
 export const SearchDescription = ({
   searchQuery,
+  eventTypes,
   showText,
   showPlaceholders,
   style
 }: SearchDescriptionProps) => {
-  const ALL_FILTERS = searchFilters()
+  const ALL_FILTERS = searchFilters(eventTypes)
   const filterDefs =
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters

@@ -102,6 +102,15 @@ const GQL_GET_SAVED_SEARCHES = gql`
   }
 `
 
+const GQL_EVENT_TYPES = gql`
+  query {
+    eventTypes {
+      code
+      status
+    }
+  }
+`
+
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 10
 const SEARCH_ITEMS = {
@@ -262,6 +271,7 @@ const Search = ({
     data,
     refetch
   } = API.useApiQuery(GQL_GET_SAVED_SEARCHES)
+  const { data: eventTypesData } = API.useApiQuery(GQL_EVENT_TYPES)
   const { done, result } = useBoilerplate({
     loading,
     error: err,
@@ -433,6 +443,11 @@ const Search = ({
     [hasObjectResults]
   )
 
+  const eventTypes = useMemo(
+    () => eventTypesData?.eventTypes ?? [],
+    [eventTypesData]
+  )
+
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -563,7 +578,8 @@ const Search = ({
       <h4 className="d-none d-print-block">
         Search query: {searchQuery.text}
         <br />
-        Filters: <SearchDescription searchQuery={searchQuery} />
+        Filters:{" "}
+        <SearchDescription searchQuery={searchQuery} eventTypes={eventTypes} />
       </h4>
       {numResults === 0 && (
         <Alert variant="warning">
