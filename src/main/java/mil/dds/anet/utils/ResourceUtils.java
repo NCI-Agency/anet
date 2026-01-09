@@ -1,6 +1,8 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,93 +21,110 @@ public class ResourceUtils {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  public static void validateHistoryInput(final String personUuid,
-      final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
-      final String personCurrentPrimaryPositionUUid) {
-    // Check if personUuid is null
-    if (personUuid == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person Uuid cannot be null.");
+  public static void validateHistoryInput(final String entityUuid,
+      final List<PersonPositionHistory> personPositionHistory,
+      final boolean isCheckingPersonHistory, final String currentEntityInHistoryUuid) {
+
+    // There has to be either a personUuid or positionUuid
+    if (entityUuid == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Person/Position Uuid cannot be null.");
     }
-    // If there is a current primary position for this person there has to be history
-    if (Utils.isEmptyOrNull(previousPositions)) {
-      if (personCurrentPrimaryPositionUUid != null) {
+    // If there is a current entity there has to be history
+    if (Utils.isEmptyOrNull(personPositionHistory)) {
+      if (currentEntityInHistoryUuid != null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "History should not be empty.");
       }
-      // No previous positions do nothing
-      return;
+    } else {
+      // Check history
+      validateHistory(personPositionHistory, currentEntityInHistoryUuid, isCheckingPersonHistory);
     }
+  }
 
-    boolean seenPrimaryPositionNullEndTime = false;
-    for (final PersonPositionHistory pph : previousPositions) {
-      // Check if start time is null
-      if (pph.getStartTime() == null) {
+  private static void validateHistory(List<PersonPositionHistory> personPositionHistory,
+      String currentEntityInHistoryUuid, boolean isCheckingPersonHistory) {
+    // Sort by start time
+    personPositionHistory.sort(Comparator.comparing(PersonPositionHistory::getStartTime,
+        Comparator.nullsFirst(Comparator.naturalOrder())));
+    int countCurrentPrimaryPositions = 0;
+    String latestEntityInHistoryUuid = null;
+    for (int i = 0; i < personPositionHistory.size(); i++) {
+      PersonPositionHistory current = personPositionHistory.get(i);
+      Instant start = current.getStartTime();
+      Instant end = current.getEndTime();
+
+      // Check start not null
+      if (start == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time cannot be empty.");
       }
 
-      // Check start time and end time make sense
-      if (pph.getEndTime() != null && pph.getEndTime().isBefore(pph.getStartTime())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            "End time cannot before start time.");
+      // Check start <= end
+      if (end != null && start.isAfter(end)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date range in entry.");
       }
 
-      // These checks apply for primary positions
-      if (Boolean.TRUE.equals(pph.getPrimary()) && pph.getEndTime() == null) {
+      for (int j = 0; j < i; j++) {
+        PersonPositionHistory other = personPositionHistory.get(j);
 
-        // Check if end time is null more than once
-        if (seenPrimaryPositionNullEndTime) {
+        if (!isOverlapAllowed(isCheckingPersonHistory, current, other) && overlap(current, other)) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "There cannot be more than one primary position history entry without an end time.");
+              "History entries should not overlap.");
         }
-
-        if (personCurrentPrimaryPositionUUid == null) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "Based on history there must be a current primary position");
-        } else {
-          final String uuidToCheck =
-              DaoUtils.getUuid(checkPerson ? pph.getPosition() : pph.getPerson());
-          final String message = checkPerson
-              ? "Last primary position history entry must be identical to person's current primary position."
-              : "Last primary position history entry must be identical to position's current person.";
-          if (!personCurrentPrimaryPositionUUid.equals(uuidToCheck)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-          }
-        }
-
-        seenPrimaryPositionNullEndTime = true;
+      }
+      // Update counters
+      if (current.getPrimary() && current.getEndTime() == null) {
+        countCurrentPrimaryPositions++;
+      }
+      if (isCheckingPersonHistory && current.getPrimary()) {
+        latestEntityInHistoryUuid = current.getPositionUuid();
+      } else {
+        latestEntityInHistoryUuid = current.getPersonUuid();
       }
     }
 
-    // If has relation and there is no last entry in history
-    if (personCurrentPrimaryPositionUUid != null && !seenPrimaryPositionNullEndTime) {
+    // Specific checks for person history
+    if (isCheckingPersonHistory && countCurrentPrimaryPositions == 0
+        && currentEntityInHistoryUuid != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "There should be a primary position history entry without an end time.");
     }
-
-    // Check for conflicts in primary positions
-    final List<PersonPositionHistory> primaryPositions =
-        previousPositions.stream().filter(pp -> Boolean.TRUE.equals(pp.getPrimary())).toList();
-    final int historySize = primaryPositions.size();
-    for (int i = 0; i < historySize; i++) {
-      final PersonPositionHistory pph = primaryPositions.get(i);
-      for (int j = i + 1; j < historySize; j++) {
-        if (overlap(pph, primaryPositions.get(j))) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "Primary Positions History entries should not overlap.");
-        }
-      }
+    if (isCheckingPersonHistory && countCurrentPrimaryPositions > 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "There cannot be more than one primary position history entry without an end time.");
     }
+
+    // Check for both person and position history
+    if (latestEntityInHistoryUuid != null && currentEntityInHistoryUuid != null
+        && !latestEntityInHistoryUuid.equals(currentEntityInHistoryUuid)) {
+      final String message = isCheckingPersonHistory
+          ? "Last primary position history entry must be identical to person's current primary position."
+          : "Last primary position history entry must be identical to position's current person.";
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    }
+  }
+
+  private static boolean isOverlapAllowed(boolean isCheckingPersonHistory, PersonPositionHistory a,
+      PersonPositionHistory b) {
+    if (!isCheckingPersonHistory) {
+      // Now overlaps allowed if checking position history
+      return false;
+    }
+    boolean bothPrimary =
+        Boolean.TRUE.equals(a.getPrimary()) && Boolean.TRUE.equals(b.getPrimary());
+    boolean samePosition = a.getPositionUuid().equals(b.getPositionUuid());
+
+    return !(bothPrimary || samePosition);
   }
 
   private static boolean overlap(final PersonPositionHistory pph1,
       final PersonPositionHistory pph2) {
-    if (pph1.getEndTime() == null) {
-      return pph2.getEndTime().isAfter(pph1.getStartTime());
-    }
-    if (pph2.getEndTime() == null) {
-      return pph1.getEndTime().isAfter(pph2.getStartTime());
-    }
-    return pph2.getStartTime().isBefore(pph1.getEndTime())
-        && pph2.getEndTime().isAfter(pph1.getStartTime());
+    Instant aStart = pph1.getStartTime();
+    Instant bStart = pph2.getStartTime();
+
+    Instant aEnd = pph1.getEndTime() != null ? pph1.getEndTime() : Instant.MAX;
+    Instant bEnd = pph2.getEndTime() != null ? pph2.getEndTime() : Instant.MAX;
+
+    return aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
   }
 
   public static void checkAndFixAssessment(final Assessment a) {

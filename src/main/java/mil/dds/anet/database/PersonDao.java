@@ -442,7 +442,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  public int mergePeople(Person winner, Person loser) {
+  public int mergePeople(Person winner, Person loser, boolean useWinnerPositions) {
     final Handle handle = getDbHandle();
     try {
       final String winnerUuid = winner.getUuid();
@@ -498,25 +498,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       // Update attachment authors
       updateForMerge("attachments", "authorUuid", winnerUuid, loserUuid);
 
-      // Remove winner and loser from (old) position
-      final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
-      handle
-          .createUpdate("/* personMergePositionRemovePerson.update */ UPDATE positions "
-              + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
-              + "WHERE \"currentPersonUuid\" IN ( :winnerUuid, :loserUuid )")
-          .bind("updatedAt", now).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-          .execute();
-      // Set winner in (new) position
-      handle
-          .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
-              + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
-              + "WHERE uuid = :positionUuid")
-          .bind("personUuid", winnerUuid).bind("updatedAt", now)
-          .bind("positionUuid", DaoUtils.getUuid(winner.getPosition())).execute();
-      // Remove loser from position history
-      deleteForMerge("peoplePositions", "personUuid", loserUuid);
-      // Update position history with given input on winner
-      updatePersonHistory(winner);
+      if (useWinnerPositions) {
+        updatePosition(handle, null, loserUuid, loserUuid);
+      } else {
+        updatePosition(handle, winnerUuid, loserUuid, winnerUuid);
+        // Move loser's position history to winner
+        updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
+      }
 
       // Update assessment authors
       updateForMerge("assessments", "authorUuid", winnerUuid, loserUuid);
@@ -602,6 +590,20 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     } finally {
       closeDbHandle(handle);
     }
+  }
+
+  private void updatePosition(Handle handle, String newPersonUuidForPosition,
+      String oldPersonUuidForPosition, String personUuidForHistoryRemoval) {
+    // Update position
+    final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
+    handle
+        .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
+            + "SET \"currentPersonUuid\" = :newPersonUuid, \"updatedAt\" = :updatedAt "
+            + "WHERE \"currentPersonUuid\" = :oldPersonUuid")
+        .bind("newPersonUuid", newPersonUuidForPosition)
+        .bind("oldPersonUuid", oldPersonUuidForPosition).bind("updatedAt", now).execute();
+    // Clear obsolete position history
+    deleteForMerge("peoplePositions", "personUuid", personUuidForHistoryRemoval);
   }
 
   public CompletableFuture<List<Position>> getAdditionalPositionsForPerson(
@@ -696,46 +698,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         }
       }
       return numRows;
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public boolean hasHistoryConflict(final String uuid, final String loserUuid,
-      final List<PersonPositionHistory> history, final boolean checkPerson) {
-    final Handle handle = getDbHandle();
-    try {
-      if (!Utils.isEmptyOrNull(history)) {
-        final String countClause = "SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ";
-        final String personPositionClause = checkPerson
-            ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
-            : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
-        final String endClause =
-            " (\"endedAt\" IS NULL OR \"endedAt\" > :startTime) AND " + personPositionClause;
-        for (final PersonPositionHistory pph : history) {
-          final Query q;
-          final Instant endTime = pph.getEndTime();
-          if (endTime == null) {
-            q = handle.createQuery(countClause + endClause);
-          } else {
-            q = handle.createQuery(countClause + "\"createdAt\" < :endTime AND" + endClause)
-                .bind("endTime", DaoUtils.asLocalDateTime(endTime));
-          }
-          final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
-          final Number count =
-              (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
-                  .bind("personUuid", checkPerson ? uuid : histUuid)
-                  .bind("positionUuid", checkPerson ? histUuid : uuid)
-                  .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper()).one()
-                  .get("count");
-
-          if (count.longValue() > 0) {
-            return true;
-          }
-        }
-      }
-      return false;
     } finally {
       closeDbHandle(handle);
     }
