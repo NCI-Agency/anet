@@ -77,7 +77,7 @@ const CustomDateInput = ({
         selectAllOnFocus: true,
         showArrowButtons: true
       }
-  const inputValue = value ? moment(value).toISOString() : null
+  const inputValue = value == null ? null : moment(value).toISOString()
   return (
     <DateInput
       inputProps={{

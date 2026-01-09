@@ -19,7 +19,7 @@ const EXAMPLE_POSITIONS = {
     ],
     previousPeople: [
       {
-        name: "✔️\nCIV BEMERGED, Myposwill",
+        name: "CIV BEMERGED, Myposwill",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],

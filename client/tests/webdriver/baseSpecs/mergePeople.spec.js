@@ -20,7 +20,7 @@ const EXAMPLE_PEOPLE = {
     nationality: "Afghanistan",
     previousPositions: [
       {
-        name: "✔️\nChief of Merge People Test 1",
+        name: "Chief of Merge People Test 1",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],
@@ -47,7 +47,7 @@ const EXAMPLE_PEOPLE = {
     nationality: "Afghanistan",
     previousPositions: [
       {
-        name: "✔️\nChief of Merge People Test 2",
+        name: "Chief of Merge People Test 2",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],
@@ -74,7 +74,7 @@ const EXAMPLE_PEOPLE = {
     nationality: "United States",
     previousPositions: [
       {
-        name: "✔️\nEF 1 Manager",
+        name: "EF 1 Manager",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],

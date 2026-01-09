@@ -361,12 +361,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         )}
         {isAdmin && (
           <EditHistory
-            mainTitle="Edit position history"
-            history1={person.previousPositions}
-            initialHistory={person.previousPositions}
-            currentlyOccupyingEntity={person.position}
             historyEntityType="position"
-            parentEntityUuid1={person.uuid}
+            parentEntityUuid={person.uuid}
+            mainTitle="Edit position history"
+            initialHistory={person.previousPositions}
             showModal={showHistoryModal}
             setShowModal={setShowHistoryModal}
             setHistory={history => onSavePreviousPositions(history)}
@@ -728,7 +726,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     const newPerson = person.filterClientSideFields()
     newPerson.previousPositions = history
     API.mutation(GQL_UPDATE_PREVIOUS_POSITIONS, { person: newPerson })
-      .then(refetch)
+      .then(() => {
+        setStateError(null)
+        refetch()
+      })
       .catch(error => {
         setStateError(error)
         jumpToTop()

@@ -249,11 +249,6 @@ public class PersonResource {
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
         existingPositionUuid);
 
-    if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
     final int numRows = dao.updatePersonHistory(p);
     AnetAuditLogger.log("History updated for person {} by {}", p, user);
     return numRows;
@@ -387,7 +382,9 @@ public class PersonResource {
   @GraphQLMutation(name = "mergePeople")
   public Integer mergePeople(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
-      @GraphQLArgument(name = "winnerPerson") Person winner) {
+      @GraphQLArgument(name = "winnerPerson") Person winner,
+      @GraphQLArgument(name = "useWinnerPositions",
+          defaultValue = "true") boolean useWinnerPositions) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
 
@@ -407,17 +404,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
     }
 
-    // Do some additional sanity checks
-    final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
-    ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
-        winnerPositionUuid);
-
-    if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
-    int numRows = dao.mergePeople(winner, loser);
+    int numRows = dao.mergePeople(winner, loser, useWinnerPositions);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged person relation information.");

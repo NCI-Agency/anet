@@ -1,6 +1,7 @@
 package mil.dds.anet.test.database;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
@@ -10,12 +11,14 @@ import java.util.List;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.test.SpringTestConfig;
+import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest(classes = SpringTestConfig.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -126,37 +129,37 @@ class PersonDaoTest {
   @Test
   void hasHistoryConflictForPersonTest() {
     // History tests for Dvisor and Dvisor's own position
-    checkHistoryConflict(DVISOR_UUID, null, EF22_ASF_UUID, true, testData1);
+    checkHistoryConflict(DVISOR_UUID, null, true, testData1);
     // History tests for Selena and Dvisor's position
-    checkHistoryConflict(SELENA_UUID, null, EF22_ASF_UUID, true, testData2);
+    checkHistoryConflict(SELENA_UUID, null, true, testData2);
   }
 
   @Test
   void hasHistoryConflictForPositionTest() {
     // History tests for Dvisor's own position and Dvisor
-    checkHistoryConflict(DVISOR_UUID, null, EF22_ASF_UUID, false, testData1);
+    checkHistoryConflict(DVISOR_UUID, null, false, testData1);
     // History tests for Selena's position and Dvisor:
-    checkHistoryConflict(DVISOR_UUID, null, EF12_A_UUID, false, testData2);
+    checkHistoryConflict(DVISOR_UUID, null, false, testData2);
   }
 
   @Test
   void hasHistoryConflictForMergingPersonTest() {
     // History tests for merging positions if DVISOR_UUID is winner
-    checkHistoryConflict(DVISOR_UUID, STEVESON_STEVE, EF22_ASF_UUID, true, testData1);
+    checkHistoryConflict(DVISOR_UUID, STEVESON_STEVE, true, testData1);
     // History tests for merging positions if DVISOR_UUID is winner
-    checkHistoryConflict(DVISOR_UUID, STEVESON_STEVE, EF12_A_UUID, true, testData2);
+    checkHistoryConflict(DVISOR_UUID, STEVESON_STEVE, true, testData2);
   }
 
   @Test
   void hasHistoryConflictForMergingPositionTest() {
     // History tests for merging positions if EF22_ASF_UUID is winner
-    checkHistoryConflict(DVISOR_UUID, EF11_G_UUID, EF22_ASF_UUID, false, testData1);
+    checkHistoryConflict(DVISOR_UUID, EF11_G_UUID, false, testData1);
     // History tests for merging positions if EF12_A_UUID is winner
-    checkHistoryConflict(DVISOR_UUID, EF11_G_UUID, EF12_A_UUID, false, testData2);
+    checkHistoryConflict(DVISOR_UUID, EF11_G_UUID, false, testData2);
   }
 
-  private void checkHistoryConflict(final String personUuid, final String loserUuid,
-      final String positionUuid, final boolean checkPerson, final Object[][] testData) {
+  private void checkHistoryConflict(final String personUuid, final String positionUuid,
+      final boolean checkPerson, final Object[][] testData) {
     for (final Object[] testItem : testData) {
       int i = 0;
       final boolean hasConflict = (boolean) testItem[i++];
@@ -170,9 +173,13 @@ class PersonDaoTest {
         hist.add(pph);
       }
       logger.debug("checking {}", Arrays.toString(testItem));
-      final boolean hasHistoryConflict = personDao.hasHistoryConflict(
-          checkPerson ? personUuid : positionUuid, loserUuid, hist, checkPerson);
-      assertThat(hasHistoryConflict).isEqualTo(hasConflict);
+      if (!hasConflict) {
+        ResourceUtils.validateHistoryInput(personUuid, hist, checkPerson, null);
+      } else {
+        assertThrows(ResponseStatusException.class, () -> {
+          ResourceUtils.validateHistoryInput(personUuid, hist, checkPerson, null);
+        });
+      }
     }
   }
 
