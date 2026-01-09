@@ -13,7 +13,6 @@ import {
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositions from "components/EditAssociatedPositions"
-import EditHistory from "components/EditHistory"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -77,7 +76,6 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
   const initialLeftUuid = state?.initialLeftUuid
   const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
-  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Position
   )
@@ -306,25 +304,6 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
                 value={
                   <>
                     <PreviousPeople history={mergedPosition.previousPeople} />
-                    <EditHistory
-                      history1={position1.previousPeople}
-                      history2={position2.previousPeople}
-                      initialHistory={mergedPosition.previousPeople}
-                      historyComp={PreviousPeople}
-                      showModal={showHistoryModal}
-                      setShowModal={setShowHistoryModal}
-                      currentlyOccupyingEntity={mergedPosition.person}
-                      showEditButton
-                      parentEntityUuid1={position1.uuid}
-                      parentEntityUuid2={position2.uuid}
-                      midColTitle="Merged Position History"
-                      mainTitle="Pick and Choose people and dates for People History"
-                      setHistory={history =>
-                        dispatchMergeActions(
-                          setAMergedField("previousPeople", history, "mid")
-                        )
-                      }
-                    />
                   </>
                 }
                 align={ALIGN_OPTIONS.CENTER}

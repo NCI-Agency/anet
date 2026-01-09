@@ -4,7 +4,7 @@ import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import React from "react"
-import { Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
+import { Badge, Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import Settings from "settings"
 
 interface PreviousPositionsProps {
@@ -35,7 +35,9 @@ function PreviousPositions({
           {previousPositions.map((pp, idx) => (
             <tr key={idx} id={`previousPosition_${idx}`}>
               <td>
-                {showPrimaryFlag && pp.primary && "✔️ "}
+                {showPrimaryFlag && pp.primary && (
+                  <Badge bg="primary">Primary</Badge>
+                )}
                 <LinkTo modelType="Position" model={pp.position} />
               </td>
               <td>

@@ -209,13 +209,6 @@ public class PositionResource {
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
         existing.getPersonUuid());
-
-    if (engine.getPersonDao().hasHistoryConflict(pos.getUuid(), null, pos.getPreviousPeople(),
-        false)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
     final int numRows = engine.getPositionDao().updatePositionHistory(pos);
     AnetAuditLogger.log("History updated for position {} by {}", pos, user);
     return numRows;
@@ -322,11 +315,13 @@ public class PositionResource {
 
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);
-    if (ApplicationContextProvider.getEngine().getPersonDao().hasHistoryConflict(
-        winnerPosition.getUuid(), loserUuid, winnerPosition.getPreviousPeople(), false)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the people in the history is occupied for the specified period.");
-    }
+    /*
+     * TODO do we need this? if
+     * (ApplicationContextProvider.getEngine().getPersonDao().hasHistoryConflict(
+     * winnerPosition.getUuid(), loserUuid, winnerPosition.getPreviousPeople(), false)) { throw new
+     * ResponseStatusException(HttpStatus.BAD_REQUEST,
+     * "At least one of the people in the history is occupied for the specified period."); }
+     */
     validatePosition(user, winnerPosition);
 
     int numRows = dao.mergePositions(winnerPosition, loserPosition);
