@@ -448,30 +448,26 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
           )}
         </Fieldset>
 
-        <Fieldset
-          title="Previous position holders"
-          id="previous-people"
-          action={
-            canEdit && (
-              <EditHistory
-                mainTitle="Edit person history"
-                history1={position.previousPeople}
-                initialHistory={position.previousPeople}
-                currentlyOccupyingEntity={position.person}
-                midColTitle="New History"
-                showEditButton
-                parentEntityUuid1={position.uuid}
-                showModal={showEditHistoryModal}
-                setShowModal={setShowEditHistoryModal}
-                setHistory={history => {
-                  onSavePreviousPeople(history)
-                }}
-              />
-            )
-          }
-        >
-          <PreviousPeople history={position.previousPeople} />
+        <Fieldset title="Previous position holders" id="previous-people">
+          <PreviousPeople
+            history={position.previousPeople}
+            canEditHistory
+            action={() => setShowEditHistoryModal(true)}
+          />
         </Fieldset>
+        {isAdmin && (
+          <EditHistory
+            historyEntityType="person"
+            parentEntityUuid={position.uuid}
+            mainTitle="Edit position history"
+            initialHistory={position.previousPeople}
+            showModal={showEditHistoryModal}
+            setShowModal={setShowEditHistoryModal}
+            setHistory={history => {
+              onSavePreviousPeople(history)
+            }}
+          />
+        )}
         {isSuperuser && (
           <Fieldset
             id="organizationsAdministrated"

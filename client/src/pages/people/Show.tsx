@@ -361,12 +361,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         )}
         {isAdmin && (
           <EditHistory
-            mainTitle="Edit position history"
-            history1={person.previousPositions}
-            initialHistory={person.previousPositions}
-            currentlyOccupyingEntity={person.position}
             historyEntityType="position"
-            parentEntityUuid1={person.uuid}
+            parentEntityUuid={person.uuid}
+            mainTitle="Edit position history"
+            initialHistory={person.previousPositions}
             showModal={showHistoryModal}
             setShowModal={setShowHistoryModal}
             setHistory={history => onSavePreviousPositions(history)}

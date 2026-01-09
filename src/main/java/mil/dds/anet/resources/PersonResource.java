@@ -8,11 +8,17 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -251,11 +257,6 @@ public class PersonResource {
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
         existingPositionUuid);
 
-    if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
     final int numRows = dao.updatePersonHistory(p);
     AnetAuditLogger.log("History updated for person {} by {}", p, user);
     return numRows;
@@ -413,11 +414,12 @@ public class PersonResource {
     final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
     ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
         winnerPositionUuid);
-
-    if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
+    /*
+     * TODO do we need this? if (dao.hasHistoryConflict(winnerUuid, loserUuid,
+     * winner.getPreviousPositions(), true)) { throw new
+     * ResponseStatusException(HttpStatus.BAD_REQUEST,
+     * "At least one of the positions in the history is occupied for the specified period."); }
+     */
 
     int numRows = dao.mergePeople(winner, loser);
     if (numRows == 0) {
