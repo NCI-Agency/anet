@@ -912,8 +912,6 @@ properties:
                     uniqueItems: true
                     items:
                       type: string
-                      enum:
-                        [CONFERENCE, EXERCISE, VISIT_BAN, FESTIVAL, OTHER]
           reportCommunities:
             "$ref": "#/$defs/excludableInputField"
           customFields:
