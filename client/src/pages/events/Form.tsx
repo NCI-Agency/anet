@@ -476,33 +476,24 @@ const EventForm = ({
                   dictProps={Settings.fields.event.type}
                   name="type"
                   component={FieldHelper.SpecialField}
+                  onChange={event => {
+                    setFieldValue("type", event.target.value, true)
+                  }}
                   widget={
-                    <>
-                      {!activeEventTypes.length ? (
-                        <div className="text-danger mt-2">
-                          Could not load event types
-                        </div>
-                      ) : (
-                        <FormSelect
-                          className="location-type-form-group form-control"
-                          name="type"
-                          value={values.type || ""}
-                          onChange={e => {
-                            setFieldTouched("type", true, false)
-                            setFieldValue("type", e.target.value, true)
-                          }}
-                          disabled={loading || !!error}
-                        >
-                          {activeEventTypes.map(t => (
-                            <option key={t.code} value={t.code}>
-                              {Event.humanNameOfType
-                                ? Event.humanNameOfType(t.code)
-                                : t.code}
-                            </option>
-                          ))}
-                        </FormSelect>
-                      )}
-                    </>
+                    !activeEventTypes.length ? (
+                      <div className="text-danger mt-2">
+                        Could not load event types
+                      </div>
+                    ) : (
+                      <FormSelect className="location-type-form-group form-control">
+                        <option value="">Please select an event type</option>
+                        {activeEventTypes.map(t => (
+                          <option key={t.code} value={t.code}>
+                            {Event.humanNameOfType(t.code)}
+                          </option>
+                        ))}
+                      </FormSelect>
+                    )
                   }
                 />
                 <DictionaryField
