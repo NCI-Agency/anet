@@ -99,7 +99,7 @@ public class EventResourceTest extends AbstractResourceTest {
     failCreateEvent(eventInput);
     eventInput.setAdminOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
-    eventInput.setType(EventType.CONFERENCE);
+    eventInput.setType("CONFERENCE");
     succeedCreateEvent(eventInput);
   }
 

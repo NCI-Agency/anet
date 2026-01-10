@@ -90,7 +90,7 @@ public class TestData {
     return EventInput.builder().withName(name).withStatus(Status.ACTIVE)
         .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
         .withAdminOrg(adminOrg).withStartDate(Instant.now()).withEndDate(Instant.now())
-        .withType(EventType.CONFERENCE).build();
+        .withType("CONFERENCE").build();
   }
 
   public static EventSeriesInput createEventSeriesInput(String name, String description,
