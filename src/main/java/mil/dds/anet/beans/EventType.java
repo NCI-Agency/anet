@@ -30,6 +30,14 @@ public class EventType extends AbstractAnetBean implements WithStatus {
     this.status = status;
   }
 
+  @GraphQLQuery(name = "relatedEventsCount")
+  public Integer getRelatedEventsCount() {
+    if (code == null) {
+      return 0;
+    }
+    return engine().getEventDao().countByType(code);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
