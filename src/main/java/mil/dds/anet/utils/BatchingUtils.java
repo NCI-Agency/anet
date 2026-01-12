@@ -293,6 +293,13 @@ public final class BatchingUtils {
                 () -> engine.getPositionDao().getPrimaryPersonForPosition(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(
+        FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON_WHEN.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, Instant>, List<Position>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getPositionDao().getPrimaryPositionsByDate(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture

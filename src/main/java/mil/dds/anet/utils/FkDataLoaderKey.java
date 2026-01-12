@@ -24,6 +24,7 @@ public enum FkDataLoaderKey {
   POSITION_ASSOCIATED_POSITIONS, // position.associatedPositions
   POSITION_PERSON_POSITION_HISTORY, // position.personPositionHistory
   POSITION_PRIMARY_POSITION_FOR_PERSON, // position.primaryPositionForPerson
+  POSITION_PRIMARY_POSITION_FOR_PERSON_WHEN, // position.primaryPositionForPerson at a given date
   RELATED_OBJECT_APPROVAL_STEPS, // <relatedObject>.approvalSteps
   RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION, // <relatedObject>.customSensitiveInformation
   RELATED_OBJECT_PLANNING_APPROVAL_STEPS, // <relatedObject>.planningApprovalSteps
