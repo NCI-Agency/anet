@@ -99,6 +99,17 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
     return new PeopleBatcher().getByForeignKeys(foreignKeys);
   }
 
+  public int countByType(String type) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery("/* countEventsByType */ SELECT COUNT(*) FROM events WHERE type = :type")
+          .bind("type", type).mapTo(Integer.class).one();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   @Override
   public List<Event> getByIds(List<String> uuids) {
     return new SelfIdBatcher().getByIds(uuids);

@@ -639,6 +639,7 @@ enum EventSeriesSearchSortBy {
 type EventType {
   code: String
   createdAt: Instant
+  relatedEventsCount: Int
   status: Status
   updatedAt: Instant
   uuid: String

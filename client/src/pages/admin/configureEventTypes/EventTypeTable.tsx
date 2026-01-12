@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
@@ -10,11 +11,13 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { deserializeQueryParams } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import AddNewEventTypeModal from "./AddNewEventTypeModal"
 
@@ -25,6 +28,7 @@ const GQL_EVENT_TYPES = gql`
       status
       createdAt
       updatedAt
+      relatedEventsCount
     }
   }
 `
@@ -51,10 +55,15 @@ const GQL_DELETE_EVENT_TYPE = gql`
 
 interface EventTypeTableProps {
   pageDispatchers?: PageDispatchersPropType
+  setSearchQuery: (...args: unknown[]) => unknown
 }
 
-const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
+const EventTypeTable = ({
+  pageDispatchers,
+  setSearchQuery
+}: EventTypeTableProps) => {
   const [showAddModal, setShowAddModal] = useState(false)
+  const navigate = useNavigate()
 
   const { loading, error, data, refetch } = API.useApiQuery(GQL_EVENT_TYPES, {})
 
@@ -133,7 +142,9 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
 
       switch (reason) {
         case "EVENT_TYPE_IN_USE":
-          toast.warn("This event type is in use and cannot be deleted.")
+          toast.warn(
+            "This event type is in use, therefore it cannot be deleted."
+          )
           break
         case "EVENT_TYPE_NOT_FOUND":
           toast.error("Event type not found.")
@@ -148,6 +159,18 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
 
   const validateCode = (code: string): boolean => {
     return !eventTypes.some(eventType => eventType.code === code)
+  }
+
+  const goToEventTypeSearch = (code: string) => {
+    const queryParams = { type: code }
+    deserializeQueryParams(
+      SEARCH_OBJECT_TYPES.EVENTS,
+      queryParams,
+      (objectType, filters, text) => {
+        setSearchQuery({ objectType, filters, text })
+        navigate("/search")
+      }
+    )
   }
 
   return (
@@ -176,8 +199,8 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
                 <th>Status</th>
                 <th>Created At</th>
                 <th>Updated At</th>
+                <th># of Related Events</th>
                 <th>Actions</th>
-                <th />
               </tr>
             </thead>
             <tbody>
@@ -203,6 +226,21 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
                   </td>
                   <td>
                     {moment(eventType.updatedAt).format("YYYY-MM-DD HH:mm")}
+                  </td>
+                  <td>
+                    <div className="d-inline-flex align-items-center gap-1">
+                      <span>{eventType.relatedEventsCount ?? 0}</span>
+                      {eventType.relatedEventsCount > 0 && (
+                        <Button
+                          variant="link"
+                          className="p-0"
+                          onClick={() => goToEventTypeSearch(eventType.code)}
+                          title="View related events"
+                        >
+                          <Icon icon={IconNames.SEARCH} />
+                        </Button>
+                      )}
+                    </div>
                   </td>
                   <td>
                     <Button
@@ -236,4 +274,9 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
   )
 }
 
-export default connect(null, mapPageDispatchersToProps)(EventTypeTable)
+const mapDispatchToProps = dispatch => ({
+  ...mapPageDispatchersToProps(dispatch),
+  setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery))
+})
+
+export default connect(null, mapDispatchToProps)(EventTypeTable)

@@ -1506,16 +1506,16 @@ INSERT INTO "eventSeries" (uuid, name, description, status, "createdAt", "update
 INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "locationUuid", "eventSeriesUuid", "ownerOrgUuid", "hostOrgUuid", "adminOrgUuid", "startDate", "endDate", type) VALUES
   ('7cb0fc5d-74d0-4deb-86dd-7c84761b8ac6', 'My active test event', 'To test that active events in inactive event series are still shown', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    NULL, 'bacec3a6-f075-421e-90a0-be6e3396197c', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
-   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'OTHER'),
+   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Other'),
   ('46963161-53c1-4eab-85bb-d46a03d152c4', 'My inactive test event', 'To test that inactive events are also shown', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    NULL, 'bacec3a6-f075-421e-90a0-be6e3396197c', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
-   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'EXERCISE'),
+   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Exercise'),
   ('426a8f59-98de-48eb-9e5c-bbc774f1e35f', 'My active NMI test event', 'NMI pre-deployment active test event', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    NULL, 'b7b70191-54e4-462f-8e40-679dd2e71ec4', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
-   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'OTHER'),
+   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Other'),
   ('d7c96ce1-c785-4207-abb7-20935c9a2371', 'My inactive NMI test event', 'NMI pre-deployment inactive test event', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    NULL, 'b7b70191-54e4-462f-8e40-679dd2e71ec4', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
-   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'OTHER'),
+   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Other'),
   ('e850846e-9741-40e8-bc51-4dccc30cf47f', 'NMI PDT 2024-01', 'NMI pre-deployment training 2024 January', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    '0855fb0a-995e-4a79-a132-4024ee2983ff', 'b7b70191-54e4-462f-8e40-679dd2e71ec4',
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
@@ -1859,7 +1859,7 @@ INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "creat
 INSERT INTO "eventTypes" (uuid, code, status, "createdAt", "updatedAt") VALUES
   (uuid_generate_v4(), 'Conference', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'Exercise', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'Visit Ban', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Visit ban', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'Other', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
