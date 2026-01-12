@@ -261,24 +261,21 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @GraphQLQuery(name = "position")
-  public CompletableFuture<Position> loadPositionBatched(
-      @GraphQLRootContext GraphQLContext context) {
+  public CompletableFuture<Position> loadPosition(@GraphQLRootContext GraphQLContext context) {
+    return loadPositionByDate(context, null);
+  }
+
+  @GraphQLQuery(name = "positionByDate")
+  public CompletableFuture<Position> loadPositionByDate(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "when") Instant when) {
     if (position != null) {
       return CompletableFuture.completedFuture(position);
     }
-    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid).thenApply(o -> {
-      position = o;
-      return o;
-    });
-  }
-
-  /* When loaded through means other than GraphQL */
-  public synchronized Position loadPosition() {
-    if (position != null) {
-      return position;
-    }
-    position = engine().getPositionDao().getCurrentPositionForPerson(uuid);
-    return position;
+    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid, when)
+        .thenApply(o -> {
+          position = o;
+          return o;
+        });
   }
 
   @GraphQLInputField(name = "position")

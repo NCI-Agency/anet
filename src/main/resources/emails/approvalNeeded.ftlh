@@ -44,8 +44,8 @@
       <#if !attendee.interlocutor>
         <li>
           ${(attendee.name)!}
-          <#if attendee.loadPosition()??>
-            <#assign position = attendee.loadPosition()>
+          <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
+            <#assign position = attendee.getPosition()>
             <#if position.loadOrganization(context).get()??>
               <#assign organization = position.getOrganization()>
               <em>from</em> ${(organization.shortName)!}
@@ -71,8 +71,8 @@
       <#if attendee.interlocutor>
         <li>
           ${(attendee.name)!}
-          <#if attendee.loadPosition()??>
-            <#assign position = attendee.loadPosition()>
+          <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
+            <#assign position = attendee.getPosition()>
             <#if position.loadOrganization(context).get()??>
               <#assign organization = position.getOrganization()>
               <em>from</em> ${(organization.shortName)!}
