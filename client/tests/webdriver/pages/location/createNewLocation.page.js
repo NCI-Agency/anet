@@ -43,6 +43,10 @@ class CreateNewLocation extends Page {
     return browser.$('//a[@role="button"][@aria-label="Full Screen"]')
   }
 
+  async getMinimiseLeafletButton() {
+    return browser.$('//a[@role="button"][@aria-label="Exit Full Screen"]')
+  }
+
   async getModalCloseButton() {
     return (await this.getModalContent()).$(".btn-close")
   }
