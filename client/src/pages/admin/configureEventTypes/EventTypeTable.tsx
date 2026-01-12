@@ -64,7 +64,12 @@ const EventTypeTable = ({ pageDispatchers }: EventTypeTableProps) => {
     pageDispatchers
   })
 
-  const eventTypes = data?.eventTypes || []
+  const eventTypes = (data?.eventTypes || []).slice().sort((a, b) => {
+    if (a.status !== b.status) {
+      return a.status === Model.STATUS.ACTIVE ? -1 : 1
+    }
+    return (a.code || "").localeCompare(b.code || "")
+  })
 
   if (done) {
     return result
