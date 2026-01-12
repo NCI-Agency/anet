@@ -30,7 +30,7 @@ const AddNewEventTypeModal = ({
           }}
           validate={values => {
             const errors: { code?: string } = {}
-            const code = values.code?.toUpperCase()
+            const code = values.code
             if (code && !validateCode(code)) {
               errors.code = "Code already exists"
             }
@@ -43,21 +43,13 @@ const AddNewEventTypeModal = ({
             onHide()
           }}
         >
-          {({ values, setFieldValue, setFieldTouched, errors }) => (
+          {({ values, errors }) => (
             <Form className="d-flex flex-column gap-3">
               <Field
                 name="code"
                 component={FieldHelper.InputField}
                 placeholder="Give this event type a code"
                 vertical
-                onChange={e => {
-                  const sanitized = e.target.value?.replace(/[^a-zA-Z_ ]+/g, "")
-                  const parsedCode = sanitized
-                    ?.toUpperCase()
-                    .replace(/\s+/g, "_")
-                  setFieldValue("code", parsedCode)
-                  setFieldTouched("code", true, false)
-                }}
               />
               <div className="submit-buttons">
                 <div>
