@@ -415,7 +415,7 @@ UPDATE positions SET "currentPersonUuid" = '1ad0c049-6ce8-4890-84f6-5e6a364764c4
 
 -- Put Erin into the EF 2.2 Advisor D Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2020-01-01');
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2021-01-01');
 UPDATE positions SET "currentPersonUuid" = 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9' WHERE name = 'EF 2.2 Advisor D';
 
 -- Put Jacob in the EF 2.2 Superuser Billet
