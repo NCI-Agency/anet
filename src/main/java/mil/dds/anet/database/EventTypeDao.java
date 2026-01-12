@@ -15,7 +15,7 @@ public class EventTypeDao {
   public static final String TABLE_NAME = "eventTypes";
 
   private static final String EVENT_TYPE_FIELDS =
-      "\"code\", \"status\", \"createdAt\", \"updatedAt\"";
+      "\"uuid\", \"code\", \"status\", \"createdAt\", \"updatedAt\"";
 
   private final DatabaseHandler databaseHandler;
 
@@ -47,6 +47,10 @@ public class EventTypeDao {
 
   public int insert(EventType type) {
     final Instant now = Instant.now();
+
+    if (type.getUuid() == null) {
+      type.setUuid(DaoUtils.getNewUuid());
+    }
     if (type.getStatus() == null) {
       type.setStatus(Status.ACTIVE);
     }
@@ -57,15 +61,17 @@ public class EventTypeDao {
     try {
       return handle
           .createUpdate("/* insertEventType */ INSERT INTO \"" + TABLE_NAME + "\" "
-              + "(\"code\", \"status\", \"createdAt\", \"updatedAt\") "
-              + "VALUES (:code, :status, :createdAt, :updatedAt)")
-          .bind("code", type.getCode()).bind("status", type.getStatus().ordinal())
+              + "(\"uuid\", \"code\", \"status\", \"createdAt\", \"updatedAt\") "
+              + "VALUES (:uuid, :code, :status, :createdAt, :updatedAt)")
+          .bind("uuid", type.getUuid()).bind("code", type.getCode())
+          .bind("status", type.getStatus().ordinal())
           .bind("createdAt", DaoUtils.asLocalDateTime(type.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(type.getUpdatedAt())).execute();
     } finally {
       closeDbHandle(handle);
     }
   }
+
 
   public int updateStatus(String code, Status status) {
     final Handle handle = getDbHandle();

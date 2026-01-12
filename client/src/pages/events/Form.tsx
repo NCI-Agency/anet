@@ -66,6 +66,7 @@ import utils from "utils"
 const GQL_EVENT_TYPES = gql`
   query {
     eventTypes {
+      uuid
       code
       status
     }

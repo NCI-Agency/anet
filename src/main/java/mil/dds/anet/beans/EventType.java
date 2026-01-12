@@ -1,22 +1,16 @@
 package mil.dds.anet.beans;
 
 import io.leangen.graphql.annotations.GraphQLQuery;
-import java.time.Instant;
 import java.util.Objects;
+import mil.dds.anet.views.AbstractAnetBean;
 
-public class EventType implements WithStatus {
+public class EventType extends AbstractAnetBean implements WithStatus {
 
   @GraphQLQuery
   private String code;
 
   @GraphQLQuery
   private Status status;
-
-  @GraphQLQuery
-  private Instant createdAt;
-
-  @GraphQLQuery
-  private Instant updatedAt;
 
   public String getCode() {
     return code;
@@ -34,22 +28,6 @@ public class EventType implements WithStatus {
   @Override
   public void setStatus(Status status) {
     this.status = status;
-  }
-
-  public Instant getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(Instant createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public Instant getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(Instant updatedAt) {
-    this.updatedAt = updatedAt;
   }
 
   @Override

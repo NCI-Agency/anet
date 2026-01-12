@@ -60,6 +60,7 @@ export const gqlBasicEventFields = `
   ${gqlMinimalEventFields}
   ${gqlCommonEntityFields}
   type
+  eventType { uuid code status }
   startDate
   endDate
 `
