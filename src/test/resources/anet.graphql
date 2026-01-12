@@ -1063,6 +1063,7 @@ type Person {
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
+  positionByDate(when: Instant): Position
   preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
   rank: String
@@ -1518,6 +1519,7 @@ type ReportPerson {
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
+  positionByDate(when: Instant): Position
   preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
   primary: Boolean!

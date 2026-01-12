@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -32,6 +31,7 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyByDateFetcher;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -128,7 +128,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         + POSITION_FIELDS + " FROM positions "
         + "LEFT JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
         + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> ) "
-        + "AND \"peoplePositions\".primary IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL";
+        + "AND \"peoplePositions\".primary IS TRUE "
+        + "AND \"peoplePositions\".\"endedAt\" IS NULL";
 
     public PrimaryPositionsBatcher() {
       super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
@@ -475,26 +476,44 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY, positionUuid);
   }
 
-  public CompletableFuture<Position> getPrimaryPositionForPerson(GraphQLContext context,
-      String personUuid) {
-    return new ForeignKeyFetcher<Position>()
-        .load(context, FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON, personUuid)
-        .thenApply(l -> l.isEmpty() ? null : l.get(0));
+  class PrimaryPositionsByDateBatcher extends ForeignKeyByDateBatcher<Position> {
+    private static final String sql = "/* batch.getPrimaryPositionForPersonByDate */ SELECT "
+        + POSITION_FIELDS + " FROM positions "
+        + "LEFT JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
+        + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> ) "
+        + "AND \"peoplePositions\".primary IS TRUE "
+        + "AND \"peoplePositions\".\"createdAt\" <= :when "
+        + "AND (\"peoplePositions\".\"endedAt\" IS NULL"
+        + " OR \"peoplePositions\".\"endedAt\" > :when)";
+
+    public PrimaryPositionsByDateBatcher() {
+      super(PositionDao.this.databaseHandler, sql, "foreignKeys", new PositionMapper(),
+          "positions_currentPersonUuid");
+    }
   }
 
-  @Transactional
-  public Position getCurrentPositionForPerson(String personUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      Optional<Position> position = handle.createQuery("/* getCurrentPositionForPerson */ SELECT "
-          + POSITION_FIELDS
-          + " FROM positions INNER JOIN \"peoplePositions\" pp ON pp.\"positionUuid\" = positions.uuid"
-          + " WHERE pp.\"endedAt\" IS NULL AND pp.primary IS TRUE AND pp.\"personUuid\" = :personUuid")
-          .bind("personUuid", personUuid).map(new PositionMapper()).findFirst();
-      return position.orElse(null);
-    } finally {
-      closeDbHandle(handle);
+  public List<List<Position>> getPrimaryPositionsByDate(
+      List<ImmutablePair<String, Instant>> foreignKeys) {
+    return new PrimaryPositionsByDateBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Position>> getPrimaryPositionsForPerson(GraphQLContext context,
+      String personUuid, Instant when) {
+    return when == null
+        ? new ForeignKeyFetcher<Position>().load(context,
+            FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON, personUuid)
+        : new ForeignKeyByDateFetcher<Position>().load(context,
+            FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON_WHEN,
+            new ImmutablePair<>(personUuid, when));
+  }
+
+  public CompletableFuture<Position> getPrimaryPositionForPerson(GraphQLContext context,
+      String personUuid, Instant when) {
+    if (personUuid == null) {
+      return CompletableFuture.completedFuture(null);
     }
+    return getPrimaryPositionsForPerson(context, personUuid, when)
+        .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
   @Transactional
