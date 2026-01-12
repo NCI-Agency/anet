@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.EventType;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
@@ -23,8 +24,6 @@ public class Event extends EventSeries {
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
 
-  @GraphQLQuery
-  @GraphQLInputField
   String type;
   @GraphQLQuery
   @GraphQLInputField
@@ -53,6 +52,7 @@ public class Event extends EventSeries {
 
   private ForeignObjectHolder<EventSeries> eventSeries = new ForeignObjectHolder<>();
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
+  private ForeignObjectHolder<EventType> eventType = new ForeignObjectHolder<>();
 
   @GraphQLQuery(name = "eventSeries")
   public CompletableFuture<EventSeries> loadEventSeries(
@@ -178,12 +178,15 @@ public class Event extends EventSeries {
     return people;
   }
 
+  @GraphQLQuery(name = "type")
   public String getType() {
     return type;
   }
 
+  @GraphQLInputField(name = "type")
   public void setType(String type) {
     this.type = type;
+    this.eventType = new ForeignObjectHolder<>();
   }
 
   public Instant getStartDate() {
@@ -208,6 +211,19 @@ public class Event extends EventSeries {
 
   public void setOutcomes(String outcomes) {
     this.outcomes = outcomes;
+  }
+
+  @GraphQLQuery(name = "eventType")
+  public CompletableFuture<EventType> loadEventType(@GraphQLRootContext GraphQLContext context) {
+    if (eventType.hasForeignObject()) {
+      return CompletableFuture.completedFuture(eventType.getForeignObject());
+    }
+    if (type == null) {
+      return CompletableFuture.completedFuture(null);
+    }
+    final EventType loaded = engine().getEventTypeDao().getByCode(type);
+    eventType = new ForeignObjectHolder<>(loaded);
+    return CompletableFuture.completedFuture(loaded);
   }
 
   @GraphQLQuery(name = "reports")

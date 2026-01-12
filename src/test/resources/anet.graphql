@@ -499,6 +499,7 @@ type Event {
   endDate: Instant
   entityAvatar: EntityAvatar
   eventSeries: EventSeries
+  eventType: EventType
   hostOrg: Organization
   isSubscribed: Boolean
   location: Location
@@ -640,6 +641,7 @@ type EventType {
   createdAt: Instant
   status: Status
   updatedAt: Instant
+  uuid: String
 }
 
 """"""

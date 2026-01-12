@@ -148,7 +148,12 @@ export default class Event extends Model {
     return this.name
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["tasks", "organizations", "people"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    "tasks",
+    "organizations",
+    "people",
+    "eventType"
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

@@ -35,12 +35,12 @@ public class EventTypeResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "EVENT_TYPE_CODE_REQUIRED");
     }
 
-    if (dao.getByCode(normalizedCode) != null) {
+    if (dao.getByCode(code) != null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "EVENT_TYPE_ALREADY_EXISTS");
     }
 
     EventType et = new EventType();
-    et.setCode(normalizedCode);
+    et.setCode(code);
     et.setStatus(Status.ACTIVE);
 
     dao.insert(et);
@@ -65,12 +65,7 @@ public class EventTypeResource {
     if (dao.isInUse(code)) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "EVENT_TYPE_IN_USE");
     }
-
-    final int numRows = dao.delete(code);
-    if (numRows == 0) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EVENT_TYPE_NOT_FOUND");
-    }
-    return numRows;
+    return dao.delete(code);
   }
 
 }

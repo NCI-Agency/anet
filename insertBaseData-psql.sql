@@ -1519,7 +1519,7 @@ INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "
   ('e850846e-9741-40e8-bc51-4dccc30cf47f', 'NMI PDT 2024-01', 'NMI pre-deployment training 2024 January', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    '0855fb0a-995e-4a79-a132-4024ee2983ff', 'b7b70191-54e4-462f-8e40-679dd2e71ec4',
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
-   '2024-01-08 07:00', '2024-01-12 17:00', 'CONFERENCE');
+   '2024-01-08 07:00', '2024-01-12 17:00', 'Conference');
 
 -- Add attachments for event series
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
@@ -1856,11 +1856,11 @@ INSERT INTO "peoplePreferences" ("personUuid", "preferenceUuid", "value", "creat
   ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'REPORTS' AND category = 'emailing'), 'TRUE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('b5d495af-44d5-4c35-851a-1039352a8307', (SELECT uuid FROM preferences WHERE name = 'SUBSCRIPTIONS' AND category = 'emailing'), 'FALSE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO "eventTypes" (code, status, "createdAt", "updatedAt") VALUES
-  ('CONFERENCE', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('EXERCISE', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('VISIT_BAN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('OTHER', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "eventTypes" (uuid, code, status, "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'Conference', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Exercise', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Visit Ban', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Other', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
