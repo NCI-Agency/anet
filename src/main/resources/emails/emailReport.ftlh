@@ -575,10 +575,12 @@
                 </span>
               </button>
             </#if>
-            <div>
-              <span>By ${(person.name)!SYSTEM_USER}</span><br>
-              <small>On ${(dateTimeFormatter.format(reportAction.createdAt))!}</small>
-            </div>
+            <#if reportAction.createdAt??>
+              <div>
+                <span>By ${(person.name)!SYSTEM_USER}</span><br>
+                <small>On ${(dateTimeFormatter.format(reportAction.createdAt))!}</small>
+              </div>
+            </#if>
           </div>
         </#list>
       </fieldset>
