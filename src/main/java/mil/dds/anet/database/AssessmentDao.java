@@ -429,13 +429,15 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
     } else if (checkPerson(gro)) {
       final var associatedPositionsUuids = loadAssociatedPositions(user);
       final Position position = engine.getPositionDao()
-          .getPrimaryPositionForPerson(engine.getContext(), gro.getRelatedObjectUuid()).join();
+          .getPrimaryPositionForPerson(engine.getContext(), gro.getRelatedObjectUuid(), null)
+          .join();
       // Allowed if this position is among the associated positions of the user
       return associatedPositionsUuids.contains(DaoUtils.getUuid(position));
     } else if (checkOrganization(gro)) {
       final var administratedPositionsUuids = loadOrganizationAdministrated(user);
       final Position position = engine.getPositionDao()
-          .getPrimaryPositionForPerson(engine.getContext(), gro.getRelatedObjectUuid()).join();
+          .getPrimaryPositionForPerson(engine.getContext(), gro.getRelatedObjectUuid(), null)
+          .join();
       // Allowed if this position is among the administrative positions of the organization
       return administratedPositionsUuids.contains(DaoUtils.getUuid(position));
     } else {
