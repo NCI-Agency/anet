@@ -120,8 +120,8 @@ class PositionMergeTest extends AbstractResourceTest {
     mergedPositionInput.setType(secondPosition.getType());
 
     // Merge the two positions
-    final int nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.mergePositions("", secondPosition.getUuid(), mergedPositionInput));
+    final int nrUpdated = withCredentials(adminUser, t -> mutationExecutor.mergePositions("",
+        secondPosition.getUuid(), false, mergedPositionInput));
     assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.

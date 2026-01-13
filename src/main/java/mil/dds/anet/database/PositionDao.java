@@ -565,7 +565,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int mergePositions(Position winner, Position loser) {
+  public int mergePositions(Position winner, Position loser, boolean userWinnerPersonHistory) {
     final Handle handle = getDbHandle();
     try {
       final String winnerUuid = winner.getUuid();
@@ -586,10 +586,15 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       // Update the winner's fields
       update(winner);
 
-      // Remove loser from position history
-      deleteForMerge("peoplePositions", "positionUuid", loserUuid);
-      // Update position history with given input on winner
-      updatePositionHistory(winner);
+      if (userWinnerPersonHistory) {
+        // Remove loser from position history
+        deleteForMerge("peoplePositions", "positionUuid", loserUuid);
+      } else {
+        // Remove winner from position history
+        deleteForMerge("peoplePositions", "positionUuid", winnerUuid);
+        // Move loser's position history to winner
+        updateForMerge("peoplePositions", "positionUuid", winnerUuid, loserUuid);
+      }
 
       // Update positionRelationships with given input on winner
       final Set<String> existingApUuids =

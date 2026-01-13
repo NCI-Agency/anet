@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Note;
@@ -72,10 +73,10 @@ public class ResourceUtils {
         }
       }
       // Update counters
-      if (current.getPrimary() && current.getEndTime() == null) {
+      if (Boolean.TRUE.equals(current.getPrimary()) && current.getEndTime() == null) {
         countCurrentPrimaryPositions++;
       }
-      if (isCheckingPersonHistory && current.getPrimary()) {
+      if (isCheckingPersonHistory && Boolean.TRUE.equals(current.getPrimary())) {
         latestEntityInHistoryUuid = current.getPositionUuid();
       } else {
         latestEntityInHistoryUuid = current.getPersonUuid();
@@ -111,7 +112,7 @@ public class ResourceUtils {
     }
     boolean bothPrimary =
         Boolean.TRUE.equals(a.getPrimary()) && Boolean.TRUE.equals(b.getPrimary());
-    boolean samePosition = a.getPositionUuid().equals(b.getPositionUuid());
+    boolean samePosition = Objects.equals(a.getPositionUuid(), b.getPositionUuid());
 
     return !(bothPrimary || samePosition);
   }
