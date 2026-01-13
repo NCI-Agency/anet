@@ -32,7 +32,7 @@ class ShowEvent extends Page {
   }
 
   async getType() {
-    return browser.$('div[id="type"]')
+    return browser.$('div[id="eventType"]')
   }
 
   async getStartDate() {

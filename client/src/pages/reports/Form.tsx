@@ -268,12 +268,13 @@ const ReportForm = ({
       engagementDate,
       locationUuid
     ) {
-      // When engagement date or location uuid changes we need to call the back-end to figure out if there is a VISIT BAN event
-      // that applies to the location in the engagement date. If so we need to warn the user.
+      // When engagement date or location uuid changes we need to call the back-end to figure out
+      // if there is a Visit Ban event that applies to the location in the engagement date. If so
+      // we need to warn the user.
       if (engagementDate && locationUuid) {
         const eventQuery = {
           pageSize: 1,
-          type: "Visit ban",
+          eventTypeUuid: Settings.eventTypeVisitBanUuid,
           locationUuid,
           includeDate: getEventMinDate(engagementDate)
         }
@@ -502,7 +503,12 @@ const ReportForm = ({
           }
         }
 
-        const eventFilters = Event.getReportEventFilters()
+        const eventFilters = {
+          all: {
+            label: "All",
+            queryVars: {}
+          }
+        }
 
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {

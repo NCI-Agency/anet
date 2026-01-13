@@ -2,14 +2,14 @@ import {
   gqlAllAttachmentFields,
   gqlAllEventFields,
   gqlEntityAvatarFields,
-  gqlEntityFieldsMap
+  gqlEntityFieldsMap,
+  gqlMinimalEventTypeFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import Model, { yupDate } from "components/Model"
 import moment from "moment"
 import EVENTS_ICON from "resources/events.png"
 import Settings from "settings"
-import utils from "utils"
 import * as yup from "yup"
 
 export default class Event extends Model {
@@ -29,11 +29,11 @@ export default class Event extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
-    type: yup
-      .string()
+    eventType: yup
+      .object()
       .nullable()
-      .required("Event type is required")
-      .default(null),
+      .default(null)
+      .test("required-object", "type is a required field", et => !!et?.uuid),
     name: yup.string().required().default(""),
     description: yup.string().default(""),
     startDate: yupDate.required().default(null),
@@ -62,9 +62,11 @@ export default class Event extends Model {
 
   static autocompleteQuery = `
     ${gqlEntityFieldsMap.Event}
-    type
     startDate
     endDate
+    eventType {
+      ${gqlMinimalEventTypeFields}
+    }
     location {
       ${gqlEntityFieldsMap.Location}
     }
@@ -74,11 +76,22 @@ export default class Event extends Model {
     super(Model.fillObject(props, Event.yupSchema))
   }
 
+  static getEventTypesQuery = gql`
+    query {
+      eventTypes {
+        ${gqlMinimalEventTypeFields}
+      }
+    }
+  `
+
   static getEventQuery = gql`
     query ($uuid: String) {
       event(uuid: $uuid) {
         ${gqlAllEventFields}
         ${gqlEntityAvatarFields}
+        eventType {
+          ${gqlMinimalEventTypeFields}
+        }
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -148,12 +161,7 @@ export default class Event extends Model {
     return this.name
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = [
-    "tasks",
-    "organizations",
-    "people",
-    "eventType"
-  ]
+  static FILTERED_CLIENT_SIDE_FIELDS = ["tasks", "organizations", "people"]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(
@@ -171,23 +179,5 @@ export default class Event extends Model {
     return Settings.eventsIncludeStartAndEndTime
       ? Settings.dateFormats.forms.displayLong.withTime
       : Settings.dateFormats.forms.displayLong.date
-  }
-
-  static humanNameOfType(type) {
-    return utils.sentenceCase(type)
-  }
-
-  static getEventFilters(filterDefs) {
-    return filterDefs?.reduce((accumulator, filter) => {
-      accumulator[filter] = {
-        label: Event.humanNameOfType(filter),
-        queryVars: { type: filter }
-      }
-      return accumulator
-    }, {})
-  }
-
-  static getReportEventFilters() {
-    return Event.getEventFilters(Settings?.fields?.report?.event?.filter)
   }
 }

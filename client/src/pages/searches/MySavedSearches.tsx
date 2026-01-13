@@ -21,6 +21,7 @@ import {
 } from "components/SearchFilters"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
+import { Event } from "models"
 import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
@@ -62,6 +63,8 @@ const MySavedSearches = ({
   const [stateError, setStateError] = useState(null)
   const [deserializedQueries, setDeserializedQueries] = useState({})
   const [searches, setSearches] = useState([])
+  const { data: eventTypesData } = API.useApiQuery(Event.getEventTypesQuery)
+  const eventTypes = eventTypesData?.eventTypes ?? []
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
   )
@@ -190,6 +193,7 @@ const MySavedSearches = ({
                           {deserializedQuery && (
                             <SearchDescription
                               searchQuery={deserializedQuery}
+                              eventTypes={eventTypes}
                               showText
                               style={{ pointerEvents: "none" }}
                             />

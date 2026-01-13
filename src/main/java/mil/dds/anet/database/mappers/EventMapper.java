@@ -5,6 +5,7 @@ import static mil.dds.anet.database.mappers.MapperUtils.getInstantAsLocalDateTim
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Event;
+import mil.dds.anet.beans.WithStatus;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -14,13 +15,13 @@ public class EventMapper implements RowMapper<Event> {
   public Event map(ResultSet r, StatementContext ctx) throws SQLException {
     Event event = new Event();
     MapperUtils.setCustomizableBeanFields(event, r, "events");
-    event.setType(r.getString("events_type"));
     event.setName(r.getString("events_name"));
-    event.setStatus(MapperUtils.getEnumIdx(r, "events_status", Event.Status.class));
+    event.setStatus(MapperUtils.getEnumIdx(r, "events_status", WithStatus.Status.class));
     event.setDescription(r.getString("events_description"));
     event.setStartDate(getInstantAsLocalDateTime(r, "events_startDate"));
     event.setEndDate(getInstantAsLocalDateTime(r, "events_endDate"));
     event.setOutcomes(r.getString("events_outcomes"));
+    event.setEventTypeUuid(r.getString("events_eventTypeUuid"));
     event.setOwnerOrgUuid(r.getString("events_ownerOrgUuid"));
     event.setHostOrgUuid(r.getString("events_hostOrgUuid"));
     event.setAdminOrgUuid(r.getString("events_adminOrgUuid"));

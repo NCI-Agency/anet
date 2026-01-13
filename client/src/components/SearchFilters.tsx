@@ -42,7 +42,7 @@ import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Event, EventSeries, Location, Person, Position, Report } from "models"
+import { EventSeries, Location, Person, Position, Report } from "models"
 import React from "react"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -149,7 +149,7 @@ const advancedSelectFilterEventSeriesProps = {
 }
 
 export const searchFilters = function (
-  eventTypes?: Array<string | { code: string }>
+  eventTypes?: Array<{ uuid: string; name: string }>
 ) {
   const filters = {}
 
@@ -717,13 +717,6 @@ export const searchFilters = function (
     }
   }
 
-  const eventTypeOptions = (eventTypes ?? []).map(type =>
-    typeof type === "string" ? type : type.code
-  )
-  const eventTypeLabels = eventTypeOptions.map(code =>
-    Event.humanNameOfType ? Event.humanNameOfType(code) : code
-  )
-
   filters[SEARCH_OBJECT_TYPES.EVENTS] = {
     filters: {
       [Settings.fields.event.type.label]: {
@@ -731,9 +724,9 @@ export const searchFilters = function (
         dictProps: Settings.fields.event.type,
         deserializer: deserializeSelectFilter,
         props: {
-          queryKey: "type",
-          options: eventTypeOptions,
-          labels: eventTypeLabels
+          queryKey: "eventTypeUuid",
+          options: (eventTypes ?? []).map(eventType => eventType.uuid),
+          labels: (eventTypes ?? []).map(eventType => eventType.name)
         }
       },
       [Settings.fields.event.eventSeries.label]: {
@@ -869,7 +862,7 @@ const SearchFilterDisplay = ({
 
 interface SearchDescriptionProps {
   searchQuery?: SearchQueryPropType
-  eventTypes?: Array<string | { code: string }>
+  eventTypes?: Array<{ uuid: string; name: string }>
   showText?: boolean
   showPlaceholders?: boolean
   style?: any

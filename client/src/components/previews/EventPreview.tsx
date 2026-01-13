@@ -73,7 +73,7 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.type}
-          value={Event.humanNameOfType(event.type)}
+          value={event.eventType?.name}
         />
         <DictionaryField
           wrappedComponent={PreviewField}

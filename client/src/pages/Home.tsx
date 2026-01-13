@@ -28,7 +28,7 @@ import {
   SearchDescription
 } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
-import { Report } from "models"
+import { Event, Report } from "models"
 import { superuserTour, userTour } from "pages/GuidedTour"
 import SearchResults from "pages/searches/SearchResults"
 import React, { useContext, useEffect, useState } from "react"
@@ -402,6 +402,8 @@ const MySavedSearches = ({
   const [searchCount, setSearchCount] = useState({})
   const [collapsed, setCollapsed] = useState({})
   const [searches, setSearches] = useState([])
+  const { data: eventTypesData } = API.useApiQuery(Event.getEventTypesQuery)
+  const eventTypes = eventTypesData?.eventTypes ?? []
 
   const { data, loading, error } = API.useApiQuery(
     GQL_GET_HOMEPAGE_SAVED_SEARCHES
@@ -525,6 +527,7 @@ const MySavedSearches = ({
                       {savedQuery && (
                         <SearchDescription
                           searchQuery={savedQuery}
+                          eventTypes={eventTypes}
                           showText
                           style={{ fontSize: 20, pointerEvents: "none" }}
                         />

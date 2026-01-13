@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import API from "api"
@@ -13,6 +12,7 @@ import {
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import { Event } from "models"
 import React, { useContext, useState } from "react"
 import {
   Button,
@@ -24,15 +24,6 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-
-const GQL_EVENT_TYPES = gql`
-  query {
-    eventTypes {
-      code
-      status
-    }
-  }
-`
 
 interface CustomToggleProps {
   onClick: (...args: unknown[]) => unknown
@@ -108,7 +99,7 @@ const AdvancedSearch = ({
     searchQuery.filters ? searchQuery.filters.slice() : []
   )
 
-  const { loading, error, data } = API.useApiQuery(GQL_EVENT_TYPES)
+  const { loading, error, data } = API.useApiQuery(Event.getEventTypesQuery)
   const eventTypes = data?.eventTypes ?? []
   const ALL_FILTERS = searchFilters(eventTypes)
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(

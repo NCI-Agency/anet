@@ -1,5 +1,6 @@
 import {
   gqlEntityFieldsMap,
+  gqlMinimalEventTypeFields,
   gqlPaginationFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -18,6 +19,9 @@ const GQL_GET_EVENT_LIST = gql`
         ${gqlEntityFieldsMap.Event}
         startDate
         endDate
+        eventType {
+          ${gqlMinimalEventTypeFields}
+        }
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }

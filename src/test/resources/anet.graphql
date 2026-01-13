@@ -513,7 +513,6 @@ type Event {
   startDate: Instant
   status: Status
   tasks: [Task]
-  type: String
   updatedAt: Instant
   uuid: String
 }
@@ -528,6 +527,7 @@ input EventInput {
   endDate: Instant
   entityAvatar: EntityAvatarInput
   eventSeries: EventSeriesInput
+  eventType: EventTypeInput
   hostOrg: OrganizationInput
   location: LocationInput
   name: String
@@ -538,7 +538,6 @@ input EventInput {
   startDate: Instant
   status: Status
   tasks: [TaskInput]
-  type: String
   updatedAt: Instant
   uuid: String
 }
@@ -551,6 +550,7 @@ input EventSearchQueryInput {
   endDate: Instant
   eventSeriesUuid: String
   eventTaskUuid: [String]
+  eventTypeUuid: String
   hostOrgUuid: [String]
   inMyReports: Boolean
   includeDate: Instant
@@ -565,7 +565,6 @@ input EventSearchQueryInput {
   subscribed: Boolean
   taskUuid: [String]
   text: String
-  type: String
 }
 
 """"""
@@ -637,9 +636,18 @@ enum EventSeriesSearchSortBy {
 
 """"""
 type EventType {
-  code: String
   createdAt: Instant
+  name: String
   relatedEventsCount: Int
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input EventTypeInput {
+  createdAt: Instant
+  name: String
   status: Status
   updatedAt: Instant
   uuid: String
@@ -801,7 +809,7 @@ type Mutation {
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createEvent(event: EventInput): Event
   createEventSeries(eventSeries: EventSeriesInput): EventSeries
-  createEventType(code: String): EventType
+  createEventType(eventType: EventTypeInput): EventType
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
   createOrUpdateEntityAvatar(entityAvatar: EntityAvatarInput): Int
@@ -816,7 +824,7 @@ type Mutation {
   deleteAssessment(uuid: String): Int
   deleteAttachment(uuid: String): Int
   deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
-  deleteEventType(code: String): Int!
+  deleteEventType(uuid: String): Int!
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
   deletePerson(uuid: String): Int
@@ -845,7 +853,7 @@ type Mutation {
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput, force: Boolean = false): Int
   updateEvent(event: EventInput, force: Boolean = false): Int
   updateEventSeries(eventSeries: EventSeriesInput, force: Boolean = false): Int
-  updateEventTypeStatus(code: String, status: Status): Int!
+  updateEventType(eventType: EventTypeInput): Int!
   updateLocation(force: Boolean = false, location: LocationInput): Int
   updateMe(force: Boolean = false, person: PersonInput): Int
   updateNote(force: Boolean = false, note: NoteInput): Note

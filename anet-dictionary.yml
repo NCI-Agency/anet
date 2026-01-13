@@ -6,6 +6,7 @@ SUPPORT_EMAIL_ADDR: support@example.com
 regularUsersCanCreateLocations: true
 engagementsIncludeTimeAndDuration: true
 eventsIncludeStartAndEndTime: true
+eventTypeVisitBanUuid: 54d88b80-6af5-4327-ab42-d1bc292745e9
 featureMartGuiEnabled: true
 
 calendarOptions:
@@ -500,7 +501,6 @@ fields:
     event:
       label: Event
       placeholder: Was the engagement part of an event?
-      filter: []
     reportCommunities:
       label: Communities of interest
       placeholder: Search for Communities…

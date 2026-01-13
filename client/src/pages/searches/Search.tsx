@@ -46,6 +46,7 @@ import SubNav from "components/SubNav"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
+import { Event } from "models"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
@@ -98,15 +99,6 @@ const GQL_GET_SAVED_SEARCHES = gql`
   query {
     savedSearches: mySearches {
       ${gqlSavedSearchFields}
-    }
-  }
-`
-
-const GQL_EVENT_TYPES = gql`
-  query {
-    eventTypes {
-      code
-      status
     }
   }
 `
@@ -271,7 +263,7 @@ const Search = ({
     data,
     refetch
   } = API.useApiQuery(GQL_GET_SAVED_SEARCHES)
-  const { data: eventTypesData } = API.useApiQuery(GQL_EVENT_TYPES)
+  const { data: eventTypesData } = API.useApiQuery(Event.getEventTypesQuery)
   const { done, result } = useBoilerplate({
     loading,
     error: err,

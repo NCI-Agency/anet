@@ -159,7 +159,7 @@ public class EventResource {
     if (event.getStatus() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event status must not be empty");
     }
-    if (event.getType() == null) {
+    if (event.getEventType() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event type must not be empty");
     }
     if (event.getName() == null || event.getName().trim().isEmpty()) {

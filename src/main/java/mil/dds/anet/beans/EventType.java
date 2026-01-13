@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -7,18 +8,12 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class EventType extends AbstractAnetBean implements WithStatus {
 
   @GraphQLQuery
-  private String code;
-
-  @GraphQLQuery
+  @GraphQLInputField
   private Status status;
 
-  public String getCode() {
-    return code;
-  }
-
-  public void setCode(String code) {
-    this.code = code;
-  }
+  @GraphQLQuery
+  @GraphQLInputField
+  private String name;
 
   @Override
   public Status getStatus() {
@@ -30,12 +25,20 @@ public class EventType extends AbstractAnetBean implements WithStatus {
     this.status = status;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   @GraphQLQuery(name = "relatedEventsCount")
-  public Integer getRelatedEventsCount() {
-    if (code == null) {
+  public Integer loadRelatedEventsCount() {
+    if (uuid == null) {
       return 0;
     }
-    return engine().getEventDao().countByType(code);
+    return engine().getEventDao().countByEventType(uuid);
   }
 
   @Override
@@ -43,15 +46,14 @@ public class EventType extends AbstractAnetBean implements WithStatus {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof EventType that)) {
       return false;
     }
-    EventType eventType = (EventType) o;
-    return Objects.equals(code, eventType.code);
+    return Objects.equals(name, that.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code);
+    return Objects.hash(name);
   }
 }
