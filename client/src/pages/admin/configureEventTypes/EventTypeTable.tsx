@@ -3,7 +3,6 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
-import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import {
@@ -11,6 +10,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import { deserializeQueryParams } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
@@ -243,26 +243,24 @@ const EventTypeTable = ({
                     </div>
                   </td>
                   <td>
-                    <Button
-                      variant={`${eventType.status === Model.STATUS.ACTIVE ? "danger" : "primary"}`}
-                      onClick={() =>
-                        updateStatus(eventType.code, eventType.status)
-                      }
-                    >
-                      {eventType.status === Model.STATUS.ACTIVE
-                        ? "Deactivate"
-                        : "Activate"}
-                    </Button>
-                  </td>
-                  <td>
-                    <ConfirmDestructive
-                      onConfirm={() => deleteEventType(eventType.code)}
-                      operation="delete"
-                      objectType="event type"
-                      objectDisplay={eventType.code}
-                      variant="outline-danger"
-                      buttonLabel="Delete"
-                    />
+                    <div className="d-flex gap-3">
+                      <Button
+                        variant={`${eventType.status === Model.STATUS.ACTIVE ? "danger" : "primary"}`}
+                        style={{ width: 100 }}
+                        onClick={() =>
+                          updateStatus(eventType.code, eventType.status)
+                        }
+                      >
+                        {eventType.status === Model.STATUS.ACTIVE
+                          ? "Deactivate"
+                          : "Activate"}
+                      </Button>
+                      <RemoveButton
+                        title="Delete event type"
+                        onClick={() => deleteEventType(eventType.code)}
+                        disabled={eventType.relatedEventsCount > 0}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
