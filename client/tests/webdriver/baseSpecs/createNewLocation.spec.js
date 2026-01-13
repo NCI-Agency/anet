@@ -106,7 +106,7 @@ describe("When creating a new Location", () => {
     await (await CreateNewLocation.getMaximiseLeafletButton()).click()
     expect(
       await (
-        await CreateNewLocation.getMaximiseLeafletButton()
+        await CreateNewLocation.getMinimiseLeafletButton()
       ).getAttribute("title")
     ).to.equal("Exit Full Screen")
   })

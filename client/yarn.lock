@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.0.11":
-  version: 4.0.11
-  resolution: "@apollo/client@npm:4.0.11"
+"@apollo/client@npm:4.0.12":
+  version: 4.0.12
+  resolution: "@apollo/client@npm:4.0.12"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/a50f3ea06420ac08680119d42024576b37b1f98e8e9419b9da57c6928665b6bb9d15668cf20ec67164195d28685fd9d54eba038b534561bd9dcc15ce0f907477
+  checksum: 10c0/aaf67908591b546f93e20b2c5484559179863e9dacddb2f1b1fae6a37c0bc30377e0db4fee3c00afe48074c21591d0ee490f6288545fe230967fe338ed5ed61d
   languageName: node
   linkType: hard
 
@@ -7197,7 +7197,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.0.11"
+    "@apollo/client": "npm:4.0.12"
     "@babel/core": "npm:7.28.5"
     "@babel/eslint-parser": "npm:7.28.5"
     "@babel/plugin-proposal-decorators": "npm:7.28.0"
@@ -7316,7 +7316,7 @@ __metadata:
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.2"
     leaflet-gesture-handling: "npm:1.2.2"
-    leaflet.fullscreen: "npm:5.1.1"
+    leaflet.fullscreen: "npm:5.2.1"
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
@@ -7368,7 +7368,7 @@ __metadata:
     ts-loader: "npm:9.5.4"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.9.3"
-    use-debounce: "npm:10.0.6"
+    use-debounce: "npm:10.1.0"
     uuid: "npm:13.0.0"
     webdriverio: "npm:9.23.0"
     webpack: "npm:5.104.1"
@@ -14734,12 +14734,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.fullscreen@npm:5.1.1":
-  version: 5.1.1
-  resolution: "leaflet.fullscreen@npm:5.1.1"
+"leaflet.fullscreen@npm:5.2.1":
+  version: 5.2.1
+  resolution: "leaflet.fullscreen@npm:5.2.1"
   peerDependencies:
     leaflet: ^1.7.0 || >=2.0.0-alpha.1
-  checksum: 10c0/0b8d6a85600bcb073536e89c00b75d70fb4db98e760cf46acb4070807060c0e4a01a310b0fd1663f9978a6dd8a12ab79fdd7e619144f838613a2561a9ae36fb9
+  checksum: 10c0/912e3cd5a638f1ffdec1c9bed4c70fce74d673aad0d03b3c05132bb1d2d991ad42dec05f92afa37609f83f29535412c0b7d650e2b00c1967a3936a7d387920bf
   languageName: node
   linkType: hard
 
@@ -20317,12 +20317,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:10.0.6":
-  version: 10.0.6
-  resolution: "use-debounce@npm:10.0.6"
+"use-debounce@npm:10.1.0":
+  version: 10.1.0
+  resolution: "use-debounce@npm:10.1.0"
   peerDependencies:
     react: "*"
-  checksum: 10c0/f0745de48fc344e6f90ea24384f3c79bf0733d06649827241135847abd67ee8db32f523d490c3276bce9f5a6867194ab1c0187bf6b84cabe1dd679037f4a527e
+  checksum: 10c0/1d2c9ab71be283f7ea9f9c78f3574aeb6ff6fbcb18a9c5daf7f633521a8978f14d190016d39fd773227e40e9929e223677bb311343dadf33ee0763ef24bff510
   languageName: node
   linkType: hard
 
