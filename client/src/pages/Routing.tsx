@@ -1,6 +1,7 @@
 import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
 import AccessTokensList from "pages/admin/accessTokens/Index"
+import ConfigureEventTypesShow from "pages/admin/configureEventTypes/Show"
 import AdminIndex from "pages/admin/Index"
 import MartImporterShow from "pages/admin/martImporter/Show"
 import MergeLocations from "pages/admin/merge/MergeLocations"
@@ -71,7 +72,6 @@ import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import Settings from "settings"
-import ConfigureEventTypesShow from "./admin/configureEventTypes/Show"
 
 const Routing = () => {
   const { currentUser } = useContext(AppContext)

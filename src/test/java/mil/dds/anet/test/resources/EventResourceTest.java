@@ -11,7 +11,7 @@ import mil.dds.anet.test.client.AnetBeanList_Event;
 import mil.dds.anet.test.client.Event;
 import mil.dds.anet.test.client.EventInput;
 import mil.dds.anet.test.client.EventSearchQueryInput;
-import mil.dds.anet.test.client.EventType;
+import mil.dds.anet.test.client.EventTypeInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.utils.UtilsTest;
@@ -28,7 +28,7 @@ public class EventResourceTest extends AbstractResourceTest {
       "{ uuid status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
   public static final String FIELDS =
       "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid }"
-          + " updatedAt startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
+          + " updatedAt startDate endDate eventType { uuid } organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
   void eventTestGraphQL() {
@@ -99,7 +99,8 @@ public class EventResourceTest extends AbstractResourceTest {
     failCreateEvent(eventInput);
     eventInput.setAdminOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
-    eventInput.setType("Conference");
+    final String EVENT_TYPE_CONFERENCE_UUID = "92a69ee6-829e-4a67-88fb-3387f81b6d37";
+    eventInput.setEventType(EventTypeInput.builder().withUuid(EVENT_TYPE_CONFERENCE_UUID).build());
     succeedCreateEvent(eventInput);
   }
 

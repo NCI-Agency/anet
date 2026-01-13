@@ -7,12 +7,9 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.beans.EventType;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
@@ -24,7 +21,6 @@ public class Event extends EventSeries {
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
 
-  String type;
   @GraphQLQuery
   @GraphQLInputField
   Instant startDate;
@@ -178,17 +174,6 @@ public class Event extends EventSeries {
     return people;
   }
 
-  @GraphQLQuery(name = "type")
-  public String getType() {
-    return type;
-  }
-
-  @GraphQLInputField(name = "type")
-  public void setType(String type) {
-    this.type = type;
-    this.eventType = new ForeignObjectHolder<>();
-  }
-
   public Instant getStartDate() {
     return startDate;
   }
@@ -218,12 +203,30 @@ public class Event extends EventSeries {
     if (eventType.hasForeignObject()) {
       return CompletableFuture.completedFuture(eventType.getForeignObject());
     }
-    if (type == null) {
-      return CompletableFuture.completedFuture(null);
-    }
-    final EventType loaded = engine().getEventTypeDao().getByCode(type);
-    eventType = new ForeignObjectHolder<>(loaded);
-    return CompletableFuture.completedFuture(loaded);
+    return new UuidFetcher<EventType>()
+        .load(context, IdDataLoaderKey.EVENT_TYPE, eventType.getForeignUuid()).thenApply(o -> {
+          eventType.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setEventTypeUuid(String eventTypeUuid) {
+    this.eventType = new ForeignObjectHolder<>(eventTypeUuid);
+  }
+
+  @JsonIgnore
+  public String getEventTypeUuid() {
+    return eventType.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "eventType")
+  public void setEventType(EventType eventType) {
+    this.eventType = new ForeignObjectHolder<>(eventType);
+  }
+
+  public EventType getEventType() {
+    return eventType.getForeignObject();
   }
 
   @GraphQLQuery(name = "reports")
@@ -268,7 +271,7 @@ public class Event extends EventSeries {
     if (!super.equals(o))
       return false;
     Event event = (Event) o;
-    return Objects.equals(type, event.type) && Objects.equals(startDate, event.startDate)
+    return Objects.equals(eventType, event.eventType) && Objects.equals(startDate, event.startDate)
         && Objects.equals(endDate, event.endDate) && Objects.equals(outcomes, event.outcomes)
         && Objects.equals(tasks, event.tasks) && Objects.equals(organizations, event.organizations)
         && Objects.equals(people, event.people) && Objects.equals(eventSeries, event.eventSeries)
@@ -277,7 +280,7 @@ public class Event extends EventSeries {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), type, startDate, endDate, outcomes, tasks, organizations,
-        people, eventSeries, location);
+    return Objects.hash(super.hashCode(), eventType, startDate, endDate, outcomes, tasks,
+        organizations, people, eventSeries, location);
   }
 }

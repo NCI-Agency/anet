@@ -63,16 +63,6 @@ import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
-const GQL_EVENT_TYPES = gql`
-  query {
-    eventTypes {
-      uuid
-      code
-      status
-    }
-  }
-`
-
 const GQL_CREATE_EVENT = gql`
   mutation ($event: EventInput!) {
     createEvent(event: $event) {
@@ -129,7 +119,7 @@ const EventForm = ({
     }
   ]
 
-  const { loading, error, data } = API.useApiQuery(GQL_EVENT_TYPES)
+  const { loading, error, data } = API.useApiQuery(Event.getEventTypesQuery)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -139,7 +129,7 @@ const EventForm = ({
     return result
   }
   const activeEventTypes = (data?.eventTypes ?? []).filter(
-    t => t.status === "ACTIVE"
+    t => t.status === Model.STATUS.ACTIVE
   )
 
   return (
@@ -475,10 +465,15 @@ const EventForm = ({
                 <DictionaryField
                   wrappedComponent={FastField}
                   dictProps={Settings.fields.event.type}
-                  name="type"
+                  name="eventType"
+                  value={values.eventType?.uuid ?? ""}
                   component={FieldHelper.SpecialField}
                   onChange={event => {
-                    setFieldValue("type", event.target.value, true)
+                    setFieldValue(
+                      "eventType",
+                      { uuid: event.target.value },
+                      true
+                    )
                   }}
                   widget={
                     !activeEventTypes.length ? (
@@ -489,8 +484,8 @@ const EventForm = ({
                       <FormSelect className="location-type-form-group form-control">
                         <option value="">Please select an event type</option>
                         {activeEventTypes.map(t => (
-                          <option key={t.code} value={t.code}>
-                            {Event.humanNameOfType(t.code)}
+                          <option key={t.uuid} value={t.uuid}>
+                            {t.name}
                           </option>
                         ))}
                       </FormSelect>
@@ -769,6 +764,7 @@ const EventForm = ({
     event.organizations = values.organizations.map(t => utils.getReference(t))
     // strip person fields not in data model
     event.people = values.people.map(t => utils.getReference(t))
+    event.eventType = utils.getReference(event.eventType)
     event.ownerOrg = utils.getReference(event.ownerOrg)
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)

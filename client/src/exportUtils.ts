@@ -315,10 +315,17 @@ const getEventFragment = (fields: string[] = []) => `
       ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
-        ${shouldInclude(fields, "type")}
         ${shouldInclude(fields, "name")}
         ${shouldInclude(fields, "startDate")}
         ${shouldInclude(fields, "endDate")}
+        ${shouldInclude(
+          fields,
+          "eventType",
+          `eventType {
+            uuid
+            name
+          }`
+        )}
         ${shouldInclude(
           fields,
           "ownerOrg",

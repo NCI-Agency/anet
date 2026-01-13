@@ -7,14 +7,14 @@ interface AddNewEventTypeModalProps {
   show: boolean
   onHide: () => void
   onSave: (values: any) => void
-  validateCode: (code: string) => boolean
+  validateName: (name: string) => boolean
 }
 
 const AddNewEventTypeModal = ({
   show,
   onHide,
   onSave,
-  validateCode
+  validateName
 }: AddNewEventTypeModalProps) => {
   return (
     <Modal backdrop="static" centered show={show} onHide={onHide}>
@@ -26,13 +26,13 @@ const AddNewEventTypeModal = ({
         <Formik
           enableReinitialize
           initialValues={{
-            code: ""
+            name: ""
           }}
           validate={values => {
-            const errors: { code?: string } = {}
-            const code = values.code
-            if (code && !validateCode(code)) {
-              errors.code = "Code already exists"
+            const errors: { name?: string } = {}
+            const name = values.name
+            if (name && !validateName(name)) {
+              errors.name = "Name already exists"
             }
             return errors
           }}
@@ -46,9 +46,9 @@ const AddNewEventTypeModal = ({
           {({ values, errors }) => (
             <Form className="d-flex flex-column gap-3">
               <Field
-                name="code"
+                name="name"
                 component={FieldHelper.InputField}
-                placeholder="Give this event type a code"
+                placeholder="Give this event type a name"
                 vertical
               />
               <div className="submit-buttons">
@@ -57,7 +57,7 @@ const AddNewEventTypeModal = ({
                     id="saveSearchModalSubmitButton"
                     variant="primary"
                     onClick={() => onSave(values)}
-                    disabled={!!errors.code || !values.code}
+                    disabled={!!errors.name || !values.name}
                   >
                     Add
                   </Button>

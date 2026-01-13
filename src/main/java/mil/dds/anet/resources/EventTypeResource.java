@@ -1,14 +1,20 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EventType;
-import mil.dds.anet.beans.WithStatus.Status;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.EventTypeDao;
+import mil.dds.anet.utils.AuthUtils;
+import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResponseUtils;
+import mil.dds.anet.utils.Utils;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,8 +25,8 @@ public class EventTypeResource {
 
   private final EventTypeDao dao;
 
-  public EventTypeResource(AnetObjectEngine engine) {
-    this.dao = engine.getEventTypeDao();
+  public EventTypeResource(EventTypeDao dao) {
+    this.dao = dao;
   }
 
   @GraphQLQuery(name = "eventTypes")
@@ -29,43 +35,44 @@ public class EventTypeResource {
   }
 
   @GraphQLMutation(name = "createEventType")
-  public EventType createEventType(@GraphQLArgument(name = "code") String code) {
-    final String normalizedCode = code == null ? "" : code.toUpperCase();
-    if (normalizedCode.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "EVENT_TYPE_CODE_REQUIRED");
+  public EventType createEventType(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "eventType") EventType eventType) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+
+    if (Utils.isEmptyOrNull(Utils.trimStringReturnNull(eventType.getName()))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Please enter a name for the event type");
     }
 
-    if (dao.getByCode(code) != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "EVENT_TYPE_ALREADY_EXISTS");
+    try {
+      dao.insert(eventType);
+    } catch (UnableToExecuteStatementException e) {
+      throw ResponseUtils.handleSqlException(e, "Duplicate event type name");
     }
-
-    EventType et = new EventType();
-    et.setCode(code);
-    et.setStatus(Status.ACTIVE);
-
-    dao.insert(et);
-    return et;
+    return eventType;
   }
 
-  @GraphQLMutation(name = "updateEventTypeStatus")
-  public int updateStatus(@GraphQLArgument(name = "code") String code,
-      @GraphQLArgument(name = "status") Status status) {
+  @GraphQLMutation(name = "updateEventType")
+  public int updateStatus(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "eventType") EventType eventType) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
 
-    if (dao.getByCode(code) == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EVENT_TYPE_NOT_FOUND");
-    }
-    return dao.updateStatus(code, status);
+    return dao.update(eventType);
   }
 
   @GraphQLMutation(name = "deleteEventType")
-  public int deleteEventType(@GraphQLArgument(name = "code") String code) {
-    if (dao.getByCode(code) == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "EVENT_TYPE_NOT_FOUND");
+  public int deleteEventType(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "uuid") String uuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+
+    try {
+      return dao.delete(uuid);
+    } catch (UnableToExecuteStatementException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event type is in use");
     }
-    if (dao.isInUse(code)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "EVENT_TYPE_IN_USE");
-    }
-    return dao.delete(code);
   }
 
 }

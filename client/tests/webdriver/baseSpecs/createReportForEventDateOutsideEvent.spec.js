@@ -30,7 +30,7 @@ describe("When creating a report for an event with engagement date outside of ev
     await CreateReport.fillForm(REPORT_FIELDS)
     await browser.pause(500)
     await CreateReport.submitForm()
-    expect(await (await CreateReport.getAlert()).getText()).to.include(
+    expect(await (await CreateReport.getAlertWarning()).getText()).to.include(
       EVENT_DATES_WARNING
     )
   })

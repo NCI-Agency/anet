@@ -35,9 +35,7 @@ describe("Create event page", () => {
       await (await CreateEvent.getNameInput()).waitForDisplayed()
       await (await CreateEvent.getNameInput()).setValue("Test Event")
 
-      await (
-        await CreateEvent.getTypeInput()
-      ).selectByAttribute("value", "Conference")
+      await (await CreateEvent.getTypeInput()).selectByVisibleText("Conference")
 
       await (await CreateEvent.getStartDateInput()).waitForDisplayed()
       await (await CreateEvent.getStartDateInput()).setValue("01-01-2025 00:00")
@@ -85,9 +83,7 @@ describe("Create event page", () => {
       await (await CreateEvent.getNameInput()).waitForDisplayed()
       await (await CreateEvent.getNameInput()).setValue("Test Event 2")
 
-      await (
-        await CreateEvent.getTypeInput()
-      ).selectByAttribute("value", "Conference")
+      await (await CreateEvent.getTypeInput()).selectByVisibleText("Conference")
 
       await (await CreateEvent.getStartDateInput()).waitForDisplayed()
       await (await CreateEvent.getStartDateInput()).setValue("01-01-2025 00:00")

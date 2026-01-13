@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import API from "api"
@@ -8,20 +7,12 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import _isEqual from "lodash/isEqual"
+import { Event } from "models"
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
-
-const GQL_EVENT_TYPES = gql`
-  query {
-    eventTypes {
-      code
-      status
-    }
-  }
-`
 
 interface SearchPopoverProps {
   popoverContent: React.ReactElement
@@ -87,7 +78,7 @@ const SearchBar = ({
   const queryTextUnchanged = _isEqual(latestQueryText.current, searchQuery.text)
   const [searchTerms, setSearchTerms] = useState(searchQuery.text)
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
-  const { data: eventTypesData } = API.useApiQuery(GQL_EVENT_TYPES)
+  const { data: eventTypesData } = API.useApiQuery(Event.getEventTypesQuery)
   const eventTypes = eventTypesData?.eventTypes ?? []
 
   useEffect(() => {

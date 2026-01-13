@@ -8,6 +8,7 @@ import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
+import mil.dds.anet.database.EventTypeDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -25,6 +26,7 @@ public enum IdDataLoaderKey {
   ENTITY_AVATAR(EntityAvatarDao.TABLE_NAME), // -
   EVENTS(EventDao.TABLE_NAME), // -
   EVENT_SERIES(EventSeriesDao.TABLE_NAME), // -
+  EVENT_TYPE(EventTypeDao.TABLE_NAME), // -
   LOCATIONS(LocationDao.TABLE_NAME), // -
   ORGANIZATIONS(OrganizationDao.TABLE_NAME), // -
   PEOPLE(PersonDao.TABLE_NAME), // -
