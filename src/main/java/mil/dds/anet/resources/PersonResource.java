@@ -383,8 +383,8 @@ public class PersonResource {
   public Integer mergePeople(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerPerson") Person winner,
-      @GraphQLArgument(name = "useWinnerPositions",
-          defaultValue = "true") boolean useWinnerPositions) {
+      @GraphQLArgument(name = "useWinnerPositionHistory",
+          defaultValue = "true") boolean useWinnerPositionHistory) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
 
@@ -404,7 +404,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
     }
 
-    int numRows = dao.mergePeople(winner, loser, useWinnerPositions);
+    int numRows = dao.mergePeople(winner, loser, useWinnerPositionHistory);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged person relation information.");

@@ -204,7 +204,7 @@ const EditHistory = ({
                     parentEntityUuid={parentEntityUuid}
                     setPeriodsOverlapping={setPeriodsOverlapping}
                     setAlreadyOccupiedEntity={setAlreadyOccupiedEntity}
-                    isCheckingPerson={historyEntityType == "position"}
+                    isCheckingPerson={historyEntityType === "position"}
                   />
                   <Container fluid>
                     <Row>

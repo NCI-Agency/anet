@@ -299,7 +299,10 @@ public class PositionResource {
   @GraphQLMutation(name = "mergePositions")
   public Integer mergePositions(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "winnerPosition") Position winnerPosition,
-      @GraphQLArgument(name = "loserUuid") String loserUuid) throws ResponseStatusException {
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "useWinnerPersonHistory",
+          defaultValue = "true") boolean useWinnerPersonHistory)
+      throws ResponseStatusException {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
     AuthUtils.assertAdministrator(user);
@@ -315,16 +318,9 @@ public class PositionResource {
 
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);
-    /*
-     * TODO do we need this? if
-     * (ApplicationContextProvider.getEngine().getPersonDao().hasHistoryConflict(
-     * winnerPosition.getUuid(), loserUuid, winnerPosition.getPreviousPeople(), false)) { throw new
-     * ResponseStatusException(HttpStatus.BAD_REQUEST,
-     * "At least one of the people in the history is occupied for the specified period."); }
-     */
     validatePosition(user, winnerPosition);
 
-    int numRows = dao.mergePositions(winnerPosition, loserPosition);
+    int numRows = dao.mergePositions(winnerPosition, loserPosition, useWinnerPersonHistory);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged position relation information.");
