@@ -45,7 +45,6 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.jdbi.v3.core.Handle;
-import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -442,7 +441,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  public int mergePeople(Person winner, Person loser, boolean useWinnerPositions) {
+  public int mergePeople(Person winner, Person loser, boolean useWinnerPositionHistory) {
     final Handle handle = getDbHandle();
     try {
       final String winnerUuid = winner.getUuid();
@@ -498,7 +497,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       // Update attachment authors
       updateForMerge("attachments", "authorUuid", winnerUuid, loserUuid);
 
-      if (useWinnerPositions) {
+      if (useWinnerPositionHistory) {
         updatePosition(handle, null, loserUuid, loserUuid);
       } else {
         updatePosition(handle, winnerUuid, loserUuid, winnerUuid);
