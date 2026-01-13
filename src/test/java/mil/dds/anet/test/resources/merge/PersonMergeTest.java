@@ -171,7 +171,7 @@ class PersonMergeTest extends AbstractResourceTest {
     // Merge the two persons
     winnerInput.setUuid(winner.getUuid());
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.mergePeople("", loser1.getUuid(), winnerInput));
+        t -> mutationExecutor.mergePeople("", loser1.getUuid(), true, winnerInput));
     assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.
@@ -216,7 +216,7 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.mergePeople("", loser2.getUuid(), winnerInput));
+        t -> mutationExecutor.mergePeople("", loser2.getUuid(), false, winnerInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
@@ -259,7 +259,7 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(winner1.getUuid()).isNotNull();
     winnerInput.setUuid(winner1.getUuid());
     final Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.mergePeople("", loser.getUuid(), winnerInput));
+        t -> mutationExecutor.mergePeople("", loser.getUuid(), false, winnerInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
@@ -281,7 +281,7 @@ class PersonMergeTest extends AbstractResourceTest {
   void testMergeSame() {
     try {
       withCredentials(adminUser,
-          t -> mutationExecutor.mergePeople("", admin.getUuid(), getPersonInput(admin)));
+          t -> mutationExecutor.mergePeople("", admin.getUuid(), true, getPersonInput(admin)));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -293,7 +293,8 @@ class PersonMergeTest extends AbstractResourceTest {
     try {
       final PersonInput winner = getPersonInput(admin);
       winner.setUuid(UUID.randomUUID().toString());
-      withCredentials(adminUser, t -> mutationExecutor.mergePeople("", admin.getUuid(), winner));
+      withCredentials(adminUser,
+          t -> mutationExecutor.mergePeople("", admin.getUuid(), true, winner));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -304,7 +305,7 @@ class PersonMergeTest extends AbstractResourceTest {
   void testMergeUnknownLoser() {
     try {
       withCredentials(adminUser, t -> mutationExecutor.mergePeople("", UUID.randomUUID().toString(),
-          getPersonInput(admin)));
+          true, getPersonInput(admin)));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -325,7 +326,8 @@ class PersonMergeTest extends AbstractResourceTest {
       winner.setPosition(
           opt.map(personPositionHistory -> getPositionInput(personPositionHistory.getPosition()))
               .orElse(null));
-      withCredentials(adminUser, t -> mutationExecutor.mergePeople("", admin.getUuid(), winner));
+      withCredentials(adminUser,
+          t -> mutationExecutor.mergePeople("", admin.getUuid(), true, winner));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK

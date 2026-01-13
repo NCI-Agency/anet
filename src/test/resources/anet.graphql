@@ -836,8 +836,8 @@ type Mutation {
   emailReport(email: AnetEmailInput, uuid: String): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
-  mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
-  mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
+  mergePeople(loserUuid: String, useWinnerPositionHistory: Boolean = true, winnerPerson: PersonInput): Int
+  mergePositions(loserUuid: String, useWinnerPersonHistory: Boolean = true, winnerPosition: PositionInput): Int
   mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
   publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, previousPositionUuid: String, primary: Boolean = true, uuid: String): Int!

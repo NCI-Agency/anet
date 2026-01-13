@@ -29,7 +29,7 @@ function PreviousPeople({
           <tr>
             <th>Name</th>
             <th>Dates</th>
-            <th></th>
+            <th />
           </tr>
         </thead>
         <tbody>

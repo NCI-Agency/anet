@@ -22,6 +22,7 @@ interface MergeFieldProps {
   autoMerge?: boolean
   dispatchMergeActions?: (...args: unknown[]) => unknown
   className?: string
+  showAction: boolean
 }
 
 const MergeField = ({
@@ -33,7 +34,8 @@ const MergeField = ({
   mergeState,
   autoMerge,
   dispatchMergeActions,
-  className
+  className,
+  showAction = true
 }: MergeFieldProps) => {
   const fieldRef = useRef(null)
   const [height, setHeight] = useState("auto")
@@ -76,8 +78,11 @@ const MergeField = ({
   }, [canAutoMerge, action, fieldName, mergeState])
 
   // show an action button for fields that need to be merged manually
+  console.log(fieldName)
+  console.log(showAction)
   const actionButton = useMemo(
     () =>
+      showAction &&
       !canAutoMerge &&
       action &&
       getActionButton(action, align, mergeState, fieldName),
