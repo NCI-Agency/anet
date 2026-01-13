@@ -377,7 +377,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
-            {Settings.fields.report.customFieldsX && (
+            {Settings.fields.report.customFields && (
               <CompactRow
                 id="customFields"
                 content={
