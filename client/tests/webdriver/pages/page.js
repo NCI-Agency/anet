@@ -140,6 +140,17 @@ class Page {
     }
   }
 
+  async getAlertInfo() {
+    return browser.$(".alert-info")
+  }
+
+  async waitForAlertInfoToLoad() {
+    if (!(await (await this.getAlertInfo()).isDisplayed())) {
+      await (await this.getAlertInfo()).waitForExist()
+      await (await this.getAlertInfo()).waitForDisplayed()
+    }
+  }
+
   async getAlertWarning() {
     return browser.$(".alert-warning")
   }

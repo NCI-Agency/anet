@@ -119,7 +119,7 @@ describe("When working with custom fields for different anet objects", () => {
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
 
-      expect(await (await CreateReport.getAlert()).getText()).to.include(
+      expect(await (await CreateReport.getAlertDanger()).getText()).to.include(
         "Number trained must be greater than or equal to 1"
       )
     })
@@ -139,9 +139,9 @@ describe("When working with custom fields for different anet objects", () => {
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
 
-      expect(await (await CreateReport.getAlert()).getText()).to.not.include(
-        "Number trained must be greater than or equal to 1"
-      )
+      expect(
+        await (await CreateReport.getAlertDanger()).getText()
+      ).to.not.include("Number trained must be greater than or equal to 1")
     })
 
     it("Should show valid visible field after saving", async () => {
