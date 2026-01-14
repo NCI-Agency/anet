@@ -236,7 +236,7 @@ const HF_COMMON_STYLE = `
 
 const HeaderContentS = styled.div`
   ${HF_COMMON_STYLE};
-  top: 0mm;
+  top: 0;
   @media print {
     .banner span {
       display: block;
