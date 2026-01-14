@@ -182,7 +182,7 @@ interface ConnectionBannerProps {
 
 const ConnectionBanner = ({ connection }: ConnectionBannerProps) => {
   let background = ""
-  let newBanner = ""
+  let newBanner = null
   if (connection.error) {
     background = CONNECTION_INFO_COLORS.error
     newBanner = <>{Settings.CONNECTION_ERROR_MSG}</>
