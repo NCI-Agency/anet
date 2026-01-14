@@ -80,18 +80,24 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     () => new Location(data?.location ?? {}),
     [data?.location]
   )
-  const markers = useMemo(() => {
-    const marker = {
-      id: location.uuid || 0,
-      name: _escape(location.name) || "" // escape HTML in location name!
-    }
-    if (Location.hasCoordinates(location)) {
-      Object.assign(marker, {
-        lat: location.lat,
-        lng: location.lng
-      })
-    }
-    return [marker]
+
+  const { shapes, markers } = useMemo(() => {
+    const shapes = location?.geoJson
+      ? [{ id: location.uuid || 0, geoJson: location.geoJson }]
+      : []
+
+    const markers = Location.hasCoordinates(location)
+      ? [
+          {
+            id: location.uuid || 0,
+            name: _escape(location.name) || "", // escape HTML in location name!
+            lat: location.lat,
+            lng: location.lng
+          }
+        ]
+      : []
+
+    return { shapes, markers }
   }, [location])
   usePageTitle(location?.name)
   useEffect(() => {
@@ -316,7 +322,9 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
           </Fieldset>
         )}
 
-        {Location.hasCoordinates(location) && <Leaflet markers={markers} />}
+        {(!_isEmpty(markers) || !_isEmpty(shapes)) && (
+          <Leaflet markers={markers} shapes={shapes} />
+        )}
       </div>
 
       <Approvals

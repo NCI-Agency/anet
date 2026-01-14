@@ -666,6 +666,7 @@ type Location {
   description: String
   digram: String
   entityAvatar: EntityAvatar
+  geoJson: String
   isSubscribed: Boolean
   lat: Float
   lng: Float
@@ -689,6 +690,7 @@ input LocationInput {
   description: String
   digram: String
   entityAvatar: EntityAvatarInput
+  geoJson: String
   lat: Float
   lng: Float
   name: String

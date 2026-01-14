@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
   private static final String[] fields = {"uuid", "name", "status", "lat", "lng", "type", "digram",
-      "trigram", "description", "createdAt", "updatedAt", "customFields"};
+      "trigram", "description", "createdAt", "updatedAt", "customFields", "geoJson"};
   public static final String TABLE_NAME = "locations";
   public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
@@ -88,6 +88,20 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     }
   }
 
+  public int updateGeoJson(String uuid, String geoJson, Instant updatedAt) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* updateLocationGeoJsonOnly */ UPDATE locations "
+              + "SET \"geoJson\" = :geoJson, \"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
+          .bind("uuid", uuid).bind("geoJson", geoJson)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt)).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+
   @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
     return new PostgresqlLocationSearcher(databaseHandler).runSearch(query);
@@ -102,7 +116,15 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     final GraphQLContext context = engine().getContext();
 
     // Update location
+    final String mergedGeoJson =
+        existingWinnerLoc.getGeoJson() != null ? existingWinnerLoc.getGeoJson()
+            : existingLoserLoc.getGeoJson();
+
     update(winnerLocation);
+
+    if (mergedGeoJson != null) {
+      updateGeoJson(winnerLocationUuid, mergedGeoJson, Instant.now());
+    }
 
     // Update approvalSteps (note that this may fail if reports are currently pending at one of the
     // approvalSteps that are going to be deleted):

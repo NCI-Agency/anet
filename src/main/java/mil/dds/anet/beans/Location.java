@@ -72,6 +72,9 @@ public class Location extends AbstractCustomizableAnetBean
   private Double lng;
   @GraphQLQuery
   @GraphQLInputField
+  private String geoJson;
+  @GraphQLQuery
+  @GraphQLInputField
   private LocationType type;
   @GraphQLQuery
   @GraphQLInputField
@@ -131,6 +134,14 @@ public class Location extends AbstractCustomizableAnetBean
 
   public void setLng(Double lng) {
     this.lng = lng;
+  }
+
+  public String getGeoJson() {
+    return geoJson;
+  }
+
+  public void setGeoJson(String geoJson) {
+    this.geoJson = geoJson;
   }
 
   @AllowUnverifiedUsers
