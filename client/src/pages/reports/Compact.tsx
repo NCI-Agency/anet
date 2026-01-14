@@ -209,7 +209,6 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         backgroundText={backgroundText}
       >
         <CompactHeaderContent
-          color={null}
           policyAndClassification={utils.getPolicyAndClassificationForChoice(
             report.classification
           )}
@@ -397,8 +396,6 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
           </FullColumn>
         </CompactTable>
         <CompactFooterContent
-          object={report}
-          color={null}
           policyAndClassification={utils.getPolicyAndClassificationForChoice(
             report.classification
           )}

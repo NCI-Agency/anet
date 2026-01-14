@@ -208,20 +208,18 @@ const ConnectionBanner = ({ connection }: ConnectionBannerProps) => {
 }
 
 interface CompactSecurityBannerProps {
-  color: string
   policyAndClassification: string
   releasableTo: string
   bannerId?: string
 }
 
 export const CompactSecurityBanner = ({
-  color,
   policyAndClassification,
   releasableTo,
   bannerId
 }: CompactSecurityBannerProps) => {
   return (
-    <CompactBannerS className="banner" bgc={color}>
+    <CompactBannerS className="banner">
       <span className="fw-bold me-1" id={bannerId}>
         {policyAndClassification}
       </span>
@@ -231,8 +229,7 @@ export const CompactSecurityBanner = ({
 }
 
 const CompactBannerS = styled.div`
-  background: ${props => props.bgc};
-  color: ${props => utils.getContrastYIQ(props.bgc, "black")};
+  color: black;
   display: flex;
   flex-direction: column;
 `
