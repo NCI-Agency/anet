@@ -47,7 +47,7 @@ public class ResourceUtils {
     // Sort by start time
     personPositionHistory.sort(Comparator.comparing(PersonPositionHistory::getStartTime,
         Comparator.nullsFirst(Comparator.naturalOrder())));
-    int countCurrentPrimaryPositions = 0;
+    int countCurrentPrimary = 0;
     String latestEntityInHistoryUuid = null;
     for (int i = 0; i < personPositionHistory.size(); i++) {
       PersonPositionHistory current = personPositionHistory.get(i);
@@ -66,7 +66,6 @@ public class ResourceUtils {
 
       for (int j = 0; j < i; j++) {
         PersonPositionHistory other = personPositionHistory.get(j);
-
         if (!isOverlapAllowed(isCheckingPersonHistory, current, other) && overlap(current, other)) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               "History entries should not overlap.");
@@ -74,33 +73,35 @@ public class ResourceUtils {
       }
       // Update counters
       if (Boolean.TRUE.equals(current.getPrimary()) && current.getEndTime() == null) {
-        countCurrentPrimaryPositions++;
+        countCurrentPrimary++;
       }
       if (isCheckingPersonHistory && Boolean.TRUE.equals(current.getPrimary())) {
-        latestEntityInHistoryUuid = current.getPositionUuid();
+        latestEntityInHistoryUuid = current.getPosition().getUuid();
       } else {
-        latestEntityInHistoryUuid = current.getPersonUuid();
+        latestEntityInHistoryUuid = current.getPerson().getUuid();
       }
     }
 
-    // Specific checks for person history
-    if (isCheckingPersonHistory && countCurrentPrimaryPositions == 0
-        && currentEntityInHistoryUuid != null) {
+    if (countCurrentPrimary == 0 && currentEntityInHistoryUuid != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "There should be a primary position history entry without an end time.");
+          "There should be a primary history entry without an end time.");
     }
-    if (isCheckingPersonHistory && countCurrentPrimaryPositions > 1) {
+    if (countCurrentPrimary > 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "There cannot be more than one primary position history entry without an end time.");
+          "There cannot be more than one primary history entry without an end time.");
     }
 
-    // Check for both person and position history
     if (latestEntityInHistoryUuid != null && currentEntityInHistoryUuid != null
         && !latestEntityInHistoryUuid.equals(currentEntityInHistoryUuid)) {
       final String message = isCheckingPersonHistory
           ? "Last primary position history entry must be identical to person's current primary position."
           : "Last primary position history entry must be identical to position's current person.";
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    }
+
+    if (countCurrentPrimary > 0 && currentEntityInHistoryUuid == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "There has to be a current entity based on the history.");
     }
   }
 
@@ -112,7 +113,7 @@ public class ResourceUtils {
     }
     boolean bothPrimary =
         Boolean.TRUE.equals(a.getPrimary()) && Boolean.TRUE.equals(b.getPrimary());
-    boolean samePosition = Objects.equals(a.getPositionUuid(), b.getPositionUuid());
+    boolean samePosition = Objects.equals(a.getPosition().getUuid(), b.getPosition().getUuid());
 
     return !(bothPrimary || samePosition);
   }

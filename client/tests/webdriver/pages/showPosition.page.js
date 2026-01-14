@@ -21,7 +21,7 @@ class ShowPosition extends Page {
   }
 
   async getEditHistoryButton() {
-    return browser.$("div.edit-history button")
+    return browser.$("button.edit-history")
   }
 
   async getEditAttachmentsButton() {
