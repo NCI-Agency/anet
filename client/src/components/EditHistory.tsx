@@ -243,7 +243,6 @@ const EditHistory = ({
                           // To be able to set fields inside the array state
                           const startTimeFieldName = `history[${idx}].startTime`
                           const endTimeFieldName = `history[${idx}].endTime`
-                          const isCurrent = item.endTime == null
 
                           return (
                             <div key={item.uuid} style={getStyle(isError)}>
@@ -274,7 +273,7 @@ const EditHistory = ({
                                     </span>
                                   }
                                   action={
-                                    !isCurrent && (
+                                    !item.isCurrent && (
                                       <RemoveButton
                                         title="Remove Item"
                                         onClick={() =>
@@ -289,7 +288,7 @@ const EditHistory = ({
                               </div>
                               <div className="date-container">
                                 <div className="inner-container">
-                                  {!isCurrent && (
+                                  {!item.isCurrent && (
                                     <>
                                       <div className="date-text">Primary</div>
                                       <FastField
@@ -363,15 +362,12 @@ const EditHistory = ({
                                 </div>
                                 <div className="inner-container">
                                   <div className="date-text">to</div>
-                                  {isCurrent ? (
+                                  {item.isCurrent ? (
                                     <div className="date-input">present</div>
                                   ) : (
                                     <Field
                                       name={endTimeFieldName}
                                       label={null}
-                                      disabled={
-                                        values.history[idx].endTime == null
-                                      }
                                       value={values.history[idx].endTime}
                                       onChange={value => {
                                         const newValue =
@@ -450,7 +446,7 @@ const EditHistory = ({
     setFinalHistory([...values.history])
     // Shouldn't have uuid, that was for item listing
     const savedHistory = values.history.map(item =>
-      Object.without(item, "uuid")
+      Object.without(item, "uuid", "isCurrent")
     )
     setHistory(savedHistory)
   }
@@ -529,7 +525,11 @@ function getStyle(isOverlap: boolean) {
 }
 
 function populateHistory(history) {
-  return history.map(item => ({ ...item, uuid: uuidv4(), new: false }))
+  return history.map(item => ({
+    ...item,
+    uuid: uuidv4(),
+    isCurrent: item.endTime == null
+  }))
 }
 
 function getSingleSelectParameters(historyEntityType) {
