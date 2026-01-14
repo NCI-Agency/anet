@@ -141,6 +141,7 @@ const UserBox = styled.h6`
 
 const SecurityTextContainer = styled.div`
   background: ${props => props.bgc};
+  color: ${props => utils.getContrastYIQ(props.bgc, "black")};
   flex: 3 3 30%;
   margin-bottom: 10px;
   line-height: 25px;
