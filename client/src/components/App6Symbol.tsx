@@ -4,6 +4,30 @@ import React, { useEffect, useRef } from "react"
 
 const VERSION = 10
 
+type App6ChoiceMap = { [key: string]: string }
+type App6ChoiceGroup = { category: string; values: App6ChoiceMap }
+
+const isGroupedChoices = (choices: unknown): choices is App6ChoiceGroup[] =>
+  Array.isArray(choices)
+
+const flattenChoices = (
+  choices?: App6ChoiceMap | App6ChoiceGroup[]
+): App6ChoiceMap => {
+  if (!choices) {
+    return {}
+  }
+  if (!isGroupedChoices(choices)) {
+    return choices
+  }
+  return choices.reduce(
+    (acc, group) => ({
+      ...acc,
+      ...group.values
+    }),
+    {}
+  )
+}
+
 export const getChoices = (field: string, values: any[]) => {
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
   const app6entity = getCodeFieldValue(getSymbolCode(values), "app6entity")
@@ -32,7 +56,25 @@ export const getChoices = (field: string, values: any[]) => {
     app6sectorTwoModifier: () => App6Choices[field][symbolSet] || {}
   }
 
-  return (choiceHandlers[field] || (() => App6Choices[field] || {}))()
+  const choices = (choiceHandlers[field] || (() => App6Choices[field] || {}))()
+  return flattenChoices(choices)
+}
+
+export const getGroupedChoices = (
+  field: string,
+  values: any[]
+): App6ChoiceGroup[] | null => {
+  if (
+    field !== "app6amplifier" &&
+    field !== "app6sectorOneModifier" &&
+    field !== "app6sectorTwoModifier"
+  ) {
+    return null
+  }
+  const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
+  const choices = App6Choices[field]?.[symbolSet]
+  // Only return grouped data when there are multiple categories to display.
+  return isGroupedChoices(choices) && choices.length > 1 ? choices : null
 }
 
 export const fieldsList = [
