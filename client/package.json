@@ -31,7 +31,7 @@
     "@babel/runtime": "7.28.6",
     "@colors/colors": "1.6.0",
     "@faker-js/faker": "10.2.0",
-    "@graphql-codegen/cli": "6.1.0",
+    "@graphql-codegen/cli": "6.1.1",
     "@graphql-codegen/schema-ast": "5.0.0",
     "@graphql-codegen/visitor-plugin-common": "6.2.2",
     "@ianvs/prettier-plugin-sort-imports": "4.7.0",
