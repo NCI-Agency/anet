@@ -29,6 +29,9 @@ describe("Create report form page", () => {
 
       // Select interlocutor
       await (await CreateFutureReport.getAttendeesFieldLabel()).click()
+      const attendeesFilter = await CreateFutureReport.getAttendeesFilter(2)
+      await attendeesFilter.waitForClickable()
+      await attendeesFilter.click()
       await (
         await CreateFutureReport.getAttendeesField()
       ).setValue(INTERLOCUTOR)
@@ -61,6 +64,9 @@ describe("Create report form page", () => {
 
       // Select task
       await (await CreateFutureReport.getTasksFieldLabel()).click()
+      const tasksFilter = await CreateFutureReport.getTasksFilter(2)
+      await tasksFilter.waitForClickable()
+      await tasksFilter.click()
       await (await CreateFutureReport.getTasksField()).setValue(TASK_SEARCH)
       await CreateFutureReport.waitForAdvancedSelectToChange(
         CreateFutureReport.getTasksFieldAdvancedSelectItem(3),

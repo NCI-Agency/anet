@@ -1,24 +1,19 @@
 import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import classNames from "classnames"
-import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import { CompactRow } from "components/Compact"
-import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
-import { Task } from "models"
 import React, { useCallback, useMemo } from "react"
 import {
-  Button,
   Col,
   Form,
   FormControl,
   FormGroup,
   FormSelect,
   InputGroup,
-  ListGroup,
   Row,
   ToggleButton,
   ToggleButtonGroup
@@ -92,7 +87,6 @@ interface FieldProps {
   extraColElem?: any
   addon?: React.ReactNode
   vertical?: boolean
-  extraAddon?: any
   isCompact?: boolean
   labelColumnWidth?: number
   className?: string
@@ -109,7 +103,6 @@ const Field = ({
   addon,
   vertical = false, // default direction of label and input = horizontal
   isCompact,
-  extraAddon,
   labelColumnWidth = 2,
   className,
   style
@@ -122,22 +115,19 @@ const Field = ({
       ) : (
         <InputGroup>
           {widgetElem}
-          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
           <FieldAddon id={id} addon={addon} />
         </InputGroup>
       ),
-    [addon, extraAddon, id, widgetElem]
+    [addon, id, widgetElem]
   )
 
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
-  // setting label or extraColElem explicitly to null will completely remove these columns!
-  const widgetWidth =
-    12 -
-    (label === null ? 0 : labelColumnWidth) -
-    (extraColElem === null ? 0 : 3)
-  // controlId prop of the FormGroup sets the id of the control element
+  // backwards-compatible with main form width before; could be 12 to take up all space
+  const maxWidth = 9
+  // setting label explicitly to null will completely remove the label column!
+  const widgetWidth = maxWidth - (label === null ? 0 : 2)
 
   if (isCompact) {
     return (
@@ -156,6 +146,7 @@ const Field = ({
     )
   }
 
+  // controlId prop of the FormGroup sets the id of the control element
   return (
     <FormGroup id={`fg-${id}`} controlId={id} className={className}>
       {vertical ? (
@@ -178,8 +169,8 @@ const Field = ({
               {getHelpBlock(field.name, form)}
               {children}
             </div>
+            {extraColElem}
           </Col>
-          {extraColElem && <Col sm={3} {...extraColElem.props} />}
         </Row>
       )}
     </FormGroup>
@@ -196,7 +187,6 @@ interface InputFieldProps {
   extraColElem?: any
   addon?: React.ReactNode
   vertical?: boolean
-  extraAddon?: any
 }
 
 export const InputField = ({
@@ -209,7 +199,6 @@ export const InputField = ({
   extraColElem,
   addon,
   vertical,
-  extraAddon,
   ...otherProps
 }: InputFieldProps) => {
   const { validationState } = getFormGroupValidationState(field.name, form)
@@ -235,7 +224,6 @@ export const InputField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      extraAddon={extraAddon}
     >
       {children}
     </Field>
@@ -607,7 +595,6 @@ interface SelectFieldProps {
   extraColElem?: any
   addon?: React.ReactNode
   vertical?: boolean
-  extraAddon?: any
 }
 
 export const SelectField = ({
@@ -622,7 +609,6 @@ export const SelectField = ({
   extraColElem,
   addon,
   vertical,
-  extraAddon,
   ...otherProps
 }: SelectFieldProps) => {
   const { validationState, className: updatedClassName } =
@@ -679,7 +665,6 @@ export const SelectField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      extraAddon={extraAddon}
     >
       {children}
     </Field>
@@ -744,62 +729,6 @@ export function handleSingleSelectAddItem(newItem, onChange, curValue) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
 export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
-}
-
-interface FieldShortcutsProps {
-  shortcuts?: {
-    uuid?: string
-  }[]
-  fieldName: string
-  objectType: (...args: unknown[]) => unknown
-  curValue?: any | any[]
-  onChange?: (...args: unknown[]) => unknown
-  handleAddItem: (...args: unknown[]) => unknown
-  title: string
-}
-
-export const FieldShortcuts = ({
-  shortcuts,
-  fieldName,
-  objectType,
-  curValue,
-  onChange,
-  handleAddItem,
-  title
-}: FieldShortcutsProps) => {
-  const modelType = objectType.resourceName
-  return (
-    shortcuts &&
-    shortcuts.length > 0 && (
-      <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
-        <h5>{title}</h5>
-        <ListGroup>
-          {objectType.map(shortcuts, shortcut => (
-            <ListGroup.Item key={shortcut.uuid}>
-              <Button
-                onClick={() => handleAddItem(shortcut, onChange, curValue)}
-                variant="secondary"
-                size="sm"
-              >
-                <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
-              </Button>
-              {modelType === Task.resourceName ? (
-                <BreadcrumbTrail
-                  modelType={modelType}
-                  leaf={shortcut}
-                  ascendantObjects={shortcut.ascendantTasks}
-                  parentField="parentTask"
-                  isLink={false}
-                />
-              ) : (
-                <LinkTo modelType={modelType} model={shortcut} isLink={false} />
-              )}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      </div>
-    )
-  )
 }
 
 interface PreviewFieldProps {

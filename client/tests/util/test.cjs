@@ -379,10 +379,23 @@ test.beforeEach(t => {
       )
       await $nextMonthDate.click()
     },
-    async chooseAdvancedSelectOption(inputSelector, text, rowNumber = 1) {
+    async chooseAdvancedSelectOption(
+      inputSelector,
+      text,
+      rowNumber = 1,
+      filterIndex = null
+    ) {
       const popoverSelector = `${inputSelector}-popover`
       const $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.click()
+      if (filterIndex != null) {
+        // select filter
+        const $filter = await t.context.$(
+          `${popoverSelector} .advanced-select-filters li:nth-child(${filterIndex}) button`
+        )
+        await $filter.click()
+        await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to apply the filter
+      }
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()
