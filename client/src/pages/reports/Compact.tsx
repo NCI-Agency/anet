@@ -209,7 +209,6 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         backgroundText={backgroundText}
       >
         <CompactHeaderContent
-          color={null}
           policyAndClassification={utils.getPolicyAndClassificationForChoice(
             report.classification
           )}
@@ -397,8 +396,6 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
           </FullColumn>
         </CompactTable>
         <CompactFooterContent
-          object={report}
-          color={null}
           policyAndClassification={utils.getPolicyAndClassificationForChoice(
             report.classification
           )}
@@ -556,7 +553,7 @@ const CompactReportViewS = styled.div`
   .table {
     & span.badge {
       background-color: unset !important;
-      padding: 0px;
+      padding: 0;
       font-size: 12px !important;
     }
 
@@ -570,7 +567,7 @@ const CompactReportViewS = styled.div`
         white-space: nowrap;
       }
       & td {
-        padding: 0px;
+        padding: 0;
         font-weight: bold;
       }
     }
@@ -765,7 +762,7 @@ const CompactRowReportAction = ({ action }: CompactRowReportActionProps) => {
 }
 
 const CompactRowReportActionS = styled.div`
-  margin: 0px !important;
+  margin: 0 !important;
   display: list-item !important;
   text-align: left !important;
 
@@ -773,8 +770,8 @@ const CompactRowReportActionS = styled.div`
     width: fit-content !important;
     vertical-align: middle;
     background-color: unset !important;
-    margin: 0px !important;
-    padding: 0px;
+    margin: 0 !important;
+    padding: 0;
     border: none;
   }
 

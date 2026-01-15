@@ -112,14 +112,12 @@ const CompactViewS = styled.div`
 `
 
 interface CompactHeaderContentProps {
-  color?: string
   policyAndClassification?: string
   releasableTo?: string
   sensitiveInformation?: boolean
 }
 
 export const CompactHeaderContent = ({
-  color = utils.getColorForChoice(Settings.siteClassification),
   policyAndClassification = utils.getPolicyAndClassificationForChoice(
     Settings.siteClassification
   ),
@@ -127,7 +125,7 @@ export const CompactHeaderContent = ({
   sensitiveInformation
 }: CompactHeaderContentProps) => {
   return (
-    <HeaderContentS bgc={color}>
+    <HeaderContentS>
       <img
         src={anetLogo}
         alt="logo"
@@ -136,7 +134,6 @@ export const CompactHeaderContent = ({
       />
       <ClassificationBoxS>
         <ClassificationBanner
-          color={color}
           policyAndClassification={policyAndClassification}
           releasableTo={releasableTo}
           bannerId="header-banner"
@@ -148,20 +145,17 @@ export const CompactHeaderContent = ({
 }
 
 interface CompactFooterContentProps {
-  color?: string
   policyAndClassification?: string
 }
 
 export const CompactFooterContent = ({
-  color = utils.getColorForChoice(Settings.siteClassification),
   policyAndClassification = utils.getPolicyAndClassificationForChoice(
     Settings.siteClassification
   )
 }: CompactFooterContentProps) => {
   return (
-    <FooterContentS bgc={color}>
+    <FooterContentS>
       <ClassificationBanner
-        color={color}
         policyAndClassification={policyAndClassification}
         bannerId="footer-banner"
       />
@@ -242,8 +236,7 @@ const HF_COMMON_STYLE = `
 
 const HeaderContentS = styled.div`
   ${HF_COMMON_STYLE};
-  top: 0mm;
-  background-color: ${props => props.bgc} !important;
+  top: 0;
   @media print {
     .banner span {
       display: block;
@@ -255,18 +248,15 @@ const FooterContentS = styled.div`
   ${HF_COMMON_STYLE};
   justify-content: center;
   bottom: 0mm;
-  background-color: ${props => props.bgc} !important;
 `
 
 interface ClassificationBannerProps {
-  color: string
   policyAndClassification: string
-  releasableTo: string
+  releasableTo?: string
   bannerId?: string
 }
 
 const ClassificationBanner = ({
-  color,
   policyAndClassification,
   releasableTo,
   bannerId
@@ -274,7 +264,6 @@ const ClassificationBanner = ({
   return (
     <ClassificationBannerS>
       <CompactSecurityBanner
-        color={color}
         policyAndClassification={policyAndClassification}
         releasableTo={releasableTo}
         bannerId={bannerId}

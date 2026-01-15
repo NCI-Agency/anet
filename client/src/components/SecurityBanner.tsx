@@ -141,6 +141,7 @@ const UserBox = styled.h6`
 
 const SecurityTextContainer = styled.div`
   background: ${props => props.bgc};
+  color: ${props => utils.getContrastYIQ(props.bgc, "black")};
   flex: 3 3 30%;
   margin-bottom: 10px;
   line-height: 25px;
@@ -181,7 +182,7 @@ interface ConnectionBannerProps {
 
 const ConnectionBanner = ({ connection }: ConnectionBannerProps) => {
   let background = ""
-  let newBanner = ""
+  let newBanner = null
   if (connection.error) {
     background = CONNECTION_INFO_COLORS.error
     newBanner = <>{Settings.CONNECTION_ERROR_MSG}</>
@@ -208,20 +209,18 @@ const ConnectionBanner = ({ connection }: ConnectionBannerProps) => {
 }
 
 interface CompactSecurityBannerProps {
-  color: string
   policyAndClassification: string
   releasableTo: string
   bannerId?: string
 }
 
 export const CompactSecurityBanner = ({
-  color,
   policyAndClassification,
   releasableTo,
   bannerId
 }: CompactSecurityBannerProps) => {
   return (
-    <CompactBannerS className="banner" bgc={color}>
+    <CompactBannerS className="banner">
       <span className="fw-bold me-1" id={bannerId}>
         {policyAndClassification}
       </span>
@@ -231,8 +230,7 @@ export const CompactSecurityBanner = ({
 }
 
 const CompactBannerS = styled.div`
-  background: ${props => props.bgc};
-  color: ${props => utils.getContrastYIQ(props.bgc, "black")};
+  color: black;
   display: flex;
   flex-direction: column;
 `
