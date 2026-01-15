@@ -112,7 +112,7 @@ dependencyManagement {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.8'
+	implementation 'org.postgresql:postgresql:42.7.9'
 	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
