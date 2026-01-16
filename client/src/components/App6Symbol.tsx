@@ -64,11 +64,7 @@ export const getGroupedChoices = (
   field: string,
   values: any[]
 ): App6ChoiceGroup[] | null => {
-  if (
-    field !== "app6amplifier" &&
-    field !== "app6sectorOneModifier" &&
-    field !== "app6sectorTwoModifier"
-  ) {
+  if (field !== "app6sectorOneModifier" && field !== "app6sectorTwoModifier") {
     return null
   }
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")

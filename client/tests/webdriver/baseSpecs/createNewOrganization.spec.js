@@ -13,13 +13,13 @@ const testOrgs = {
     app6standardIdentityInput: "2",
     app6standardIdentity: "Assumed Friend",
     app6symbolSetInput: "10",
-    app6symbolSet: "Land Unit",
+    app6symbolSet: "Land Units",
     app6hqInput: "3",
     app6hq: "Feint / Dummy Headquarters",
     app6amplifierInput: "12",
     app6amplifier: "Squad",
     app6entityInput: "12",
-    app6entity: "Movement and Manoeuvre"
+    app6entity: "Movement and Maneuver"
   },
   secondLevel: {
     shortName: "TO 1.1",
@@ -29,11 +29,11 @@ const testOrgs = {
     app6standardIdentityInput: "3",
     app6standardIdentity: "Friend",
     app6symbolSetInput: "10",
-    app6symbolSet: "Land Unit",
+    app6symbolSet: "Land Units",
     app6hqInput: "5",
     app6hq: "Feint / Dummy Task Force",
     app6amplifierInput: "11",
-    app6amplifier: "Team / Crew"
+    app6amplifier: "Team/Crew"
   },
   thirdLevel: {
     shortName: "TO 1.1.1",
@@ -122,7 +122,9 @@ describe("When creating an organization", () => {
     expect(
       await CreateOrganization.getApp6DropdownValue("app6symbolSet")
     ).to.equal(`${topLevelOrg.app6symbolSet} (inherited)`)
-    expect(await CreateOrganization.getApp6DropdownValue("app6hq")).to.equal("")
+    expect(await CreateOrganization.getApp6DropdownValue("app6hq")).to.equal(
+      "None"
+    )
     await CreateOrganization.closeEditApp6Modal()
     await CreateOrganization.fillOrganization(testOrgs.secondLevel)
     await CreateOrganization.submitForm()
@@ -187,7 +189,9 @@ describe("When creating an organization", () => {
     expect(
       await CreateOrganization.getApp6DropdownValue("app6symbolSet")
     ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited)`)
-    expect(await CreateOrganization.getApp6DropdownValue("app6hq")).to.equal("")
+    expect(await CreateOrganization.getApp6DropdownValue("app6hq")).to.equal(
+      "None"
+    )
     await CreateOrganization.closeEditApp6Modal()
 
     await CreateOrganization.fillOrganization(testOrgs.thirdLevel)
@@ -197,10 +201,10 @@ describe("When creating an organization", () => {
     await CreateOrganization.openEditApp6Modal()
     expect(
       await CreateOrganization.getApp6DropdownValue("app6context")
-    ).to.equal("")
+    ).to.equal("None")
     expect(
       await CreateOrganization.getApp6DropdownValue("app6standardIdentity")
-    ).to.equal("")
+    ).to.equal("None")
     await CreateOrganization.closeEditApp6Modal()
 
     // Search by uuid as the full-text index may not yet be updated
@@ -229,6 +233,7 @@ describe("When creating an organization", () => {
   })
   it("Should display the newly created third-level organization", async () => {
     const testOrg = testOrgs.thirdLevel
+    await (await ShowOrganization.getLongName()).waitForExist()
     expect(await (await ShowOrganization.getLongName()).getText()).to.equal(
       testOrg.description
     )
