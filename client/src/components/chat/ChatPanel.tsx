@@ -16,12 +16,13 @@ const base = {
 const openStyle = { ...base, width: "25%" }
 
 export default function ChatPanel() {
-  const { isOpen, setIframeEl } = useChatBridge()
+  const { isOpen, onIframeLoad, setIframeEl } = useChatBridge()
 
   return (
     <div style={isOpen ? openStyle : base}>
       <iframe
         ref={setIframeEl}
+        onLoad={onIframeLoad}
         src="https://127.0.0.1:7002/chat/index.html"
         title="ChatGPT Panel"
         style={{ width: "100%", height: "100%", border: "none" }}
