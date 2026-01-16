@@ -30,7 +30,11 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import { ChatSuggestion, useChatBridge, useChatPageContext } from "components/chat/ChatBridge"
+import {
+  ChatSuggestion,
+  useChatBridge,
+  useChatPageContext
+} from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -57,7 +61,7 @@ import {
 } from "components/Page"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
-import { FastField, Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik, useFormikContext } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
@@ -77,7 +81,14 @@ import CreateNewLocation from "pages/locations/CreateNewLocation"
 import LocationModal from "pages/locations/LocationModal"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
-import { useContext, useEffect, useRef, useState } from "react"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react"
 import * as React from "react"
 import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
@@ -242,7 +253,7 @@ const ReportForm = ({
 }: ReportFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
-  const { isReady, send: sendToChat} = useChatBridge()
+  const { isReady, send: sendToChat } = useChatBridge()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -314,8 +325,8 @@ const ReportForm = ({
     }
   }
 
-  function makeSuggestions(): ChatSuggestion[] {
-    return [
+  const chatSuggestions = useMemo<ChatSuggestion[]>(
+    () => [
       {
         label: "Derive key outcomes",
         prompt: "Derive key outcomes from the report information",
@@ -328,12 +339,42 @@ const ReportForm = ({
         icon: "lightbulb",
         iconColor: "yellow"
       }
-    ]
-  }
+    ],
+    []
+  )
 
-  function sendReportContextToAI(report: any) {
-    const businessObject = buildReportBusinessObject(report)
-    sendToChat(businessObject, makeSuggestions())
+  const sendReportContextToAI = useCallback(
+    (report: any) => {
+      const businessObject = buildReportBusinessObject(report)
+      sendToChat(businessObject, chatSuggestions)
+    },
+    [sendToChat, chatSuggestions]
+  )
+
+  const ReportChatContextSync = () => {
+    const { values } = useFormikContext<any>()
+    const chatContext = useMemo(
+      () => buildReportBusinessObject(values),
+      [
+        values?.uuid,
+        values?.intent,
+        values?.reportText,
+        values?.classification,
+        values?.engagementDate,
+        values?.location?.name,
+        values?.advisorOrg?.shortName,
+        values?.advisorOrg?.longName,
+        values?.interlocutorOrg?.shortName,
+        values?.interlocutorOrg?.longName,
+        values?.tasks,
+        values?.reportPeople,
+        values?.keyOutcomes,
+        values?.nextSteps,
+        values?.authors
+      ]
+    )
+    useChatPageContext(chatContext, chatSuggestions)
+    return null
   }
 
   useEffect(() => {
@@ -354,20 +395,7 @@ const ReportForm = ({
     return () => {
       window.clearInterval(intervalId)
     }
-  }, [isReady, sendToChat])
-
-
-  useChatPageContext(
-    buildReportBusinessObject(latestValuesRef.current),
-    makeSuggestions(),
-    [
-      latestValuesRef.current.uuid,
-      latestValuesRef.current.intent,
-      latestValuesRef.current.reportText,
-      latestValuesRef.current.tasks,
-      latestValuesRef.current.reportPeople
-    ]
-  )
+  }, [isReady, sendReportContextToAI])
 
   const autoSaveActive = useRef(true)
   useEffect(() => {
@@ -677,6 +705,7 @@ const ReportForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div className="report-form">
+              <ReportChatContextSync />
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <MessagesWithConflict
                 error={saveError}
