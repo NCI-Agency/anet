@@ -1,12 +1,5 @@
 import React, {
-  createContext,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
+  createContext, FC, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react"
 
 export type ChatSuggestion = {
@@ -21,143 +14,179 @@ type ChatBridgeContextType = {
   open: () => void
   close: () => void
   toggle: () => void
-  send: (businessObject: any, suggestions: ChatSuggestion[]) => void
-  setIframeEl: (el: HTMLIFrameElement | null) => void
   isReady: boolean
-  origin?: string
+  setIframeEl: (el: HTMLIFrameElement | null) => void
+  send: (context?: any, suggestions?: ChatSuggestion[]) => void
+  registerPageContext: (ctx?: any, suggestions?: ChatSuggestion[]) => symbol
+  unregisterPageContext: (token: symbol) => void
 }
 
 const ChatBridgeContext = createContext<ChatBridgeContextType | null>(null)
 export const useChatBridge = () => {
   const ctx = useContext(ChatBridgeContext)
-  if (!ctx) {
-    throw new Error("useChatBridge must be used within ChatBridgeProvider")
-  }
+  if (!ctx) throw new Error("useChatBridge must be used within ChatBridgeProvider")
   return ctx
+}
+
+const DEFAULT_CONTEXT: any = {}
+const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
+  { label: "Summarize", prompt: "Summarize what I'm viewing", icon: "list-bullets" },
+  { label: "Explain", prompt: "Explain this ANET page is used for", icon: "book" },
+  { label: "Search", prompt: "Help me find reports, people, or tasks", icon: "magnifying-glass" }
+]
+
+const buildPayload = (ctx?: any, suggestions?: ChatSuggestion[]) => {
+  const payload = {
+    application: "ANET",
+    businessObject: ctx ?? DEFAULT_CONTEXT,
+    suggestions: suggestions ?? DEFAULT_SUGGESTIONS
+  }
+
+  payload.businessObject.currentPage = window.location.pathname
+
+  return payload
 }
 
 export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [iframeEl, setIframeElState] = useState<HTMLIFrameElement | null>(null)
-  const [targetOrigin, setTargetOrigin] = useState(undefined)
   const [isReady, setIsReady] = useState(false)
-  const [iframeOrigin, setIframeOrigin] = useState(undefined)
-  const queue = useRef<any[]>([])
 
-  useEffect(() => {
-    const handleMessage = ev => {
-      if (targetOrigin && ev.origin !== targetOrigin) {
-        return
-      }
-      if (!iframeOrigin) {
-        setIframeOrigin(ev.origin)
-      }
+  const iframeElRef = useRef<HTMLIFrameElement | null>(null)
+  const targetOriginRef = useRef<string | undefined>(undefined)
 
-      if (typeof ev.data === "string" && ev.data === "ready") {
-        setIsReady(true)
-      }
-    }
-    window.addEventListener("message", handleMessage)
-    return () => window.removeEventListener("message", handleMessage)
-  }, [iframeOrigin, targetOrigin])
+  const queueRef = useRef<any[]>([])
 
-  useEffect(() => {
-    if (!iframeEl) {
-      return
-    }
+  type StackItem = { token: symbol; ctx?: any; suggestions?: ChatSuggestion[] }
+  const stackRef = useRef<StackItem[]>([])
 
-    let computedOrigin
-    try {
-      computedOrigin = new URL(iframeEl.src, window.location.href).origin
-    } catch {
-      computedOrigin = undefined
-    }
-    setTargetOrigin(computedOrigin)
+  const lastSentRef = useRef<string | null>(null)
 
-    let attempts = 0
-    const maxAttempts = 20
-    const intervalMs = 500
-
-    let timer = null
-
-    const ping = () => {
-      attempts += 1
-      iframeEl.contentWindow?.postMessage(
-        { type: "PING" },
-        computedOrigin || "*"
-      )
-      if (isReady || attempts >= maxAttempts) {
-        if (timer) {
-          clearInterval(timer)
-          timer = null
-        }
-      }
-    }
-
-    timer = setInterval(ping, intervalMs)
-    ping()
-
-    return () => {
-      if (timer) {
-        clearInterval(timer)
-        timer = null
-      }
-    }
-  }, [iframeEl, isReady])
-
-  // Flush queued messages once ready
-  useEffect(() => {
-    if (!isReady || !iframeEl) {
-      return
-    }
-    while (queue.current.length) {
-      const msg = queue.current.shift()!
-      iframeEl.contentWindow?.postMessage(msg, targetOrigin || "*")
-    }
-  }, [isReady, iframeEl, targetOrigin])
-
-  const setIframeEl = useCallback(el => {
-    setIframeElState(el)
-    setIsReady(false)
+  const getActive = useCallback(() => {
+    const top = stackRef.current[stackRef.current.length - 1]
+    return top ? { ctx: top.ctx, suggestions: top.suggestions }
+               : { ctx: DEFAULT_CONTEXT, suggestions: DEFAULT_SUGGESTIONS }
   }, [])
 
-  const send = useCallback(
-    (context, suggestions) => {
-      const payload = {
-        application: "ANET",
-        businessObject: context || {},
-        suggestions: suggestions || []
-      }
-      if (!iframeEl || !isReady) {
-        queue.current.push(payload)
-        return
-      }
-      iframeEl.contentWindow?.postMessage(payload, targetOrigin || "*")
-    },
-    [iframeEl, isReady, targetOrigin]
-  )
+  const _post = useCallback((payload: any) => {
+    const win = iframeElRef.current?.contentWindow
+    const key = JSON.stringify(payload)
+    if (!isReady) return
+    //if (key === lastSentRef.current) return // This needs to be uncommented
+    lastSentRef.current = key
 
-  const open = useCallback(() => setIsOpen(true), [])
+    if (!win || !isReady) {
+      queueRef.current.push(payload)
+      return
+    }
+    win.postMessage(payload, targetOriginRef.current || "*")
+  }, [isReady])
+
+  const flushQueue = useCallback(() => {
+    const win = iframeElRef.current?.contentWindow
+    if (!win || !isReady) return
+    while (queueRef.current.length) {
+      win.postMessage(queueRef.current.shift()!, targetOriginRef.current || "*")
+    }
+  }, [isReady])
+
+  const announceActive = useCallback(() => {
+    const { ctx, suggestions } = getActive()
+    _post(buildPayload(ctx, suggestions))
+  }, [_post, getActive])
+
+  const setIframeEl = useCallback((el: HTMLIFrameElement | null) => {
+    iframeElRef.current = el
+    setIsReady(false)
+    try {
+      targetOriginRef.current = el ? new URL(el.src, window.location.href).origin : undefined
+    } catch {
+      targetOriginRef.current = undefined
+    }
+  }, [])
+
+  const send = useCallback((context?: any, suggestions?: ChatSuggestion[]) => {
+    _post(buildPayload(context, suggestions))
+  }, [_post])
+
+  const registerPageContext = useCallback((ctx?: any, suggestions?: ChatSuggestion[]) => {
+    const token = Symbol("chat-page")
+    stackRef.current.push({ token, ctx, suggestions })
+    announceActive()
+    return token
+  }, [announceActive])
+
+  const unregisterPageContext = useCallback((token: symbol) => {
+    const idx = stackRef.current.findIndex(s => s.token === token)
+    if (idx >= 0) stackRef.current.splice(idx, 1)
+    announceActive()
+  }, [announceActive])
+
+  useEffect(() => {
+    const onMessage = (ev: MessageEvent) => {
+      const expected = targetOriginRef.current
+      if (expected && ev.origin !== expected) return
+      const type = typeof ev.data === "string" ? ev.data : ev.data?.type
+      if (type === "ready") {
+        if (!isReady) setIsReady(true)
+        announceActive()
+        flushQueue()
+      }
+    }
+    window.addEventListener("message", onMessage)
+    return () => window.removeEventListener("message", onMessage)
+  }, [announceActive, flushQueue, isReady])
+
+  useEffect(() => {
+    const el = iframeElRef.current
+    if (!el) return
+    let attempts = 0
+    const max = 20
+    const id = window.setInterval(() => {
+      attempts += 1
+      el.contentWindow?.postMessage({ type: "PING" }, targetOriginRef.current || "*")
+      if (isReady || attempts >= max) window.clearInterval(id)
+    }, 500)
+    el.contentWindow?.postMessage({ type: "PING" }, targetOriginRef.current || "*")
+    return () => window.clearInterval(id)
+  }, [setIframeEl, isReady])
+
+  useEffect(() => {
+    announceActive()
+  }, [announceActive])
+
+  const open = useCallback(() => {
+    setIsOpen(true)
+    announceActive()
+  }, [announceActive])
+
   const close = useCallback(() => setIsOpen(false), [])
-  const toggle = useCallback(() => setIsOpen(s => !s), [])
+  const toggle = useCallback(() => {
+    setIsOpen(s => !s)
+    announceActive()
+  }, [announceActive])
 
-  const value = useMemo(
-    () => ({
-      isOpen,
-      open,
-      close,
-      toggle,
-      send,
-      setIframeEl,
-      isReady,
-      origin: iframeOrigin
-    }),
-    [isOpen, open, close, toggle, send, setIframeEl, isReady, iframeOrigin]
-  )
+  const value = useMemo<ChatBridgeContextType>(() => ({
+    isOpen, open, close, toggle,
+    isReady, setIframeEl, send,
+    registerPageContext, unregisterPageContext
+  }), [isOpen, open, close, toggle, isReady, setIframeEl, send, registerPageContext, unregisterPageContext])
 
   return (
     <ChatBridgeContext.Provider value={value}>
       {children}
     </ChatBridgeContext.Provider>
   )
+}
+
+export function useChatPageContext(
+  ctx?: any,
+  suggestions?: ChatSuggestion[],
+  deps: React.DependencyList = []
+) {
+  const { registerPageContext, unregisterPageContext } = useChatBridge()
+  useEffect(() => {
+    const token = registerPageContext(ctx, suggestions)
+    return () => unregisterPageContext(token)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
 }
