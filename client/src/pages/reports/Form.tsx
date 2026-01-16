@@ -30,7 +30,7 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import { ChatSuggestion, useChatBridge } from "components/chat/ChatBridge"
+import { ChatSuggestion, useChatBridge, useChatPageContext } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -232,7 +232,7 @@ const ReportForm = ({
 }: ReportFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
-  const { open: openChat, send: sendToChat, isReady } = useChatBridge()
+  const { isReady, send: sendToChat} = useChatBridge()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -345,6 +345,19 @@ const ReportForm = ({
       window.clearInterval(intervalId)
     }
   }, [isReady, sendToChat])
+
+
+  useChatPageContext(
+    buildReportBusinessObject(latestValuesRef.current),
+    makeSuggestions(),
+    [
+      latestValuesRef.current.uuid,
+      latestValuesRef.current.intent,
+      latestValuesRef.current.reportText,
+      latestValuesRef.current.tasks,
+      latestValuesRef.current.reportPeople
+    ]
+  )
 
   const autoSaveActive = useRef(true)
   useEffect(() => {
