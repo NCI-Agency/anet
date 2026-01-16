@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.0.12":
-  version: 4.0.12
-  resolution: "@apollo/client@npm:4.0.12"
+"@apollo/client@npm:4.1.0":
+  version: 4.1.0
+  resolution: "@apollo/client@npm:4.1.0"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/aaf67908591b546f93e20b2c5484559179863e9dacddb2f1b1fae6a37c0bc30377e0db4fee3c00afe48074c21591d0ee490f6288545fe230967fe338ed5ed61d
+  checksum: 10c0/21b8c7c16169f34cb9603584c13f9e3303843b55148d27744da3ca835621418ab7185a7dd99b9e16a1641efc85bcb2df357792edfb56d570ce050138f339e4df
   languageName: node
   linkType: hard
 
@@ -7340,7 +7340,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.0.12"
+    "@apollo/client": "npm:4.1.0"
     "@babel/core": "npm:7.28.6"
     "@babel/eslint-parser": "npm:7.28.6"
     "@babel/plugin-proposal-decorators": "npm:7.28.6"
@@ -7459,7 +7459,7 @@ __metadata:
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.2"
     leaflet-gesture-handling: "npm:1.2.2"
-    leaflet.fullscreen: "npm:5.2.1"
+    leaflet.fullscreen: "npm:5.3.0"
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
@@ -14895,12 +14895,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.fullscreen@npm:5.2.1":
-  version: 5.2.1
-  resolution: "leaflet.fullscreen@npm:5.2.1"
+"leaflet.fullscreen@npm:5.3.0":
+  version: 5.3.0
+  resolution: "leaflet.fullscreen@npm:5.3.0"
   peerDependencies:
     leaflet: ^1.7.0 || >=2.0.0-alpha.1
-  checksum: 10c0/912e3cd5a638f1ffdec1c9bed4c70fce74d673aad0d03b3c05132bb1d2d991ad42dec05f92afa37609f83f29535412c0b7d650e2b00c1967a3936a7d387920bf
+  checksum: 10c0/a2dd713677ff342d43be20147c111f6268814ff4857dc29012ae9f7a012f36544a627c14d1059f900905a2b03fd13dcf95f2f1f281504a590cb5684f83656c00
   languageName: node
   linkType: hard
 
