@@ -1,5 +1,12 @@
 import React, {
-  createContext, FC, useCallback, useContext, useEffect, useMemo, useRef, useState
+  createContext,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
 } from "react"
 import { useLocation } from "react-router-dom"
 
@@ -17,6 +24,7 @@ type ChatBridgeContextType = {
   toggle: () => void
   isReady: boolean
   setIframeEl: (el: HTMLIFrameElement | null) => void
+  onIframeLoad: () => void
   send: (context?: any, suggestions?: ChatSuggestion[]) => void
   registerPageContext: (ctx?: any, suggestions?: ChatSuggestion[]) => symbol
   unregisterPageContext: (token: symbol) => void
@@ -25,25 +33,38 @@ type ChatBridgeContextType = {
 const ChatBridgeContext = createContext<ChatBridgeContextType | null>(null)
 export const useChatBridge = () => {
   const ctx = useContext(ChatBridgeContext)
-  if (!ctx) throw new Error("useChatBridge must be used within ChatBridgeProvider")
+  if (!ctx)
+    throw new Error("useChatBridge must be used within ChatBridgeProvider")
   return ctx
 }
 
 const DEFAULT_CONTEXT: any = {}
 const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
-  { label: "Summarize", prompt: "Summarize what I'm viewing", icon: "list-bullets" },
-  { label: "Explain", prompt: "Explain this ANET page is used for", icon: "book" },
-  { label: "Search", prompt: "Help me find reports, people, or tasks", icon: "magnifying-glass" }
+  {
+    label: "Summarize",
+    prompt: "Summarize what I'm viewing",
+    icon: "list-bullets"
+  },
+  {
+    label: "Explain",
+    prompt: "Explain what this ANET page is used for",
+    icon: "book"
+  },
+  {
+    label: "Search",
+    prompt: "Help me find reports, people, or tasks",
+    icon: "magnifying-glass"
+  }
 ]
 
 const buildPayload = (ctx?: any, suggestions?: ChatSuggestion[]) => {
   const payload = {
     application: "ANET",
-    businessObject: ctx ?? DEFAULT_CONTEXT,
+    businessObject: { ...(ctx ?? DEFAULT_CONTEXT) },
     suggestions: suggestions ?? DEFAULT_SUGGESTIONS
   }
 
-  payload.businessObject.currentPage = window.location.pathname
+  payload.businessObject.currentPage = `${window.location.pathname}${window.location.search}${window.location.hash}`
 
   return payload
 }
@@ -65,23 +86,26 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
 
   const getActive = useCallback(() => {
     const top = stackRef.current[stackRef.current.length - 1]
-    return top ? { ctx: top.ctx, suggestions: top.suggestions }
-               : { ctx: DEFAULT_CONTEXT, suggestions: DEFAULT_SUGGESTIONS }
+    return top
+      ? { ctx: top.ctx, suggestions: top.suggestions }
+      : { ctx: DEFAULT_CONTEXT, suggestions: DEFAULT_SUGGESTIONS }
   }, [])
 
-  const _post = useCallback((payload: any) => {
-    const win = iframeElRef.current?.contentWindow
-    const key = JSON.stringify(payload)
-    if (!isReady) return
-    //if (key === lastSentRef.current) return // This needs to be uncommented
-    lastSentRef.current = key
+  const _post = useCallback(
+    (payload: any) => {
+      const win = iframeElRef.current?.contentWindow
+      const key = JSON.stringify(payload)
+      if (key === lastSentRef.current) return
+      lastSentRef.current = key
 
-    if (!win || !isReady) {
-      queueRef.current.push(payload)
-      return
-    }
-    win.postMessage(payload, targetOriginRef.current || "*")
-  }, [isReady])
+      if (!win || !isReady) {
+        queueRef.current.push(payload)
+        return
+      }
+      win.postMessage(payload, targetOriginRef.current || "*")
+    },
+    [isReady]
+  )
 
   const flushQueue = useCallback(() => {
     const win = iframeElRef.current?.contentWindow
@@ -100,28 +124,43 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
     iframeElRef.current = el
     setIsReady(false)
     try {
-      targetOriginRef.current = el ? new URL(el.src, window.location.href).origin : undefined
+      targetOriginRef.current = el
+        ? new URL(el.src, window.location.href).origin
+        : undefined
     } catch {
       targetOriginRef.current = undefined
     }
   }, [])
 
-  const send = useCallback((context?: any, suggestions?: ChatSuggestion[]) => {
-    _post(buildPayload(context, suggestions))
-  }, [_post])
+  const onIframeLoad = useCallback(() => {
+    setIsReady(true)
+  }, [])
 
-  const registerPageContext = useCallback((ctx?: any, suggestions?: ChatSuggestion[]) => {
-    const token = Symbol("chat-page")
-    stackRef.current.push({ token, ctx, suggestions })
-    announceActive()
-    return token
-  }, [announceActive])
+  const send = useCallback(
+    (context?: any, suggestions?: ChatSuggestion[]) => {
+      _post(buildPayload(context, suggestions))
+    },
+    [_post]
+  )
 
-  const unregisterPageContext = useCallback((token: symbol) => {
-    const idx = stackRef.current.findIndex(s => s.token === token)
-    if (idx >= 0) stackRef.current.splice(idx, 1)
-    announceActive()
-  }, [announceActive])
+  const registerPageContext = useCallback(
+    (ctx?: any, suggestions?: ChatSuggestion[]) => {
+      const token = Symbol("chat-page")
+      stackRef.current.push({ token, ctx, suggestions })
+      announceActive()
+      return token
+    },
+    [announceActive]
+  )
+
+  const unregisterPageContext = useCallback(
+    (token: symbol) => {
+      const idx = stackRef.current.findIndex(s => s.token === token)
+      if (idx >= 0) stackRef.current.splice(idx, 1)
+      announceActive()
+    },
+    [announceActive]
+  )
 
   useEffect(() => {
     const onMessage = (ev: MessageEvent) => {
@@ -139,16 +178,39 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   }, [announceActive, flushQueue, isReady])
 
   useEffect(() => {
+    if (!isReady) return
+    let attempts = 0
+    const max = 5
+    const id = window.setInterval(() => {
+      attempts += 1
+      lastSentRef.current = null
+      announceActive()
+      flushQueue()
+      if (attempts >= max) window.clearInterval(id)
+    }, 300)
+    lastSentRef.current = null
+    announceActive()
+    flushQueue()
+    return () => window.clearInterval(id)
+  }, [announceActive, flushQueue, isReady])
+
+  useEffect(() => {
     const el = iframeElRef.current
     if (!el) return
     let attempts = 0
     const max = 20
     const id = window.setInterval(() => {
       attempts += 1
-      el.contentWindow?.postMessage({ type: "PING" }, targetOriginRef.current || "*")
+      el.contentWindow?.postMessage(
+        { type: "PING" },
+        targetOriginRef.current || "*"
+      )
       if (isReady || attempts >= max) window.clearInterval(id)
     }, 500)
-    el.contentWindow?.postMessage({ type: "PING" }, targetOriginRef.current || "*")
+    el.contentWindow?.postMessage(
+      { type: "PING" },
+      targetOriginRef.current || "*"
+    )
     return () => window.clearInterval(id)
   }, [setIframeEl, isReady])
 
@@ -171,11 +233,32 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
     announceActive()
   }, [announceActive])
 
-  const value = useMemo<ChatBridgeContextType>(() => ({
-    isOpen, open, close, toggle,
-    isReady, setIframeEl, send,
-    registerPageContext, unregisterPageContext
-  }), [isOpen, open, close, toggle, isReady, setIframeEl, send, registerPageContext, unregisterPageContext])
+  const value = useMemo<ChatBridgeContextType>(
+    () => ({
+      isOpen,
+      open,
+      close,
+      toggle,
+      isReady,
+      setIframeEl,
+      onIframeLoad,
+      send,
+      registerPageContext,
+      unregisterPageContext
+    }),
+    [
+      isOpen,
+      open,
+      close,
+      toggle,
+      isReady,
+      setIframeEl,
+      onIframeLoad,
+      send,
+      registerPageContext,
+      unregisterPageContext
+    ]
+  )
 
   return (
     <ChatBridgeContext.Provider value={value}>
@@ -193,6 +276,5 @@ export function useChatPageContext(
   useEffect(() => {
     const token = registerPageContext(ctx, suggestions)
     return () => unregisterPageContext(token)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
+  }, [registerPageContext, unregisterPageContext, ctx, suggestions, ...deps])
 }
