@@ -1,6 +1,7 @@
 import React, {
   createContext, FC, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react"
+import { useLocation } from "react-router-dom"
 
 export type ChatSuggestion = {
   label: string
@@ -50,6 +51,7 @@ const buildPayload = (ctx?: any, suggestions?: ChatSuggestion[]) => {
 export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const location = useLocation()
 
   const iframeElRef = useRef<HTMLIFrameElement | null>(null)
   const targetOriginRef = useRef<string | undefined>(undefined)
@@ -153,6 +155,10 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   useEffect(() => {
     announceActive()
   }, [announceActive])
+
+  useEffect(() => {
+    announceActive()
+  }, [announceActive, location.pathname, location.search, location.hash])
 
   const open = useCallback(() => {
     setIsOpen(true)
