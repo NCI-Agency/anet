@@ -247,7 +247,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   )
   const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
-  const { open: openChat, send: sendToChat } = useChatBridge()
+  const { isReady, open: openChat, send: sendToChat } = useChatBridge()
 
   function makeReportSuggestions(): ChatSuggestion[] {
     return [
@@ -335,9 +335,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   useEffect(() => {
     setAttachments(data?.report?.attachments || [])
   }, [data])
-  if (done) {
-    return result
-  }
 
   let hasAssessments
   let report, validationErrors, validationWarnings, reportSchema
@@ -376,6 +373,17 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     } catch (e) {
       validationWarnings = e.errors
     }
+  }
+
+  useEffect(() => {
+    if (done || !isReady) {
+      return
+    }
+    sendReportContextToAI(report)
+  }, [done, isReady, report])
+
+  if (done) {
+    return result
   }
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
@@ -422,9 +430,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   // Anybody can email a report as long as it's not in draft.
   const canEmail = !report.isDraft()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-
-  // Initialize AI chat
-  sendReportContextToAI(report)
 
   return (
     <Formik
