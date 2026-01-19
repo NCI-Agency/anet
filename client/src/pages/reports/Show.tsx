@@ -259,6 +259,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         iconColor: "#1e90ff"
       },
       {
+        label: "Spell check",
+        prompt: "Perform a spell check on this report",
+        icon: "pencil",
+        iconColor: "#ff8c00ff"
+      },
+      {
         label: "Latest report",
         prompt: "Get the latest report",
         icon: "arrow-up",
@@ -279,10 +285,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
       report.tasks
         ?.map(t => t?.shortName || t?.longName || t?.uuid)
         .filter(Boolean) || []
-    const keyOutcomes = Array.isArray(report.keyOutcomes)
-      ? report.keyOutcomes
-      : []
-    const nextSteps = Array.isArray(report.nextSteps) ? report.nextSteps : []
 
     return {
       title: report.intent || "",
@@ -297,8 +299,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         authors,
         attendees,
         tasks,
-        keyOutcomes,
-        nextSteps
+        keyOutcomes: report.keyOutcomes,
+        nextSteps: report.nextSteps
       }
     }
   }
