@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
 import mil.dds.anet.config.AnetConfig;
-import mil.dds.anet.test.SpringTestConfig;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -13,15 +13,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * This class is only meant to show the basic capabilities of the fake SMTP server. It shows how to
  * query the email server and parse the response. Web-interface available at
  * http://[smtp_address]:[smtp_port]
  */
-@SpringBootTest(classes = SpringTestConfig.class)
-class EmailServerTest {
+class EmailServerTest extends AnetApplicationTest {
 
   @Autowired
   protected AnetConfig config;

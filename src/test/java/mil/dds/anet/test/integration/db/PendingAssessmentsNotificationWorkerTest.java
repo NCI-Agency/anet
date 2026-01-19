@@ -19,7 +19,7 @@ import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
-import mil.dds.anet.test.SpringTestConfig;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -29,15 +29,11 @@ import mil.dds.anet.utils.PendingAssessmentsHelper.Recurrence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = SpringTestConfig.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PendingAssessmentsNotificationWorkerTest {
+class PendingAssessmentsNotificationWorkerTest extends AnetApplicationTest {
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

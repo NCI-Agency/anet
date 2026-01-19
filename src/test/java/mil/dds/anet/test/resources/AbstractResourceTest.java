@@ -13,8 +13,8 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.GraphQLPluginConfiguration;
-import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Subscription;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
@@ -63,22 +63,16 @@ import mil.dds.anet.threads.MaterializedViewRefreshWorker;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.provider.Arguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 
-@SpringBootTest(classes = SpringTestConfig.class,
-    useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class AbstractResourceTest {
+public abstract class AbstractResourceTest extends AnetApplicationTest {
 
   @Autowired
   protected QueryExecutor queryExecutor;
