@@ -625,6 +625,7 @@ input EventSeriesSearchQueryInput {
 enum EventSeriesSearchSortBy {
   CREATED_AT
   NAME
+  START_DATE
 }
 
 """"""

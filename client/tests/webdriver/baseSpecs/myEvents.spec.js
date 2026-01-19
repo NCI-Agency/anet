@@ -54,7 +54,7 @@ describe("My events page", () => {
     it("Should see a summary of the events for the user", async () => {
       await MyEvents.selectEventsSummary()
       // Validate some fields
-      const nmiEventIdx = 3
+      const nmiEventIdx = 5
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 1, 1)).getText()
       ).to.equal("Name: NMI PDT 2024-01")

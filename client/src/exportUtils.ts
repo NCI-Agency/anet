@@ -585,7 +585,7 @@ export const exportResults = (
     : {
         ...searchQueryParams,
         pageSize: maxNumberResults,
-        sortBy: "NAME",
+        sortBy: "START_DATE",
         sortOrder: "DESC"
       }
   const eventSeriesQuery = !includeEventSeries

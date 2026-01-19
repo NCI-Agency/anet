@@ -101,7 +101,9 @@ const PaginatedEvents = ({
   const eventQuery = {
     ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
-    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE,
+    sortOrder: "DESC",
+    sortBy: "START_DATE"
   }
 
   const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
