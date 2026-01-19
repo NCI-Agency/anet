@@ -15,15 +15,12 @@ import java.util.List;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
-@SpringBootTest(classes = SpringTestConfig.class)
 class ResourceUtilsTest {
 
   protected static final Logger logger =
