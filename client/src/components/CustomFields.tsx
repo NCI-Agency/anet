@@ -405,10 +405,10 @@ const GeoLocationField = ({
           {...otherFieldProps}
         />
       ) : (
-        <FastField
-          name={label}
+        <FieldHelper.ReadonlyField
+          field={{ name, value: fieldValue || null }}
+          label={label}
           isCompact={isCompact}
-          component={FieldHelper.ReadonlyField}
           humanValue={<CompactGeoLocation coordinates={coordinates} />}
           {...Object.without(otherFieldProps, "style")}
         />

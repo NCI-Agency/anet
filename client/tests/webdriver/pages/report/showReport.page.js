@@ -254,6 +254,14 @@ class ShowReport extends Page {
     return await elements.map(async element => (await element).getText())
   }
 
+  async getCompactFieldValue(label) {
+    const element = await browser.$(
+      `//div[contains(@class,'compact-view')]//tr[./th[normalize-space()="${label}"]]//td`
+    )
+    await element.waitForExist()
+    return element.getText()
+  }
+
   async selectOptionalField(field) {
     const optionalFieldsButton = await browser.$(
       '//button[text()="Optional Fields"]'
