@@ -38,6 +38,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.SecurityUtils;
 import mil.dds.anet.utils.Utils;
+import org.apache.http.client.HttpResponseException;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -143,9 +144,13 @@ public class AdminResource {
   public String reloadDictionary(@GraphQLRootContext GraphQLContext context) throws IOException {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    dict.loadDictionary();
-    AnetAuditLogger.log("Dictionary updated by {}", user);
-    return AnetConstants.DICTIONARY_RELOAD_MESSAGE;
+    if (dict.tryLoadDictionary()) {
+      AnetAuditLogger.log("Dictionary reload by {} succeeded", user);
+      return AnetConstants.DICTIONARY_RELOAD_SUCCEED_MESSAGE;
+    }
+    AnetAuditLogger.log("Dictionary reload by {} failed", user);
+    throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY,
+        AnetConstants.DICTIONARY_RELOAD_FAILED_MESSAGE);
   }
 
   /**

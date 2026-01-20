@@ -22,14 +22,10 @@ public class AnetCheckCommand {
   @Command(command = "check", description = "Checks the ANET dictionary",
       interactionMode = InteractionMode.NONINTERACTIVE)
   public void check() throws IOException {
-    int exitCode = 1;
-    try {
-      if (dict.checkDictionary()) {
-        exitCode = 0;
-      }
-    } finally {
-      Utils.exit(applicationContext, exitCode);
+    if (dict != null) {
+      Utils.exit(applicationContext, 0);
     }
+    throw new Error("Should not be able to load without a dictionary");
   }
 
 }

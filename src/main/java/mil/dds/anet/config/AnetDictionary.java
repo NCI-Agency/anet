@@ -20,6 +20,7 @@ import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -46,7 +47,14 @@ public class AnetDictionary {
 
   @PostConstruct
   public void init() throws IOException {
-    loadDictionary();
+    logger.info("Loading dictionary...");
+    Map<String, Object> dictionaryData = this.loadDictionary();
+
+    logger.info("Validating dictionary...");
+    this.checkDictionary(dictionaryData);
+
+    this.setDictionary(dictionaryData);
+    logger.info("Dictionary validated");
   }
 
   public Map<String, Object> getDictionary() {
@@ -57,29 +65,26 @@ public class AnetDictionary {
     this.dictionary = Collections.unmodifiableMap(dictionary);
   }
 
-  // This method is also called from AdminResource
-  public void loadDictionary() throws IOException, IllegalArgumentException {
+  /**
+   * Tries to load the dictionary, designed to be used runtime. If suppresses errors, and returns
+   * false if it failed to load the dictionary
+   */
+  public boolean tryLoadDictionary() {
     // Read and set anet-dictionary
-    // scan:ignore — false positive, we *want* to load the user-provided dictionary file
-    final File file = new File(config.getAnetDictionaryName());
-    try (final InputStream inputStream = new FileInputStream(file)) {
-      @SuppressWarnings("unchecked")
-      final Map<String, Object> dictionaryMap =
-          addKeycloakConfiguration(yamlMapper.readValue(inputStream, Map.class));
-      // Check and then set dictionary if it is valid
-      if (isValid(dictionaryMap)) {
-        this.setDictionary(dictionaryMap);
-      }
-    } catch (IOException | IllegalArgumentException e) {
-      logger.error("Error while trying to load dictionary");
-      throw e;
+    final Map<String, Object> dictionaryMap;
+    try {
+      dictionaryMap = loadDictionary();
+    } catch (IOException e) {
+      logger.warn("Loading the dictionary failed");
+      return false;
     }
+    if (this.isValid(dictionaryMap)) {
+      this.setDictionary(dictionaryMap);
+      return true;
+    }
+    return false;
   }
 
-  // This method is called from AnetCheckCommand
-  public boolean checkDictionary() {
-    return this.isValid(this.getDictionary());
-  }
 
   @SuppressWarnings("unchecked")
   public Object getDictionaryEntry(String keyPath) {
@@ -96,7 +101,27 @@ public class AnetDictionary {
     return elem;
   }
 
+  private Map<String, Object> loadDictionary() throws IOException {
+    // scan:ignore — false positive, we *want* to load the user-provided dictionary file
+    final File file = new File(config.getAnetDictionaryName());
+    try (final InputStream inputStream = new FileInputStream(file)) {
+      return addKeycloakConfiguration(
+          yamlMapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {}));
+    }
+  }
+
   private boolean isValid(final Map<String, Object> dictionaryMap) throws IllegalArgumentException {
+    try {
+      this.checkDictionary(dictionaryMap);
+      return true;
+    } catch (final IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  private void checkDictionary(final Map<String, Object> dictionaryMap)
+      throws IllegalArgumentException {
+    final List<Error> errors;
     try {
       final SchemaRegistryConfig schemaRegistryConfig =
           SchemaRegistryConfig.builder().formatAssertionsEnabled(true).build();
@@ -108,19 +133,18 @@ public class AnetDictionary {
           schemaRegistry.getSchema(SchemaLocation.of(SCHEMA_ID_PREFIX + "/anet-schema.yml"));
       schema.initializeValidators();
       final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
-      final List<Error> errors = schema.validate(anetDictionary);
-      if (!errors.isEmpty()) {
-        for (final Error error : errors) {
-          logger.error("Dictionary error: {}", error);
-        }
-        throw new IllegalArgumentException("Invalid dictionary in the configuration");
-      }
-      logger.atInfo().log("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
-      return true;
+      errors = schema.validate(anetDictionary);
     } catch (final Exception e) {
       logger.error("Malformed ANET schema", e);
+      throw new IllegalArgumentException("Malformed ANET schema", e);
     }
-    return false;
+    if (!errors.isEmpty()) {
+      for (final Error error : errors) {
+        logger.error("Dictionary error: {}", error);
+      }
+      throw new IllegalArgumentException("Invalid dictionary");
+    }
+    logger.atInfo().log("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
   }
 
   private Map<String, Object> addKeycloakConfiguration(Map<String, Object> dictionaryMap) {
