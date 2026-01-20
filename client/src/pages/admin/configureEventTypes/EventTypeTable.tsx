@@ -172,18 +172,9 @@ const EventTypeTable = ({
                 <tr key={eventType.name}>
                   <td>{eventType.name}</td>
                   <td>
-                    <Icon
-                      icon={
-                        eventType.status === Model.STATUS.ACTIVE
-                          ? IconNames.TICK
-                          : IconNames.CROSS
-                      }
-                      className={
-                        eventType.status === Model.STATUS.ACTIVE
-                          ? "text-success"
-                          : "text-danger"
-                      }
-                    />
+                    {eventType.status === Model.STATUS.ACTIVE
+                      ? "Active"
+                      : "Inactive"}
                   </td>
                   <td>
                     {moment(eventType.createdAt).format("YYYY-MM-DD HH:mm")}
