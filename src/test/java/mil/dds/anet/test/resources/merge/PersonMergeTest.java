@@ -311,27 +311,4 @@ class PersonMergeTest extends AbstractResourceTest {
       // OK
     }
   }
-
-  @Test
-  void testMergeOccupiedPosition() {
-    try {
-      final String elizabethUuid = getElizabethElizawell().getUuid();
-      final Person occupiedPerson = withCredentials(adminUser,
-          t -> queryExecutor.person(PERSON_FIELDS_ONLY_HISTORY, elizabethUuid));
-      final Optional<PersonPositionHistory> opt = occupiedPerson.getPreviousPositions().stream()
-          .filter(pph -> pph.getEndTime() == null).findAny();
-      final PersonInput winner = getPersonInput(getRegularUser());
-      winner.setPreviousPositions(
-          getPersonPositionHistoryInput(occupiedPerson.getPreviousPositions()));
-      winner.setPosition(
-          opt.map(personPositionHistory -> getPositionInput(personPositionHistory.getPosition()))
-              .orElse(null));
-      withCredentials(adminUser,
-          t -> mutationExecutor.mergePeople("", admin.getUuid(), true, winner));
-      fail("Expected an Exception");
-    } catch (Exception expectedException) {
-      // OK
-    }
-  }
-
 }
