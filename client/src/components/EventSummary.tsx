@@ -117,11 +117,8 @@ const EventSummary = ({
 
   const eventQuery = {
     ...queryParams,
-    pageNum,
-    sortOrder: "DESC",
-    sortBy: "START_DATE"
+    pageNum
   }
-
   const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
   })
