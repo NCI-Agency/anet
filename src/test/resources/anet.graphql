@@ -557,7 +557,7 @@ input EventSearchQueryInput {
   ownerOrgUuid: [String]
   pageNum: Int
   pageSize: Int
-  sortBy: EventSeriesSearchSortBy
+  sortBy: EventSearchSortBy
   sortOrder: SortOrder
   startDate: Instant
   status: Status
@@ -565,6 +565,13 @@ input EventSearchQueryInput {
   taskUuid: [String]
   text: String
   type: String
+}
+
+""""""
+enum EventSearchSortBy {
+  CREATED_AT
+  NAME
+  START_DATE
 }
 
 """"""

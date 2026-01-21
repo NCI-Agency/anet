@@ -33,7 +33,7 @@ describe("Create event page", () => {
 
     it("Should successfully create an event when required fields are filled", async () => {
       await (await CreateEvent.getNameInput()).waitForDisplayed()
-      await (await CreateEvent.getNameInput()).setValue("Test Event Series")
+      await (await CreateEvent.getNameInput()).setValue("Test Event")
 
       await (
         await CreateEvent.getTypeInput()
@@ -83,7 +83,7 @@ describe("Create event page", () => {
       await (await CreateEvent.getForm()).waitForDisplayed()
 
       await (await CreateEvent.getNameInput()).waitForDisplayed()
-      await (await CreateEvent.getNameInput()).setValue("Test Event Series")
+      await (await CreateEvent.getNameInput()).setValue("Test Event 2")
 
       await (
         await CreateEvent.getTypeInput()

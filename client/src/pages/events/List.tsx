@@ -17,8 +17,6 @@ import { connect } from "react-redux"
 
 const queryParams = {
   pageSize: 10,
-  sortBy: "NAME",
-  sortOrder: "ASC",
   status: "ACTIVE"
 }
 

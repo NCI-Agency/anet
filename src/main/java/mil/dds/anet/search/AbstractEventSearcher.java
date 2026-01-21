@@ -141,8 +141,11 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "events_createdAt"));
         break;
       case NAME:
-      default:
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "events_name"));
+        break;
+      case START_DATE:
+      default:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "events_startDate"));
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "events_uuid"));

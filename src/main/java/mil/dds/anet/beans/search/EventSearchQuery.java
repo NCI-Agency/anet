@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class EventSearchQuery extends EventSeriesSearchQuery {
+public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearchSortBy> {
   @GraphQLQuery
   @GraphQLInputField
   private String eventSeriesUuid;
@@ -31,7 +31,8 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
   String type;
 
   public EventSearchQuery() {
-    super();
+    super(EventSearchSortBy.START_DATE);
+    setSortOrder(SortOrder.DESC);
   }
 
   public String getEventSeriesUuid() {

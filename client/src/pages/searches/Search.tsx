@@ -316,12 +316,23 @@ const Search = ({
     }),
     [searchQueryParams, pageSize]
   )
+  const eventSearchQueryParams = useMemo(
+    () => ({
+      ...searchQueryParams,
+      pageSize,
+      sortBy: "START_DATE",
+      sortOrder: "DESC"
+    }),
+    [searchQueryParams, pageSize]
+  )
   const getSearchQueryParams = (queryType: string) => {
     switch (queryType) {
       case SEARCH_OBJECT_TYPES.ATTACHMENTS:
         return attachmentSearchQueryParams
       case SEARCH_OBJECT_TYPES.REPORTS:
         return reportsSearchQueryParams
+      case SEARCH_OBJECT_TYPES.EVENTS:
+        return eventSearchQueryParams
       default:
         return genericSearchQueryParams
     }

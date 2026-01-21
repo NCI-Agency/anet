@@ -35,8 +35,6 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
   const eventSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
-      sortBy: "NAME",
-      sortOrder: "ASC",
       adminOrgUuid: currentUser.position.organizationsAdministrated.map(
         org => org.uuid
       )
