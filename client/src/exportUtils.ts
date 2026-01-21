@@ -578,7 +578,7 @@ export const exportResults = (
         ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
-        sortOrder: "DESC"
+        sortOrder: "ASC"
       }
   const eventQuery = !includeEvents
     ? {}
@@ -594,7 +594,7 @@ export const exportResults = (
         ...searchQueryParams,
         pageSize: maxNumberResults,
         sortBy: "NAME",
-        sortOrder: "DESC"
+        sortOrder: "ASC"
       }
   const { emailNetwork } = searchQueryParams
   const variables = {
