@@ -36,7 +36,7 @@ export const getChoices = (field: string, values: any[]) => {
     "app6entityType"
   )
 
-  const toEntries = options =>
+  const toEntries = (options = {}) =>
     Object.fromEntries(
       Object.entries(options).map(([key, value]) => [key, value.label])
     )
