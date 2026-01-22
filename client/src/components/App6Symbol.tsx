@@ -2,7 +2,7 @@ import { App6Choices } from "components/App6"
 import ms from "milsymbol"
 import React, { useEffect, useRef } from "react"
 
-const VERSION = 10
+const VERSION = 10 // APP-6D
 
 type App6ChoiceMap = { [key: string]: string }
 type App6ChoiceGroup = { category: string; values: App6ChoiceMap }
