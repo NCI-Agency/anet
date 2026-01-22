@@ -1,4 +1,5 @@
 import {
+  gqlAllAttachmentFields,
   gqlAllReportFields,
   gqlApprovalStepFields,
   gqlAssessmentsFields,
@@ -120,6 +121,9 @@ const GQL_GET_REPORT = gql`
       advisorOrg {
         ${gqlEntityFieldsMap.Organization}
       }
+      attachments {
+        ${gqlAllAttachmentFields}
+      }
       ${gqlReportWorkflowFields}
       approvalStep {
         ${gqlApprovalStepFields}
@@ -193,6 +197,12 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
   // Author can always read assessments
   const canReadAssessments = isAuthor
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const imageAttachments = attachmentsEnabled
+    ? (report.attachments || []).filter(attachment =>
+        attachment?.mimeType?.startsWith("image/")
+      )
+    : []
   return (
     <>
       <CompactReportViewHeader
@@ -386,6 +396,35 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
+            {imageAttachments.length > 0 && (
+              <CompactRow
+                id="attachmentsWithImages"
+                content={
+                  <AttachmentsWithImagesS>
+                    <AttachmentsTitleS>
+                      Attachments with images
+                    </AttachmentsTitleS>
+                    <AttachmentsListS>
+                      {imageAttachments.map(attachment => (
+                        <AttachmentFigureS key={attachment.uuid}>
+                          <AttachmentImageS
+                            src={`/api/attachment/view/${attachment.uuid}`}
+                            alt={attachment.caption || attachment.fileName}
+                          />
+                          <AttachmentCaptionS>
+                            {attachment.caption ||
+                              attachment.description ||
+                              attachment.fileName ||
+                              attachment.uuid}
+                          </AttachmentCaptionS>
+                        </AttachmentFigureS>
+                      ))}
+                    </AttachmentsListS>
+                  </AttachmentsWithImagesS>
+                }
+                className="reportField"
+              />
+            )}
           </FullColumn>
         </CompactTable>
         <CompactFooterContent
@@ -576,6 +615,52 @@ const CompactReportViewS = styled.div`
       box-shadow: none;
     }
   }
+`
+
+const AttachmentsWithImagesS = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+`
+
+const AttachmentsTitleS = styled.div`
+  align-self: flex-start;
+  color: #445566;
+  font-size: 14px;
+  font-weight: bold;
+`
+
+const AttachmentsListS = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+`
+
+const AttachmentFigureS = styled.figure`
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+`
+
+const AttachmentImageS = styled.img`
+  max-width: 600px;
+  max-height: 600px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+`
+
+const AttachmentCaptionS = styled.figcaption`
+  font-size: 13px;
+  color: #445566;
+  text-align: center;
 `
 
 const OPTIONAL_FIELDS_INIT = {
