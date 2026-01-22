@@ -143,9 +143,14 @@ public class AdminResource {
   public String reloadDictionary(@GraphQLRootContext GraphQLContext context) throws IOException {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    dict.loadDictionary();
-    AnetAuditLogger.log("Dictionary updated by {}", user);
-    return AnetConstants.DICTIONARY_RELOAD_MESSAGE;
+    try {
+      dict.loadDictionary();
+      AnetAuditLogger.log("Dictionary updated by {}", user);
+      return AnetConstants.DICTIONARY_RELOAD_SUCCEEDED_MESSAGE;
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          AnetConstants.DICTIONARY_RELOAD_FAILED_MESSAGE, e);
+    }
   }
 
   /**
