@@ -10,8 +10,9 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import EngagementsBetweenCommunitiesMatrix from "components/EngagementsBetweenCommunitiesMatrix"
 import { mapPageDispatchersToProps } from "components/Page"
 import { AuthorizationGroup } from "models"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
+import { useLocation, useNavigate } from "react-router-dom"
 import COMMUNITIES_ICON from "resources/communities.png"
 import Settings from "settings"
 
@@ -37,33 +38,87 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
 `
 
 const CadenceDashboard = () => {
-  const [authorizationGroupAdvisors, setAuthorizationGroupAdvisors] =
-    useState(undefined)
-  const [authorizationGroupInterlocutors, setAuthorizationGroupInterlocutors] =
-    useState(undefined)
+  const navigate = useNavigate()
+  const location = useLocation()
 
-  const handleChangeAuthorizationGroup = async (selected, setter) => {
-    if (!selected?.uuid) {
-      setter(null)
-      return
+  const [authorizationGroupAdvisors, setAuthorizationGroupAdvisors] =
+    useState<AuthorizationGroup | null>(null)
+  const [authorizationGroupInterlocutors, setAuthorizationGroupInterlocutors] =
+    useState<AuthorizationGroup | null>(null)
+
+  const updateSingleQueryParam = (
+    key: "advisors" | "interlocutors",
+    value: string | null
+  ) => {
+    const params = new URLSearchParams(location.search)
+
+    if (value) {
+      params.set(key, value)
+    } else {
+      params.delete(key)
     }
 
-    const uuid = selected.uuid
+    navigate({ search: params.toString() }, { replace: true })
+  }
+
+  const handleChangeAuthorizationGroup = async (
+    selected,
+    setter,
+    type: "advisors" | "interlocutors"
+  ) => {
+    if (!selected?.uuid) {
+      setter(null)
+      updateSingleQueryParam(type, null)
+      return
+    }
 
     try {
       const result = await API.client.query({
         query: GQL_GET_AUTHORIZATION_GROUP,
-        variables: { uuid },
+        variables: { uuid: selected.uuid },
         fetchPolicy: "network-only"
       })
 
       if (result?.data?.authorizationGroup) {
         setter(result.data.authorizationGroup)
+        updateSingleQueryParam(type, result.data.authorizationGroup.uuid)
       }
     } catch (err) {
       console.error("Failed to fetch authorization group", err)
     }
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+
+    const advisorsUuid = params.get("advisors")
+    const interlocutorsUuid = params.get("interlocutors")
+
+    if (
+      advisorsUuid &&
+      (!authorizationGroupAdvisors ||
+        authorizationGroupAdvisors.uuid !== advisorsUuid)
+    ) {
+      handleChangeAuthorizationGroup(
+        { uuid: advisorsUuid },
+        setAuthorizationGroupAdvisors,
+        "advisors"
+      )
+    }
+
+    if (
+      interlocutorsUuid &&
+      (!authorizationGroupInterlocutors ||
+        authorizationGroupInterlocutors.uuid !== interlocutorsUuid)
+    ) {
+      handleChangeAuthorizationGroup(
+        { uuid: interlocutorsUuid },
+        setAuthorizationGroupInterlocutors,
+        "interlocutors"
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search])
 
   return (
     <>
@@ -88,7 +143,8 @@ const CadenceDashboard = () => {
             onChange={selected =>
               handleChangeAuthorizationGroup(
                 selected,
-                setAuthorizationGroupAdvisors
+                setAuthorizationGroupAdvisors,
+                "advisors"
               )
             }
           />
@@ -114,7 +170,8 @@ const CadenceDashboard = () => {
             onChange={selected =>
               handleChangeAuthorizationGroup(
                 selected,
-                setAuthorizationGroupInterlocutors
+                setAuthorizationGroupInterlocutors,
+                "interlocutors"
               )
             }
           />

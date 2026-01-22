@@ -1228,7 +1228,9 @@ INSERT INTO "authorizationGroups" (uuid, name, description, status, "distributio
   ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2', 'The complete EF 2.2 organisation', 0, FALSE, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('ab1a7d99-4529-44b1-a118-bdee3ca8296b', 'EF 5', 'The complete EF 5 organization', 0, TRUE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('89d8d60a-f3ff-4fa6-8246-805fd74d14fd', 'Unlimited exporters', 'Unlimited exporters', 0, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'Key Advisors', 'Key Advisors', 0, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'Key Interlocutors', 'Key Interlocutors', 0, FALSE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Authorization group members
 INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1251,6 +1253,24 @@ INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relat
   SELECT '90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'positions', p.uuid
   FROM positions p
   WHERE p.status = 1;
+
+-- Populate Key Advisors community with JACKSON - Jack , his organization and his position
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+VALUES ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'people',  'b5d495af-44d5-4c35-851a-1039352a8307');
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+VALUES ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'organizations',  'a267a964-e9a1-4dfd-baa4-0c57d35a6212');
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+SELECT 'e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'positions', p.uuid
+FROM positions p
+WHERE p.name = 'EF 2.1 Advisor B';
+
+-- Populate key interlocutors with CHRISVILLE - Chris, his organization and his position
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+VALUES ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'people',  '5fa54ffd-cc90-493a-b4b1-73e9c4568177');
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+VALUES ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'organizations',  'df85610c-c6fd-4381-a276-84238e81cb3e');
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+VALUES ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'positions',  '18f42d92-ada7-11eb-8529-0242ac130003');
 
 -- Report authorized members for reports with sensitive information
 INSERT INTO "reportAuthorizedMembers" ("reportUuid", "relatedObjectType", "relatedObjectUuid") VALUES

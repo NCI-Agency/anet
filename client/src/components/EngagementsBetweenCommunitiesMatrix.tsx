@@ -89,13 +89,34 @@ const EngagementsBetweenCommunitiesMatrix = ({
     plannedEngagements
   ])
 
+  function getEngagementColor(engagementDate: string): string {
+    const engagementMoment = moment(engagementDate)
+    const now = moment()
+    const monthsAgo = now.diff(engagementMoment, "months")
+
+    if (monthsAgo < 3) {
+      return "#28a745"
+    } else if (monthsAgo < 6) {
+      return "#6c757d"
+    } else if (monthsAgo < 12) {
+      return "#ffc107"
+    } else if (monthsAgo < 24) {
+      return "#fd7e14"
+    } else {
+      return "#dc3545"
+    }
+  }
+
   function getEngagement(advisorEntityUuid, interlocutorEntityUuid) {
     const match = engagementsBetweenCommunities.find(
       e =>
         e.advisor?.relatedObjectUuid === advisorEntityUuid &&
         e.interlocutor?.relatedObjectUuid === interlocutorEntityUuid
     )
-    if (!match) return null
+    if (!match) {
+      return null
+    }
+    const engagementColor = getEngagementColor(match.engagementDate)
     const report = new Report({
       uuid: match.reportUuid,
       intent: moment(match.engagementDate).format(
@@ -103,9 +124,16 @@ const EngagementsBetweenCommunitiesMatrix = ({
       )
     })
     return (
-      <>
+      <div
+        style={{
+          backgroundColor: engagementColor,
+          padding: "0.25rem 0.5rem",
+          borderRadius: "4px",
+          textAlign: "center"
+        }}
+      >
         <LinkTo modelType="Report" model={report} />
-      </>
+      </div>
     )
   }
 
@@ -152,18 +180,18 @@ const EngagementsBetweenCommunitiesMatrix = ({
             responsive
             hover
             id="events-matrix"
-            style={{ minWidth: `${advisorEntities.length * 300}px` }}
+            style={{ minWidth: `${advisorEntities.length * 220}px` }}
           >
             <tbody>
               <tr id="event-series-table-header" className="table-primary">
-                <th></th>
+                <th />
                 {advisorEntities.map(advisorEntity => (
                   <th
                     key={advisorEntity.relatedObjectUuid}
                     style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis"
+                      whiteSpace: "normal",
+                      overflow: "anywhere",
+                      wordBreak: "break-word"
                     }}
                   >
                     <LinkTo
@@ -189,9 +217,9 @@ const EngagementsBetweenCommunitiesMatrix = ({
                     >
                       <td
                         style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis"
+                          whiteSpace: "normal",
+                          overflow: "anywhere",
+                          wordBreak: "break-word"
                         }}
                       >
                         <LinkTo
