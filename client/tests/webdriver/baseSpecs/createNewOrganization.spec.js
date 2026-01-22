@@ -13,13 +13,13 @@ const testOrgs = {
     app6standardIdentityInput: "2",
     app6standardIdentity: "Assumed Friend",
     app6symbolSetInput: "10",
-    app6symbolSet: "Land Units",
+    app6symbolSet: "Land Unit",
     app6hqInput: "3",
-    app6hq: "Feint / Dummy Headquarters",
+    app6hq: "Feint/Dummy Headquarters",
     app6amplifierInput: "12",
     app6amplifier: "Squad",
     app6entityInput: "12",
-    app6entity: "Movement and Maneuver"
+    app6entity: "Movement and Manoeuvre"
   },
   secondLevel: {
     shortName: "TO 1.1",
@@ -29,9 +29,9 @@ const testOrgs = {
     app6standardIdentityInput: "3",
     app6standardIdentity: "Friend",
     app6symbolSetInput: "10",
-    app6symbolSet: "Land Units",
+    app6symbolSet: "Land Unit",
     app6hqInput: "5",
-    app6hq: "Feint / Dummy Task Force",
+    app6hq: "Feint/Dummy Task Force",
     app6amplifierInput: "11",
     app6amplifier: "Team/Crew"
   },
