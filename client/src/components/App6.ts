@@ -56,7 +56,6 @@ export const App6Choices: { [key: string]: any } = {
     9: "Version Extension Flag"
   },
   app6hq: {
-    0: "Not Applicable",
     1: "Feint/Dummy",
     2: "Headquarters",
     3: "Feint/Dummy Headquarters",
@@ -6279,12 +6278,6 @@ export const App6Choices: { [key: string]: any } = {
   app6sectorOneModifier: {
     "01": [
       {
-        category: "Not Applicable",
-        values: {
-          "00": "Not Applicable"
-        }
-      },
-      {
         category: "MILITARY AIRCRAFT TYPE",
         values: {
           "01": "Attack/Strike",
@@ -6351,12 +6344,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     "02": [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "LAUNCH ORIGIN",
         values: {
           "01": "Air",
@@ -6377,12 +6364,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     "05": [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "ORBIT",
         values: {
           "01": "Low Earth Orbit (LEO)",
@@ -6395,12 +6376,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     10: [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "MOBILITY",
         values: {
@@ -6497,12 +6472,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     11: [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "CRIME",
         values: {
           "01": "Assassination",
@@ -6544,12 +6513,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     15: [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "SENSOR TYPE",
         values: {
           "01": "Biological",
@@ -6575,12 +6538,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     20: [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "MILITARY TELECOMMUNICATIONS TYPE",
         values: {
@@ -6609,7 +6566,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     27: {
-      "00": "Unspecified",
       "01": "Close Protection",
       "02": "Crowd and Riot Control",
       "03": "Explosive Ordnance Disposal",
@@ -6668,12 +6624,6 @@ export const App6Choices: { [key: string]: any } = {
     },
     30: [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "MISSION AREA",
         values: {
           "01": "Own Ship",
@@ -6718,12 +6668,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     35: [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "MISSION AREA",
         values: {
@@ -6772,12 +6716,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     40: [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "CRIME",
         values: {
           "01": "Assassination",
@@ -6820,12 +6758,6 @@ export const App6Choices: { [key: string]: any } = {
   app6sectorTwoModifier: {
     "01": [
       {
-        category: "Not Applicable",
-        values: {
-          "00": "Not Applicable"
-        }
-      },
-      {
         category: "CARGO/TRANSPORT CAPACITY",
         values: {
           "01": "Heavy",
@@ -6858,12 +6790,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     "02": [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "MISSILE DESTINATION",
         values: {
@@ -6907,12 +6833,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     "05": [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "SENSOR",
         values: {
           "01": "Optical",
@@ -6923,12 +6843,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     10: [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "MOBILITY",
         values: {
@@ -6999,12 +6913,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
     11: [
       {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
-      {
         category: "ORGANIZATION",
         values: {
           "01": "Leader or Leadership"
@@ -7012,12 +6920,6 @@ export const App6Choices: { [key: string]: any } = {
       }
     ],
     20: [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "Not Specified",
         values: {
@@ -7032,55 +6934,69 @@ export const App6Choices: { [key: string]: any } = {
         }
       }
     ],
-    27: {
-      "00": "Unspecified",
-      "01": "Airborne",
-      "02": "Bicycle Equipped",
-      "03": "Demolition",
-      "04": "Functional Staff Area J1",
-      "05": "Functional Staff Area J2",
-      "06": "Functional Staff Area J3",
-      "07": "Functional Staff Area J4",
-      "08": "Functional Staff Area J5",
-      "09": "Functional Staff Area J6",
-      10: "Functional Staff Area J7",
-      11: "Functional Staff Area J8",
-      12: "Functional Staff Area J9",
-      13: "Mountain",
-      14: "Rank Code OF-1",
-      15: "Rank Code OF-2",
-      16: "Rank Code OF-3",
-      17: "Rank Code OF-4",
-      18: "Rank Code OF-5",
-      19: "Rank Code OF-6",
-      20: "Rank Code OF-7",
-      21: "Rank Code OF-8",
-      22: "Rank Code OF-9",
-      23: "Rank Code OF-10",
-      24: "Rank Code OF-D",
-      25: "Rank Code OR-1",
-      26: "Rank Code OR-2",
-      27: "Rank Code OR-3",
-      28: "Rank Code OR-4",
-      29: "Rank Code OR-5",
-      30: "Rank Code OR-6",
-      31: "Rank Code OR-7",
-      32: "Rank Code OR-8",
-      33: "Rank Code OR-9",
-      34: "Rank Code WO-1",
-      35: "Rank Code WO-2",
-      36: "Rank Code WO-3",
-      37: "Rank Code WO-4",
-      38: "Rank Code WO-5",
-      39: "Ski"
-    },
-    30: [
+    27: [
       {
-        category: "Unspecified",
+        category: "MOBILITY",
         values: {
-          "00": "Unspecified"
+          "01": "Airborne",
+          "02": "Bicycle Equipped",
+          39: "Ski"
         }
       },
+      {
+        category: "CAPABILITY",
+        values: {
+          "03": "Demolition",
+          13: "Mountain"
+        }
+      },
+      {
+        category: "FUNCTIONAL STAFF AREA",
+        values: {
+          "04": "Functional Staff Area J1",
+          "05": "Functional Staff Area J2",
+          "06": "Functional Staff Area J3",
+          "07": "Functional Staff Area J4",
+          "08": "Functional Staff Area J5",
+          "09": "Functional Staff Area J6",
+          10: "Functional Staff Area J7",
+          11: "Functional Staff Area J8",
+          12: "Functional Staff Area J9"
+        }
+      },
+      {
+        category: "RANK CODE",
+        values: {
+          14: "Rank Code OF-1",
+          15: "Rank Code OF-2",
+          16: "Rank Code OF-3",
+          17: "Rank Code OF-4",
+          18: "Rank Code OF-5",
+          19: "Rank Code OF-6",
+          20: "Rank Code OF-7",
+          21: "Rank Code OF-8",
+          22: "Rank Code OF-9",
+          23: "Rank Code OF-10",
+          24: "Rank Code OF-D",
+          25: "Rank Code OR-1",
+          26: "Rank Code OR-2",
+          27: "Rank Code OR-3",
+          28: "Rank Code OR-4",
+          29: "Rank Code OR-5",
+          30: "Rank Code OR-6",
+          31: "Rank Code OR-7",
+          32: "Rank Code OR-8",
+          33: "Rank Code OR-9",
+          34: "Rank Code WO-1",
+          35: "Rank Code WO-2",
+          36: "Rank Code WO-3",
+          37: "Rank Code WO-4",
+          38: "Rank Code WO-5"
+        }
+      }
+    ],
+
+    30: [
       {
         category: "SHIP PROPULSION",
         values: {
@@ -7124,12 +7040,6 @@ export const App6Choices: { [key: string]: any } = {
     ],
 
     35: [
-      {
-        category: "Unspecified",
-        values: {
-          "00": "Unspecified"
-        }
-      },
       {
         category: "SHIP PROPULSION",
         values: {
