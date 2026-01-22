@@ -396,35 +396,36 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
-            {imageAttachments.length > 0 && (
-              <CompactRow
-                id="attachmentsWithImages"
-                content={
-                  <AttachmentsWithImagesS>
-                    <AttachmentsTitleS>
-                      Attachments with images
-                    </AttachmentsTitleS>
-                    <AttachmentsListS>
-                      {imageAttachments.map(attachment => (
-                        <AttachmentFigureS key={attachment.uuid}>
-                          <AttachmentImageS
-                            src={`/api/attachment/view/${attachment.uuid}`}
-                            alt={attachment.caption || attachment.fileName}
-                          />
-                          <AttachmentCaptionS>
-                            {attachment.caption ||
-                              attachment.description ||
-                              attachment.fileName ||
-                              attachment.uuid}
-                          </AttachmentCaptionS>
-                        </AttachmentFigureS>
-                      ))}
-                    </AttachmentsListS>
-                  </AttachmentsWithImagesS>
-                }
-                className="reportField"
-              />
-            )}
+            {optionalFields.attachmentsWithImages.active &&
+              imageAttachments.length > 0 && (
+                <CompactRow
+                  id="attachmentsWithImages"
+                  content={
+                    <AttachmentsWithImagesS>
+                      <AttachmentsTitleS>
+                        Attachments with images
+                      </AttachmentsTitleS>
+                      <AttachmentsListS>
+                        {imageAttachments.map(attachment => (
+                          <AttachmentFigureS key={attachment.uuid}>
+                            <AttachmentImageS
+                              src={`/api/attachment/view/${attachment.uuid}`}
+                              alt={attachment.caption || attachment.fileName}
+                            />
+                            <AttachmentCaptionS>
+                              {attachment.caption ||
+                                attachment.description ||
+                                attachment.fileName ||
+                                attachment.uuid}
+                            </AttachmentCaptionS>
+                          </AttachmentFigureS>
+                        ))}
+                      </AttachmentsListS>
+                    </AttachmentsWithImagesS>
+                  }
+                  className="reportField"
+                />
+              )}
           </FullColumn>
         </CompactTable>
         <CompactFooterContent
@@ -666,6 +667,10 @@ const AttachmentCaptionS = styled.figcaption`
 const OPTIONAL_FIELDS_INIT = {
   assessments: {
     text: "Assessments",
+    active: false
+  },
+  attachmentsWithImages: {
+    text: "Display Attachments with Images",
     active: false
   },
   reportSensitiveInformation: {
