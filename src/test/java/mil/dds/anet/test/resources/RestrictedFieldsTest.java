@@ -167,9 +167,9 @@ class RestrictedFieldsTest extends AbstractResourceTest {
             "ef22advisorSewingFacilities@example.ns", "ef51advisorQualityAssurance@example.ns"));
 
     // authorizationGroup search
-    assertAuthorizationGroupSearch(domainUsername, EMAIL_NETWORK_INTERNET, 2,
+    assertAuthorizationGroupSearch(domainUsername, EMAIL_NETWORK_INTERNET, 5,
         list("ef11@example.com", "ef22@example.com"));
-    assertAuthorizationGroupSearch(domainUsername, EMAIL_NETWORK_NS, 2,
+    assertAuthorizationGroupSearch(domainUsername, EMAIL_NETWORK_NS, 3,
         list("ef11@example.ns", "ef22@example.ns"));
   }
 
