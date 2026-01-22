@@ -1,6 +1,5 @@
 package mil.dds.anet.commands;
 
-import java.io.IOException;
 import mil.dds.anet.config.AnetDictionary;
 import org.springframework.context.ApplicationContext;
 import org.springframework.shell.command.annotation.Command;
@@ -12,24 +11,21 @@ import org.springframework.shell.standard.ShellComponent;
 public class AnetCheckCommand {
 
   private final ApplicationContext applicationContext;
-  private final AnetDictionary dict;
 
-  public AnetCheckCommand(ApplicationContext applicationContext, AnetDictionary dict) {
+  public AnetCheckCommand(ApplicationContext applicationContext) {
     this.applicationContext = applicationContext;
-    this.dict = dict;
   }
 
+  /**
+   * The dictionary is loaded and validated in {@link AnetDictionary#init()} and will either log the
+   * dictionary when valid, or throw an Exception, in which case this code will never be reached and
+   * the application will terminate abnormally.
+   */
   @Command(command = "check", description = "Checks the ANET dictionary",
       interactionMode = InteractionMode.NONINTERACTIVE)
-  public void check() throws IOException {
-    int exitCode = 1;
-    try {
-      if (dict.checkDictionary()) {
-        exitCode = 0;
-      }
-    } finally {
-      Utils.exit(applicationContext, exitCode);
-    }
+  public void check() {
+    // Dictionary is valid, exit with success
+    Utils.exit(applicationContext, 0);
   }
 
 }

@@ -2,6 +2,7 @@ package mil.dds.anet.config;
 
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaException;
 import com.networknt.schema.SchemaLocation;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SchemaRegistryConfig;
@@ -45,7 +46,7 @@ public class AnetDictionary {
   }
 
   @PostConstruct
-  public void init() throws IOException {
+  public void init() throws IOException, IllegalArgumentException, SchemaException {
     loadDictionary();
   }
 
@@ -57,8 +58,11 @@ public class AnetDictionary {
     this.dictionary = Collections.unmodifiableMap(dictionary);
   }
 
-  // This method is also called from AdminResource
-  public void loadDictionary() throws IOException, IllegalArgumentException {
+  /**
+   * This method is called from {@link #init()} and
+   * {@link mil.dds.anet.resources.AdminResource#reloadDictionary(graphql.GraphQLContext)}.
+   */
+  public void loadDictionary() throws IOException, IllegalArgumentException, SchemaException {
     // Read and set anet-dictionary
     // scan:ignore — false positive, we *want* to load the user-provided dictionary file
     final File file = new File(config.getAnetDictionaryName());
@@ -67,18 +71,12 @@ public class AnetDictionary {
       final Map<String, Object> dictionaryMap =
           addKeycloakConfiguration(yamlMapper.readValue(inputStream, Map.class));
       // Check and then set dictionary if it is valid
-      if (isValid(dictionaryMap)) {
-        this.setDictionary(dictionaryMap);
-      }
-    } catch (IOException | IllegalArgumentException e) {
+      this.validate(dictionaryMap);
+      this.setDictionary(dictionaryMap);
+    } catch (final Exception e) {
       logger.error("Error while trying to load dictionary");
       throw e;
     }
-  }
-
-  // This method is called from AnetCheckCommand
-  public boolean checkDictionary() {
-    return this.isValid(this.getDictionary());
   }
 
   @SuppressWarnings("unchecked")
@@ -96,7 +94,9 @@ public class AnetDictionary {
     return elem;
   }
 
-  private boolean isValid(final Map<String, Object> dictionaryMap) throws IllegalArgumentException {
+  private void validate(final Map<String, Object> dictionaryMap)
+      throws IllegalArgumentException, SchemaException {
+    final Schema schema;
     try {
       final SchemaRegistryConfig schemaRegistryConfig =
           SchemaRegistryConfig.builder().formatAssertionsEnabled(true).build();
@@ -104,23 +104,22 @@ public class AnetDictionary {
           SpecificationVersion.DRAFT_2019_09,
           builder -> builder.schemaRegistryConfig(schemaRegistryConfig).schemaIdResolvers(
               schemaIdResolvers -> schemaIdResolvers.mapPrefix(SCHEMA_ID_PREFIX, "classpath:/")));
-      final Schema schema =
-          schemaRegistry.getSchema(SchemaLocation.of(SCHEMA_ID_PREFIX + "/anet-schema.yml"));
+      schema = schemaRegistry.getSchema(SchemaLocation.of(SCHEMA_ID_PREFIX + "/anet-schema.yml"));
       schema.initializeValidators();
-      final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
-      final List<Error> errors = schema.validate(anetDictionary);
-      if (!errors.isEmpty()) {
-        for (final Error error : errors) {
-          logger.error("Dictionary error: {}", error);
-        }
-        throw new IllegalArgumentException("Invalid dictionary in the configuration");
-      }
-      logger.atInfo().log("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
-      return true;
     } catch (final Exception e) {
-      logger.error("Malformed ANET schema", e);
+      logger.error("Malformed ANET schema");
+      throw e;
     }
-    return false;
+
+    final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
+    final List<Error> errors = schema.validate(anetDictionary);
+    if (!errors.isEmpty()) {
+      for (final Error error : errors) {
+        logger.error("Dictionary error: {}", error);
+      }
+      throw new IllegalArgumentException("Invalid dictionary in the configuration");
+    }
+    logger.atInfo().log("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
   }
 
   private Map<String, Object> addKeycloakConfiguration(Map<String, Object> dictionaryMap) {

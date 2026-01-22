@@ -129,7 +129,7 @@ class AdminResourceTest extends AbstractResourceTest {
       final String result =
           withCredentials(getDomainUsername(user), t -> mutationExecutor.reloadDictionary(""));
       if (isAdmin) {
-        assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_MESSAGE);
+        assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_SUCCEEDED_MESSAGE);
       } else {
         fail("Expected an Exception");
       }
