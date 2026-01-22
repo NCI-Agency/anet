@@ -151,7 +151,7 @@
     "leaflet.fullscreen": "5.3.0",
     "leaflet.markercluster": "1.5.3",
     "locale-compare-polyfill": "0.0.2",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "milsymbol": "3.0.3",
     "ml-matrix": "6.12.1",
     "moment": "2.30.1",
