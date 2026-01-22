@@ -6277,212 +6277,337 @@ export const App6Choices: { [key: string]: any } = {
     }
   },
   app6sectorOneModifier: {
-    "01": {
-      "00": "Not Applicable",
-      "01": "Attack/Strike",
-      "02": "Bomber",
-      "03": "Cargo",
-      "04": "Fighter",
-      "05": "Interceptor",
-      "06": "Tanker",
-      "07": "Utility",
-      "08": "Vertical or Short Take-off and Landing (VSTOL)/Vertical Take-off and Landing (VTOL)",
-      "09": "Passenger",
-      10: "Ultra Light",
-      11: "Airborne Command Post (ACP)",
-      12: "Airborne Early Warning (AEW)",
-      13: "Government",
-      14: "Medical Evacuation (MEDEVAC)",
-      15: "Escort",
-      16: "Electronic Combat (EC)/Jammer",
-      17: "Patrol",
-      18: "Reconnaissance",
-      19: "Trainer",
-      20: "Photographic Reconnaissance",
-      21: "Personnel Recovery",
-      22: "Antisubmarine Warfare",
-      23: "Communications",
-      24: "Electronic Support Measures (ESM)",
-      25: "Mine Countermeasures (MCM)",
-      26: "Search and Rescue",
-      27: "Special Operations Forces",
-      28: "Surface Warfare",
-      29: "Very Important Person (VIP) Transport",
-      30: "Combat Search and Rescue (CSAR)",
-      31: "Suppression of Enemy Air Defences",
-      32: "Antisurface Warfare",
-      33: "Fighter/Bomber",
-      34: "Intensive Care",
-      35: "Electronic Attack (EA)",
-      36: "Multimission",
-      37: "Hijacking",
-      38: "ASW Helo- LAMPS",
-      39: "ASW Helo - SH-60R"
-    },
-    "02": {
-      "00": "Unspecified",
-      "01": "Air",
-      "02": "Surface",
-      "03": "Subsurface",
-      "04": "Space",
-      "05": "Anti-Ballistic",
-      "06": "Ballistic",
-      "07": "Cruise",
-      "08": "Interceptor"
-    },
-    "05": {
-      "00": "Unspecified",
-      "01": "Low Earth Orbit (LEO)",
-      "02": "Medium Earth Orbit (MEO)",
-      "03": "High Earth Orbit (HEO)",
-      "04": "Geosynchronous Orbit (GSO)",
-      "05": "Geostationary Orbit (GO)",
-      "06": "Molniya Orbit (MO)"
-    },
-    10: {
-      "00": "Unspecified",
-      "01": "Air Mobile/Air Assault",
-      "02": "Area",
-      "03": "Attack",
-      "04": "Biological",
-      "05": "Border",
-      "06": "Bridging",
-      "07": "Chemical",
-      "08": "Close Protection",
-      "09": "Combat",
-      10: "Command and Control",
-      11: "Communications Contingency Package",
-      12: "Construction",
-      13: "Cross Cultural Communication",
-      14: "Crowd and Riot Control",
-      15: "Decontamination",
-      16: "Detention",
-      17: "Direct Communications",
-      18: "Diving",
-      19: "Division",
-      20: "Dog",
-      21: "Drilling",
-      22: "Electro-Optical",
-      23: "Enhanced",
-      24: "Explosive Ordnance Disposal (EOD)",
-      25: "Fire Direction Centre",
-      26: "Force",
-      27: "Forward",
-      28: "Ground Station Module",
-      29: "Landing Support",
-      30: "Large Extension Node",
-      31: "Maintenance",
-      32: "Meteorological",
-      33: "Mine Countermeasure",
-      34: "Missile",
-      35: "Mobile Advisor and Support",
-      36: "Mobile Subscriber Equipment",
-      37: "Mobility Support",
-      38: "Movement Control Centre",
-      39: "Multinational",
-      40: "Multinational Specialized Unit",
-      41: "Multiple Rocket Launcher",
-      42: "NATO Medical Role 1",
-      43: "NATO Medical Role 2",
-      44: "NATO Medical Role 3",
-      45: "NATO Medical Role 4",
-      46: "Naval",
-      47: "Node Centre",
-      48: "Nuclear",
-      49: "Operations",
-      50: "Radar",
-      51: "Radio Frequency Identification (RFID) Interrogator / Sensor",
-      52: "Radiological",
-      53: "Search and Rescue",
-      54: "Security",
-      55: "Sensor",
-      56: "Sensor Control Module (SCM)",
-      57: "Signals Intelligence",
-      58: "Single Shelter Switch",
-      59: "Single Rocket Launcher",
-      60: "Smoke",
-      61: "Sniper",
-      62: "Sound Ranging",
-      63: "Special Operations Forces (SOF)",
-      64: "Special Weapons and Tactics",
-      65: "Survey",
-      66: "Tactical Exploitation",
-      67: "Target Acquisition",
-      68: "Topographic",
-      69: "Utility",
-      70: "Video Imagery (Combat Camera)",
-      75: "Medevac",
-      76: "Ranger",
-      77: "Support",
-      78: "Aviation",
-      79: "Route, Reconnaissance, and Clearance",
-      80: "Command Post Node",
-      81: "Joint Network Node",
-      82: "Retransmission Site",
-      94: "Theatre",
-      95: "Army or Theatre Army",
-      96: "Corps",
-      97: "Brigade",
-      98: "Headquarters or headquarters staff element"
-    },
-    11: {
-      "00": "Unspecified",
-      "01": "Assassination",
-      "02": "Execution (Wrongful Killing)",
-      "03": "Murder Victims",
-      "04": "Hijacking",
-      "05": "Kidnapping",
-      "06": "Piracy",
-      "07": "Rape",
-      "08": "Civilian",
-      "09": "Displaced Person(s), Refugee(s) and Evacuee(s)",
-      10: "Foreign Fighter(s)",
-      11: "Gang Member or Gang",
-      12: "Government Organization",
-      13: "Leader or Leadership",
-      14: "Non-governmental Organization Member or Non-governmental Organization",
-      15: "Coerced/Impressed Recruit",
-      16: "Willing Recruit",
-      17: "Religious or Religious Organization",
-      18: "Targeted Individual or Organization",
-      19: "Terrorist or Terrorist Organization",
-      20: "Speaker",
-      21: "Accident",
-      22: "Combat",
-      23: "Other",
-      24: "Loot"
-    },
-    15: {
-      "00": "Unspecified",
-      "01": "Biological",
-      "02": "Chemical",
-      "03": "Early Warning Radar",
-      "04": "Intrusion",
-      "05": "Nuclear",
-      "06": "Radiological",
-      "07": "Upgraded Early Warning Radar",
-      "08": "Hijacking",
-      "09": "Civilian"
-    },
-    20: {
-      "00": "Unspecified",
-      "01": "Biological",
-      "02": "Chemical",
-      "03": "Nuclear",
-      "04": "Radiological",
-      "05": "Decontamination",
-      "06": "Coal",
-      "07": "Geothermal",
-      "08": "Hydroelectric",
-      "09": "Natural Gas",
-      10: "Petroleum",
-      11: "Civilian",
-      12: "Civilian Telephone",
-      13: "Civilian Television",
-      14: "Retransmission Site",
-      15: "Joint Network Node",
-      16: "Command Post Node"
-    },
+    "01": [
+      {
+        category: "Not Applicable",
+        values: {
+          "00": "Not Applicable"
+        }
+      },
+      {
+        category: "MILITARY AIRCRAFT TYPE",
+        values: {
+          "01": "Attack/Strike",
+          "02": "Bomber",
+          "04": "Fighter",
+          "05": "Interceptor",
+          11: "Airborne Command Post (ACP)",
+          12: "Airborne Early Warning (AEW)",
+          33: "Fighter/Bomber"
+        }
+      },
+      {
+        category: "AIRCRAFT TYPE",
+        values: {
+          "03": "Cargo",
+          "06": "Tanker",
+          "07": "Utility",
+          "08": "Vertical or Short Take-off and Landing (VSTOL)/Vertical Take-off and Landing (VTOL)",
+          "09": "Passenger",
+          10: "Ultra Light",
+          13: "Government"
+        }
+      },
+      {
+        category: "MISSION AREA",
+        values: {
+          14: "Medical Evacuation (MEDEVAC)",
+          17: "Patrol",
+          18: "Reconnaissance",
+          19: "Trainer",
+          20: "Photographic Reconnaissance",
+          21: "Personnel Recovery",
+          23: "Communications",
+          26: "Search and Rescue",
+          29: "Very Important Person (VIP) Transport",
+          34: "Intensive Care",
+          36: "Multimission",
+          38: "ASW Helo- LAMPS",
+          39: "ASW Helo - SH-60R"
+        }
+      },
+      {
+        category: "MILITARY MISSION AREA",
+        values: {
+          15: "Escort",
+          16: "Electronic Combat (EC)/Jammer",
+          22: "Antisubmarine Warfare",
+          24: "Electronic Support Measures (ESM)",
+          25: "Mine Countermeasures (MCM)",
+          27: "Special Operations Forces",
+          28: "Surface Warfare",
+          30: "Combat Search and Rescue (CSAR)",
+          31: "Suppression of Enemy Air Defences",
+          32: "Antisurface Warfare",
+          35: "Electronic Attack (EA)"
+        }
+      },
+      {
+        category: "CRIME",
+        values: {
+          37: "Hijacking"
+        }
+      }
+    ],
+    "02": [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "LAUNCH ORIGIN",
+        values: {
+          "01": "Air",
+          "02": "Surface",
+          "03": "Subsurface",
+          "04": "Space"
+        }
+      },
+      {
+        category: "MISSILE CLASS",
+        values: {
+          "05": "Anti-Ballistic",
+          "06": "Ballistic",
+          "07": "Cruise",
+          "08": "Interceptor"
+        }
+      }
+    ],
+    "05": [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "ORBIT",
+        values: {
+          "01": "Low Earth Orbit (LEO)",
+          "02": "Medium Earth Orbit (MEO)",
+          "03": "High Earth Orbit (HEO)",
+          "04": "Geosynchronous Orbit (GSO)",
+          "05": "Geostationary Orbit (GO)",
+          "06": "Molniya Orbit (MO)"
+        }
+      }
+    ],
+    10: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "MOBILITY",
+        values: {
+          "01": "Air Mobile/Air Assault"
+        }
+      },
+      {
+        category: "CAPABILITY",
+        values: {
+          "02": "Area",
+          "03": "Attack",
+          "04": "Biological",
+          "05": "Border",
+          "06": "Bridging",
+          "07": "Chemical",
+          "08": "Close Protection",
+          "09": "Combat",
+          10: "Command and Control",
+          11: "Communications Contingency Package",
+          12: "Construction",
+          13: "Cross Cultural Communication",
+          14: "Crowd and Riot Control",
+          15: "Decontamination",
+          16: "Detention",
+          17: "Direct Communications",
+          18: "Diving",
+          19: "Division",
+          20: "Dog",
+          21: "Drilling",
+          22: "Electro-Optical",
+          23: "Enhanced",
+          24: "Explosive Ordnance Disposal (EOD)",
+          25: "Fire Direction Centre",
+          26: "Force",
+          27: "Forward",
+          28: "Ground Station Module",
+          29: "Landing Support",
+          30: "Large Extension Node",
+          31: "Maintenance",
+          32: "Meteorological",
+          33: "Mine Countermeasure",
+          34: "Missile",
+          35: "Mobile Advisor and Support",
+          36: "Mobile Subscriber Equipment",
+          37: "Mobility Support",
+          38: "Movement Control Centre",
+          39: "Multinational",
+          40: "Multinational Specialized Unit",
+          41: "Multiple Rocket Launcher",
+          42: "NATO Medical Role 1",
+          43: "NATO Medical Role 2",
+          44: "NATO Medical Role 3",
+          45: "NATO Medical Role 4",
+          46: "Naval",
+          47: "Node Centre",
+          48: "Nuclear",
+          49: "Operations",
+          50: "Radar",
+          51: "Radio Frequency Identification (RFID) Interrogator / Sensor",
+          52: "Radiological",
+          53: "Search and Rescue",
+          54: "Security",
+          55: "Sensor",
+          56: "Sensor Control Module (SCM)",
+          57: "Signals Intelligence",
+          58: "Single Shelter Switch",
+          59: "Single Rocket Launcher",
+          60: "Smoke",
+          61: "Sniper",
+          62: "Sound Ranging",
+          63: "Special Operations Forces (SOF)",
+          64: "Special Weapons and Tactics",
+          65: "Survey",
+          66: "Tactical Exploitation",
+          67: "Target Acquisition",
+          68: "Topographic",
+          69: "Utility",
+          70: "Video Imagery (Combat Camera)",
+          75: "Medevac",
+          76: "Ranger",
+          77: "Support",
+          78: "Aviation",
+          79: "Route, Reconnaissance, and Clearance",
+          80: "Command Post Node",
+          81: "Joint Network Node",
+          82: "Retransmission Site",
+          94: "Theatre",
+          95: "Army or Theatre Army",
+          96: "Corps",
+          97: "Brigade",
+          98: "Headquarters or headquarters staff element"
+        }
+      }
+    ],
+    11: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "CRIME",
+        values: {
+          "01": "Assassination",
+          "02": "Execution (Wrongful Killing)",
+          "03": "Murder Victims",
+          "04": "Hijacking",
+          "05": "Kidnapping",
+          "06": "Piracy",
+          "07": "Rape",
+          24: "Loot"
+        }
+      },
+      {
+        category: "ORGANIZATION",
+        values: {
+          "08": "Civilian",
+          "09": "Displaced Person(s), Refugee(s) and Evacuee(s)",
+          10: "Foreign Fighter(s)",
+          11: "Gang Member or Gang",
+          12: "Government Organization",
+          13: "Leader or Leadership",
+          14: "Non-governmental Organization Member or Non-governmental Organization",
+          15: "Coerced/Impressed Recruit",
+          16: "Willing Recruit",
+          17: "Religious or Religious Organization",
+          18: "Targeted Individual or Organization",
+          19: "Terrorist or Terrorist Organization",
+          20: "Speaker"
+        }
+      },
+      {
+        category: "COMPOSITE LOSS",
+        values: {
+          21: "Accident",
+          22: "Combat",
+          23: "Other"
+        }
+      }
+    ],
+    15: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "SENSOR TYPE",
+        values: {
+          "01": "Biological",
+          "02": "Chemical",
+          "03": "Early Warning Radar",
+          "04": "Intrusion",
+          "05": "Nuclear",
+          "06": "Radiological",
+          "07": "Upgraded Early Warning Radar"
+        }
+      },
+      {
+        category: "CRIME",
+        values: {
+          "08": "Hijacking"
+        }
+      },
+      {
+        category: "ORGANIZATION",
+        values: {
+          "09": "Civilian"
+        }
+      }
+    ],
+    20: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "MILITARY TELECOMMUNICATIONS TYPE",
+        values: {
+          15: "Joint Network Node",
+          16: "Command Post Node"
+        }
+      },
+      {
+        category: "Not Specified",
+        values: {
+          "01": "Biological",
+          "02": "Chemical",
+          "03": "Nuclear",
+          "04": "Radiological",
+          "05": "Decontamination",
+          "06": "Coal",
+          "07": "Geothermal",
+          "08": "Hydroelectric",
+          "09": "Natural Gas",
+          10: "Petroleum",
+          11: "Civilian",
+          12: "Civilian Telephone",
+          13: "Civilian Television",
+          14: "Retransmission Site"
+        }
+      }
+    ],
     27: {
       "00": "Unspecified",
       "01": "Close Protection",
@@ -6541,192 +6666,372 @@ export const App6Choices: { [key: string]: any } = {
       54: "Brigade",
       55: "Division"
     },
-    30: {
-      "00": "Unspecified",
-      "01": "Own Ship",
-      "02": "Anti-air Warfare",
-      "03": "Antisubmarine Warfare",
-      "04": "Escort",
-      "05": "Electronic Warfare",
-      "06": "Intelligence, Surveillance, Reconnaissance",
-      "07": "Mine Countermeasures",
-      "08": "Missile Defence",
-      "09": "Medical",
-      10: "Mine Warfare",
-      11: "Remote Multi-Mission Vehicle",
-      12: "Special Operations Forces (SOF)",
-      13: "Surface Warfare",
-      14: "Ballistic Missile",
-      15: "Guided Missile",
-      16: "Other Guided Missile",
-      17: "Torpedo",
-      18: "Drone-Equipped",
-      19: "Helicopter-Equipped/VSTOL",
-      20: "Ballistic Missile Defence, Shooter",
-      21: "Ballistic Missile Defence, Long-Range Surveillance and Track (LRS&T)",
-      22: "Sea-Base X-Band",
-      23: "Hijacking"
-    },
-    35: {
-      "00": "Unspecified",
-      "01": "Antisubmarine Warfare",
-      "02": "Auxiliary",
-      "03": "Command and Control",
-      "04": "Intelligence, Surveillance, Reconnaissance",
-      "05": "Mine Countermeasures",
-      "06": "Mine Warfare",
-      "07": "Surface Warfare",
-      "08": "Attack",
-      "09": "Ballistic Missile",
-      10: "Guided Missile",
-      11: "Other Guided Missile",
-      12: "Special Operations Forces (SOF)",
-      13: "Possible Submarine Low 1",
-      14: "Possible Submarine Low 2",
-      15: "Possible Submarine High 3",
-      16: "Possible Submarine High 4",
-      17: "Probable Submarine",
-      18: "Certain Submarine",
-      19: "Anti-torpedo Torpedo",
-      20: "Hijacking/Hijacked"
-    },
-    40: {
-      "00": "Unspecified",
-      "01": "Assassination",
-      "02": "Execution (Wrongful Killing)",
-      "03": "Hijacking/Hijacked",
-      "04": "House-to-House",
-      "05": "Kidnapping",
-      "06": "Murder",
-      "07": "Piracy",
-      "08": "Rape",
-      "09": "Written Psychological Operations (PSYOPS)",
-      10: "Pirate",
-      11: "False",
-      12: "Find",
-      13: "Found and Cleared",
-      14: "Hoax (Decoy)",
-      15: "Attempted",
-      16: "Accident",
-      17: "Incident",
-      18: "Theft"
-    }
+    30: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "MISSION AREA",
+        values: {
+          "01": "Own Ship",
+          "02": "Anti-air Warfare",
+          "03": "Antisubmarine Warfare",
+          "04": "Escort",
+          "05": "Electronic Warfare",
+          "06": "Intelligence, Surveillance, Reconnaissance",
+          "07": "Mine Countermeasures",
+          "08": "Missile Defence",
+          "09": "Medical",
+          10: "Mine Warfare",
+          11: "Remote Multi-Mission Vehicle",
+          13: "Surface Warfare",
+          20: "Ballistic Missile Defence, Shooter",
+          21: "Ballistic Missile Defence, Long-Range Surveillance and Track (LRS&T)",
+          22: "Sea-Base X-Band"
+        }
+      },
+      {
+        category: "ASSET CAPABILITY",
+        values: {
+          12: "Special Operations Forces (SOF)",
+          18: "Drone-Equipped",
+          19: "Helicopter-Equipped/VSTOL"
+        }
+      },
+      {
+        category: "WEAPONS CAPABILITY",
+        values: {
+          14: "Ballistic Missile",
+          15: "Guided Missile",
+          16: "Other Guided Missile",
+          17: "Torpedo"
+        }
+      },
+      {
+        category: "CRIME",
+        values: {
+          23: "Hijacking"
+        }
+      }
+    ],
+    35: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "MISSION AREA",
+        values: {
+          "01": "Antisubmarine Warfare",
+          "02": "Auxiliary",
+          "03": "Command and Control",
+          "04": "Intelligence, Surveillance, Reconnaissance",
+          "05": "Mine Countermeasures",
+          "06": "Mine Warfare",
+          "07": "Surface Warfare"
+        }
+      },
+      {
+        category: "WEAPONS CAPABILITY",
+        values: {
+          "08": "Attack",
+          "09": "Ballistic Missile",
+          10: "Guided Missile",
+          11: "Other Guided Missile",
+          19: "Anti-torpedo Torpedo"
+        }
+      },
+      {
+        category: "ASSET CAPABILITY",
+        values: {
+          12: "Special Operations Forces (SOF)"
+        }
+      },
+      {
+        category: "SUBMARINE CONFIDENCE",
+        values: {
+          13: "Possible Submarine Low 1",
+          14: "Possible Submarine Low 2",
+          15: "Possible Submarine High 3",
+          16: "Possible Submarine High 4",
+          17: "Probable Submarine",
+          18: "Certain Submarine"
+        }
+      },
+      {
+        category: "CRIME",
+        values: {
+          20: "Hijacking/Hijacked"
+        }
+      }
+    ],
+    40: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "CRIME",
+        values: {
+          "01": "Assassination",
+          "02": "Execution (Wrongful Killing)",
+          "03": "Hijacking/Hijacked",
+          "05": "Kidnapping",
+          "06": "Murder",
+          "07": "Piracy",
+          "08": "Rape",
+          10: "Pirate",
+          18: "Theft"
+        }
+      },
+      {
+        category: "PSYCHOLOGICAL OPERATIONS (PSYOPS)",
+        values: {
+          "04": "House-to-House",
+          "09": "Written Psychological Operations (PSYOPS)"
+        }
+      },
+      {
+        category: "IED CATEGORY",
+        values: {
+          11: "False",
+          12: "Find",
+          13: "Found and Cleared",
+          14: "Hoax (Decoy)"
+        }
+      },
+      {
+        category: "INCIDENT QUALIFIER",
+        values: {
+          15: "Attempted",
+          16: "Accident",
+          17: "Incident"
+        }
+      }
+    ]
   },
   app6sectorTwoModifier: {
-    "01": {
-      "00": "Not Applicable",
-      "01": "Heavy",
-      "02": "Medium",
-      "03": "Light",
-      "04": "Boom-Only",
-      "05": "Drogue-Only",
-      "06": "Boom and Drogue",
-      "07": "Close Range",
-      "08": "Short Range",
-      "09": "Medium Range",
-      10: "Long Range",
-      11: "Downlinked"
-    },
-    "02": {
-      "00": "Unspecified",
-      "01": "Air",
-      "02": "Surface",
-      "03": "Subsurface",
-      "04": "Space",
-      "05": "Launched",
-      "07": "Patriot",
-      "08": "Standard Missile-2 (SM-2)",
-      "09": "Standard Missile-6 (SM-6)",
-      10: "Evolved Sea Sparrow Missile (ESSM)",
-      11: "Rolling Airframe Missile (RAM)",
-      12: "Short Range",
-      13: "Medium Range",
-      14: "Intermediate Range",
-      15: "Long Range",
-      16: "Intercontinental"
-    },
-    "05": {
-      "00": "Unspecified",
-      "01": "Optical",
-      "02": "Infrared",
-      "03": "Radar",
-      "04": "Signals Intelligence (SIGINT)"
-    },
-    10: {
-      "00": "Unspecified",
-      "01": "Airborne",
-      "02": "Arctic",
-      "03": "Battle Damage Repair",
-      "04": "Bicycle Equipped",
-      "05": "Casualty Staging",
-      "06": "Clearing",
-      "07": "Close Range",
-      "08": "Control",
-      "09": "Decontamination",
-      10: "Demolition",
-      11: "Dental",
-      12: "Digital",
-      13: "Enhanced Position Location Reporting System (EPLRS)",
-      14: "Equipment",
-      15: "Heavy",
-      16: "High Altitude",
-      17: "Intermodal",
-      18: "Intensive Care",
-      19: "Light",
-      20: "Laboratory",
-      21: "Launcher",
-      22: "Long Range",
-      23: "Low Altitude",
-      24: "Medium",
-      25: "Medium Altitude",
-      26: "Medium Range",
-      27: "Mountain",
-      28: "High to Medium Altitude",
-      29: "Multi-Channel",
-      30: "Optical (Flash)",
-      31: "Pack Animal",
-      32: "Patient Evacuation Coordination",
-      33: "Preventive Maintenance",
-      34: "Psychological",
-      35: "Radio Relay Line of Sight",
-      36: "Railroad",
-      37: "Recovery (Unmanned Systems)",
-      38: "Recovery (Maintenance)",
-      39: "Rescue Coordination Centre",
-      40: "Riverine",
-      41: "Single Channel",
-      42: "Ski",
-      43: "Short Range",
-      44: "Strategic",
-      45: "Support",
-      46: "Tactical",
-      47: "Towed",
-      48: "Troop",
-      49: "Vertical or Short Take-Off and Landing (VTOL/VSTOL)",
-      50: "Veterinary",
-      51: "Wheeled",
-      52: "High to Low Altitude",
-      53: "Medium to Low Altitude",
-      54: "Attack",
-      55: "Refuel",
-      56: "Utility",
-      57: "Combat Search and Rescue"
-    },
-    11: {
-      "00": "Unspecified",
-      "01": "Leader or Leadership"
-    },
-    20: {
-      "00": "Unspecified",
-      "01": "Biological",
-      "02": "Chemical",
-      "03": "Nuclear",
-      "04": "Radiological",
-      "05": "Atomic Energy Reactor",
-      "06": "Nuclear Material Production",
-      "07": "Nuclear Material Storage",
-      "08": "Weapons Grade"
-    },
+    "01": [
+      {
+        category: "Not Applicable",
+        values: {
+          "00": "Not Applicable"
+        }
+      },
+      {
+        category: "CARGO/TRANSPORT CAPACITY",
+        values: {
+          "01": "Heavy",
+          "02": "Medium",
+          "03": "Light"
+        }
+      },
+      {
+        category: "AIR-TO-AIR REFUELLING CAPABILITY",
+        values: {
+          "04": "Boom-Only",
+          "05": "Drogue-Only",
+          "06": "Boom and Drogue"
+        }
+      },
+      {
+        category: "RANGE",
+        values: {
+          "07": "Close Range",
+          "08": "Short Range",
+          "09": "Medium Range",
+          10: "Long Range"
+        }
+      },
+      {
+        category: "TRACK LINK AVAILABILITY",
+        values: {
+          11: "Downlinked"
+        }
+      }
+    ],
+    "02": [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "MISSILE DESTINATION",
+        values: {
+          "01": "Air",
+          "02": "Surface",
+          "03": "Subsurface",
+          "04": "Space"
+        }
+      },
+      {
+        category: "MISSILE STATUS",
+        values: {
+          "05": "Launched"
+        }
+      },
+      {
+        category: "MISSILE TYPE-BMD",
+        values: {
+          "07": "Patriot"
+        }
+      },
+      {
+        category: "MISSILE TYPE-AAW",
+        values: {
+          "08": "Standard Missile-2 (SM-2)",
+          "09": "Standard Missile-6 (SM-6)",
+          10: "Evolved Sea Sparrow Missile (ESSM)",
+          11: "Rolling Airframe Missile (RAM)"
+        }
+      },
+      {
+        category: "MISSILE RANGE",
+        values: {
+          12: "Short Range",
+          13: "Medium Range",
+          14: "Intermediate Range",
+          15: "Long Range",
+          16: "Intercontinental"
+        }
+      }
+    ],
+    "05": [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "SENSOR",
+        values: {
+          "01": "Optical",
+          "02": "Infrared",
+          "03": "Radar",
+          "04": "Signals Intelligence (SIGINT)"
+        }
+      }
+    ],
+    10: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "MOBILITY",
+        values: {
+          "01": "Airborne",
+          "02": "Arctic",
+          "04": "Bicycle Equipped",
+          36: "Railroad",
+          40: "Riverine",
+          42: "Ski",
+          47: "Towed",
+          49: "Vertical or Short Take-Off and Landing (VTOL/VSTOL)",
+          51: "Wheeled"
+        }
+      },
+      {
+        category: "CAPABILITY",
+        values: {
+          "03": "Battle Damage Repair",
+          "05": "Casualty Staging",
+          "06": "Clearing",
+          "07": "Close Range",
+          "08": "Control",
+          "09": "Decontamination",
+          10: "Demolition",
+          11: "Dental",
+          12: "Digital",
+          13: "Enhanced Position Location Reporting System (EPLRS)",
+          14: "Equipment",
+          15: "Heavy",
+          16: "High Altitude",
+          17: "Intermodal",
+          18: "Intensive Care",
+          19: "Light",
+          20: "Laboratory",
+          21: "Launcher",
+          22: "Long Range",
+          23: "Low Altitude",
+          24: "Medium",
+          25: "Medium Altitude",
+          26: "Medium Range",
+          27: "Mountain",
+          28: "High to Medium Altitude",
+          29: "Multi-Channel",
+          30: "Optical (Flash)",
+          31: "Pack Animal",
+          32: "Patient Evacuation Coordination",
+          33: "Preventive Maintenance",
+          34: "Psychological",
+          35: "Radio Relay Line of Sight",
+          37: "Recovery (Unmanned Systems)",
+          38: "Recovery (Maintenance)",
+          39: "Rescue Coordination Centre",
+          41: "Single Channel",
+          43: "Short Range",
+          44: "Strategic",
+          45: "Support",
+          46: "Tactical",
+          48: "Troop",
+          50: "Veterinary",
+          52: "High to Low Altitude",
+          53: "Medium to Low Altitude",
+          54: "Attack",
+          55: "Refuel",
+          56: "Utility",
+          57: "Combat Search and Rescue"
+        }
+      }
+    ],
+    11: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "ORGANIZATION",
+        values: {
+          "01": "Leader or Leadership"
+        }
+      }
+    ],
+    20: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "Not Specified",
+        values: {
+          "01": "Biological",
+          "02": "Chemical",
+          "03": "Nuclear",
+          "04": "Radiological",
+          "05": "Atomic Energy Reactor",
+          "06": "Nuclear Material Production",
+          "07": "Nuclear Material Storage",
+          "08": "Weapons Grade"
+        }
+      }
+    ],
     27: {
       "00": "Unspecified",
       "01": "Airborne",
@@ -6769,42 +7074,88 @@ export const App6Choices: { [key: string]: any } = {
       38: "Rank Code WO-5",
       39: "Ski"
     },
-    30: {
-      "00": "Unspecified",
-      "01": "Nuclear Powered",
-      "02": "Heavy",
-      "03": "Light",
-      "04": "Medium",
-      "05": "Dock",
-      "06": "Logistics",
-      "07": "Tank",
-      "08": "Vehicle",
-      "09": "Fast",
-      10: "Air-Cushioned (US)",
-      11: "Air-Cushioned (NATO)",
-      12: "Hydrofoil",
-      13: "Autonomous Control",
-      14: "Remotely Piloted",
-      15: "Expendable"
-    },
-    35: {
-      "00": "Unspecified",
-      "01": "Air Independent Propulsion",
-      "02": "Diesel Electric, General",
-      "03": "Diesel - Type 1",
-      "04": "Diesel - Type 2",
-      "05": "Diesel - Type 3",
-      "06": "Nuclear Powered, General",
-      "07": "Nuclear - Type 1",
-      "08": "Nuclear - Type 2",
-      "09": "Nuclear - Type 3",
-      10: "Nuclear - Type 4",
-      11: "Nuclear - Type 5",
-      12: "Nuclear - Type 6",
-      13: "Nuclear - Type 7",
-      14: "Autonomous Control",
-      15: "Remotely Piloted",
-      16: "Expendable"
-    }
+    30: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "SHIP PROPULSION",
+        values: {
+          "01": "Nuclear Powered"
+        }
+      },
+      {
+        category: "SHIP CAPACITY",
+        values: {
+          "02": "Heavy",
+          "03": "Light",
+          "04": "Medium"
+        }
+      },
+      {
+        category: "CARGO CAPACITY",
+        values: {
+          "05": "Dock",
+          "06": "Logistics",
+          "07": "Tank",
+          "08": "Vehicle"
+        }
+      },
+      {
+        category: "SHIP MOBILITY",
+        values: {
+          "09": "Fast",
+          10: "Air-Cushioned (US)",
+          11: "Air-Cushioned (NATO)",
+          12: "Hydrofoil"
+        }
+      },
+      {
+        category: "USV CONTROL",
+        values: {
+          13: "Autonomous Control",
+          14: "Remotely Piloted",
+          15: "Expendable"
+        }
+      }
+    ],
+
+    35: [
+      {
+        category: "Unspecified",
+        values: {
+          "00": "Unspecified"
+        }
+      },
+      {
+        category: "SHIP PROPULSION",
+        values: {
+          "01": "Air Independent Propulsion",
+          "02": "Diesel Electric, General",
+          "03": "Diesel - Type 1",
+          "04": "Diesel - Type 2",
+          "05": "Diesel - Type 3",
+          "06": "Nuclear Powered, General",
+          "07": "Nuclear - Type 1",
+          "08": "Nuclear - Type 2",
+          "09": "Nuclear - Type 3",
+          10: "Nuclear - Type 4",
+          11: "Nuclear - Type 5",
+          12: "Nuclear - Type 6",
+          13: "Nuclear - Type 7"
+        }
+      },
+      {
+        category: "UUV CONTROL",
+        values: {
+          14: "Autonomous Control",
+          15: "Remotely Piloted",
+          16: "Expendable"
+        }
+      }
+    ]
   }
 }
