@@ -42,6 +42,7 @@ import mil.dds.anet.test.client.AuthorizationGroupSearchQueryInput;
 import mil.dds.anet.test.client.Comment;
 import mil.dds.anet.test.client.EmailAddress;
 import mil.dds.anet.test.client.EmailAddressInput;
+import mil.dds.anet.test.client.EngagementsBetweenCommunitiesSearchQueryInput;
 import mil.dds.anet.test.client.GenericRelatedObject;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
@@ -127,6 +128,8 @@ public class ReportResourceTest extends AbstractResourceTest {
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AUTHORIZED_MEMBERS_FIELDS,
       AttachmentResourceTest.ATTACHMENT_FIELDS);
+  public static final String ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS =
+      "{ engagementDate reportUuid advisor {relatedObjectType relatedObjectUuid} interlocutor {relatedObjectType relatedObjectUuid}}";
 
   @Test
   void createReport() {
@@ -2650,5 +2653,44 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> mutationExecutor.updateReport(FIELDS, true, outdatedInput, false));
     assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
     assertThat(forceUpdated.getReportText()).isEqualTo(test.getReportText());
+  }
+
+  @Test
+  void testEngagementsBetweenCommunities() {
+    final String keyAdvisors = "e2f93f4d-7e1c-4fb4-9338-45305c3869ca";
+    final String keyInterlocutors = "76ecf9ec-d198-4f0c-8ef3-3a155df92351";
+    final EngagementsBetweenCommunitiesSearchQueryInput query =
+        EngagementsBetweenCommunitiesSearchQueryInput.builder().withPlannedEngagements(false)
+            .withAdvisorAuthorizationGroupUuid(keyAdvisors)
+            .withInterlocutorAuthorizationGroupUuid(keyInterlocutors).build();
+
+    List<mil.dds.anet.test.client.EngagementInformation> results =
+        withCredentials(jackUser, t -> queryExecutor
+            .getEngagementsBetweenCommunities(ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS, query));
+    // Key advisors community contains one person, one organization and one position that engaged
+    // with the
+    // one person, one organization and one position in key interlocutors, therefore we expect 9
+    // results here
+    assertThat(results).isNotNull().hasSize(9);
+    assertThat(results)
+        .filteredOn(r -> r.getAdvisor().getRelatedObjectType().equals("organizations")).hasSize(3);
+    assertThat(results)
+        .filteredOn(r -> r.getInterlocutor().getRelatedObjectType().equals("organizations"))
+        .hasSize(3);
+    assertThat(results).filteredOn(r -> r.getAdvisor().getRelatedObjectType().equals("positions"))
+        .hasSize(3);
+    assertThat(results)
+        .filteredOn(r -> r.getInterlocutor().getRelatedObjectType().equals("positions")).hasSize(3);
+    assertThat(results).filteredOn(r -> r.getAdvisor().getRelatedObjectType().equals("people"))
+        .hasSize(3);
+    assertThat(results).filteredOn(r -> r.getInterlocutor().getRelatedObjectType().equals("people"))
+        .hasSize(3);
+    assertThat(results).filteredOn(r -> r.getEngagementDate() == null).hasSize(0);
+
+    query.setPlannedEngagements(true);
+    // No planned engagements
+    results = withCredentials(jackUser, t -> queryExecutor
+        .getEngagementsBetweenCommunities(ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS, query));
+    assertThat(results).isNotNull().hasSize(0);
   }
 }
