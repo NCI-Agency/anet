@@ -51,7 +51,8 @@ export const getChoices = (field: string, values: any[]) => {
           app6entityType
         ]?.options || {}
       ),
-    app6amplifier: () => App6Choices[field][symbolSet] || {},
+    app6amplifier: () =>
+      App6Choices[field]?.[symbolSet] || App6Choices[field] || {},
     app6sectorOneModifier: () => App6Choices[field][symbolSet] || {},
     app6sectorTwoModifier: () => App6Choices[field][symbolSet] || {}
   }

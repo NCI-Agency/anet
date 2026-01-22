@@ -178,10 +178,16 @@ const EditApp6SymbolModal = ({
       values: calculateUpdateValues(currentMergedValues, fieldName, null)
     })
 
-    const selectedOption = currentValues[fieldName] || null
-    const selectedChoice = dropdownOptions.find(
-      option => option.key === selectedOption
-    )?.label
+    const selectedOption =
+      currentValues[fieldName] === undefined ? null : currentValues[fieldName]
+    const normalizedSelectedOption =
+      selectedOption === null ? null : String(selectedOption)
+    const selectedChoice = dropdownOptions.find(option => {
+      if (option.key === null) {
+        return normalizedSelectedOption === null
+      }
+      return String(option.key) === normalizedSelectedOption
+    })?.label
 
     // Precompute grouped dropdown data for rendering headers + items together.
     const groupedDropdownOptions = groupedChoices
