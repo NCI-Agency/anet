@@ -206,6 +206,15 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   const imageAttachmentUuids = new Set(
     imageAttachments.map(attachment => attachment.uuid)
   )
+  const reportTextAttachmentUuids = new Set(
+    (report.reportText || "")
+      .match(/urn:anet:attachments:([0-9a-f-]+)/gi)
+      ?.map(match => match.split(":").pop())
+      .filter(Boolean) || []
+  )
+  const imageAttachmentsForSection = imageAttachments.filter(
+    attachment => !reportTextAttachmentUuids.has(attachment.uuid)
+  )
   return (
     <>
       <CompactReportViewHeader
@@ -400,7 +409,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
               />
             )}
             {optionalFields.attachmentsWithImages.active &&
-              imageAttachments.length > 0 && (
+              imageAttachmentsForSection.length > 0 && (
                 <CompactRow
                   id="attachmentsWithImages"
                   content={
@@ -409,7 +418,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                         Attachments with images
                       </AttachmentsTitleS>
                       <AttachmentsListS>
-                        {imageAttachments.map(attachment => (
+                        {imageAttachmentsForSection.map(attachment => (
                           <AttachmentFigureS key={attachment.uuid}>
                             <AttachmentImageS
                               src={`/api/attachment/view/${attachment.uuid}`}
