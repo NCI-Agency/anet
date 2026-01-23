@@ -203,6 +203,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         attachment?.mimeType?.startsWith("image/")
       )
     : []
+  const imageAttachmentUuids = new Set(
+    imageAttachments.map(attachment => attachment.uuid)
+  )
   return (
     <>
       <CompactReportViewHeader
@@ -326,7 +329,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   <RichTextEditor
                     readOnly
                     showAvatar={false}
-                    value={report.reportText}
+                    value={replaceAttachmentLinksWithImages(report.reportText)}
                   />
                 }
                 className="reportField keyDetailsRow"
@@ -547,6 +550,19 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
     )
   }
 
+  function replaceAttachmentLinksWithImages(value?: string) {
+    if (!value) {
+      return value
+    }
+    return value.replace(
+      /<a\b[^>]*href=["']urn:anet:attachments:([0-9a-f-]+)["'][^>]*>.*?<\/a>/gi,
+      (match, uuid) =>
+        imageAttachmentUuids.has(uuid)
+          ? `<img src="/api/attachment/view/${uuid}" alt="Attachment ${uuid}" />`
+          : match
+    )
+  }
+
   function getAttendeesAndAssessments(
     interlocutor: boolean,
     displayAssessments?: boolean,
@@ -616,6 +632,21 @@ const CompactReportViewS = styled.div`
       box-shadow: none;
     }
   }
+
+  .rich-text-image {
+    max-width: 400px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: inline-block;
+    margin: 0 0 0 6px;
+    vertical-align: middle;
+  }
+
+  .rich-text-image-wrapper {
+    display: inline;
+  }
 `
 
 const AttachmentsWithImagesS = styled.div`
@@ -650,8 +681,8 @@ const AttachmentFigureS = styled.figure`
 `
 
 const AttachmentImageS = styled.img`
-  max-width: 600px;
-  max-height: 600px;
+  max-width: 400px;
+  max-height: 400px;
   width: auto;
   height: auto;
   object-fit: contain;
