@@ -194,6 +194,16 @@ describe("Show print report page", () => {
         )
       })
     })
+    it("Should display attachment images only when enabled", async () => {
+      const attachmentsSection = await browser.$("tr#attachmentsWithImages")
+      expect(await attachmentsSection.isExisting()).to.equal(false)
+
+      await ShowReport.selectOptionalField("attachmentsWithImages")
+      await (await browser.$("tr#attachmentsWithImages")).waitForDisplayed()
+
+      const attachmentImages = await browser.$$("tr#attachmentsWithImages img")
+      expect(attachmentImages.length).to.be.equal(1)
+    })
   })
   describe("When on the print page of a report without classification", () => {
     it("We should see the default text for classification in the header and footer banners", async () => {
