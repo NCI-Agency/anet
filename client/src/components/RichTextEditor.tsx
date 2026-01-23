@@ -232,7 +232,9 @@ const withHtml = editor => {
   const { insertData, isInline, isVoid } = editor
 
   editor.isInline = element =>
-    LINK_TYPES.includes(element.type) || isInline(element)
+    LINK_TYPES.includes(element.type) ||
+    element.type === "image" ||
+    isInline(element)
   editor.isVoid = element =>
     LINK_TYPES.includes(element.type) ||
     element.type === "image" ||
@@ -262,7 +264,9 @@ const withAnetLink = editor => {
   editor.isVoid = element =>
     LINK_TYPES.includes(element.type) ? true : isVoid(element)
   editor.isInline = element =>
-    LINK_TYPES.includes(element.type) ? true : isInline(element)
+    LINK_TYPES.includes(element.type) || element.type === "image"
+      ? true
+      : isInline(element)
   return editor
 }
 
@@ -471,6 +475,17 @@ const Element = ({
       return <li {...attributes}>{children}</li>
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
+    case "image":
+      return (
+        <span {...attributes} className="rich-text-image-wrapper">
+          <img
+            className="rich-text-image"
+            src={element.url}
+            alt="Embedded image"
+          />
+          {children}
+        </span>
+      )
     case ANET_LINK:
     case EXTERNAL_LINK:
       return getLink(

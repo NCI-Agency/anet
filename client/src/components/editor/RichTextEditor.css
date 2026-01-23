@@ -92,3 +92,18 @@
 .editable h3 {
   font-size: 1.0rem;
 }
+
+.compact-view .rich-text-image {
+  max-width: 400px;
+  max-height: 400px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.compact-view .rich-text-image-wrapper {
+  display: inline;
+}
