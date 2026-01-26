@@ -93,32 +93,23 @@
   font-size: 1.0rem;
 }
 
-.compact-view .rich-text-image {
+.compact-view .rich-text-image,
+.report-show .rich-text-image {
   max-width: 400px;
   max-height: 400px;
   width: auto;
   height: auto;
   object-fit: contain;
-  display: inline-block;
-  margin-left: 6px;
-  vertical-align: middle;
+  margin: 6px 0 4px;
 }
 
+.report-show .rich-text-image-wrapper,
 .compact-view .rich-text-image-wrapper {
-  display: inline;
+  margin: 6px 0 12px;
 }
 
-.report-show .rich-text-image {
-  max-width: 600px;
-  max-height: 600px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: inline-block;
-  margin-left: 6px;
-  vertical-align: middle;
-}
-
-.report-show .rich-text-image-wrapper {
-  display: inline;
+.report-show .rich-text-image-caption,
+.compact-view .rich-text-image-caption {
+  font-size: 12px;
+  color: #445566;
 }
