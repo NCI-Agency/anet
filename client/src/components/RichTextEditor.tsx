@@ -81,7 +81,11 @@ const ELEMENT_TAGS = {
   LI: () => ({ type: "list-item" }),
   OL: () => ({ type: "numbered-list" }),
   UL: () => ({ type: "bulleted-list" }),
-  IMG: el => ({ type: "image", url: el.getAttribute("src") })
+  IMG: el => ({
+    type: "image",
+    url: el.getAttribute("src"),
+    caption: el.getAttribute("data-caption") || el.getAttribute("alt")
+  })
 }
 
 interface RichTextEditorProps {
@@ -232,9 +236,7 @@ const withHtml = editor => {
   const { insertData, isInline, isVoid } = editor
 
   editor.isInline = element =>
-    LINK_TYPES.includes(element.type) ||
-    element.type === "image" ||
-    isInline(element)
+    LINK_TYPES.includes(element.type) || isInline(element)
   editor.isVoid = element =>
     LINK_TYPES.includes(element.type) ||
     element.type === "image" ||
@@ -264,9 +266,7 @@ const withAnetLink = editor => {
   editor.isVoid = element =>
     LINK_TYPES.includes(element.type) ? true : isVoid(element)
   editor.isInline = element =>
-    LINK_TYPES.includes(element.type) || element.type === "image"
-      ? true
-      : isInline(element)
+    LINK_TYPES.includes(element.type) ? true : isInline(element)
   return editor
 }
 
@@ -477,14 +477,17 @@ const Element = ({
       return <blockquote {...attributes}>{children}</blockquote>
     case "image":
       return (
-        <span {...attributes} className="rich-text-image-wrapper">
+        <div {...attributes} className="rich-text-image-wrapper">
           <img
             className="rich-text-image"
             src={element.url}
-            alt="Embedded image"
+            alt={element.caption || "Embedded image"}
           />
+          {element.caption && (
+            <div className="rich-text-image-caption">{element.caption}</div>
+          )}
           {children}
-        </span>
+        </div>
       )
     case ANET_LINK:
     case EXTERNAL_LINK:
