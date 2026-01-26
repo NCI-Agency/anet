@@ -232,7 +232,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       }
 
       // If the position is already assigned to another person, remove the person from the position
-      removePersonFromPosition(positionUuid);
+      removePersonFromPosition(newPos);
       // Get timestamp *after* remove to preserve correct order
       final Instant now = Instant.now();
 
@@ -334,39 +334,36 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int removePersonFromPosition(String positionUuid) {
+  public int removePersonFromPosition(Position position) {
     final Handle handle = getDbHandle();
     try {
-      // Get original position data from database (we need its type)
-      final Position position = getByUuid(positionUuid);
       if (position == null) {
         return 0;
       }
-      final Instant now = Instant.now();
+      DaoUtils.setUpdateFields(position);
       final int nr = handle
           .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
               + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
-              + "WHERE uuid = :positionUuid")
-          .bind("type", DaoUtils.getEnumId(revokePrivilege(position)))
-          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
-          .execute();
+              + "WHERE uuid = :uuid")
+          .bindBean(position).bind("type", DaoUtils.getEnumId(revokePrivilege(position)))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(position.getUpdatedAt())).execute();
 
       // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
       // (i.e. with both a position and a person).
       final String updateSql =
           "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
               + "(SELECT * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " WHERE \"positionUuid\" = :uuid AND \"endedAt\" IS NULL"
               + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
               + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
               + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
               + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
               + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      handle.createUpdate(updateSql).bind("positionUuid", positionUuid)
-          .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+      handle.createUpdate(updateSql).bindBean(position)
+          .bind("endedAt", DaoUtils.asLocalDateTime(position.getUpdatedAt())).execute();
 
       // Evict the person (previously) holding this position from the domain users cache
-      engine().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+      engine().getPersonDao().evictFromCacheByPositionUuid(position.getUuid());
       return nr;
     } finally {
       closeDbHandle(handle);
