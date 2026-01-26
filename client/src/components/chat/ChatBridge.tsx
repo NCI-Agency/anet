@@ -33,8 +33,9 @@ type ChatBridgeContextType = {
 const ChatBridgeContext = createContext<ChatBridgeContextType | null>(null)
 export const useChatBridge = () => {
   const ctx = useContext(ChatBridgeContext)
-  if (!ctx)
+  if (!ctx) {
     throw new Error("useChatBridge must be used within ChatBridgeProvider")
+  }
   return ctx
 }
 
@@ -95,7 +96,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
     (payload: any) => {
       const win = iframeElRef.current?.contentWindow
       const key = JSON.stringify(payload)
-      if (key === lastSentRef.current) return
+      if (key === lastSentRef.current) {
+        return
+      }
       lastSentRef.current = key
 
       if (!win || !isReady) {
@@ -109,7 +112,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
 
   const flushQueue = useCallback(() => {
     const win = iframeElRef.current?.contentWindow
-    if (!win || !isReady) return
+    if (!win || !isReady) {
+      return
+    }
     while (queueRef.current.length) {
       win.postMessage(queueRef.current.shift()!, targetOriginRef.current || "*")
     }
@@ -156,7 +161,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const unregisterPageContext = useCallback(
     (token: symbol) => {
       const idx = stackRef.current.findIndex(s => s.token === token)
-      if (idx >= 0) stackRef.current.splice(idx, 1)
+      if (idx >= 0) {
+        stackRef.current.splice(idx, 1)
+      }
       announceActive()
     },
     [announceActive]
@@ -165,10 +172,14 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   useEffect(() => {
     const onMessage = (ev: MessageEvent) => {
       const expected = targetOriginRef.current
-      if (expected && ev.origin !== expected) return
+      if (expected && ev.origin !== expected) {
+        return
+      }
       const type = typeof ev.data === "string" ? ev.data : ev.data?.type
       if (type === "ready") {
-        if (!isReady) setIsReady(true)
+        if (!isReady) {
+          setIsReady(true)
+        }
         announceActive()
         flushQueue()
       }
@@ -178,7 +189,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   }, [announceActive, flushQueue, isReady])
 
   useEffect(() => {
-    if (!isReady) return
+    if (!isReady) {
+      return
+    }
     let attempts = 0
     const max = 5
     const id = window.setInterval(() => {
@@ -186,7 +199,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
       lastSentRef.current = null
       announceActive()
       flushQueue()
-      if (attempts >= max) window.clearInterval(id)
+      if (attempts >= max) {
+        window.clearInterval(id)
+      }
     }, 300)
     lastSentRef.current = null
     announceActive()
@@ -196,7 +211,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
 
   useEffect(() => {
     const el = iframeElRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     let attempts = 0
     const max = 20
     const id = window.setInterval(() => {
@@ -205,7 +222,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         { type: "PING" },
         targetOriginRef.current || "*"
       )
-      if (isReady || attempts >= max) window.clearInterval(id)
+      if (isReady || attempts >= max) {
+        window.clearInterval(id)
+      }
     }, 500)
     el.contentWindow?.postMessage(
       { type: "PING" },
