@@ -281,10 +281,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   }
 
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const imageAttachmentUuids = new Set(
+  const imageAttachmentsByUuid = new Map(
     (attachmentsEnabled ? attachments : [])
       .filter(attachment => attachment?.mimeType?.startsWith("image/"))
-      .map(attachment => attachment.uuid)
+      .map(attachment => [
+        attachment.uuid,
+        attachment.caption || attachment.description || attachment.fileName
+      ])
   )
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
@@ -694,7 +697,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     readOnly
                     value={utils.replaceAttachmentLinksWithImages(
                       report.reportText,
-                      imageAttachmentUuids
+                      imageAttachmentsByUuid
                     )}
                   />
                 </Fieldset>
