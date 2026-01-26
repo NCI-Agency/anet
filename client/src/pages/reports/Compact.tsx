@@ -338,7 +338,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   <RichTextEditor
                     readOnly
                     showAvatar={false}
-                    value={replaceAttachmentLinksWithImages(report.reportText)}
+                    value={utils.replaceAttachmentLinksWithImages(
+                      report.reportText,
+                      imageAttachmentUuids
+                    )}
                   />
                 }
                 className="reportField keyDetailsRow"
@@ -556,19 +559,6 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
           </React.Fragment>
         ))
       )
-    )
-  }
-
-  function replaceAttachmentLinksWithImages(value?: string) {
-    if (!value) {
-      return value
-    }
-    return value.replace(
-      /<a\b[^>]*href=["']urn:anet:attachments:([0-9a-f-]+)["'][^>]*>.*?<\/a>/gi,
-      (match, uuid) =>
-        imageAttachmentUuids.has(uuid)
-          ? `<img src="/api/attachment/view/${uuid}" alt="Attachment ${uuid}" />`
-          : match
     )
   }
 

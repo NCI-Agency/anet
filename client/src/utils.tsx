@@ -399,6 +399,19 @@ export default {
     return path.split(".").reduce((value, el) => value[el], obj)
   },
 
+  replaceAttachmentLinksWithImages: function (value, imageAttachmentUuids) {
+    if (!value) {
+      return value
+    }
+    return value.replace(
+      /<a\b[^>]*href=["']urn:anet:attachments:([0-9a-f-]+)["'][^>]*>.*?<\/a>/gi,
+      (match, uuid) =>
+        imageAttachmentUuids?.has(uuid)
+          ? `<img src="/api/attachment/view/${uuid}" alt="Attachment ${uuid}" />`
+          : match
+    )
+  },
+
   humanReadableFileSize: function (number) {
     if (number < 1024) {
       return `${number} bytes`

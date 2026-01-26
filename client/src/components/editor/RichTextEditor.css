@@ -107,3 +107,18 @@
 .compact-view .rich-text-image-wrapper {
   display: inline;
 }
+
+.report-show .rich-text-image {
+  max-width: 600px;
+  max-height: 600px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.report-show .rich-text-image-wrapper {
+  display: inline;
+}
