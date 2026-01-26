@@ -153,7 +153,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
     Position existingPos = DaoUtils.getPosition(p);
     if (existingPos != null) {
-      engine().getPositionDao().removePersonFromPosition(existingPos.getUuid());
+      engine().getPositionDao().removePersonFromPosition(existingPos);
       auditTrailDao.logUpdate(null, Instant.now(), PersonDao.TABLE_NAME, p,
           "person has been removed from a position by the system because they are now inactive",
           String.format("from position %s", existingPos));

@@ -18,6 +18,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuditTrailDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -34,12 +35,14 @@ public class PositionResource {
   private final AnetObjectEngine engine;
   private final AuditTrailDao auditTrailDao;
   private final PositionDao dao;
+  private final PersonDao personDao;
 
   public PositionResource(AnetObjectEngine anetObjectEngine, AuditTrailDao auditTrailDao,
-      PositionDao dao) {
+      PositionDao dao, PersonDao personDao) {
     this.auditTrailDao = auditTrailDao;
     this.dao = dao;
     this.engine = anetObjectEngine;
+    this.personDao = personDao;
   }
 
   public static boolean hasPermission(final Person user, final String positionUuid) {
@@ -134,9 +137,14 @@ public class PositionResource {
             dao.deletePositionAssociation(DaoUtils.getUuid(pos), DaoUtils.getUuid(oldPosition));
           });
       // Log the change
-      auditTrailDao.logUpdate(user, Instant.now(), PositionDao.TABLE_NAME, pos,
+      final Instant now = Instant.now();
+      final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PositionDao.TABLE_NAME, pos,
           "positions associations have been changed", String.format("from %s to %s",
               current.getAssociatedPositions(), pos.getAssociatedPositions()));
+      // Update any subscriptions
+      pos.setUpdatedAt(now);
+      dao.updateSubscriptions(pos, auditTrailUuid, false);
+
       // GraphQL mutations *have* to return something
       return 1;
     }
@@ -180,12 +188,17 @@ public class PositionResource {
     // Automatically remove people from a position if the position is inactive.
     if (WithStatus.Status.INACTIVE.equals(pos.getStatus()) && existing != null
         && existing.getPersonUuid() != null) {
+      final Person existingPerson = existing.loadPerson(engine.getContext()).join();
       // Remove this person from this position.
-      dao.removePersonFromPosition(existing.getUuid());
+      dao.removePersonFromPosition(existing);
       // Log the change
-      auditTrailDao.logUpdate(user, Instant.now(), PositionDao.TABLE_NAME, existing,
+      final String auditTrailUuid = auditTrailDao.logUpdate(user, PositionDao.TABLE_NAME, existing,
           "person has been removed from this position because the position is now inactive",
-          String.format("from person %s", existing.getPersonUuid()));
+          String.format("from person %s", existingPerson));
+      // Update any subscriptions
+      dao.updateSubscriptions(existing, auditTrailUuid, false);
+      existingPerson.setUpdatedAt(existing.getUpdatedAt());
+      personDao.updateSubscriptions(existingPerson, auditTrailUuid, false);
     }
 
     // Log the change
@@ -211,9 +224,14 @@ public class PositionResource {
     final int numRows = dao.updatePositionHistory(pos);
 
     // Log the change
-    auditTrailDao.logUpdate(user, Instant.now(), PositionDao.TABLE_NAME, existing,
-        "position history has been updated",
+    final Instant now = Instant.now();
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PositionDao.TABLE_NAME,
+        existing, "position history has been updated",
         String.format("from %s to %s", existing.getPreviousPeople(), pos.getPreviousPeople()));
+    // Update any subscriptions
+    pos.setUpdatedAt(now);
+    dao.updateSubscriptions(pos, auditTrailUuid, false);
+
     return numRows;
   }
 
@@ -234,9 +252,17 @@ public class PositionResource {
         previousPositionUuid);
 
     // Log the change
-    auditTrailDao.logUpdate(user, Instant.now(), PositionDao.TABLE_NAME, pos, String
-        .format("person has been assigned this %s position", primary ? "primary" : "additional"),
+    final Instant now = Instant.now();
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PositionDao.TABLE_NAME, pos,
+        String.format("person has been assigned this %s position",
+            primary ? "primary" : "additional"),
         String.format("to person %s", person));
+    // Update any subscriptions
+    pos.setUpdatedAt(now);
+    dao.updateSubscriptions(pos, auditTrailUuid, false);
+    person.setUpdatedAt(now);
+    personDao.updateSubscriptions(person, auditTrailUuid, false);
+
     return numRows;
   }
 
@@ -250,16 +276,22 @@ public class PositionResource {
     }
     AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid());
 
-    final int numRows = dao.removePersonFromPosition(positionUuid);
+    final Person person = pos.loadPerson(engine.getContext()).join();
+    final int numRows = dao.removePersonFromPosition(pos);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process delete person from position");
     }
 
     // Log the change
-    auditTrailDao.logUpdate(user, Instant.now(), PositionDao.TABLE_NAME, pos,
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, PositionDao.TABLE_NAME, pos,
         "person has been removed from this position",
         String.format("from person %s", pos.getPersonUuid()));
+    // Update any subscriptions
+    dao.updateSubscriptions(pos, auditTrailUuid, false);
+    person.setUpdatedAt(pos.getUpdatedAt());
+    personDao.updateSubscriptions(person, auditTrailUuid, false);
+
     return numRows;
   }
 
