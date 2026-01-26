@@ -1,5 +1,7 @@
 package mil.dds.anet.resources;
 
+import static mil.dds.anet.database.AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement;
+
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -17,6 +19,9 @@ import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.SubscriptionDao;
+import mil.dds.anet.database.SubscriptionUpdateGroup;
+import mil.dds.anet.database.SubscriptionUpdateStatement;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -30,12 +35,14 @@ public class EntityAvatarResource {
   private final AnetObjectEngine engine;
   private final AuditTrailDao auditTrailDao;
   private final EntityAvatarDao entityAvatarDao;
+  private final SubscriptionDao subscriptionDao;
 
   public EntityAvatarResource(AnetObjectEngine engine, AuditTrailDao auditTrailDao,
-      EntityAvatarDao entityAvatarDao) {
+      EntityAvatarDao entityAvatarDao, SubscriptionDao subscriptionDao) {
     this.engine = engine;
     this.auditTrailDao = auditTrailDao;
     this.entityAvatarDao = entityAvatarDao;
+    this.subscriptionDao = subscriptionDao;
   }
 
   /**
@@ -56,11 +63,7 @@ public class EntityAvatarResource {
 
     final int numRows = entityAvatarDao.upsert(entityAvatar);
     if (numRows > 0) {
-      // Log the change
-      final RelatableObject relatedObject =
-          entityAvatar.loadRelatedObject(engine.getContext()).join();
-      auditTrailDao.logUpdate(user, Instant.now(), entityAvatar.getRelatedObjectType(),
-          (AbstractAnetBean) relatedObject, "avatar has been set");
+      logAndUpdateSubscriptions(entityAvatar, user, "avatar has been set");
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -87,10 +90,7 @@ public class EntityAvatarResource {
 
     int numRows = entityAvatarDao.delete(relatedObjectType, relatedObjectUuid);
     if (numRows > 0) {
-      // Log the change
-      final RelatableObject relatedObject = existing.loadRelatedObject(engine.getContext()).join();
-      auditTrailDao.logDelete(user, relatedObjectType, (AbstractAnetBean) relatedObject,
-          "avatar has been deleted");
+      logAndUpdateSubscriptions(existing, user, "avatar has been deleted");
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -118,5 +118,22 @@ public class EntityAvatarResource {
       // TODO: add other object types if and when entity avatars for them are allowed
       default -> false;
     };
+  }
+
+  private void logAndUpdateSubscriptions(EntityAvatar entityAvatar, Person user,
+      String updateDescription) {
+    // Log the change
+    final RelatableObject relatedObject =
+        entityAvatar.loadRelatedObject(engine.getContext()).join();
+    final Instant now = Instant.now();
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, now,
+        entityAvatar.getRelatedObjectType(), (AbstractAnetBean) relatedObject, updateDescription);
+    // Update any subscriptions
+    final SubscriptionUpdateStatement update = getCommonSubscriptionUpdateStatement(true,
+        entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), "uuid");
+    final SubscriptionUpdateGroup subscriptionUpdateGroup =
+        new SubscriptionUpdateGroup(entityAvatar.getRelatedObjectType(),
+            entityAvatar.getRelatedObjectUuid(), auditTrailUuid, now, update);
+    subscriptionDao.updateSubscriptions(subscriptionUpdateGroup, auditTrailUuid);
   }
 }

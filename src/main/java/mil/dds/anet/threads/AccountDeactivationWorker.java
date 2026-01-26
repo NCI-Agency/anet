@@ -152,24 +152,26 @@ public class AccountDeactivationWorker extends AbstractWorker {
   }
 
   private void deactivateAccount(Person p) {
+    // Update
     p.setStatus(Status.INACTIVE);
-    auditTrailDao.logUpdate(null, Instant.now(), PersonDao.TABLE_NAME, p,
+    dao.updateAuthenticationDetails(p);
+    // Log the change
+    auditTrailDao.logUpdate(null, PersonDao.TABLE_NAME, p,
         "person has been set to inactive by the system because their End-of-Tour date has been reached");
 
+    // Remove from positions
     final Position userPrimaryPosition = DaoUtils.getPosition(p);
     final List<Position> allUserPositions =
         ResourceUtils.getAllUserPositions(engine().getContext(), p, userPrimaryPosition);
-    int numPositions = positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition);
+    final Instant now = Instant.now();
+    int numPositions = positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition, now);
     if (numPositions > 0) {
       // Log the change
-      auditTrailDao.logUpdate(null, Instant.now(), PersonDao.TABLE_NAME, p, String.format(
+      auditTrailDao.logUpdate(null, now, PersonDao.TABLE_NAME, p, String.format(
           "person has been removed from %s position(s) by the system because they are now inactive",
           numPositions),
           String.format("from position(s) %s", Joiner.on(", ").join(allUserPositions)));
     }
-
-    // Update
-    dao.updateAuthenticationDetails(p);
 
     // Send email to inform user
     sendAccountDeactivationEmail(p);
