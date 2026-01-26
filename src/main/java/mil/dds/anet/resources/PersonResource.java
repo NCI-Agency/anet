@@ -175,8 +175,10 @@ public class PersonResource {
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
       dao.updateAuthenticationDetails(p);
       // Log the change
-      auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
-          "person has been set to inactive");
+      final String auditTrailUuid =
+          auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p, "person has been set to inactive");
+      // Update any subscriptions
+      dao.updateSubscriptions(p, auditTrailUuid, false);
     }
 
     // Automatically remove people from a position if they are inactive.
@@ -189,14 +191,21 @@ public class PersonResource {
       final Position userPrimaryPosition = DaoUtils.getPosition(existing);
       final List<Position> allUserPositions =
           ResourceUtils.getAllUserPositions(engine.getContext(), existing, userPrimaryPosition);
-      int numPositions = positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition);
+      final Instant now = Instant.now();
+      int numPositions =
+          positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition, now);
       if (numPositions > 0) {
         // Log the change
-        auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+        final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PersonDao.TABLE_NAME, p,
             String.format(
                 "person has been removed from %s position(s) because they are now inactive",
                 numPositions),
             String.format("from position(s) %s", Joiner.on(", ").join(allUserPositions)));
+        // Update any subscriptions
+        allUserPositions
+            .forEach(userPos -> positionDao.updateSubscriptions(userPos, auditTrailUuid, false));
+        existing.setUpdatedAt(now);
+        dao.updateSubscriptions(existing, auditTrailUuid, false);
       }
     }
 
@@ -236,15 +245,21 @@ public class PersonResource {
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
         existingPositionUuid);
 
+    final Person existing = dao.getByUuid(p.getUuid());
     existing.loadPreviousPositions(engine.getContext()).join();
     final int numRows = dao.updatePersonHistory(p);
 
     // Log the change
-    auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, p,
+    final Instant now = Instant.now();
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PersonDao.TABLE_NAME, p,
         "position history has been updated",
         String.format("from %s to %s",
             DaoUtils.formatPreviousPositions(existing.getPreviousPositions(), true),
             DaoUtils.formatPreviousPositions(p.getPreviousPositions(), true)));
+    // Update any subscriptions
+    p.setUpdatedAt(now);
+    dao.updateSubscriptions(p, auditTrailUuid, false);
+
     return numRows;
   }
 
@@ -309,7 +324,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Person is not pending verification");
     }
 
-    final int numRows = isApproved ? dao.approve(personUuid) : dao.delete(personUuid);
+    final int numRows = isApproved ? dao.approve(person) : dao.delete(personUuid);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
@@ -318,7 +333,7 @@ public class PersonResource {
     // Log the change
     final String auditTrailUuid;
     if (isApproved) {
-      auditTrailUuid = auditTrailDao.logUpdate(user, Instant.now(), PersonDao.TABLE_NAME, person,
+      auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, person,
           "person has been allowed access");
     } else {
       auditTrailUuid = auditTrailDao.logDelete(user, PersonDao.TABLE_NAME, person,

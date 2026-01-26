@@ -236,7 +236,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       }
 
       // If the position is already assigned to another person, remove the person from the position
-      removePersonFromPosition(positionUuid);
+      removePersonFromPosition(newPos);
       // Get timestamp *after* remove to preserve correct order
       final Instant now = Instant.now();
 
@@ -337,39 +337,36 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int removePersonFromPosition(String positionUuid) {
+  public int removePersonFromPosition(Position position) {
     final Handle handle = getDbHandle();
     try {
-      // Get original position data from database (we need its type)
-      final Position position = getByUuid(positionUuid);
       if (position == null) {
         return 0;
       }
-      final Instant now = Instant.now();
+      DaoUtils.setUpdateFields(position);
       final int nr = handle
           .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
               + "SET \"currentPersonUuid\" = NULL, type = :regularType, \"updatedAt\" = :updatedAt "
-              + "WHERE uuid = :positionUuid")
-          .bind("updatedAt", DaoUtils.asLocalDateTime(now))
-          .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
-          .bind("positionUuid", positionUuid).execute();
+              + "WHERE uuid = :uuid")
+          .bindBean(position).bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(position.getUpdatedAt())).execute();
 
       // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
       // (i.e. with both a position and a person).
       final String updateSql =
           "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
               + "(SELECT * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " WHERE \"positionUuid\" = :uuid AND \"endedAt\" IS NULL"
               + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
               + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
               + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
               + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
               + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      handle.createUpdate(updateSql).bind("positionUuid", positionUuid)
-          .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+      handle.createUpdate(updateSql).bindBean(position)
+          .bind("endedAt", DaoUtils.asLocalDateTime(position.getUpdatedAt())).execute();
 
       // Evict the person (previously) holding this position from the domain users cache
-      personCache.evictFromCacheByPositionUuid(positionUuid);
+      personCache.evictFromCacheByPositionUuid(position.getUuid());
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -377,17 +374,17 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int removePersonFromPositions(String personUuid, Position primaryPosition) {
+  public int removePersonFromPositions(String personUuid, Position primaryPosition,
+      Instant timestamp) {
     final Handle handle = getDbHandle();
     try {
-      final Instant now = Instant.now();
       if (primaryPosition != null) {
         handle
             .createUpdate("/* positionsRemovePerson.update */ UPDATE positions "
                 + "SET \"currentPersonUuid\" = NULL, "
                 + "type = CASE WHEN uuid = :positionUuid THEN :regularType ELSE type END, "
                 + "\"updatedAt\" = :updatedAt WHERE \"currentPersonUuid\" = :personUuid")
-            .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+            .bind("updatedAt", DaoUtils.asLocalDateTime(timestamp)).bind("personUuid", personUuid)
             .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
             .bind("positionUuid", primaryPosition.getUuid()).execute();
       } else {
@@ -395,7 +392,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             .createUpdate("/* positionsRemovePerson.update */ UPDATE positions "
                 + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
                 + "WHERE \"currentPersonUuid\" = :personUuid")
-            .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+            .bind("updatedAt", DaoUtils.asLocalDateTime(timestamp)).bind("personUuid", personUuid)
             .execute();
       }
       final String updateSql = "/* positionsRemovePerson.end */ UPDATE \"peoplePositions\" "
@@ -403,7 +400,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           + "AND \"endedAt\" IS NULL";
 
       final int nr = handle.createUpdate(updateSql).bind("personUuid", personUuid)
-          .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+          .bind("endedAt", DaoUtils.asLocalDateTime(timestamp)).execute();
 
       // Evict the person (previously) holding this primary position from the domain users cache
       if (primaryPosition != null) {
