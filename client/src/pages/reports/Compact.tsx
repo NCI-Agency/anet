@@ -203,8 +203,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         attachment?.mimeType?.startsWith("image/")
       )
     : []
-  const imageAttachmentUuids = new Set(
-    imageAttachments.map(attachment => attachment.uuid)
+  const imageAttachmentsByUuid = new Map(
+    imageAttachments.map(attachment => [
+      attachment.uuid,
+      attachment.caption || attachment.description || attachment.fileName
+    ])
   )
   const reportTextAttachmentUuids = new Set(
     (report.reportText || "")
@@ -340,7 +343,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     showAvatar={false}
                     value={utils.replaceAttachmentLinksWithImages(
                       report.reportText,
-                      imageAttachmentUuids
+                      imageAttachmentsByUuid
                     )}
                   />
                 }
@@ -680,12 +683,11 @@ const AttachmentFigureS = styled.figure`
 `
 
 const AttachmentImageS = styled.img`
-  max-width: 400px;
-  max-height: 400px;
+  max-width: 600px;
+  max-height: 600px;
   width: auto;
   height: auto;
   object-fit: contain;
-  display: block;
 `
 
 const AttachmentCaptionS = styled.figcaption`
