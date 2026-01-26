@@ -244,7 +244,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     return [
       {
         label: "Review",
-        prompt: `Review the report`,
+        prompt: "Review the report",
         icon: "check-circle",
         iconColor: "#19aa28ff"
       },
