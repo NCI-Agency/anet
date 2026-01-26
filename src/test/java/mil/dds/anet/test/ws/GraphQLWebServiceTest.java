@@ -3,8 +3,14 @@ package mil.dds.anet.test.ws;
 import static mil.dds.anet.test.ws.security.BearerToken.VALID_GRAPHQL_TOKEN;
 import static mil.dds.anet.test.ws.security.BearerToken.VALID_NVG_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import graphql.introspection.IntrospectionQueryBuilder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +20,8 @@ import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.ws.GraphQLWebService;
 import mil.dds.anet.ws.security.AccessTokenAuthentication;
 import mil.dds.anet.ws.security.BearerTokenService;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +45,9 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
           + " } }";
   // Report "Look for Budget Controls", contains reportSensitiveInformation
   private static final String REPORT_UUID = "a766b3f1-4705-43c1-b62a-ca4e3bb4dce3";
-  public static final Map<String, Object> REPORT_QUERY_VARIABLES = Map.of("uuid", REPORT_UUID);
+  private static final Map<String, Object> REPORT_QUERY_VARIABLES = Map.of("uuid", REPORT_UUID);
+
+  private final ObjectMapper defaultMapper = MapperUtils.getDefaultMapper();
 
   @Autowired
   private GraphQLWebService graphQLWebService;
@@ -55,9 +65,14 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
     SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
   }
 
+  private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {
+    var accessToken = bearerTokenService.getAccessPrincipalFromAuthHeader(bearerToken);
+    assertThat(accessToken).isPresent();
+    return new AccessTokenAuthentication(accessToken.get());
+  }
+
   @Test
   void testWithValidToken() {
-    setAuthentication(VALID_GRAPHQL_TOKEN);
     final Map<String, Object> report =
         sendGraphQLRequest(REPORT_QUERY, REPORT_QUERY_VARIABLES, "report");
     assertThat(report).isNotNull().containsEntry("uuid", REPORT_UUID)
@@ -104,18 +119,11 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
         .isEmpty();
   }
 
-  private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {
-    var accessToken = bearerTokenService.getAccessPrincipalFromAuthHeader(bearerToken);
-    assertThat(accessToken.isEmpty()).isFalse();
-    return new AccessTokenAuthentication(accessToken.get());
-  }
-
   @Test
   void testIntrospectionWithWrongScope() {
     try {
       setAuthentication(VALID_NVG_TOKEN);
       graphQLWebService
-
           .graphqlPostJson(new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
     } catch (Exception expectedException) {
       assertThat(expectedException).hasMessage("Access Denied");
@@ -132,7 +140,6 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
 
   @Test
   void testMutation() {
-    setAuthentication(VALID_GRAPHQL_TOKEN);
     final String createReportMutation =
         "mutation ($report: ReportInput!) { createReport(report: $report) {"
             + " uuid state authors { uuid } reportSensitiveInformation { uuid text } } }";
@@ -149,21 +156,71 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
     assertThat(report).isNull();
   }
 
-  private Map<String, Object> sendGraphQLRequest(String query, Map<String, Object> variables,
-      String value) {
+  @Test
+  void testMcpOperations() {
+    // Test the MCP operations from src/test/resources/operations
+    final File testDir = new File(this.getClass().getResource("/operations").getFile());
+    assertThat(testDir.getAbsolutePath()).isNotNull();
+    assertThat(testDir).isDirectory();
+
+    final File[] fileList = testDir.listFiles();
+    assertThat(fileList).isNotNull();
+    for (final File f : fileList) {
+      if (f.isFile()) {
+        try (final FileInputStream input = new FileInputStream(f)) {
+          final String query = IOUtils.toString(input, StandardCharsets.UTF_8);
+          final Map<String, Object> variables = getVariablesForFile(f);
+          final String value = getValueForFile(f);
+          if (variables != null && value != null) {
+            logger.debug("Processing file={} with variables={} and value={}", f, variables, value);
+            final Map<String, Object> result = sendGraphQLRequest(query, variables);
+            logger.debug("Result is {}", result);
+            assertThat(result).containsKey(value);
+            assertThat(result.get(value)).isNotNull();
+          }
+        } catch (IOException e) {
+          fail("Unable to read file ", e);
+        }
+      }
+    }
+  }
+
+  private Map<String, Object> getVariablesForFile(final File f) {
+    return switch (FilenameUtils.getBaseName(f.getName())) {
+      case "adminSettings" -> Map.of();
+      case "recentReports" -> Map.of(// -
+          "startDate", Instant.now().toEpochMilli() - 864000, // 10 days ago
+          "endDate", Instant.now().toEpochMilli(), // now
+          "excludeTaskUuids", List.of("1145e584-4485-4ce0-89c4-2fa2e1fe846a")); // task EF 1
+      case "searchReports" -> Map.of("text", "telescope");
+      default -> fail(String.format("Missing test data for %s", f));
+    };
+  }
+
+  private String getValueForFile(final File f) {
+    return switch (FilenameUtils.getBaseName(f.getName())) {
+      case "adminSettings" -> "adminSettings";
+      case "recentReports", "searchReports" -> "reportList";
+      default -> fail(String.format("Missing test data for %s", f));
+    };
+  }
+
+  private Map<String, Object> sendGraphQLRequest(String query, Map<String, Object> variables) {
     setAuthentication(VALID_GRAPHQL_TOKEN);
-
     final GraphQLRequest graphQLRequest = new GraphQLRequest(null, query, null, variables);
-
     final ResponseEntity<Map<String, Object>> result =
         graphQLWebService.graphqlPostJson(graphQLRequest);
-
     assertThat(result).isNotNull();
-
     @SuppressWarnings("unchecked")
     final Map<String, Object> data =
         (Map<String, Object>) Objects.requireNonNull(result.getBody()).get("data");
-    final ObjectMapper defaultMapper = MapperUtils.getDefaultMapper();
-    return defaultMapper.convertValue(data.get(value), new TypeReference<>() {});
+    assertThat(data).isNotNull();
+    return data;
+  }
+
+  private Map<String, Object> sendGraphQLRequest(String query, Map<String, Object> variables,
+      String value) {
+    return defaultMapper.convertValue(sendGraphQLRequest(query, variables).get(value),
+        new TypeReference<>() {});
   }
 }
