@@ -55,7 +55,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
     return new SubscriptionUpdateGroup(tableName, uuid, auditTrailUuid, updatedAt, update);
   }
 
-  protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(boolean isParam,
+  public static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(boolean isParam,
       String uuid, String tableName, String paramName) {
     if ((isParam && uuid == null) || tableName == null || paramName == null) {
       return null;

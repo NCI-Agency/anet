@@ -423,7 +423,7 @@ export const gqlSubscriptionUpdateFields = `
   updatedObjectUuid
 `
 
-export const gqlRelatedObjectFields = `
+export const gqlSubscribableObjectFields = `
   ... on AuthorizationGroup {
     ${gqlEntityFieldsMap.AuthorizationGroup}
   }
@@ -450,6 +450,13 @@ export const gqlRelatedObjectFields = `
   }
   ... on Task {
     ${gqlEntityFieldsMap.Task}
+  }
+`
+
+export const gqlRelatedObjectFields = `
+  ${gqlSubscribableObjectFields}
+  ... on Attachment {
+    ${gqlEntityFieldsMap.Attachment}
   }
 `
 

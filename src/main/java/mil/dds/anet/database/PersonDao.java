@@ -411,15 +411,17 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  public int approve(String personUuid) {
+  public int approve(Person person) {
     final Handle handle = getDbHandle();
     try {
+      DaoUtils.setUpdateFields(person);
       final int nr = handle
           .createUpdate("UPDATE people SET \"pendingVerification\" = :pendingVerification"
-              + " WHERE uuid = :personUuid")
-          .bind("pendingVerification", false).bind("personUuid", personUuid).execute();
+              + " WHERE uuid = :uuid")
+          .bindBean(person).bind("updatedAt", DaoUtils.asLocalDateTime(person.getUpdatedAt()))
+          .bind("pendingVerification", false).execute();
       // Evict the person from the domain users cache
-      evictFromCacheByPersonUuid(personUuid);
+      evictFromCacheByPersonUuid(person.getUuid());
       return nr;
     } finally {
       closeDbHandle(handle);

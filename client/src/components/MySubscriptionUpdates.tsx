@@ -2,6 +2,7 @@ import {
   gqlEntityFieldsMap,
   gqlPaginationFields,
   gqlRelatedObjectFields,
+  gqlSubscribableObjectFields,
   gqlSubscriptionFields,
   gqlSubscriptionUpdateFields
 } from "constants/GraphQLDefinitions"
@@ -31,12 +32,12 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
       list {
         ${gqlSubscriptionUpdateFields}
         updatedObject {
-          ${gqlRelatedObjectFields}
+          ${gqlSubscribableObjectFields}
         }
         subscription {
           ${gqlSubscriptionFields}
           subscribedObject {
-            ${gqlRelatedObjectFields}
+            ${gqlSubscribableObjectFields}
           }
         }
         auditTrail {
