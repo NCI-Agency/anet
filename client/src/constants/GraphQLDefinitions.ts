@@ -20,16 +20,16 @@ export const gqlMinimalAttachmentFields = `
   uuid
   caption
   fileName
-  description
+  mimeType
+  contentLength
 `
 
 export const gqlBasicAttachmentFields = `
   ${gqlMinimalAttachmentFields}
   createdAt
   updatedAt
-  mimeType
-  contentLength
   classification
+  description
 `
 
 export const gqlAllAttachmentFields = `
