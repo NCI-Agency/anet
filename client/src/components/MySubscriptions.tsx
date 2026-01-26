@@ -1,6 +1,6 @@
 import {
   gqlPaginationFields,
-  gqlRelatedObjectFields,
+  gqlSubscribableObjectFields,
   gqlSubscriptionFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -29,7 +29,7 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
       list {
         ${gqlSubscriptionFields}
         subscribedObject {
-          ${gqlRelatedObjectFields}
+          ${gqlSubscribableObjectFields}
         }
       }
     }
