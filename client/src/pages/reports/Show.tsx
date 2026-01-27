@@ -280,16 +280,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     }
   }
 
-  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const imageAttachmentsByUuid = new Map(
-    (attachmentsEnabled ? attachments : [])
-      .filter(attachment => attachment?.mimeType?.startsWith("image/"))
-      .map(attachment => [
-        attachment.uuid,
-        attachment.caption || attachment.description || attachment.fileName
-      ])
-  )
-
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
@@ -333,6 +323,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   // Anybody can email a report as long as it's not in draft.
   const canEmail = !report.isDraft()
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   return (
     <Formik
@@ -693,13 +684,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   title={Settings.fields.report.reportText?.label}
                   id="report-text"
                 >
-                  <RichTextEditor
-                    readOnly
-                    value={utils.replaceAttachmentLinksWithImages(
-                      report.reportText,
-                      imageAttachmentsByUuid
-                    )}
-                  />
+                  <RichTextEditor readOnly value={report.reportText} />
                 </Fieldset>
               )}
               {report.reportSensitiveInformation?.text && (

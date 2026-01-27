@@ -399,31 +399,6 @@ export default {
     return path.split(".").reduce((value, el) => value[el], obj)
   },
 
-  replaceAttachmentLinksWithImages: function (value, imageAttachmentsByUuid) {
-    if (!value) {
-      return value
-    }
-    const escapeAttribute = text =>
-      String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;")
-    return value.replace(
-      /<a\b[^>]*href=["']urn:anet:attachments:([0-9a-f-]+)["'][^>]*>.*?<\/a>/gi,
-      (match, uuid) => {
-        const caption = imageAttachmentsByUuid?.get?.(uuid)
-        if (!caption) {
-          return match
-        }
-        return `<img src="/api/attachment/view/${uuid}" alt="${escapeAttribute(
-          caption
-        )}" data-caption="${escapeAttribute(caption)}" />`
-      }
-    )
-  },
-
   humanReadableFileSize: function (number) {
     if (number < 1024) {
       return `${number} bytes`
@@ -452,6 +427,12 @@ export default {
       iconImage = `/api/attachment/view/${attachment.uuid}`
     }
     return { iconSize, iconImage, contentMissing }
+  },
+
+  getImageAttachments: function (attachments = []) {
+    return attachments.filter(attachment =>
+      attachment?.mimeType?.startsWith("image/")
+    )
   },
 
   stripExtension: function (fileName) {
