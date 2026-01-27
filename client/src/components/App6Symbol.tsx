@@ -2,7 +2,31 @@ import { App6Choices } from "components/App6"
 import ms from "milsymbol"
 import React, { useEffect, useRef } from "react"
 
-const VERSION = 10
+const VERSION = 10 // APP-6D
+
+type App6ChoiceMap = { [key: string]: string }
+type App6ChoiceGroup = { category: string; values: App6ChoiceMap }
+
+const isGroupedChoices = (choices: unknown): choices is App6ChoiceGroup[] =>
+  Array.isArray(choices)
+
+const flattenChoices = (
+  choices?: App6ChoiceMap | App6ChoiceGroup[]
+): App6ChoiceMap => {
+  if (!choices) {
+    return {}
+  }
+  if (!isGroupedChoices(choices)) {
+    return choices
+  }
+  return choices.reduce(
+    (acc, group) => ({
+      ...acc,
+      ...group.values
+    }),
+    {}
+  )
+}
 
 export const getChoices = (field: string, values: any[]) => {
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
@@ -12,7 +36,7 @@ export const getChoices = (field: string, values: any[]) => {
     "app6entityType"
   )
 
-  const toEntries = options =>
+  const toEntries = (options = {}) =>
     Object.fromEntries(
       Object.entries(options).map(([key, value]) => [key, value.label])
     )
@@ -27,12 +51,27 @@ export const getChoices = (field: string, values: any[]) => {
           app6entityType
         ]?.options || {}
       ),
-    app6amplifier: () => App6Choices[field][symbolSet] || {},
+    app6amplifier: () =>
+      App6Choices[field]?.[symbolSet] || App6Choices[field] || {},
     app6sectorOneModifier: () => App6Choices[field][symbolSet] || {},
     app6sectorTwoModifier: () => App6Choices[field][symbolSet] || {}
   }
 
-  return (choiceHandlers[field] || (() => App6Choices[field] || {}))()
+  const choices = (choiceHandlers[field] || (() => App6Choices[field] || {}))()
+  return flattenChoices(choices)
+}
+
+export const getGroupedChoices = (
+  field: string,
+  values: any[]
+): App6ChoiceGroup[] | null => {
+  if (field !== "app6sectorOneModifier" && field !== "app6sectorTwoModifier") {
+    return null
+  }
+  const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
+  const choices = App6Choices[field]?.[symbolSet]
+  // Only return grouped data when there are multiple categories to display.
+  return isGroupedChoices(choices) && choices.length > 1 ? choices : null
 }
 
 export const fieldsList = [

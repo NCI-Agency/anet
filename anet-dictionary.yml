@@ -1081,15 +1081,15 @@ fields:
     app6amplifier:
       label: Amplifier
     app6entity:
-      label: Entity
+      label: Main icon category
     app6entityType:
-      label: Entity Type
+      label: Main icon type
     app6entitySubtype:
-      label: Entity Subtype
+      label: Main icon sub type
     app6sectorOneModifier:
-      label: Entity 1 Modifier
+      label: Modifier 1
     app6sectorTwoModifier:
-      label: Entity 2 Modifier
+      label: Modifier 2
     emailAddresses:
       label: Email addresses
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']
