@@ -107,6 +107,14 @@ const EngagementsBetweenCommunitiesMatrix = ({
     }
   }
 
+  function hexToRgba(hex: string, alpha: number): string {
+    const normalized = hex.replace("#", "")
+    const r = parseInt(normalized.slice(0, 2), 16)
+    const g = parseInt(normalized.slice(2, 4), 16)
+    const b = parseInt(normalized.slice(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+
   function getEngagement(advisorEntityUuid, interlocutorEntityUuid) {
     const match = engagementsBetweenCommunities.find(
       e =>
@@ -117,6 +125,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
       return null
     }
     const engagementColor = getEngagementColor(match.engagementDate)
+    const engagementFade = hexToRgba(engagementColor, 0.25)
     const report = new Report({
       uuid: match.reportUuid,
       intent: moment(match.engagementDate).format(
@@ -126,7 +135,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
     return (
       <div
         style={{
-          backgroundColor: engagementColor,
+          backgroundImage: `linear-gradient(90deg, ${engagementColor} 0%, ${engagementFade} 25%, ${engagementFade} 75%, ${engagementColor} 100%)`,
           padding: "0.25rem 0.5rem",
           borderRadius: "4px",
           textAlign: "center"
