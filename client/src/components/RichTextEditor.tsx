@@ -81,11 +81,7 @@ const ELEMENT_TAGS = {
   LI: () => ({ type: "list-item" }),
   OL: () => ({ type: "numbered-list" }),
   UL: () => ({ type: "bulleted-list" }),
-  IMG: el => ({
-    type: "image",
-    url: el.getAttribute("src"),
-    caption: el.getAttribute("data-caption") || el.getAttribute("alt")
-  })
+  IMG: el => ({ type: "image", url: el.getAttribute("src") })
 }
 
 interface RichTextEditorProps {
@@ -233,15 +229,7 @@ const RichTextEditor = ({
 }
 
 const withHtml = editor => {
-  const { insertData, isInline, isVoid } = editor
-
-  editor.isInline = element =>
-    LINK_TYPES.includes(element.type) || isInline(element)
-  editor.isVoid = element =>
-    LINK_TYPES.includes(element.type) ||
-    element.type === "image" ||
-    isVoid(element)
-
+  const { insertData } = editor
   editor.insertData = data => {
     const html = data?.getData("text/html")
     if (html) {
@@ -387,6 +375,17 @@ const deserialize = (el, markAttributes = {}) => {
   }
 }
 
+function isImageAttachment(entity: any) {
+  return (
+    entity instanceof Models.Attachment &&
+    entity?.mimeType?.startsWith("image/")
+  )
+}
+
+function showIconCallback(entity: any) {
+  return !isImageAttachment(entity)
+}
+
 const displayCallback = modelInstance => {
   if (modelInstance instanceof Models.Report) {
     const title = utils.ellipsizeOnWords(
@@ -396,6 +395,19 @@ const displayCallback = modelInstance => {
     if (title) {
       return title
     }
+  } else if (isImageAttachment(modelInstance)) {
+    return (
+      <div className="rich-text-image-wrapper">
+        <img
+          className="rich-text-image"
+          src={`/api/attachment/view/${modelInstance.uuid}`}
+          alt={modelInstance.caption}
+        />
+        {modelInstance.caption && (
+          <div className="rich-text-image-caption">{modelInstance.caption}</div>
+        )}
+      </div>
+    )
   }
   return modelInstance.toString()
 }
@@ -418,6 +430,7 @@ const getLink = (
         type={element.entityType}
         uuid={element.entityUuid}
         displayCallback={displayCallback}
+        showIcon={showIconCallback}
         showAvatar={showAvatar}
       >
         {reducedChildren}
@@ -475,20 +488,6 @@ const Element = ({
       return <li {...attributes}>{children}</li>
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
-    case "image":
-      return (
-        <div {...attributes} className="rich-text-image-wrapper">
-          <img
-            className="rich-text-image"
-            src={element.url}
-            alt={element.caption || "Embedded image"}
-          />
-          {element.caption && (
-            <div className="rich-text-image-caption">{element.caption}</div>
-          )}
-          {children}
-        </div>
-      )
     case ANET_LINK:
     case EXTERNAL_LINK:
       return getLink(

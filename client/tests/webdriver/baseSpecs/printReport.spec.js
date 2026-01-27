@@ -195,13 +195,13 @@ describe("Show print report page", () => {
       })
     })
     it("Should display attachment images only when enabled", async () => {
-      const attachmentsSection = await browser.$("tr#attachmentsWithImages")
+      const attachmentsSection = await browser.$("tr#imageAttachments")
       expect(await attachmentsSection.isExisting()).to.equal(false)
 
-      await ShowReport.selectOptionalField("attachmentsWithImages")
-      await (await browser.$("tr#attachmentsWithImages")).waitForDisplayed()
+      await ShowReport.selectOptionalField("imageAttachments")
+      await (await browser.$("tr#imageAttachments")).waitForDisplayed()
 
-      const attachmentImages = await browser.$$("tr#attachmentsWithImages img")
+      const attachmentImages = await browser.$$("tr#imageAttachments img")
       expect(attachmentImages.length).to.be.equal(1)
     })
   })

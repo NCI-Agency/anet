@@ -1,10 +1,10 @@
 import {
-  gqlAllAttachmentFields,
   gqlAllReportFields,
   gqlApprovalStepFields,
   gqlAssessmentsFields,
   gqlAuthorizedMembersFields,
   gqlEntityFieldsMap,
+  gqlMinimalAttachmentFields,
   gqlReportCommentsFields,
   gqlReportCommunitiesFields,
   gqlReportSensitiveInformationFields,
@@ -57,6 +57,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
+import { getAttachmentUuidsFromRichText } from "utils_links"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -122,7 +123,7 @@ const GQL_GET_REPORT = gql`
         ${gqlEntityFieldsMap.Organization}
       }
       attachments {
-        ${gqlAllAttachmentFields}
+        ${gqlMinimalAttachmentFields}
       }
       ${gqlReportWorkflowFields}
       approvalStep {
@@ -199,21 +200,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   const canReadAssessments = isAuthor
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const imageAttachments = attachmentsEnabled
-    ? (report.attachments || []).filter(attachment =>
-        attachment?.mimeType?.startsWith("image/")
-      )
+    ? utils.getImageAttachments(report.attachments)
     : []
-  const imageAttachmentsByUuid = new Map(
-    imageAttachments.map(attachment => [
-      attachment.uuid,
-      attachment.caption || attachment.description || attachment.fileName
-    ])
-  )
-  const reportTextAttachmentUuids = new Set(
-    (report.reportText || "")
-      .match(/urn:anet:attachments:([0-9a-f-]+)/gi)
-      ?.map(match => match.split(":").pop())
-      .filter(Boolean) || []
+  const reportTextAttachmentUuids = getAttachmentUuidsFromRichText(
+    report.reportText
   )
   const imageAttachmentsForSection = imageAttachments.filter(
     attachment => !reportTextAttachmentUuids.has(attachment.uuid)
@@ -341,10 +331,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   <RichTextEditor
                     readOnly
                     showAvatar={false}
-                    value={utils.replaceAttachmentLinksWithImages(
-                      report.reportText,
-                      imageAttachmentsByUuid
-                    )}
+                    value={report.reportText}
                   />
                 }
                 className="reportField keyDetailsRow"
@@ -414,15 +401,13 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
-            {optionalFields.attachmentsWithImages.active &&
+            {optionalFields.imageAttachments.active &&
               imageAttachmentsForSection.length > 0 && (
                 <CompactRow
-                  id="attachmentsWithImages"
+                  id="imageAttachments"
                   content={
                     <AttachmentsWithImagesS>
-                      <AttachmentsTitleS>
-                        Attachments with images
-                      </AttachmentsTitleS>
+                      <AttachmentsTitleS>Image attachments</AttachmentsTitleS>
                       <AttachmentsListS>
                         {imageAttachmentsForSection.map(attachment => (
                           <AttachmentFigureS key={attachment.uuid}>
@@ -431,10 +416,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                               alt={attachment.caption || attachment.fileName}
                             />
                             <AttachmentCaptionS>
-                              {attachment.caption ||
-                                attachment.description ||
-                                attachment.fileName ||
-                                attachment.uuid}
+                              {attachment.caption || attachment.fileName}
                             </AttachmentCaptionS>
                           </AttachmentFigureS>
                         ))}
@@ -634,21 +616,6 @@ const CompactReportViewS = styled.div`
       box-shadow: none;
     }
   }
-
-  .rich-text-image {
-    max-width: 400px;
-    max-height: 400px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: inline-block;
-    margin: 0 0 0 6px;
-    vertical-align: middle;
-  }
-
-  .rich-text-image-wrapper {
-    display: inline;
-  }
 `
 
 const AttachmentsWithImagesS = styled.div`
@@ -701,8 +668,8 @@ const OPTIONAL_FIELDS_INIT = {
     text: "Assessments",
     active: false
   },
-  attachmentsWithImages: {
-    text: "Display Attachments with Images",
+  imageAttachments: {
+    text: "Image Attachments",
     active: false
   },
   reportSensitiveInformation: {
