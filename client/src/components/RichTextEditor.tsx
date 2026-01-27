@@ -37,9 +37,14 @@ import {
   LINK_TYPES
 } from "utils_links"
 
-const createSlateValue = value => {
+const createSlateValue = (value, readOnly) => {
   const document = new DOMParser().parseFromString(value || "", "text/html")
-  return deserialize(document.body)
+  const slateValue = deserialize(document.body)
+  if (!readOnly && !!value) {
+    // add empty text node at the end to ease appending new content
+    slateValue.push({ type: "paragraph", children: [{ text: "" }] })
+  }
+  return slateValue
 }
 
 const usePrevious = value => {
@@ -121,14 +126,16 @@ const RichTextEditor = ({
   const editableRef = useRef()
   const toolbarRef = useRef()
 
-  const [slateValue, setSlateValue] = useState(createSlateValue(value))
+  const [slateValue, setSlateValue] = useState(
+    createSlateValue(value, readOnly)
+  )
   const previousValue = usePrevious(value)
 
   useEffect(() => {
     if (readOnly && previousValue !== value) {
       // Only update editor when a new value comes in
       // (different from the one used for slateValue above)
-      editor.children = createSlateValue(value)
+      editor.children = createSlateValue(value, readOnly)
       editor.onChange()
     }
   }, [editor, previousValue, readOnly, disableFullSize, value])
