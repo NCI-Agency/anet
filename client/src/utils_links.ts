@@ -64,3 +64,17 @@ export function getUrlFromEntityInfo(node) {
     `urn:anet:${ENTITY_TYPE_TO_RELATED_OBJECT_TYPE[entityType]}:${entityUuid}`
   )
 }
+
+export function getAttachmentUuidsFromRichText(richText = "") {
+  return new Set(
+    richText
+      .matchAll(
+        new RegExp(
+          `<a href="urn:anet:${Models.Attachment.relatedObjectType}:([^"]*)"`,
+          "g"
+        )
+      )
+      .map(match => match?.[1])
+      .filter(uuid => UUID_REGEX.test(uuid))
+  )
+}

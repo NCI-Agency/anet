@@ -10,7 +10,7 @@
 
 /* Style used to make rich-text-editor to full-size */
 .editor-container-fullsize {
-  position: absolute; 
+  position: absolute;
   /* In full size mode the richtext-editor start position, just below the topbar */
   top: var(--banner-height);
   left: 0;
@@ -41,9 +41,9 @@
 /* Style used to make editable area to full-size */
 .editor-container .editable-fullsize {
   /* Prevent edit-area from being longer than the editor-container */
-  max-height: calc(99% - var(--toolbar-height)) !important; 
+  max-height: calc(99% - var(--toolbar-height)) !important;
   /* Support full height, but limited by max-height parameter */
-  height: 99%; 
+  height: 99%;
   border: 1px solid #ccc;
 }
 
@@ -77,7 +77,7 @@
   z-index: 1300 !important;
 }
 
-/* 
+/*
  * Rich text editor style overrides.
 */
 
@@ -93,23 +93,24 @@
   font-size: 1.0rem;
 }
 
-.compact-view .rich-text-image,
-.report-show .rich-text-image {
-  max-width: 400px;
-  max-height: 400px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  margin: 6px 0 4px;
-}
+.rich-text-image-wrapper {
+  text-align: center;
 
-.report-show .rich-text-image-wrapper,
-.compact-view .rich-text-image-wrapper {
-  margin: 6px 0 12px;
-}
+  & .rich-text-image {
+    max-width: 400px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    margin: 6px 0 4px;
+  }
 
-.report-show .rich-text-image-caption,
-.compact-view .rich-text-image-caption {
-  font-size: 12px;
-  color: #445566;
+  & .rich-text-image-wrapper {
+    margin: 6px 0 12px;
+  }
+
+  & .rich-text-image-caption {
+    font-size: 12px;
+    color: #445566;
+  }
 }

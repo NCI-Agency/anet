@@ -55,7 +55,10 @@ export default class Attachment extends Model {
     return Attachment.filterClientSideFields(this, ...additionalFields)
   }
 
-  toString() {
-    return this.caption || this.fileName || this.description
+  toString(displayCallback) {
+    if (typeof displayCallback === "function") {
+      return displayCallback(this)
+    }
+    return this.caption || this.fileName
   }
 }
