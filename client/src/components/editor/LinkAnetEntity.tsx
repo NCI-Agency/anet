@@ -8,6 +8,7 @@ interface LinkAnetEntityProps {
   uuid: string
   displayCallback?: (...args: unknown[]) => unknown
   children?: React.ReactNode
+  showIcon?: (entity: any) => boolean
   showAvatar?: boolean
 }
 
@@ -16,6 +17,7 @@ const LinkAnetEntity = ({
   uuid,
   displayCallback = null,
   children = null,
+  showIcon = () => true,
   showAvatar = true
 }: LinkAnetEntityProps) => {
   const [entity, setEntity] = useState()
@@ -51,6 +53,7 @@ const LinkAnetEntity = ({
     <LinkTo
       modelType={type}
       model={entity}
+      showIcon={showIcon(entity)}
       showAvatar={showAvatar}
       displayCallback={displayCallback}
     >
