@@ -24,8 +24,8 @@ export const gqlBasicAttachmentFields = `
   ${gqlMinimalAttachmentFields}
   createdAt
   updatedAt
-  description
   classification
+  description
 `
 
 export const gqlAllAttachmentFields = `
