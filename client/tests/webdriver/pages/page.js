@@ -230,7 +230,8 @@ class Page {
     // Wait for the editor to be focused
     await browser.pause(300)
     if (oldValue) {
-      await this.deleteText(oldValue)
+      // Delete the text including the empty paragraph at the end
+      await this.deleteText(`${oldValue}\n`)
       // Wait for the previous value to be deleted
       await browser.pause(300)
     }
