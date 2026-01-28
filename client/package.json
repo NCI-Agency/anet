@@ -117,7 +117,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "4.1.0",
+    "@apollo/client": "4.1.2",
     "@blueprintjs/core": "6.6.1",
     "@blueprintjs/datetime": "6.0.13",
     "@emotion/react": "11.14.0",
@@ -128,11 +128,11 @@
     "@fullcalendar/list": "6.1.20",
     "@fullcalendar/react": "6.1.20",
     "@fullcalendar/timegrid": "6.1.20",
-    "axios": "1.13.2",
+    "axios": "1.13.4",
     "bootstrap": "5.3.8",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
-    "core-js": "3.47.0",
+    "core-js": "3.48.0",
     "d3": "7.9.0",
     "email-addresses": "5.0.0",
     "escape-html": "1.0.3",
