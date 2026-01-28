@@ -167,6 +167,17 @@ const PRESETS = [
   }
 ]
 
+const RichTextEditorS = styled(RichTextEditor)`
+  .rich-text-image-wrapper {
+    & .rich-text-image {
+      max-width: ${props =>
+        `min(400px, calc(0.5 * ${props.pageSize.width}))`} !important;
+      max-height: ${props =>
+        `min(400px, calc(0.5 * ${props.pageSize.width}))`} !important;
+    }
+  }
+`
+
 interface CompactPersonViewProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -368,10 +379,11 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     // map fields that have specific human value
     const humanValuesExceptions = {
       biography: (
-        <RichTextEditor
+        <RichTextEditorS
           readOnly
           value={person.biography}
           style={{ marginBottom: -11 }}
+          pageSize={pageSize}
         />
       ),
       user: utils.formatBoolean(person.user),
