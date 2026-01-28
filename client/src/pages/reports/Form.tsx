@@ -705,7 +705,7 @@ const ReportForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div className="report-form">
-              <ReportChatContextSync />
+              {Settings.chatAssistantUrl && <ReportChatContextSync />}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <MessagesWithConflict
                 error={saveError}
