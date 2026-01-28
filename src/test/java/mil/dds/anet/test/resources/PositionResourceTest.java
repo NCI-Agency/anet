@@ -546,12 +546,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(prin2.getUuid()).isNotNull();
     assertThat(prin2.getPosition()).isNull();
 
-    final PositionInput prin2PositionInput =
-        PositionInput.builder().withUuid(newbPosition.getUuid()).build();
-    final PersonInput prin2UpdateInput = getPersonInput(prin2);
-    prin2UpdateInput.setPosition(prin2PositionInput);
-    Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, prin2UpdateInput));
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(prin2), null, true, newbPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Reload this person to check their position was set.

@@ -180,7 +180,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Change this person w/ a new position, and ensure it gets changed.
 
     final PositionInput newPos2Input =
-        PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
+        PositionInput.builder().withType(PositionType.SUPERUSER).withRole(PositionRole.MEMBER)
             .withName("A Second Test Position").withOrganization(getOrganizationInput(org))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position newPos2 = withCredentials(adminUser,
@@ -188,25 +188,22 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPos2).isNotNull();
     assertThat(newPos2.getUuid()).isNotNull();
 
-    newPerson2.setName("Changey McChangeface");
-    newPerson2.setPosition(newPos2);
     // A person cannot change their own position
     try {
-      withCredentials(getDomainUsername(newPerson2),
-          t -> mutationExecutor.updatePerson("", false, getPersonInput(newPerson2)));
+      withCredentials(getDomainUsername(newPerson2), t -> mutationExecutor.putPersonInPosition("",
+          getPersonInput(newPerson2), newPos.getUuid(), true, newPos2.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
 
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", false, getPersonInput(newPerson2)));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(newPerson2), newPos.getUuid(), true, newPos2.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person retPerson =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, newPerson2.getUuid()));
     assertThat(retPerson).isNotNull();
-    assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
     assertThat(retPerson.getPosition()).isNotNull();
     assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 

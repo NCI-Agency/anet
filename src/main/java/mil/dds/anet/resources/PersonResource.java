@@ -169,29 +169,6 @@ public class PersonResource {
       validateEmail(p.getEmailAddresses());
     }
 
-    // Swap the position first in order to do the authentication check.
-    if (p.getPosition() != null) {
-      // Maybe update position?
-      final Position existingPos = DaoUtils.getPosition(existing);
-      final String positionUuid = DaoUtils.getUuid(p.getPosition());
-      if (existingPos == null && positionUuid != null) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      } else if (existingPos != null && positionUuid == null) {
-        // Remove this person from their position.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
-      } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      }
-    }
-
     // If person changed to inactive, update the status
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
@@ -200,8 +177,8 @@ public class PersonResource {
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (WithStatus.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
-      Position existingPos = DaoUtils.getPosition(existing);
+    if (WithStatus.Status.INACTIVE.equals(p.getStatus())) {
+      final Position existingPos = DaoUtils.getPosition(existing);
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
         if (!user.getUuid().equals(p.getUuid())) {
