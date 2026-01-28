@@ -211,7 +211,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
 
   useEffect(() => {
     const el = iframeElRef.current
-    if (!el) {
+    if (!el || !isReady) {
       return
     }
     let attempts = 0
