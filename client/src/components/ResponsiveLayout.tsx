@@ -11,6 +11,7 @@ import { legacy_connect as connect } from "react-redux"
 import LoadingBar from "react-redux-loading-bar"
 import { Navigate, Outlet, useLocation } from "react-router"
 import { Element } from "react-scroll"
+import Settings from "settings"
 
 const anetContainer = {
   display: "flex",
@@ -122,14 +123,25 @@ const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
     <ResponsiveLayoutContext.Provider value={layoutContext}>
       <PollingContext.Provider value={pollingContext}>
         <div style={anetContainer} className="anet">
-          <TopBarWithChat
-            handleTopbarHeight={handleTopbarHeight}
-            minimalHeader={pageProps.minimalHeader}
-            handleSecurityBannerBottom={handleSecurityBannerBottom}
-            toggleMenuAction={() => {
-              setFloatingMenu(!floatingMenu)
-            }}
-          />
+          {Settings.chatAssistantUrl ? (
+            <TopBarWithChat
+              handleTopbarHeight={handleTopbarHeight}
+              minimalHeader={pageProps.minimalHeader}
+              handleSecurityBannerBottom={handleSecurityBannerBottom}
+              toggleMenuAction={() => {
+                setFloatingMenu(!floatingMenu)
+              }}
+            />
+          ) : (
+            <TopBar
+              handleTopbarHeight={handleTopbarHeight}
+              minimalHeader={pageProps.minimalHeader}
+              handleSecurityBannerBottom={handleSecurityBannerBottom}
+              toggleMenuAction={() => {
+                showFloatingMenu(!floatingMenu)
+              }}
+            />
+          )}
           <div style={contentContainer} className="content-container">
             <LoadingBar showFastActions style={loadingBar} />
             <div
@@ -155,7 +167,7 @@ const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
             >
               <Outlet />
             </Element>
-            <ChatPanel />
+            {Settings.chatAssistantUrl && <ChatPanel />}
           </div>
         </div>
       </PollingContext.Provider>
@@ -172,10 +184,12 @@ const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
 }
 
 const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
-  return (
+  return Settings.chatAssistantUrl ? (
     <ChatBridgeProvider>
       <ResponsiveLayoutInner pageProps={pageProps} />
     </ChatBridgeProvider>
+  ) : (
+    <ResponsiveLayoutInner pageProps={pageProps} />
   )
 }
 
