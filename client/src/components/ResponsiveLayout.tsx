@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react"
 import LoadingBar from "react-redux-loading-bar"
 import { useLocation } from "react-router-dom"
 import { Element } from "react-scroll"
+import Settings from "settings"
 
 const anetContainer = {
   display: "flex",
@@ -93,14 +94,25 @@ const ResponsiveLayoutInner = ({
       }}
     >
       <div style={anetContainer} className="anet">
-        <TopBarWithChat
-          handleTopbarHeight={handleTopbarHeight}
-          minimalHeader={pageProps.minimalHeader}
-          handleSecurityBannerBottom={handleSecurityBannerBottom}
-          toggleMenuAction={() => {
-            showFloatingMenu(!floatingMenu)
-          }}
-        />
+        {Settings.chatAssistantUrl ? (
+          <TopBarWithChat
+            handleTopbarHeight={handleTopbarHeight}
+            minimalHeader={pageProps.minimalHeader}
+            handleSecurityBannerBottom={handleSecurityBannerBottom}
+            toggleMenuAction={() => {
+              showFloatingMenu(!floatingMenu)
+            }}
+          />
+        ) : (
+          <TopBar
+            handleTopbarHeight={handleTopbarHeight}
+            minimalHeader={pageProps.minimalHeader}
+            handleSecurityBannerBottom={handleSecurityBannerBottom}
+            toggleMenuAction={() => {
+              showFloatingMenu(!floatingMenu)
+            }}
+          />
+        )}
         <div style={contentContainer} className="content-container">
           <LoadingBar showFastActions style={loadingBar} />
           <div
@@ -126,7 +138,7 @@ const ResponsiveLayoutInner = ({
           >
             {children}
           </Element>
-          <ChatPanel />
+          {Settings.chatAssistantUrl && <ChatPanel />}
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>
@@ -146,10 +158,12 @@ const ResponsiveLayoutInner = ({
 }
 
 const ResponsiveLayout = (props: ResponsiveLayoutProps) => {
-  return (
+  return Settings.chatAssistantUrl ? (
     <ChatBridgeProvider>
       <ResponsiveLayoutInner {...props} />
     </ChatBridgeProvider>
+  ) : (
+    <ResponsiveLayoutInner {...props} />
   )
 }
 

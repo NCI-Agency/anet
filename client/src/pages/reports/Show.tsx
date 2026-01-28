@@ -438,13 +438,15 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 Email report
               </Button>
             )}
-            <Button
-              variant="outline-primary"
-              onClick={openChat}
-              title="Open AI chat panel"
-            >
-              Ask AI
-            </Button>
+            {Settings.chatAssistantUrl && (
+              <Button
+                variant="outline-primary"
+                onClick={openChat}
+                title="Open AI chat panel"
+              >
+                Ask AI
+              </Button>
+            )}
             <Button
               value="compactView"
               variant="primary"
