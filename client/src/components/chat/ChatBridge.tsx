@@ -9,6 +9,7 @@ import React, {
   useState
 } from "react"
 import { useLocation } from "react-router-dom"
+import Settings from "settings"
 
 export type ChatSuggestion = {
   label: string
@@ -34,7 +35,10 @@ const ChatBridgeContext = createContext<ChatBridgeContextType | null>(null)
 export const useChatBridge = () => {
   const ctx = useContext(ChatBridgeContext)
   if (!ctx) {
-    throw new Error("useChatBridge must be used within ChatBridgeProvider")
+    if (Settings.chatAssistantUrl) {
+      throw new Error("useChatBridge must be used within ChatBridgeProvider")
+    }
+    return {}
   }
   return ctx
 }
