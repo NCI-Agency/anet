@@ -71,7 +71,7 @@ public class SecurityConfig {
       // we get data from our own server, the authentication server, and from a geoSearcher
       CspDirective.of("connect-src", CSP_SELF, "%1$s", "%2$s"),
       // the authentication server opens an iframe for refreshing the token
-      CspDirective.of("frame-src", "%1$s"),
+      CspDirective.of("frame-src", "%1$s", "%4$s"),
       // we supply images, load images through a data: URL, and get images from the map baseLayers
       CspDirective.of("img-src", CSP_SELF, "data:", "%3$s"));
 
@@ -151,7 +151,7 @@ public class SecurityConfig {
     // Configure CSP
     http.headers(headers -> headers
         .contentSecurityPolicy(csp -> csp.policyDirectives(String.format(defaultCsp.toString(),
-            getAuthServerUrl(), getGeoSearcherUrl(), getBaseLayersUrls()))));
+            getAuthServerUrl(), getGeoSearcherUrl(), getBaseLayersUrls(), getChatAssistantUrl()))));
     // Configure Referrer Policy
     http.headers(header -> header.referrerPolicy(rp -> rp.policy(SAME_ORIGIN)));
     return http.build();
@@ -174,6 +174,11 @@ public class SecurityConfig {
     final List<String> baseLayersUrls = baseLayers.stream()
         .map(layer -> ResponseUtils.getBaseUrl((String) layer.get("url"))).toList();
     return String.join(" ", baseLayersUrls);
+  }
+
+  private String getChatAssistantUrl() {
+    final String chatAssistantUrl = (String) anetDictionary.getDictionaryEntry("chatAssistantUrl");
+    return ResponseUtils.getBaseUrl(chatAssistantUrl);
   }
 
   @Bean
