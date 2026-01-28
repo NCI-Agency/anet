@@ -1436,6 +1436,8 @@ properties:
             options:
               type: object
               additionalProperties: true
+  chatAssistantUrl:
+    type: string
   dashboards:
     type: array
     items:
