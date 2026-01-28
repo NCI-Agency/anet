@@ -11,6 +11,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -95,10 +96,6 @@ public class PositionResource {
 
     final Position created = dao.insert(pos);
 
-    if (pos.getPersonUuid() != null) {
-      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid(), true, null);
-    }
-
     emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
         pos.getEmailAddresses());
 
@@ -170,30 +167,14 @@ public class PositionResource {
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.customSensitiveInformationKey(), pos.getCustomSensitiveInformation());
 
-    if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
-      if (existing != null) {
-        // Run the diff and see if anything changed and update.
-        if (pos.getPerson() != null) {
-          if (pos.getPersonUuid() == null) {
-            // Intentionally remove the person
-            dao.removePersonFromPosition(existing.getUuid());
-            AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPersonUuid(),
-                existing, user);
-          } else if (!Objects.equals(pos.getPersonUuid(), existing.getPersonUuid())) {
-            dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid(), true, null);
-            AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), existing,
-                user);
-          }
-        }
-
-        if (Position.Status.INACTIVE.equals(pos.getStatus()) && existing.getPersonUuid() != null) {
-          // Remove this person from this position.
-          AnetAuditLogger.log(
-              "Person {} removed from position {} by {} because the position is now inactive",
-              existing.getPersonUuid(), existing, user);
-          dao.removePersonFromPosition(existing.getUuid());
-        }
-      }
+    // Automatically remove people from a position if the position is inactive.
+    if (WithStatus.Status.INACTIVE.equals(pos.getStatus()) && existing != null
+        && existing.getPersonUuid() != null) {
+      // Remove this person from this position.
+      AnetAuditLogger.log(
+          "Person {} removed from position {} by {} because the position is now inactive",
+          existing.getPersonUuid(), existing, user);
+      dao.removePersonFromPosition(existing.getUuid());
     }
 
     // Update any subscriptions
@@ -280,7 +261,7 @@ public class PositionResource {
     }
 
     // if position is active, reject
-    if (Position.Status.ACTIVE.equals(position.getStatus())) {
+    if (WithStatus.Status.ACTIVE.equals(position.getStatus())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete an active position");
     }
 

@@ -503,11 +503,6 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PersonInput newbInput =
         PersonInput.builder().withName("PositionTest Person").withStatus(Status.ACTIVE).build();
 
-    final Person newb1 =
-        withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, newbInput));
-    assertThat(newb1).isNotNull();
-    assertThat(newb1.getUuid()).isNotNull();
-
     final OrganizationSearchQueryInput queryOrgs =
         OrganizationSearchQueryInput.builder().withText("Ministry").build();
     final AnetBeanList_Organization orgs = withCredentials(adminUser,
@@ -518,7 +513,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PositionInput newbPositionInput = PositionInput.builder()
         .withName("PositionTest Position for Newb").withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
-        .withStatus(Status.ACTIVE).withPerson(getPersonInput(newb1)).withCode(positionCode)
+        .withStatus(Status.ACTIVE).withCode(positionCode)
         .withDescription("<p>This position has no description.</p>").build();
 
     final Position newbPosition =
@@ -526,8 +521,22 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(newbPosition).isNotNull();
     assertThat(newbPosition.getUuid()).isNotNull();
     assertThat(newbPositionInput.getDescription()).isEqualTo(newbPosition.getDescription());
+
+    // Create a new person
+    final Person newb1 =
+        withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, newbInput));
+    assertThat(newb1).isNotNull();
+    assertThat(newb1.getUuid()).isNotNull();
+
+    // Put this person in the position
+    final Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(newb1), null, true, newbPosition.getUuid()));
+    assertThat(nrUpdated).isOne();
+
     // Ensure that the position contains the person
-    final Person returnedPerson = newbPosition.getPerson();
+    final Position assignedPos =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, newbPosition.getUuid()));
+    final Person returnedPerson = assignedPos.getPerson();
     assertThat(returnedPerson).isNotNull();
     assertThat(returnedPerson.getUuid()).isEqualTo(newb1.getUuid());
 
@@ -546,13 +555,9 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(prin2.getUuid()).isNotNull();
     assertThat(prin2.getPosition()).isNull();
 
-    final PositionInput prin2PositionInput =
-        PositionInput.builder().withUuid(newbPosition.getUuid()).build();
-    final PersonInput prin2UpdateInput = getPersonInput(prin2);
-    prin2UpdateInput.setPosition(prin2PositionInput);
-    Integer nrUpdated =
-        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, prin2UpdateInput));
-    assertThat(nrUpdated).isEqualTo(1);
+    final Integer nrAssigned = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(prin2), null, true, newbPosition.getUuid()));
+    assertThat(nrAssigned).isEqualTo(1);
 
     // Reload this person to check their position was set.
     final Person prin3 =
@@ -576,19 +581,27 @@ public class PositionResourceTest extends AbstractResourceTest {
       // just continue
     }
 
-    // Create a new position and move prin2 there on CREATE.
+    // Create a new position
     final PositionInput pos2Input = PositionInput.builder().withName("Created by PositionTest")
         .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
         .withOrganization(getOrganizationInput(orgs.getList().get(0)))
-        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE)
-        .withPerson(getPersonInput(prin2)).build();
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
     final Position pos2 =
         withCredentials(adminUser, t -> mutationExecutor.createPosition(FIELDS, pos2Input));
     assertThat(pos2).isNotNull();
     assertThat(pos2.getUuid()).isNotNull();
     assertThat(pos2.getName()).isEqualTo(pos2Input.getName());
-    final Person returnedPerson2 = pos2.getPerson();
+
+    // Move prin2 there
+    final Integer nrAssigned2 = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(prin2), null, true, pos2.getUuid()));
+    assertThat(nrAssigned2).isOne();
+
+    // Ensure that the position contains the person
+    final Position assignedPos2 =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, pos2.getUuid()));
+    final Person returnedPerson2 = assignedPos2.getPerson();
     assertThat(returnedPerson2).isNotNull();
     assertThat(returnedPerson2.getUuid()).isEqualTo(prin2.getUuid());
 

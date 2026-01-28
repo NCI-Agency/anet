@@ -79,13 +79,6 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   @Test
   void testCreatePerson() {
-    // final Person jack = getJackJackson();
-    //
-    // final Person jackPerson =
-    // withCredentials(jackUser, t -> queryExecutor.person(FIELDS, jack.getUuid()));
-    // assertThat(jackPerson).isNotNull();
-    // assertThat(jackPerson.getUuid()).isEqualTo(jack.getUuid());
-
     final UserInput newUserInput =
         UserInput.builder().withDomainUsername("testCreatePerson").build();
     final PersonInput newPersonInput = PersonInput.builder().withName("testCreatePerson Person")
@@ -147,7 +140,7 @@ public class PersonResourceTest extends AbstractResourceTest {
           .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
     }
 
-    // Test creating a person with a position already set.
+    // Test creating a person
     final OrganizationSearchQueryInput query =
         OrganizationSearchQueryInput.builder().withText("EF 6").build();
     final AnetBeanList_Organization orgs = withCredentials(jackUser,
@@ -156,6 +149,16 @@ public class PersonResourceTest extends AbstractResourceTest {
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 
+    final UserInput newUser2Input =
+        UserInput.builder().withDomainUsername("testcreateperson").build();
+    final PersonInput newPerson2Input = PersonInput.builder().withName("Namey McNameface")
+        .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUser2Input)).build();
+    final Person newPerson2 =
+        withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPerson2Input));
+    assertThat(newPerson2).isNotNull();
+    assertThat(newPerson2.getUuid()).isNotNull();
+
+    // Create a new position
     final PositionInput newPosInput =
         PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
             .withName("Test Position").withOrganization(getOrganizationInput(org))
@@ -165,22 +168,27 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPos).isNotNull();
     assertThat(newPos.getUuid()).isNotNull();
 
-    final UserInput newUser2Input =
-        UserInput.builder().withDomainUsername("testcreateperson").build();
-    final PersonInput newPerson2Input =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
-            .withUsers(List.of(newUser2Input)).withPosition(getPositionInput(newPos)).build();
-    final Person newPerson2 =
-        withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPerson2Input));
-    assertThat(newPerson2).isNotNull();
-    assertThat(newPerson2.getUuid()).isNotNull();
-    assertThat(newPerson2.getPosition()).isNotNull();
-    assertThat(newPerson2.getPosition().getUuid()).isEqualTo(newPos.getUuid());
+    // Put the person in this position
+    final Integer nrAssigned = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(newPerson2), null, true, newPos.getUuid()));
+    assertThat(nrAssigned).isOne();
+
+    // Ensure that the position contains the person
+    final Position assignedPos =
+        withCredentials(adminUser, t -> queryExecutor.position(POSITION_FIELDS, newPos.getUuid()));
+    final Person returnedPerson = assignedPos.getPerson();
+    assertThat(returnedPerson).isNotNull();
+    assertThat(returnedPerson.getUuid()).isEqualTo(newPerson2.getUuid());
+
+    // Ensure that the person is assigned to this position.
+    final Person assignedPerson =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, newPerson2.getUuid()));
+    assertThat(assignedPerson.getPosition()).isNotNull();
+    assertThat(assignedPerson.getPosition().getUuid()).isEqualTo(newPos.getUuid());
 
     // Change this person w/ a new position, and ensure it gets changed.
-
     final PositionInput newPos2Input =
-        PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
+        PositionInput.builder().withType(PositionType.SUPERUSER).withRole(PositionRole.MEMBER)
             .withName("A Second Test Position").withOrganization(getOrganizationInput(org))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position newPos2 = withCredentials(adminUser,
@@ -188,25 +196,22 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPos2).isNotNull();
     assertThat(newPos2.getUuid()).isNotNull();
 
-    newPerson2.setName("Changey McChangeface");
-    newPerson2.setPosition(newPos2);
     // A person cannot change their own position
     try {
-      withCredentials(getDomainUsername(newPerson2),
-          t -> mutationExecutor.updatePerson("", false, getPersonInput(newPerson2)));
+      withCredentials(getDomainUsername(newPerson2), t -> mutationExecutor.putPersonInPosition("",
+          getPersonInput(newPerson2), newPos.getUuid(), true, newPos2.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
 
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", false, getPersonInput(newPerson2)));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(newPerson2), newPos.getUuid(), true, newPos2.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person retPerson =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, newPerson2.getUuid()));
     assertThat(retPerson).isNotNull();
-    assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
     assertThat(retPerson.getPosition()).isNotNull();
     assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 
@@ -407,9 +412,8 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final UserInput newUserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
-    final PersonInput newPersonInput =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
-            .withUsers(List.of(newUserInput)).withPosition(getPositionInput(retPos)).build();
+    final PersonInput newPersonInput = PersonInput.builder().withName("Namey McNameface")
+        .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUserInput)).build();
     final Person retPerson =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput));
     assertThat(retPerson).isNotNull();
@@ -417,7 +421,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getStatus()).isEqualTo(Status.ACTIVE);
     assertThat(getDomainUsername(retPerson)).isEqualTo(getDomainUsername(newPersonInput));
     assertThat(retPerson.getUser()).isEqualTo(newPersonInput.getUser());
-    assertThat(retPerson.getPosition()).isNotNull();
+
+    // Put the person in this position
+    final Integer nrAssigned = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(retPerson), null, true, retPos.getUuid()));
+    assertThat(nrAssigned).isOne();
 
     retPerson.setStatus(Status.INACTIVE);
     final Integer nrUpdated = withCredentials(adminUser,
@@ -568,6 +576,13 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // advisor with position in own organization
+    final UserInput advisorPositionUserInput =
+        UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
+    final PersonInput advisorPositionInput =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
+            .withUsers(List.of(advisorPositionUserInput)).build();
+
+    final Person ap = assertCreatePerson(user, advisorPositionInput, isSuperuser);
     final PositionSearchQueryInput query = PositionSearchQueryInput.builder()
         .withOrganizationUuid(List.of(organization.getUuid())).withIsFilled(false).build();
     final AnetBeanList_Position searchObjects = withCredentials(getDomainUsername(user),
@@ -576,14 +591,57 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getList()).isNotEmpty();
     final Position freePos = searchObjects.getList().get(0);
 
-    final UserInput advisorPositionUserInput =
-        UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
-    final PersonInput advisorPositionInput = PersonInput.builder().withName("Namey McNameface")
-        .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(advisorPositionUserInput))
-        .withPosition(getPositionInput(freePos)).build();
-
+    // Put the person in this position
     try {
-      final Person ap = withCredentials(getDomainUsername(user),
+      final Integer nrAssigned = withCredentials(getDomainUsername(user), t -> mutationExecutor
+          .putPersonInPosition("", getPersonInput(ap), null, true, freePos.getUuid()));
+      if (isSuperuser) {
+        assertThat(nrAssigned).isOne();
+      } else {
+        fail("Expected an Exception");
+      }
+    } catch (Exception expectedException) {
+      if (isSuperuser) {
+        fail("Unexpected Exception", expectedException);
+      }
+    }
+
+    // advisor with position in other organization
+    final UserInput advisorPosition2UserInput =
+        UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
+    final PersonInput advisorPosition2Input =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
+            .withUsers(List.of(advisorPosition2UserInput)).build();
+
+    final Person ap2 = assertCreatePerson(user, advisorPosition2Input, isSuperuser);
+    final List<PositionType> positionTypes = new ArrayList<>();
+    positionTypes.add(PositionType.REGULAR);
+    final PositionSearchQueryInput query2 =
+        PositionSearchQueryInput.builder().withType(positionTypes).withIsFilled(false).build();
+    final AnetBeanList_Position searchObjects2 = withCredentials(getDomainUsername(user),
+        t -> queryExecutor.positionList(getListFields(POSITION_FIELDS), query2));
+    assertThat(searchObjects2).isNotNull();
+    assertThat(searchObjects2.getList()).isNotEmpty();
+    final Optional<Position> foundPos2 = searchObjects2.getList().stream()
+        .filter(p -> !organization.getUuid().equals(p.getOrganization().getUuid())).findFirst();
+    assertThat(foundPos2).isPresent();
+    final Position freePos2 = foundPos2.get();
+
+    // Put the person in this position
+    try {
+      withCredentials(getDomainUsername(user), t -> mutationExecutor.putPersonInPosition("",
+          getPersonInput(ap2), null, true, freePos2.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+  }
+
+  private Person assertCreatePerson(Person user, PersonInput advisorPositionInput,
+      boolean isSuperuser) {
+    Person ap = null;
+    try {
+      ap = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.createPerson(FIELDS, advisorPositionInput));
       if (isSuperuser) {
         assertThat(ap).isNotNull();
@@ -599,34 +657,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         fail("Unexpected Exception", expectedException);
       }
     }
-
-    // advisor with position in other organization
-    final List<PositionType> positionTypes = new ArrayList<>();
-    positionTypes.add(PositionType.REGULAR);
-    final PositionSearchQueryInput query2 =
-        PositionSearchQueryInput.builder().withType(positionTypes).withIsFilled(false).build();
-    final AnetBeanList_Position searchObjects2 = withCredentials(getDomainUsername(user),
-        t -> queryExecutor.positionList(getListFields(POSITION_FIELDS), query2));
-    assertThat(searchObjects2).isNotNull();
-    assertThat(searchObjects2.getList()).isNotEmpty();
-    final Optional<Position> foundPos2 = searchObjects2.getList().stream()
-        .filter(p -> !organization.getUuid().equals(p.getOrganization().getUuid())).findFirst();
-    assertThat(foundPos2).isPresent();
-    final Position freePos2 = foundPos2.get();
-
-    final UserInput advisorPosition2UserInput =
-        UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
-    final PersonInput advisorPosition2Input = PersonInput.builder().withName("Namey McNameface")
-        .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(advisorPosition2UserInput))
-        .withPosition(getPositionInput(freePos2)).build();
-
-    try {
-      withCredentials(getDomainUsername(user),
-          t -> mutationExecutor.createPerson(FIELDS, advisorPosition2Input));
-      fail("Expected an Exception");
-    } catch (Exception expectedException) {
-      // OK
-    }
+    return ap;
   }
 
   @Test
@@ -670,44 +701,40 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, persInput));
     assertThat(person).isNotNull();
     assertThat(person.getUuid()).isNotNull();
-    // Create a Position
+
+    // Create two positions
     final PositionInput testInput1 = PositionInput.builder().withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withName("Test Position for person history edit  1")
         .withOrganization(getOrganizationInput(org))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
-
     final Position createdPos1 = withCredentials(adminUser,
         t -> mutationExecutor.createPosition(POSITION_FIELDS, testInput1));
     assertThat(createdPos1).isNotNull();
     assertThat(createdPos1.getUuid()).isNotNull();
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
-    final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
+
     final PositionInput testInput2 = PositionInput.builder().withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(org))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
-
     final Position createdPos2 = withCredentials(adminUser,
         t -> mutationExecutor.createPosition(POSITION_FIELDS, testInput2));
     assertThat(createdPos2).isNotNull();
     assertThat(createdPos2.getUuid()).isNotNull();
     assertThat(createdPos2.getName()).isEqualTo(testInput2.getName());
-    final PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
+
+    // Update person's position history
     final PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
-        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1)
-        .withPrimary(true).build();
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS))
+        .withPosition(getPositionInput(createdPos1)).withPrimary(true).build();
     final PersonPositionHistoryInput hist2 =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
             .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
-            .withPrimary(true).withPosition(posInput2).build();
-
-    final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
-    historyList.add(hist1);
-    historyList.add(hist2);
+            .withPrimary(true).withPosition(getPositionInput(createdPos2)).build();
     final PersonInput personInput = getPersonInput(person);
-    personInput.setPreviousPositions(historyList);
+    personInput.setPreviousPositions(List.of(hist1, hist2));
     withCredentials(adminUser, t -> mutationExecutor.updatePersonHistory("", personInput));
     final Person personUpdated = withCredentials(adminUser,
         t -> queryExecutor.person(PERSON_FIELDS_ONLY_HISTORY, personInput.getUuid()));
