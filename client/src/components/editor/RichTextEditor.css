@@ -95,6 +95,10 @@
 
 .rich-text-image-wrapper {
   text-align: center;
+  @media print {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 
   & .rich-text-image {
     max-width: 400px;
