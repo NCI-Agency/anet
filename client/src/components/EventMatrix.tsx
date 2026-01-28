@@ -144,7 +144,7 @@ const EventMatrix = ({
 }: EventMatrixProps) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const { currentUser, appSettings } = useContext(AppContext)
-  const [periodLengthInDays, setPeriodLengthInDays] = useState<number>(5)
+  const [periodLengthInDays, setPeriodLengthInDays] = useState<number>(null)
   const [startDay, setStartDay] = useState(moment())
   const [periodDays, setPeriodDays] = useState([])
   const [events, setEvents] = useState([])
@@ -182,12 +182,14 @@ const EventMatrix = ({
   }
 
   useEffect(() => {
-    const period = []
-    period.push(moment(startDay).startOf("day"))
-    for (let i = 1; i < periodLengthInDays; i++) {
-      period.push(moment(startDay).add(i, "days"))
+    if (startDay && periodLengthInDays) {
+      const period = []
+      period.push(moment(startDay).startOf("day"))
+      for (let i = 1; i < periodLengthInDays; i++) {
+        period.push(moment(startDay).add(i, "days"))
+      }
+      setPeriodDays(period)
     }
-    setPeriodDays(period)
   }, [startDay, periodLengthInDays])
 
   useEffect(() => {
