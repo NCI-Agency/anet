@@ -85,12 +85,6 @@ public class PersonResource {
           "You do not have permissions to create this person");
     }
 
-    final String positionUuid = DaoUtils.getUuid(p.getPosition());
-    if (positionUuid != null && positionDao.getByUuid(positionUuid) == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Position " + p.getPosition() + " does not exist");
-    }
-
     // Only admins can set user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
       p.setUser(false);
@@ -104,11 +98,6 @@ public class PersonResource {
     p.setBiography(
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final Person created = dao.insert(p);
-
-    if (DaoUtils.getUuid(created.getPosition()) != null) {
-      positionDao.setPersonInPosition(created.getUuid(), DaoUtils.getUuid(created.getPosition()),
-          true, null);
-    }
 
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
@@ -136,13 +125,12 @@ public class PersonResource {
       return true;
     }
     if (editorPos.getType() == PositionType.SUPERUSER) {
+      if (create) {
+        // Superusers can create new people.
+        return true;
+      }
       // Ensure that the editor is the superuser for the subject's organization.
-      final Position subjectPos;
-      subjectPos =
-          create
-              ? ApplicationContextProvider.getEngine().getPositionDao()
-                  .getByUuid(DaoUtils.getUuid(subject.getPosition()))
-              : DaoUtils.getPosition(subject);
+      final Position subjectPos = DaoUtils.getPosition(subject);
       if (subjectPos == null) {
         // Superusers can edit position-less people.
         return true;
@@ -173,29 +161,6 @@ public class PersonResource {
       validateEmail(p.getEmailAddresses());
     }
 
-    // Swap the position first in order to do the authentication check.
-    if (p.getPosition() != null) {
-      // Maybe update position?
-      final Position existingPos = DaoUtils.getPosition(existing);
-      final String positionUuid = DaoUtils.getUuid(p.getPosition());
-      if (existingPos == null && positionUuid != null) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        positionDao.setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      } else if (existingPos != null && positionUuid == null) {
-        // Remove this person from their position.
-        AuthUtils.assertSuperuser(user);
-        positionDao.removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
-      } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        positionDao.setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      }
-    }
-
     // If person changed to inactive, update the status
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
@@ -204,8 +169,8 @@ public class PersonResource {
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (WithStatus.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
-      Position existingPos = DaoUtils.getPosition(existing);
+    if (WithStatus.Status.INACTIVE.equals(p.getStatus())) {
+      final Position existingPos = DaoUtils.getPosition(existing);
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
         if (!user.getUuid().equals(p.getUuid())) {

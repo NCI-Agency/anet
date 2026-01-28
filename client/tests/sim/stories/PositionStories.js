@@ -148,16 +148,6 @@ const _createPosition = async function (user) {
     {},
     "uuid emailAddresses { network address }"
   )
-  const person = await getRandomObject(
-    "people",
-    {},
-    "uuid users { domainUsername }",
-    randomObject =>
-      randomObject?.uuid === user.uuid ||
-      (randomObject?.users ?? []).some(
-        u => u.domainUsername === specialUser.name
-      )
-  )
   const location = await getRandomObject("locations", {
     type: Location.LOCATION_TYPES.POINT_LOCATION
   })
@@ -177,7 +167,6 @@ const _createPosition = async function (user) {
     status: () =>
       fuzzy.withProbability(0.9) ? Model.STATUS.ACTIVE : Model.STATUS.INACTIVE,
     organization,
-    person,
     location,
     role: () => getPositionRole(),
     description: async () => await createHtmlParagraphs(),
@@ -189,7 +178,6 @@ const _createPosition = async function (user) {
   await positionGenerator.code.sometimes()
   await positionGenerator.type.always()
   await positionGenerator.status.always()
-  await positionGenerator.person.always()
   await positionGenerator.organization.always()
   await positionGenerator.location.always()
   await positionGenerator.role.always()
@@ -197,12 +185,13 @@ const _createPosition = async function (user) {
   await positionGenerator.emailAddresses.always()
 
   console.debug(`Creating position ${position.name.green}`)
-  const createdPositionUuid = (
+  const createdPosition = (
     await runGQL(user, {
       query: `
         mutation ($position: PositionInput!) {
           createPosition(position: $position) {
             uuid
+            name
           }
         }
       `,
@@ -210,9 +199,39 @@ const _createPosition = async function (user) {
         position
       }
     })
-  ).data.createPosition.uuid
-  const createdPosition = await getPosition(user, createdPositionUuid)
-  const firstHistoryItem = createdPosition.previousPeople[0]
+  ).data.createPosition
+
+  // Put a person in this position
+  const person = await getRandomObject(
+    "people",
+    {},
+    "uuid name users { domainUsername }",
+    randomObject =>
+      randomObject?.uuid === user.uuid ||
+      (randomObject?.users ?? []).some(
+        u => u.domainUsername === specialUser.name
+      )
+  )
+  console.debug(
+    `Putting ${person.name.green} in position of ${createdPosition.name.green}`
+  )
+  await runGQL(user, {
+    query: `
+      mutation($uuid: String!, $person: PersonInput!) {
+        putPersonInPosition(uuid: $uuid, person: $person)
+      }
+    `,
+    variables: {
+      person: {
+        uuid: person.uuid
+      },
+      uuid: createdPosition.uuid
+    }
+  })
+
+  // Update the position history
+  const assignedPosition = await getPosition(user, createdPosition.uuid)
+  const firstHistoryItem = assignedPosition.previousPeople[0]
   if (firstHistoryItem.person.previousPositions.length <= 1) {
     // Set startTime back by a year
     firstHistoryItem.startTime = moment(firstHistoryItem.startTime).subtract(
@@ -228,11 +247,11 @@ const _createPosition = async function (user) {
         }
       `,
       variables: {
-        position: createdPosition
+        position: assignedPosition
       }
     })
   }
-  return createdPosition
+  return assignedPosition
 }
 
 /**
