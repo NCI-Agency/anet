@@ -1,5 +1,6 @@
 import { useChatBridge } from "components/chat/ChatBridge"
 import React from "react"
+import Settings from "settings"
 
 const base = {
   position: "relative",
@@ -23,7 +24,7 @@ export default function ChatPanel() {
       <iframe
         ref={setIframeEl}
         onLoad={onIframeLoad}
-        src="https://127.0.0.1:7002/chat/index.html"
+        src={Settings.chatAssistantUrl}
         title="ChatGPT Panel"
         style={{ width: "100%", height: "100%", border: "none" }}
         sandbox="allow-scripts allow-same-origin allow-forms"
