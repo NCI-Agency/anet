@@ -136,6 +136,17 @@ const GQL_GET_REPORT = gql`
   }
 `
 
+const RichTextEditorS = styled(RichTextEditor)`
+  .rich-text-image-wrapper {
+    & .rich-text-image {
+      max-width: ${props =>
+        `min(400px, calc(0.5 * ${props.pageSize.width}))`} !important;
+      max-height: ${props =>
+        `min(400px, calc(0.5 * ${props.pageSize.width}))`} !important;
+    }
+  }
+`
+
 interface CompactReportViewProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -328,10 +339,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 wrappedComponent={CompactRow}
                 dictProps={Settings.fields.report.reportText}
                 content={
-                  <RichTextEditor
+                  <RichTextEditorS
                     readOnly
                     showAvatar={false}
                     value={report.reportText}
+                    pageSize={pageSize}
                   />
                 }
                 className="reportField keyDetailsRow"
@@ -345,10 +357,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   <CompactRow
                     id="reportSensitiveInformation"
                     content={
-                      <RichTextEditor
+                      <RichTextEditorS
                         readOnly
                         showAvatar={false}
                         value={report.reportSensitiveInformation.text}
+                        pageSize={pageSize}
                       />
                     }
                     className="reportField"
@@ -414,6 +427,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                             <AttachmentImageS
                               src={`/api/attachment/view/${attachment.uuid}`}
                               alt={attachment.caption || attachment.fileName}
+                              pageSize={pageSize}
                             />
                             <AttachmentCaptionS>
                               {attachment.caption || attachment.fileName}
@@ -647,11 +661,15 @@ const AttachmentFigureS = styled.figure`
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  @media print {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 `
 
 const AttachmentImageS = styled.img`
-  max-width: 600px;
-  max-height: 600px;
+  max-width: ${props => `min(600px, calc(0.5 * ${props.pageSize.width}))`};
+  max-height: ${props => `min(600px, calc(0.5 * ${props.pageSize.width}))`};
   width: auto;
   height: auto;
   object-fit: contain;
