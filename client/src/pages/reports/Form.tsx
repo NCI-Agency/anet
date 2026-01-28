@@ -252,7 +252,7 @@ const ReportForm = ({
 }: ReportFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
-  const { isReady, send: sendToChat} = useChatBridge()
+  const { isReady, send: sendToChat } = useChatBridge()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -344,7 +344,7 @@ const ReportForm = ({
 
   const sendReportContextToAI = useCallback(
     (report: any) => {
-    const businessObject = buildReportBusinessObject(report)
+      const businessObject = buildReportBusinessObject(report)
       sendToChat(businessObject, chatSuggestions)
     },
     [sendToChat, chatSuggestions]
@@ -704,7 +704,7 @@ const ReportForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div className="report-form">
-            <ReportChatContextSync />
+              {Settings.chatAssistantUrl && <ReportChatContextSync />}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <MessagesWithConflict
                 error={saveError}
