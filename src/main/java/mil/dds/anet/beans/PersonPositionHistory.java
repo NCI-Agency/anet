@@ -17,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * used to represent a person in a position at a particular time. Populated from results of the
  * peoplePositions table.
- * 
+ *
  * @author hpitelka
  */
 public class PersonPositionHistory extends AbstractAnetBean {
@@ -32,6 +32,9 @@ public class PersonPositionHistory extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   Instant endTime;
+  @GraphQLQuery
+  @GraphQLInputField
+  Boolean primary;
 
   @Override
   @JsonIgnore
@@ -122,5 +125,13 @@ public class PersonPositionHistory extends AbstractAnetBean {
 
   public void setEndTime(Instant endTime) {
     this.endTime = endTime;
+  }
+
+  public Boolean getPrimary() {
+    return primary;
+  }
+
+  public void setPrimary(Boolean primary) {
+    this.primary = primary;
   }
 }

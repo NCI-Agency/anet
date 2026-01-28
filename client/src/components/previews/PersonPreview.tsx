@@ -3,6 +3,7 @@ import {
   gqlEmailAddressesFields,
   gqlEntityAvatarFields,
   gqlEntityFieldsMap,
+  gqlPreviousPositionsFields,
   gqlUsersFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -15,6 +16,7 @@ import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import PositionsTable from "components/PositionsTable"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
@@ -51,9 +53,14 @@ const GQL_GET_PERSON = gql`
           }
         }
       }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+      }
       previousPositions {
-        startTime
-        endTime
+        ${gqlPreviousPositionsFields}
         position {
           ${gqlEntityFieldsMap.Position}
         }
@@ -219,9 +226,16 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
           className={!position || !position.uuid ? "warning" : undefined}
         >
           {hasPosition
-            ? renderPosition(position)
+            ? renderCurrentPosition(position)
             : renderPositionBlankSlate(person)}
         </div>
+      </div>
+      <h4>{Settings.fields.person.additionalPositions?.label}</h4>
+      <div className="preview-section">
+        <PositionsTable
+          label={Settings.fields.person.additionalPositions?.label}
+          positions={person.additionalPositions}
+        />
       </div>
 
       {hasPosition && (
@@ -239,7 +253,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
     </div>
   )
 
-  function renderPosition(position) {
+  function renderCurrentPosition(position) {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
@@ -299,8 +313,8 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
     if (Person.isEqual(currentUser, person)) {
       return (
         <em>
-          You are not assigned to a position. Contact your organization's
-          superuser to be added.
+          You do not have a primary position assigned. Please contact your
+          organization's superuser(s) to be assigned to one.
         </em>
       )
     } else {

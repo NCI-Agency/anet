@@ -27,7 +27,6 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
@@ -37,14 +36,8 @@ import mil.dds.anet.test.resources.ReportResourceTest;
 import mil.dds.anet.threads.MergedEntityWorker;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = SpringTestConfig.class,
-    useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MergedEntityWorkerTest extends AbstractResourceTest {
 
   @Autowired

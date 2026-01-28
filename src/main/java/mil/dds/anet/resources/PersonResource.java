@@ -103,7 +103,7 @@ public class PersonResource {
 
     if (DaoUtils.getUuid(created.getPosition()) != null) {
       engine.getPositionDao().setPersonInPosition(created.getUuid(),
-          DaoUtils.getUuid(created.getPosition()));
+          DaoUtils.getUuid(created.getPosition()), true, null);
     }
 
     if (AuthUtils.isAdmin(user)) {
@@ -169,29 +169,6 @@ public class PersonResource {
       validateEmail(p.getEmailAddresses());
     }
 
-    // Swap the position first in order to do the authentication check.
-    if (p.getPosition() != null) {
-      // Maybe update position?
-      final Position existingPos = DaoUtils.getPosition(existing);
-      final String positionUuid = DaoUtils.getUuid(p.getPosition());
-      if (existingPos == null && positionUuid != null) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      } else if (existingPos != null && positionUuid == null) {
-        // Remove this person from their position.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
-      } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      }
-    }
-
     // If person changed to inactive, update the status
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
@@ -200,8 +177,8 @@ public class PersonResource {
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (WithStatus.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
-      Position existingPos = DaoUtils.getPosition(existing);
+    if (WithStatus.Status.INACTIVE.equals(p.getStatus())) {
+      final Position existingPos = DaoUtils.getPosition(existing);
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
         if (!user.getUuid().equals(p.getUuid())) {
@@ -250,11 +227,6 @@ public class PersonResource {
     final String existingPositionUuid = DaoUtils.getUuid(p.getPosition());
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
         existingPositionUuid);
-
-    if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
 
     final int numRows = dao.updatePersonHistory(p);
     AnetAuditLogger.log("History updated for person {} by {}", p, user);
@@ -389,7 +361,9 @@ public class PersonResource {
   @GraphQLMutation(name = "mergePeople")
   public Integer mergePeople(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
-      @GraphQLArgument(name = "winnerPerson") Person winner) {
+      @GraphQLArgument(name = "winnerPerson") Person winner,
+      @GraphQLArgument(name = "useWinnerPositionHistory",
+          defaultValue = "true") boolean useWinnerPositionHistory) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
 
@@ -409,17 +383,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
     }
 
-    // Do some additional sanity checks
-    final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
-    ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
-        winnerPositionUuid);
-
-    if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
-    int numRows = dao.mergePeople(winner, loser);
+    int numRows = dao.mergePeople(winner, loser, useWinnerPositionHistory);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged person relation information.");

@@ -108,8 +108,8 @@ class PositionMergeTest extends AbstractResourceTest {
     final PersonPositionHistoryInput hist =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
             .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
-            .withPerson(getPersonInput(testPerson)).withPosition(getPositionInput(secondPosition))
-            .build();
+            .withPrimary(true).withPerson(getPersonInput(testPerson))
+            .withPosition(getPositionInput(secondPosition)).build();
 
     final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
     historyList.add(hist);
@@ -120,8 +120,8 @@ class PositionMergeTest extends AbstractResourceTest {
     mergedPositionInput.setType(secondPosition.getType());
 
     // Merge the two positions
-    final int nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.mergePositions("", secondPosition.getUuid(), mergedPositionInput));
+    final int nrUpdated = withCredentials(adminUser, t -> mutationExecutor.mergePositions("",
+        secondPosition.getUuid(), false, mergedPositionInput));
     assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.

@@ -3,7 +3,7 @@ package mil.dds.anet.test.ws.security;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
-import mil.dds.anet.test.SpringTestConfig;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import mil.dds.anet.ws.security.BearerTokenService;
 import mil.dds.anet.ws.security.WebServiceGrantedAuthority;
@@ -13,11 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.GrantedAuthority;
 
-@SpringBootTest(classes = SpringTestConfig.class)
-class BearerTokenServiceTest {
+class BearerTokenServiceTest extends AnetApplicationTest {
 
   @Autowired
   private BearerTokenService service;
