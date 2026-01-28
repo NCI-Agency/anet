@@ -286,14 +286,10 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   )
 }
 
-export function useChatPageContext(
-  ctx?: any,
-  suggestions?: ChatSuggestion[],
-  deps: React.DependencyList = []
-) {
+export function useChatPageContext(ctx?: any, suggestions?: ChatSuggestion[]) {
   const { registerPageContext, unregisterPageContext } = useChatBridge()
   useEffect(() => {
     const token = registerPageContext(ctx, suggestions)
     return () => unregisterPageContext(token)
-  }, [registerPageContext, unregisterPageContext, ctx, suggestions, ...deps])
+  }, [registerPageContext, unregisterPageContext, ctx, suggestions])
 }
