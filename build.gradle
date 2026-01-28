@@ -6,10 +6,10 @@ plugins {
 	// https://github.com/bmuschko/gradle-docker-plugin
 	id "com.bmuschko.docker-remote-api" version "10.0.0"
 	id "com.github.node-gradle.node" version "7.1.0"
-	id "com.diffplug.spotless" version "8.1.0"
+	id "com.diffplug.spotless" version "8.2.1"
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "3.1"
 	id "org.beryx.runtime" version "2.0.1"
-	id "com.netflix.nebula.rpm" version "12.1.1"
+	id "com.netflix.nebula.rpm" version "12.2.0"
 	id "org.springframework.boot" version "3.5.10" apply false
 	id 'io.mateo.cxf-codegen' version '2.5.0'
 }
