@@ -1,5 +1,6 @@
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
+import API from "api"
 import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DictionaryField from "components/DictionaryField"
@@ -11,6 +12,7 @@ import {
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import { Event } from "models"
 import React, { useContext, useState } from "react"
 import {
   Button,
@@ -96,7 +98,10 @@ const AdvancedSearch = ({
   const [filters, setFilters] = useState(
     searchQuery.filters ? searchQuery.filters.slice() : []
   )
-  const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
+
+  const { loading, error, data } = API.useApiQuery(Event.getEventTypesQuery)
+  const eventTypes = data?.eventTypes ?? []
+  const ALL_FILTERS = searchFilters(eventTypes)
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
     searchObjectTypes,
     ALL_FILTERS

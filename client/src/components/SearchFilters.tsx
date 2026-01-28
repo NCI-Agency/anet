@@ -42,7 +42,7 @@ import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Event, EventSeries, Location, Person, Position, Report } from "models"
+import { EventSeries, Location, Person, Position, Report } from "models"
 import React from "react"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -148,7 +148,9 @@ const advancedSelectFilterEventSeriesProps = {
   addon: EVENT_SERIES_ICON
 }
 
-export const searchFilters = function () {
+export const searchFilters = function (
+  eventTypes?: Array<{ uuid: string; name: string }>
+) {
   const filters = {}
 
   const authorWidgetFilters = {
@@ -714,12 +716,6 @@ export const searchFilters = function () {
       }
     }
   }
-  const eventTypeOptions = [
-    Event.EVENT_TYPES.EXERCISE,
-    Event.EVENT_TYPES.CONFERENCE,
-    Event.EVENT_TYPES.VISIT_BAN,
-    Event.EVENT_TYPES.OTHER
-  ]
 
   filters[SEARCH_OBJECT_TYPES.EVENTS] = {
     filters: {
@@ -728,9 +724,9 @@ export const searchFilters = function () {
         dictProps: Settings.fields.event.type,
         deserializer: deserializeSelectFilter,
         props: {
-          queryKey: "type",
-          options: eventTypeOptions,
-          labels: eventTypeOptions.map(lt => Event.humanNameOfType(lt))
+          queryKey: "eventTypeUuid",
+          options: (eventTypes ?? []).map(eventType => eventType.uuid),
+          labels: (eventTypes ?? []).map(eventType => eventType.name)
         }
       },
       [Settings.fields.event.eventSeries.label]: {
@@ -866,6 +862,7 @@ const SearchFilterDisplay = ({
 
 interface SearchDescriptionProps {
   searchQuery?: SearchQueryPropType
+  eventTypes?: Array<{ uuid: string; name: string }>
   showText?: boolean
   showPlaceholders?: boolean
   style?: any
@@ -873,11 +870,12 @@ interface SearchDescriptionProps {
 
 export const SearchDescription = ({
   searchQuery,
+  eventTypes,
   showText,
   showPlaceholders,
   style
 }: SearchDescriptionProps) => {
-  const ALL_FILTERS = searchFilters()
+  const ALL_FILTERS = searchFilters(eventTypes)
   const filterDefs =
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters

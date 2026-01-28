@@ -104,9 +104,9 @@ describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
-        "The following errors must be fixed"
-      )
+      expect(
+        await (await CreateFutureReport.getAlertDanger()).getText()
+      ).to.include("The following errors must be fixed")
 
       /* eslint-disable no-unused-expressions */
       // Attendee assessments should not be shown in the display
@@ -180,9 +180,9 @@ describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
-        "The following errors must be fixed"
-      )
+      expect(
+        await (await CreateFutureReport.getAlertDanger()).getText()
+      ).to.include("The following errors must be fixed")
 
       /* eslint-disable no-unused-expressions */
       // Attendee assessments should be shown in the display
@@ -238,7 +238,9 @@ describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
+      expect(
+        await (await CreateFutureReport.getAlertInfo()).getText()
+      ).to.include(
         "You'll need to fill out these required fields before you can submit your final planned engagement"
       )
 
@@ -274,9 +276,9 @@ describe("Create report form page", () => {
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       await CreateFutureReport.waitForAlertToLoad()
-      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
-        "Report deleted"
-      )
+      expect(
+        await (await CreateFutureReport.getAlertSuccess()).getText()
+      ).to.include("Report deleted")
     })
   })
 })

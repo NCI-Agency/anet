@@ -1,5 +1,6 @@
 import {
   gqlEntityFieldsMap,
+  gqlMinimalEventTypeFields,
   gqlPaginationFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -35,7 +36,9 @@ const GQL_GET_EVENT_LIST = gql`
         ${gqlEntityFieldsMap.Event}
         startDate
         endDate
-        type
+        eventType {
+          ${gqlMinimalEventTypeFields}
+        }
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -210,7 +213,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
         <Col md={12}>
           <span>
             <strong>{Settings.fields.event.type.label}: </strong>
-            {Event.humanNameOfType(event.type)}
+            {event.eventType?.name}
           </span>
         </Col>
       </Row>

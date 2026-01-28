@@ -16,6 +16,7 @@ import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Event;
 import mil.dds.anet.beans.EventSeries;
+import mil.dds.anet.beans.EventType;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Note;
@@ -167,6 +168,11 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, EventSeries>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getEventSeriesDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.EVENT_TYPE.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, EventType>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getEventTypeDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.LOCATIONS.toString(),
         DataLoaderFactory.newDataLoader(

@@ -7,9 +7,7 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.search.FkBatchParams;
@@ -23,38 +21,6 @@ public class Event extends EventSeries {
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
 
-  public enum EventType {
-    CONFERENCE("CONFERENCE"), // -
-    EXERCISE("EXERCISE"), // -
-    VISIT_BAN("VISIT_BAN"), // -
-    OTHER("OTHER"); // -
-
-    private static final Map<String, Event.EventType> BY_CODE = new HashMap<>();
-    static {
-      for (final Event.EventType e : values()) {
-        BY_CODE.put(e.code, e);
-      }
-    }
-
-    public static Event.EventType valueOfCode(String code) {
-      return BY_CODE.get(code);
-    }
-
-    private final String code;
-
-    EventType(String code) {
-      this.code = code;
-    }
-
-    @Override
-    public String toString() {
-      return code;
-    }
-  }
-
-  @GraphQLQuery
-  @GraphQLInputField
-  EventType type;
   @GraphQLQuery
   @GraphQLInputField
   Instant startDate;
@@ -82,6 +48,7 @@ public class Event extends EventSeries {
 
   private ForeignObjectHolder<EventSeries> eventSeries = new ForeignObjectHolder<>();
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
+  private ForeignObjectHolder<EventType> eventType = new ForeignObjectHolder<>();
 
   @GraphQLQuery(name = "eventSeries")
   public CompletableFuture<EventSeries> loadEventSeries(
@@ -207,14 +174,6 @@ public class Event extends EventSeries {
     return people;
   }
 
-  public EventType getType() {
-    return type;
-  }
-
-  public void setType(EventType type) {
-    this.type = type;
-  }
-
   public Instant getStartDate() {
     return startDate;
   }
@@ -237,6 +196,37 @@ public class Event extends EventSeries {
 
   public void setOutcomes(String outcomes) {
     this.outcomes = outcomes;
+  }
+
+  @GraphQLQuery(name = "eventType")
+  public CompletableFuture<EventType> loadEventType(@GraphQLRootContext GraphQLContext context) {
+    if (eventType.hasForeignObject()) {
+      return CompletableFuture.completedFuture(eventType.getForeignObject());
+    }
+    return new UuidFetcher<EventType>()
+        .load(context, IdDataLoaderKey.EVENT_TYPE, eventType.getForeignUuid()).thenApply(o -> {
+          eventType.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setEventTypeUuid(String eventTypeUuid) {
+    this.eventType = new ForeignObjectHolder<>(eventTypeUuid);
+  }
+
+  @JsonIgnore
+  public String getEventTypeUuid() {
+    return eventType.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "eventType")
+  public void setEventType(EventType eventType) {
+    this.eventType = new ForeignObjectHolder<>(eventType);
+  }
+
+  public EventType getEventType() {
+    return eventType.getForeignObject();
   }
 
   @GraphQLQuery(name = "reports")
@@ -281,7 +271,7 @@ public class Event extends EventSeries {
     if (!super.equals(o))
       return false;
     Event event = (Event) o;
-    return Objects.equals(type, event.type) && Objects.equals(startDate, event.startDate)
+    return Objects.equals(eventType, event.eventType) && Objects.equals(startDate, event.startDate)
         && Objects.equals(endDate, event.endDate) && Objects.equals(outcomes, event.outcomes)
         && Objects.equals(tasks, event.tasks) && Objects.equals(organizations, event.organizations)
         && Objects.equals(people, event.people) && Objects.equals(eventSeries, event.eventSeries)
@@ -290,7 +280,7 @@ public class Event extends EventSeries {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), type, startDate, endDate, outcomes, tasks, organizations,
-        people, eventSeries, location);
+    return Objects.hash(super.hashCode(), eventType, startDate, endDate, outcomes, tasks,
+        organizations, people, eventSeries, location);
   }
 }
