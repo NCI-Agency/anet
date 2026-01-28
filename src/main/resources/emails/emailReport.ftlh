@@ -452,8 +452,8 @@ td {
               <a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
             </td>
             <td>
-              <#if attendee.loadPosition()??>
-                <#assign position = attendee.loadPosition()>
+              <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
+                <#assign position = attendee.getPosition()>
                 <a href="/positions/${position.uuid}">${(position.name)!}</a>
               </#if>
             </td>
@@ -576,10 +576,12 @@ td {
                 </span>
               </button>
             </#if>
-            <div>
-              <span>By ${(person.name)!SYSTEM_USER}</span><br>
-              <small>On ${(dateTimeFormatter.format(reportAction.createdAt))!}</small>
-            </div>
+            <#if reportAction.createdAt??>
+              <div>
+                <span>By ${(person.name)!SYSTEM_USER}</span><br>
+                <small>On ${(dateTimeFormatter.format(reportAction.createdAt))!}</small>
+              </div>
+            </#if>
           </div>
         </#list>
       </fieldset>

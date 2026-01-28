@@ -374,7 +374,7 @@ public class Position extends AbstractEmailableAnetBean
     if (entityAvatar != null) {
       return CompletableFuture.completedFuture(entityAvatar);
     }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATARS, uuid)
         .thenApply(o -> {
           entityAvatar = o;
           return o;
@@ -435,5 +435,10 @@ public class Position extends AbstractEmailableAnetBean
   @Override
   public String toString() {
     return String.format("[uuid:%s name:%s orgUuid:%s]", uuid, name, getOrganizationUuid());
+  }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
   }
 }

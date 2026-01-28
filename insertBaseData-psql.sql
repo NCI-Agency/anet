@@ -30,7 +30,8 @@ TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
 TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
-TRUNCATE TABLE "people" CASCADE;
+-- ANET Importer user is inserted by the migrations!
+DELETE FROM "people" WHERE name != 'ANET Importer';
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 -- Skip preferences, as these are inserted by the migrations
@@ -414,7 +415,7 @@ UPDATE positions SET "currentPersonUuid" = '1ad0c049-6ce8-4890-84f6-5e6a364764c4
 
 -- Put Erin into the EF 2.2 Advisor D Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2020-01-01');
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2021-01-01');
 UPDATE positions SET "currentPersonUuid" = 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9' WHERE name = 'EF 2.2 Advisor D';
 
 -- Put Jacob in the EF 2.2 Superuser Billet
@@ -1166,12 +1167,12 @@ INSERT INTO "adminSettings" (key, value) VALUES
 
 -- System user, used when importing data that can't be linked to any specific user
 INSERT INTO PEOPLE (uuid, name, status, "createdAt", "updatedAt")
-  SELECT 'a163cd6f-98ac-4a61-896c-9444dd1293af', 'ANET Importer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+  SELECT uuid_generate_v4(), 'ANET Importer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
   WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer');
 
 -- Tag some reports
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as bribery - Giving/Promising money or something valuable to corrupt the behavior of a public official',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1181,7 +1182,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as embezzlement - Steal or misappropriate money from the organization the person works for',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1191,7 +1192,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('01463629-8670-475f-9e0a-a1bf594f9eda', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('01463629-8670-475f-9e0a-a1bf594f9eda', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as patronage - Leaders illegally appointing someone to a position',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1201,7 +1202,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as facilitation payment - Payment made to a government official that acts as an incentive to complete an action quickly',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")

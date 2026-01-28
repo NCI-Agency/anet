@@ -5,11 +5,12 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.NoteDao.UpdateType;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,13 @@ import org.springframework.web.server.ResponseStatusException;
 @GraphQLApi
 public class NoteResource {
 
+  private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final NoteDao dao;
 
-  public NoteResource(NoteDao dao) {
+  public NoteResource(AnetObjectEngine engine, AuditTrailDao auditTrailDao, NoteDao dao) {
+    this.engine = engine;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -34,7 +39,13 @@ public class NoteResource {
     checkNotePermission(user, n.getAuthorUuid(), UpdateType.CREATE);
     ResourceUtils.checkAndFixNote(n);
     n = dao.insert(n);
-    AnetAuditLogger.log("Note {} created by {}", n, user);
+
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logCreate(user, NoteDao.TABLE_NAME, n, null,
+        String.format("linked to %s", n.getNoteRelatedObjects()));
+    // Update any subscriptions
+    dao.updateSubscriptions(n, auditTrailUuid, false);
+
     return n;
   }
 
@@ -63,7 +74,13 @@ public class NoteResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process note update");
     }
-    AnetAuditLogger.log("Note {} updated by {}", n, user);
+
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, NoteDao.TABLE_NAME, n, null,
+        String.format("linked to %s", n.getNoteRelatedObjects()));
+    // Update any subscriptions
+    dao.updateSubscriptions(n, auditTrailUuid, false);
+
     // Return the updated note since we want to use the updatedAt field
     return n;
   }
@@ -77,13 +94,19 @@ public class NoteResource {
     }
     final Person user = DaoUtils.getUserFromContext(context);
     checkNotePermission(user, n.getAuthorUuid(), UpdateType.DELETE);
+    n.loadNoteRelatedObjects(engine.getContext()).join();
     final int numRows = dao.delete(noteUuid);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process note delete");
     }
-    AnetAuditLogger.log("Note {} deleted by {}", n, user);
-    // GraphQL mutations *have* to return something, so we return the number of
-    // deleted rows
+
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logDelete(user, NoteDao.TABLE_NAME, n, null,
+        String.format("unlinked from %s", n.getNoteRelatedObjects()));
+    // Update any subscriptions
+    dao.updateSubscriptions(n, auditTrailUuid, true);
+
+    // GraphQL mutations *have* to return something, so we return the number of deleted rows
     return numRows;
   }
 

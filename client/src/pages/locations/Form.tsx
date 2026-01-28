@@ -21,6 +21,7 @@ import LocationTable from "components/LocationTable"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
@@ -196,6 +197,7 @@ const LocationForm = ({
               Save Location
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
 

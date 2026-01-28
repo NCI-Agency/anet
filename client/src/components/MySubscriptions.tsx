@@ -1,14 +1,12 @@
 import {
   gqlPaginationFields,
-  gqlRelatedObjectFields,
+  gqlSubscribableObjectFields,
   gqlSubscriptionFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { OBJECT_TYPE_TO_MODEL } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -16,6 +14,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
@@ -30,7 +29,7 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
       list {
         ${gqlSubscriptionFields}
         subscribedObject {
-          ${gqlRelatedObjectFields}
+          ${gqlSubscribableObjectFields}
         }
       }
     }
@@ -114,58 +113,31 @@ const MySubscriptions = ({
                   <td colSpan={3}>nothing to show…</td>
                 </tr>
               )) ||
-                subscriptions.map(subscription => {
-                  const createdAt = moment(subscription.createdAt).fromNow()
-                  const objectType =
-                    OBJECT_TYPE_TO_MODEL[subscription.subscribedObjectType]
-                  let linkTo
-                  if (subscription.subscribedObject) {
-                    linkTo = (
-                      <LinkTo
-                        modelType={objectType}
-                        model={{
-                          uuid: subscription.subscribedObjectUuid,
-                          ...subscription.subscribedObject
+                subscriptions.map(subscription => (
+                  <tr key={subscription.uuid}>
+                    <td>
+                      <SubscriptionIcon
+                        subscribedObjectType={subscription.subscribedObjectType}
+                        subscribedObjectUuid={subscription.subscribedObjectUuid}
+                        isSubscribed
+                        updatedAt={null}
+                        refetch={() => {
+                          refetch()
+                          refetchCallback()
                         }}
+                        setError={error => setSaveError(error)}
                       />
-                    )
-                  } else {
-                    linkTo = (
-                      <LinkTo
-                        componentClass="span"
-                        modelType={objectType}
-                        model={{
-                          uuid: subscription.subscribedObjectUuid
-                        }}
-                      >
-                        [object was deleted]
-                      </LinkTo>
-                    )
-                  }
-                  return (
-                    <tr key={subscription.uuid}>
-                      <td>
-                        <SubscriptionIcon
-                          subscribedObjectType={
-                            subscription.subscribedObjectType
-                          }
-                          subscribedObjectUuid={
-                            subscription.subscribedObjectUuid
-                          }
-                          isSubscribed
-                          updatedAt={null}
-                          refetch={() => {
-                            refetch()
-                            refetchCallback()
-                          }}
-                          setError={error => setSaveError(error)}
-                        />
-                      </td>
-                      <td>{createdAt}</td>
-                      <td>{linkTo}</td>
-                    </tr>
-                  )
-                })}
+                    </td>
+                    <td>{moment(subscription.createdAt).fromNow()}</td>
+                    <td>
+                      <RelatedObjectDisplay
+                        relatedObjectType={subscription.subscribedObjectType}
+                        relatedObjectUuid={subscription.subscribedObjectUuid}
+                        relatedObject={subscription.subscribedObject}
+                      />
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </Table>
         </div>

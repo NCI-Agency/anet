@@ -11,7 +11,7 @@ import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Attachment extends AbstractAnetBean {
+public class Attachment extends AbstractAnetBean implements RelatableObject {
 
   @GraphQLQuery
   @GraphQLInputField
