@@ -467,8 +467,8 @@ async function validateUserCanEditUserForCurrentPage(t, canChangeName) {
   await assertElementText(t, await $(".alert"), "Person saved")
   await assertElementText(
     t,
-    await $(".biography p"),
-    originalBioText + fakeBioText
+    await $(".biography .editable"),
+    `${originalBioText}\n${fakeBioText}`
   )
 }
 
