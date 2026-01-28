@@ -54,12 +54,17 @@ class PositionMergeTest extends AbstractResourceTest {
     final PositionInput firstPositionInput = PositionInput.builder()
         .withName("MergePositionsTest First Position").withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
-        .withStatus(Status.ACTIVE).withPerson(getPersonInput(testPerson)).build();
+        .withStatus(Status.ACTIVE).build();
 
     final Position firstPosition = withCredentials(adminUser,
         t -> mutationExecutor.createPosition(FIELDS, firstPositionInput));
     assertThat(firstPosition).isNotNull();
     assertThat(firstPosition.getUuid()).isNotNull();
+
+    // Put person in this position
+    final Integer nrAssigned = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(testPerson), null, true, firstPosition.getUuid()));
+    assertThat(nrAssigned).isOne();
     final Position updatedFirstPosition =
         withCredentials(adminUser, t -> queryExecutor.position(FIELDS, firstPosition.getUuid()));
 
