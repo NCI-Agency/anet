@@ -80,7 +80,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const location = useLocation()
 
   const iframeElRef = useRef<HTMLIFrameElement | null>(null)
-  const targetOriginRef = useRef<string | undefined>(undefined)
+  const chatAssistantOrigin = useRef(new URL(Settings.chatAssistantUrl).origin)
 
   const queueRef = useRef<any[]>([])
 
@@ -109,7 +109,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         queueRef.current.push(payload)
         return
       }
-      win.postMessage(payload, targetOriginRef.current || "*")
+      win.postMessage(payload, chatAssistantOrigin.current)
     },
     [isReady]
   )
@@ -120,7 +120,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
       return
     }
     while (queueRef.current.length) {
-      win.postMessage(queueRef.current.shift()!, targetOriginRef.current || "*")
+      win.postMessage(queueRef.current.shift(), chatAssistantOrigin.current)
     }
   }, [isReady])
 
@@ -132,13 +132,6 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const setIframeEl = useCallback((el: HTMLIFrameElement | null) => {
     iframeElRef.current = el
     setIsReady(false)
-    try {
-      targetOriginRef.current = el
-        ? new URL(el.src, window.location.href).origin
-        : undefined
-    } catch {
-      targetOriginRef.current = undefined
-    }
   }, [])
 
   const onIframeLoad = useCallback(() => {
@@ -175,8 +168,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
 
   useEffect(() => {
     const onMessage = (ev: MessageEvent) => {
-      const expected = targetOriginRef.current
-      if (expected && ev.origin !== expected) {
+      if (ev.origin !== chatAssistantOrigin.current) {
         return
       }
       const type = typeof ev.data === "string" ? ev.data : ev.data?.type
@@ -224,16 +216,13 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
       attempts += 1
       el.contentWindow?.postMessage(
         { type: "PING" },
-        targetOriginRef.current || "*"
+        chatAssistantOrigin.current
       )
       if (isReady || attempts >= max) {
         window.clearInterval(id)
       }
     }, 500)
-    el.contentWindow?.postMessage(
-      { type: "PING" },
-      targetOriginRef.current || "*"
-    )
+    el.contentWindow?.postMessage({ type: "PING" }, chatAssistantOrigin.current)
     return () => window.clearInterval(id)
   }, [setIframeEl, isReady])
 
