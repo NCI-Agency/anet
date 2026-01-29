@@ -14,6 +14,7 @@ import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -29,10 +30,13 @@ public class PositionResource {
 
   private final AnetObjectEngine engine;
   private final PositionDao dao;
+  private final EmailAddressDao emailAddressDao;
 
-  public PositionResource(AnetObjectEngine anetObjectEngine, PositionDao dao) {
+  public PositionResource(AnetObjectEngine anetObjectEngine, PositionDao dao,
+      EmailAddressDao emailAddressDao) {
     this.dao = dao;
     this.engine = anetObjectEngine;
+    this.emailAddressDao = emailAddressDao;
   }
 
   public static boolean hasPermission(final Person user, final String positionUuid) {
@@ -95,7 +99,7 @@ public class PositionResource {
       dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid(), true, null);
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
+    emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
         pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, created.getUuid(),
@@ -160,7 +164,7 @@ public class PositionResource {
           oldOrg -> dao.removeOrganizationFromPosition(DaoUtils.getUuid(oldOrg), pos));
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, pos.getUuid(),
+    emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
@@ -209,7 +213,7 @@ public class PositionResource {
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
         existing.getPersonUuid());
-    final int numRows = engine.getPositionDao().updatePositionHistory(pos);
+    final int numRows = dao.updatePositionHistory(pos);
     AnetAuditLogger.log("History updated for position {} by {}", pos, user);
     return numRows;
   }

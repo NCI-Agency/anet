@@ -20,6 +20,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -42,13 +43,15 @@ public class TaskResource {
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final TaskDao dao;
+  private final ApprovalStepDao approvalStepDao;
 
-  public TaskResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, TaskDao dao) {
+  public TaskResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, TaskDao dao,
+      ApprovalStepDao approvalStepDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.dao = dao;
+    this.approvalStepDao = approvalStepDao;
   }
-
 
   public static boolean hasPermission(final Person user, final String taskUuid) {
     return AuthUtils.isResponsibleForTask(user, taskUuid);
@@ -115,7 +118,7 @@ public class TaskResource {
       for (ApprovalStep step : t.getPlanningApprovalSteps()) {
         Utils.validateApprovalStep(step);
         step.setRelatedObjectUuid(created.getUuid());
-        engine.getApprovalStepDao().insertAtEnd(step);
+        approvalStepDao.insertAtEnd(step);
       }
     }
     if (t.getApprovalSteps() != null) {
@@ -123,7 +126,7 @@ public class TaskResource {
       for (ApprovalStep step : t.getApprovalSteps()) {
         Utils.validateApprovalStep(step);
         step.setRelatedObjectUuid(created.getUuid());
-        engine.getApprovalStepDao().insertAtEnd(step);
+        approvalStepDao.insertAtEnd(step);
       }
     }
 
