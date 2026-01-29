@@ -12,7 +12,6 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
@@ -51,6 +50,8 @@ const GQL_PERSON_FIELDS = `
 const GQL_POSITION_FIELDS = `
   fragment positionFields on Position {
     ${gqlEntityFieldsMap.Position}
+    type
+    role
   }
 `
 const GQL_GET_ORGANIZATION = gql`

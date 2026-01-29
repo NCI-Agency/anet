@@ -30,7 +30,7 @@ import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   jumpToTop,
