@@ -9,7 +9,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPreference;
@@ -20,8 +19,11 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PersonPreferenceDao;
+import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.UserDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -36,16 +38,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class PersonResource {
 
   private final AnetDictionary dict;
-  private final AnetObjectEngine engine;
   private final PersonDao dao;
+  private final EmailAddressDao emailAddressDao;
   private final PersonPreferenceDao personPreferenceDao;
+  private final PositionDao positionDao;
+  private final UserDao userDao;
 
-  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, PersonDao dao,
-      PersonPreferenceDao personPreferenceDao) {
+  public PersonResource(AnetDictionary dict, PersonDao dao, EmailAddressDao emailAddressDao,
+      PersonPreferenceDao personPreferenceDao, PositionDao positionDao, UserDao userDao) {
     this.dict = dict;
-    this.engine = anetObjectEngine;
     this.dao = dao;
+    this.emailAddressDao = emailAddressDao;
     this.personPreferenceDao = personPreferenceDao;
+    this.positionDao = positionDao;
+    this.userDao = userDao;
   }
 
   public static boolean hasPermission(final Person user, final String personUuid) {
@@ -80,7 +86,7 @@ public class PersonResource {
     }
 
     final String positionUuid = DaoUtils.getUuid(p.getPosition());
-    if (positionUuid != null && engine.getPositionDao().getByUuid(positionUuid) == null) {
+    if (positionUuid != null && positionDao.getByUuid(positionUuid) == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Position " + p.getPosition() + " does not exist");
     }
@@ -100,15 +106,15 @@ public class PersonResource {
     final Person created = dao.insert(p);
 
     if (DaoUtils.getUuid(created.getPosition()) != null) {
-      engine.getPositionDao().setPersonInPosition(created.getUuid(),
-          DaoUtils.getUuid(created.getPosition()), true, null);
+      positionDao.setPersonInPosition(created.getUuid(), DaoUtils.getUuid(created.getPosition()),
+          true, null);
     }
 
     if (AuthUtils.isAdmin(user)) {
-      engine.getUserDao().updateUsers(p, p.getUsers());
+      userDao.updateUsers(p, p.getUsers());
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
         p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
@@ -175,17 +181,17 @@ public class PersonResource {
       if (existingPos == null && positionUuid != null) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
+        positionDao.setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null && positionUuid == null) {
         // Remove this person from their position.
         AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
+        positionDao.removePersonFromPosition(existingPos.getUuid());
         AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
       } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
+        positionDao.setPersonInPosition(DaoUtils.getUuid(p), positionUuid, true, null);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       }
     }
@@ -208,7 +214,7 @@ public class PersonResource {
         }
         AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
             p, user);
-        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
+        positionDao.removePersonFromPosition(existingPos.getUuid());
       }
     }
 
@@ -221,11 +227,10 @@ public class PersonResource {
     }
 
     if (AuthUtils.isAdmin(user)) {
-      engine.getUserDao().updateUsers(p, p.getUsers());
+      userDao.updateUsers(p, p.getUsers());
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
-        p.getEmailAddresses());
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
         p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
@@ -371,8 +376,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
-        p.getEmailAddresses());
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
     AnetAuditLogger.log("Person {} updated by themselves", p);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
