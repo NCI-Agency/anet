@@ -106,7 +106,7 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(dict, jobHistoryDao, personDao);
+        new AccountDeactivationWorker(dict, jobHistoryDao, personDao, positionDao);
     accountDeactivationWorker.run();
 
     // Verify
@@ -143,7 +143,7 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(dict, jobHistoryDao, personDao);
+        new AccountDeactivationWorker(dict, jobHistoryDao, personDao, positionDao);
     accountDeactivationWorker.run();
 
     // Verify

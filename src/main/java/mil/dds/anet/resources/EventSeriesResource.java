@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -27,9 +26,9 @@ public class EventSeriesResource {
   private final AnetDictionary dict;
   private final EventSeriesDao dao;
 
-  public EventSeriesResource(AnetDictionary dict, AnetObjectEngine engine) {
+  public EventSeriesResource(AnetDictionary dict, EventSeriesDao dao) {
     this.dict = dict;
-    this.dao = engine.getEventSeriesDao();
+    this.dao = dao;
   }
 
   public static boolean hasPermission(final Person user, final String orgUuid) {
