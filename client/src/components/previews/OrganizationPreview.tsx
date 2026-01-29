@@ -51,6 +51,8 @@ const GQL_PERSON_FIELDS = `
 const GQL_POSITION_FIELDS = `
   fragment positionFields on Position {
     ${gqlEntityFieldsMap.Position}
+    type
+    role
   }
 `
 const GQL_GET_ORGANIZATION = gql`
