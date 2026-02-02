@@ -1,6 +1,5 @@
 package mil.dds.anet.ws;
 
-import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import jakarta.jws.WebService;
 import jakarta.xml.bind.JAXBElement;
 import java.math.BigInteger;
@@ -34,6 +33,7 @@ import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.graphql.GraphQLRequest;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -586,7 +586,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     reportQuery.put("notTaskUuid", excludeTaskUuids);
     final GraphQLRequest graphQLRequest =
         new GraphQLRequest("nvgData", REPORT_QUERY, null, Map.of("reportQuery", reportQuery));
-    final Map<String, Object> result = graphQLResource.graphql(principal, graphQLRequest, null);
+    final Map<String, Object> result = graphQLResource.graphql(principal, graphQLRequest);
     @SuppressWarnings("unchecked")
     final Map<String, Object> data = (Map<String, Object>) result.get("data");
     final TypeReference<AnetBeanList<Report>> typeRef = new TypeReference<>() {};

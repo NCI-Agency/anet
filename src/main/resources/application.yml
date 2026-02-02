@@ -36,21 +36,9 @@ spring:
         # Allow our worker threads to run concurrently
         size: 10
 
-# GraphQL integration through SPQR
-graphql:
-  spqr:
-    base-packages: mil.dds.anet
-    abstract-input-type-resolution: false
-    http:
-      # We register our own controller under /graphql
-      enabled: false
-      endpoint: /graphql-unused
-    relay:
-      enabled: false
-    ws:
-      enabled: false
-    gui:
-      enabled: false
+# GraphQL integration
+anet:
+  graphql-base-packages: mil.dds.anet
 
 # Apache CXF Servlet
 cxf:

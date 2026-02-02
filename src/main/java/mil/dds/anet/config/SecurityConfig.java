@@ -43,9 +43,6 @@ public class SecurityConfig {
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
   String jwkSetUri;
 
-  @Value("${graphql.spqr.http.endpoint}")
-  String unusedGraphQLEndpoint;
-
   private final AnetConfig anetConfig;
   private final AnetDictionary anetDictionary;
   private final BearerTokenAuthFilter bearerTokenAuthFilter;
@@ -144,8 +141,6 @@ public class SecurityConfig {
             .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,
                 AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH)
             .permitAll()
-            // Block the default GraphQL endpoint
-            .requestMatchers(unusedGraphQLEndpoint).denyAll()
             // The rest requires authentication
             .anyRequest().authenticated()) // -
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

@@ -4,7 +4,6 @@ import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionUpdateSearchQuery;
@@ -13,7 +12,6 @@ import mil.dds.anet.utils.DaoUtils;
 import org.springframework.stereotype.Component;
 
 @Component
-@GraphQLApi
 public class SubscriptionUpdateResource {
 
   private final SubscriptionUpdateDao dao;

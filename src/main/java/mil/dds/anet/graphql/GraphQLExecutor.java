@@ -1,4 +1,4 @@
-package mil.dds.anet.resources;
+package mil.dds.anet.graphql;
 
 import graphql.ExceptionWhileDataFetching;
 import graphql.ExecutionInput;
@@ -6,10 +6,6 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.introspection.Introspection;
-import io.leangen.graphql.spqr.spring.autoconfigure.ContextFactory;
-import io.leangen.graphql.spqr.spring.web.HttpExecutor;
-import io.leangen.graphql.spqr.spring.web.dto.ExecutorParams;
-import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.time.Instant;
@@ -35,28 +31,26 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
+public class GraphQLExecutor {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetConfig config;
 
-  protected GraphQLExecutor(ContextFactory<NativeWebRequest> contextFactory, AnetConfig config) {
-    super(contextFactory, null);
+  protected GraphQLExecutor(AnetConfig config) {
     this.config = config;
   }
 
   @Transactional
   public Map<String, Object> execute(final Principal principal, final GraphQL graphQL,
-      final ExecutorParams<NativeWebRequest> params) {
+      GraphQLRequest graphQLRequest) {
     final Long graphqlRequestTimeoutMs = config.getGraphqlRequestTimeoutMs();
     final ExecutionResult executionResult =
-        dispatchRequest(principal, graphQL, params, graphqlRequestTimeoutMs);
+        dispatchRequest(principal, graphQL, graphQLRequest, graphqlRequestTimeoutMs);
     final Map<String, Object> result = executionResult.toSpecification();
     if (executionResult.getErrors().isEmpty()) {
       return result;
@@ -83,13 +77,13 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
 
   private ExecutionInput buildInput(GraphQLRequest graphQLRequest,
       DataLoaderRegistry dataLoaderRegistry, final Map<String, Object> context) {
-    return ExecutionInput.newExecutionInput().operationName(graphQLRequest.getOperationName())
-        .query(graphQLRequest.getQuery()).variables(graphQLRequest.getVariables())
+    return ExecutionInput.newExecutionInput().operationName(graphQLRequest.operationName())
+        .query(graphQLRequest.query()).variables(graphQLRequest.variables())
         .dataLoaderRegistry(dataLoaderRegistry).graphQLContext(context).build();
   }
 
   private ExecutionResult dispatchRequest(final Principal principal, final GraphQL graphQL,
-      final ExecutorParams<NativeWebRequest> params, final Long graphqlRequestTimeoutMs) {
+      GraphQLRequest graphQLRequest, final Long graphqlRequestTimeoutMs) {
     final BatchingUtils batchingUtils =
         new BatchingUtils(ApplicationContextProvider.getEngine(), true, true);
     final DataLoaderRegistry dataLoaderRegistry = batchingUtils.getDataLoaderRegistry();
@@ -108,8 +102,7 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
 
     context.put("dataLoaderRegistry", dataLoaderRegistry);
 
-    final ExecutionInput executionInput =
-        buildInput(params.graphQLRequest, dataLoaderRegistry, context);
+    final ExecutionInput executionInput = buildInput(graphQLRequest, dataLoaderRegistry, context);
 
     final Instant executionEnd = (graphqlRequestTimeoutMs == null) ? null
         : Instant.now().plusMillis(graphqlRequestTimeoutMs);

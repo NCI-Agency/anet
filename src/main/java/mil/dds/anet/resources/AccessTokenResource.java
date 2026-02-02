@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Person;
@@ -15,7 +14,6 @@ import mil.dds.anet.utils.DaoUtils;
 import org.springframework.stereotype.Component;
 
 @Component
-@GraphQLApi
 public class AccessTokenResource {
 
   private final AccessTokenDao accessTokenDao;

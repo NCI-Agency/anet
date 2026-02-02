@@ -2,12 +2,10 @@ package mil.dds.anet.resources;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLQuery;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.database.ApprovalStepDao;
 import org.springframework.stereotype.Component;
 
 @Component
-@GraphQLApi
 public class ApprovalStepResource {
 
   private final ApprovalStepDao dao;

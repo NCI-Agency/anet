@@ -5,11 +5,11 @@ import static mil.dds.anet.test.ws.security.BearerToken.VALID_NVG_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import graphql.introspection.IntrospectionQueryBuilder;
-import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.graphql.GraphQLRequest;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.ws.GraphQLWebService;
 import mil.dds.anet.ws.security.AccessTokenAuthentication;
