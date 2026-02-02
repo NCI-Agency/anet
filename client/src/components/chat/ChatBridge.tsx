@@ -35,7 +35,7 @@ const ChatBridgeContext = createContext<ChatBridgeContextType | null>(null)
 export const useChatBridge = () => {
   const ctx = useContext(ChatBridgeContext)
   if (!ctx) {
-    if (Settings.chatAssistantUrl) {
+    if (Settings.chatAssistant.enabled) {
       throw new Error("useChatBridge must be used within ChatBridgeProvider")
     }
     return {}
@@ -80,7 +80,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const location = useLocation()
 
   const iframeElRef = useRef<HTMLIFrameElement | null>(null)
-  const chatAssistantOrigin = useRef(new URL(Settings.chatAssistantUrl).origin)
+  const chatAssistantOrigin = useRef(new URL(Settings.chatAssistant.url).origin)
 
   const queueRef = useRef<any[]>([])
 
