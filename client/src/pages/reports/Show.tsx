@@ -440,7 +440,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 Email report
               </Button>
             )}
-            {Settings.chatAssistantUrl && (
+            {Settings.chatAssistant.enabled && (
               <Button
                 variant="outline-primary"
                 onClick={openChat}
