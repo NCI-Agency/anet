@@ -177,7 +177,11 @@ public class SecurityConfig {
   }
 
   private String getChatAssistantUrl() {
-    final String chatAssistantUrl = (String) anetDictionary.getDictionaryEntry("chatAssistantUrl");
+    final Boolean chatAssistantEnabled =
+        (Boolean) anetDictionary.getDictionaryEntry("chatAssistant.enabled");
+    final String chatAssistantUrl = Boolean.TRUE.equals(chatAssistantEnabled)
+        ? (String) anetDictionary.getDictionaryEntry("chatAssistant.url")
+        : "";
     return ResponseUtils.getBaseUrl(chatAssistantUrl);
   }
 

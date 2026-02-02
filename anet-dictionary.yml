@@ -2060,7 +2060,9 @@ automaticallyInactivateUsers:
   checkIntervalInSecs: 86400 # 60 * 60 * 24
   initialDelayInSecs: 20
 
-chatAssistantUrl: https://localhost:7002/chat/index.html
+chatAssistant:
+  enabled: true
+  url: https://localhost:7002/chat/index.html
 
 dashboards:
   - label: dashboard0

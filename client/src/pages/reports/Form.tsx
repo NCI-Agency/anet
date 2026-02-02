@@ -699,7 +699,7 @@ const ReportForm = ({
 
         return (
           <div className="report-form">
-            {Settings.chatAssistantUrl && <ReportChatContextSync />}
+            {Settings.chatAssistant.enabled && <ReportChatContextSync />}
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <MessagesWithConflict
               error={saveError}

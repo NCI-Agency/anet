@@ -94,7 +94,7 @@ const ResponsiveLayoutInner = ({
       }}
     >
       <div style={anetContainer} className="anet">
-        {Settings.chatAssistantUrl ? (
+        {Settings.chatAssistant.enabled ? (
           <TopBarWithChat
             handleTopbarHeight={handleTopbarHeight}
             minimalHeader={pageProps.minimalHeader}
@@ -138,7 +138,7 @@ const ResponsiveLayoutInner = ({
           >
             {children}
           </Element>
-          {Settings.chatAssistantUrl && <ChatPanel />}
+          {Settings.chatAssistant.enabled && <ChatPanel />}
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>
@@ -158,7 +158,7 @@ const ResponsiveLayoutInner = ({
 }
 
 const ResponsiveLayout = (props: ResponsiveLayoutProps) => {
-  return Settings.chatAssistantUrl ? (
+  return Settings.chatAssistant.enabled ? (
     <ChatBridgeProvider>
       <ResponsiveLayoutInner {...props} />
     </ChatBridgeProvider>
