@@ -123,7 +123,7 @@ const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
     <ResponsiveLayoutContext.Provider value={layoutContext}>
       <PollingContext.Provider value={pollingContext}>
         <div style={anetContainer} className="anet">
-          {Settings.chatAssistantUrl ? (
+          {Settings.chatAssistant.enabled ? (
             <TopBarWithChat
               handleTopbarHeight={handleTopbarHeight}
               minimalHeader={pageProps.minimalHeader}
@@ -167,7 +167,7 @@ const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
             >
               <Outlet />
             </Element>
-            {Settings.chatAssistantUrl && <ChatPanel />}
+            {Settings.chatAssistant.enabled && <ChatPanel />}
           </div>
         </div>
       </PollingContext.Provider>
@@ -184,7 +184,7 @@ const ResponsiveLayoutInner = ({ pageProps }: ResponsiveLayoutProps) => {
 }
 
 const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
-  return Settings.chatAssistantUrl ? (
+  return Settings.chatAssistant.enabled ? (
     <ChatBridgeProvider>
       <ResponsiveLayoutInner pageProps={pageProps} />
     </ChatBridgeProvider>
