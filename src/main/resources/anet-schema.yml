@@ -457,6 +457,7 @@ required:
   - emailArchive
   - imagery
   - automaticallyAllowAllNewUsers
+  - chatAssistant
 properties:
   keycloakConfiguration:
     type: object
@@ -1493,8 +1494,17 @@ properties:
             options:
               type: object
               additionalProperties: true
-  chatAssistantUrl:
-    type: string
+
+  chatAssistant:
+    type: object
+    additionalProperties: false
+    required: [enabled, url]
+    properties:
+      enabled:
+        type: boolean
+      url:
+        type: string
+
   dashboards:
     type: array
     items:

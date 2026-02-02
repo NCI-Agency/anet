@@ -24,7 +24,7 @@ export default function ChatPanel() {
       <iframe
         ref={setIframeEl}
         onLoad={onIframeLoad}
-        src={Settings.chatAssistantUrl}
+        src={Settings.chatAssistant.url}
         title="ChatGPT Panel"
         style={{ width: "100%", height: "100%", border: "none" }}
         sandbox="allow-scripts allow-same-origin allow-forms"
