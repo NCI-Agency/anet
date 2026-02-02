@@ -702,6 +702,7 @@ const ReportForm = ({
 
         return (
           <AttachmentContext.Provider value={values}>
+            {Settings.chatAssistant.enabled && <ReportChatContextSync />}
             <div className="report-form">
               {Settings.chatAssistant.enabled && <ReportChatContextSync />}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
