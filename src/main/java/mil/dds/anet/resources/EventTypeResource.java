@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
 import mil.dds.anet.beans.EventType;
 import mil.dds.anet.beans.Person;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-@GraphQLApi
 public class EventTypeResource {
 
   private final EventTypeDao dao;
