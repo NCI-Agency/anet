@@ -53,6 +53,7 @@ const GQL_GET_CHART_DATA = gql`
       app6sectorTwoModifier
       positions {
         ${gqlEntityFieldsMap.Position}
+        role
         organization {
           ${gqlEntityFieldsMap.Organization}
         }
