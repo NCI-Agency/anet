@@ -1,5 +1,5 @@
 // This mapping was derived from APP-6D Joint Military Symbology (16 October 2017) PDF.
-// and correspondes to the APP-6(D) standard for military symbology.
+// and corresponds to the APP-6(D) standard for military symbology.
 
 export const App6Choices: { [key: string]: any } = {
   app6context: {
@@ -468,7 +468,7 @@ export const App6Choices: { [key: string]: any } = {
             label: "Amphibious"
           },
           "04": {
-            label: "Antitank/Antiaromour",
+            label: "Antitank/Antiarmour",
             options: {
               "01": {
                 label: "Armoured"
