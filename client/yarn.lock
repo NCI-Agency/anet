@@ -2322,6 +2322,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fregante/circular-dependency-plugin@npm:5.2.5":
+  version: 5.2.5
+  resolution: "@fregante/circular-dependency-plugin@npm:5.2.5"
+  peerDependencies:
+    webpack: ">=4.0.1"
+  checksum: 10c0/f2019928792dd5b9410e761b03f896427f163bd57ee7207cc1d5b778729e440c34b297c826ea2114d48384a7217f3b580df70e86ebae7f810a38a651d60120c6
+  languageName: node
+  linkType: hard
+
 "@fullcalendar/core@npm:6.1.20":
   version: 6.1.20
   resolution: "@fullcalendar/core@npm:6.1.20"
@@ -7388,6 +7397,7 @@ __metadata:
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
     "@faker-js/faker": "npm:10.2.0"
+    "@fregante/circular-dependency-plugin": "npm:5.2.5"
     "@fullcalendar/core": "npm:6.1.20"
     "@fullcalendar/daygrid": "npm:6.1.20"
     "@fullcalendar/interaction": "npm:6.1.20"
@@ -7423,7 +7433,6 @@ __metadata:
     browserstack-local: "npm:1.5.8"
     chai: "npm:6.2.2"
     change-case: "npm:5.4.4"
-    circular-dependency-plugin: "npm:5.2.2"
     classnames: "npm:2.5.1"
     clean-webpack-plugin: "npm:4.0.0"
     config: "npm:4.2.0"
@@ -8851,15 +8860,6 @@ __metadata:
   version: 1.0.1
   resolution: "ci-parallel-vars@npm:1.0.1"
   checksum: 10c0/80952f699cbbc146092b077b4f3e28d085620eb4e6be37f069b4dbb3db0ee70e8eec3beef4ebe70ff60631e9fc743b9d0869678489f167442cac08b260e5ac08
-  languageName: node
-  linkType: hard
-
-"circular-dependency-plugin@npm:5.2.2":
-  version: 5.2.2
-  resolution: "circular-dependency-plugin@npm:5.2.2"
-  peerDependencies:
-    webpack: ">=4.0.1"
-  checksum: 10c0/a2227a7d76c6110f818d364d280406d9dc79c99f7d18f7c643b0a72a2694399195e68ace32115b2bb2da6e53328fda0cadd4fa9535dd67c884567daa3e5a9560
   languageName: node
   linkType: hard
 
@@ -16010,21 +16010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.7, node-fetch@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "node-fetch@npm:2.7.0"
-  dependencies:
-    whatwg-url: "npm:^5.0.0"
-  peerDependencies:
-    encoding: ^0.1.0
-  peerDependenciesMeta:
-    encoding:
-      optional: true
-  checksum: 10c0/b55786b6028208e6fbe594ccccc213cab67a72899c9234eb59dba51062a299ea853210fcf526998eaa2867b0963ad72338824450905679ff0fa304b8c5093ae8
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:^3.3.2":
+"node-fetch@npm:3.3.2":
   version: 3.3.2
   resolution: "node-fetch@npm:3.3.2"
   dependencies:
@@ -19903,13 +19889,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tr46@npm:~0.0.3":
-  version: 0.0.3
-  resolution: "tr46@npm:0.0.3"
-  checksum: 10c0/047cb209a6b60c742f05c9d3ace8fa510bff609995c129a37ace03476a9b12db4dbf975e74600830ef0796e18882b2381fb5fb1f6b4f96b832c374de3ab91a11
-  languageName: node
-  linkType: hard
-
 "tree-changes@npm:^0.11.2":
   version: 0.11.3
   resolution: "tree-changes@npm:0.11.3"
@@ -20858,13 +20837,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webidl-conversions@npm:^3.0.0":
-  version: 3.0.1
-  resolution: "webidl-conversions@npm:3.0.1"
-  checksum: 10c0/5612d5f3e54760a797052eb4927f0ddc01383550f542ccd33d5238cfd65aeed392a45ad38364970d0a0f4fea32e1f4d231b3d8dac4a3bdd385e5cf802ae097db
-  languageName: node
-  linkType: hard
-
 "webidl-conversions@npm:^7.0.0":
   version: 7.0.0
   resolution: "webidl-conversions@npm:7.0.0"
@@ -21070,16 +21042,6 @@ __metadata:
     tr46: "npm:^5.1.0"
     webidl-conversions: "npm:^7.0.0"
   checksum: 10c0/f746fc2f4c906607d09537de1227b13f9494c171141e5427ed7d2c0dd0b6a48b43d8e71abaae57d368d0c06b673fd8ec63550b32ad5ed64990c7b0266c2b4272
-  languageName: node
-  linkType: hard
-
-"whatwg-url@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "whatwg-url@npm:5.0.0"
-  dependencies:
-    tr46: "npm:~0.0.3"
-    webidl-conversions: "npm:^3.0.0"
-  checksum: 10c0/1588bed84d10b72d5eec1d0faa0722ba1962f1821e7539c535558fb5398d223b0c50d8acab950b8c488b4ba69043fd833cc2697056b167d8ad46fac3995a55d5
   languageName: node
   linkType: hard
 

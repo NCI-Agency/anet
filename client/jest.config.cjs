@@ -24,6 +24,6 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest"
   },
   transformIgnorePatterns: [
-    "<rootDir>/node_modules/(?!(chai|change-case|geographiclib-mgrs|jsonpath-plus|react-resize-detector|title-case|uuid)/)"
+    "<rootDir>/node_modules/(?!(chai|change-case|data-uri-to-buffer|fetch-blob|formdata-polyfill|geographiclib-mgrs|jsonpath-plus|node-fetch|react-resize-detector|title-case|uuid)/)"
   ]
 }

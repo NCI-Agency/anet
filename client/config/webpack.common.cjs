@@ -1,5 +1,5 @@
 const merge = require("webpack-merge")
-const CircularDependencyPlugin = require("circular-dependency-plugin")
+const CircularDependencyPlugin = require("@fregante/circular-dependency-plugin")
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const ESLintPlugin = require("eslint-webpack-plugin")

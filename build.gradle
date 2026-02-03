@@ -775,7 +775,7 @@ startScripts {
 
 node {
 	nodeProjectDir = file("${project.projectDir}/client")
-	version = '20.19.5'
+	version = '24.13.0'
 	yarnVersion = '1.22.22'
 	download = true
 }
