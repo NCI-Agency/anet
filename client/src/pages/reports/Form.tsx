@@ -705,8 +705,10 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("event", value, true)
-                    setFieldValue("location", value?.location)
-                    setLocationUuid(value?.location?.uuid)
+                    if (value?.location?.uuid) {
+                      setFieldValue("location", value?.location)
+                      setLocationUuid(value?.location?.uuid)
+                    }
                     // If event selected and engagementDate empty assign start date of the event
                     if (value?.startDate && !engagementDate) {
                       setFieldValue("engagementDate", value?.startDate)
