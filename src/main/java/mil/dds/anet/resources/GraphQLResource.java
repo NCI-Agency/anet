@@ -1,11 +1,10 @@
 package mil.dds.anet.resources;
 
 import graphql.GraphQL;
-import io.leangen.graphql.spqr.spring.web.dto.ExecutorParams;
-import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
-import io.leangen.graphql.spqr.spring.web.dto.TransportType;
 import java.security.Principal;
 import java.util.Map;
+import mil.dds.anet.graphql.GraphQLExecutor;
+import mil.dds.anet.graphql.GraphQLRequest;
 import mil.dds.anet.graphql.outputtransformers.ResourceTransformers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -37,15 +35,14 @@ public class GraphQLResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Map<String, Object>> graphqlPostJson(final Principal principal,
       @RequestBody GraphQLRequest requestBody,
-      @RequestParam(name = "output", required = false) String ignoredOutput,
-      NativeWebRequest request) {
+      @RequestParam(name = "output", required = false) String ignoredOutput) {
     if (requestBody == null) {
       // Empty body, possibly after re-authentication; user will have to try again
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(Map.of("error", "Request failed, please try again or refresh your browser window"));
     }
 
-    return ResourceTransformers.jsonTransformer.apply(graphql(principal, requestBody, request));
+    return ResourceTransformers.jsonTransformer.apply(graphql(principal, requestBody));
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -58,7 +55,7 @@ public class GraphQLResource {
     return transformer
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown XML output type"))
-        .apply(graphql(principal, requestBody, null));
+        .apply(graphql(principal, requestBody));
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -66,31 +63,26 @@ public class GraphQLResource {
   public ResponseEntity<StreamingResponseBody> graphqlPostXlsx(final Principal principal,
       @RequestBody GraphQLRequest requestBody,
       @RequestParam(name = "output", required = false) String ignoredOutput) {
-    return ResourceTransformers.xlsxTransformer.apply(graphql(principal, requestBody, null));
+    return ResourceTransformers.xlsxTransformer.apply(graphql(principal, requestBody));
   }
 
-  public Map<String, Object> graphql(final GraphQLRequest requestBody,
-      final NativeWebRequest request) {
+  public Map<String, Object> graphql(final GraphQLRequest requestBody) {
     final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
           "Must provide a valid Web Service Access Token");
     }
     return executor.execute((Principal) auth.getPrincipal(), this.graphQL,
-        getExecutorParams(requestBody, request));
+        getGraphQLRequest(requestBody));
   }
 
-  public Map<String, Object> graphql(final Principal principal, final GraphQLRequest requestBody,
-      final NativeWebRequest request) {
-    return executor.execute(principal, this.graphQL, getExecutorParams(requestBody, request));
+  public Map<String, Object> graphql(final Principal principal, final GraphQLRequest requestBody) {
+    return executor.execute(principal, this.graphQL, getGraphQLRequest(requestBody));
   }
 
-  private ExecutorParams<NativeWebRequest> getExecutorParams(final GraphQLRequest requestBody,
-      final NativeWebRequest request) {
-    return new ExecutorParams<>(
-        new GraphQLRequest(requestBody.getId(), requestBody.getQuery(),
-            requestBody.getOperationName(), requestBody.getVariables()),
-        request, TransportType.HTTP);
+  private GraphQLRequest getGraphQLRequest(final GraphQLRequest requestBody) {
+    return new GraphQLRequest(requestBody.id(), requestBody.query(), requestBody.operationName(),
+        requestBody.variables());
   }
 
 }

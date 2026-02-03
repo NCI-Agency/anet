@@ -30,6 +30,7 @@ public class AnetConfig {
 
   private boolean redirectToHttps = false;
   private Long graphqlRequestTimeoutMs;
+  private String[] graphqlBasePackages;
   private boolean automaticallyInactivateUsers;
 
   private SmtpConfiguration smtp;
@@ -63,6 +64,14 @@ public class AnetConfig {
 
   public void setGraphqlRequestTimeoutMs(Long graphqlRequestTimeoutMs) {
     this.graphqlRequestTimeoutMs = graphqlRequestTimeoutMs;
+  }
+
+  public String[] getGraphqlBasePackages() {
+    return graphqlBasePackages;
+  }
+
+  public void setGraphqlBasePackages(String[] graphqlBasePackages) {
+    this.graphqlBasePackages = graphqlBasePackages;
   }
 
   public boolean isAutomaticallyInactivateUsers() {

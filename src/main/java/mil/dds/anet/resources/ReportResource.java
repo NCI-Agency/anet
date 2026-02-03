@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
@@ -67,7 +66,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-@GraphQLApi
 public class ReportResource {
 
   private static final Logger logger =

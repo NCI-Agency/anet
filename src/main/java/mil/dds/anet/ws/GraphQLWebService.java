@@ -1,7 +1,7 @@
 package mil.dds.anet.ws;
 
-import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import java.util.Map;
+import mil.dds.anet.graphql.GraphQLRequest;
 import mil.dds.anet.graphql.outputtransformers.ResourceTransformers;
 import mil.dds.anet.resources.GraphQLResource;
 import org.springframework.http.HttpStatus;
@@ -35,7 +35,6 @@ public class GraphQLWebService {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-    return ResourceTransformers.jsonTransformer
-        .apply(graphQLResource.graphql(graphQLRequest, null));
+    return ResourceTransformers.jsonTransformer.apply(graphQLResource.graphql(graphQLRequest));
   }
 }

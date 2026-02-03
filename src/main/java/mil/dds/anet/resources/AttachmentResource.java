@@ -6,7 +6,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -59,7 +58,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 @RestController
 @RequestMapping("/api/attachment")
-@GraphQLApi
 public class AttachmentResource {
 
   private static final Logger logger =

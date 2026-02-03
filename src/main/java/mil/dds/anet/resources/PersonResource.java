@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.AnetObjectEngine;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-@GraphQLApi
 public class PersonResource {
 
   private final AnetDictionary dict;

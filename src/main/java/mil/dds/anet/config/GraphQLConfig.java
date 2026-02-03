@@ -17,8 +17,6 @@ import io.leangen.graphql.generator.mapping.common.ScalarMapper;
 import io.leangen.graphql.metadata.strategy.DefaultInclusionStrategy;
 import io.leangen.graphql.metadata.strategy.InputFieldInclusionParams;
 import io.leangen.graphql.metadata.strategy.query.AnnotatedResolverBuilder;
-import io.leangen.graphql.spqr.spring.autoconfigure.SpqrProperties;
-import io.leangen.graphql.spqr.spring.web.GraphQLController;
 import java.lang.reflect.AnnotatedElement;
 import java.security.Principal;
 import java.util.List;
@@ -56,7 +54,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -124,13 +121,8 @@ public class GraphQLConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public GraphQLController<NativeWebRequest> graphQLController() {
-    return null;
-  }
-
-  @Bean
-  public GraphQLSchemaGenerator graphQLSchemaGenerator(SpqrProperties spqrProperties) {
-    final var basePackages = spqrProperties.getBasePackages();
+  public GraphQLSchemaGenerator graphQLSchemaGenerator(AnetConfig anetConfig) {
+    final var basePackages = anetConfig.getGraphqlBasePackages();
     final GraphQLSchemaGenerator schemaGenerator = new GraphQLSchemaGenerator()
         // Load only our own packages:
         .withBasePackages(basePackages)

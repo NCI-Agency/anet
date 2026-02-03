@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-@GraphQLApi
 public class TaskResource {
 
   private static final Logger logger =

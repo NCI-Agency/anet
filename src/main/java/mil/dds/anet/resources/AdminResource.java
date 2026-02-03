@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -53,7 +52,6 @@ import org.yaml.snakeyaml.Yaml;
 
 @RestController
 @RequestMapping(AdminResource.ADMIN_RESOURCE_PATH)
-@GraphQLApi
 public class AdminResource {
 
   public static final String ADMIN_RESOURCE_PATH = "/api/admin";

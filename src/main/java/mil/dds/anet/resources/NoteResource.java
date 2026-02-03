@@ -4,7 +4,6 @@ import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.NoteDao;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-@GraphQLApi
 public class NoteResource {
 
   private final NoteDao dao;
