@@ -97,7 +97,7 @@ class MyReports extends Page {
 
   async getReportsSummarySpan(summaryItem, summaryLine, infoSpan) {
     return (await this.getReportsSummaryLine(summaryItem, summaryLine)).$(
-      `span:nth-child(${infoSpan})`
+      `div.col-md-12 > span:nth-child(${infoSpan})`
     )
   }
 }
