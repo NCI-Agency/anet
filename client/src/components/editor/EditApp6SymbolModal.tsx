@@ -1,6 +1,10 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import App6Symbol, { fieldsList, getChoices } from "components/App6Symbol"
+import App6Symbol, {
+  fieldsList,
+  getChoices,
+  getGroupedChoices
+} from "components/App6Symbol"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
 import React, { useState } from "react"
@@ -147,25 +151,55 @@ const EditApp6SymbolModal = ({
       return null
     }
 
-    const sortedChoicesKeys = Object.keys(choices).sort((a, b) =>
-      a.localeCompare(b)
-    )
-    const dropdownOptions = sortedChoicesKeys.map(key => ({
-      key,
-      label: choices[key],
-      values: calculateUpdateValues(currentMergedValues, fieldName, key)
-    }))
+    // Grouped choices are used to show category headers in the dropdown.
+    const groupedChoices = getGroupedChoices(fieldName, currentMergedValues)
+    const sortedChoicesKeys = groupedChoices
+      ? []
+      : Object.keys(choices).sort((a, b) => a.localeCompare(b))
+
+    const dropdownOptions = groupedChoices
+      ? groupedChoices.flatMap(group =>
+          Object.entries(group.values).map(([key, label]) => ({
+            key,
+            label,
+            values: calculateUpdateValues(currentMergedValues, fieldName, key),
+            category: group.category
+          }))
+        )
+      : sortedChoicesKeys.map(key => ({
+          key,
+          label: choices[key],
+          values: calculateUpdateValues(currentMergedValues, fieldName, key)
+        }))
     const parentValue = parentValues[fieldName]
     dropdownOptions.unshift({
       key: null,
-      label: parentValue ? `${choices[parentValue]} (inherited)` : "",
+      label: parentValue ? `${choices[parentValue]} (inherited)` : "None",
       values: calculateUpdateValues(currentMergedValues, fieldName, null)
     })
 
-    const selectedOption = currentValues[fieldName] || null
-    const selectedChoice = dropdownOptions.find(
-      option => option.key === selectedOption
-    )?.label
+    const selectedOption =
+      currentValues[fieldName] === undefined ? null : currentValues[fieldName]
+    const normalizedSelectedOption =
+      selectedOption === null ? null : String(selectedOption)
+    const selectedChoice = dropdownOptions.find(option => {
+      if (option.key === null) {
+        return normalizedSelectedOption === null
+      }
+      return String(option.key) === normalizedSelectedOption
+    })?.label
+
+    // Precompute grouped dropdown data for rendering headers + items together.
+    const groupedDropdownOptions = groupedChoices
+      ? groupedChoices.map(group => ({
+          category: group.category,
+          options: Object.entries(group.values).map(([key, label]) => ({
+            key,
+            label,
+            values: calculateUpdateValues(currentMergedValues, fieldName, key)
+          }))
+        }))
+      : null
 
     return (
       <Row>
@@ -175,6 +209,7 @@ const EditApp6SymbolModal = ({
             setFieldValue,
             selectedChoice,
             dropdownOptions,
+            groupedDropdownOptions,
             currentValues
           )}
         </Col>
@@ -204,6 +239,7 @@ const EditApp6SymbolModal = ({
     setFieldValue,
     selectedChoice,
     dropdownOptions,
+    groupedDropdownOptions,
     currentValues
   ) => (
     <Dropdown className="w-100">
@@ -239,31 +275,72 @@ const EditApp6SymbolModal = ({
         </div>
       </Dropdown.Toggle>
       <Dropdown.Menu className="w-100">
-        {dropdownOptions.map(({ key, label, values }) => (
-          <Dropdown.Item
-            key={key}
-            data-key={key}
-            onClick={() =>
-              handleFieldUpdate(fieldName, key, setFieldValue, currentValues)
-            }
-            className="d-flex align-items-center gap-2"
-            style={{
-              minHeight: 40
-            }}
-            onMouseEnter={() => setPreviewValues({ ...values })}
-            onMouseLeave={() => setPreviewValues({ ...currentValues })}
-          >
-            {getApp6Symbol(values, 20, 40)}
-            <span
-              className="text-truncate w-100"
-              style={{
-                whiteSpace: "normal"
-              }}
-            >
-              {label}
-            </span>
-          </Dropdown.Item>
-        ))}
+        {groupedDropdownOptions
+          ? groupedDropdownOptions.flatMap(group => [
+              <Dropdown.Header key={`${group.category}-header`}>
+                {group.category}
+              </Dropdown.Header>,
+              ...group.options.map(({ key, label, values }) => (
+                <Dropdown.Item
+                  key={key}
+                  data-key={key}
+                  onClick={() =>
+                    handleFieldUpdate(
+                      fieldName,
+                      key,
+                      setFieldValue,
+                      currentValues
+                    )
+                  }
+                  className="d-flex align-items-center gap-2"
+                  style={{
+                    minHeight: 40
+                  }}
+                  onMouseEnter={() => setPreviewValues({ ...values })}
+                  onMouseLeave={() => setPreviewValues({ ...currentValues })}
+                >
+                  {getApp6Symbol(values, 20, 40)}
+                  <span
+                    className="text-truncate w-100"
+                    style={{
+                      whiteSpace: "normal"
+                    }}
+                  >
+                    {label}
+                  </span>
+                </Dropdown.Item>
+              ))
+            ])
+          : dropdownOptions.map(({ key, label, values }) => (
+              <Dropdown.Item
+                key={key}
+                data-key={key}
+                onClick={() =>
+                  handleFieldUpdate(
+                    fieldName,
+                    key,
+                    setFieldValue,
+                    currentValues
+                  )
+                }
+                className="d-flex align-items-center gap-2"
+                style={{
+                  minHeight: 40
+                }}
+                onMouseEnter={() => setPreviewValues({ ...values })}
+                onMouseLeave={() => setPreviewValues({ ...currentValues })}
+              >
+                {getApp6Symbol(values, 20, 40)}
+                <span
+                  className="text-truncate w-100"
+                  style={{
+                    whiteSpace: "normal"
+                  }}
+                >
+                  {label}
+                </span>
+              </Dropdown.Item>
+            ))}
       </Dropdown.Menu>
     </Dropdown>
   )
