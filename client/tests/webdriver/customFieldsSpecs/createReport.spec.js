@@ -495,7 +495,7 @@ describe("Create report form page", () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      expect(await (await CreateReport.getAlert()).getText()).to.include(
+      expect(await (await CreateReport.getAlertDanger()).getText()).to.include(
         "The following errors must be fixed"
       )
 
@@ -612,7 +612,7 @@ describe("Create report form page", () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      const alertMessage = await (await CreateReport.getAlert()).getText()
+      const alertMessage = await (await CreateReport.getAlertDanger()).getText()
       expect(alertMessage).to.include("The following errors must be fixed")
 
       // Check ANET object reference
@@ -656,7 +656,7 @@ describe("Create report form page", () => {
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       await CreateReport.waitForAlertToLoad()
-      expect(await (await CreateReport.getAlert()).getText()).to.include(
+      expect(await (await CreateReport.getAlertSuccess()).getText()).to.include(
         "Report deleted"
       )
     })

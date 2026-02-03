@@ -6826,6 +6826,82 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-eventTypes-table" author="gjvoosten">
+		<createTable tableName="eventTypes">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="status" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="timestamp" />
+			<column name="updatedAt" type="timestamp" />
+		</createTable>
+
+		<!-- Insert initial eventTypes -->
+		<sql>
+			INSERT INTO "eventTypes" ("uuid", "status", "name", "createdAt", "updatedAt") VALUES
+				('92a69ee6-829e-4a67-88fb-3387f81b6d37', 0, 'Conference', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				('e6c47dff-271d-419a-8ee4-306e0b3ee7ff', 0, 'Exercise', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				('54d88b80-6af5-4327-ab42-d1bc292745e9', 0, 'Visit Ban', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+				('85e9988b-cb72-4917-b0b8-d59009da4ee8', 0, 'Other', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		</sql>
+
+		<!-- Add new eventTypeUuid column to events -->
+		<addColumn tableName="events">
+			<column name="eventTypeUuid" type="${uuid_type}" />
+		</addColumn>
+
+		<!-- Migrate existing event types -->
+		<sql>
+			UPDATE events
+			SET "eventTypeUuid" = '92a69ee6-829e-4a67-88fb-3387f81b6d37'
+			WHERE type = 'CONFERENCE';
+
+			UPDATE events
+			SET "eventTypeUuid" = 'e6c47dff-271d-419a-8ee4-306e0b3ee7ff'
+			WHERE type = 'EXERCISE';
+
+			UPDATE events
+			SET "eventTypeUuid" = '54d88b80-6af5-4327-ab42-d1bc292745e9'
+			WHERE type = 'VISIT_BAN';
+
+			UPDATE events
+			SET "eventTypeUuid" = '85e9988b-cb72-4917-b0b8-d59009da4ee8'
+			WHERE type = 'OTHER';
+		</sql>
+
+		<!-- Add foreign key constraint -->
+		<addForeignKeyConstraint
+			constraintName="FK_events_eventType"
+			baseTableName="events"
+			baseColumnNames="eventTypeUuid"
+			referencedTableName="eventTypes"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<!-- Drop old events type column -->
+		<dropColumn tableName="events" columnName="type" />
+
+		<!-- Update the export preferences for events -->
+		<sql>
+			UPDATE preferences
+			SET "defaultValue" = 'uuid,name,startDate,endDate,eventType,ownerOrg,hostOrg,adminOrg,eventSeries,location',
+			    "allowedValues" = 'uuid,name,startDate,endDate,eventType,ownerOrg,hostOrg,adminOrg,eventSeries,location',
+			    "updatedAt" = CURRENT_TIMESTAMP
+			WHERE name = 'EVENTS' AND category = 'export';
+
+			UPDATE "peoplePreferences"
+			SET value = REPLACE(value, ',type,', ',eventType,'),
+			    "updatedAt" = CURRENT_TIMESTAMP
+			WHERE "preferenceUuid" = (SELECT uuid FROM preferences WHERE name = 'EVENTS' AND category = 'export');
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

@@ -28,7 +28,7 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
   Instant endDate;
   @GraphQLQuery
   @GraphQLInputField
-  String type;
+  String eventTypeUuid;
 
   public EventSearchQuery() {
     super(EventSearchSortBy.START_DATE);
@@ -83,18 +83,18 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
     this.endDate = endDate;
   }
 
-  public String getType() {
-    return type;
+  public String getEventTypeUuid() {
+    return eventTypeUuid;
   }
 
-  public void setType(String type) {
-    this.type = type;
+  public void setEventTypeUuid(String eventTypeUuid) {
+    this.eventTypeUuid = eventTypeUuid;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), eventSeriesUuid, locationUuid, taskUuid, includeDate,
-        startDate, endDate, type);
+        startDate, endDate, eventTypeUuid);
   }
 
   @Override
@@ -108,7 +108,7 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
         && Objects.equals(getIncludeDate(), other.getIncludeDate())
         && Objects.equals(getStartDate(), other.getStartDate())
         && Objects.equals(getEndDate(), other.getEndDate())
-        && Objects.equals(getType(), other.getType());
+        && Objects.equals(getEventTypeUuid(), other.getEventTypeUuid());
   }
 
   @Override

@@ -1,6 +1,7 @@
 import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
 import AccessTokensList from "pages/admin/accessTokens/Index"
+import ConfigureEventTypesShow from "pages/admin/configureEventTypes/Show"
 import AdminIndex from "pages/admin/Index"
 import MartImporterShow from "pages/admin/martImporter/Show"
 import MergeLocations from "pages/admin/merge/MergeLocations"
@@ -186,6 +187,10 @@ const Routing = () => {
           </Route>
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
+          <Route
+            path="configureEventTypes"
+            element={<ConfigureEventTypesShow />}
+          />
           {Settings.featureMartGuiEnabled && (
             <Route path="martImporter" element={<MartImporterShow />} />
           )}

@@ -29,7 +29,7 @@ describe("When creating a report without an interlocutor", () => {
     await CreateReport.fillForm(REPORT_FIELDS)
     await browser.pause(500)
     await CreateReport.submitForm()
-    expect(await (await CreateReport.getAlert()).getText()).to.include(
+    expect(await (await CreateReport.getAlertWarning()).getText()).to.include(
       NO_INTERLOCUTOR_WARNING
     )
   })

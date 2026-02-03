@@ -69,8 +69,9 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     if (!Utils.isEmptyOrNull(query.getTaskUuid())) {
       addTaskQuery(query);
     }
-    if (!Utils.isEmptyOrNull(query.getType())) {
-      qb.addStringEqualsClause("type", "events.type", query.getType());
+    if (!Utils.isEmptyOrNull(query.getEventTypeUuid())) {
+      qb.addStringEqualsClause("eventTypeUuid", "events.\"eventTypeUuid\"",
+          query.getEventTypeUuid());
     }
     qb.addDateRangeClause("includeDateStart", "events.\"endDate\"", Comparison.AFTER,
         query.getIncludeDate(), "includeDateEnd", "events.\"startDate\"", Comparison.BEFORE,

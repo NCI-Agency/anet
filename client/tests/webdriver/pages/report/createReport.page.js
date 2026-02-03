@@ -91,6 +91,7 @@ class CreateReport extends cr.CreateReport {
     // wait for table loader to disappear
     await (await this.getReportCommunitiesTable()).waitForDisplayed()
     await browser.keys(name)
+    await browser.pause(500)
     await (await this.getReportCommunitiesTable()).waitForDisplayed()
     const checkBox = await (
       await this.getReportCommunitiesTable()
@@ -144,6 +145,7 @@ class CreateReport extends cr.CreateReport {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
     await browser.keys(searchTerm)
+    await browser.pause(500)
     await (await this.getReportPeopleTable()).waitForDisplayed()
     const checkBox = await (
       await this.getReportPeopleTable()
@@ -184,6 +186,7 @@ class CreateReport extends cr.CreateReport {
     // wait for tasks table loader to disappear
     await (await this.getTasksTable()).waitForDisplayed()
     await browser.keys(name)
+    await browser.pause(500)
     await (await this.getTasksTable()).waitForDisplayed()
     const checkBox = await (
       await this.getTasksTable()
@@ -200,6 +203,7 @@ class CreateReport extends cr.CreateReport {
   async selectLocation(location, rowNumber = 2) {
     await (await this.getLocation()).click()
     await browser.keys(location)
+    await browser.pause(500)
     await (await this.getLocationTable()).waitForDisplayed()
     const checkBox = await (
       await this.getLocationTable()
@@ -214,6 +218,7 @@ class CreateReport extends cr.CreateReport {
   async selectEvent(event, rowNumber = 1) {
     await (await this.getEvent()).click()
     await browser.keys(event)
+    await browser.pause(500)
     await (await this.getEventTable()).waitForDisplayed()
     const checkBox = await (
       await this.getEventTable()

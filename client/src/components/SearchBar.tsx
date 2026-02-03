@@ -1,11 +1,13 @@
 import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
+import API from "api"
 import AdvancedSearch from "components/AdvancedSearch"
 import {
   SearchDescription,
   SearchQueryPropType
 } from "components/SearchFilters"
 import _isEqual from "lodash/isEqual"
+import { Event } from "models"
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -76,6 +78,8 @@ const SearchBar = ({
   const queryTextUnchanged = _isEqual(latestQueryText.current, searchQuery.text)
   const [searchTerms, setSearchTerms] = useState(searchQuery.text)
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
+  const { data: eventTypesData } = API.useApiQuery(Event.getEventTypesQuery)
+  const eventTypes = eventTypesData?.eventTypes ?? []
 
   useEffect(() => {
     if (!queryTextUnchanged) {
@@ -128,7 +132,11 @@ const SearchBar = ({
         isOpen={showAdvancedSearch}
         setIsOpen={setShowAdvancedSearch}
       >
-        <SearchDescription searchQuery={searchQuery} showPlaceholders />
+        <SearchDescription
+          searchQuery={searchQuery}
+          eventTypes={eventTypes}
+          showPlaceholders
+        />
       </SearchPopover>
     </>
   )

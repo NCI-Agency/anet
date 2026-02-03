@@ -393,9 +393,9 @@ describe("In new report page", () => {
         await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
         // Report should be deleted
         await CreateReport.waitForAlertToLoad()
-        expect(await (await CreateReport.getAlert()).getText()).to.include(
-          "Report deleted"
-        )
+        expect(
+          await (await CreateReport.getAlertSuccess()).getText()
+        ).to.include("Report deleted")
       }
     })
   })

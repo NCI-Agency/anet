@@ -1,5 +1,6 @@
 import {
   gqlEntityFieldsMap,
+  gqlMinimalEventTypeFields,
   gqlPaginationFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -28,6 +29,9 @@ const GQL_GET_EVENT_LIST = gql`
         ${gqlEntityFieldsMap.Event}
         startDate
         endDate
+        eventType {
+          ${gqlMinimalEventTypeFields}
+        }
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -187,6 +191,7 @@ const BaseEventTable = ({
           <thead>
             <tr>
               <th>{Settings.fields.event.name.label}</th>
+              <th>{Settings.fields.event.type.label}</th>
               {showEventSeries && (
                 <th>{Settings.fields.event.eventSeries.label}</th>
               )}
@@ -202,6 +207,7 @@ const BaseEventTable = ({
                 <td>
                   <LinkTo modelType="Event" model={event} />
                 </td>
+                <td>{event.eventType?.name}</td>
                 {showEventSeries && (
                   <td>
                     <LinkTo modelType="EventSeries" model={event.eventSeries} />

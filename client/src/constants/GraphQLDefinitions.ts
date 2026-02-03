@@ -8,6 +8,10 @@ const gqlMinimalEntityFields = `
 const gqlCommonEntityFields = `
   createdAt
   updatedAt
+`
+
+const gqlCommonSubscribableEntityFields = `
+  ${gqlCommonEntityFields}
   isSubscribed
 `
 
@@ -41,7 +45,7 @@ export const gqlMinimalAuthorizationGroupFields = `
 // AuthorizationGroup
 export const gqlBasicAuthorizationGroupFields = `
   ${gqlMinimalAuthorizationGroupFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   distributionList
   forSensitiveInformation
 `
@@ -58,8 +62,7 @@ export const gqlMinimalEventFields = `
 
 export const gqlBasicEventFields = `
   ${gqlMinimalEventFields}
-  ${gqlCommonEntityFields}
-  type
+  ${gqlCommonSubscribableEntityFields}
   startDate
   endDate
 `
@@ -79,13 +82,29 @@ export const gqlMinimalEventSeriesFields = `
 
 export const gqlBasicEventSeriesFields = `
   ${gqlMinimalEventSeriesFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
 `
 
 export const gqlAllEventSeriesFields = `
   ${gqlBasicEventSeriesFields}
   description
   customFields
+`
+
+// EventType
+export const gqlMinimalEventTypeFields = `
+  ${gqlMinimalEntityFields}
+  name
+`
+
+export const gqlBasicEventTypeFields = `
+  ${gqlMinimalEventTypeFields}
+  ${gqlCommonEntityFields}
+`
+
+export const gqlAllEventTypeFields = `
+  ${gqlBasicEventTypeFields}
+  relatedEventsCount
 `
 
 // Location
@@ -96,7 +115,7 @@ export const gqlMinimalLocationFields = `
 
 export const gqlBasicLocationFields = `
   ${gqlMinimalLocationFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   digram
   trigram
   lat
@@ -121,7 +140,7 @@ export const gqlMinimalOrganizationFields = `
 
 export const gqlBasicOrganizationFields = `
   ${gqlMinimalOrganizationFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   app6context
   app6standardIdentity
   app6symbolSet
@@ -151,7 +170,7 @@ export const gqlMinimalPersonFields = `
 
 export const gqlBasicPersonFields = `
   ${gqlMinimalPersonFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   endOfTourDate
   gender
   phoneNumber
@@ -174,7 +193,7 @@ export const gqlMinimalPositionFields = `
 
 export const gqlBasicPositionFields = `
   ${gqlMinimalPositionFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   role
   type
   superuserType
@@ -196,7 +215,7 @@ export const gqlMinimalReportFields = `
 
 export const gqlBasicReportFields = `
   ${gqlMinimalReportFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   createdAt
   updatedAt
   isSubscribed
@@ -239,7 +258,7 @@ export const gqlMinimalTaskFields = `
 
 export const gqlBasicTaskFields = `
   ${gqlMinimalTaskFields}
-  ${gqlCommonEntityFields}
+  ${gqlCommonSubscribableEntityFields}
   selectable
   category
   plannedCompletion
@@ -276,7 +295,7 @@ export const gqlEntityFieldsMap = {
   Task: gqlMinimalTaskFields,
   AuthorizationGroup: gqlMinimalAuthorizationGroupFields,
   Attachment: gqlMinimalAttachmentFields,
-  Event: `${gqlMinimalEventFields}  ${gqlEntityAvatarFields}`,
+  Event: `${gqlMinimalEventFields} ${gqlEntityAvatarFields}`,
   EventSeries: `${gqlMinimalEventSeriesFields} ${gqlEntityAvatarFields}`
 }
 

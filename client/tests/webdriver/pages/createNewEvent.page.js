@@ -15,11 +15,11 @@ class CreateEvent extends Page {
   }
 
   async getTypeInput() {
-    return (await this.getForm()).$("#type")
+    return (await this.getForm()).$("#eventType")
   }
 
   async getTypeHelpBlock() {
-    return browser.$("#fg-type div.invalid-feedback")
+    return browser.$("#fg-eventType div.invalid-feedback")
   }
 
   async getOwnerOrganizationInput() {

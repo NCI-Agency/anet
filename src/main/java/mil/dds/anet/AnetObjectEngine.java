@@ -31,6 +31,7 @@ import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
+import mil.dds.anet.database.EventTypeDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.MartImportedReportDao;
@@ -159,6 +160,10 @@ public class AnetObjectEngine {
 
   public EventDao getEventDao() {
     return ApplicationContextProvider.getBean(EventDao.class);
+  }
+
+  public EventTypeDao getEventTypeDao() {
+    return ApplicationContextProvider.getBean(EventTypeDao.class);
   }
 
   public MartImportedReportDao getMartImportedReportDao() {

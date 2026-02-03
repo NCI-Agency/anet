@@ -268,12 +268,13 @@ const ReportForm = ({
       engagementDate,
       locationUuid
     ) {
-      // When engagement date or location uuid changes we need to call the back-end to figure out if there is a VISIT BAN event
-      // that applies to the location in the engagement date. If so we need to warn the user.
+      // When engagement date or location uuid changes we need to call the back-end to figure out
+      // if there is a Visit Ban event that applies to the location in the engagement date. If so
+      // we need to warn the user.
       if (engagementDate && locationUuid) {
         const eventQuery = {
           pageSize: 1,
-          type: Event.EVENT_TYPES.VISIT_BAN,
+          eventTypeUuid: Settings.eventTypeVisitBanUuid,
           locationUuid,
           includeDate: getEventMinDate(engagementDate)
         }
@@ -502,7 +503,12 @@ const ReportForm = ({
           }
         }
 
-        const eventFilters = Event.getReportEventFilters()
+        const eventFilters = {
+          all: {
+            label: "All",
+            queryVars: {}
+          }
+        }
 
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
@@ -699,8 +705,10 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("event", value, true)
-                    setFieldValue("location", value?.location)
-                    setLocationUuid(value?.location?.uuid)
+                    if (value?.location?.uuid) {
+                      setFieldValue("location", value?.location)
+                      setLocationUuid(value?.location?.uuid)
+                    }
                     // If event selected and engagementDate empty assign start date of the event
                     if (value?.startDate && !engagementDate) {
                       setFieldValue("engagementDate", value?.startDate)

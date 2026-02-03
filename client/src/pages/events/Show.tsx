@@ -214,8 +214,8 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
           <DictionaryField
             wrappedComponent={FieldHelper.ReadonlyField}
             dictProps={Settings.fields.event.type}
-            field={{ name: "type" }}
-            humanValue={Event.humanNameOfType(event.type)}
+            field={{ name: "eventType" }}
+            humanValue={event.eventType?.name}
           />
           <DictionaryField
             wrappedComponent={FieldHelper.ReadonlyField}

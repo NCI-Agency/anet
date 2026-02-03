@@ -46,6 +46,7 @@ import SubNav from "components/SubNav"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
+import { Event } from "models"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
@@ -262,6 +263,7 @@ const Search = ({
     data,
     refetch
   } = API.useApiQuery(GQL_GET_SAVED_SEARCHES)
+  const { data: eventTypesData } = API.useApiQuery(Event.getEventTypesQuery)
   const { done, result } = useBoilerplate({
     loading,
     error: err,
@@ -433,6 +435,11 @@ const Search = ({
     [hasObjectResults]
   )
 
+  const eventTypes = useMemo(
+    () => eventTypesData?.eventTypes ?? [],
+    [eventTypesData]
+  )
+
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -563,7 +570,8 @@ const Search = ({
       <h4 className="d-none d-print-block">
         Search query: {searchQuery.text}
         <br />
-        Filters: <SearchDescription searchQuery={searchQuery} />
+        Filters:{" "}
+        <SearchDescription searchQuery={searchQuery} eventTypes={eventTypes} />
       </h4>
       {numResults === 0 && (
         <Alert variant="warning">

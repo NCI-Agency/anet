@@ -29,7 +29,12 @@ import NavigationWarning from "components/NavigationWarning"
 import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
 import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
-import { jumpToTop } from "components/Page"
+import {
+  jumpToTop,
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -47,6 +52,7 @@ import CreateNewLocation from "pages/locations/CreateNewLocation"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Button, Col, FormGroup, FormSelect, Row } from "react-bootstrap"
+import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -71,14 +77,8 @@ const GQL_UPDATE_EVENT = gql`
   }
 `
 
-const EVENT_TYPES = [
-  Event.EVENT_TYPES.CONFERENCE,
-  Event.EVENT_TYPES.EXERCISE,
-  Event.EVENT_TYPES.VISIT_BAN,
-  Event.EVENT_TYPES.OTHER
-]
-
 interface EventFormProps {
+  pageDispatchers?: PageDispatchersPropType
   initialValues: any
   title?: string
   edit?: boolean
@@ -86,6 +86,7 @@ interface EventFormProps {
 }
 
 const EventForm = ({
+  pageDispatchers,
   edit = false,
   title = "",
   initialValues,
@@ -117,6 +118,19 @@ const EventForm = ({
       label: "Inactive"
     }
   ]
+
+  const { loading, error, data } = API.useApiQuery(Event.getEventTypesQuery)
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+  const activeEventTypes = (data?.eventTypes ?? []).filter(
+    t => t.status === Model.STATUS.ACTIVE
+  )
 
   return (
     <Formik
@@ -451,21 +465,31 @@ const EventForm = ({
                 <DictionaryField
                   wrappedComponent={FastField}
                   dictProps={Settings.fields.event.type}
-                  name="type"
+                  name="eventType"
+                  value={values.eventType?.uuid ?? ""}
                   component={FieldHelper.SpecialField}
                   onChange={event => {
-                    // validation will be done by setFieldValue
-                    setFieldValue("type", event.target.value, true)
+                    setFieldValue(
+                      "eventType",
+                      { uuid: event.target.value },
+                      true
+                    )
                   }}
                   widget={
-                    <FormSelect className="location-type-form-group form-control">
-                      <option value="">Please select an event type</option>
-                      {EVENT_TYPES.map(type => (
-                        <option key={type} value={type}>
-                          {Event.humanNameOfType(type)}
-                        </option>
-                      ))}
-                    </FormSelect>
+                    !activeEventTypes.length ? (
+                      <div className="text-danger mt-2">
+                        Could not load event types
+                      </div>
+                    ) : (
+                      <FormSelect className="location-type-form-group form-control">
+                        <option value="">Please select an event type</option>
+                        {activeEventTypes.map(t => (
+                          <option key={t.uuid} value={t.uuid}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </FormSelect>
+                    )
                   }
                 />
                 <DictionaryField
@@ -740,6 +764,7 @@ const EventForm = ({
     event.organizations = values.organizations.map(t => utils.getReference(t))
     // strip person fields not in data model
     event.people = values.people.map(t => utils.getReference(t))
+    event.eventType = utils.getReference(event.eventType)
     event.ownerOrg = utils.getReference(event.ownerOrg)
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
@@ -752,4 +777,4 @@ const EventForm = ({
   }
 }
 
-export default EventForm
+export default connect(null, mapPageDispatchersToProps)(EventForm)

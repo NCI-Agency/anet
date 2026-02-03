@@ -416,6 +416,7 @@ required:
   - VERSION_CHANGED_MSG
   - SUPPORT_EMAIL_ADDR
   - useISO8601
+  - eventTypeVisitBanUuid
   - featureMartGuiEnabled
   - dateFormats
   - calendarOptions
@@ -467,6 +468,10 @@ properties:
     default: false
     title: Whether events also include a time and a duration
     description: Used for events; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
+
+  eventTypeVisitBanUuid:
+    title: The uuid of the event type "Visit Ban"
+    type: string
 
   useISO8601:
     type: boolean
@@ -903,17 +908,7 @@ properties:
                           type: string
                           title: UUID of organisation membership to form
           event:
-            required: [filter]
-            allOf:
-              - "$ref": "#/$defs/extensibleInputField"
-              - properties:
-                  filter:
-                    type: array
-                    uniqueItems: true
-                    items:
-                      type: string
-                      enum:
-                        [CONFERENCE, EXERCISE, VISIT_BAN, OTHER]
+            "$ref": "#/$defs/inputField"
           reportCommunities:
             "$ref": "#/$defs/excludableInputField"
           customFields:
