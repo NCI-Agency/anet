@@ -144,13 +144,13 @@ const LinkTo = ({
   if (!isLink) {
     const linkStyle = showPreview ? { cursor: "help", ...style } : null
     const linkComponent = (
-      <div style={linkStyle} className={linkToClassName}>
+      <span style={linkStyle} className={linkToClassName}>
         <span>
           {iconComponent}
           {avatarComponent}
           {children || modelInstance.toString(displayCallback)}
         </span>
-      </div>
+      </span>
     )
     return (
       <LinkToWithOptionalPreview
@@ -177,13 +177,13 @@ const LinkTo = ({
   }
 
   const linkComponent = (
-    <div className={linkToClassName}>
+    <span className={linkToClassName}>
       <LinkToComponent to={to} style={style} {...componentProps}>
         {iconComponent}
         {avatarComponent}
         {children || modelInstance.toString(displayCallback)}
       </LinkToComponent>
-    </div>
+    </span>
   )
   return (
     <LinkToWithOptionalPreview

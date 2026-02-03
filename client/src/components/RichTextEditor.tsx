@@ -404,16 +404,18 @@ const displayCallback = modelInstance => {
     }
   } else if (isImageAttachment(modelInstance)) {
     return (
-      <div className="rich-text-image-wrapper">
+      <span className="rich-text-image-wrapper">
         <img
           className="rich-text-image"
           src={`/api/attachment/view/${modelInstance.uuid}`}
           alt={modelInstance.caption}
         />
         {modelInstance.caption && (
-          <div className="rich-text-image-caption">{modelInstance.caption}</div>
+          <span className="rich-text-image-caption">
+            {modelInstance.caption}
+          </span>
         )}
-      </div>
+      </span>
     )
   }
   return modelInstance.toString()
