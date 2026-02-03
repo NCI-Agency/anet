@@ -47,11 +47,11 @@ class ShowOrganization extends Page {
   }
 
   async getLeaderPosition() {
-    return browser.$("div#Leaders span")
+    return browser.$("div#Leaders div.list-group-item > span:first-child")
   }
 
   async getLeaderPositionPerson() {
-    return browser.$("div#Leaders span:nth-child(2)")
+    return browser.$("div#Leaders div.list-group-item > span:nth-child(2)")
   }
 
   async getDeputies() {
@@ -59,11 +59,11 @@ class ShowOrganization extends Page {
   }
 
   async getDeputyPosition() {
-    return browser.$("div#Deputies span")
+    return browser.$("div#Deputies div.list-group-item > span:first-child")
   }
 
   async getDeputyPositionPerson() {
-    return browser.$("div#Deputies span:nth-child(2)")
+    return browser.$("div#Deputies div.list-group-item > span:nth-child(2)")
   }
 
   async getTasks() {

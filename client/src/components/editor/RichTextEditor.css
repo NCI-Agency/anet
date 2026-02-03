@@ -94,6 +94,7 @@
 }
 
 .rich-text-image-wrapper {
+  display: block;
   text-align: center;
   @media print {
     break-inside: avoid;
@@ -114,6 +115,7 @@
   }
 
   & .rich-text-image-caption {
+    display: block;
     font-size: 12px;
     color: #445566;
   }
