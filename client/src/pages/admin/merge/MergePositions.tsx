@@ -322,9 +322,7 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
               <MergeField
                 label="Previous People"
                 value={
-                  <>
-                    <PreviousPeople history={mergedPosition.previousPeople} />
-                  </>
+                  <PreviousPeople history={mergedPosition.previousPeople} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="previousPeople"
