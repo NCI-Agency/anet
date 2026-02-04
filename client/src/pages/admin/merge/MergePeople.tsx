@@ -286,11 +286,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.prevPositions}
                 value={
-                  <>
-                    <PreviousPositions
-                      history={mergedPerson.previousPositions}
-                    />
-                  </>
+                  <PreviousPositions history={mergedPerson.previousPositions} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="previousPositions"

@@ -75,16 +75,14 @@ public class ResourceUtils {
       if (Boolean.TRUE.equals(current.getPrimary()) && current.getEndTime() == null) {
         countCurrentPrimary++;
       }
-      if (isCheckingPersonHistory && Boolean.TRUE.equals(current.getPrimary())) {
-        latestEntityInHistoryUuid = current.getPosition().getUuid();
-      } else {
-        latestEntityInHistoryUuid = current.getPerson().getUuid();
+      if (Boolean.TRUE.equals(current.getPrimary())) {
+        if (isCheckingPersonHistory) {
+          latestEntityInHistoryUuid = current.getPosition().getUuid();
+        } else {
+          latestEntityInHistoryUuid = current.getPerson().getUuid();
+        }
       }
-    }
 
-    if (countCurrentPrimary == 0 && currentEntityInHistoryUuid != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "There should be a primary history entry without an end time.");
     }
     if (countCurrentPrimary > 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

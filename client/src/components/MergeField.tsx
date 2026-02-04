@@ -78,15 +78,13 @@ const MergeField = ({
   }, [canAutoMerge, action, fieldName, mergeState])
 
   // show an action button for fields that need to be merged manually
-  console.log(fieldName)
-  console.log(showAction)
   const actionButton = useMemo(
     () =>
       showAction &&
       !canAutoMerge &&
       action &&
       getActionButton(action, align, mergeState, fieldName),
-    [canAutoMerge, action, align, fieldName, mergeState]
+    [showAction, canAutoMerge, action, align, fieldName, mergeState]
   )
 
   // get selected side (has side effect!)
