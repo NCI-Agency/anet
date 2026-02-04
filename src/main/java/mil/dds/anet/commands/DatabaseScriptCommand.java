@@ -1,5 +1,7 @@
 package mil.dds.anet.commands;
 
+import static mil.dds.anet.commands.Utils.ANET_COMMAND_GROUP;
+
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,13 +10,11 @@ import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.shell.command.annotation.Command;
-import org.springframework.shell.command.annotation.Option;
-import org.springframework.shell.context.InteractionMode;
-import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
+import org.springframework.stereotype.Component;
 
-@ShellComponent
-@Command(group = "ANET commands")
+@Component
 public class DatabaseScriptCommand {
 
   private static final Logger logger =
@@ -37,24 +37,20 @@ public class DatabaseScriptCommand {
     databaseHandler.closeHandle(handle);
   }
 
-  @Command(command = "dbScript", description = "Executes a SQL script",
-      interactionMode = InteractionMode.NONINTERACTIVE)
-  public void dbScript(@Option(longNames = "sqlFile", shortNames = 'S',
-      description = "the SQL file", required = true) String sqlFile) {
-    int exitCode = 1;
+  @Command(group = ANET_COMMAND_GROUP, name = "dbScript", description = "Executes a SQL script")
+  public void dbScript(@Option(longName = "sqlFile", shortName = 'S', description = "the SQL file",
+      required = true) String sqlFile) {
     final Handle handle = getDbHandle();
     try {
       // scan:ignore — false positive, we *want* to run the user-provided SQL script
       final String sqlScript = new String(Files.readAllBytes(Paths.get(sqlFile)));
       logger.info("Running SQL script: {}", sqlFile);
-      if (handle.createScript(sqlScript).execute() != null) {
-        exitCode = 0;
-      }
+      handle.createScript(sqlScript).execute();
     } catch (Exception e) {
       logger.error("Error running SQL script", e);
+      Utils.exitWithError(applicationContext);
     } finally {
       closeDbHandle(handle);
-      Utils.exit(applicationContext, exitCode);
     }
   }
 

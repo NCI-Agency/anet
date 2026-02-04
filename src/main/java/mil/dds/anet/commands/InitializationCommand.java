@@ -1,7 +1,9 @@
 package mil.dds.anet.commands;
 
 import static mil.dds.anet.beans.Position.PositionType.ADMINISTRATOR;
+import static mil.dds.anet.commands.Utils.ANET_COMMAND_GROUP;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
@@ -15,15 +17,18 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.shell.command.annotation.Command;
-import org.springframework.shell.command.annotation.Option;
-import org.springframework.shell.context.InteractionMode;
-import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
+import org.springframework.stereotype.Component;
 
-@ShellComponent
-@Command(group = "ANET commands")
+@Component
 public class InitializationCommand {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static final String DB_SHOULD_BE_EMPTY =
       "\tThis task can only be run on an otherwise empty database";
@@ -36,24 +41,22 @@ public class InitializationCommand {
     this.engine = engine;
   }
 
-  @Command(command = "init", description = "Initializes the ANET database",
-      interactionMode = InteractionMode.NONINTERACTIVE)
+  @Command(group = ANET_COMMAND_GROUP, name = "init", description = "Initializes the ANET database")
   public void init(
-      @Option(longNames = "adminOrgName", description = "set administrative organization name",
+      @Option(longName = "adminOrgName", description = "set administrative organization name",
           required = true) String adminOrgName,
-      @Option(longNames = "adminPosName", description = "set administrative position name",
+      @Option(longName = "adminPosName", description = "set administrative position name",
           required = true) String adminPosName,
-      @Option(longNames = "adminFullName",
+      @Option(longName = "adminFullName",
           description = "set administrator's full name; use format: LASTNAME, Firstname",
           required = true) String adminFullName,
-      @Option(longNames = "adminDomainUsername",
-          description = "set administrator's domain username",
+      @Option(longName = "adminDomainUsername", description = "set administrator's domain username",
           required = true) String adminDomainUsername) {
+    logger.info("Initializing ANET database");
     checkPreconditions();
     final String defaultApprovalOrgUuid =
         createInitialAdministrator(adminOrgName, adminPosName, adminFullName, adminDomainUsername);
     saveAdminSettings(defaultApprovalOrgUuid);
-    Utils.exit(applicationContext, 0);
   }
 
   private void checkPreconditions() {
@@ -95,7 +98,7 @@ public class InitializationCommand {
   private void exitWithError(final String errorMessage, final String userHint) {
     System.err.println(errorMessage);
     System.err.println(userHint);
-    Utils.exit(applicationContext, 1);
+    Utils.exitWithError(applicationContext);
   }
 
   private String createInitialAdministrator(String adminOrgName, String adminPosName,
