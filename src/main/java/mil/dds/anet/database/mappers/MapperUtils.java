@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 public class MapperUtils {
@@ -24,8 +25,11 @@ public class MapperUtils {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static ObjectMapper getDefaultMapper() {
-    return JsonMapper.builder().disable(DateTimeFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS,
-        DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS).build();
+    return JsonMapper.builder()
+        .configure(DateTimeFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+        .configure(DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+        .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
+        .configure(EnumFeature.READ_ENUMS_USING_TO_STRING, false).build();
   }
 
   public static void setCommonBeanFields(AbstractAnetBean bean, ResultSet rs, String tableName)
