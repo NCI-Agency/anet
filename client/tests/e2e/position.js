@@ -479,17 +479,17 @@ test.serial("Update permissions while changing positions", async t => {
       }
     }
   }
-  // Verify the option to save as additional position exists
+  // Verify the option to Assign as secondary position position exists
   const $saveButtonAdditional = await t.context.driver.findElement(
-    By.xpath('//button[text()="Save as Additional"]')
+    By.xpath('//button[text()="Assign as secondary position"]')
   )
   await t.context.driver.wait(
     until.elementIsVisible($saveButtonAdditional),
     mediumWaitMs
   )
-  // Click on the save as primary button
+  // Click on the Assign as primary position button
   $saveButton = await t.context.driver.findElement(
-    By.xpath('//button[text()="Save as Primary"]')
+    By.xpath('//button[text()="Assign as primary position"]')
   )
   await $saveButton.click()
   // Wait for the transition
