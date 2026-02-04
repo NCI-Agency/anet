@@ -18,6 +18,7 @@ import {
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
 import PendingAssessmentsByPosition from "components/PendingAssessmentsByPosition"
+import PublishedReportsOverTime from "components/PublishedReportsOverTime"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
 import {
@@ -41,6 +42,7 @@ export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
 export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 export const ADVISOR_REPORTS = "advisor-reports"
 export const CADENCE_DASHBOARD = "cadence-dashboard"
+export const PUBLISHED_REPORTS_OVER_TIME = "published-reports-over-time"
 
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS,
@@ -50,7 +52,8 @@ export const INSIGHTS = [
   REPORTS_BY_DAY_OF_WEEK,
   PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS,
-  CADENCE_DASHBOARD
+  CADENCE_DASHBOARD,
+  PUBLISHED_REPORTS_OVER_TIME
 ]
 
 const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
@@ -111,6 +114,12 @@ export const INSIGHT_DETAILS = {
     component: CadenceDashboard,
     navTitle: "Cadence Dashboard",
     title: "Cadence Dashboard"
+  },
+  [PUBLISHED_REPORTS_OVER_TIME]: {
+    searchProps: REPORT_SEARCH_PROPS,
+    component: PublishedReportsOverTime,
+    navTitle: "Reports Published Over Time",
+    title: ""
   }
 }
 
@@ -200,7 +209,12 @@ const InsightsShow = ({
       ...orgQuery
     },
     [ADVISOR_REPORTS]: {},
-    [CADENCE_DASHBOARD]: {}
+    [CADENCE_DASHBOARD]: {},
+    [PUBLISHED_REPORTS_OVER_TIME]: {
+      state: [Report.STATE.PUBLISHED],
+      releasedAtStart: getCurrentDateTime().startOf("year").toISOString(),
+      releasedAtEnd: getCurrentDateTime().endOf("year").toISOString()
+    }
   }
   let queryParams
   if (searchQuery === DEFAULT_SEARCH_QUERY) {
