@@ -1,71 +1,48 @@
 package mil.dds.anet.commands;
 
+import static mil.dds.anet.commands.Utils.ANET_COMMAND_GROUP;
+
 import java.lang.invoke.MethodHandles;
 import mil.dds.anet.AnetObjectEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.shell.command.annotation.Command;
-import org.springframework.shell.context.InteractionMode;
-import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.stereotype.Component;
 
-@ShellComponent
-@Command(group = "ANET commands", command = "maintenance",
-    description = "Various helpful maintenance commands for the ANET Database")
+@Component
 public class MaintenanceCommand {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final ApplicationContext applicationContext;
+  private static final String MAINTENANCE_COMMAND = "maintenance";
+
   private final AnetObjectEngine engine;
 
-  public MaintenanceCommand(ApplicationContext applicationContext, AnetObjectEngine engine) {
-    this.applicationContext = applicationContext;
+  public MaintenanceCommand(AnetObjectEngine engine) {
     this.engine = engine;
   }
 
-  @Command(command = "clearEmptyBiographies",
-      description = "Clears empty biographies (blank or empty HTML tags) by replacing them with a NULL value",
-      interactionMode = InteractionMode.NONINTERACTIVE)
+  @Command(group = ANET_COMMAND_GROUP, name = {MAINTENANCE_COMMAND, "clearEmptyBiographies"},
+      description = "Clears empty biographies (blank or empty HTML tags) by replacing them with a NULL value")
   public void clearEmptyBiographies() {
-    int exitCode = 1;
-    try {
-      logger.info("Clearing empty biographies");
-      engine.getPersonDao().clearEmptyBiographies();
-      exitCode = 0;
-    } finally {
-      Utils.exit(applicationContext, exitCode);
-    }
+    logger.info("Clearing empty biographies");
+    engine.getPersonDao().clearEmptyBiographies();
   }
 
-  @Command(command = "deleteDanglingAssessments",
+  @Command(group = ANET_COMMAND_GROUP, name = {MAINTENANCE_COMMAND, "deleteDanglingAssessments"},
       description = "Deletes dangling assessments (either report assessments for reports that have been deleted,"
-          + " or assessments pointing to objects that no longer exist)",
-      interactionMode = InteractionMode.NONINTERACTIVE)
+          + " or assessments pointing to objects that no longer exist)")
   public void deleteDanglingAssessments() {
-    int exitCode = 1;
-    try {
-      logger.info("Deleting dangling assessments");
-      engine.getAssessmentDao().deleteDanglingAssessments();
-      exitCode = 0;
-    } finally {
-      Utils.exit(applicationContext, exitCode);
-    }
+    logger.info("Deleting dangling assessments");
+    engine.getAssessmentDao().deleteDanglingAssessments();
   }
 
-  @Command(command = "deleteDanglingNotes",
-      description = "Deletes dangling notes (notes pointing to objects that no longer exist)",
-      interactionMode = InteractionMode.NONINTERACTIVE)
+  @Command(group = ANET_COMMAND_GROUP, name = {MAINTENANCE_COMMAND, "deleteDanglingNotes"},
+      description = "Deletes dangling notes (notes pointing to objects that no longer exist)")
   public void deleteDanglingNotes() {
-    int exitCode = 1;
-    try {
-      logger.info("Deleting dangling notes");
-      engine.getNoteDao().deleteDanglingNotes();
-      exitCode = 0;
-    } finally {
-      Utils.exit(applicationContext, exitCode);
-    }
+    logger.info("Deleting dangling notes");
+    engine.getNoteDao().deleteDanglingNotes();
   }
 
 }
