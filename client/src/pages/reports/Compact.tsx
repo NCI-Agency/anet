@@ -4,6 +4,7 @@ import {
   gqlAssessmentsFields,
   gqlAuthorizedMembersFields,
   gqlEntityFieldsMap,
+  gqlMinimalAttachmentFields,
   gqlReportCommentsFields,
   gqlReportCommunitiesFields,
   gqlReportSensitiveInformationFields,
@@ -56,6 +57,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
+import { getAttachmentUuidsFromRichText } from "utils_links"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -120,6 +122,9 @@ const GQL_GET_REPORT = gql`
       advisorOrg {
         ${gqlEntityFieldsMap.Organization}
       }
+      attachments {
+        ${gqlMinimalAttachmentFields}
+      }
       ${gqlReportWorkflowFields}
       approvalStep {
         ${gqlApprovalStepFields}
@@ -127,6 +132,17 @@ const GQL_GET_REPORT = gql`
       ${gqlReportSensitiveInformationFields}
       ${gqlAuthorizedMembersFields}
       ${gqlAssessmentsFields}
+    }
+  }
+`
+
+const RichTextEditorS = styled(RichTextEditor)`
+  .rich-text-image-wrapper {
+    & .rich-text-image {
+      max-width: ${props =>
+        `min(400px, calc(0.5 * ${props.pageSize.width}))`} !important;
+      max-height: ${props =>
+        `min(400px, calc(0.5 * ${props.pageSize.width}))`} !important;
     }
   }
 `
@@ -193,6 +209,16 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
   // Author can always read assessments
   const canReadAssessments = isAuthor
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const imageAttachments = attachmentsEnabled
+    ? utils.getImageAttachments(report.attachments)
+    : []
+  const reportTextAttachmentUuids = getAttachmentUuidsFromRichText(
+    report.reportText
+  )
+  const imageAttachmentsForSection = imageAttachments.filter(
+    attachment => !reportTextAttachmentUuids.has(attachment.uuid)
+  )
   return (
     <>
       <CompactReportViewHeader
@@ -313,10 +339,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 wrappedComponent={CompactRow}
                 dictProps={Settings.fields.report.reportText}
                 content={
-                  <RichTextEditor
+                  <RichTextEditorS
                     readOnly
                     showAvatar={false}
                     value={report.reportText}
+                    pageSize={pageSize}
                   />
                 }
                 className="reportField keyDetailsRow"
@@ -330,10 +357,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   <CompactRow
                     id="reportSensitiveInformation"
                     content={
-                      <RichTextEditor
+                      <RichTextEditorS
                         readOnly
                         showAvatar={false}
                         value={report.reportSensitiveInformation.text}
+                        pageSize={pageSize}
                       />
                     }
                     className="reportField"
@@ -386,6 +414,32 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
+            {optionalFields.imageAttachments.active &&
+              imageAttachmentsForSection.length > 0 && (
+                <CompactRow
+                  id="imageAttachments"
+                  content={
+                    <AttachmentsWithImagesS>
+                      <AttachmentsTitleS>Image attachments</AttachmentsTitleS>
+                      <AttachmentsListS>
+                        {imageAttachmentsForSection.map(attachment => (
+                          <AttachmentFigureS key={attachment.uuid}>
+                            <AttachmentImageS
+                              src={`/api/attachment/view/${attachment.uuid}`}
+                              alt={attachment.caption || attachment.fileName}
+                              pageSize={pageSize}
+                            />
+                            <AttachmentCaptionS>
+                              {attachment.caption || attachment.fileName}
+                            </AttachmentCaptionS>
+                          </AttachmentFigureS>
+                        ))}
+                      </AttachmentsListS>
+                    </AttachmentsWithImagesS>
+                  }
+                  className="reportField"
+                />
+              )}
           </FullColumn>
         </CompactTable>
         <CompactFooterContent
@@ -578,9 +632,62 @@ const CompactReportViewS = styled.div`
   }
 `
 
+const AttachmentsWithImagesS = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+`
+
+const AttachmentsTitleS = styled.div`
+  align-self: flex-start;
+  color: #445566;
+  font-size: 14px;
+  font-weight: bold;
+`
+
+const AttachmentsListS = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+`
+
+const AttachmentFigureS = styled.figure`
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  @media print {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+`
+
+const AttachmentImageS = styled.img`
+  max-width: ${props => `min(600px, calc(0.5 * ${props.pageSize.width}))`};
+  max-height: ${props => `min(600px, calc(0.5 * ${props.pageSize.width}))`};
+  width: auto;
+  height: auto;
+  object-fit: contain;
+`
+
+const AttachmentCaptionS = styled.figcaption`
+  font-size: 13px;
+  color: #445566;
+  text-align: center;
+`
+
 const OPTIONAL_FIELDS_INIT = {
   assessments: {
     text: "Assessments",
+    active: false
+  },
+  imageAttachments: {
+    text: "Image Attachments",
     active: false
   },
   reportSensitiveInformation: {
