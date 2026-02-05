@@ -186,7 +186,7 @@ class ResourceUtilsTest {
         pph.setPrimary((boolean) testItem[i++]);
         hist.add(pph);
       }
-      logger.error("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);
+      logger.debug("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);
       try {
         ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, relationUuid);
         if (!isValid) {

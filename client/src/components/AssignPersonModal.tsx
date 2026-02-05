@@ -301,7 +301,7 @@ const AssignPersonModal = ({
             className="save-button"
             type="submit"
           >
-            Assign as secondary position
+            Assign as additional position
           </Button>
         )}
         <Button
