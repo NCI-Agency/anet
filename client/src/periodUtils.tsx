@@ -249,23 +249,20 @@ export const PeriodsTableHeader = ({
   </thead>
 )
 
-export function getOverlappingPeriodIndexes(inputPeriods) {
-  const overlappingDateIndexes = []
-  const periods = inputPeriods || []
-
-  for (let i = 0; i < periods.length; i++) {
-    // end time being null means it is still continuing, might as well pick a large number for it
-    const endTime1 = periods[i].endTime || Infinity
-    // Search against other periods
-    for (let j = i + 1; j < periods.length; j++) {
-      const endTime2 = periods[j].endTime || Infinity
-      if (periods[i].startTime < endTime2 && endTime1 > periods[j].startTime) {
-        overlappingDateIndexes.push([i, j])
-      }
-    }
+export function timesOverlap(
+  startA?: number,
+  endA?: number | null,
+  startB?: number,
+  endB?: number | null
+): boolean {
+  if (startA == null || startB == null) {
+    return false
   }
 
-  return overlappingDateIndexes
+  const aEnd = endA ?? Infinity
+  const bEnd = endB ?? Infinity
+
+  return startA < bEnd && startB < aEnd
 }
 
 const SCREEN_SIZES = {

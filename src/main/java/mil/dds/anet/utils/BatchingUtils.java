@@ -230,6 +230,12 @@ public final class BatchingUtils {
                 .supplyAsync(() -> engine.getOrganizationDao().getOrganizationsByDate(foreignKeys),
                     dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.PERSON_PERSON_ADDITIONAL_POSITIONS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getPersonDao().getPersonAdditionalPositions(foreignKeys),
+                dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture
@@ -259,10 +265,10 @@ public final class BatchingUtils {
                 () -> engine.getPositionDao().getAssociatedPositionsForPosition(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.POSITION_CURRENT_POSITION_FOR_PERSON.toString(),
+    dataLoaderRegistry.register(FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getPositionDao().getCurrentPersonForPosition(foreignKeys),
+                () -> engine.getPositionDao().getPrimaryPersonForPosition(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY.toString(),

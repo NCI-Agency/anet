@@ -95,7 +95,7 @@ public class SubscriptionResource {
   private void checkSubscriber(Position position) {
     if (DaoUtils.getUuid(position) == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "User must have a current position to subscribe");
+          "User must have a current primary position to subscribe");
     }
   }
 

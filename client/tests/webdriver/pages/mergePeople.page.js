@@ -57,10 +57,6 @@ class MergePeople extends Page {
     return browser.$$(".offcanvas .card")
   }
 
-  async getEditHistoryButton() {
-    return browser.$('//button[text()="Edit History Manually"]')
-  }
-
   async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
     return browser.$(`#mid-merge-per-col ${button} > button`)

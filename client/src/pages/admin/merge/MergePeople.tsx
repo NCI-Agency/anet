@@ -12,7 +12,6 @@ import {
   mapReadonlyCustomFieldToComp
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
-import EditHistory from "components/EditHistory"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -29,6 +28,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionsTable from "components/PositionsTable"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
 import UserTable from "components/UserTable"
@@ -63,8 +63,16 @@ const GQL_GET_PERSON = gql`
 `
 
 const GQL_MERGE_PERSON = gql`
-  mutation ($loserUuid: String!, $winnerPerson: PersonInput!) {
-    mergePeople(loserUuid: $loserUuid, winnerPerson: $winnerPerson)
+  mutation (
+    $loserUuid: String!
+    $winnerPerson: PersonInput!
+    $useWinnerPositionHistory: Boolean
+  ) {
+    mergePeople(
+      loserUuid: $loserUuid
+      winnerPerson: $winnerPerson
+      useWinnerPositionHistory: $useWinnerPositionHistory
+    )
   }
 `
 
@@ -78,7 +86,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
   const initialLeftUuid = state?.initialLeftUuid
   const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
-  const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [sideUsedForHistory, setSideUsedForHistory] = useState(null)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Person
   )
@@ -125,6 +133,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
             align={ALIGN_OPTIONS.LEFT}
             label="Person 1"
             disabled={!!initialLeftUuid}
+            setSideUsedForHistory={setSideUsedForHistory}
           />
         </Col>
         <Col md={4} id="mid-merge-per-col">
@@ -261,33 +270,23 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.additionalPositions}
+                value={
+                  <PositionsTable
+                    label={Settings.fields.person.additionalPositions?.label}
+                    positions={mergedPerson.additionalPositions}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="additionalPositions"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.prevPositions}
                 value={
-                  <>
-                    <PreviousPositions
-                      history={mergedPerson.previousPositions}
-                    />
-                    <EditHistory
-                      history1={person1.previousPositions}
-                      history2={person2.previousPositions}
-                      initialHistory={mergedPerson.previousPositions}
-                      historyComp={PreviousPositions}
-                      showModal={showHistoryModal}
-                      setShowModal={setShowHistoryModal}
-                      currentlyOccupyingEntity={mergedPerson.position}
-                      parentEntityUuid1={person1.uuid}
-                      parentEntityUuid2={person2.uuid}
-                      showEditButton
-                      historyEntityType="position"
-                      midColTitle="Merged Person History"
-                      mainTitle="Pick and Choose positions and dates for Positions History"
-                      setHistory={history =>
-                        dispatchMergeActions(
-                          setAMergedField("previousPositions", history, "mid")
-                        )
-                      }
-                    />
-                  </>
+                  <PreviousPositions history={mergedPerson.previousPositions} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="previousPositions"
@@ -449,6 +448,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.RIGHT}
             label="Person 2"
+            setSideUsedForHistory={setSideUsedForHistory}
           />
         </Col>
       </Row>
@@ -475,9 +475,17 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
     const loser = mergedPerson.uuid === person1.uuid ? person2 : person1
     mergedPerson.customFields = customFieldsJSONString(mergedPerson)
     const winnerPerson = Person.filterClientSideFields(mergedPerson)
+
+    // Figure out which history has been selected
+    const winnerIsLeft = mergedPerson.uuid === person1.uuid
+    const useWinnerPositionHistory =
+      (sideUsedForHistory === ALIGN_OPTIONS.LEFT && winnerIsLeft) ||
+      (sideUsedForHistory === ALIGN_OPTIONS.RIGHT && !winnerIsLeft)
+
     API.mutation(GQL_MERGE_PERSON, {
       loserUuid: loser.uuid,
-      winnerPerson
+      winnerPerson,
+      useWinnerPositionHistory
     })
       .then(res => {
         if (res) {
@@ -520,6 +528,7 @@ interface PersonColumnProps {
   disabled?: boolean
   mergeState?: any
   dispatchMergeActions?: (...args: unknown[]) => unknown
+  setSideUsedForHistory: (...args: unknown[]) => unknown
 }
 
 const PersonColumn = ({
@@ -527,7 +536,8 @@ const PersonColumn = ({
   label,
   disabled,
   mergeState,
-  dispatchMergeActions
+  dispatchMergeActions,
+  setSideUsedForHistory
 }: PersonColumnProps) => {
   const person = mergeState[align]
   const otherSide = mergeState[getOtherSide(align)]
@@ -659,7 +669,37 @@ const PersonColumn = ({
               dispatchMergeActions(
                 setAMergedField("position", person.position, align)
               )
+              dispatchMergeActions(
+                setAMergedField(
+                  "additionalPositions",
+                  person.additionalPositions,
+                  align
+                )
+              )
+              dispatchMergeActions(
+                setAMergedField(
+                  "previousPositions",
+                  person.previousPositions,
+                  align
+                )
+              )
+              setSideUsedForHistory(align)
             }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.additionalPositions}
+            fieldName="additionalPositions"
+            value={
+              <PositionsTable
+                label={Settings.fields.person.additionalPositions?.label}
+                positions={person.additionalPositions}
+              />
+            }
+            align={align}
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
@@ -670,16 +710,8 @@ const PersonColumn = ({
             fieldName="previousPositions"
             value={<PreviousPositions history={person.previousPositions} />}
             align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField(
-                  "previousPositions",
-                  person.previousPositions,
-                  align
-                )
-              )
-            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField

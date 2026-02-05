@@ -6902,6 +6902,24 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="drop-unique-currentPersonInPosition-index" author="gjvoosten">
+		<dropIndex tableName="positions" indexName="UQ_CurrentPersonInPosition" />
+	</changeSet>
+
+	<changeSet id="add-primary-column-to-peoplePositions" author="fdelcastillo">
+		<addColumn tableName="peoplePositions">
+			<column name="primary" type="boolean" defaultValue="true" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="make-people-primaryPosition-unique" author="fdelcastillo">
+		<sql>
+			CREATE UNIQUE INDEX "UQ_PeoplePrimaryPosition"
+				ON "peoplePositions" ("personUuid")
+				WHERE "primary" IS TRUE AND "endedAt" IS NULL;
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
