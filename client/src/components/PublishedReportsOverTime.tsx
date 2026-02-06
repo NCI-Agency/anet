@@ -10,9 +10,8 @@ import {
   usePageTitle
 } from "components/Page"
 import _escape from "lodash/escape"
-import { Report } from "models"
 import moment from "moment"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { useResizeDetector } from "react-resize-detector"
 
@@ -37,39 +36,55 @@ const GRANULARITY = {
   WEEK: "week"
 }
 
+// Helper to resolve various date value types to a moment object
+function resolveDateValue(value) {
+  if (value === null || value === undefined) {
+    return null
+  }
+  if (typeof value === "number") {
+    return moment().add(value, "milliseconds")
+  }
+  if (moment.isMoment(value)) {
+    return value.clone()
+  }
+  return moment(value)
+}
+
 interface PublishedReportsOverTimeProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
+  setQueryParams?: (...args: unknown[]) => unknown
 }
 
 const PublishedReportsOverTime = ({
   pageDispatchers,
-  queryParams
+  queryParams,
+  setQueryParams
 }: PublishedReportsOverTimeProps) => {
   const [granularity, setGranularity] = useState(GRANULARITY.MONTH)
-  const [yearOffset, setYearOffset] = useState(0)
   usePageTitle("Reports Published Over Time")
 
   const { width, ref } = useResizeDetector()
-  const yearStart = useMemo(
-    () => moment().subtract(yearOffset, "year").startOf("year"),
-    [yearOffset]
+  const rangeStart = useMemo(
+    () => resolveDateValue(queryParams?.releasedAtStart),
+    [queryParams?.releasedAtStart]
   )
-  const displayEnd = useMemo(() => {
-    if (yearOffset === 0) {
-      return moment().endOf("day")
-    }
-    return yearStart.clone().endOf("year")
-  }, [yearOffset, yearStart])
+  const rangeEnd = useMemo(
+    () => resolveDateValue(queryParams?.releasedAtEnd),
+    [queryParams?.releasedAtEnd]
+  )
+  const todayEnd = moment().endOf("day")
+  const displayRangeEnd =
+    rangeEnd && rangeEnd.isAfter(todayEnd) ? todayEnd : rangeEnd
+  const hasRange = Boolean(
+    rangeStart && displayRangeEnd && rangeStart.isSameOrBefore(displayRangeEnd)
+  )
   const reportQuery = useMemo(
     () => ({
       ...(queryParams || {}),
-      pageSize: 0,
-      state: [Report.STATE.PUBLISHED],
-      releasedAtStart: yearStart,
-      releasedAtEnd: displayEnd
+      pageSize: 0
     }),
-    [queryParams, yearStart, displayEnd]
+    [queryParams]
   )
 
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
@@ -81,7 +96,7 @@ const PublishedReportsOverTime = ({
     pageDispatchers
   })
   const graphData = useMemo(() => {
-    if (!data) {
+    if (!data || !hasRange) {
       return []
     }
     const reportsList = data.reportList.list || []
@@ -90,8 +105,8 @@ const PublishedReportsOverTime = ({
     }
     const periods =
       granularity === GRANULARITY.MONTH
-        ? buildMonthlyPeriods(yearStart, displayEnd)
-        : buildWeeklyPeriods(yearStart, displayEnd)
+        ? buildMonthlyPeriods(rangeStart, displayRangeEnd)
+        : buildWeeklyPeriods(rangeStart, displayRangeEnd)
     const counts = reportsList.reduce((acc, report) => {
       if (!report.releasedAt) {
         return acc
@@ -100,7 +115,7 @@ const PublishedReportsOverTime = ({
       const key =
         granularity === GRANULARITY.MONTH
           ? releasedAt.format("YYYY-MM")
-          : getWeekKey(releasedAt, yearStart)
+          : getWeekKey(releasedAt, rangeStart)
       acc[key] = (acc[key] || 0) + 1
       return acc
     }, {})
@@ -108,13 +123,14 @@ const PublishedReportsOverTime = ({
       ...period,
       reportsCount: counts[period.periodKey] || 0
     }))
-  }, [data, granularity, yearStart, displayEnd])
+  }, [data, displayRangeEnd, granularity, hasRange, rangeStart])
 
-  if (done) {
-    return result
-  }
-
-  const displayedYear = yearStart.year()
+  const displayedRangeLabel =
+    hasRange && rangeStart.year() === displayRangeEnd.year()
+      ? `Year ${rangeStart.year()}`
+      : hasRange
+        ? `${rangeStart.format("YYYY")}–${displayRangeEnd.format("YYYY")}`
+        : "Release Date range"
   const totalReports = graphData.reduce(
     (total, period) => total + period.reportsCount,
     0
@@ -123,8 +139,66 @@ const PublishedReportsOverTime = ({
     granularity === GRANULARITY.MONTH ? BAR_WIDTH_MONTHLY : BAR_WIDTH_WEEKLY
   const chartWidth = Math.max(width || 0, graphData.length * minBarWidth)
   const hasData = graphData.length > 0
-  const updateYearOffset = nextOffset => {
-    setYearOffset(Math.max(0, nextOffset))
+  const isCurrentYearClampedRange =
+    hasRange &&
+    rangeStart.isSame(rangeStart.clone().startOf("year"), "day") &&
+    displayRangeEnd.isSame(todayEnd, "day") &&
+    rangeStart.isSame(todayEnd, "year")
+  const isFullYearRange =
+    hasRange &&
+    rangeStart.isSame(rangeStart.clone().startOf("year"), "day") &&
+    displayRangeEnd.isSame(displayRangeEnd.clone().endOf("year"), "day")
+  const getShiftedRange = direction => {
+    if (!hasRange) {
+      return null
+    }
+    let nextStart = rangeStart.clone().add(direction, "year")
+    let nextEnd = displayRangeEnd.clone().add(direction, "year")
+    if (direction < 0 && isCurrentYearClampedRange) {
+      nextStart = nextStart.startOf("year")
+      nextEnd = nextStart.clone().endOf("year")
+    } else if (direction > 0 && isFullYearRange) {
+      nextStart = nextStart.startOf("year")
+      if (nextStart.isSame(todayEnd, "year")) {
+        nextEnd = todayEnd.clone()
+      } else {
+        nextEnd = nextStart.clone().endOf("year")
+      }
+    } else if (direction > 0 && nextEnd.isAfter(todayEnd)) {
+      nextEnd = todayEnd.clone()
+    }
+    if (direction > 0 && nextStart.isAfter(todayEnd, "day")) {
+      return null
+    }
+    return { start: nextStart, end: nextEnd }
+  }
+
+  const canGoNewer = Boolean(getShiftedRange(1))
+  const canGoPrevious = Boolean(getShiftedRange(-1))
+  const updateQueryParams = nextQueryParams => setQueryParams?.(nextQueryParams)
+  useEffect(() => {
+    if (!rangeEnd || !rangeEnd.isAfter(todayEnd)) {
+      return
+    }
+    updateQueryParams({
+      ...(queryParams || {}),
+      releasedAtEnd: todayEnd.toISOString()
+    })
+  }, [queryParams, rangeEnd, todayEnd])
+  const shiftRange = direction => {
+    const shifted = getShiftedRange(direction)
+    if (!shifted) {
+      return
+    }
+    updateQueryParams({
+      ...(queryParams || {}),
+      releasedAtStart: shifted.start.toISOString(),
+      releasedAtEnd: shifted.end.toISOString()
+    })
+  }
+
+  if (done) {
+    return result
   }
 
   return (
@@ -134,17 +208,18 @@ const PublishedReportsOverTime = ({
           <div className="d-flex align-items-center gap-2">
             <Button
               variant="outline-secondary"
-              onClick={() => updateYearOffset(yearOffset + 1)}
+              disabled={!canGoPrevious}
+              onClick={() => shiftRange(-1)}
             >
               <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} /> previous year
             </Button>
-            <div className="fw-semibold">Year {displayedYear}</div>
+            <div className="fw-semibold">{displayedRangeLabel}</div>
             <Button
               variant="outline-secondary"
-              disabled={yearOffset === 0}
-              onClick={() => updateYearOffset(yearOffset - 1)}
+              disabled={!canGoNewer}
+              onClick={() => shiftRange(1)}
             >
-              next year <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
+              newer year <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
             </Button>
           </div>
           <ButtonToggleGroup value={granularity} onChange={setGranularity}>
@@ -158,12 +233,17 @@ const PublishedReportsOverTime = ({
         </div>
 
         <div className="mb-3">
-          <div className="fw-semibold">
-            Total published reports: {totalReports}
+          <div className="fw-semibold">Total reports: {totalReports}</div>
+          <div className="text-muted">
+            Counts reflect the current search filters.
           </div>
         </div>
 
-        {hasData ? (
+        {!hasRange ? (
+          <em>
+            Select a Release Date range in search filters to view results.
+          </em>
+        ) : hasData ? (
           <>
             <div ref={ref} style={{ overflowX: "auto" }}>
               <BarChart
@@ -187,7 +267,7 @@ const PublishedReportsOverTime = ({
                 <thead>
                   <tr>
                     <th>Period</th>
-                    <th className="text-end">Published reports</th>
+                    <th className="text-end">Reports</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -202,48 +282,63 @@ const PublishedReportsOverTime = ({
             </div>
           </>
         ) : (
-          <em>No published reports found for {displayedYear}.</em>
+          <em>No reports found for the selected range.</em>
         )}
       </div>
     </div>
   )
 }
 
-const buildMonthlyPeriods = (yearStart, displayEnd) => {
-  const totalMonths = displayEnd.diff(yearStart, "months") + 1
+const buildMonthlyPeriods = (rangeStart, rangeEnd) => {
+  const startOfFirstMonth = rangeStart.clone().startOf("month")
+  const startOfLastMonth = rangeEnd.clone().startOf("month")
+  const totalMonths = startOfLastMonth.diff(startOfFirstMonth, "months") + 1
   return Array.from({ length: totalMonths }, (_, index) => {
-    const start = yearStart.clone().add(index, "month").startOf("month")
-    let end = start.clone().endOf("month")
-    if (end.isAfter(displayEnd)) {
-      end = displayEnd.clone()
-    }
+    const start = startOfFirstMonth.clone().add(index, "month").startOf("month")
+    const monthEnd = start.clone().endOf("month")
+    const isFirst = index === 0
+    const isLast = index === totalMonths - 1
+    const periodStart = isFirst ? rangeStart.clone() : start
+    const periodEnd = isLast ? rangeEnd.clone() : monthEnd
     return {
       periodKey: start.format("YYYY-MM"),
       label: start.format("MMM"),
-      periodRange: `${start.format("MMM D")} - ${end.format("MMM D")}`
+      periodRange: `${periodStart.format("MMM D")} - ${periodEnd.format(
+        "MMM D"
+      )}`
     }
   })
 }
 
-const buildWeeklyPeriods = (yearStart, displayEnd) => {
-  const totalWeeks = displayEnd.diff(yearStart, "weeks") + 1
+const buildWeeklyPeriods = (rangeStart, rangeEnd) => {
+  const startOfRange = rangeStart.clone().startOf("day")
+  const endOfRange = rangeEnd.clone().startOf("day")
+  const totalWeeks = endOfRange.diff(startOfRange, "weeks") + 1
   return Array.from({ length: totalWeeks }, (_, index) => {
-    const start = yearStart.clone().add(index, "weeks").startOf("day")
-    let end = start.clone().add(6, "days").endOf("day")
-    if (end.isAfter(displayEnd)) {
-      end = displayEnd.clone()
+    const start = startOfRange.clone().add(index, "weeks")
+    const isFirst = index === 0
+    const isLast = index === totalWeeks - 1
+    const periodStart = isFirst ? rangeStart.clone() : start.clone()
+    let periodEnd = start.clone().add(6, "days").endOf("day")
+    if (isLast || periodEnd.isAfter(rangeEnd)) {
+      periodEnd = rangeEnd.clone()
     }
     const weekLabel = String(index + 1).padStart(2, "0")
     return {
       periodKey: `W${weekLabel}`,
       label: `W${weekLabel}`,
-      periodRange: `${start.format("MMM D")} - ${end.format("MMM D")}`
+      periodRange: `${periodStart.format("MMM D")} - ${periodEnd.format(
+        "MMM D"
+      )}`
     }
   })
 }
 
-const getWeekKey = (releasedAt, yearStart) => {
-  const weekIndex = releasedAt.diff(yearStart, "weeks")
+const getWeekKey = (releasedAt, rangeStart) => {
+  const weekIndex = releasedAt
+    .clone()
+    .startOf("day")
+    .diff(rangeStart.clone().startOf("day"), "weeks")
   const weekLabel = String(weekIndex + 1).padStart(2, "0")
   return `W${weekLabel}`
 }

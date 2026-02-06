@@ -216,6 +216,14 @@ const InsightsShow = ({
   }
   const insightConfig = INSIGHT_DETAILS[insight]
   const InsightComponent = insightConfig.component
+  const searchObjectType = insightConfig.searchProps.searchObjectTypes?.[0]
+  const setInsightQueryParams = nextQueryParams => {
+    deserializeQueryParams(
+      searchObjectType,
+      nextQueryParams,
+      deserializeCallback
+    )
+  }
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: insightConfig.searchProps,
@@ -229,6 +237,7 @@ const InsightsShow = ({
           pageDispatchers={pageDispatchers}
           style={mosaicLayoutStyle}
           queryParams={queryParams}
+          setQueryParams={setInsightQueryParams}
         />
       </Fieldset>
     </div>
