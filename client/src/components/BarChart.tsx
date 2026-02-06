@@ -27,6 +27,7 @@ interface BarChartProps {
   xProp: string | string[]
   yProp: string | string[]
   xLabel?: string | string[]
+  xPadding?: number
   barClass?: string
   onBarClick?: (...args: unknown[]) => unknown
   tooltip?: (...args: unknown[]) => unknown
@@ -42,6 +43,7 @@ const BarChart = ({
   xProp, // data property to use for the x-axis domain
   yProp, // data property to use for the y-axis domain
   xLabel, // data property to use for the x-axis ticks label
+  xPadding = 0.1,
   barClass = "bars-group",
   onBarClick,
   tooltip,
@@ -131,7 +133,7 @@ const BarChart = ({
     const xWidth = chartWidth - marginLeft - MARGIN.right
     const yHeight = chartHeight - MARGIN.top - marginBottom
 
-    xScale.rangeRound([0, xWidth]).padding(0.1)
+    xScale.rangeRound([0, xWidth]).padding(xPadding)
     yScale.range([yHeight, 0])
 
     const xAxis = d3.axisBottom(xScale).tickFormat(function (d) {

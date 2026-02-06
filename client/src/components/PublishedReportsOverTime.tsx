@@ -28,8 +28,6 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const BAR_WIDTH_MONTHLY = 44
-const BAR_WIDTH_WEEKLY = 28
 const BAR_HEIGHT = 320
 const GRANULARITY = {
   MONTH: "month",
@@ -135,9 +133,10 @@ const PublishedReportsOverTime = ({
     (total, period) => total + period.reportsCount,
     0
   )
-  const minBarWidth =
-    granularity === GRANULARITY.MONTH ? BAR_WIDTH_MONTHLY : BAR_WIDTH_WEEKLY
-  const chartWidth = Math.max(width || 0, graphData.length * minBarWidth)
+  const periodCount = graphData.length
+  const containerWidth = width || 0
+  const chartWidth = containerWidth
+  const barPadding = 0.1
   const hasData = graphData.length > 0
   const isCurrentYearClampedRange =
     hasRange &&
@@ -254,6 +253,7 @@ const PublishedReportsOverTime = ({
                 xProp="periodKey"
                 yProp="reportsCount"
                 xLabel="label"
+                xPadding={barPadding}
                 tooltip={d => `
                   <h4>${_escape(d.label)}</h4>
                   <p>${_escape(d.periodRange)}</p>
