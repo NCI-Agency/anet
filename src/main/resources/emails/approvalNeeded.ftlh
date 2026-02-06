@@ -1,29 +1,16 @@
-<html>
+<html lang="en">
 <head>
-<style type="text/css">
-  body {
-    font-family: Arial, Helvetica, SourceSansPro-Regular;
-    color: #000000;
-    font-size: 11px
-  }
-  h1 {
-    font-size: 20px
-  }
-  h2 {
-    font-size: 16px;
-  }
-  a {
-    color:#0072BD;
-  }
-</style>
+  <style>
+    <#include "common/emailStyle.css" parse="false">
+  </style>
 </head>
 <body>
-<p style="font-size:12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+<#include "common/securityBanner.ftlh">
 
 <p>Dear ${approvalStepName},</p>
-<br><br>
+
 <div>
-  This report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>,
+  This report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent}</a>,
   authored by
   <#assign reportAuthors = (report.loadAuthors(context).get())!>
   <#list reportAuthors as reportAuthor>
@@ -57,8 +44,8 @@
       <#if !attendee.interlocutor>
         <li>
           ${(attendee.name)!}
-          <#if attendee.loadPosition()??>
-            <#assign position = attendee.loadPosition()>
+          <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
+            <#assign position = attendee.getPosition()>
             <#if position.loadOrganization(context).get()??>
               <#assign organization = position.getOrganization()>
               <em>from</em> ${(organization.shortName)!}
@@ -82,10 +69,10 @@
   <ul>
     <#list attendees as attendee>
       <#if attendee.interlocutor>
-         <li>
+        <li>
           ${(attendee.name)!}
-          <#if attendee.loadPosition()??>
-            <#assign position = attendee.loadPosition()>
+          <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
+            <#assign position = attendee.getPosition()>
             <#if position.loadOrganization(context).get()??>
               <#assign organization = position.getOrganization()>
               <em>from</em> ${(organization.shortName)!}
@@ -142,12 +129,6 @@
   </div>
 </div>
 
-<p>ANET Support Team
-<#if SUPPORT_EMAIL_ADDR??>
-  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
-</#if></p>
-
-<p>The email is automatically sent by ANET. If you no longer wish to receive these emails you can adjust your <a href="${serverUrl}/preferences"><em><strong>notification preferences</strong></em></a></p>
-
+<#include "common/notificationFooter.ftlh">
 </body>
 </html>

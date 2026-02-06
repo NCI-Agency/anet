@@ -12,9 +12,9 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,11 +23,14 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false}")
 public class ReportPublicationWorker extends AbstractWorker {
 
+  private final AuditTrailDao auditTrailDao;
   private final ReportDao dao;
 
-  public ReportPublicationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, ReportDao dao) {
+  public ReportPublicationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
+      AuditTrailDao auditTrailDao, ReportDao dao) {
     super(dict, jobHistoryDao,
         "Report Publication Worker waking up to check for reports to be published");
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -61,9 +64,9 @@ public class ReportPublicationWorker extends AbstractWorker {
               if (numRows == 0) {
                 logger.error("Couldn't process report publication for report {}", r.getUuid());
               } else {
-                AnetAuditLogger.log(
-                    "report {} automatically published by the ReportPublicationWorker",
-                    r.getUuid());
+                // Log the change
+                auditTrailDao.logUpdate(null, ReportDao.TABLE_NAME, r,
+                    "report has been automatically published by the ReportPublicationWorker");
               }
             } catch (Exception e) {
               logger.error("Exception when publishing report", e);

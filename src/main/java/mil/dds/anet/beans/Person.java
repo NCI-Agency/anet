@@ -8,12 +8,14 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -259,24 +261,21 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @GraphQLQuery(name = "position")
-  public CompletableFuture<Position> loadPositionBatched(
-      @GraphQLRootContext GraphQLContext context) {
+  public CompletableFuture<Position> loadPosition(@GraphQLRootContext GraphQLContext context) {
+    return loadPositionByDate(context, null);
+  }
+
+  @GraphQLQuery(name = "positionByDate")
+  public CompletableFuture<Position> loadPositionByDate(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "when") Instant when) {
     if (position != null) {
       return CompletableFuture.completedFuture(position);
     }
-    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid).thenApply(o -> {
-      position = o;
-      return o;
-    });
-  }
-
-  /* When loaded through means other than GraphQL */
-  public synchronized Position loadPosition() {
-    if (position != null) {
-      return position;
-    }
-    position = engine().getPositionDao().getCurrentPositionForPerson(uuid);
-    return position;
+    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid, when)
+        .thenApply(o -> {
+          position = o;
+          return o;
+        });
   }
 
   @GraphQLInputField(name = "position")
@@ -384,7 +383,7 @@ public class Person extends AbstractEmailableAnetBean
     if (entityAvatar != null) {
       return CompletableFuture.completedFuture(entityAvatar);
     }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATARS, uuid)
         .thenApply(o -> {
           entityAvatar = o;
           return o;
@@ -499,6 +498,13 @@ public class Person extends AbstractEmailableAnetBean
   public String toString() {
     // Only use the uuid, no personal information
     return String.format("[uuid:%s]", uuid);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    final List<String> labelParts = Arrays.asList(getRank(), getName());
+    return labelParts.stream().filter(s -> !Utils.isEmptyOrNull(s))
+        .collect(Collectors.joining(" "));
   }
 
   public static Person createWithUuid(String uuid) {

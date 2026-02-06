@@ -6920,6 +6920,202 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-auditTrail" author="gjvoosten">
+		<createTable tableName="auditTrail">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="updateType" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="updateDescription" type="${long_text_type}" />
+			<column name="updateDetails" type="${long_text_type}" />
+			<column name="personUuid" type="${uuid_type}" />
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)" />
+			<column name="relatedObjectUuid" type="${uuid_type}" />
+			<column name="createdAt" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex tableName="auditTrail" indexName="IDX_auditTrail_relatedObjectUuid">
+			<column name="relatedObjectUuid" />
+		</createIndex>
+		<createIndex tableName="auditTrail" indexName="IDX_auditTrail_personUuid">
+			<column name="personUuid" />
+		</createIndex>
+
+		<addColumn tableName="subscriptionUpdates">
+			<column name="auditTrailUuid" type="${uuid_type}" />
+		</addColumn>
+		<addForeignKeyConstraint
+			constraintName="FK_subscriptionUpdates_auditTrail"
+			baseTableName="subscriptionUpdates"
+			baseColumnNames="auditTrailUuid"
+			referencedTableName="auditTrail"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION" />
+		<createIndex tableName="subscriptionUpdates" indexName="IDX_subscriptionUpdates_auditTrailUuid">
+			<column name="auditTrailUuid" />
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="add-initial-auditTrail" author="gjvoosten">
+		<sql>
+			-- assessments
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid")
+			SELECT ${uuid_function}, 0, 'assessments', uuid, "createdAt", "authorUuid"
+			FROM "assessments";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'assessments', uuid, "updatedAt"
+			FROM "assessments"
+			WHERE "updatedAt" > "createdAt";
+
+			-- attachments
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid")
+			SELECT ${uuid_function}, 0, 'attachments', uuid, "createdAt", "authorUuid"
+			FROM "attachments";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'attachments', uuid, "updatedAt"
+			FROM "attachments"
+			WHERE "updatedAt" > "createdAt";
+
+			-- authorizationGroups
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'authorizationGroups', uuid, "createdAt"
+			FROM "authorizationGroups";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'authorizationGroups', uuid, "updatedAt"
+			FROM "authorizationGroups"
+			WHERE "updatedAt" > "createdAt";
+
+			-- events
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'events', uuid, "createdAt"
+			FROM "events";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'events', uuid, "updatedAt"
+			FROM "events"
+			WHERE "updatedAt" > "createdAt";
+
+			-- eventSeries
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'eventSeries', uuid, "createdAt"
+			FROM "eventSeries";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'eventSeries', uuid, "updatedAt"
+			FROM "eventSeries"
+			WHERE "updatedAt" > "createdAt";
+
+			-- locations
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'locations', uuid, "createdAt"
+			FROM "locations";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'locations', uuid, "updatedAt"
+			FROM "locations"
+			WHERE "updatedAt" > "createdAt";
+
+			-- notes
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid")
+			SELECT ${uuid_function}, 0, 'notes', uuid, "createdAt", "authorUuid"
+			FROM "notes";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'notes', uuid, "updatedAt"
+			FROM "notes"
+			WHERE "updatedAt" > "createdAt";
+
+			-- organizations
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'organizations', uuid, "createdAt"
+			FROM "organizations";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'organizations', uuid, "updatedAt"
+			FROM "organizations"
+			WHERE "updatedAt" > "createdAt";
+
+			-- people
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'people', uuid, "createdAt"
+			FROM "people";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'people', uuid, "updatedAt"
+			FROM "people"
+			WHERE "updatedAt" > "createdAt";
+
+			-- positions
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'positions', uuid, "createdAt"
+			FROM "positions";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'positions', uuid, "updatedAt"
+			FROM "positions"
+			WHERE "updatedAt" > "createdAt";
+
+			-- reports
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'reports', uuid, "createdAt"
+			FROM "reports";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'reports', uuid, "updatedAt"
+			FROM "reports"
+			WHERE "updatedAt" > "createdAt";
+
+			-- savedSearches
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid")
+			SELECT ${uuid_function}, 0, 'savedSearches', uuid, "createdAt", "ownerUuid"
+			FROM "savedSearches";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid")
+			SELECT ${uuid_function}, 1, 'savedSearches', uuid, "updatedAt", "ownerUuid"
+			FROM "savedSearches"
+			WHERE "updatedAt" > "createdAt";
+
+			-- subscriptions
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid")
+			SELECT ${uuid_function}, 0, 'subscriptions', uuid, "createdAt", "subscriberUuid"
+			FROM "subscriptions";
+
+			-- tasks
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 0, 'tasks', uuid, "createdAt"
+			FROM "tasks";
+
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt")
+			SELECT ${uuid_function}, 1, 'tasks', uuid, "updatedAt"
+			FROM "tasks"
+			WHERE "updatedAt" > "createdAt";
+
+			-- reportActions
+			INSERT INTO "auditTrail" (uuid, "updateType", "relatedObjectType", "relatedObjectUuid", "createdAt", "personUuid", "updateDescription")
+			SELECT ${uuid_function}, 1, 'reports', "reportUuid", "createdAt", "personUuid",
+			  CASE
+			    WHEN type = 0 THEN 'report was approved'
+			    WHEN type = 1 THEN 'report changes were requested'
+			    WHEN type = 2 THEN 'report was submitted'
+			    WHEN type = 3 THEN
+			      CASE
+				WHEN "personUuid" IS NULL
+				THEN 'report was automatically published by the ReportPublicationWorker'
+				ELSE 'report was published'
+			      END
+			    WHEN type = 4 THEN 'report was unpublished'
+			  END
+			FROM "reportActions";
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

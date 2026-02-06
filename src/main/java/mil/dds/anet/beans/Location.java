@@ -303,7 +303,7 @@ public class Location extends AbstractCustomizableAnetBean
     if (entityAvatar != null) {
       return CompletableFuture.completedFuture(entityAvatar);
     }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATARS, uuid)
         .thenApply(o -> {
           entityAvatar = o;
           return o;
@@ -351,6 +351,11 @@ public class Location extends AbstractCustomizableAnetBean
   @Override
   public String toString() {
     return String.format("(%s) - %s [%f, %f]", uuid, name, lat, lng);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
   }
 
 }

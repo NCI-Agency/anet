@@ -23,6 +23,7 @@ import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AssessmentDao;
 import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.CustomSensitiveInformationDao;
@@ -112,6 +113,10 @@ public class AnetObjectEngine {
 
   public CustomSensitiveInformationDao getCustomSensitiveInformationDao() {
     return ApplicationContextProvider.getBean(CustomSensitiveInformationDao.class);
+  }
+
+  public AuditTrailDao getAuditTrailDao() {
+    return ApplicationContextProvider.getBean(AuditTrailDao.class);
   }
 
   public AuthorizationGroupDao getAuthorizationGroupDao() {

@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
@@ -28,10 +29,10 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.services.IMartDictionaryService;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -61,14 +62,17 @@ public class AdminResource {
 
   private final AnetConfig config;
   private final AnetDictionary dict;
+  private final AuditTrailDao auditTrailDao;
   private final AdminDao adminDao;
   private final UserActivityDao userActivityDao;
   private final IMartDictionaryService martDictionaryService;
 
-  public AdminResource(AnetConfig config, AnetDictionary dict, AdminDao adminDao,
-      UserActivityDao userActivityDao, IMartDictionaryService martDictionaryService) {
+  public AdminResource(AnetConfig config, AnetDictionary dict, AuditTrailDao auditTrailDao,
+      AdminDao adminDao, UserActivityDao userActivityDao,
+      IMartDictionaryService martDictionaryService) {
     this.config = config;
     this.dict = dict;
+    this.auditTrailDao = auditTrailDao;
     this.adminDao = adminDao;
     this.userActivityDao = userActivityDao;
     this.martDictionaryService = martDictionaryService;
@@ -89,7 +93,9 @@ public class AdminResource {
     for (AdminSetting setting : settings) {
       numRows += adminDao.saveSetting(setting);
     }
-    AnetAuditLogger.log("Admin settings updated by {}", user);
+
+    // Log the change
+    auditTrailDao.logUpdate(user, Instant.now(), "admin settings have been updated");
     return numRows;
   }
 
@@ -143,7 +149,7 @@ public class AdminResource {
     AuthUtils.assertAdministrator(user);
     try {
       dict.loadDictionary();
-      AnetAuditLogger.log("Dictionary updated by {}", user);
+      auditTrailDao.logUpdate(user, Instant.now(), "dictionary has been updated");
       return AnetConstants.DICTIONARY_RELOAD_SUCCEEDED_MESSAGE;
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -169,7 +175,11 @@ public class AdminResource {
   public String clearCache(@GraphQLRootContext GraphQLContext context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    return ApplicationContextProvider.getEngine().getPersonDao().clearCache();
+    final String result = ApplicationContextProvider.getEngine().getPersonDao().clearCache();
+
+    // Log the change
+    auditTrailDao.logUpdate(user, Instant.now(), "cache has been cleared");
+    return result;
   }
 
   /**
