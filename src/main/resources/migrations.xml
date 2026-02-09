@@ -7166,6 +7166,35 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="split-people-name-in-first-and-last-name" author="gjvoosten">
+		<addColumn tableName="people">
+			<column name="familyName" type="varchar(255)" />
+			<column name="givenName" type="varchar(255)" />
+		</addColumn>
+		<sql>
+			<!-- Migrate existing data from people.name -->
+			UPDATE people
+			SET "familyName" = BTRIM(SPLIT_PART(name, ',', 1)),
+			    "givenName" = BTRIM(REGEXP_REPLACE(name, '^[^,]*,?', ''));
+
+			<!-- Drop the old people.name column
+			     (needs CASCADE as e.g. some Materialized Views depend on it, which will be recreated below -->
+			ALTER TABLE people DROP COLUMN name CASCADE;
+
+			<!-- Update the export preferences for people -->
+			UPDATE preferences
+			SET "defaultValue" = 'uuid,familyName,givenName,rank,emailAddresses,position',
+			    "allowedValues" = 'uuid,familyName,givenName,rank,emailAddresses,position',
+			    "updatedAt" = CURRENT_TIMESTAMP
+			WHERE name = 'PEOPLE' AND category = 'export';
+
+			UPDATE "peoplePreferences"
+			SET value = REPLACE(value, ',name,', ',familyName,givenName,'),
+			    "updatedAt" = CURRENT_TIMESTAMP
+			WHERE "preferenceUuid" = (SELECT uuid FROM preferences WHERE name = 'PEOPLE' AND category = 'export');
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -7443,7 +7472,8 @@
 
 			ALTER TABLE people
 				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."familyName", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."givenName", '')), ${fts_high}) ||
 					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high})
 				) STORED;
 
