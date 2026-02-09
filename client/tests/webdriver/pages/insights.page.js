@@ -9,6 +9,7 @@ const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
 export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 const ADVISOR_REPORTS = "advisor-reports"
 const CADENCE_DASHBOARD = "cadence-dashboard"
+export const PUBLISHED_REPORTS_OVER_TIME = "published-reports-over-time"
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS,
   CANCELLED_REPORTS,
@@ -17,7 +18,8 @@ export const INSIGHTS = [
   REPORTS_BY_DAY_OF_WEEK,
   PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS,
-  CADENCE_DASHBOARD
+  CADENCE_DASHBOARD,
+  PUBLISHED_REPORTS_OVER_TIME
 ]
 
 class Insights extends Page {
