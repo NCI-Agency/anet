@@ -19,7 +19,8 @@ public class TestBeans {
 
   public static Person getTestPerson() {
     Person p = new Person();
-    p.setName("TEST, Test");
+    p.setFamilyName("TEST");
+    p.setGivenName("Test");
     p.setPhoneNumber("+0-00000");
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);

@@ -14,7 +14,8 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
     state
     authors {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -27,7 +28,8 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
     }
     primaryAdvisor {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -40,7 +42,8 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
     }
     primaryInterlocutor {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -84,7 +87,8 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
           name
           person {
             uuid
-            name
+            familyName
+            givenName
             rank
             entityAvatar {
               attachmentUuid
@@ -99,7 +103,8 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
       }
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid

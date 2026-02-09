@@ -205,7 +205,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdGoodReport.getAdvisorOrg().getUuid())
         .isEqualTo(goodReport.getOrganizationUuid());
     assertThat(createdGoodReport.getAuthors()).hasSize(1);
-    assertThat(createdGoodReport.getAuthors().getFirst().getName()).isEqualTo(person1.getName());
+    assertThat(createdGoodReport.getAuthors().getFirst().getFamilyName())
+        .isEqualTo(person1.getFamilyName());
     assertThat(createdGoodReport.getTasks()).hasSize(1);
     assertThat(createdGoodReport.getAttachments()).hasSize(1);
     assertThat(createdGoodReport.getAttachments().getFirst().getFileName())

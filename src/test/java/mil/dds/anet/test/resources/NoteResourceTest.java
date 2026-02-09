@@ -32,12 +32,14 @@ class NoteResourceTest extends AbstractResourceTest {
   protected static final String NOTE_FIELDS = "{ uuid updatedAt text author { uuid }"
       + " noteRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
-  private static final String PERSON_FIELDS = String.format("{ uuid name %1$s }", _NOTES_FIELDS);
+  private static final String PERSON_FIELDS =
+      String.format("{ uuid familyName givenName %1$s }", _NOTES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
       "{ uuid name type status organization { uuid } location { uuid } %1$s }", _NOTES_FIELDS);
-  private static final String REPORT_FIELDS = String
-      .format("{ uuid intent state reportPeople { uuid name author attendee primary interlocutor }"
-          + " tasks { uuid shortName } %1$s }", _NOTES_FIELDS);
+  private static final String REPORT_FIELDS = String.format(
+      "{ uuid intent state reportPeople { uuid familyName givenName author attendee primary interlocutor }"
+          + " tasks { uuid shortName } %1$s }",
+      _NOTES_FIELDS);
 
   @Autowired
   private NoteCounterDao noteCounterDao;

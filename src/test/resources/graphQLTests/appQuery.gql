@@ -1,6 +1,7 @@
 me {
   uuid
-  name
+  familyName
+  givenName
   rank
   entityAvatar {
     attachmentUuid
@@ -58,7 +59,8 @@ me {
       }
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid
