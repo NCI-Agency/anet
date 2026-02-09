@@ -178,7 +178,8 @@ public class PersonCache {
           PropertyUtils.setSimpleProperty(personCopy, prop,
               PropertyUtils.getSimpleProperty(person, prop));
         }
-        personCopy.setName(person.getName());
+        personCopy.setFamilyName(person.getFamilyName());
+        personCopy.setGivenName(person.getGivenName());
         // Copy users
         if (!Utils.isEmptyOrNull(person.getUsers())) {
           final List<User> usersCopy = new ArrayList<>();

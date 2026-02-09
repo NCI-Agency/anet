@@ -35,7 +35,8 @@ public class PersonMapper implements RowMapper<Person> {
       return null;
     }
     MapperUtils.setCustomizableBeanFields(a, rs, "people");
-    a.setName(MapperUtils.getOptionalString(rs, "people_name"));
+    a.setFamilyName(MapperUtils.getOptionalString(rs, "people_familyName"));
+    a.setGivenName(MapperUtils.getOptionalString(rs, "people_givenName"));
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", Person.Status.class));
     a.setUser(MapperUtils.getOptionalBoolean(rs, "people_user"));
     a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));

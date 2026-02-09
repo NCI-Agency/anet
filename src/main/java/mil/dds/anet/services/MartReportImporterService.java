@@ -416,7 +416,8 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private Person createNewPerson(ReportDto martReport, List<String> errors) {
     Person person = new Person();
-    person.setName(martReport.getLastName().toUpperCase() + ", " + martReport.getFirstName());
+    person.setFamilyName(martReport.getLastName());
+    person.setGivenName(martReport.getFirstName());
     person.setRank(martReport.getRank());
     person.setStatus(WithStatus.Status.ACTIVE);
     getPersonCountry(person, martReport, errors);

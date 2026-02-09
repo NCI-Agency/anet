@@ -173,7 +173,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people_name"));
+        qb.addAllOrderByClauses(
+            getOrderBy(query.getSortOrder(), "people_familyName", "people_givenName"));
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "people_uuid"));
