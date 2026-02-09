@@ -711,12 +711,19 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       final Object[] fmtArgs;
       if (!Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
         fmtArgs = new String[] {
-            "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"personUuid\" ELSE a.\"personUuid\" END AS \"personUuid\",",
-            "CASE WHEN a.name IS NULL THEN b.name ELSE a.name END AS name,",
-            "people.uuid AS \"personUuid\",", "people.name AS name,", "people,",
-            "AND positions.\"currentPersonUuid\" = people.uuid", "people.uuid,", "people.name,",
-            "AND a.\"personUuid\" = b.\"personUuid\"", "name,",
-            "AND organizations.uuid = :organizationUuid"};
+            "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"personUuid\" ELSE a.\"personUuid\" END AS \"personUuid\",", // -
+            "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"familyName\" ELSE a.\"familyName\" END AS \"familyName\", "
+                + "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"givenName\" ELSE a.\"givenName\" END AS \"givenName\",", // -
+            "people.uuid AS \"personUuid\",", // -
+            "people.\"familyName\" AS \"familyName\", people.\"givenName\" AS \"givenName\",", // -
+            "people,", // -
+            "AND positions.\"currentPersonUuid\" = people.uuid", // -
+            "people.uuid,", // -
+            "people.\"familyName\", people.\"givenName\",", // -
+            "AND a.\"personUuid\" = b.\"personUuid\"", // -
+            "\"familyName\", \"givenName\",", // -
+            "AND organizations.uuid = :organizationUuid" // -
+        };
         sqlArgs.put("organizationUuid", orgUuid);
       } else {
         fmtArgs = new String[] {"", "", "", "", "", "", "", "", "", "", ""};
@@ -759,7 +766,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
             + ", \"reportPeople\".\"isInterlocutor\" FROM \"reportPeople\" "
             + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
             + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
-            + "ORDER BY people.name, people.uuid";
+            + "ORDER BY people.\"familyName\", people.\"givenName\", people.uuid";
 
     public ReportPeopleBatcher() {
       super(ReportDao.this.databaseHandler, SQL, "foreignKeys", new ReportPersonMapper(),
