@@ -235,8 +235,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
               + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
               + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
-              + "WHERE \"emailAddresses\".address = :emailAddress")
-          .bind("emailAddress", emailAddress).map(new PersonMapper()).list();
+              + "WHERE people.status = :status AND \"emailAddresses\".address = :emailAddress")
+          .bind("emailAddress", emailAddress)
+          .bind("status", DaoUtils.getEnumId(WithStatus.Status.ACTIVE)).map(new PersonMapper())
+          .list();
     } finally {
       closeDbHandle(handle);
     }
