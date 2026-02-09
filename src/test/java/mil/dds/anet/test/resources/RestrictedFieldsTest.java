@@ -28,8 +28,8 @@ class RestrictedFieldsTest extends AbstractResourceTest {
   private static final String EMAIL_NETWORK_INTERNET = "Internet";
   private static final String EMAIL_NETWORK_NS = "NS";
   private static final String EMAIL_NETWORK_PARAMETER = "emailNetwork";
-  private static final List<String> MART_EMAIL_ADDRESSES =
-      List.of("mart-user@kfor.nato.int", "mart-user-2@kfor.nato.int", "mart-user-3@kfor.nato.int");
+  private static final List<String> MART_EMAIL_ADDRESSES = List.of("mart-user@kfor.nato.int",
+      "mart-user-2@kfor.nato.int", "mart-user-3@kfor.nato.int", "mart-user-4@kfor.nato.int");
   private static final String EMAIL_ADDRESSES_FIELDS =
       "emailAddresses(network: ?" + EMAIL_NETWORK_PARAMETER + ") { network address }";
   private static final String PERSON_FIELDS =
