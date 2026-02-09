@@ -1,6 +1,7 @@
 person(uuid:"${personUuid}") {
   uuid
-  name
+  familyName
+  givenName
   rank
   entityAvatar {
     attachmentUuid
@@ -48,7 +49,8 @@ person(uuid:"${personUuid}") {
       type
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid
@@ -83,7 +85,8 @@ person(uuid:"${personUuid}") {
     assessmentValues
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -105,7 +108,8 @@ person(uuid:"${personUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid
@@ -133,7 +137,8 @@ person(uuid:"${personUuid}") {
     text
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -161,7 +166,8 @@ person(uuid:"${personUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid

@@ -18,7 +18,8 @@ mySubscriptions(query: {pageSize:0}) {
         identificationCode
       }
       ... on Person {
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid

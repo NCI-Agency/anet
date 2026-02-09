@@ -90,7 +90,7 @@ public class LocationMergeTest extends AbstractResourceTest {
 
     // Create a person
     final PersonInput testPersonInput =
-        PersonInput.builder().withName("Test person for location merge")
+        PersonInput.builder().withFamilyName("Test person for location merge")
             .withCountry(getLocationInput(secondLocation)).build();
     final Person testPerson = withCredentials(adminUser,
         t -> mutationExecutor.createPerson(PERSON_FIELDS, testPersonInput));

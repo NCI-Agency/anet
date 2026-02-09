@@ -26,7 +26,8 @@ organization(uuid:"${orgUuid}") {
     type
     person {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -46,7 +47,8 @@ organization(uuid:"${orgUuid}") {
       status
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid
@@ -68,7 +70,8 @@ organization(uuid:"${orgUuid}") {
       name
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid
@@ -89,7 +92,8 @@ organization(uuid:"${orgUuid}") {
       name
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid
@@ -110,7 +114,8 @@ organization(uuid:"${orgUuid}") {
     assessmentValues
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -132,7 +137,8 @@ organization(uuid:"${orgUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid
@@ -160,7 +166,8 @@ organization(uuid:"${orgUuid}") {
     text
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -188,7 +195,8 @@ organization(uuid:"${orgUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid

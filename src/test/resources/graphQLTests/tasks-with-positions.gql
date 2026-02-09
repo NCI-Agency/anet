@@ -18,7 +18,8 @@ taskList(query: {pageSize: 0}) {
       }
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid

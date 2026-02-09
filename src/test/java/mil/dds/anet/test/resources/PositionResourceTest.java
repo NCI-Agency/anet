@@ -39,8 +39,9 @@ public class PositionResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _ORGANIZATION_FIELDS =
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
-  private static final String _PERSON_FIELDS = String
-      .format("uuid updatedAt name additionalPositions {uuid name } %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _PERSON_FIELDS =
+      String.format("uuid updatedAt familyName givenName additionalPositions { uuid name } %1$s",
+          _EMAIL_ADDRESSES_FIELDS);
   private static final String _POSITION_FIELDS =
       String.format("uuid updatedAt name code type role status description customFields %1$s",
           _EMAIL_ADDRESSES_FIELDS);
@@ -52,7 +53,7 @@ public class PositionResourceTest extends AbstractResourceTest {
   public static final String FIELDS = String.format(
       "{ %1$s person { %2$s } organization { %3$s } associatedPositions { uuid }"
           + " previousPeople { createdAt startTime endTime position { uuid }"
-          + " person { uuid name rank } } attachments %4$s }",
+          + " person { uuid familyName givenName rank } } attachments %4$s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _ORGANIZATION_FIELDS,
       AttachmentResourceTest.ATTACHMENT_FIELDS);
   private static final String PA_FIELDS =
@@ -509,8 +510,8 @@ public class PositionResourceTest extends AbstractResourceTest {
   @Test
   void createPositionTest() {
     // Create a new position and designate the person upfront
-    final PersonInput newbInput =
-        PersonInput.builder().withName("PositionTest Person").withStatus(Status.ACTIVE).build();
+    final PersonInput newbInput = PersonInput.builder().withFamilyName("PositionTest Person")
+        .withStatus(Status.ACTIVE).build();
 
     final OrganizationSearchQueryInput queryOrgs =
         OrganizationSearchQueryInput.builder().withText("Ministry").build();
@@ -557,7 +558,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Assign somebody else to this position.
     final PersonInput prin2Input =
-        PersonInput.builder().withName("2nd Interlocutor in InterlocutorTest").build();
+        PersonInput.builder().withFamilyName("2nd Interlocutor in InterlocutorTest").build();
     final Person prin2 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, prin2Input));
     assertThat(prin2).isNotNull();
@@ -745,13 +746,13 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
 
     final PersonInput persInput1 =
-        PersonInput.builder().withName("Test person for edit history").build();
+        PersonInput.builder().withFamilyName("Test person for edit history").build();
     final Person person1 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, persInput1));
     assertThat(person1).isNotNull();
     assertThat(person1.getUuid()).isNotNull();
     final PersonInput persInput2 =
-        PersonInput.builder().withName("Test person for edit history").build();
+        PersonInput.builder().withFamilyName("Test person for edit history").build();
     final Person person2 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, persInput2));
     assertThat(person2).isNotNull();

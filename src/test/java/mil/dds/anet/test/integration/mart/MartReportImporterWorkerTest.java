@@ -191,7 +191,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdReport.getLocation().getUuid()).isEqualTo(goodReport.getLocationUuid());
     assertThat(createdReport.getAdvisorOrg().getUuid()).isEqualTo(goodReport.getOrganizationUuid());
     assertThat(createdReport.getAuthors()).hasSize(1);
-    assertThat(createdReport.getAuthors().get(0).getName()).isEqualTo(person1.getName());
+    assertThat(createdReport.getAuthors().get(0).getFamilyName())
+        .isEqualTo(person1.getFamilyName());
     assertThat(createdReport.getTasks()).hasSize(1);
     assertThat(createdReport.getAttachments()).hasSize(1);
     assertThat(createdReport.getAttachments().get(0).getFileName()).isEqualTo(ATTACHMENT_NAME);

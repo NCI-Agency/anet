@@ -37,8 +37,8 @@ class PositionMergeTest extends AbstractResourceTest {
     final String objectType = PositionDao.TABLE_NAME;
 
     // Create a new position and designate the person upfront
-    final PersonInput testPersonInput = PersonInput.builder().withName("MergePositionsTest Person")
-        .withStatus(Status.ACTIVE).build();
+    final PersonInput testPersonInput = PersonInput.builder()
+        .withFamilyName("MergePositionsTest Person").withStatus(Status.ACTIVE).build();
 
     final Person testPerson = withCredentials(adminUser,
         t -> mutationExecutor.createPerson(PERSON_FIELDS, testPersonInput));

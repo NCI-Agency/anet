@@ -56,7 +56,7 @@ class PersonMergeTest extends AbstractResourceTest {
     // Create a person
     final UserInput loserUser =
         UserInput.builder().withDomainUsername("loserUser." + UUID.randomUUID()).build();
-    final PersonInput loserInput1 = PersonInput.builder().withName("Loser for Merging")
+    final PersonInput loserInput1 = PersonInput.builder().withFamilyName("Loser for Merging")
         .withCountry(getLocationInput(loserCountry)).withUsers(List.of(loserUser)).build();
     final Person loser1 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, loserInput1));
@@ -124,7 +124,7 @@ class PersonMergeTest extends AbstractResourceTest {
     // Create a person
     final UserInput winnerUser =
         UserInput.builder().withDomainUsername("winnerUser." + UUID.randomUUID()).build();
-    final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
+    final PersonInput winnerInput = PersonInput.builder().withFamilyName("Winner for merging")
         .withStatus(Status.ACTIVE)
         // set HTML of biography
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
@@ -220,7 +220,8 @@ class PersonMergeTest extends AbstractResourceTest {
     assertThat(mergedPerson.getCountry().getName()).isEqualTo(winnerCountry.getName());
 
     // Re-create loser and put into the position.
-    final PersonInput loserInput2 = PersonInput.builder().withName("Loser for Merging").build();
+    final PersonInput loserInput2 =
+        PersonInput.builder().withFamilyName("Loser for Merging").build();
     final Person loser2 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, loserInput2));
     assertThat(loser2).isNotNull();
@@ -251,13 +252,14 @@ class PersonMergeTest extends AbstractResourceTest {
   @Test
   void testMergeNoHistory() {
     // Create a person
-    final PersonInput loserInput = PersonInput.builder().withName("Loser for Merging").build();
+    final PersonInput loserInput =
+        PersonInput.builder().withFamilyName("Loser for Merging").build();
     final Person loser =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, loserInput));
     assertThat(loser).isNotNull();
     assertThat(loser.getUuid()).isNotNull();
 
-    final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
+    final PersonInput winnerInput = PersonInput.builder().withFamilyName("Winner for merging")
         .withStatus(Status.ACTIVE)
         // set HTML of biography
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())

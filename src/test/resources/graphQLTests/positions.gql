@@ -14,7 +14,8 @@ position(uuid:"${positionUuid}") {
   }
   person {
     uuid
-    name
+    familyName
+    givenName
     rank
     entityAvatar {
       attachmentUuid
@@ -31,7 +32,8 @@ position(uuid:"${positionUuid}") {
     type
     person {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -54,7 +56,8 @@ position(uuid:"${positionUuid}") {
     endTime
     person {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -77,7 +80,8 @@ position(uuid:"${positionUuid}") {
     text
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -105,7 +109,8 @@ position(uuid:"${positionUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid
