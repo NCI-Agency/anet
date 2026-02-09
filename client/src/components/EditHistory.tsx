@@ -146,6 +146,8 @@ const EditHistory = ({
   const [finalHistory, setFinalHistory] = useState(getInitialState)
   const [periodsOverlapping, setPeriodsOverlapping] = useState([])
   const [alreadyOccupiedEntity, setAlreadyOccupiedEntity] = useState([])
+  const [invalidFromDates, setInvalidFromDates] = useState<string[]>([])
+  const [invalidToDates, setInvalidToDates] = useState<string[]>([])
 
   const singleSelectParameters = getSingleSelectParameters(historyEntityType)
 
@@ -213,6 +215,8 @@ const EditHistory = ({
                           <ValidationMessages
                             overlappingPositions={periodsOverlapping}
                             alreadyOccupiedPositions={alreadyOccupiedEntity}
+                            invalidFromDates={invalidFromDates}
+                            invalidToDates={invalidToDates}
                             historyEntityType={historyEntityType}
                           />
                         </div>
@@ -239,7 +243,10 @@ const EditHistory = ({
                             ) ||
                             alreadyOccupiedEntity.some(
                               o => o.uuid === item.uuid
-                            )
+                            ) ||
+                            invalidFromDates.includes(item.uuid) ||
+                            invalidToDates.includes(item.uuid)
+
                           // To be able to set fields inside the array state
                           const startTimeFieldName = `history[${idx}].startTime`
                           const endTimeFieldName = `history[${idx}].endTime`
@@ -333,6 +340,21 @@ const EditHistory = ({
                                     label={null}
                                     value={item.startTime}
                                     onChange={value => {
+                                      if (
+                                        value == null &&
+                                        values.history[idx].startTime != null
+                                      ) {
+                                        markInvalid(
+                                          setInvalidFromDates,
+                                          item.uuid
+                                        )
+                                        return
+                                      }
+                                      clearInvalid(
+                                        setInvalidFromDates,
+                                        item.uuid
+                                      )
+
                                       const newValue =
                                         value && moment(value).valueOf()
 
@@ -356,6 +378,19 @@ const EditHistory = ({
                                       <CustomDateInput
                                         id={startTimeFieldName}
                                         maxDate={getMaxDate(item)}
+                                        onInvalidChange={isInvalid => {
+                                          if (isInvalid) {
+                                            markInvalid(
+                                              setInvalidFromDates,
+                                              item.uuid
+                                            )
+                                          } else {
+                                            clearInvalid(
+                                              setInvalidFromDates,
+                                              item.uuid
+                                            )
+                                          }
+                                        }}
                                       />
                                     }
                                   />
@@ -370,6 +405,21 @@ const EditHistory = ({
                                       label={null}
                                       value={values.history[idx].endTime}
                                       onChange={value => {
+                                        if (
+                                          value == null &&
+                                          values.history[idx].endTime != null
+                                        ) {
+                                          markInvalid(
+                                            setInvalidToDates,
+                                            item.uuid
+                                          )
+                                          return
+                                        }
+                                        clearInvalid(
+                                          setInvalidToDates,
+                                          item.uuid
+                                        )
+
                                         const newValue =
                                           value && moment(value).valueOf()
 
@@ -394,6 +444,19 @@ const EditHistory = ({
                                           id={endTimeFieldName}
                                           maxDate={moment().toDate()}
                                           minDate={new Date(item.startTime)}
+                                          onInvalidChange={isInvalid => {
+                                            if (isInvalid) {
+                                              markInvalid(
+                                                setInvalidToDates,
+                                                item.uuid
+                                              )
+                                            } else {
+                                              clearInvalid(
+                                                setInvalidToDates,
+                                                item.uuid
+                                              )
+                                            }
+                                          }}
                                         />
                                       }
                                     />
@@ -417,7 +480,11 @@ const EditHistory = ({
                               id="editHistoryModalSubmitButton"
                               variant="primary"
                               onClick={() => onSave(values)}
-                              disabled={periodsOverlapping.length > 0}
+                              disabled={
+                                periodsOverlapping.length > 0 ||
+                                invalidFromDates.length > 0 ||
+                                invalidToDates.length > 0
+                              }
                             >
                               Save
                             </Button>
@@ -457,23 +524,39 @@ export default EditHistory
 interface ValidationMessagesProps {
   overlappingPositions: any
   alreadyOccupiedPositions: any
+  invalidFromDates: any
+  invalidToDates: any
   historyEntityType?: string
 }
 
 const ValidationMessages = ({
   overlappingPositions,
   alreadyOccupiedPositions,
-  historyEntityType
+  historyEntityType,
+  invalidFromDates,
+  invalidToDates
 }: ValidationMessagesProps) => {
   if (
     overlappingPositions.length === 0 &&
-    alreadyOccupiedPositions.length === 0
+    alreadyOccupiedPositions.length === 0 &&
+    invalidFromDates.length === 0 &&
+    invalidToDates.length === 0
   ) {
     return null
   }
 
   return (
     <Alert variant="danger">
+      {invalidFromDates.length > 0 && (
+        <>
+          <p>Some start dates are not valid</p>
+        </>
+      )}
+      {invalidToDates.length > 0 && (
+        <>
+          <p>Some end dates are not valid</p>
+        </>
+      )}
       {overlappingPositions.length > 0 && (
         <>
           <legend>{`Overlapping ${historyEntityType}s error`}</legend>
@@ -668,4 +751,11 @@ function getHistoryConflicts(
   })
 
   return Array.from(conflicts.values())
+}
+function markInvalid(setter, uuid) {
+  setter(prev => (prev.includes(uuid) ? prev : [...prev, uuid]))
+}
+
+function clearInvalid(setter, uuid) {
+  setter(prev => prev.filter(id => id !== uuid))
 }
