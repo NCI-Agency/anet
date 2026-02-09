@@ -15,6 +15,25 @@ class AdvancedSearch {
     return (await this.getAdvancedSearchPopover()).$$(".btn-group > .btn")
   }
 
+  async getObjectTypeButton(objectType) {
+    return (await this.getAdvancedSearchPopover()).$(
+      `.btn-group > .btn[value="${objectType}"]`
+    )
+  }
+
+  async selectObjectType(objectType) {
+    const button = await this.getObjectTypeButton(objectType)
+    if (await button.isExisting()) {
+      const isDisabled =
+        (await button.getAttribute("disabled")) !== null ||
+        !(await button.isEnabled())
+      if (isDisabled) {
+        return
+      }
+      await button.click()
+    }
+  }
+
   async getCommonSearchFilter() {
     return (await this.getAdvancedSearchPopover()).$(
       '.advanced-search-content label[for="status"]'
@@ -45,6 +64,21 @@ class AdvancedSearch {
 
   async getSearchFilter(filter) {
     return (await this.getAddFilterPopover()).$(`.//a[text()="${filter}"]`)
+  }
+
+  async getFilterRowByLabel(labelText) {
+    return (await this.getAdvancedSearchPopover()).$(
+      `.//label[normalize-space()="${labelText}"]/ancestor::div[contains(@class,"form-group")]`
+    )
+  }
+
+  async getRemoveButtonForFilter(labelText) {
+    const row = await this.getFilterRowByLabel(labelText)
+    return row.$(".remove-button")
+  }
+
+  async getSearchButton() {
+    return (await this.getAdvancedSearchPopover()).$('button[type="submit"]')
   }
 }
 
