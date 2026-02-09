@@ -6,7 +6,7 @@ import {
 } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import moment from "moment"
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
 import CALENDAR_ICON from "resources/calendar.png"
 import Settings from "settings"
 
@@ -40,6 +40,7 @@ interface CustomDateInputProps {
   onChange?: (...args: unknown[]) => unknown
   onBlur?: (...args: unknown[]) => unknown
   canClearSelection?: boolean
+  onInvalidChange?: (isInvalid: boolean) => void
 }
 
 const CustomDateInput = ({
@@ -56,8 +57,10 @@ const CustomDateInput = ({
   shortcuts,
   onChange,
   onBlur,
-  canClearSelection = false
+  canClearSelection = false,
+  onInvalidChange
 }: CustomDateInputProps) => {
+  const [isInvalid, setIsInvalid] = useState(false)
   const inputRef = useRef()
   const rightElement = showIcon && CalendarIcon(inputRef.current)
   const width = 8 + (showIcon ? 3 : 0) + (withTime ? 3 : 0)
@@ -78,6 +81,12 @@ const CustomDateInput = ({
         showArrowButtons: true
       }
   const inputValue = value == null ? null : moment(value).toISOString()
+  const reportInvalid = (next: boolean) => {
+    if (next !== isInvalid) {
+      setIsInvalid(next)
+      onInvalidChange?.(next)
+    }
+  }
   return (
     <DateInput
       inputProps={{
@@ -90,14 +99,23 @@ const CustomDateInput = ({
       rightElement={rightElement}
       value={inputValue}
       initialMonth={initialMonth}
-      onChange={onChange}
+      onChange={date => {
+        reportInvalid(false)
+        onChange?.(date)
+      }}
       formatDate={date => {
         const dt = moment(date)
         return dt.isValid() ? dt.format(inputFormat) : ""
       }}
       parseDate={str => {
         const dt = moment(str, dateFormats, true)
-        return dt.isValid() ? dt.toDate() : false
+        if (!dt.isValid()) {
+          reportInvalid(true)
+          return false
+        }
+
+        reportInvalid(false)
+        return dt.toDate()
       }}
       placeholder={inputFormat}
       maxDate={maxDate}

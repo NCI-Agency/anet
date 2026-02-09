@@ -169,7 +169,13 @@ const AssignPersonModal = ({
   }
 
   return (
-    <Modal backdrop="static" centered show={showModal} onHide={closeModal}>
+    <Modal
+      backdrop="static"
+      centered
+      show={showModal}
+      onHide={closeModal}
+      size="lg"
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           Assign person to{" "}
