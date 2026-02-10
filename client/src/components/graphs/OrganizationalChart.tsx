@@ -286,7 +286,8 @@ const OrganizationFlowChart = ({
               // when these are equal, highest ranking person first
               RANKS.indexOf(b.person?.rank) - RANKS.indexOf(a.person?.rank) ||
               // when these are also equal, sort alphabetically on person name
-              a.person?.name?.localeCompare(b.person?.name) ||
+              a.person?.familyName?.localeCompare(b.person?.familyName) ||
+              a.person?.givenName?.localeCompare(b.person?.givenName) ||
               // else sort by position name
               a.name?.localeCompare(b.name) ||
               // last resort: sort by position uuid

@@ -30,8 +30,6 @@ export default class Person extends Model {
   static getInstanceName = "person"
   static relatedObjectType = "people"
 
-  static nameDelimiter = ","
-
   static assessmentDictionaryPath = "fields.regular.person.assessments"
 
   static assessmentConfig = Settings.fields.regular.person.assessments
@@ -55,29 +53,26 @@ export default class Person extends Model {
     .object()
     .shape({
       uuid: yup.string().nullable().default(null),
-      name: yup.string().nullable().default(""),
-      // not actually in the database, but used for validation
-      firstName: yup
+      givenName: yup
         .string()
         .nullable()
         .when("user", ([user], schema) =>
           !user
             ? schema
             : schema.required(
-                `You must provide the ${Settings.fields.person.firstName?.label}`
+                `You must provide the ${Settings.fields.person.givenName?.label}`
               )
         )
         .default("")
-        .label(Settings.fields.person.firstName?.label),
-      // not actually in the database, but used for validation
-      lastName: yup
+        .label(Settings.fields.person.givenName?.label),
+      familyName: yup
         .string()
         .nullable()
         .required(
-          `You must provide the ${Settings.fields.person.lastName?.label}`
+          `You must provide the ${Settings.fields.person.familyName?.label}`
         )
         .default("")
-        .label(Settings.fields.person.lastName?.label),
+        .label(Settings.fields.person.familyName?.label),
       user: yup
         .boolean()
         .default(false)
@@ -366,65 +361,37 @@ export default class Person extends Model {
     return PEOPLE_ICON
   }
 
-  toString() {
-    const militaryName = Person.militaryName(this.name)
-    if (this.rank) {
-      return this.rank + " " + militaryName
+  static toString(person) {
+    const fullName = Person.fullName(person)
+    if (person.rank) {
+      return `${person.rank} ${fullName}`
     } else {
-      return militaryName || this.uuid
+      return fullName || person.uuid
     }
   }
 
-  static fullName(person, doTrim) {
-    if (person.lastName && person.firstName) {
-      return `${Person.formattedLastName(person.lastName, doTrim)}${
-        Person.nameDelimiter
-      } ${Person.formattedFirstName(person.firstName, doTrim)}`
-    } else if (person.lastName) {
-      return Person.formattedLastName(person.lastName)
+  toString() {
+    return Person.toString(this)
+  }
+
+  static fullName(person, doTrim = false) {
+    if (person?.familyName && person?.givenName) {
+      return `${Person.formattedName(person.givenName, doTrim)} ${Person.formattedName(person.familyName, doTrim)}`
+    } else if (person?.familyName) {
+      return Person.formattedName(person.familyName)
+    } else if (person?.givenName) {
+      return Person.formattedName(person.givenName)
     } else {
       return ""
     }
   }
 
-  static formattedLastName(lastName, doTrim) {
-    let r = lastName
+  static formattedName(name, doTrim = false) {
+    let r = name
     if (doTrim) {
       r = r.trim()
     }
     return r
-  }
-
-  static formattedFirstName(firstName, doTrim) {
-    let r = firstName
-    if (doTrim) {
-      r = r.trim()
-    }
-    return r
-  }
-
-  static militaryName(name) {
-    const parsedName = Person.parseFullName(name)
-    if (parsedName.lastName) {
-      parsedName.lastName = parsedName.lastName.toUpperCase()
-    }
-    return Person.fullName(parsedName)
-  }
-
-  static parseFullName(name) {
-    const delimiter = name?.indexOf(Person.nameDelimiter)
-    let lastName = name ?? ""
-    let firstName = ""
-
-    if (delimiter > -1) {
-      lastName = name.substring(0, delimiter)
-      firstName = name.substring(delimiter + 1, name.length)
-    }
-
-    return {
-      lastName: lastName.trim(),
-      firstName: firstName.trim()
-    }
   }
 
   getNumberOfFieldsInLeftColumn() {
@@ -522,11 +489,7 @@ export default class Person extends Model {
     return Person.assessmentConfig || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = [
-    "firstName",
-    "lastName",
-    "authorizationGroups"
-  ]
+  static FILTERED_CLIENT_SIDE_FIELDS = ["authorizationGroups"]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

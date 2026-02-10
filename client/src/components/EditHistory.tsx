@@ -119,6 +119,11 @@ function getMaxDate(item) {
   }
 }
 
+const getHistoryEntityName = (item, historyEntityType) =>
+  historyEntityType === "person"
+    ? Person.fullName(item[historyEntityType])
+    : item[historyEntityType]?.name
+
 interface EditHistoryProps {
   historyEntityType?: string
   parentEntityUuid: string
@@ -233,6 +238,11 @@ const EditHistory = ({
                           }
                           objectType={singleSelectParameters.objectType}
                           valueKey="name"
+                          valueFunc={
+                            historyEntityType === "person"
+                              ? Person.fullName
+                              : undefined
+                          }
                           fields={singleSelectParameters.fields}
                           addon={singleSelectParameters.addon}
                         />
@@ -270,7 +280,7 @@ const EditHistory = ({
                                         flexWrap: "wrap"
                                       }}
                                     >
-                                      {`${idx + 1}-) ${item[historyEntityType].name}`}
+                                      {`${idx + 1}-) ${getHistoryEntityName(item, historyEntityType)}`}
                                       {item.primary && (
                                         <Badge bg="primary">Primary</Badge>
                                       )}
@@ -560,8 +570,8 @@ const ValidationMessages = ({
           <ul>
             {overlappingPositions.map((item, index) => (
               <li key={item.uuid ?? index}>
-                <strong>{item[historyEntityType]?.name}</strong> (
-                {moment(item.startTime).format("DD MMM YYYY")} –{" "}
+                <strong>{getHistoryEntityName(item, historyEntityType)}</strong>{" "}
+                ({moment(item.startTime).format("DD MMM YYYY")} –{" "}
                 {item.endTime
                   ? moment(item.endTime).format("DD MMM YYYY")
                   : "present"}
@@ -577,8 +587,8 @@ const ValidationMessages = ({
           <ul>
             {alreadyOccupiedPositions.map((item, index) => (
               <li key={item.uuid ?? index}>
-                <strong>{item[historyEntityType]?.name}</strong> (
-                {moment(item.startTime).format("DD MMM YYYY")} –{" "}
+                <strong>{getHistoryEntityName(item, historyEntityType)}</strong>{" "}
+                ({moment(item.startTime).format("DD MMM YYYY")} –{" "}
                 {item.endTime
                   ? moment(item.endTime).format("DD MMM YYYY")
                   : "present"}

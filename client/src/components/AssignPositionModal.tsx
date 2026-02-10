@@ -8,7 +8,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
-import { Position } from "models"
+import { Person, Position } from "models"
 import React, {
   useCallback,
   useContext,
@@ -313,9 +313,9 @@ const AssignPositionModal = ({
                     <td>{newPosition.humanNameOfType()}</td>
                     <td>
                       {newPosition.person ? (
-                        newPosition.person.name
+                        Person.fullName(newPosition.person)
                       ) : newPosition.uuid === currentPosition?.uuid ? (
-                        person.name
+                        Person.fullName(person)
                       ) : (
                         <i>Unfilled</i>
                       )}

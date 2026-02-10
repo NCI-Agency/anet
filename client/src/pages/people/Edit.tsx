@@ -84,7 +84,7 @@ const PersonEdit = ({ pageDispatchers }: PersonEditProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle(data?.person && `Edit | ${data.person.rank} ${data.person.name}`)
+  usePageTitle(data?.person && `Edit | ${Person.toString(data.person)}`)
   if (done) {
     return result
   }
@@ -93,9 +93,6 @@ const PersonEdit = ({ pageDispatchers }: PersonEditProps) => {
     if (data.person.endOfTourDate) {
       data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
     }
-    const parsedFullName = Person.parseFullName(data.person.name)
-    data.person.firstName = parsedFullName.firstName
-    data.person.lastName = parsedFullName.lastName
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
@@ -111,7 +108,7 @@ const PersonEdit = ({ pageDispatchers }: PersonEditProps) => {
     person.isPendingVerification() && Person.isEqual(currentUser, person)
   const legendText = isPending
     ? "Create your account"
-    : `Edit ${Person.militaryName(person.name)}`
+    : `Edit ${Person.fullName(person)}`
   const saveText = isPending ? "Update profile" : "Save Person"
 
   // mutates the object

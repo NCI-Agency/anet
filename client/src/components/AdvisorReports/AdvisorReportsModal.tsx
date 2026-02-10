@@ -10,7 +10,7 @@ interface AdvisorReportsModalProps {
 }
 
 const AdvisorReportsModal = (props: AdvisorReportsModalProps) => (
-  <SimpleModal title={props.name} size="lg">
+  <SimpleModal title={props.name} size="xl">
     <AdvisorReportsTable
       columnGroups={props.columnGroups}
       orgUuid={props.uuid}
