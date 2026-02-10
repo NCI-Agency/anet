@@ -22,8 +22,8 @@ test.serial("Move someone in and out of a position", async t => {
 
   const positionName = "EF 2.2 Advisor C"
   const positionRole = "Member"
-  const person = "Reinton, Reina"
-  const personName = "CIV REINTON, Reina"
+  const person = "Reina Reinton"
+  const personName = "CIV Reina Reinton"
 
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     personName,
@@ -221,33 +221,33 @@ test.serial("Update permissions while changing positions", async t => {
   const testUsers = [
     {
       positionName: "EF 5 Admin",
-      person: "SCOTT, Michael",
+      person: "Michael Scott",
       rank: "CIV",
-      personName: "CIV SCOTT, Michael"
+      personName: "CIV Michael Scott"
     },
     {
       positionName: "EF 5.1 Advisor Quality Assurance",
-      person: "BRATTON, Creed",
+      person: "Creed Bratton ",
       rank: "CIV",
-      personName: "CIV BRATTON, Creed"
+      personName: "CIV Creed Bratton"
     },
     {
       positionName: "EF 5.1 Advisor Accounting",
-      person: "MALONE, Kevin",
+      person: "Kevin Malone",
       rank: "CIV",
-      personName: "CIV MALONE, Kevin"
+      personName: "CIV Kevin Malone"
     },
     {
       positionName: "EF 5.1 Superuser Sales 1",
-      person: "HALPERT, Jim",
+      person: "Jim Halpert",
       rank: "CIV",
-      personName: "CIV HALPERT, Jim"
+      personName: "CIV Jim Halpert"
     },
     {
       positionName: "EF 5.1 Superuser Sales 2",
-      person: "SCHRUTE, Dwight",
+      person: "Dwight Schrute",
       rank: "CIV",
-      personName: "CIV SCHRUTE, Dwight"
+      personName: "CIV Dwight Schrute"
     }
   ]
 
