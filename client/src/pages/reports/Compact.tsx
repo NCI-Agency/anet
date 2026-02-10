@@ -515,19 +515,12 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
-            {Settings.fields.report.customFieldsX && (
-              <CompactRow
-                id="customFields"
-                content={
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.report.customFields}
-                    values={report}
-                    vertical
-                    isCompact
-                    hideIfEmpty
-                  />
-                }
-                className="reportField"
+            {Settings.fields.report.customFields && (
+              <ReadonlyCustomFields
+                fieldsConfig={Settings.fields.report.customFields}
+                values={report}
+                vertical
+                isCompact
                 hideIfEmpty
               />
             )}
