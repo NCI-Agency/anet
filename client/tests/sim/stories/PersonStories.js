@@ -23,10 +23,10 @@ function afghanName(gender) {
   const genderForName =
     gender === "NOT SPECIFIED" ? undefined : gender.toLowerCase().charAt(0)
   return {
-    firstName: faker.helpers.arrayElement(
+    givenName: faker.helpers.arrayElement(
       afghanFirstNames.filter(d => !genderForName || d.gender === genderForName)
     ).name,
-    lastName: faker.helpers.arrayElement(afghanSurnames).name
+    familyName: faker.helpers.arrayElement(afghanSurnames).name
   }
 }
 
@@ -35,8 +35,8 @@ function personName(gender, locale) {
     gender === "NOT SPECIFIED" ? undefined : gender.toLowerCase()
   const localeFaker = allFakers[locale]
   return {
-    firstName: localeFaker.person.firstName(genderForName),
-    lastName: localeFaker.person.lastName(genderForName)
+    givenName: localeFaker.person.firstName(genderForName),
+    familyName: localeFaker.person.lastName(genderForName)
   }
 }
 
@@ -87,20 +87,21 @@ async function randomPerson(isUser, status) {
   let domainUsername
   if (isUser) {
     domainUsername = faker.internet.username({
-      firstName: name.firstName,
-      lastName: name.lastName
+      firstName: name.givenName,
+      lastName: name.familyName
     })
   }
   let email
   if (isUser || fuzzy.withProbability(0.25)) {
     email = faker.internet.displayName({
-      firstName: name.firstName,
-      lastName: name.lastName
+      firstName: name.givenName,
+      lastName: name.familyName
     })
   }
 
   return {
-    name: () => Person.fullName(name, true),
+    familyName: () => name.familyName,
+    givenName: () => name.givenName,
     status: () => status || Model.STATUS.ACTIVE,
     country: () => country,
     rank: () => rank,
@@ -116,7 +117,8 @@ async function randomPerson(isUser, status) {
 
 function modifiedPerson() {
   return {
-    name: identity,
+    familyName: identity,
+    givenName: identity,
     status: identity,
     country: identity,
     rank: identity,
@@ -127,10 +129,9 @@ function modifiedPerson() {
     user: identity,
     users: identity,
     emailAddresses: (value, instance) => {
-      const name = Person.parseFullName(instance.name)
       const email = faker.internet.displayName({
-        firstName: name.firstName,
-        lastName: name.lastName
+        firstName: instance.givenName,
+        lastName: instance.familyName
       })
       return createEmailAddresses(instance.user, email)
     }
@@ -143,7 +144,8 @@ const _createPerson = async function (user, isUser, status) {
     person,
     await randomPerson(isUser, status)
   )
-  await personGenerator.name.always()
+  await personGenerator.familyName.always()
+  await personGenerator.givenName.always()
   await personGenerator.status.always()
   await personGenerator.rank.always()
   await personGenerator.user.always()
@@ -154,18 +156,18 @@ const _createPerson = async function (user, isUser, status) {
   await personGenerator.biography.always()
   await personGenerator.emailAddresses.always()
 
+  const fullName = Person.fullName(person)
   console.debug(
     `Creating ${person.user ? "user " : ""}${
       person.gender.toLowerCase().green
-    } ${person.name.green}`
+    } ${fullName.green}`
   )
 
-  const { firstName, lastName, ...personStripped } = person // TODO: we need to do this more generically
   return (
     await runGQL(user, {
       query:
         "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
-      variables: { person: personStripped }
+      variables: { person }
     })
   ).data.createPerson
 }
@@ -208,7 +210,8 @@ const updatePerson = async function (user) {
             }
             endOfTourDate
             gender
-            name
+            familyName
+            givenName
             user
             users {
               uuid
@@ -228,7 +231,8 @@ const updatePerson = async function (user) {
 
   const person = people && people[0]
   const personGenerator = await populate(person, modifiedPerson())
-  await personGenerator.name.rarely()
+  await personGenerator.familyName.rarely()
+  await personGenerator.givenName.rarely()
   await personGenerator.user.never()
   await personGenerator.users.never()
   await personGenerator.phoneNumber.sometimes()
@@ -282,7 +286,8 @@ const _deletePerson = async function (user) {
         }) {
           list {
             uuid
-            name
+            familyName
+            givenName
             biography
             country {
               uuid
@@ -310,7 +315,8 @@ const _deletePerson = async function (user) {
   if (person) {
     person.status = Model.STATUS.INACTIVE
 
-    console.debug(`Deleting/Deactivating ${person.name.green}`)
+    const fullName = Person.fullName(person)
+    console.debug(`Deleting/Deactivating ${fullName.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
     return (
       await runGQL(user, {

@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Location, Position } from "models"
+import { Location, Person, Position } from "models"
 import { PositionRole } from "models/Position"
 import moment from "moment"
 import {
@@ -35,7 +35,8 @@ async function getPosition(user, uuid) {
             primary
             person {
               uuid
-              name
+              familyName
+              givenName
               previousPositions {
                 startTime
                 endTime
@@ -205,7 +206,7 @@ const _createPosition = async function (user) {
   const person = await getRandomObject(
     "people",
     {},
-    "uuid name users { domainUsername }",
+    "uuid familyName givenName users { domainUsername }",
     randomObject =>
       randomObject?.uuid === user.uuid ||
       (randomObject?.users ?? []).some(
@@ -213,8 +214,9 @@ const _createPosition = async function (user) {
       )
   )
   const primary = faker.datatype.boolean(0.75)
+  const fullName = Person.fullName(person)
   console.debug(
-    `Putting ${person.name.green} in ${primary ? "primary" : "additional"} position of ${createdPosition.name.green}`
+    `Putting ${fullName.green} in ${primary ? "primary" : "additional"} position of ${createdPosition.name.green}`
   )
   await runGQL(user, {
     query: `
@@ -323,7 +325,8 @@ const _deactivatePosition = async function (user) {
               name
               person {
                 uuid
-                name
+                familyName
+                givenName
                 rank
               }
             }
@@ -389,7 +392,8 @@ const updatePosition = async function (user) {
               name
               person {
                 uuid
-                name
+                familyName
+                givenName
                 rank
               }
             }
@@ -447,7 +451,8 @@ const putPersonInPosition = async function (user) {
         personList(query: $peopleQuery) {
           list {
             uuid
-            name
+            familyName
+            givenName
             position {
               uuid
             }
@@ -476,8 +481,9 @@ const putPersonInPosition = async function (user) {
     console.debug("No person available to fulfill the position")
     return "(nop)"
   } else {
+    const fullName = Person.fullName(person)
     console.debug(
-      `Putting ${person.name.green} in position of ${position.name.green}`
+      `Putting ${fullName.green} in position of ${position.name.green}`
     )
     return (
       await runGQL(user, {
@@ -508,7 +514,8 @@ const deletePersonFromPosition = async function (user) {
             name
             type
             person {
-              name
+              familyName
+              givenName
               users {
                 domainUsername
               }
@@ -537,8 +544,9 @@ const deletePersonFromPosition = async function (user) {
   const position = faker.helpers.arrayElement(positions)
 
   if (position) {
+    const fullName = Person.fullName(position.person)
     console.debug(
-      `Removing ${position.person.name.green} from position of ${position.name.green}`
+      `Removing ${fullName.green} from position of ${position.name.green}`
     )
     return (
       await runGQL(user, {

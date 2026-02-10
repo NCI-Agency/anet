@@ -16,7 +16,7 @@ const getRandomPerson = async function () {
   return await getRandomObject(
     "people",
     { positionType: Object.values(Position.TYPE) },
-    "uuid name"
+    "uuid familyName givenName"
   )
 }
 
