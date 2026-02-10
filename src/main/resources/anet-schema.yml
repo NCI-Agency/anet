@@ -933,15 +933,15 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [status, firstName, lastName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
+        required: [status, givenName, familyName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
-          firstName:
+          givenName:
             "$ref": "#/$defs/inputField"
-          lastName:
+          familyName:
             "$ref": "#/$defs/inputField"
           position:
             "$ref": "#/$defs/inputField"
