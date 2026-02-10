@@ -3,11 +3,11 @@ import moment from "moment"
 import CreateReport from "../pages/report/createReport.page"
 import ShowReport from "../pages/report/showReport.page"
 
-const AUTHOR_NAME = "ERINSON, Erin"
+const AUTHOR_NAME = "Erin Erinson"
 const AUTHOR = `CIV ${AUTHOR_NAME}`
-const ADVISOR_NAME = "DVISOR, A"
+const ADVISOR_NAME = "A Dvisor"
 const ADVISOR = `OF-2 ${ADVISOR_NAME}`
-const INTERLOCUTOR_NAME = "STEVESON, Steve"
+const INTERLOCUTOR_NAME = "Steve Steveson"
 const INTERLOCUTOR = `OF-4 ${INTERLOCUTOR_NAME}`
 const REPORT_FIELDS = {
   intent: "Show attendee positions based on engagement date",

@@ -7,7 +7,7 @@ const VALID_NUMBER_INPUT = "10"
 const TRAIN_ENGAGEMENT_BUTTON = "train"
 
 const REQUIRED_PERSON_FIELDS = {
-  lastname: "customPerson",
+  familyName: "customPerson",
   rank: "CIV",
   gender: "MALE",
   country: "Türkiye"
@@ -204,8 +204,8 @@ describe("When working with custom fields for different anet objects", () => {
       await (await CreatePerson.getForm()).waitForDisplayed()
       // fill other required fields at the beginning
       await (
-        await CreatePerson.getLastName()
-      ).setValue(REQUIRED_PERSON_FIELDS.lastname)
+        await CreatePerson.getFamilyName()
+      ).setValue(REQUIRED_PERSON_FIELDS.familyName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute("value", REQUIRED_PERSON_FIELDS.rank)

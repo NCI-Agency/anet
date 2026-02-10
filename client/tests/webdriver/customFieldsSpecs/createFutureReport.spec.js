@@ -3,7 +3,7 @@ import moment from "moment"
 import CreateFutureReport from "../pages/createFutureReport.page"
 
 const INTERLOCUTOR = "Christopf"
-const INTERLOCUTOR_VALUE = `CIV TOPFERNESS, ${INTERLOCUTOR}`
+const INTERLOCUTOR_VALUE = `CIV ${INTERLOCUTOR} Topferness`
 
 const TASK_SEARCH = "1.2.A first milestone"
 const TASK_POPOVER_VALUE = "1.2.A: Milestone the First in EF 1.2"
