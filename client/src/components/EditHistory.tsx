@@ -547,16 +547,8 @@ const ValidationMessages = ({
 
   return (
     <Alert variant="danger">
-      {invalidFromDates.length > 0 && (
-        <>
-          <p>Some start dates are not valid</p>
-        </>
-      )}
-      {invalidToDates.length > 0 && (
-        <>
-          <p>Some end dates are not valid</p>
-        </>
-      )}
+      {invalidFromDates.length > 0 && <p>Some start dates are not valid</p>}
+      {invalidToDates.length > 0 && <p>Some end dates are not valid</p>}
       {overlappingPositions.length > 0 && (
         <>
           <legend>{`Overlapping ${historyEntityType}s error`}</legend>
