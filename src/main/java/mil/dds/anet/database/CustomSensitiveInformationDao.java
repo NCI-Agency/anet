@@ -2,11 +2,13 @@ package mil.dds.anet.database;
 
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuditTrail;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -28,6 +30,8 @@ import tools.jackson.core.JacksonException;
 @Component
 public class CustomSensitiveInformationDao
     extends AnetBaseDao<CustomSensitiveInformation, AbstractSearchQuery<?>> {
+
+  public static final String TABLE_NAME = "customSensitiveInformation";
 
   public CustomSensitiveInformationDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
@@ -137,6 +141,7 @@ public class CustomSensitiveInformationDao
       final List<CustomSensitiveInformation> customSensitiveInformation) {
     if (!Utils.isEmptyOrNull(customSensitiveInformation)) {
       for (final CustomSensitiveInformation csi : customSensitiveInformation) {
+        final boolean isInsert = DaoUtils.getUuid(csi) == null;
         try {
           // Sanitize JSON
           csi.setCustomFieldValue(Utils.sanitizeJson(customSensitiveInformationDictKey,
@@ -144,7 +149,7 @@ public class CustomSensitiveInformationDao
           // Set relatedObject ourselves (ignore what was passed by the client)
           csi.setRelatedObjectType(relatedObjectType);
           csi.setRelatedObjectUuid(relatedObjectUuid);
-          if (DaoUtils.getUuid(csi) == null) {
+          if (isInsert) {
             checkAndInsert(user, userAuthorizationGroupUuids, relatedObjectType, relatedObjectUuid,
                 csi);
           } else {
@@ -153,8 +158,10 @@ public class CustomSensitiveInformationDao
           }
         } catch (JacksonException e) {
           // Audit and ignore
-          AnetAuditLogger.log("Person {} tried to insert CustomSensitiveInformation {}"
-              + " with invalid JSON, refused", user, csi);
+          AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+              String.format("user tried to %s row with invalid JSON, refused",
+                  isInsert ? "insert" : "update"),
+              null, user, TABLE_NAME, csi));
           csi.setCustomFieldValue(null);
         }
       }
@@ -167,12 +174,15 @@ public class CustomSensitiveInformationDao
       final CustomSensitiveInformation csi) {
     if (!hasCustomSensitiveInformationAuthorization(user, userAuthorizationGroupUuids, csi)) {
       // Audit and ignore
-      AnetAuditLogger.log("Person {} tried to insert CustomSensitiveInformation {}"
-          + " which they don't have access to, refused", user, csi);
+      AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+          "user tried to insert row which they don't have access to, refused", null, user,
+          TABLE_NAME, csi));
     } else {
       // Insert and audit
       insert(csi);
-      AnetAuditLogger.log("Person {} inserted CustomSensitiveInformation {}", user, csi);
+      AnetAuditLogger.log(AuditTrail.getCreateInstance(user, TABLE_NAME, csi, null,
+          String.format("linked to entity %s of type %s", csi.getRelatedObjectUuid(),
+              csi.getRelatedObjectType())));
     }
   }
 
@@ -183,27 +193,31 @@ public class CustomSensitiveInformationDao
     final CustomSensitiveInformation existingCsi = getByUuid(csi.getUuid());
     if (existingCsi == null) {
       // Audit and ignore
-      AnetAuditLogger.log(
-          "Person {} tried to update non-existing CustomSensitiveInformation {}, refused", user,
-          csi.getUuid());
+      AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+          "user tried to update non-existing row, refused", null, user, TABLE_NAME, csi));
     } else if (!existingCsi.getCustomFieldName().equals(csi.getCustomFieldName())) {
       // Audit and ignore
-      AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
-          + " with a different customFieldName to {}, refused", user, existingCsi, csi);
+      AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+          "user tried to update row with a different customFieldName, refused",
+          String.format("from %s to %s", existingCsi, csi), user, TABLE_NAME, existingCsi));
     } else if (!existingCsi.getRelatedObjectType().equals(relatedObjectType)
         || !existingCsi.getRelatedObjectUuid().equals(relatedObjectUuid)) {
       // Audit and ignore
-      AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
-          + " with a different relatedObject to {}, refused", user, existingCsi, csi);
+      AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+          "user tried to update row with a different relatedObject, refused",
+          String.format("from %s to %s", existingCsi, csi), user, TABLE_NAME, existingCsi));
     } else if (!hasCustomSensitiveInformationAuthorization(user, userAuthorizationGroupUuids,
         csi)) {
       // Audit and ignore
-      AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
-          + " which they don't have access to, refused", user, csi);
+      AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
+          "user tried to update row which they don't have access to, refused", null, user,
+          TABLE_NAME, csi));
     } else {
       // Update and audit
       update(csi);
-      AnetAuditLogger.log("Person {} updated CustomSensitiveInformation {}", user, csi);
+      AnetAuditLogger.log(AuditTrail.getUpdateInstance(user, TABLE_NAME, csi, null,
+          String.format("linked to entity %s of type %s", csi.getRelatedObjectUuid(),
+              csi.getRelatedObjectType())));
     }
   }
 

@@ -505,6 +505,13 @@ const Navigation = ({
                   ))}
                 </NavDropdown>
                 <SidebarLink
+                  id="audit-trail"
+                  linkTo="/admin/auditTrail"
+                  handleOnClick={resetPages}
+                >
+                  Audit trail
+                </SidebarLink>
+                <SidebarLink
                   id="email-queue"
                   linkTo="/admin/pendingEmails"
                   handleOnClick={resetPages}

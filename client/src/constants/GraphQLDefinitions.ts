@@ -20,16 +20,16 @@ export const gqlMinimalAttachmentFields = `
   uuid
   caption
   fileName
-  description
+  mimeType
+  contentLength
 `
 
 export const gqlBasicAttachmentFields = `
   ${gqlMinimalAttachmentFields}
   createdAt
   updatedAt
-  mimeType
-  contentLength
   classification
+  description
 `
 
 export const gqlAllAttachmentFields = `
@@ -423,7 +423,7 @@ export const gqlSubscriptionUpdateFields = `
   updatedObjectUuid
 `
 
-export const gqlRelatedObjectFields = `
+export const gqlSubscribableObjectFields = `
   ... on AuthorizationGroup {
     ${gqlEntityFieldsMap.AuthorizationGroup}
   }
@@ -453,6 +453,13 @@ export const gqlRelatedObjectFields = `
   }
 `
 
+export const gqlRelatedObjectFields = `
+  ${gqlSubscribableObjectFields}
+  ... on Attachment {
+    ${gqlEntityFieldsMap.Attachment}
+  }
+`
+
 export const gqlApprovalStepFields = `
   uuid
   name
@@ -463,6 +470,20 @@ export const gqlApprovalStepFields = `
     person {
       ${gqlEntityFieldsMap.Person}
     }
+  }
+`
+
+export const gqlAuditTrailFields = `
+  uuid
+  createdAt
+  updateType
+  objectUuid
+  updateDescription
+  updateDetails
+  relatedObjectType
+  relatedObjectUuid
+  person {
+    ${gqlEntityFieldsMap.Person}
   }
 `
 

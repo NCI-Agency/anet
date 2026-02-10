@@ -16,7 +16,7 @@ public class ApprovalNeededEmail implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-    return "ANET Report needs your approval";
+    return "ANET report needs your approval";
   }
 
   @Override

@@ -266,8 +266,10 @@ public class OrganizationDao
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "organizations.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj, String auditTrailUuid,
+      boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "organizations.uuid",
+        isDelete);
   }
 
   @Transactional

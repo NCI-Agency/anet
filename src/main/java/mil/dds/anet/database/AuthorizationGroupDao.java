@@ -276,8 +276,10 @@ public class AuthorizationGroupDao
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(AuthorizationGroup obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "authorizationGroups.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(AuthorizationGroup obj,
+      String auditTrailUuid, boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "authorizationGroups.uuid",
+        isDelete);
   }
 
 }

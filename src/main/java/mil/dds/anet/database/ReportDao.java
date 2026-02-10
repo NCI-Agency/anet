@@ -774,15 +774,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public void sendApprovalNeededEmail(Report r, ApprovalStep approvalStep) {
     final AnetObjectEngine engine = engine();
     final List<ReportPerson> authors = r.loadAuthors(engine.getContext()).join();
+    final List<String> authorUuids = authors.stream().map(ReportPerson::getUuid).toList();
     final List<Position> approverPositions = approvalStep.loadApprovers(engine.getContext()).join();
-    final List<Person> approvers = approverPositions.stream()
-        .filter(a -> (a.getPersonUuid() != null)
-            && authors.stream().noneMatch(p -> a.getPersonUuid().equals(p.getUuid())))
-        .map(a -> a.loadPerson(engine.getContext()).join()).toList();
+    final List<String> approverUuids = approverPositions.stream().map(Position::getPersonUuid)
+        .filter(Objects::nonNull).filter(p -> !authorUuids.contains(p)).toList();
     final ApprovalNeededEmail action = new ApprovalNeededEmail();
     action.setReport(r);
-    if (!approvers.isEmpty()) {
-      sendEmailToReportPeople(action, approvers);
+    if (!approverUuids.isEmpty()) {
+      sendEmailToReportPeople(action, approverUuids);
     }
   }
 
@@ -795,13 +794,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public void sendEmailToReportAuthors(AnetEmailAction action, Report report) {
     final List<ReportPerson> authors =
         report.loadAuthors(ApplicationContextProvider.getEngine().getContext()).join();
-    if (!authors.isEmpty()) {
-      sendEmailToReportPeople(action, authors);
+    final List<String> authorUuids = authors.stream().map(ReportPerson::getUuid).toList();
+    if (!authorUuids.isEmpty()) {
+      sendEmailToReportPeople(action, authorUuids);
     }
   }
 
-  public void sendEmailToReportPeople(AnetEmailAction action, List<? extends Person> people) {
-    final List<String> emailAddresses = getEmailAddressesBasedOnPreference(people,
+  public void sendEmailToReportPeople(AnetEmailAction action, List<String> peopleUuids) {
+    final List<String> emailAddresses = getEmailAddressesBasedOnPreference(peopleUuids,
         PreferenceDao.PREFERENCE_REPORTS, PreferenceDao.CATEGORY_EMAILING);
     if (!emailAddresses.isEmpty()) {
       AnetEmail email = new AnetEmail();
@@ -811,6 +811,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     }
   }
 
+  @Transactional
   public int submit(final Report r, final Person user) {
     final AnetObjectEngine engine = engine();
     // Get all the approval steps for this report
@@ -870,6 +871,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return numRows;
   }
 
+  @Transactional
   public int approve(Report r, Person user, ApprovalStep step) {
     // Write the approval action
     final ReportAction action = new ReportAction();
@@ -925,6 +927,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return null;
   }
 
+  @Transactional
   public int publish(Report r, Person user) {
     // Write the publication action
     final ReportAction action = new ReportAction();
@@ -1000,7 +1003,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj, String auditTrailUuid,
+      boolean isDelete) {
     final boolean isParam = (obj != null);
     if (isParam && !Set.of(ReportState.APPROVED, ReportState.PUBLISHED, ReportState.CANCELLED)
         .contains(obj.getState())) {
@@ -1009,7 +1013,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     // update report; this also adds the param
     final SubscriptionUpdateGroup update =
-        getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid");
+        getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "reports.uuid", isDelete);
     // update reportPeople
     update.getStmts()
         .add(new SubscriptionUpdateStatement("people",

@@ -69,7 +69,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getPersonDao().getSubscriptionUpdate(null)));
+          engine().getPersonDao().getSubscriptionUpdate(null, false)));
     }
 
     qb.addDateRangeClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,

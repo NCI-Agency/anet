@@ -54,7 +54,7 @@ public abstract class AbstractAuthorizationGroupSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          engine().getAuthorizationGroupDao().getSubscriptionUpdate(null)));
+          engine().getAuthorizationGroupDao().getSubscriptionUpdate(null, false)));
     }
 
     if (query.getEmailNetwork() != null) {

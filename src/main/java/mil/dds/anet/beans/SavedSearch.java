@@ -1,4 +1,4 @@
-package mil.dds.anet.beans.search;
+package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
@@ -7,13 +7,11 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.beans.ForeignObjectHolder;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class SavedSearch extends AbstractAnetBean {
+public class SavedSearch extends AbstractAnetBean implements RelatableObject {
 
   public enum SearchObjectType {
     REPORTS, PEOPLE, TASKS, POSITIONS, ORGANIZATIONS, LOCATIONS, AUTHORIZATION_GROUPS, ATTACHMENTS,

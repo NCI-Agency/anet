@@ -96,6 +96,14 @@ type AnetBeanList_Attachment {
 }
 
 """"""
+type AnetBeanList_AuditTrail {
+  list: [AuditTrail]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_AuthorizationGroup {
   list: [AuthorizationGroup]
   pageNum: Int
@@ -340,6 +348,46 @@ input AttachmentSearchQueryInput {
 """"""
 enum AttachmentSearchSortBy {
   CREATED_AT
+}
+
+""""""
+type AuditTrail {
+  createdAt: Instant
+  objectUuid: String
+  person: Person
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+  updateDescription: String
+  updateDetails: String
+  updateType: AuditTrailUpdateType
+  uuid: String
+}
+
+""""""
+input AuditTrailSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  personUuid: String
+  relatedObjectUuid: String
+  sortBy: AuditTrailSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+  updateType: AuditTrailUpdateType
+}
+
+""""""
+enum AuditTrailSearchSortBy {
+  CREATED_AT
+}
+
+""""""
+enum AuditTrailUpdateType {
+  CREATE
+  DELETE
+  UPDATE
 }
 
 """"""
@@ -1015,6 +1063,7 @@ type Person {
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
+  positionByDate(when: Instant): Position
   preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
   rank: String
@@ -1282,6 +1331,7 @@ type Query {
   approvalStepInUse(uuid: String): Boolean!
   attachment(uuid: String): Attachment
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
+  auditTrailList(query: AuditTrailSearchQueryInput): AnetBeanList_AuditTrail
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
   event(uuid: String): Event
@@ -1337,7 +1387,7 @@ enum RecurseStrategy {
 }
 
 """"""
-union RelatableObject = AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
+union RelatableObject = Assessment | Attachment | AuthorizationGroup | Event | EventSeries | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
 
 """"""
 type Report {
@@ -1469,6 +1519,7 @@ type ReportPerson {
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
+  positionByDate(when: Instant): Position
   preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
   primary: Boolean!
@@ -1700,6 +1751,8 @@ enum SubscriptionSearchSortBy {
 
 """"""
 type SubscriptionUpdate {
+  auditTrail: AuditTrail
+  auditTrailUuid: String
   createdAt: Instant
   isNote: Boolean!
   subscription: Subscription

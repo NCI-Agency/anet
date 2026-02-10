@@ -18,10 +18,10 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
@@ -40,14 +40,17 @@ public class OrganizationResource {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetObjectEngine engine;
+  private final AuditTrailDao auditTrailDao;
   private final OrganizationDao dao;
   private final ApprovalStepDao approvalStepDao;
   private final EmailAddressDao emailAddressDao;
   private final TaskDao taskDao;
 
-  public OrganizationResource(AnetObjectEngine anetObjectEngine, OrganizationDao dao,
-      ApprovalStepDao approvalStepDao, EmailAddressDao emailAddressDao, TaskDao taskDao) {
+  public OrganizationResource(AnetObjectEngine anetObjectEngine, AuditTrailDao auditTrailDao,
+      OrganizationDao dao, ApprovalStepDao approvalStepDao, EmailAddressDao emailAddressDao,
+      TaskDao taskDao) {
     this.engine = anetObjectEngine;
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
     this.approvalStepDao = approvalStepDao;
     this.emailAddressDao = emailAddressDao;
@@ -140,7 +143,8 @@ public class OrganizationResource {
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
         org.customSensitiveInformationKey(), org.getCustomSensitiveInformation());
 
-    AnetAuditLogger.log("Organization {} created by {}", created, user);
+    // Log the change
+    auditTrailDao.logCreate(user, OrganizationDao.TABLE_NAME, created);
     return created;
   }
 
@@ -179,7 +183,10 @@ public class OrganizationResource {
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, org.getUuid(),
         org.customSensitiveInformationKey(), org.getCustomSensitiveInformation());
 
-    AnetAuditLogger.log("Organization {} updated by {}", org, user);
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, OrganizationDao.TABLE_NAME, org);
+    // Update any subscriptions
+    dao.updateSubscriptions(org, auditTrailUuid, false);
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
@@ -235,9 +242,6 @@ public class OrganizationResource {
     emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, org.getUuid(),
         org.getEmailAddresses());
 
-    // Update any subscriptions
-    dao.updateSubscriptions(org);
-
     return numRows;
   }
 
@@ -266,11 +270,13 @@ public class OrganizationResource {
           "Couldn't process merge operation, error occurred while updating merged organization relation information.");
     }
 
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, OrganizationDao.TABLE_NAME,
+        winnerOrganization, "an organization has been merged into it",
+        String.format("merged organization %s", loserOrganization));
     // Update any subscriptions
-    dao.updateSubscriptions(winnerOrganization);
+    dao.updateSubscriptions(winnerOrganization, auditTrailUuid, false);
 
-    AnetAuditLogger.log("Organization {} merged into {} by {}", loserOrganization,
-        winnerOrganization, user);
     return numberOfAffectedRows;
   }
 

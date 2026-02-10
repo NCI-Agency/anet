@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -32,6 +31,7 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyByDateFetcher;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -128,7 +128,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         + POSITION_FIELDS + " FROM positions "
         + "LEFT JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
         + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> ) "
-        + "AND \"peoplePositions\".primary IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL";
+        + "AND \"peoplePositions\".primary IS TRUE "
+        + "AND \"peoplePositions\".\"endedAt\" IS NULL";
 
     public PrimaryPositionsBatcher() {
       super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
@@ -231,7 +232,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       }
 
       // If the position is already assigned to another person, remove the person from the position
-      removePersonFromPosition(positionUuid);
+      removePersonFromPosition(newPos);
       // Get timestamp *after* remove to preserve correct order
       final Instant now = Instant.now();
 
@@ -333,39 +334,36 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int removePersonFromPosition(String positionUuid) {
+  public int removePersonFromPosition(Position position) {
     final Handle handle = getDbHandle();
     try {
-      // Get original position data from database (we need its type)
-      final Position position = getByUuid(positionUuid);
       if (position == null) {
         return 0;
       }
-      final Instant now = Instant.now();
+      DaoUtils.setUpdateFields(position);
       final int nr = handle
           .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
               + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
-              + "WHERE uuid = :positionUuid")
-          .bind("type", DaoUtils.getEnumId(revokePrivilege(position)))
-          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
-          .execute();
+              + "WHERE uuid = :uuid")
+          .bindBean(position).bind("type", DaoUtils.getEnumId(revokePrivilege(position)))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(position.getUpdatedAt())).execute();
 
       // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
       // (i.e. with both a position and a person).
       final String updateSql =
           "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
               + "(SELECT * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " WHERE \"positionUuid\" = :uuid AND \"endedAt\" IS NULL"
               + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
               + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
               + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
               + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
               + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      handle.createUpdate(updateSql).bind("positionUuid", positionUuid)
-          .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+      handle.createUpdate(updateSql).bindBean(position)
+          .bind("endedAt", DaoUtils.asLocalDateTime(position.getUpdatedAt())).execute();
 
       // Evict the person (previously) holding this position from the domain users cache
-      engine().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+      engine().getPersonDao().evictFromCacheByPositionUuid(position.getUuid());
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -475,26 +473,44 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY, positionUuid);
   }
 
-  public CompletableFuture<Position> getPrimaryPositionForPerson(GraphQLContext context,
-      String personUuid) {
-    return new ForeignKeyFetcher<Position>()
-        .load(context, FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON, personUuid)
-        .thenApply(l -> l.isEmpty() ? null : l.get(0));
+  class PrimaryPositionsByDateBatcher extends ForeignKeyByDateBatcher<Position> {
+    private static final String sql = "/* batch.getPrimaryPositionForPersonByDate */ SELECT "
+        + POSITION_FIELDS + " FROM positions "
+        + "LEFT JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
+        + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> ) "
+        + "AND \"peoplePositions\".primary IS TRUE "
+        + "AND \"peoplePositions\".\"createdAt\" <= :when "
+        + "AND (\"peoplePositions\".\"endedAt\" IS NULL"
+        + " OR \"peoplePositions\".\"endedAt\" > :when)";
+
+    public PrimaryPositionsByDateBatcher() {
+      super(PositionDao.this.databaseHandler, sql, "foreignKeys", new PositionMapper(),
+          "positions_currentPersonUuid");
+    }
   }
 
-  @Transactional
-  public Position getCurrentPositionForPerson(String personUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      Optional<Position> position = handle.createQuery("/* getCurrentPositionForPerson */ SELECT "
-          + POSITION_FIELDS
-          + " FROM positions INNER JOIN \"peoplePositions\" pp ON pp.\"positionUuid\" = positions.uuid"
-          + " WHERE pp.\"endedAt\" IS NULL AND pp.primary IS TRUE AND pp.\"personUuid\" = :personUuid")
-          .bind("personUuid", personUuid).map(new PositionMapper()).findFirst();
-      return position.orElse(null);
-    } finally {
-      closeDbHandle(handle);
+  public List<List<Position>> getPrimaryPositionsByDate(
+      List<ImmutablePair<String, Instant>> foreignKeys) {
+    return new PrimaryPositionsByDateBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Position>> getPrimaryPositionsForPerson(GraphQLContext context,
+      String personUuid, Instant when) {
+    return when == null
+        ? new ForeignKeyFetcher<Position>().load(context,
+            FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON, personUuid)
+        : new ForeignKeyByDateFetcher<Position>().load(context,
+            FkDataLoaderKey.POSITION_PRIMARY_POSITION_FOR_PERSON_WHEN,
+            new ImmutablePair<>(personUuid, when));
+  }
+
+  public CompletableFuture<Position> getPrimaryPositionForPerson(GraphQLContext context,
+      String personUuid, Instant when) {
+    if (personUuid == null) {
+      return CompletableFuture.completedFuture(null);
     }
+    return getPrimaryPositionsForPerson(context, personUuid, when)
+        .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
   @Transactional
@@ -560,8 +576,9 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "positions.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj, String auditTrailUuid,
+      boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "positions.uuid", isDelete);
   }
 
   @Transactional

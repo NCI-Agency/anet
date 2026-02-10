@@ -268,8 +268,9 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   }
 
   @Override
-  public SubscriptionUpdateGroup getSubscriptionUpdate(Task obj) {
-    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "tasks.uuid");
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Task obj, String auditTrailUuid,
+      boolean isDelete) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "tasks.uuid", isDelete);
   }
 
   @Transactional

@@ -20,17 +20,23 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
     super(databaseHandler);
   }
 
-  public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
+  public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj, String auditTrailUuid,
+      boolean isDelete);
+
+  public SubscriptionUpdateGroup getSubscriptionUpdate(T obj, boolean isDelete) {
+    return getSubscriptionUpdate(obj, null, isDelete);
+  }
 
   @Transactional
-  public void updateSubscriptions(T obj) {
-    final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
+  public void updateSubscriptions(T obj, String auditTrailUuid, boolean isDelete) {
+    final SubscriptionUpdateGroup subscriptionUpdate =
+        getSubscriptionUpdate(obj, auditTrailUuid, isDelete);
     final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
-    subscriptionDao.updateSubscriptions(subscriptionUpdate);
+    subscriptionDao.updateSubscriptions(subscriptionUpdate, auditTrailUuid);
   }
 
   protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractSubscribableAnetBean obj,
-      String tableName, String paramName) {
+      String tableName, String auditTrailUuid, String paramName, boolean isDelete) {
     final boolean isParam = (obj != null);
     final String uuid = isParam ? obj.getUuid() : null;
     final SubscriptionUpdateStatement update =
@@ -38,11 +44,18 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
     if (update == null) {
       return null;
     }
-    final Instant updatedAt = isParam ? obj.getUpdatedAt() : null;
-    return new SubscriptionUpdateGroup(tableName, uuid, updatedAt, update);
+    final Instant updatedAt;
+    if (!isParam) {
+      updatedAt = null;
+    } else if (isDelete) {
+      updatedAt = Instant.now();
+    } else {
+      updatedAt = obj.getUpdatedAt();
+    }
+    return new SubscriptionUpdateGroup(tableName, uuid, auditTrailUuid, updatedAt, update);
   }
 
-  protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(boolean isParam,
+  public static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(boolean isParam,
       String uuid, String tableName, String paramName) {
     if ((isParam && uuid == null) || tableName == null || paramName == null) {
       return null;

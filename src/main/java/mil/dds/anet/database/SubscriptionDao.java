@@ -6,37 +6,27 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
-import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
-import mil.dds.anet.emails.SubscriptionUpdateEmail;
 import mil.dds.anet.search.pg.PostgresqlSubscriptionSearcher;
-import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQuery<?>> {
+public class SubscriptionDao extends AnetBaseDao<Subscription, SubscriptionSearchQuery> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -47,8 +37,12 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
   public static final String SUBSCRIPTION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
-  public SubscriptionDao(DatabaseHandler databaseHandler) {
+  private final SubscriptionUpdateDao subscriptionUpdateDao;
+
+  public SubscriptionDao(DatabaseHandler databaseHandler,
+      SubscriptionUpdateDao subscriptionUpdateDao) {
     super(databaseHandler);
+    this.subscriptionUpdateDao = subscriptionUpdateDao;
   }
 
   @Override
@@ -56,29 +50,20 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
-  public List<Person> getSubscribedPeople(String subscribedObjectType,
-      String subscribedObjectUuid) {
+  @Transactional
+  public Subscription getBySubscribedObject(Person user, String subscribedObjectUuid) {
     final Handle handle = getDbHandle();
     try {
-      if (Utils.isEmptyOrNull(subscribedObjectType) || Utils.isEmptyOrNull(subscribedObjectUuid)) {
-        return Collections.emptyList();
-      }
-      return handle.attach(SubscriptionListQueries.class).getSubscribedPeople(subscribedObjectType,
-          subscribedObjectUuid);
+      final Position position = DaoUtils.getPosition(user);
+      return handle
+          .createQuery("/* getBySubscribedObject */ SELECT " + SUBSCRIPTION_FIELDS
+              + " FROM subscriptions WHERE \"subscriberUuid\" = :subscriberUuid"
+              + " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
+          .bind("subscriberUuid", DaoUtils.getUuid(position))
+          .bind("subscribedObjectUuid", subscribedObjectUuid).map(new SubscriptionMapper()).first();
     } finally {
       closeDbHandle(handle);
     }
-  }
-
-  public interface SubscriptionListQueries {
-    @RegisterRowMapper(PersonMapper.class)
-    @SqlQuery("SELECT p.uuid AS people_uuid, p.name AS people_name FROM subscriptions s "
-        + " INNER JOIN positions pos ON s.\"subscriberUuid\" = pos.uuid "
-        + " INNER JOIN people p ON pos.\"currentPersonUuid\" = p.uuid "
-        + " WHERE \"subscribedObjectType\" = :subscribedObjectType AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
-    List<Person> getSubscribedPeople(
-        @Bind(value = "subscribedObjectType") String subscribedObjectType,
-        @Bind(value = "subscribedObjectUuid") String subscribedObjectUuid);
   }
 
   @Transactional
@@ -111,8 +96,10 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
     final Handle handle = getDbHandle();
     try {
       handle.createUpdate(
-          "/* insertSubscription */ INSERT INTO subscriptions (uuid, \"subscriberUuid\", \"subscribedObjectType\", \"subscribedObjectUuid\", \"createdAt\", \"updatedAt\") "
-              + "VALUES (:uuid, :subscriberUuid, :subscribedObjectType, :subscribedObjectUuid, :createdAt, :updatedAt)")
+          "/* insertSubscription */ INSERT INTO subscriptions (uuid, \"subscriberUuid\", "
+              + "\"subscribedObjectType\", \"subscribedObjectUuid\", \"createdAt\", \"updatedAt\") "
+              + "VALUES (:uuid, :subscriberUuid, :subscribedObjectType, :subscribedObjectUuid, "
+              + ":createdAt, :updatedAt)")
           .bindBean(s).bind("createdAt", DaoUtils.asLocalDateTime(s.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(s.getUpdatedAt())).execute();
       return s;
@@ -139,23 +126,8 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
   }
 
   @Transactional
-  public int deleteObjectSubscription(Person user, String uuid) {
-    final Handle handle = getDbHandle();
-    try {
-      final Position position = DaoUtils.getPosition(user);
-      return handle
-          .createUpdate("/* deleteObjectSubscription */ DELETE FROM subscriptions"
-              + " WHERE \"subscriberUuid\" = :subscriberUuid"
-              + " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
-          .bind("subscriberUuid", DaoUtils.getUuid(position)).bind("subscribedObjectUuid", uuid)
-          .execute();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public int updateSubscriptions(SubscriptionUpdateGroup subscriptionUpdate) {
+  public int updateSubscriptions(SubscriptionUpdateGroup subscriptionUpdate,
+      String auditTrailUuid) {
     final Handle handle = getDbHandle();
     try {
       if (subscriptionUpdate == null || !subscriptionUpdate.isValid()) {
@@ -186,74 +158,12 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
       final int nRows = handle.createUpdate(sqlPre + sqlSuf)
           .bind("updatedAt", DaoUtils.asLocalDateTime(subscriptionUpdate.getUpdatedAt()))
           .bindMap(params).execute();
-      insertSubscriptionUpdates(subscriptionUpdate);
+      subscriptionUpdateDao.insert(subscriptionUpdate, auditTrailUuid);
       return nRows;
     } finally {
       closeDbHandle(handle);
     }
   }
-
-  private int insertSubscriptionUpdates(SubscriptionUpdateGroup subscriptionUpdate) {
-    final Handle handle = getDbHandle();
-    try {
-      final StringBuilder sqlPre =
-          new StringBuilder("/* insertSubscriptionUpdates */ INSERT INTO \"subscriptionUpdates\""
-              + " (\"subscriptionUuid\", \"updatedObjectType\", \"updatedObjectUuid\", \"isNote\", \"createdAt\")"
-              + " SELECT s.uuid, :updatedObjectType, :updatedObjectUuid, :isNote, :createdAt"
-              + " FROM subscriptions s WHERE ");
-      final String paramObjectTypeTpl = "objectType%1$d";
-      final String stmtTpl =
-          "( \"subscribedObjectType\" = :%1$s AND \"subscribedObjectUuid\" IN ( %2$s ) )";
-      final List<String> stmts = new ArrayList<>();
-      final Map<String, Object> params = new HashMap<>();
-      final ListIterator<SubscriptionUpdateStatement> iter =
-          subscriptionUpdate.getStmts().listIterator();
-      while (iter.hasNext()) {
-        final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
-        final SubscriptionUpdateStatement stmt = iter.next();
-        if (stmt != null && stmt.sql != null && stmt.objectType != null && stmt.params != null) {
-          stmts.add(String.format(stmtTpl, objectTypeParam, stmt.sql));
-          params.put(objectTypeParam, stmt.objectType);
-          params.putAll(stmt.params);
-        }
-      }
-      final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
-      logger.info(
-          "Inserting subscription updates: sql={}, createdAt={}, updatedObjectType={}, updatedObjectUuid={}, isNote={}, params={}",
-          sqlSuf, subscriptionUpdate.getUpdatedAt(), subscriptionUpdate.getObjectType(),
-          subscriptionUpdate.getObjectUuid(), subscriptionUpdate.isNote(), params);
-
-      final int rowNum = handle.createUpdate(sqlPre + sqlSuf)
-          .bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.getUpdatedAt()))
-          .bind("updatedObjectType", subscriptionUpdate.getObjectType())
-          .bind("updatedObjectUuid", subscriptionUpdate.getObjectUuid())
-          .bind("isNote", subscriptionUpdate.isNote()).bindMap(params).execute();
-      sendEmailToSubscribers(subscriptionUpdate);
-      return rowNum;
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  private void sendEmailToSubscribers(SubscriptionUpdateGroup subscriptionUpdate) {
-    final List<Person> subscribers =
-        getSubscribedPeople(subscriptionUpdate.getObjectType(), subscriptionUpdate.getObjectUuid());
-    if (!subscribers.isEmpty()) {
-      final List<String> addresses = getEmailAddressesBasedOnPreference(subscribers,
-          PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
-      if (!addresses.isEmpty()) {
-        final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
-        action.setUpdatedObjectType(subscriptionUpdate.getObjectType());
-        action.setUpdatedObjectUuid(subscriptionUpdate.getObjectUuid());
-        action.setIsNote(subscriptionUpdate.isNote());
-        final AnetEmail email = new AnetEmail();
-        email.setAction(action);
-        email.setToAddresses(addresses);
-        AnetEmailWorker.sendEmailAsync(email);
-      }
-    }
-  }
-
 
   @Transactional
   public boolean isSubscribedObject(GraphQLContext context, String subscribedObjectUuid) {
@@ -275,8 +185,9 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
     }
   }
 
-  public AnetBeanList<Subscription> search(Person user, SubscriptionSearchQuery query) {
-    return new PostgresqlSubscriptionSearcher(databaseHandler).runSearch(query, user);
+  @Override
+  public AnetBeanList<Subscription> search(SubscriptionSearchQuery query) {
+    return new PostgresqlSubscriptionSearcher(databaseHandler).runSearch(query);
   }
 
 }
