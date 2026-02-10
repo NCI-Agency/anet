@@ -39,8 +39,8 @@ public class PositionResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _ORGANIZATION_FIELDS =
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
-  private static final String _PERSON_FIELDS =
-      String.format("uuid updatedAt additionalPositions name %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _PERSON_FIELDS = String
+      .format("uuid updatedAt name additionalPositions {uuid name } %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _POSITION_FIELDS =
       String.format("uuid updatedAt name code type role status description customFields %1$s",
           _EMAIL_ADDRESSES_FIELDS);
