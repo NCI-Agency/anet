@@ -238,11 +238,21 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <MergeField
-                label="Name"
-                value={mergedPerson.name}
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.familyName}
+                value={mergedPerson.familyName}
                 align={ALIGN_OPTIONS.CENTER}
-                fieldName="name"
+                fieldName="familyName"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.givenName}
+                value={mergedPerson.givenName}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="givenName"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -574,7 +584,7 @@ const PersonColumn = ({
           placeholder="Select a person to merge"
           value={person}
           disabledValue={otherSide}
-          overlayColumns={["name"]}
+          overlayColumns={["Name"]}
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
           onChange={(value: any) => {
@@ -591,7 +601,7 @@ const PersonColumn = ({
             }
           }}
           objectType={Person}
-          valueKey="name"
+          valueFunc={Person.fullName}
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           disabled={disabled}
@@ -626,14 +636,31 @@ const PersonColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          <MergeField
-            label="Name"
-            fieldName="name"
-            value={person.name}
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.familyName}
+            fieldName="familyName"
+            value={person.familyName}
             align={align}
             action={() => {
-              dispatchMergeActions(setAMergedField("name", person.name, align))
+              dispatchMergeActions(
+                setAMergedField("familyName", person.familyName, align)
+              )
               dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.givenName}
+            fieldName="givenName"
+            value={person.givenName}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("givenName", person.givenName, align)
+              )
             }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

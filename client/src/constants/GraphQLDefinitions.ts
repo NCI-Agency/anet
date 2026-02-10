@@ -181,7 +181,8 @@ export const gqlAllOrganizationFields = `
 // Person
 export const gqlMinimalPersonFields = `
   ${gqlMinimalEntityFields}
-  name
+  familyName
+  givenName
   rank
   code
   user

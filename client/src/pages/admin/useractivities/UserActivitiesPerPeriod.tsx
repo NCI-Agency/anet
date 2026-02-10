@@ -25,6 +25,7 @@ import {
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
+import { Person } from "models"
 import moment from "moment"
 import { WeekPeriodFormat } from "periodUtils"
 import pluralize from "pluralize"
@@ -320,9 +321,9 @@ const UserActivitiesPerPeriod = ({
     let tooltip
     if (searchType === SEARCH_TYPES.PERSON) {
       xProp = "personUuid"
-      xLabel = ["person.name", DELETED_PERSON]
+      xLabel = d => Person.fullName(d?.person) || DELETED_PERSON
       tooltip = d => `
-        <h4>${_escape(d?.person?.name || DELETED_PERSON)}</h4>
+        <h4>${_escape(Person.fullName(d?.person) || DELETED_PERSON)}</h4>
         <p>${_escape(d.count)}</p>
       `
     } else {

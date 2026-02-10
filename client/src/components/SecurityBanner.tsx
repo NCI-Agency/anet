@@ -71,7 +71,7 @@ const SecurityBanner = ({ onLogout }: SecurityBannerProps) => {
                 width={25}
                 height={25}
               />{" "}
-              {Person.militaryName(currentUser.name)}
+              {Person.fullName(currentUser)}
             </LinkTo>
             {Settings.keycloakConfiguration.showLogoutLink && (
               <Dropdown.Toggle

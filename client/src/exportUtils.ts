@@ -31,7 +31,8 @@ const getPersonFragment = (fields: string[] = []) => `
       ${gqlPaginationFields}
       list {
         ${shouldInclude(fields, "uuid")}
-        ${shouldInclude(fields, "name")}
+        ${shouldInclude(fields, "familyName")}
+        ${shouldInclude(fields, "givenName")}
         ${shouldInclude(fields, "rank")}
         ${shouldInclude(fields, "emailAddresses", getEmailAddresses())}
         ${shouldInclude(
@@ -94,7 +95,8 @@ const getPositionFragment = (fields: string[] = []) => `
           "person",
           `person {
             uuid
-            name
+            familyName
+            givenName
             rank
           }`
         )}
@@ -167,7 +169,8 @@ const getReportFragment = (fields: string[] = []) => `
           "authors",
           `authors {
             uuid
-            name
+            familyName
+            givenName
             rank
           }`
         )}
@@ -176,7 +179,8 @@ const getReportFragment = (fields: string[] = []) => `
           "reportPeople",
           `reportPeople {
             uuid
-            name
+            familyName
+            givenName
             rank
           }`
         )}
@@ -185,7 +189,8 @@ const getReportFragment = (fields: string[] = []) => `
           "primaryAdvisor",
           `primaryAdvisor {
             uuid
-            name
+            familyName
+            givenName
             rank
             position {
               uuid
@@ -203,7 +208,8 @@ const getReportFragment = (fields: string[] = []) => `
           "primaryInterlocutor",
           `primaryInterlocutor {
             uuid
-            name
+            familyName
+            givenName
             rank
           }`
         )}
@@ -259,14 +265,16 @@ const getReportFragment = (fields: string[] = []) => `
                 name
                 person {
                   uuid
-                  name
+                  familyName
+                  givenName
                   rank
                 }
               }
             }
             person {
               uuid
-              name
+              familyName
+              givenName
               rank
             }
           }`
@@ -294,7 +302,8 @@ const getAuthorizationGroupFragment = (fields: string[] = []) => `
               ${getEmailAddresses()}
             }
             ... on Person {
-              name
+              familyName
+              givenName
               rank
               ${getEmailAddresses()}
             }
