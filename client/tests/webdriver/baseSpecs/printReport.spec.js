@@ -4,14 +4,14 @@ import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
 
 const INTERLOCUTORS = [
-  "OF-3 CHRISVILLE, Chris",
-  "CIV KYLESON, Kyle",
-  "CIV SHARTON, Shardul"
+  "OF-3 Chris Chrisville",
+  "CIV Kyle Kyleson",
+  "CIV Shardul Sharton"
 ]
 const INTERLOCUTORS_WITH_ASSESSMENTS = INTERLOCUTORS
 
-const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
-const ADVISORS_WITH_ASSESSMENTS = ["CIV GUIST, Lin"]
+const ADVISORS = ["CIV Arthur Dmin", "CIV Lin Guist"]
+const ADVISORS_WITH_ASSESSMENTS = ["CIV Lin Guist"]
 
 const TASKS = ["EF 1\n»\nEF 1.2\n»\n1.2.A", "EF 1\n»\nEF 1.2\n»\n1.2.B"]
 const TASKS_WITH_ASSESSMENTS = TASKS

@@ -67,7 +67,7 @@ describe("Show event page", () => {
     await (await ShowEvent.getPeople()).waitForExist()
     await (await ShowEvent.getPeople()).waitForDisplayed()
     expect(await (await ShowEvent.getPeople()).getText()).to.include(
-      "CIV ERINSON, Erin"
+      "CIV Erin Erinson"
     )
     await (await ShowEvent.getTasks()).waitForExist()
     await (await ShowEvent.getTasks()).waitForDisplayed()

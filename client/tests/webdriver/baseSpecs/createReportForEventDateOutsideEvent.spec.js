@@ -12,7 +12,7 @@ const REPORT_FIELDS = {
   duration: "60",
   location: "Cabot Tower",
   atmosphere: "Positive",
-  advisors: ["CIV REPORTGUY, Ima"],
+  advisors: ["CIV Ima Reportguy"],
   tasks: [{ name: "2.B" }],
   event: "NMI PDT 2024-01",
   keyOutcomes: "Report engagement date can be outside of the report event",

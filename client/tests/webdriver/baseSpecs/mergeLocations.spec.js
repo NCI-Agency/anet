@@ -47,9 +47,9 @@ const EXAMPLE_LOCATIONS = {
     status: "ACTIVE",
     parentLocations: "Name Type\nFrench Southern Territories\nCountry",
     planningApprovalSteps:
-      "Step 1: Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina\nEF 2.2 Advisor C",
+      "Step 1: Location planning approval for merge loser\nPerson Position\nCIV Reina Reinton\nEF 2.2 Advisor C",
     approvalSteps:
-      "Step 1: Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin\nEF 2.2 Advisor D"
+      "Step 1: Location publication approval for merge loser\nPerson Position\nCIV Erin Erinson\nEF 2.2 Advisor D"
   }
 }
 

@@ -21,12 +21,12 @@ export class CreatePerson extends Page {
     return browser.$(".alert-success")
   }
 
-  async getLastName() {
-    return (await this.getForm()).$("#lastName")
+  async getFamilyName() {
+    return (await this.getForm()).$("#familyName")
   }
 
-  async getFirstName() {
-    return browser.$("#firstName")
+  async getGivenName() {
+    return browser.$("#givenName")
   }
 
   async getDuplicatesButton() {
