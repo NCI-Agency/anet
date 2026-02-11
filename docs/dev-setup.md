@@ -165,7 +165,7 @@ If you have updated the generated schema and need to update the generated Java c
 ### Client-side tests
 #### How the client-side tests work
 Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
-This driver can either run the tests locally on your system, or remotely via [BrowserStack](https://www.browserstack.com/).
+This driver runs the tests locally on your system.
 
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
@@ -202,50 +202,6 @@ await t.context.waitForever()
 ```
 
 In rare circumstances, when using Chrome, the tests will hang on the `data:,` URL. I don't know why this is. If you re-run the test, you should not see the issue a second time.
-
-#### Client-side testing remotely
-To run the tests remotely, you need
-a [username and access key](https://www.browserstack.com/accounts/settings) for BrowserStack.
-
-Look up your settings and put them in `client/config/default.json`:
-```json
-{
-  "browserstack_user": "myusername123",
-  "browserstack_key": "mYbRoWsErStAcKkEy"
-}
-```
-If you want step-by-step screenshots from your tests (_Visual Logs_ on BrowserStack) you can also add:
-```json
-  "browserstack_debug": "true"
-```
-to your `default.json`.
-
-Note that both the E2E and the wdio tests will automatically start (and stop) BrowserStackLocal during the tests.
-
-When all is set up, run the remote tests:
-1. Configure scripts with `TEST_ENV` environment variable for remote testing:
-    ```shell
-    export TEST_ENV=remote
-    ```
-1. Run;
-    1.  the client side E2E tests:
-        ```shell
-        ./gradlew yarn_run_test-e2e
-        ```
-    1. the client side wdio tests:
-        ```shell
-        ./gradlew yarn_run_test-wdio
-        ```
-    1. the client side wdio-ie tests:
-        ```shell
-        ./gradlew yarn_run_test-wdio-ie
-        ```
-       **About IE tests:** Internet Explorer is not fully supported by ANET and all features are **NOT** guaranteed to work with IE. For that reason, a warning banner is displayed when IE detected. `test-wdio-ie` runs tests for this scenario and these tests run only on remote testing. When testing locally, they gracefully abort.
-    1. all client side tests:
-        ```shell
-        ./gradlew yarn_run_test-all
-        ```
-1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
 ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.

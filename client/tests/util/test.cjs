@@ -7,17 +7,8 @@ const moment = require("moment")
 const _includes = require("lodash/includes")
 const _isRegExp = require("lodash/isRegExp")
 
-let capabilities
-const testEnv =
-  (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
-if (testEnv === "local") {
-  // Set capabilities for local Chrome
-  capabilities = webdriver.Capabilities.chrome()
-} else {
-  // Set capabilities for BrowserStack
-  require("./keep-alive.cjs")
-  capabilities = require("../../config/browserstack.config.cjs")
-}
+// Set capabilities for local Chrome
+const capabilities = webdriver.Capabilities.chrome()
 
 // Webdriver's promise manager only made sense before Node had async/await support.
 // Now it's a deprecated legacy feature, so we should use the simpler native Node support instead.
@@ -39,86 +30,34 @@ function debugLog(...args) {
   }
 }
 
-let bsLocal
-
-test.before(async t => {
-  if (testEnv !== "local") {
-    const browserstack = require("browserstack-local")
-    bsLocal = new browserstack.Local()
-    const bsOptions = capabilities["bstack:options"]
-    const bsLocalArgs = {
-      force: true,
-      forceLocal: true,
-      onlyAutomate: true,
-      key: bsOptions.accessKey,
-      localIdentifier: bsOptions.localIdentifier
-    }
-    console.log("Starting BrowserStackLocal")
-    await new Promise((resolve, reject) => {
-      bsLocal.start(bsLocalArgs, error => {
-        if (error) {
-          console.error("Failed to start BrowserStackLocal:", error)
-          reject(error)
-        } else {
-          console.log("Started BrowserStackLocal")
-          resolve(bsLocal)
-        }
-      })
-    })
-  }
-})
-
-test.after.always(async t => {
-  if (bsLocal) {
-    console.log("Stopping BrowserStackLocal")
-    await new Promise((resolve, reject) => {
-      bsLocal.stop(error => {
-        if (error) {
-          console.error("Failed to stop BrowserStackLocal:", error)
-          reject(error)
-        } else {
-          console.log("Stopped BrowserStackLocal")
-          resolve(bsLocal)
-        }
-      })
-    })
-  }
-})
-
 // We use the before hook to put helpers on t.context and set up test scaffolding.
 test.beforeEach(t => {
   let builder = new webdriver.Builder()
-  if (testEnv === "local") {
-    const chrome = require("selenium-webdriver/chrome")
-    const options = new chrome.Options(capabilities)
-      .setBrowserVersion("131") // or "stable"
-      .addArguments([
-        "--incognito",
-        "--headless=old",
-        "--disable-gpu",
-        "--disable-search-engine-choice-screen",
-        "--disable-dev-shm-usage",
-        "--disable-browser-side-navigation",
-        "--no-sandbox",
-        "--window-size=1600,1200"
-      ])
-    builder = builder
-      .forBrowser(webdriver.Browser.CHROME)
-      .setChromeOptions(options)
-      /*
-       * If we don't explicitly define ServiceBuilder for ChromeDriver it uses a default ServiceBuilder
-       * which is a singleton, shared amongst different driver instances. As a result, the same
-       * ChromeDriver server process is used by different drivers. When driver.quit() is called by
-       * one of the drivers, that process is terminated. As a result even though all assertions pass,
-       * the afterEach.always hook reports intermittent errors. By explicitly defining a new ServiceBuilder
-       * here we enforce the creation of a separate ChromeDriver server child process for each driver instance.
-       */
-      .setChromeService(new chrome.ServiceBuilder())
-  } else {
-    builder = builder
-      .usingServer("http://hub.browserstack.com/wd/hub")
-      .withCapabilities(capabilities)
-  }
+  const chrome = require("selenium-webdriver/chrome")
+  const options = new chrome.Options(capabilities)
+    .setBrowserVersion("131") // or "stable"
+    .addArguments([
+      "--incognito",
+      "--headless=old",
+      "--disable-gpu",
+      "--disable-search-engine-choice-screen",
+      "--disable-dev-shm-usage",
+      "--disable-browser-side-navigation",
+      "--no-sandbox",
+      "--window-size=1600,1200"
+    ])
+  builder = builder
+    .forBrowser(webdriver.Browser.CHROME)
+    .setChromeOptions(options)
+    /*
+     * If we don't explicitly define ServiceBuilder for ChromeDriver it uses a default ServiceBuilder
+     * which is a singleton, shared amongst different driver instances. As a result, the same
+     * ChromeDriver server process is used by different drivers. When driver.quit() is called by
+     * one of the drivers, that process is terminated. As a result even though all assertions pass,
+     * the afterEach.always hook reports intermittent errors. By explicitly defining a new ServiceBuilder
+     * here we enforce the creation of a separate ChromeDriver server child process for each driver instance.
+     */
+    .setChromeService(new chrome.ServiceBuilder())
   t.context.driver = builder.build()
 
   const shortWaitMs = moment.duration(1, "seconds").asMilliseconds()
@@ -474,31 +413,9 @@ test.beforeEach(t => {
   }
 })
 
-test.beforeEach(async t => {
-  if (t.context.driver) {
-    if (testEnv !== "local") {
-      // Set test title on BrowserStack
-      const body = JSON.stringify({
-        action: "setSessionName",
-        arguments: { name: t.title.replace(/^beforeEach hook for /, "") }
-      })
-      await t.context.driver.executeScript(`browserstack_executor: ${body}`)
-    }
-  }
-})
-
 // Shut down the browser when we are done.
 test.afterEach.always(async t => {
   if (t.context.driver) {
-    if (testEnv !== "local") {
-      // Send back test result to BrowserStack
-      const body = JSON.stringify({
-        action: "setSessionStatus",
-        arguments: { status: t.passed ? "passed" : "failed" }
-      })
-      await t.context.driver.executeScript(`browserstack_executor: ${body}`)
-    }
-
     await t.context.driver.quit()
   }
 })
