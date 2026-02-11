@@ -5,6 +5,7 @@ import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import EventCollection from "components/EventCollection"
+import EventHostMembersTable from "components/EventHostMembersTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -166,16 +167,6 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
           />
           <DictionaryField
             wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.eventSeries.hostOrg}
-            field={{ name: "hostOrg" }}
-            humanValue={
-              eventSeries.hostOrg && (
-                <LinkTo modelType="Organization" model={eventSeries.hostOrg} />
-              )
-            }
-          />
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
             dictProps={Settings.fields.eventSeries.adminOrg}
             field={{ name: "adminOrg" }}
             humanValue={
@@ -206,6 +197,14 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
             />
           )}
         </Fieldset>
+        {eventSeries.hostRelatedObjects.length > 0 && (
+          <Fieldset
+            id="hosts"
+            title={Settings.fields.eventSeries.hostRelatedObjects?.label}
+          >
+            <EventHostMembersTable entity={eventSeries} />
+          </Fieldset>
+        )}
         <Fieldset
           title={Settings.fields.eventSeries.description?.label}
           id="description"

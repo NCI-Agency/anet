@@ -86,20 +86,19 @@ public class TestData {
   }
 
   public static EventInput createEventInput(String name, String description,
-      OrganizationInput ownerOrg, OrganizationInput hostOrg, OrganizationInput adminOrg) {
+      OrganizationInput ownerOrg, OrganizationInput adminOrg) {
     final String EVENT_TYPE_CONFERENCE_UUID = "92a69ee6-829e-4a67-88fb-3387f81b6d37";
     return EventInput.builder().withName(name).withStatus(Status.ACTIVE)
-        .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
-        .withAdminOrg(adminOrg).withStartDate(Instant.now()).withEndDate(Instant.now())
+        .withDescription(description).withOwnerOrg(ownerOrg).withAdminOrg(adminOrg)
+        .withStartDate(Instant.now()).withEndDate(Instant.now())
         .withEventType(EventTypeInput.builder().withUuid(EVENT_TYPE_CONFERENCE_UUID).build())
         .build();
   }
 
   public static EventSeriesInput createEventSeriesInput(String name, String description,
-      OrganizationInput ownerOrg, OrganizationInput hostOrg, OrganizationInput adminOrg) {
+      OrganizationInput ownerOrg, OrganizationInput adminOrg) {
     return EventSeriesInput.builder().withName(name).withStatus(Status.ACTIVE)
-        .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
-        .withAdminOrg(adminOrg).build();
+        .withDescription(description).withOwnerOrg(ownerOrg).withAdminOrg(adminOrg).build();
   }
 
   public static ReportDto createGoodMartReport(long sequence) {

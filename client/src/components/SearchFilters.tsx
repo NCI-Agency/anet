@@ -779,21 +779,21 @@ export const searchFilters = function (
 
   filters[SEARCH_OBJECT_TYPES.EVENT_SERIES] = {
     filters: {
-      [`Within ${Settings.fields.event.ownerOrg.label}`]: {
+      [`Within ${Settings.fields.eventSeries.ownerOrg.label}`]: {
         component: OrganizationMultiFilter,
         deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "ownerOrgUuid"
         }
       },
-      [`Within ${Settings.fields.event.hostOrg.label}`]: {
+      [`Within ${Settings.fields.eventSeries.hostOrg.label}`]: {
         component: OrganizationMultiFilter,
         deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "hostOrgUuid"
         }
       },
-      [`Within ${Settings.fields.event.adminOrg.label}`]: {
+      [`Within ${Settings.fields.eventSeries.adminOrg.label}`]: {
         component: OrganizationMultiFilter,
         deserializer: deserializeOrganizationMultiFilter,
         props: {

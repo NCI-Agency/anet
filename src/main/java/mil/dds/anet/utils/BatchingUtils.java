@@ -205,6 +205,19 @@ public final class BatchingUtils {
             (BatchLoader<String, EventType>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getEventTypeDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.EVENT_EVENT_HOST_RELATED_OBJECTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getEventDao().getEventHostRelatedObjects(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry
+        .register(FkDataLoaderKey.EVENT_SERIES_EVENT_SERIES_HOST_RELATED_OBJECTS.toString(),
+            DataLoaderFactory.newDataLoader(
+                (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                    .supplyAsync(() -> engine.getEventSeriesDao()
+                        .getEventSeriesHostRelatedObjects(foreignKeys), dispatcherService),
+                dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.LOCATIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, Location>) keys -> CompletableFuture

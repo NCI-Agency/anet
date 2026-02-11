@@ -3,6 +3,14 @@ import CreateEventSeries from "../pages/createNewEventSeries.page"
 
 const ORG = "ANET Admin"
 const ORG_COMPLETE = "ANET Administrators"
+const POSITION = "anet"
+const POSITION_COMPLETE = "ANET Administrator"
+const ORGANIZATION = "moi"
+const ORGANIZATION_COMPLETE = "MoI | Ministry of Interior"
+const PERSON = "jacob"
+const PERSON_COMPLETE = "CIV JACOBSON, Jacob"
+
+const SHORT_WAIT_MS = 200
 
 describe("Create event series page", () => {
   describe("When creating an event series as admin", () => {
@@ -41,20 +49,90 @@ describe("Create event series page", () => {
         await CreateEventSeries.getOwnerOrgAdvancedSelectFirstItem()
       ).click()
 
+      await (await CreateEventSeries.getRelatedObjectsInput()).click()
+      // Add an organization
       await (
-        await CreateEventSeries.getHostOrganizationInput()
-      ).waitForDisplayed()
-      await (await CreateEventSeries.getHostOrganizationInput()).click()
-      await (await CreateEventSeries.getHostOrganizationInput()).setValue(ORG)
-      await CreateEventSeries.waitForHostOrgAdvancedSelectToChange(ORG_COMPLETE)
+        await CreateEventSeries.getRelatedObjectsInput()
+      ).setValue(ORGANIZATION)
+      await CreateEventSeries.waitForAdvancedSelectToChange(
+        ORGANIZATION_COMPLETE,
+        CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem
+      )
       expect(
         await (
-          await CreateEventSeries.getHostOrgAdvancedSelectFirstItem()
+          await CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem()
         ).getText()
-      ).to.include(ORG_COMPLETE)
+      ).to.include(ORGANIZATION_COMPLETE)
       await (
-        await CreateEventSeries.getHostOrgAdvancedSelectFirstItem()
+        await CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
+      await browser.pause(SHORT_WAIT_MS)
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateEventSeries.getRelatedObjectsTableEntry(
+            ORGANIZATION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      // Add a position
+      await (await CreateEventSeries.getMemberTypeButton("Positions")).click()
+      await CreateEventSeries.deleteInput(
+        CreateEventSeries.getRelatedObjectsInput()
+      )
+      await (
+        await CreateEventSeries.getRelatedObjectsInput()
+      ).setValue(POSITION)
+      await CreateEventSeries.waitForAdvancedSelectToChange(
+        POSITION_COMPLETE,
+        CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(POSITION_COMPLETE)
+      await (
+        await CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      await browser.pause(SHORT_WAIT_MS)
+      // The position is added to a table underneath, so relatedObjects table exists now
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (await CreateEventSeries.getRelatedObjectsTable()).isExisting()
+      ).to.be.true
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateEventSeries.getRelatedObjectsTableEntry(POSITION_COMPLETE)
+        ).isExisting()
+      ).to.be.true
+
+      // Add a person
+      await (await CreateEventSeries.getHostTypeButton("People")).click()
+      await CreateEventSeries.deleteInput(
+        CreateEventSeries.getRelatedObjectsInput()
+      )
+      await (await CreateEventSeries.getRelatedObjectsInput()).setValue(PERSON)
+      await CreateEventSeries.waitForAdvancedSelectToChange(
+        PERSON_COMPLETE,
+        CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(PERSON_COMPLETE)
+      await (
+        await CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      await browser.pause(SHORT_WAIT_MS)
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateEventSeries.getRelatedObjectsTableEntry(PERSON_COMPLETE)
+        ).isExisting()
+      ).to.be.true
 
       await (
         await CreateEventSeries.getAdminOrganizationInput()
