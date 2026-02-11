@@ -34,6 +34,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Location, Person } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import {
   Alert,
@@ -190,8 +191,7 @@ const PersonForm = ({
           values.endOfTourDate && values.endOfTourDate <= Date.now()
         const willAutoKickPosition =
           values.status === Model.STATUS.INACTIVE &&
-          values.position &&
-          !!values.position.uuid
+          getNumberOfPositions(values) > 0
         const authorizedSensitiveFields =
           currentUser &&
           Person.getAuthorizedSensitiveFields(
@@ -550,9 +550,23 @@ const PersonForm = ({
                       >
                         {willAutoKickPosition && (
                           <Alert variant="warning">
-                            Setting this person to inactive will automatically
-                            remove them from the{" "}
-                            <strong>{values.position.name}</strong> position.
+                            <p>
+                              {`Setting this person to inactive will automatically remove them from the following ${getNumberOfPositionsText(values)}`}
+                            </p>
+
+                            <ul className="mb-0">
+                              {values.position?.name && (
+                                <li>
+                                  <strong>{values.position.name}</strong>
+                                </li>
+                              )}
+
+                              {values.additionalPositions?.map(p => (
+                                <li key={p.id ?? p.name}>
+                                  <strong>{p.name}</strong>
+                                </li>
+                              ))}
+                            </ul>
                           </Alert>
                         )}
                       </DictionaryField>
@@ -936,6 +950,20 @@ const PersonForm = ({
       setError(null)
       setShowSimilarPeopleMessage(false)
     }
+  }
+  function getNumberOfPositionsText(values) {
+    if (getNumberOfPositions(values) == 1) {
+      return "position"
+    } else {
+      return pluralize("position")
+    }
+  }
+  function getNumberOfPositions(values) {
+    let result = 0
+    if (values.position && values.position.uuid) {
+      result = result + 1
+    }
+    return result + values.additionalPositions?.length
   }
 }
 
