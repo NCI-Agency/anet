@@ -3,6 +3,7 @@ import {
   gqlAllEventFields,
   gqlEntityAvatarFields,
   gqlEntityFieldsMap,
+  gqlHostMembers,
   gqlMinimalEventTypeFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -51,13 +52,13 @@ export default class Event extends Model {
       .default(null),
     outcomes: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
-    hostOrg: yup.object().nullable().default(null),
     adminOrg: yup.object().nullable().default(null),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),
     tasks: yup.array().nullable().default([]),
     organizations: yup.array().nullable().default([]),
-    people: yup.array().nullable().default([])
+    people: yup.array().nullable().default([]),
+    hostRelatedObjects: yup.array().nullable().default([])
   })
 
   static autocompleteQuery = `
@@ -93,9 +94,6 @@ export default class Event extends Model {
           ${gqlMinimalEventTypeFields}
         }
         ownerOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
-        hostOrg {
           ${gqlEntityFieldsMap.Organization}
         }
         adminOrg {
@@ -149,6 +147,7 @@ export default class Event extends Model {
         attachments {
           ${gqlAllAttachmentFields}
         }
+        ${gqlHostMembers}
       }
     }
   `

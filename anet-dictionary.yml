@@ -403,6 +403,8 @@ fields:
     description:
       label: Description
       placeholder: The description of the event series
+    hostRelatedObjects:
+      label: Hosts
 
   event:
     status:
@@ -449,6 +451,8 @@ fields:
     tasks:
       label: Objectives
       placeholder: Objectives of the event
+    hostRelatedObjects:
+      label: Hosts
 
   report:
     canUnpublishReports: true

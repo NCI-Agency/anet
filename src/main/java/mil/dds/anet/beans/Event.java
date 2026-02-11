@@ -16,7 +16,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Event extends EventSeries {
+public class Event extends AbstractCommonEvent {
 
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
@@ -30,6 +30,8 @@ public class Event extends EventSeries {
   @GraphQLQuery
   @GraphQLInputField
   String outcomes;
+  // annotated below
+  private List<GenericRelatedObject> hostRelatedObjects;
 
   // annotated below
   private EntityAvatar entityAvatar;
@@ -260,6 +262,27 @@ public class Event extends EventSeries {
 
   public EntityAvatar getEntityAvatar() {
     return this.entityAvatar;
+  }
+
+  @GraphQLQuery(name = "hostRelatedObjects")
+  public CompletableFuture<List<GenericRelatedObject>> loadHostRelatedObjects(
+      @GraphQLRootContext GraphQLContext context) {
+    if (hostRelatedObjects != null) {
+      return CompletableFuture.completedFuture(hostRelatedObjects);
+    }
+    return engine().getEventDao().getRelatedObjects(context, this).thenApply(o -> {
+      hostRelatedObjects = o;
+      return o;
+    });
+  }
+
+  @GraphQLInputField(name = "hostRelatedObjects")
+  public void setHostRelatedObjects(List<GenericRelatedObject> relatedObjects) {
+    this.hostRelatedObjects = relatedObjects;
+  }
+
+  public List<GenericRelatedObject> getHostRelatedObjects() {
+    return hostRelatedObjects;
   }
 
   @Override

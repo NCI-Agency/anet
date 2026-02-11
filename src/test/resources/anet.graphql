@@ -1,4 +1,23 @@
 """"""
+type AbstractCommonEvent {
+  adminOrg: Organization
+  assessments: [Assessment]
+  attachments: [Attachment]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  description: String
+  entityAvatar: EntityAvatar
+  isSubscribed: Boolean
+  name: String
+  notes: [Note]
+  ownerOrg: Organization
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
 type AccessToken {
   createdAt: Instant
   description: String
@@ -515,7 +534,7 @@ type Event {
   entityAvatar: EntityAvatar
   eventSeries: EventSeries
   eventType: EventType
-  hostOrg: Organization
+  hostRelatedObjects: [GenericRelatedObject]
   isSubscribed: Boolean
   location: Location
   name: String
@@ -543,7 +562,7 @@ input EventInput {
   entityAvatar: EntityAvatarInput
   eventSeries: EventSeriesInput
   eventType: EventTypeInput
-  hostOrg: OrganizationInput
+  hostRelatedObjects: [GenericRelatedObjectInput]
   location: LocationInput
   name: String
   organizations: [OrganizationInput]
@@ -599,7 +618,7 @@ type EventSeries {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   entityAvatar: EntityAvatar
-  hostOrg: Organization
+  hostRelatedObjects: [GenericRelatedObject]
   isSubscribed: Boolean
   name: String
   notes: [Note]
@@ -617,7 +636,7 @@ input EventSeriesInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   entityAvatar: EntityAvatarInput
-  hostOrg: OrganizationInput
+  hostRelatedObjects: [GenericRelatedObjectInput]
   name: String
   ownerOrg: OrganizationInput
   status: Status
@@ -1353,7 +1372,7 @@ enum RecurseStrategy {
 }
 
 """"""
-union RelatableObject = AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
+union RelatableObject = AbstractCommonEvent | AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
 
 """"""
 type Report {
@@ -1675,7 +1694,7 @@ enum Status {
 }
 
 """"""
-union SubscribableObject = AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
+union SubscribableObject = AbstractCommonEvent | AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
 
 """"""
 type Subscription {

@@ -1511,30 +1511,34 @@ INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachme
   ('people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', '3187ad8a-6130-4ec0-bffc-9ebfad4dee39', TRUE, 0, 0, 200, 200);
 
 -- Add event series
-INSERT INTO "eventSeries" (uuid, name, description, status, "createdAt", "updatedAt", "ownerOrgUuid", "hostOrgUuid", "adminOrgUuid") VALUES
+INSERT INTO "eventSeries" (uuid, name, description, status, "createdAt", "updatedAt", "ownerOrgUuid", "adminOrgUuid") VALUES
   ('bacec3a6-f075-421e-90a0-be6e3396197c', 'Inactive event series', 'To test that inactive event series are not shown', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
+   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
   ('b7b70191-54e4-462f-8e40-679dd2e71ec4', 'NMI PDT', 'NMI pre-deployment training', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b');
+   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b');
 
--- Add event
-INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "locationUuid", "eventSeriesUuid", "ownerOrgUuid", "hostOrgUuid", "adminOrgUuid", "startDate", "endDate", "eventTypeUuid") VALUES
+INSERT INTO "eventSeriesHostRelatedObjects" SELECT uuid , 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b' FROM "eventSeries";
+
+-- Add events
+INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "locationUuid", "eventSeriesUuid", "ownerOrgUuid", "adminOrgUuid", "startDate", "endDate", "eventTypeUuid") VALUES
   ('7cb0fc5d-74d0-4deb-86dd-7c84761b8ac6', 'My active test event', 'To test that active events in inactive event series are still shown', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-   NULL, 'bacec3a6-f075-421e-90a0-be6e3396197c', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+   NULL, 'bacec3a6-f075-421e-90a0-be6e3396197c', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '85e9988b-cb72-4917-b0b8-d59009da4ee8'),
   ('46963161-53c1-4eab-85bb-d46a03d152c4', 'My inactive test event', 'To test that inactive events are also shown', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-   NULL, 'bacec3a6-f075-421e-90a0-be6e3396197c', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+   NULL, 'bacec3a6-f075-421e-90a0-be6e3396197c', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'e6c47dff-271d-419a-8ee4-306e0b3ee7ff'),
   ('426a8f59-98de-48eb-9e5c-bbc774f1e35f', 'My active NMI test event', 'NMI pre-deployment active test event', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-   NULL, 'b7b70191-54e4-462f-8e40-679dd2e71ec4', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+   NULL, 'b7b70191-54e4-462f-8e40-679dd2e71ec4', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '85e9988b-cb72-4917-b0b8-d59009da4ee8'),
   ('d7c96ce1-c785-4207-abb7-20935c9a2371', 'My inactive NMI test event', 'NMI pre-deployment inactive test event', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
-   NULL, 'b7b70191-54e4-462f-8e40-679dd2e71ec4', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+   NULL, 'b7b70191-54e4-462f-8e40-679dd2e71ec4', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '85e9988b-cb72-4917-b0b8-d59009da4ee8'),
   ('e850846e-9741-40e8-bc51-4dccc30cf47f', 'NMI PDT 2024-01', 'NMI pre-deployment training 2024 January', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    '0855fb0a-995e-4a79-a132-4024ee2983ff', 'b7b70191-54e4-462f-8e40-679dd2e71ec4',
-   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    '2024-01-08 07:00', '2024-01-12 17:00', '92a69ee6-829e-4a67-88fb-3387f81b6d37');
+
+INSERT INTO "eventHostRelatedObjects" SELECT uuid , 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b' FROM events;
 
 -- Add attachments for event series
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES

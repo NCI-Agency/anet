@@ -208,9 +208,6 @@ const GQL_GET_ORGANIZATION = gql`
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }

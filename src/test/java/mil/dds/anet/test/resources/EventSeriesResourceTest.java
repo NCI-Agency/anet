@@ -3,10 +3,14 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.List;
 import java.util.UUID;
+import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.EventSeriesInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Status;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -17,15 +21,15 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
 
   private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
   public static final String FIELDS =
-      "{ uuid updatedAt status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
+      "{ uuid updatedAt status name description ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid} adminOrg { uuid } }";
 
   @Test
-  void eventTestSeriesGraphQL() {
+  void eventSeriesTestGraphQL() {
     // Create
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     final EventSeriesInput eSeriesInput = TestData.createEventSeriesInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org));
     final EventSeries created = succeedCreateEventSeries(eSeriesInput);
 
     // Update an event series field
@@ -40,7 +44,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void eventCreateValidationTest() {
+  void eventSeriesCreateValidationTest() {
     EventSeriesInput eventSeriesInput = new EventSeriesInput();
     failCreateEventSeries(eventSeriesInput);
     eventSeriesInput.setStatus(Status.ACTIVE);
@@ -49,7 +53,13 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventSeriesInput.setOwnerOrg(getOrganizationInput(org));
     failCreateEventSeries(eventSeriesInput);
-    eventSeriesInput.setHostOrg(getOrganizationInput(org));
+    GenericRelatedObjectInput host1 =
+        GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
+            .withRelatedObjectUuid(org.getUuid()).build();
+    GenericRelatedObjectInput host2 =
+        GenericRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
+            .withRelatedObjectUuid(getJackJackson().getUuid()).build();
+    eventSeriesInput.setHostRelatedObjects(List.of(host1, host2));
     failCreateEventSeries(eventSeriesInput);
     eventSeriesInput.setAdminOrg(getOrganizationInput(org));
     failCreateEventSeries(eventSeriesInput);
@@ -58,18 +68,18 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void eventCreateUpdateRegularUserPermissionTest() {
+  void eventSeriesCreateUpdateRegularUserPermissionTest() {
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     // Jack is not an admin of this new organization, will fail
     final EventSeriesInput eInput = TestData.createEventSeriesInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org));
     failCreateEventSeries(eInput);
     failUpdateEventSeries(eInput);
   }
 
   @Test
-  void testUpdateConflict() {
+  void eventSeriesTestUpdateConflict() {
     final String testUuid = "b7b70191-54e4-462f-8e40-679dd2e71ec4";
     final EventSeries test =
         withCredentials(adminUser, t -> queryExecutor.eventSeries(FIELDS, testUuid));

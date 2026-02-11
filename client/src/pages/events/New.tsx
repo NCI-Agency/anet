@@ -102,8 +102,8 @@ const EventNewConditional = ({
   if (data) {
     event.eventSeries = new EventSeries(data.eventSeries)
     event.ownerOrg = data.eventSeries.ownerOrg
-    event.hostOrg = data.eventSeries.hostOrg
     event.adminOrg = data.eventSeries.adminOrg
+    event.hostRelatedObjects = data.eventSeries.hostRelatedObjects
   }
   // mutates the object
   initInvisibleFields(event, Settings.fields.organization.customFields)
