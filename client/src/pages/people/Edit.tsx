@@ -50,6 +50,12 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+      }
       attachments {
         ${gqlAllAttachmentFields}
       }

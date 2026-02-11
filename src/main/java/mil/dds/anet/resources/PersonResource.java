@@ -179,7 +179,7 @@ public class PersonResource {
         }
         AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
             p, user);
-        positionDao.removePersonFromPosition(existingPos.getUuid());
+        positionDao.removePersonFromPositions(p.getUuid(), existingPos.getUuid());
       }
     }
 
