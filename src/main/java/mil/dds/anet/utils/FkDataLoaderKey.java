@@ -13,6 +13,7 @@ public enum FkDataLoaderKey {
   EVENT_TASKS, // event.tasks
   EVENT_ORGANIZATIONS, // event.organizations
   EVENT_PEOPLE, // event.people
+  EVENT_EVENT_HOST_RELATED_OBJECTS, // event.eventHostRelatedObjects
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects
   NOTE_RELATED_OBJECT_NOTES, // noteRelatedObject.notes
   ORGANIZATION_ADMINISTRATIVE_POSITIONS, // organization.responsiblePositions

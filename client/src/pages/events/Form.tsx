@@ -15,6 +15,7 @@ import {
   HierarchicalTaskOverlayTable,
   taskFields
 } from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
@@ -35,6 +36,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -332,6 +334,30 @@ const EventForm = ({
                       queryParams={eventSeriesSearchQuery}
                       valueKey="name"
                       addon={EVENT_SERIES_ICON}
+                    />
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.event.eventHostRelatedObjects}
+                  name="eventHostRelatedObjects"
+                  component={FieldHelper.SpecialField}
+                  widget={
+                    <RelatedObjectsTableInput
+                      title={pluralize.singular(
+                        Settings.fields.event.eventHostRelatedObjects?.label
+                      )}
+                      relatedObjects={values.eventHostRelatedObjects}
+                      objectType={ENTITY_TYPES.ORGANIZATIONS}
+                      entityTypes={[
+                        ENTITY_TYPES.POSITIONS,
+                        ENTITY_TYPES.ORGANIZATIONS,
+                        ENTITY_TYPES.PEOPLE
+                      ]}
+                      setRelatedObjects={value =>
+                        setFieldValue("eventHostRelatedObjects", value)
+                      }
+                      showDelete
                     />
                   }
                 />
@@ -770,6 +796,9 @@ const EventForm = ({
     event.adminOrg = utils.getReference(event.adminOrg)
     event.location = utils.getReference(event.location)
     event.eventSeries = utils.getReference(event.eventSeries)
+    event.eventHostRelatedObjects = event.eventHostRelatedObjects.map(ro =>
+      Object.without(ro, "relatedObject")
+    )
     return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
       event,
       force

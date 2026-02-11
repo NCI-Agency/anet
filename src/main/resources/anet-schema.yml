@@ -796,7 +796,7 @@ properties:
         type: object
         additionalProperties: false
         required: [status, name, type, description, startDate, endDate, outcomes, ownerOrg, hostOrg,
-                   adminOrg, eventSeries, location, organizations, people, tasks]
+                   adminOrg, eventSeries, location, organizations, people, tasks, eventHostRelatedObjects]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -828,6 +828,8 @@ properties:
             "$ref": "#/$defs/inputField"
           tasks:
             "$ref": "#/$defs/inputField"
+          eventHostRelatedObjects:
+            "$ref": "#/$defs/labeledField"
 
       report:
         type: object

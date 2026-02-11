@@ -498,6 +498,7 @@ type Event {
   description: String
   endDate: Instant
   entityAvatar: EntityAvatar
+  eventHostRelatedObjects: [GenericRelatedObject]
   eventSeries: EventSeries
   eventType: EventType
   hostOrg: Organization
@@ -526,6 +527,7 @@ input EventInput {
   description: String
   endDate: Instant
   entityAvatar: EntityAvatarInput
+  eventHostRelatedObjects: [GenericRelatedObjectInput]
   eventSeries: EventSeriesInput
   eventType: EventTypeInput
   hostOrg: OrganizationInput

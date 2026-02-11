@@ -626,3 +626,24 @@ export const gqlPaginationFields = `
   pageSize
   totalCount
 `
+
+export const gqlEventHostMembersWithEmailFields = `
+  eventHostRelatedObjects {
+    relatedObjectType
+    relatedObjectUuid
+    relatedObject {
+      ... on Organization {
+        ${gqlEntityFieldsMap.Organization}
+        ${gqlEmailAddressesFields}
+      }
+      ... on Person {
+        ${gqlEntityFieldsMap.Person}
+        ${gqlEmailAddressesFields}
+      }
+      ... on Position {
+        ${gqlEntityFieldsMap.Position}
+        ${gqlEmailAddressesFields}
+      }
+    }
+  }
+`

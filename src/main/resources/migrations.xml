@@ -6902,8 +6902,45 @@
 		</sql>
 	</changeSet>
 
-	<!-- Keep this change set as the last one in the change log;
-	     it will be re-run whenever it changes. -->
+	<changeSet id="add-eventHostRelatedObjects" author="fdelcastillo">
+		<createTable tableName="eventHostRelatedObjects">
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+				baseTableName="eventHostRelatedObjects"
+				constraintName="FK_eventHostRelatedObjects_event"
+				baseColumnNames="eventUuid"
+				referencedTableName="events"
+				referencedColumnNames="uuid"
+				onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<!-- Migrate existing event host organizations -->
+		<sql>
+			INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+			SELECT
+				events.uuid,
+				'organizations',
+				events."hostOrgUuid"
+			FROM
+				events events;
+		</sql>
+
+		<!-- TODO Now drop the column -->
+	<!--<dropColumn tableName="event" />-->
+</changeSet>
+
+<!-- Keep this change set as the last one in the change log;
+     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
 		<sql>
 			<!--

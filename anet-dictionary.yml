@@ -449,6 +449,8 @@ fields:
     tasks:
       label: Objectives
       placeholder: Objectives of the event
+    eventHostRelatedObjects:
+      label: Hosts
 
   report:
     canUnpublishReports: true

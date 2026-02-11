@@ -30,6 +30,8 @@ public class Event extends EventSeries {
   @GraphQLQuery
   @GraphQLInputField
   String outcomes;
+  // annotated below
+  private List<GenericRelatedObject> eventHostRelatedObjects;
 
   // annotated below
   private EntityAvatar entityAvatar;
@@ -260,6 +262,27 @@ public class Event extends EventSeries {
 
   public EntityAvatar getEntityAvatar() {
     return this.entityAvatar;
+  }
+
+  @GraphQLQuery(name = "eventHostRelatedObjects")
+  public CompletableFuture<List<GenericRelatedObject>> loadEventHostRelatedObjects(
+      @GraphQLRootContext GraphQLContext context) {
+    if (eventHostRelatedObjects != null) {
+      return CompletableFuture.completedFuture(eventHostRelatedObjects);
+    }
+    return engine().getEventDao().getRelatedObjects(context, this).thenApply(o -> {
+      eventHostRelatedObjects = o;
+      return o;
+    });
+  }
+
+  @GraphQLInputField(name = "eventHostRelatedObjects")
+  public void setEventHostRelatedObjects(List<GenericRelatedObject> relatedObjects) {
+    this.eventHostRelatedObjects = relatedObjects;
+  }
+
+  public List<GenericRelatedObject> getEventHostRelatedObjects() {
+    return eventHostRelatedObjects;
   }
 
   @Override

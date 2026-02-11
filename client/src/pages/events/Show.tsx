@@ -4,6 +4,7 @@ import AppContext from "components/AppContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
+import EventHostMembersTable from "components/EventHostMembersTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -155,6 +156,9 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
               </FormGroup>
             </Col>
           </Row>
+        </Fieldset>
+        <Fieldset title={Settings.fields.event.eventHostRelatedObjects?.label}>
+          <EventHostMembersTable event={event} />
         </Fieldset>
         <Fieldset id="info" title="Info">
           {event.eventSeries?.uuid && (

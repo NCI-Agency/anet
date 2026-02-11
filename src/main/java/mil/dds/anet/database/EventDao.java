@@ -5,12 +5,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Event;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
 import mil.dds.anet.database.mappers.EventMapper;
+import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -22,6 +24,7 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,6 +89,29 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
       super(EventDao.this.databaseHandler, sql, "foreignKeys", new PersonMapper(), "eventUuid");
     }
   }
+
+  class EventHostRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
+    private static final String SQL =
+        "/* batch.getEventHostRelatedObjects */ SELECT * FROM \"eventHostRelatedObjects\" "
+            + "WHERE \"eventUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
+
+    public EventHostRelatedObjectsBatcher() {
+      super(EventDao.this.databaseHandler, SQL, "foreignKeys",
+          new GenericRelatedObjectMapper("eventUuid"), "eventUuid");
+    }
+  }
+
+  public List<List<GenericRelatedObject>> getEventHostRelatedObjects(List<String> foreignKeys) {
+    return new EventDao.EventHostRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
+      Event event) {
+    return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
+        FkDataLoaderKey.EVENT_EVENT_HOST_RELATED_OBJECTS, event.getUuid());
+  }
+
+
 
   public List<List<Task>> getTasks(List<String> foreignKeys) {
     return new TasksBatcher().getByForeignKeys(foreignKeys);
@@ -169,12 +195,27 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
 
     @SqlBatch("INSERT INTO \"eventPeople\" (\"eventUuid\", \"personUuid\") VALUES (:eventUuid, :uuid)")
     void insertEventPeople(@Bind("eventUuid") String eventUuid, @BindBean List<Person> people);
+
+    @SqlBatch("INSERT INTO \"eventHostRelatedObjects\""
+        + " (\"eventUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
+        + " VALUES (:eventUuid, :relatedObjectType, :relatedObjectUuid)")
+    void insertEventRelatedObjects(@Bind("eventUuid") String eventUuid,
+        @BindBean List<GenericRelatedObject> eventHostRelatedObjects);
+
+    @SqlUpdate("DELETE FROM \"eventHostRelatedObjects\"" + " WHERE \"eventUuid\" = :eventUuid")
+    void deleteEventHostRelatedObjects(@Bind("eventUuid") String eventUuid);
   }
 
   @Override
   public int updateInternal(Event event) {
     final Handle handle = getDbHandle();
     try {
+      final EventDao.EventBatch eb = handle.attach(EventDao.EventBatch.class);
+      eb.deleteEventHostRelatedObjects(DaoUtils.getUuid(event)); // seems the easiest thing to
+      // do
+      if (event.getEventHostRelatedObjects() != null) {
+        eb.insertEventRelatedObjects(DaoUtils.getUuid(event), event.getEventHostRelatedObjects());
+      }
       return handle.createUpdate("/* updateEvent */ UPDATE events "
           + "SET status = :status, \"eventTypeUuid\" = :eventTypeUuid, name = :name, description = :description, "
           + "\"startDate\" = :startDate, \"endDate\" = :endDate, outcomes = :outcomes, "
