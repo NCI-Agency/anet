@@ -1,6 +1,7 @@
-branches:
-  - main
-name-template: "ANET $NEXT_PATCH_VERSION"
+name-template: "ANET $NEXT_MINOR_VERSION"
+tag-template: "$NEXT_MINOR_VERSION"
+filter-by-commitish: true
+commitish: main
 version-template: "$MAJOR.$MINOR.$PATCH"
 categories:
   - title: '🚀 Features'
