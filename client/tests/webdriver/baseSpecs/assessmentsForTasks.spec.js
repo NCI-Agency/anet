@@ -5,7 +5,7 @@ import ShowTask from "../pages/showTask.page"
 
 const TASK_SEARCH_STRING = "1.1.A"
 // both are responsible from '1.1.A Milestone' task
-const ADVISOR1_CREDENTIALS = "elizabeth"
+const ADVISOR1_CREDENTIALS = "bob"
 const ADVISOR2_CREDENTIALS = "andrew"
 
 const ADVISOR_1_TASK_CREATE_DETAILS = ["advisor1 create", "GREEN"]
@@ -162,6 +162,7 @@ describe("As an admin", () => {
         }
       }
     }
+    await ShowTask.logout()
   })
 
   it("Should not see not-applicable assessment sections for each task", async () => {
@@ -182,6 +183,7 @@ describe("As an admin", () => {
         ).to.equal(false)
       }
     }
+    await ShowTask.logout()
   })
 })
 
