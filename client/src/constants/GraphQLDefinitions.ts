@@ -674,3 +674,36 @@ export const gqlPaginationFields = `
   pageSize
   totalCount
 `
+
+export const gqlHostMembers = `
+  hostRelatedObjects {
+    relatedObjectType
+    relatedObjectUuid
+    relatedObject {
+      ... on Organization {
+        ${gqlEntityFieldsMap.Organization}
+      }
+      ... on Person {
+        ${gqlEntityFieldsMap.Person}
+      }
+      ... on Position {
+        ${gqlEntityFieldsMap.Position}
+      }
+    }
+  }
+`
+export const gqlHostMembersForExport = `
+  hostRelatedObjects {
+    relatedObject {
+      ... on Organization {
+        shortName
+      }
+      ... on Person {
+        name
+      }
+      ... on Position {
+        name
+      }
+    }
+  }
+`

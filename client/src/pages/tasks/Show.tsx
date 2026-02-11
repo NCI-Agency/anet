@@ -114,9 +114,6 @@ const GQL_GET_TASK = gql`
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }

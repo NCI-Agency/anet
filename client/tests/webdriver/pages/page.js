@@ -264,6 +264,30 @@ class Page {
   async getMergeButton() {
     return browser.$('a[id="mergeWithOther"]')
   }
+
+  async waitForAdvancedSelectToChange(value, getFirstItemCallback) {
+    await (await getFirstItemCallback()).waitForExist()
+    return browser.waitUntil(
+      async () => {
+        return (await (await getFirstItemCallback()).getText()) === value
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected advanced select input to contain "' + value + '" after 5s'
+      }
+    )
+  }
+
+  async getRelatedObjectsAdvancedSelectFirstItem() {
+    return browser.$(
+      "#entitySelect-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  async getMemberTypeButton(memberType) {
+    return browser.$(`button=${memberType}`)
+  }
 }
 
 export default Page

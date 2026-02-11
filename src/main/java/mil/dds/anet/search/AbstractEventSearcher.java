@@ -58,7 +58,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       addOwnerOrgQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getHostOrgUuid())) {
-      addHostOrgQuery(query);
+      addHostQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
       addAdminOrgQuery(query);
@@ -103,14 +103,16 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     }
   }
 
-  protected void addHostOrgQuery(EventSearchQuery query) {
+  protected void addHostQuery(EventSearchQuery query) {
+    qb.addFromClause(
+        "INNER JOIN \"eventHostRelatedObjects\" hosts ON hosts.\"relatedObjectType\" = 'organizations' AND hosts.\"eventUuid\" = events.uuid");
     if (query.getHostOrgUuid().size() == 1
         && Organization.DUMMY_ORG_UUID.equals(query.getHostOrgUuid().get(0))) {
-      qb.addWhereClause("events.\"hostOrgUuid\" IS NULL");
+      qb.addWhereClause("hosts.\"relatedObjectUuid\" IS NULL");
     } else {
-      qb.addRecursiveClause(null, "events", new String[] {"\"hostOrgUuid\""}, "parent_host_orgs",
-          "organizations", "uuid", "\"parentOrgUuid\"", "hostOrgUuid", query.getHostOrgUuid(), true,
-          true, null);
+      qb.addRecursiveClause(null, "hosts", new String[] {"\"relatedObjectUuid\""},
+          "parent_host_orgs", "organizations", "\"parentOrgUuid\"", "uuid", "hostOrgUuid",
+          query.getHostOrgUuid(), false, true, null);
     }
   }
 

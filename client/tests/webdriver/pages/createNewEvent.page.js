@@ -32,16 +32,6 @@ class CreateEvent extends Page {
     )
   }
 
-  async getHostOrganizationInput() {
-    return browser.$("#hostOrg")
-  }
-
-  async getHostOrgAdvancedSelectFirstItem() {
-    return browser.$(
-      "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"
-    )
-  }
-
   async getAdminOrganizationInput() {
     return browser.$("#adminOrg")
   }
@@ -82,25 +72,6 @@ class CreateEvent extends Page {
         timeout: 5000,
         timeoutMsg:
           'Expected owner org advanced select input to contain "' +
-          value +
-          '" after 5s'
-      }
-    )
-  }
-
-  async waitForHostOrgAdvancedSelectToChange(value) {
-    await (await this.getHostOrgAdvancedSelectFirstItem()).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (
-          (await (await this.getHostOrgAdvancedSelectFirstItem()).getText()) ===
-          value
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg:
-          'Expected host org advanced select input to contain "' +
           value +
           '" after 5s'
       }

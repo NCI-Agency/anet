@@ -50,15 +50,7 @@ describe("Create event page", () => {
         await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).getText()
       ).to.include(ORG_COMPLETE)
       await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).click()
-
-      await (await CreateEvent.getHostOrganizationInput()).click()
-      await (await CreateEvent.getHostOrganizationInput()).setValue(ORG)
-      await CreateEvent.waitForHostOrgAdvancedSelectToChange(ORG_COMPLETE)
-      expect(
-        await (await CreateEvent.getHostOrgAdvancedSelectFirstItem()).getText()
-      ).to.include(ORG_COMPLETE)
-      await (await CreateEvent.getHostOrgAdvancedSelectFirstItem()).click()
-
+      // Host related objects already tested in Event Series, no need to duplicate
       await (await CreateEvent.getAdminOrganizationInput()).click()
       await (await CreateEvent.getAdminOrganizationInput()).setValue(ORG)
       await CreateEvent.waitForAdminOrgAdvancedSelectToChange(ORG_COMPLETE)

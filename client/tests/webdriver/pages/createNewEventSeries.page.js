@@ -28,14 +28,28 @@ class CreateEventSeries extends Page {
     )
   }
 
-  async getHostOrganizationInput() {
-    return browser.$("#hostOrg")
+  async getRelatedObjectsInput() {
+    return browser.$("#hostRelatedObjects")
+  }
+
+  async getRelatedObjectsTable() {
+    return browser.$(".related_objects_table")
+  }
+
+  async getRelatedObjectsTableEntry(relatedObjectText) {
+    return (await this.getRelatedObjectsTable()).$(
+      `.//tr/td/span//a[text()="${relatedObjectText}"]`
+    )
   }
 
   async getHostOrgAdvancedSelectFirstItem() {
     return browser.$(
       "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"
     )
+  }
+
+  async getHostTypeButton(memberType) {
+    return browser.$(`button=${memberType}`)
   }
 
   async getAdminOrganizationInput() {

@@ -27,9 +27,6 @@ const GQL_GET_EVENTSERIES_LIST = gql`
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -122,7 +119,6 @@ const BaseEventSeriesTable = ({
             <tr>
               <th>{Settings.fields.eventSeries.name.label}</th>
               <th>{Settings.fields.eventSeries.ownerOrg.label}</th>
-              <th>{Settings.fields.eventSeries.hostOrg.label}</th>
               <th>{Settings.fields.eventSeries.adminOrg.label}</th>
             </tr>
           </thead>
@@ -136,12 +132,6 @@ const BaseEventSeriesTable = ({
                   <LinkTo
                     modelType="Organization"
                     model={eventSeries.ownerOrg}
-                  />
-                </td>
-                <td>
-                  <LinkTo
-                    modelType="Organization"
-                    model={eventSeries.hostOrg}
                   />
                 </td>
                 <td>

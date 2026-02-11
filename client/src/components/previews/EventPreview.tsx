@@ -2,6 +2,7 @@ import API from "api"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
+import EventHostMembersTable from "components/EventHostMembersTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { PreviewTitle } from "components/previews/PreviewTitle"
@@ -53,11 +54,6 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
         />
         <DictionaryField
           wrappedComponent={PreviewField}
-          dictProps={Settings.fields.event.hostOrg}
-          value={<LinkTo modelType="Organization" model={event.hostOrg} />}
-        />
-        <DictionaryField
-          wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.adminOrg}
           value={<LinkTo modelType="Organization" model={event.adminOrg} />}
         />
@@ -90,6 +86,12 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
           dictProps={Settings.fields.event.status}
           value={Event.humanNameOfStatus(event.status)}
         />
+        <p>
+          <b>{Settings.fields.event.hostRelatedObjects}</b>
+        </p>
+        <div className="preview-section">
+          <EventHostMembersTable entity={event} />
+        </div>
         {event?.organizations?.length > 0 && (
           <DictionaryField
             wrappedComponent={PreviewField}

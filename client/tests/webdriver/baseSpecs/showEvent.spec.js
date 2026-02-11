@@ -18,10 +18,10 @@ describe("Show event page", () => {
     expect(await (await ShowEvent.getOwnerOrganization()).getText()).to.equal(
       "EF 2.2"
     )
-    await (await ShowEvent.getHostOrganization()).waitForExist()
-    await (await ShowEvent.getHostOrganization()).waitForDisplayed()
-    expect(await (await ShowEvent.getHostOrganization()).getText()).to.equal(
-      "EF 2.2"
+    await (await ShowEvent.getHostRelatedObjects()).waitForExist()
+    await (await ShowEvent.getHostRelatedObjects()).waitForDisplayed()
+    expect(await (await ShowEvent.getHostRelatedObjects()).getText()).to.equal(
+      "Hosts\nEF 2.2"
     )
     await (await ShowEvent.getAdminOrganization()).waitForExist()
     await (await ShowEvent.getAdminOrganization()).waitForDisplayed()

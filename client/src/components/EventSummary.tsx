@@ -1,5 +1,6 @@
 import {
   gqlEntityFieldsMap,
+  gqlHostMembers,
   gqlMinimalEventTypeFields,
   gqlPaginationFields
 } from "constants/GraphQLDefinitions"
@@ -42,9 +43,6 @@ const GQL_GET_EVENT_LIST = gql`
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -78,6 +76,7 @@ const GQL_GET_EVENT_LIST = gql`
             role
           }
         }
+        ${gqlHostMembers}
       }
     }
   }
@@ -243,22 +242,32 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </Col>
         </Row>
       )}
-      {!_isEmpty(event.hostOrg) && (
-        <Row className="my-1">
-          <Col md={12}>
-            <span>
-              <strong>{Settings.fields.event.hostOrg.label}: </strong>
-              <LinkTo modelType="Organization" model={event.hostOrg} />
-            </span>
-          </Col>
-        </Row>
-      )}
       {!_isEmpty(event.adminOrg) && (
         <Row className="my-1">
           <Col md={12}>
             <span>
               <strong>{Settings.fields.event.adminOrg.label}: </strong>
               <LinkTo modelType="Organization" model={event.adminOrg} />
+            </span>
+          </Col>
+        </Row>
+      )}
+      {!_isEmpty(event.hostRelatedObjects) && (
+        <Row className="my-1">
+          <Col md={12}>
+            <span>
+              <strong>{Settings.fields.event.hostRelatedObjects.label}:</strong>{" "}
+              {event.hostRelatedObjects.map((host, i) => {
+                return (
+                  <React.Fragment key={host.relatedObjectUuid}>
+                    {i > 0 && separator}
+                    <LinkTo
+                      modelType={host.relatedObjectType}
+                      model={host.relatedObject}
+                    />
+                  </React.Fragment>
+                )
+              })}
             </span>
           </Col>
         </Row>
