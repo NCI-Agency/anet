@@ -30,8 +30,8 @@ export default class EventSeries extends Model {
     name: yup.string().required().default(""),
     description: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
-    adminOrg: yup.object().nullable().default(null),
-    hostRelatedObjects: yup.array().nullable().default([])
+    hostRelatedObjects: yup.array().nullable().default([]),
+    adminOrg: yup.object().nullable().default(null)
   })
 
   static autocompleteQuery = `
@@ -39,10 +39,10 @@ export default class EventSeries extends Model {
     ownerOrg {
       ${gqlEntityFieldsMap.Organization}
     }
+    ${gqlHostMembers}
     adminOrg {
       ${gqlEntityFieldsMap.Organization}
     }
-    ${gqlHostMembers}
   `
 
   static getEventSeriesQuery = gql`
@@ -53,13 +53,13 @@ export default class EventSeries extends Model {
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
+        ${gqlHostMembers}
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }
         attachments {
           ${gqlAllAttachmentFields}
         }
-        ${gqlHostMembers}
       }
     }
   `

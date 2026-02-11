@@ -43,6 +43,7 @@ const GQL_GET_EVENT_LIST = gql`
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
+        ${gqlHostMembers}
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -76,7 +77,6 @@ const GQL_GET_EVENT_LIST = gql`
             role
           }
         }
-        ${gqlHostMembers}
       }
     }
   }
@@ -242,16 +242,6 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
           </Col>
         </Row>
       )}
-      {!_isEmpty(event.adminOrg) && (
-        <Row className="my-1">
-          <Col md={12}>
-            <span>
-              <strong>{Settings.fields.event.adminOrg.label}: </strong>
-              <LinkTo modelType="Organization" model={event.adminOrg} />
-            </span>
-          </Col>
-        </Row>
-      )}
       {!_isEmpty(event.hostRelatedObjects) && (
         <Row className="my-1">
           <Col md={12}>
@@ -268,6 +258,16 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
                   </React.Fragment>
                 )
               })}
+            </span>
+          </Col>
+        </Row>
+      )}
+      {!_isEmpty(event.adminOrg) && (
+        <Row className="my-1">
+          <Col md={12}>
+            <span>
+              <strong>{Settings.fields.event.adminOrg.label}: </strong>
+              <LinkTo modelType="Organization" model={event.adminOrg} />
             </span>
           </Col>
         </Row>

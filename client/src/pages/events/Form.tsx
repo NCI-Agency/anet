@@ -331,28 +331,6 @@ const EventForm = ({
                   />
                   <DictionaryField
                     wrappedComponent={Field}
-                    dictProps={Settings.fields.event.hostRelatedObjects}
-                    name="hostRelatedObjects"
-                    component={FieldHelper.SpecialField}
-                    widget={
-                      <RelatedObjectsTableInput
-                        title={Settings.fields.event.hostRelatedObjects?.label}
-                        relatedObjects={values.hostRelatedObjects}
-                        objectType={ENTITY_TYPES.ORGANIZATIONS}
-                        entityTypes={[
-                          ENTITY_TYPES.ORGANIZATIONS,
-                          ENTITY_TYPES.POSITIONS,
-                          ENTITY_TYPES.PEOPLE
-                        ]}
-                        setRelatedObjects={value =>
-                          setFieldValue("hostRelatedObjects", value)
-                        }
-                        showDelete
-                      />
-                    }
-                  />
-                  <DictionaryField
-                    wrappedComponent={Field}
                     dictProps={Settings.fields.event.ownerOrg}
                     name="ownerOrg"
                     component={FieldHelper.SpecialField}
@@ -373,6 +351,28 @@ const EventForm = ({
                         fields={Organization.autocompleteQuery}
                         valueKey="shortName"
                         addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.hostRelatedObjects}
+                    name="hostRelatedObjects"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <RelatedObjectsTableInput
+                        title={Settings.fields.event.hostRelatedObjects?.label}
+                        relatedObjects={values.hostRelatedObjects}
+                        objectType={ENTITY_TYPES.ORGANIZATIONS}
+                        entityTypes={[
+                          ENTITY_TYPES.ORGANIZATIONS,
+                          ENTITY_TYPES.POSITIONS,
+                          ENTITY_TYPES.PEOPLE
+                        ]}
+                        setRelatedObjects={value =>
+                          setFieldValue("hostRelatedObjects", value)
+                        }
+                        showDelete
                       />
                     }
                   />
@@ -762,12 +762,12 @@ const EventForm = ({
     event.people = values.people.map(t => utils.getReference(t))
     event.eventType = utils.getReference(event.eventType)
     event.ownerOrg = utils.getReference(event.ownerOrg)
-    event.adminOrg = utils.getReference(event.adminOrg)
-    event.location = utils.getReference(event.location)
-    event.eventSeries = utils.getReference(event.eventSeries)
     event.hostRelatedObjects = event.hostRelatedObjects.map(ro =>
       Object.without(ro, "relatedObject")
     )
+    event.adminOrg = utils.getReference(event.adminOrg)
+    event.location = utils.getReference(event.location)
+    event.eventSeries = utils.getReference(event.eventSeries)
     return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
       event,
       force

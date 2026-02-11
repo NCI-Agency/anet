@@ -16,7 +16,7 @@ class ShowEventSeries extends Page {
   }
 
   async getHostRelatedObjects() {
-    return browser.$('div[id="hosts"]')
+    return browser.$('div[id="hostRelatedObjects"]')
   }
 
   async getAdminOrganization() {

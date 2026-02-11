@@ -21,7 +21,7 @@ describe("Show event page", () => {
     await (await ShowEvent.getHostRelatedObjects()).waitForExist()
     await (await ShowEvent.getHostRelatedObjects()).waitForDisplayed()
     expect(await (await ShowEvent.getHostRelatedObjects()).getText()).to.equal(
-      "Hosts\nEF 2.2"
+      "EF 2.2"
     )
     await (await ShowEvent.getAdminOrganization()).waitForExist()
     await (await ShowEvent.getAdminOrganization()).waitForDisplayed()

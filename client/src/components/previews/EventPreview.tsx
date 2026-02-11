@@ -54,6 +54,11 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
         />
         <DictionaryField
           wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.hostRelatedObjects}
+          value={<EventHostMembersTable entity={event} />}
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.adminOrg}
           value={<LinkTo modelType="Organization" model={event.adminOrg} />}
         />
@@ -86,12 +91,6 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
           dictProps={Settings.fields.event.status}
           value={Event.humanNameOfStatus(event.status)}
         />
-        <p>
-          <b>{Settings.fields.event.hostRelatedObjects?.label}</b>
-        </p>
-        <div className="preview-section">
-          <EventHostMembersTable entity={event} />
-        </div>
         {event?.organizations?.length > 0 && (
           <DictionaryField
             wrappedComponent={PreviewField}

@@ -52,13 +52,13 @@ export default class Event extends Model {
       .default(null),
     outcomes: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
+    hostRelatedObjects: yup.array().nullable().default([]),
     adminOrg: yup.object().nullable().default(null),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),
     tasks: yup.array().nullable().default([]),
     organizations: yup.array().nullable().default([]),
-    people: yup.array().nullable().default([]),
-    hostRelatedObjects: yup.array().nullable().default([])
+    people: yup.array().nullable().default([])
   })
 
   static autocompleteQuery = `
@@ -96,6 +96,7 @@ export default class Event extends Model {
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
+        ${gqlHostMembers}
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }
@@ -147,7 +148,6 @@ export default class Event extends Model {
         attachments {
           ${gqlAllAttachmentFields}
         }
-        ${gqlHostMembers}
       }
     }
   `

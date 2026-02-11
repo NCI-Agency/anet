@@ -20,7 +20,7 @@ describe("Show event series page", () => {
     await (await ShowEventSeries.getHostRelatedObjects()).waitForDisplayed()
     expect(
       await (await ShowEventSeries.getHostRelatedObjects()).getText()
-    ).to.equal("Hosts\nEF 2.2")
+    ).to.equal("EF 2.2")
     await (await ShowEventSeries.getAdminOrganization()).waitForExist()
     await (await ShowEventSeries.getAdminOrganization()).waitForDisplayed()
     expect(

@@ -1,6 +1,5 @@
 import {
   gqlEntityFieldsMap,
-  gqlHostMembers,
   gqlMinimalEventTypeFields,
   gqlPaginationFields
 } from "constants/GraphQLDefinitions"
@@ -38,7 +37,6 @@ const GQL_GET_EVENT_LIST = gql`
           lng
           type
         }
-        ${gqlHostMembers}
       }
     }
   }

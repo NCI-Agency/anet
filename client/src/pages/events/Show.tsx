@@ -182,6 +182,14 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
               )
             }
           />
+          {event.hostRelatedObjects.length > 0 && (
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.event.hostRelatedObjects}
+              field={{ name: "hostRelatedObjects" }}
+              humanValue={<EventHostMembersTable entity={event} />}
+            />
+          )}
           <DictionaryField
             wrappedComponent={FieldHelper.ReadonlyField}
             dictProps={Settings.fields.event.adminOrg}
@@ -254,14 +262,6 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
             />
           )}
         </Fieldset>
-        {event.hostRelatedObjects.length > 0 && (
-          <Fieldset
-            id="eventHosts"
-            title={Settings.fields.event.hostRelatedObjects?.label}
-          >
-            <EventHostMembersTable entity={event} />
-          </Fieldset>
-        )}
         <Fieldset
           title={Settings.fields.event.description?.label}
           id="description"

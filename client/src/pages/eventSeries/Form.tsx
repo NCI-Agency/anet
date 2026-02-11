@@ -184,30 +184,6 @@ const EventSeriesForm = ({
                 <Fieldset>
                   <DictionaryField
                     wrappedComponent={Field}
-                    dictProps={Settings.fields.eventSeries.hostRelatedObjects}
-                    name="hostRelatedObjects"
-                    component={FieldHelper.SpecialField}
-                    widget={
-                      <RelatedObjectsTableInput
-                        title={
-                          Settings.fields.eventSeries.hostRelatedObjects?.label
-                        }
-                        relatedObjects={values.hostRelatedObjects}
-                        objectType={ENTITY_TYPES.ORGANIZATIONS}
-                        entityTypes={[
-                          ENTITY_TYPES.ORGANIZATIONS,
-                          ENTITY_TYPES.POSITIONS,
-                          ENTITY_TYPES.PEOPLE
-                        ]}
-                        setRelatedObjects={value =>
-                          setFieldValue("hostRelatedObjects", value)
-                        }
-                        showDelete
-                      />
-                    }
-                  />
-                  <DictionaryField
-                    wrappedComponent={Field}
                     dictProps={Settings.fields.eventSeries.ownerOrg}
                     name="ownerOrg"
                     component={FieldHelper.SpecialField}
@@ -230,6 +206,30 @@ const EventSeriesForm = ({
                         fields={Organization.autocompleteQuery}
                         valueKey="shortName"
                         addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.eventSeries.hostRelatedObjects}
+                    name="hostRelatedObjects"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <RelatedObjectsTableInput
+                        title={
+                          Settings.fields.eventSeries.hostRelatedObjects?.label
+                        }
+                        relatedObjects={values.hostRelatedObjects}
+                        objectType={ENTITY_TYPES.ORGANIZATIONS}
+                        entityTypes={[
+                          ENTITY_TYPES.ORGANIZATIONS,
+                          ENTITY_TYPES.POSITIONS,
+                          ENTITY_TYPES.PEOPLE
+                        ]}
+                        setRelatedObjects={value =>
+                          setFieldValue("hostRelatedObjects", value)
+                        }
+                        showDelete
                       />
                     }
                   />
@@ -377,10 +377,10 @@ const EventSeriesForm = ({
     )
     // strip tasks fields not in data model
     eventSeries.ownerOrg = utils.getReference(eventSeries.ownerOrg)
-    eventSeries.adminOrg = utils.getReference(eventSeries.adminOrg)
     eventSeries.hostRelatedObjects = eventSeries.hostRelatedObjects.map(ro =>
       Object.without(ro, "relatedObject")
     )
+    eventSeries.adminOrg = utils.getReference(eventSeries.adminOrg)
     return API.mutation(
       edit ? GQL_UPDATE_EVENTSERIES : GQL_CREATE_EVENTSERIES,
       { eventSeries, force }

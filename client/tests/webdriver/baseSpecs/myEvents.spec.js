@@ -66,10 +66,10 @@ describe("My events page", () => {
       ).to.equal("Owner Organization:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 6, 1)).getText()
-      ).to.equal("Admin Organization:\nEF 2.2")
+      ).to.equal("Hosts:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 7, 1)).getText()
-      ).to.equal("Hosts:\nEF 2.2")
+      ).to.equal("Admin Organization:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 8, 1)).getText()
       ).to.equal("Event Series this event belongs to:\nNMI PDT")
