@@ -506,6 +506,11 @@ const EditHistory = ({
     setShowModal(false)
     // Set the state to initial value
     setFinalHistory(getInitialState())
+    // Clear any errors
+    setInvalidFromDates([])
+    setInvalidToDates([])
+    setAlreadyOccupiedEntity([])
+    setPeriodsOverlapping([])
   }
 
   function onSave(values) {
