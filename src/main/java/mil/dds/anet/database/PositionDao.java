@@ -253,9 +253,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         if (primary) {
           handle
               .createUpdate("/* positionSetPerson.remove1a */ UPDATE positions "
-                  + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
+                  + "SET \"currentPersonUuid\" = NULL, type = 0, \"updatedAt\" = :updatedAt "
                   + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
-              .bind("type", DaoUtils.getEnumId(revokePrivilege(currPos)))
               .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
               .bind("positionUuid", currPos.getUuid()).execute();
         } else {
@@ -344,9 +343,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       final Instant now = Instant.now();
       final int nr = handle
           .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
-              + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
+              + "SET \"currentPersonUuid\" = NULL, type = 0, \"updatedAt\" = :updatedAt "
               + "WHERE uuid = :positionUuid")
-          .bind("type", DaoUtils.getEnumId(revokePrivilege(position)))
           .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
           .execute();
 
@@ -372,17 +370,44 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
   }
 
+  @Transactional
+  public int removePersonFromPositions(String personUuid, String primaryPositionUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      // Get original position data from database (we need its type)
+      final Position position = getByUuid(primaryPositionUuid);
+      if (position == null) {
+        return 0;
+      }
+      final Instant now = Instant.now();
+      final int nr = handle
+          .createUpdate("/* positions.removePerson */ UPDATE positions "
+              + "SET \"currentPersonUuid\" = NULL, " + "    type = CASE "
+              + "        WHEN uuid = :positionUuid THEN 0 " + "        ELSE type " + "    END, "
+              + "    \"updatedAt\" = :updatedAt " + "WHERE \"currentPersonUuid\" = :personUuid")
+          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+          .bind("positionUuid", primaryPositionUuid).execute();
+
+      // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
+      // (i.e. with both a position and a person).
+      final String updateSql = "/* peoplePositions.end */ " + "UPDATE \"peoplePositions\" "
+          + "SET \"endedAt\" = :endedAt " + "WHERE \"personUuid\" = :personUuid "
+          + "AND \"endedAt\" IS NULL";
+
+      handle.createUpdate(updateSql).bind("personUuid", personUuid)
+          .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+
+      // Evict the person (previously) holding this position from the domain users cache
+      engine().getPersonDao().evictFromCacheByPositionUuid(primaryPositionUuid);
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   private PositionType keepPrivilege(final Position newPosition, final Position oldPosition) {
     // Keep type from previous position if it exists
     return oldPosition != null ? oldPosition.getType() : newPosition.getType();
-  }
-
-  private PositionType revokePrivilege(final Position position) {
-    // Revoke privilege from old position;
-    // if this was a SUPERUSER or ADMINISTRATOR, change to REGULAR
-    return (position.getType() == PositionType.SUPERUSER
-        || position.getType() == PositionType.ADMINISTRATOR) ? PositionType.REGULAR
-            : position.getType();
   }
 
   public CompletableFuture<List<Position>> getAssociatedPositions(GraphQLContext context,
