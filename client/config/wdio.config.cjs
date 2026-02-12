@@ -336,30 +336,5 @@ const config = {
   // onReload: function(oldSessionId, newSessionId) {
   // }
 }
-const testEnv =
-  (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
-if (testEnv !== "local") {
-  const capabilities = require("./browserstack.config")
-  const bsOptions = capabilities["bstack:options"]
-  config.services = [
-    [
-      "browserstack",
-      {
-        opts: {
-          force: true,
-          forceLocal: true,
-          onlyAutomate: true,
-          key: bsOptions.accessKey,
-          localIdentifier: bsOptions.localIdentifier
-        },
-        browserstackLocal: true
-      }
-    ]
-  ]
-  config.capabilities = [capabilities]
-  config.maxInstances = 1
-  // Set required config options for browserstack service
-  config.user = bsOptions.userName
-  config.key = bsOptions.accessKey
-}
+
 exports.config = config
