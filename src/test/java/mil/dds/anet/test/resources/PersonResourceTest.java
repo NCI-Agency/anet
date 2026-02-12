@@ -743,7 +743,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     });
     final Integer updatedPreferences = withCredentials(jackUser,
         t -> mutationExecutor.updatePersonPreferences("", personPreferences));
-    assertThat(updatedPreferences).isEqualTo(11);
+    assertThat(updatedPreferences).isEqualTo(12);
   }
 
   private Person checkSensitiveInformation(final String personUuid, final String user,

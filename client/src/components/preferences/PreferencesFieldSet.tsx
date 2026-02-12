@@ -226,6 +226,15 @@ const PreferencesFieldset = ({
                         />
                       )}
 
+                      {preference.type === "number" && (
+                        <FastField
+                          name={preference.uuid}
+                          label={preference.description}
+                          component={FieldHelper.InputField}
+                          type="number"
+                        />
+                      )}
+
                       {preference.type === "enumset" &&
                         !isExportFieldsPref(preference.category) && (
                           <FastField name={preference.uuid}>
