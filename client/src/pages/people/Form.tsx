@@ -551,7 +551,8 @@ const PersonForm = ({
                         {willAutoKickPosition && (
                           <Alert variant="warning">
                             <p>
-                              {`Setting this person to inactive will automatically remove them from the following ${getNumberOfPositionsText(values)}`}
+                              {`Setting this person to inactive will automatically remove them
++                               from the following ${pluralize("position", getNumberOfPositions(values))}:`}
                             </p>
 
                             <ul className="mb-0">
@@ -951,19 +952,13 @@ const PersonForm = ({
       setShowSimilarPeopleMessage(false)
     }
   }
+
   function getNumberOfPositionsText(values) {
-    if (getNumberOfPositions(values) === 1) {
-      return "position"
-    } else {
-      return pluralize("position")
-    }
+    return pluralize("position", getNumberOfPositions(values))
   }
+
   function getNumberOfPositions(values) {
-    let result = 0
-    if (values.position && values.position.uuid) {
-      result = result + 1
-    }
-    return result + values.additionalPositions?.length
+    return (values.position?.uuid ? 1 : 0) + values.additionalPositions?.length
   }
 }
 
