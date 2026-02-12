@@ -451,7 +451,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
         <Fieldset title="Previous position holders" id="previous-people">
           <PreviousPeople
             history={position.previousPeople}
-            canEditHistory
+            canEditHistory={isAdmin}
             action={() => setShowEditHistoryModal(true)}
           />
         </Fieldset>
