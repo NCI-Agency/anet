@@ -21,9 +21,11 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.pg.PostgresqlPositionSearcher;
@@ -251,11 +253,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             .execute();
 
         if (primary) {
-          handle
-              .createUpdate("/* positionSetPerson.remove1a */ UPDATE positions "
-                  + "SET \"currentPersonUuid\" = NULL, type = 0, \"updatedAt\" = :updatedAt "
-                  + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
+          handle.createUpdate("/* positionSetPerson.remove1a */ UPDATE positions "
+              + "SET \"currentPersonUuid\" = NULL, type = :regularType, \"updatedAt\" = :updatedAt "
+              + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
               .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+              .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
               .bind("positionUuid", currPos.getUuid()).execute();
         } else {
           handle
@@ -343,10 +345,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       final Instant now = Instant.now();
       final int nr = handle
           .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
-              + "SET \"currentPersonUuid\" = NULL, type = 0, \"updatedAt\" = :updatedAt "
+              + "SET \"currentPersonUuid\" = NULL, type = :regularType, \"updatedAt\" = :updatedAt "
               + "WHERE uuid = :positionUuid")
-          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
-          .execute();
+          .bind("updatedAt", DaoUtils.asLocalDateTime(now))
+          .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
+          .bind("positionUuid", positionUuid).execute();
 
       // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
       // (i.e. with both a position and a person).
@@ -383,9 +386,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       final int nr = handle
           .createUpdate("/* positions.removePerson */ UPDATE positions "
               + "SET \"currentPersonUuid\" = NULL, " + "    type = CASE "
-              + "        WHEN uuid = :positionUuid THEN 0 " + "        ELSE type " + "    END, "
-              + "    \"updatedAt\" = :updatedAt " + "WHERE \"currentPersonUuid\" = :personUuid")
+              + "        WHEN uuid = :positionUuid THEN :regularType " + "        ELSE type "
+              + "    END, " + "    \"updatedAt\" = :updatedAt "
+              + "WHERE \"currentPersonUuid\" = :personUuid")
           .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+          .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
           .bind("positionUuid", primaryPositionUuid).execute();
 
       // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
