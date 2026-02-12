@@ -952,7 +952,7 @@ const PersonForm = ({
     }
   }
   function getNumberOfPositionsText(values) {
-    if (getNumberOfPositions(values) == 1) {
+    if (getNumberOfPositions(values) === 1) {
       return "position"
     } else {
       return pluralize("position")
