@@ -20,7 +20,7 @@ const EXAMPLE_POSITIONS = {
     previousPeople: [
       {
         name: "CIV BEMERGED, Myposwill",
-        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],
     location: "Unspecified",

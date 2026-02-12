@@ -180,7 +180,7 @@ export const PersonSimpleOverlayRow = (item: any) => (
 )
 
 export const PersonDetailedOverlayRow = (item: any, date) => {
-  const position = utils.findPositionAtDate(item, date)
+  const position = utils.findPrimaryPositionAtDate(item, date)
   return (
     <React.Fragment key={item.uuid}>
       <td>

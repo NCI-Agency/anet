@@ -919,7 +919,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [status, firstName, lastName, position, prevPositions, users,
+        required: [status, firstName, lastName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
@@ -931,7 +931,11 @@ properties:
             "$ref": "#/$defs/inputField"
           position:
             "$ref": "#/$defs/inputField"
+          additionalPositions:
+            "$ref": "#/$defs/labeledField"
           prevPositions:
+            "$ref": "#/$defs/labeledField"
+          prevAdditionalPositions:
             "$ref": "#/$defs/labeledField"
           user:
             "$ref": "#/$defs/inputField"

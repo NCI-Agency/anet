@@ -836,11 +836,11 @@ type Mutation {
   emailReport(email: AnetEmailInput, uuid: String): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
-  mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
-  mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
+  mergePeople(loserUuid: String, useWinnerPositionHistory: Boolean = true, winnerPerson: PersonInput): Int
+  mergePositions(loserUuid: String, useWinnerPersonHistory: Boolean = true, winnerPosition: PositionInput): Int
   mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
   publishReport(uuid: String): Int!
-  putPersonInPosition(person: PersonInput, uuid: String): Int!
+  putPersonInPosition(person: PersonInput, previousPositionUuid: String, primary: Boolean = true, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
   reloadDictionary: String
   saveAdminSettings(settings: [AdminSettingInput]): Int
@@ -992,6 +992,7 @@ enum OrganizationSearchSortBy {
 
 """"""
 type Person {
+  additionalPositions: [Position]
   assessments: [Assessment]
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
@@ -1026,6 +1027,7 @@ type Person {
 
 """"""
 input PersonInput {
+  additionalPositions: [PositionInput]
   biography: String
   code: String
   country: LocationInput
@@ -1057,6 +1059,7 @@ type PersonPositionHistory {
   endTime: Instant
   person: Person
   position: Position
+  primary: Boolean
   startTime: Instant
   updatedAt: Instant
 }
@@ -1067,6 +1070,7 @@ input PersonPositionHistoryInput {
   endTime: Instant
   person: PersonInput
   position: PositionInput
+  primary: Boolean
   startTime: Instant
   updatedAt: Instant
 }
@@ -1439,6 +1443,7 @@ input ReportInput {
 
 """"""
 type ReportPerson {
+  additionalPositions: [Position]
   assessments: [Assessment]
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
@@ -1477,6 +1482,7 @@ type ReportPerson {
 
 """"""
 input ReportPersonInput {
+  additionalPositions: [PositionInput]
   attendee: Boolean!
   author: Boolean!
   biography: String

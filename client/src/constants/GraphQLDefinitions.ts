@@ -391,6 +391,13 @@ export const gqlPreferenceFields = `
   allowedValues
 `
 
+export const gqlPreviousPositionsFields = `
+  startTime
+  endTime
+  primary
+`
+export const gqlPreviousPeopleFields = gqlPreviousPositionsFields
+
 export const gqlSavedSearchFields = `
   uuid
   name

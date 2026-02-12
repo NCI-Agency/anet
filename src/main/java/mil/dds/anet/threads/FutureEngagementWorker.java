@@ -41,7 +41,7 @@ public class FutureEngagementWorker extends AbstractWorker {
     // needs to fill in extra information after the engagement took place and
     // afterwards this report needs to go through the approval process of past
     // engagements.
-    List<Report> reports = engine().getReportDao().getFutureToPastReports(now);
+    final List<Report> reports = dao.getFutureToPastReports(now);
 
     // update to draft state and send emails to the authors to let them know we updated their
     // report.

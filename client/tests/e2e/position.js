@@ -456,7 +456,7 @@ test.serial("Update permissions while changing positions", async t => {
   await personInputField.click()
   // Wait for transition
   await t.context.driver.sleep(mediumWaitMs)
-  // Find desired position from the list and click on the name.
+  // Find desired person from the list and click on the name.
   for (let i = 0; i < 4; i++) {
     const listItems = await t.context.driver.findElements(By.css("td"))
     for (const item of listItems) {
@@ -479,10 +479,18 @@ test.serial("Update permissions while changing positions", async t => {
       }
     }
   }
-  $saveButton = await t.context.driver.findElement(
-    By.xpath('//button[text()="Save"]')
+  // Verify the option to Assign as additional position exists
+  const $saveButtonAdditional = await t.context.driver.findElement(
+    By.xpath('//button[text()="Assign as additional position"]')
   )
-  // Click on the save button
+  await t.context.driver.wait(
+    until.elementIsVisible($saveButtonAdditional),
+    mediumWaitMs
+  )
+  // Click on the Assign as primary position button
+  $saveButton = await t.context.driver.findElement(
+    By.xpath('//button[text()="Assign as primary position"]')
+  )
   await $saveButton.click()
   // Wait for the transition
   await t.context.driver.sleep(mediumWaitMs)

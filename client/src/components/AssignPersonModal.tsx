@@ -29,8 +29,8 @@ const GQL_DELETE_PERSON_FROM_POSITION = gql`
 `
 
 const GQL_PUT_PERSON_IN_POSITION = gql`
-  mutation ($uuid: String!, $person: PersonInput!) {
-    putPersonInPosition(uuid: $uuid, person: $person)
+  mutation ($uuid: String!, $person: PersonInput!, $primary: Boolean) {
+    putPersonInPosition(uuid: $uuid, person: $person, primary: $primary)
   }
 `
 
@@ -55,99 +55,108 @@ const AssignPersonModal = ({
   )
 
   const [error, setError] = useState(null)
-  const [person, setPerson] = useState(position && position.person)
-  const [doSave, setDoSave] = useState(false)
+  const [person, setPerson] = useState(position?.person)
   const [removeUser, setRemoveUser] = useState(false)
 
-  const save = useCallback(() => {
-    let graphql, variables
-    if (person === null) {
-      graphql = GQL_DELETE_PERSON_FROM_POSITION
-      variables = {
-        uuid: position.uuid
+  const save = useCallback(
+    (person = null, primary = false) => {
+      let graphql, variables
+      if (person === null) {
+        graphql = GQL_DELETE_PERSON_FROM_POSITION
+        variables = {
+          uuid: position.uuid
+        }
+      } else {
+        graphql = GQL_PUT_PERSON_IN_POSITION
+        variables = {
+          uuid: position.uuid,
+          person: { uuid: person.uuid },
+          primary
+        }
       }
-    } else {
-      graphql = GQL_PUT_PERSON_IN_POSITION
-      variables = {
-        uuid: position.uuid,
-        person: { uuid: person.uuid }
-      }
-    }
-    API.mutation(graphql, variables).then(onSuccess).catch(setError)
-  }, [position, person, onSuccess])
+      API.mutation(graphql, variables).then(onSuccess).catch(setError)
+    },
+    [position, onSuccess]
+  )
 
   useEffect(() => {
     if (!positionPropUnchanged) {
       latestPositionProp.current = position
-      setPerson(position && position.person)
+      setPerson(position?.person)
     }
   }, [positionPropUnchanged, position])
 
   useEffect(() => {
-    if (doSave) {
-      setDoSave(false)
-      save()
-    }
-  }, [doSave, save])
+    const personWillBeRemoved = (
+      <>
+        <b>
+          <LinkTo modelType="Person" model={person} isLink={false} />
+        </b>{" "}
+        is currently assigned to the{" "}
+        <b>
+          <LinkTo
+            modelType="Position"
+            model={person?.position}
+            isLink={false}
+          />
+        </b>{" "}
+        position. By saving them as primary, their primary position will be left
+        unfilled
+      </>
+    )
+    const permissionsWillBeConvertedToRegularType = (
+      <>
+        and the position's permissions will be converted from{" "}
+        <b>{Position.convertType(person?.position?.type)}</b> to{" "}
+        <b>{Settings.fields.regular.position.type}</b>.
+      </>
+    )
+    const permissionsWillBeConvertedFromOldTypeToCurrentType = (
+      <>
+        Furthermore, permissions of the <b>{position?.name}</b> position will be
+        converted from <b>{Position.convertType(position?.type)}</b> to{" "}
+        <b>{Position.convertType(person?.position?.type)}</b>.
+      </>
+    )
+    const positionPermissionsWillBeConvertedToRegularType = (
+      <>
+        If you save, permissions of the <b>{position.name}</b> position will be
+        converted from <b>{Position.convertType(position.type)}</b> to{" "}
+        <b>{Settings.fields.regular.position.type}</b>.
+      </>
+    )
 
-  useEffect(() => {
-    let newError = null
+    let errorMessage
     if (
       !_isEmpty(person) &&
       !_isEmpty(person.position) &&
       person.position.uuid !== position.uuid
     ) {
-      const errorMessage = (
+      errorMessage = (
         <>
-          <b>
-            <LinkTo modelType="Person" model={person} isLink={false} />
-          </b>{" "}
-          is currently assigned to the{" "}
-          <b>
-            <LinkTo
-              modelType="Position"
-              model={person.position}
-              isLink={false}
-            />
-          </b>{" "}
-          position. By selecting them, their current position will be left
-          unfilled
-          {person.position.type !== Position.TYPE.REGULAR ? (
+          {personWillBeRemoved}
+          {!Position.isRegular(person.position) ? (
             <>
               {" "}
-              and the position's permissions will be converted from{" "}
-              <b>{Position.convertType(person.position.type)}</b> to{" "}
-              <b>{Settings.fields.regular.position.type}</b>.
+              {permissionsWillBeConvertedToRegularType}
+              {position.type !== person.position.type && (
+                <> {permissionsWillBeConvertedFromOldTypeToCurrentType}</>
+              )}{" "}
+              <b>You can also save as an additional position.</b>
             </>
           ) : (
             <>.</>
           )}
-          {position.type !== person.position.type && (
-            <>
-              {" "}
-              Furthermore, permissions of the <b>{position.name}</b> position
-              will be converted from{" "}
-              <b>{Position.convertType(position.type)}</b> to{" "}
-              <b>{Position.convertType(person.position.type)}</b>.
-            </>
-          )}
         </>
       )
-      newError = { message: errorMessage }
     } else if (
       !Position.isRegular(latestPositionProp.current) &&
       (removeUser || !person)
     ) {
-      const errorMessage = (
-        <>
-          If you save, permissions of the <b>{position.name}</b> position will
-          be converted from <b>{Position.convertType(position.type)}</b> to{" "}
-          <b>{Settings.fields.regular.position.type}</b>.
-        </>
-      )
-      newError = { message: errorMessage }
+      errorMessage = positionPermissionsWillBeConvertedToRegularType
     }
-    setError(newError)
+
+    setError(errorMessage ? { message: errorMessage } : null)
   }, [person, position, removeUser])
 
   const personFilters = {
@@ -160,7 +169,13 @@ const AssignPersonModal = ({
   }
 
   return (
-    <Modal backdrop="static" centered show={showModal} onHide={closeModal}>
+    <Modal
+      backdrop="static"
+      centered
+      show={showModal}
+      onHide={closeModal}
+      size="lg"
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           Assign person to{" "}
@@ -183,7 +198,7 @@ const AssignPersonModal = ({
                   onClick={() => {
                     if (Position.isRegular(latestPositionProp.current)) {
                       setPerson(null)
-                      setDoSave(true)
+                      save()
                     } else {
                       setRemoveUser(true)
                       setPerson(position.person)
@@ -230,13 +245,13 @@ const AssignPersonModal = ({
                 </FormGroup>
               </Col>
             </Row>
-            {person && person.uuid && (
+            {person?.uuid && (
               <Table striped hover responsive>
                 <thead>
                   <tr>
                     <th>Rank</th>
                     <th>Name</th>
-                    <th>Current Position</th>
+                    <th>Current Primary Position</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -273,13 +288,35 @@ const AssignPersonModal = ({
         >
           Cancel
         </Button>
+        {!_isEmpty(person?.position) && (
+          <Button
+            onClick={() => {
+              if (removeUser || !person) {
+                setPerson(null)
+                save()
+              } else if (
+                person.uuid !== latestPositionProp.current.person.uuid
+              ) {
+                save(person, false)
+              } else {
+                closeModal()
+              }
+              setRemoveUser(false)
+            }}
+            variant="primary"
+            className="save-button"
+            type="submit"
+          >
+            Assign as additional position
+          </Button>
+        )}
         <Button
           onClick={() => {
             if (removeUser || !person) {
               setPerson(null)
-              setDoSave(true)
+              save(null, false)
             } else if (person.uuid !== latestPositionProp.current.person.uuid) {
-              setDoSave(true)
+              save(person, true)
             } else {
               closeModal()
             }
@@ -289,7 +326,7 @@ const AssignPersonModal = ({
           className="save-button"
           type="submit"
         >
-          Save
+          {!_isEmpty(person?.position) ? "Assign as primary position" : "Save"}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -299,6 +336,7 @@ const AssignPersonModal = ({
     // Reset state before closing (cancel)
     setPerson(position.person)
     setRemoveUser(false)
+    setError(null)
     onCancel()
   }
 }

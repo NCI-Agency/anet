@@ -182,7 +182,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(approver1Pos).isNotNull();
     assertThat(approver1Pos.getUuid()).isNotNull();
     Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(approver1), approver1Pos.getUuid()));
+        getPersonInput(approver1), null, true, approver1Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput approver2PosInput = PositionInput.builder()
@@ -194,7 +194,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(approver2Pos).isNotNull();
     assertThat(approver2Pos.getUuid()).isNotNull();
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(approver2), approver2Pos.getUuid()));
+        getPersonInput(approver2), null, true, approver2Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
@@ -209,7 +209,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Set this author in this billet
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(author), authorBillet.getUuid()));
+        getPersonInput(author), null, true, authorBillet.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
     final Position checkit = withCredentials(adminUser,
         t -> queryExecutor.position(POSITION_FIELDS, authorBillet.getUuid()));
@@ -589,7 +589,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(approver1Pos).isNotNull();
     assertThat(approver1Pos.getUuid()).isNotNull();
     Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(approver1), approver1Pos.getUuid()));
+        getPersonInput(approver1), null, true, approver1Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput approver2PosInput = PositionInput.builder()
@@ -601,7 +601,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(approver2Pos).isNotNull();
     assertThat(approver2Pos.getUuid()).isNotNull();
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(approver2), approver2Pos.getUuid()));
+        getPersonInput(approver2), null, true, approver2Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify these users
@@ -628,7 +628,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Set this author in this billet
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
-        getPersonInput(author), authorBillet.getUuid()));
+        getPersonInput(author), null, true, authorBillet.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
     final Position checkit = withCredentials(adminUser,
         t -> queryExecutor.position(POSITION_FIELDS, authorBillet.getUuid()));

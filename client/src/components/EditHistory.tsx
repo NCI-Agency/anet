@@ -1,4 +1,8 @@
-import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
+import {
+  gqlEntityFieldsMap,
+  gqlPreviousPeopleFields,
+  gqlPreviousPositionsFields
+} from "constants/GraphQLDefinitions"
 import {
   PersonSimpleOverlayRow,
   PositionOverlayRow
@@ -8,13 +12,12 @@ import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import RemoveButton from "components/RemoveButton"
-import { Field, Form, Formik } from "formik"
-import _isEmpty from "lodash/isEmpty"
+import { FastField, Field, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import moment from "moment"
-import { getOverlappingPeriodIndexes } from "periodUtils"
+import { timesOverlap } from "periodUtils"
 import React, { useCallback, useEffect, useState } from "react"
-import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap"
+import { Alert, Badge, Button, Container, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import { v4 as uuidv4 } from "uuid"
@@ -34,7 +37,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
     cb(newEntry)
   },
   objectType: Person,
-  fields: `${gqlEntityFieldsMap.Person} position { ${gqlEntityFieldsMap.Position} } previousPositions { startTime endTime position { uuid } }`,
+  fields: `${gqlEntityFieldsMap.Person} position { ${gqlEntityFieldsMap.Position} } previousPositions { ${gqlPreviousPositionsFields} position { uuid } }`,
   addon: PEOPLE_ICON
 }
 
@@ -52,49 +55,99 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
     cb(newEntry)
   },
   objectType: Position,
-  fields: `${gqlEntityFieldsMap.Position} organization { ${gqlEntityFieldsMap.Organization} } person { ${gqlEntityFieldsMap.Person} } previousPeople { startTime endTime person { uuid } }`,
+  fields: `${gqlEntityFieldsMap.Position} organization { ${gqlEntityFieldsMap.Organization} } person { ${gqlEntityFieldsMap.Person} } previousPeople { ${gqlPreviousPeopleFields} person { uuid } }`,
   addon: POSITIONS_ICON
 }
 
 const INVALID_ENTRY_STYLE = { borderRadius: "4px", backgroundColor: "#F2DEDE" }
+type HistoryConflictType =
+  | "PRIMARY_OVERLAP"
+  | "SAME_POSITION_OVERLAP"
+  | "ALREADY_OCCUPIED"
 
-interface EditHistoryProps {
-  history1: any[]
-  history2?: any[]
-  initialHistory?: any[]
-  setHistory: (...args: unknown[]) => unknown
-  historyEntityType?: string
-  parentEntityUuid1: string
-  parentEntityUuid2?: string
-  historyComp?: (...args: unknown[]) => unknown
-  showEditButton?: boolean
-  showModal: boolean
-  setShowModal: (...args: unknown[]) => unknown
-  currentlyOccupyingEntity?: string | any
-  midColTitle?: string
-  mainTitle?: string
+interface HistoryConflictWatcherProps {
+  history: any[]
+  parentEntityUuid: string
+  setPeriodsOverlapping: (value: any[]) => void
+  setAlreadyOccupiedEntity: (entity: any[]) => void
+  isCheckingPerson: boolean
 }
 
-function EditHistory({
-  history1,
-  history2 = null,
+const HistoryConflictWatcher = ({
+  history,
+  parentEntityUuid,
+  setPeriodsOverlapping,
+  setAlreadyOccupiedEntity,
+  isCheckingPerson
+}: HistoryConflictWatcherProps) => {
+  useEffect(() => {
+    const conflicts = getHistoryConflicts(
+      history,
+      parentEntityUuid,
+      isCheckingPerson
+    )
+
+    setPeriodsOverlapping(
+      conflicts
+        .filter(
+          c =>
+            c.types.has("PRIMARY_OVERLAP") ||
+            c.types.has("SAME_POSITION_OVERLAP")
+        )
+        .map(c => c.item)
+    )
+
+    setAlreadyOccupiedEntity(
+      conflicts.filter(c => c.types.has("ALREADY_OCCUPIED")).map(c => c.item)
+    )
+  }, [
+    history,
+    isCheckingPerson,
+    parentEntityUuid,
+    setAlreadyOccupiedEntity,
+    setPeriodsOverlapping
+  ])
+
+  return null
+}
+
+function getMaxDate(item) {
+  if (item.endTime) {
+    return new Date(item.endTime)
+  } else {
+    return new Date()
+  }
+}
+
+interface EditHistoryProps {
+  historyEntityType?: string
+  parentEntityUuid: string
+  mainTitle?: string
+  initialHistory?: any[]
+  setHistory: (...args: unknown[]) => unknown
+  showModal: boolean
+  setShowModal: (...args: unknown[]) => unknown
+}
+
+const EditHistory = ({
+  historyEntityType = "person",
+  parentEntityUuid,
+  mainTitle = "Edit History",
   initialHistory = null,
   setHistory,
-  historyEntityType = "person",
-  parentEntityUuid1,
-  parentEntityUuid2,
-  historyComp: HistoryComp,
-  showEditButton,
   showModal,
-  setShowModal,
-  currentlyOccupyingEntity = null, // currentlyOccupyingEntity used to assert the last item in the history and end time
-  midColTitle,
-  mainTitle = "Pick and Choose History Items"
-}: EditHistoryProps) {
+  setShowModal
+}: EditHistoryProps) => {
   const getInitialState = useCallback(() => {
-    return giveEachItemUuid(initialHistory || history1 || [])
-  }, [initialHistory, history1])
+    const withUuid = populateHistory(initialHistory)
+    return sortHistory(historyEntityType, withUuid)
+  }, [initialHistory, historyEntityType])
+
   const [finalHistory, setFinalHistory] = useState(getInitialState)
+  const [periodsOverlapping, setPeriodsOverlapping] = useState([])
+  const [alreadyOccupiedEntity, setAlreadyOccupiedEntity] = useState([])
+  const [invalidFromDates, setInvalidFromDates] = useState<string[]>([])
+  const [invalidToDates, setInvalidToDates] = useState<string[]>([])
 
   const singleSelectParameters = getSingleSelectParameters(historyEntityType)
 
@@ -110,190 +163,213 @@ function EditHistory({
       className="edit-history"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      {showEditButton && (
-        <Button
-          variant="outline-secondary"
-          disabled={_isEmpty(history1) && _isEmpty(history2) && !!history2}
-          onClick={() => {
-            setShowModal(true)
-          }}
-        >
-          Edit History Manually
-        </Button>
-      )}
       <Modal
         backdrop="static"
         centered
         size="xl"
         show={showModal}
         onHide={onHide}
-        dialogClassName={`edit-history-dialog ${history2 && "merge"}`}
+        dialogClassName={`edit-history-dialog ${initialHistory && "merge"}`}
         style={{ zIndex: "1300" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{mainTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Formik
-            enableReinitialize
-            initialValues={{
-              history: finalHistory
-            }}
-          >
+          <Formik enableReinitialize initialValues={{ history: finalHistory }}>
             {({ values, setFieldValue, setValues }) => {
-              // Get overlapping items' indexes, e.g.[ [0,1], [2,3] ] means 0th and 1st overlaps, 2nd and 3rd overlaps
-              const overlapArrays = getOverlappingDateIndexes(values.history)
-              // Flatten the above array for getting unique indexes, e.g. [[0, 1], [0,2]] => [0,1,2]
-              const overlappingIndexesSet = new Set(overlapArrays.flat())
-              const invalidDateIndexesSet = new Set(
-                getInvalidDateIndexes(values.history)
-              )
-              const occupiedEntityIndexesSet = new Set(
-                getOccupiedEntityIndexes(
-                  values.history,
-                  historyEntityType,
-                  parentEntityUuid1,
-                  parentEntityUuid2
-                )
-              )
-              const hasCurrent = !_isEmpty(currentlyOccupyingEntity)
-              const lastItem = values.history[values.history.length - 1]
-              // For last item to be valid:
-              // 1- If there is no currently occupying entity
-              //    a- The end time of last item shouldn't be null
-              // 2- If there is a currently occupying entity
-              //    a- The last entity should be same with currently occupying
-              //    b- The end time of last entity should be null or undefined ( meaning continuing range)
-              const validWhenNoOccupant =
-                !hasCurrent && (!lastItem || lastItem?.endTime)
-              const validWhenOccupant =
-                hasCurrent &&
-                currentlyOccupyingEntity?.uuid ===
-                  lastItem?.[historyEntityType]?.uuid &&
-                lastItem?.endTime == null
-              const validLastItem = validWhenNoOccupant || validWhenOccupant
+              function removeItemFromHistory(idx) {
+                setValues({
+                  history: values.history.filter((_, i) => i !== idx)
+                })
+              }
+
+              function addItem(item) {
+                setValues({
+                  history: sortHistory(historyEntityType, [
+                    {
+                      ...item,
+                      uuid: uuidv4(),
+                      primary: true,
+                      startTime: moment().valueOf(),
+                      endTime: moment().valueOf()
+                    },
+                    ...values.history
+                  ])
+                })
+              }
 
               return (
-                <Container fluid>
-                  <Row>
-                    {history2 && (
-                      <Col md={4}>
-                        <HistoryComp
-                          history={history1}
-                          action={item => (
-                            <Button
-                              variant="outline-secondary"
-                              onClick={() => addItem(item)}
-                            >
-                              Add
-                            </Button>
-                          )}
-                        />
-                      </Col>
-                    )}
-                    <Col md={history2 ? 4 : 12}>
+                <>
+                  <HistoryConflictWatcher
+                    history={values.history}
+                    parentEntityUuid={parentEntityUuid}
+                    setPeriodsOverlapping={setPeriodsOverlapping}
+                    setAlreadyOccupiedEntity={setAlreadyOccupiedEntity}
+                    isCheckingPerson={historyEntityType === "position"}
+                  />
+                  <Container fluid>
+                    <Row>
                       <Form className="form-horizontal">
                         <div>
                           <ValidationMessages
-                            overlapArrays={overlapArrays}
-                            isInvalidLastItem={!validLastItem}
-                            invalidDateIndexesSet={invalidDateIndexesSet}
-                            occupiedEntityIndexesSet={occupiedEntityIndexesSet}
+                            overlappingPositions={periodsOverlapping}
+                            alreadyOccupiedPositions={alreadyOccupiedEntity}
+                            invalidFromDates={invalidFromDates}
+                            invalidToDates={invalidToDates}
                             historyEntityType={historyEntityType}
                           />
                         </div>
-                        <h4 style={{ textAlign: "center" }}>{midColTitle}</h4>
-                        {!history2 && (
-                          <AdvancedSingleSelect
-                            fieldName={singleSelectParameters.fieldName}
-                            placeholder={singleSelectParameters.placeholder}
-                            overlayColumns={
-                              singleSelectParameters.overlayColumns
-                            }
-                            overlayRenderRow={
-                              singleSelectParameters.overlayRenderRow
-                            }
-                            filterDefs={singleSelectParameters.filterDefs}
-                            onChange={value =>
-                              singleSelectParameters.onChange(value, addItem)
-                            }
-                            objectType={singleSelectParameters.objectType}
-                            valueKey="name"
-                            fields={singleSelectParameters.fields}
-                            addon={singleSelectParameters.addon}
-                          />
-                        )}
+                        <AdvancedSingleSelect
+                          fieldName={singleSelectParameters.fieldName}
+                          placeholder={singleSelectParameters.placeholder}
+                          overlayColumns={singleSelectParameters.overlayColumns}
+                          overlayRenderRow={
+                            singleSelectParameters.overlayRenderRow
+                          }
+                          filterDefs={singleSelectParameters.filterDefs}
+                          onChange={value =>
+                            singleSelectParameters.onChange(value, addItem)
+                          }
+                          objectType={singleSelectParameters.objectType}
+                          valueKey="name"
+                          fields={singleSelectParameters.fields}
+                          addon={singleSelectParameters.addon}
+                        />
                         {values.history.map((item, idx) => {
+                          const isError =
+                            periodsOverlapping.some(
+                              o => o.uuid === item.uuid
+                            ) ||
+                            alreadyOccupiedEntity.some(
+                              o => o.uuid === item.uuid
+                            ) ||
+                            invalidFromDates.includes(item.uuid) ||
+                            invalidToDates.includes(item.uuid)
+
                           // To be able to set fields inside the array state
                           const startTimeFieldName = `history[${idx}].startTime`
                           const endTimeFieldName = `history[${idx}].endTime`
-                          const isCurrent =
-                            hasCurrent &&
-                            idx === values.history.length - 1 &&
-                            item[historyEntityType]?.uuid ===
-                              currentlyOccupyingEntity.uuid
-
-                          if (isCurrent) {
-                            item.endTime = null
-                          }
 
                           return (
-                            <div
-                              key={item.uuid}
-                              style={getStyle(
-                                idx,
-                                overlappingIndexesSet,
-                                invalidDateIndexesSet,
-                                !validLastItem &&
-                                  idx === values.history.length - 1,
-                                occupiedEntityIndexesSet
-                              )}
-                            >
-                              <Fieldset
-                                title={`${idx + 1}-) ${
-                                  item[historyEntityType].name
-                                } ${
-                                  isCurrent
-                                    ? `(Current ${historyEntityType})`
-                                    : ""
-                                }`}
-                                action={
-                                  !isCurrent && (
-                                    <RemoveButton
-                                      title="Remove Item"
-                                      onClick={() => removeItemFromHistory(idx)}
+                            <div key={item.uuid} style={getStyle(isError)}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.5rem"
+                                }}
+                              >
+                                <Fieldset
+                                  title={
+                                    <span
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "0.5rem",
+                                        flexWrap: "wrap"
+                                      }}
                                     >
-                                      Remove
-                                    </RemoveButton>
-                                  )
-                                }
-                              />
+                                      {`${idx + 1}-) ${item[historyEntityType].name}`}
+                                      {item.primary && (
+                                        <Badge bg="primary">Primary</Badge>
+                                      )}
+                                      {item.endTime == null && (
+                                        <Badge bg="success">Current</Badge>
+                                      )}
+                                    </span>
+                                  }
+                                  action={
+                                    !item.isCurrent && (
+                                      <RemoveButton
+                                        title="Remove Item"
+                                        onClick={() =>
+                                          removeItemFromHistory(idx)
+                                        }
+                                      >
+                                        Remove
+                                      </RemoveButton>
+                                    )
+                                  }
+                                />
+                              </div>
                               <div className="date-container">
                                 <div className="inner-container">
+                                  {!item.isCurrent && (
+                                    <>
+                                      <div className="date-text">Primary</div>
+                                      <FastField
+                                        name={`history[${idx}].primary`}
+                                        label=""
+                                        component={
+                                          FieldHelper.RadioButtonToggleGroupField
+                                        }
+                                        buttons={[
+                                          {
+                                            id: "yes",
+                                            value: true,
+                                            label: "Yes"
+                                          },
+                                          {
+                                            id: "no",
+                                            value: false,
+                                            label: "No"
+                                          }
+                                        ]}
+                                        onChange={value => {
+                                          const updatedHistory =
+                                            values.history.map((h, i) =>
+                                              i === idx
+                                                ? { ...h, primary: value }
+                                                : h
+                                            )
+                                          setFieldValue(
+                                            "history",
+                                            sortHistory(
+                                              historyEntityType,
+                                              updatedHistory
+                                            )
+                                          )
+                                        }}
+                                      />
+                                    </>
+                                  )}
                                   <div className="date-text">From</div>
                                   <Field
                                     name={startTimeFieldName}
                                     label={null}
-                                    value={values.history[idx].startTime}
+                                    value={item.startTime}
                                     onChange={value => {
-                                      const startTime =
-                                        value && moment(value).valueOf()
-                                      setFieldValue(
-                                        startTimeFieldName,
-                                        startTime
+                                      if (
+                                        value == null &&
+                                        values.history[idx].startTime != null
+                                      ) {
+                                        markInvalid(
+                                          setInvalidFromDates,
+                                          item.uuid
+                                        )
+                                        return
+                                      }
+                                      clearInvalid(
+                                        setInvalidFromDates,
+                                        item.uuid
                                       )
-                                      setFinalHistory(
+
+                                      const newValue =
+                                        value && moment(value).valueOf()
+
+                                      const updatedHistory = values.history.map(
+                                        (h, i) =>
+                                          i === idx
+                                            ? { ...h, startTime: newValue }
+                                            : h
+                                      )
+
+                                      setFieldValue(
+                                        "history",
                                         sortHistory(
                                           historyEntityType,
-                                          values.history.map((item, index) =>
-                                            index === idx
-                                              ? {
-                                                  ...item,
-                                                  startTime
-                                                }
-                                              : item
-                                          ),
-                                          hasCurrent
+                                          updatedHistory
                                         )
                                       )
                                     }}
@@ -301,34 +377,89 @@ function EditHistory({
                                     widget={
                                       <CustomDateInput
                                         id={startTimeFieldName}
-                                        maxDate={moment().toDate()}
+                                        maxDate={getMaxDate(item)}
+                                        onInvalidChange={isInvalid => {
+                                          if (isInvalid) {
+                                            markInvalid(
+                                              setInvalidFromDates,
+                                              item.uuid
+                                            )
+                                          } else {
+                                            clearInvalid(
+                                              setInvalidFromDates,
+                                              item.uuid
+                                            )
+                                          }
+                                        }}
                                       />
                                     }
                                   />
                                 </div>
                                 <div className="inner-container">
                                   <div className="date-text">to</div>
-                                  {!isCurrent ? (
+                                  {item.isCurrent ? (
+                                    <div className="date-input">present</div>
+                                  ) : (
                                     <Field
                                       name={endTimeFieldName}
                                       label={null}
                                       value={values.history[idx].endTime}
-                                      onChange={value =>
-                                        setFieldValue(
-                                          endTimeFieldName,
-                                          value && moment(value).valueOf()
+                                      onChange={value => {
+                                        if (
+                                          value == null &&
+                                          values.history[idx].endTime != null
+                                        ) {
+                                          markInvalid(
+                                            setInvalidToDates,
+                                            item.uuid
+                                          )
+                                          return
+                                        }
+                                        clearInvalid(
+                                          setInvalidToDates,
+                                          item.uuid
                                         )
-                                      }
+
+                                        const newValue =
+                                          value && moment(value).valueOf()
+
+                                        const updatedHistory =
+                                          values.history.map((h, i) =>
+                                            i === idx
+                                              ? { ...h, endTime: newValue }
+                                              : h
+                                          )
+
+                                        setFieldValue(
+                                          "history",
+                                          sortHistory(
+                                            historyEntityType,
+                                            updatedHistory
+                                          )
+                                        )
+                                      }}
                                       component={FieldHelper.SpecialField}
                                       widget={
                                         <CustomDateInput
                                           id={endTimeFieldName}
                                           maxDate={moment().toDate()}
+                                          minDate={new Date(item.startTime)}
+                                          onInvalidChange={isInvalid => {
+                                            if (isInvalid) {
+                                              markInvalid(
+                                                setInvalidToDates,
+                                                item.uuid
+                                              )
+                                            } else {
+                                              clearInvalid(
+                                                setInvalidToDates,
+                                                item.uuid
+                                              )
+                                            }
+                                          }}
                                         />
                                       }
                                     />
-                                  ) : (
-                                    <div className="date-input">present</div>
                                   )}
                                 </div>
                               </div>
@@ -350,12 +481,9 @@ function EditHistory({
                               variant="primary"
                               onClick={() => onSave(values)}
                               disabled={
-                                !!(
-                                  invalidDateIndexesSet.size ||
-                                  overlapArrays.length ||
-                                  !validLastItem ||
-                                  occupiedEntityIndexesSet.size
-                                )
+                                periodsOverlapping.length > 0 ||
+                                invalidFromDates.length > 0 ||
+                                invalidToDates.length > 0
                               }
                             >
                               Save
@@ -363,41 +491,10 @@ function EditHistory({
                           </div>
                         </div>
                       </Form>
-                    </Col>
-                    {history2 && (
-                      <Col md={4}>
-                        <HistoryComp
-                          history={history2}
-                          action={item => (
-                            <Button
-                              variant="outline-secondary"
-                              onClick={() => addItem(item)}
-                            >
-                              Add
-                            </Button>
-                          )}
-                        />
-                      </Col>
-                    )}
-                  </Row>
-                </Container>
+                    </Row>
+                  </Container>
+                </>
               )
-
-              function removeItemFromHistory(idx) {
-                setValues({
-                  history: values.history.filter((item, index) => index !== idx)
-                })
-              }
-
-              function addItem(item) {
-                setValues({
-                  history: sortHistory(
-                    historyEntityType,
-                    [{ ...item, uuid: uuidv4() }, ...values.history],
-                    hasCurrent
-                  )
-                })
-              }
             }}
           </Formik>
         </Modal.Body>
@@ -409,6 +506,11 @@ function EditHistory({
     setShowModal(false)
     // Set the state to initial value
     setFinalHistory(getInitialState())
+    // Clear any errors
+    setInvalidFromDates([])
+    setInvalidToDates([])
+    setAlreadyOccupiedEntity([])
+    setPeriodsOverlapping([])
   }
 
   function onSave(values) {
@@ -416,7 +518,7 @@ function EditHistory({
     setFinalHistory([...values.history])
     // Shouldn't have uuid, that was for item listing
     const savedHistory = values.history.map(item =>
-      Object.without(item, "uuid")
+      Object.without(item, "uuid", "isCurrent")
     )
     setHistory(savedHistory)
   }
@@ -424,199 +526,90 @@ function EditHistory({
 
 export default EditHistory
 
-interface ValidationMessageProps {
-  title: string
-  keysAndMessages: {
-    key: string
-    msg: string
-  }[]
+interface ValidationMessagesProps {
+  overlappingPositions: any
+  alreadyOccupiedPositions: any
+  invalidFromDates: any
+  invalidToDates: any
+  historyEntityType?: string
 }
 
-function ValidationMessage({ title, keysAndMessages }: ValidationMessageProps) {
+const ValidationMessages = ({
+  overlappingPositions,
+  alreadyOccupiedPositions,
+  historyEntityType,
+  invalidFromDates,
+  invalidToDates
+}: ValidationMessagesProps) => {
+  if (
+    overlappingPositions.length === 0 &&
+    alreadyOccupiedPositions.length === 0 &&
+    invalidFromDates.length === 0 &&
+    invalidToDates.length === 0
+  ) {
+    return null
+  }
+
   return (
     <Alert variant="danger">
-      <legend>{title}</legend>
-      <ul>
-        {keysAndMessages.map(({ key, msg }) => (
-          <li key={key}>{msg}</li>
-        ))}
-      </ul>
+      {invalidFromDates.length > 0 && <p>Some start dates are not valid</p>}
+      {invalidToDates.length > 0 && <p>Some end dates are not valid</p>}
+      {overlappingPositions.length > 0 && (
+        <>
+          <legend>{`Overlapping ${historyEntityType}s error`}</legend>
+          <ul>
+            {overlappingPositions.map((item, index) => (
+              <li key={item.uuid ?? index}>
+                <strong>{item[historyEntityType]?.name}</strong> (
+                {moment(item.startTime).format("DD MMM YYYY")} –{" "}
+                {item.endTime
+                  ? moment(item.endTime).format("DD MMM YYYY")
+                  : "present"}
+                )
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {alreadyOccupiedPositions.length > 0 && (
+        <>
+          <legend>{`This ${historyEntityType} is already occupied in these dates`}</legend>
+          <ul>
+            {alreadyOccupiedPositions.map((item, index) => (
+              <li key={item.uuid ?? index}>
+                <strong>{item[historyEntityType]?.name}</strong> (
+                {moment(item.startTime).format("DD MMM YYYY")} –{" "}
+                {item.endTime
+                  ? moment(item.endTime).format("DD MMM YYYY")
+                  : "present"}
+                )
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </Alert>
   )
 }
 
-interface ValidationMessagesProps {
-  invalidDateIndexesSet?: any
-  occupiedEntityIndexesSet?: any
-  overlapArrays?: any[]
-  historyEntityType?: string
-  isInvalidLastItem?: boolean
-}
-
-function ValidationMessages({
-  invalidDateIndexesSet,
-  occupiedEntityIndexesSet,
-  overlapArrays,
-  historyEntityType,
-  isInvalidLastItem
-}: ValidationMessagesProps) {
-  // Don't show all errors to the user at once.
-  // Showing them according to a priority gives the user a nice path to create a valid history.
-  // First; all the startTimes must be before the endTimes
-  const showInvalidMessage = !!invalidDateIndexesSet.size
-  // Second; all history items must be available between the specified dates
-  const showOccupiedEntityMessage =
-    !showInvalidMessage && !!occupiedEntityIndexesSet.size
-  // Third; there must be no overlapping items in the created history
-  const showOverlappingMessage =
-    !showInvalidMessage && !showOccupiedEntityMessage && !!overlapArrays.length
-  // This is the last warning, if everything is fixed, show it
-  const showLastItemInvalid =
-    !showInvalidMessage &&
-    !showOccupiedEntityMessage &&
-    !showOverlappingMessage &&
-    isInvalidLastItem
-
-  return (
-    <>
-      {showInvalidMessage && (
-        <ValidationMessage
-          title="Invalid date ranges errors"
-          keysAndMessages={Array.from(invalidDateIndexesSet).map(val => ({
-            key: `${val}`,
-            msg: `${historyEntityType} #${
-              val + 1
-            }'s start time is later than end time`
-          }))}
-        />
-      )}
-      {showOccupiedEntityMessage && (
-        <ValidationMessage
-          title="Internal history conflicts"
-          keysAndMessages={Array.from(occupiedEntityIndexesSet).map(val => ({
-            key: `${val}`,
-            msg: `${historyEntityType} #${
-              val + 1
-            } is occupied between specified dates`
-          }))}
-        />
-      )}
-      {showOverlappingMessage && (
-        <ValidationMessage
-          title={`Overlapping ${historyEntityType}s error`}
-          keysAndMessages={overlapArrays.map(o => ({
-            key: `${o[0]}-${o[1]}`,
-            msg: `${historyEntityType} #${
-              o[0] + 1
-            } overlaps with ${historyEntityType} #${o[1] + 1}`
-          }))}
-        />
-      )}
-      {showLastItemInvalid && (
-        <ValidationMessage
-          title={`Last ${historyEntityType} invalid errorInvalid date ranges errors`}
-          keysAndMessages={[
-            {
-              key: "0",
-              msg: `Last ${historyEntityType} should be consistent with currently assigned ${historyEntityType}.
-                If there is an active ${historyEntityType}, there should be at least one ${historyEntityType} in history.
-                Also, last ${historyEntityType}'s end time should be empty.
-                If there is no assigned ${historyEntityType}, it shouldn't be empty`
-            }
-          ]}
-        />
-      )}
-    </>
-  )
-}
-
-// Returns indexes of the overlapping items
-function getOverlappingDateIndexes(history = []) {
-  // one of them falsy, we don't have overlapping
-  if (!history) {
-    return null
-  }
-
-  return getOverlappingPeriodIndexes(history)
-}
-
-function getInvalidDateIndexes(inputHistory) {
-  const invalidIndexes = []
-  const history = inputHistory || []
-  history.forEach((item, index) => {
-    const endTime = item.endTime || Infinity
-    if (item.startTime > endTime) {
-      invalidIndexes.push(index)
+function getStyle(isOverlap: boolean) {
+  if (isOverlap) {
+    return {
+      ...INVALID_ENTRY_STYLE,
+      border: "1px solid red",
+      padding: "8px",
+      marginBottom: "6px"
     }
-  })
-
-  return invalidIndexes
-}
-
-function getOccupiedEntityIndexes(
-  inputHistory,
-  historyEntityType,
-  parentEntityUuid1,
-  parentEntityUuid2
-) {
-  const invalidIndexes = []
-  let historyProp
-  let selfHistoryProp
-  if (historyEntityType === "position") {
-    historyProp = "previousPeople"
-    selfHistoryProp = "person"
-  } else if (historyEntityType === "person") {
-    historyProp = "previousPositions"
-    selfHistoryProp = "position"
   }
-  const history = inputHistory || []
-  history.forEach((item, index) => {
-    const selfHistory = item[historyEntityType][historyProp] || []
-    const selfHistoryFiltered = selfHistory.filter(
-      item =>
-        item?.[selfHistoryProp]?.uuid !== parentEntityUuid1 &&
-        item?.[selfHistoryProp]?.uuid !== parentEntityUuid2
-    )
-    const currStartTime = item.startTime
-    const currEndTime = item.endTime
-    // Check if the current input causes conflicts in the history
-    const overlappingDateIndexes = getOverlappingPeriodIndexes([
-      { startTime: currStartTime, endTime: currEndTime },
-      ...selfHistoryFiltered
-    ])
-    if (!_isEmpty(overlappingDateIndexes)) {
-      invalidIndexes.push(index)
-    }
-  })
-  return invalidIndexes
+  return {}
 }
 
-function getStyle(
-  index,
-  overlapSet,
-  invalidDatesSet,
-  isInvalidLastItem,
-  occupiedEntityIndexesSet
-) {
-  let style = {}
-  if (
-    invalidDatesSet.has(index) ||
-    (!invalidDatesSet.size && occupiedEntityIndexesSet.has(index)) ||
-    (!invalidDatesSet.size &&
-      !occupiedEntityIndexesSet.size &&
-      overlapSet.has(index)) ||
-    (!invalidDatesSet.size &&
-      !occupiedEntityIndexesSet.size &&
-      !overlapSet.size &&
-      isInvalidLastItem)
-  ) {
-    style = INVALID_ENTRY_STYLE
-  }
-  return style
-}
-
-function giveEachItemUuid(history) {
-  return history.map(item => ({ ...item, uuid: uuidv4() }))
+function populateHistory(history) {
+  return history.map(item => ({
+    ...item,
+    uuid: uuidv4(),
+    isCurrent: item.endTime == null
+  }))
 }
 
 function getSingleSelectParameters(historyEntityType) {
@@ -643,22 +636,123 @@ function getSingleSelectParameters(historyEntityType) {
   }
 }
 
-function compareHistory(entity, a, b) {
-  return (
-    a.startTime - b.startTime ||
-    a.endTime - b.endTime ||
-    a[entity]?.uuid?.localeCompare(b[entity]?.uuid) ||
-    a.uuid?.localeCompare(b.uuid)
-  )
+function compareHistory(entity: string, a: any, b: any) {
+  // 1) Primary first
+  if (a.primary && !b.primary) {
+    return -1
+  }
+  if (!a.primary && b.primary) {
+    return 1
+  }
+
+  // 2) Sort by endTime descending
+  // Positions with null endTime come first (current positions)
+  const aEnd = a.endTime ?? Infinity // null means current → Infinity → comes first
+  const bEnd = b.endTime ?? Infinity
+  if (aEnd !== bEnd) {
+    return bEnd - aEnd
+  }
+
+  // 3) Tie-breaker: entity UUID
+  const aUuid = a[entity]?.uuid ?? ""
+  const bUuid = b[entity]?.uuid ?? ""
+  const cmpEntity = aUuid.localeCompare(bUuid)
+  if (cmpEntity !== 0) {
+    return cmpEntity
+  }
+
+  // 4) Final tie-breaker: item UUID
+  return (a.uuid ?? "").localeCompare(b.uuid ?? "")
 }
 
-function sortHistory(historyEntityType, history, hasCurrent) {
-  if (!hasCurrent) {
-    return history.sort((a, b) => compareHistory(historyEntityType, a, b))
+function sortHistory(historyEntityType: string, history: any[]) {
+  return [...history].sort((a, b) => compareHistory(historyEntityType, a, b))
+}
+
+function getHistoryConflicts(
+  history: any[],
+  parentEntityUuid: string,
+  isCheckingPerson: boolean
+) {
+  const conflicts = new Map<
+    string,
+    { item: any; types: Set<HistoryConflictType> }
+  >()
+
+  function addConflict(item: any, type: HistoryConflictType) {
+    if (!conflicts.has(item.uuid)) {
+      conflicts.set(item.uuid, { item, types: new Set() })
+    }
+    conflicts.get(item.uuid)?.types.add(type)
   }
-  const historyWithoutCurrent = history.slice(0, history.length - 1)
-  const sortedWithoutCurrent = historyWithoutCurrent.sort((a, b) =>
-    compareHistory(historyEntityType, a, b)
-  )
-  return [...sortedWithoutCurrent, history[history.length - 1]]
+
+  history.forEach((current, i) => {
+    if (current.startTime == null) {
+      return
+    }
+
+    // Rule 1: no period interval overlaps
+    history.forEach((other, j) => {
+      if (i === j) {
+        return
+      }
+      if (other.startTime == null) {
+        return
+      }
+
+      const overlap = timesOverlap(
+        current.startTime,
+        current.endTime,
+        other.startTime,
+        other.endTime
+      )
+
+      if (!overlap) {
+        return
+      }
+
+      // No overlap at all allowed when checking position history
+      // Only primary positions can not overlap when checking person
+      if (!isCheckingPerson || (current.primary && other.primary)) {
+        addConflict(current, "PRIMARY_OVERLAP")
+        addConflict(other, "PRIMARY_OVERLAP")
+      }
+      if (
+        current.position?.uuid &&
+        current.position.uuid === other.position?.uuids
+      ) {
+        addConflict(current, "SAME_POSITION_OVERLAP")
+        addConflict(other, "SAME_POSITION_OVERLAP")
+      }
+    })
+
+    // Rule 2: no entity already occupied
+    if (current.position?.previousPeople && parentEntityUuid) {
+      const occupied = current.position.previousPeople.some(pp => {
+        if (pp.person.uuid === parentEntityUuid) {
+          return false
+        }
+
+        return timesOverlap(
+          current.startTime,
+          current.endTime,
+          pp.startTime,
+          pp.endTime
+        )
+      })
+
+      if (occupied) {
+        addConflict(current, "ALREADY_OCCUPIED")
+      }
+    }
+  })
+
+  return Array.from(conflicts.values())
+}
+function markInvalid(setter, uuid) {
+  setter(prev => (prev.includes(uuid) ? prev : [...prev, uuid]))
+}
+
+function clearInvalid(setter, uuid) {
+  setter(prev => prev.filter(id => id !== uuid))
 }

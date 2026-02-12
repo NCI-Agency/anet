@@ -54,12 +54,17 @@ class PositionMergeTest extends AbstractResourceTest {
     final PositionInput firstPositionInput = PositionInput.builder()
         .withName("MergePositionsTest First Position").withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
-        .withStatus(Status.ACTIVE).withPerson(getPersonInput(testPerson)).build();
+        .withStatus(Status.ACTIVE).build();
 
     final Position firstPosition = withCredentials(adminUser,
         t -> mutationExecutor.createPosition(FIELDS, firstPositionInput));
     assertThat(firstPosition).isNotNull();
     assertThat(firstPosition.getUuid()).isNotNull();
+
+    // Put person in this position
+    final Integer nrAssigned = withCredentials(adminUser, t -> mutationExecutor
+        .putPersonInPosition("", getPersonInput(testPerson), null, true, firstPosition.getUuid()));
+    assertThat(nrAssigned).isOne();
     final Position updatedFirstPosition =
         withCredentials(adminUser, t -> queryExecutor.position(FIELDS, firstPosition.getUuid()));
 
@@ -108,8 +113,8 @@ class PositionMergeTest extends AbstractResourceTest {
     final PersonPositionHistoryInput hist =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
             .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
-            .withPerson(getPersonInput(testPerson)).withPosition(getPositionInput(secondPosition))
-            .build();
+            .withPrimary(true).withPerson(getPersonInput(testPerson))
+            .withPosition(getPositionInput(secondPosition)).build();
 
     final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
     historyList.add(hist);
@@ -120,8 +125,8 @@ class PositionMergeTest extends AbstractResourceTest {
     mergedPositionInput.setType(secondPosition.getType());
 
     // Merge the two positions
-    final int nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.mergePositions("", secondPosition.getUuid(), mergedPositionInput));
+    final int nrUpdated = withCredentials(adminUser, t -> mutationExecutor.mergePositions("",
+        secondPosition.getUuid(), false, mergedPositionInput));
     assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.

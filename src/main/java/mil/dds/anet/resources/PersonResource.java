@@ -9,7 +9,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPreference;
@@ -20,8 +19,11 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PersonPreferenceDao;
+import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.UserDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -36,16 +38,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class PersonResource {
 
   private final AnetDictionary dict;
-  private final AnetObjectEngine engine;
   private final PersonDao dao;
+  private final EmailAddressDao emailAddressDao;
   private final PersonPreferenceDao personPreferenceDao;
+  private final PositionDao positionDao;
+  private final UserDao userDao;
 
-  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, PersonDao dao,
-      PersonPreferenceDao personPreferenceDao) {
+  public PersonResource(AnetDictionary dict, PersonDao dao, EmailAddressDao emailAddressDao,
+      PersonPreferenceDao personPreferenceDao, PositionDao positionDao, UserDao userDao) {
     this.dict = dict;
-    this.engine = anetObjectEngine;
     this.dao = dao;
+    this.emailAddressDao = emailAddressDao;
     this.personPreferenceDao = personPreferenceDao;
+    this.positionDao = positionDao;
+    this.userDao = userDao;
   }
 
   public static boolean hasPermission(final Person user, final String personUuid) {
@@ -79,12 +85,6 @@ public class PersonResource {
           "You do not have permissions to create this person");
     }
 
-    final String positionUuid = DaoUtils.getUuid(p.getPosition());
-    if (positionUuid != null && engine.getPositionDao().getByUuid(positionUuid) == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Position " + p.getPosition() + " does not exist");
-    }
-
     // Only admins can set user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
       p.setUser(false);
@@ -99,16 +99,11 @@ public class PersonResource {
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final Person created = dao.insert(p);
 
-    if (DaoUtils.getUuid(created.getPosition()) != null) {
-      engine.getPositionDao().setPersonInPosition(created.getUuid(),
-          DaoUtils.getUuid(created.getPosition()));
-    }
-
     if (AuthUtils.isAdmin(user)) {
-      engine.getUserDao().updateUsers(p, p.getUsers());
+      userDao.updateUsers(p, p.getUsers());
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
         p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
@@ -130,13 +125,12 @@ public class PersonResource {
       return true;
     }
     if (editorPos.getType() == PositionType.SUPERUSER) {
+      if (create) {
+        // Superusers can create new people.
+        return true;
+      }
       // Ensure that the editor is the superuser for the subject's organization.
-      final Position subjectPos;
-      subjectPos =
-          create
-              ? ApplicationContextProvider.getEngine().getPositionDao()
-                  .getByUuid(DaoUtils.getUuid(subject.getPosition()))
-              : DaoUtils.getPosition(subject);
+      final Position subjectPos = DaoUtils.getPosition(subject);
       if (subjectPos == null) {
         // Superusers can edit position-less people.
         return true;
@@ -167,29 +161,6 @@ public class PersonResource {
       validateEmail(p.getEmailAddresses());
     }
 
-    // Swap the position first in order to do the authentication check.
-    if (p.getPosition() != null) {
-      // Maybe update position?
-      final Position existingPos = DaoUtils.getPosition(existing);
-      final String positionUuid = DaoUtils.getUuid(p.getPosition());
-      if (existingPos == null && positionUuid != null) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      } else if (existingPos != null && positionUuid == null) {
-        // Remove this person from their position.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
-      } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
-        // Update the position for this person.
-        AuthUtils.assertSuperuser(user);
-        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      }
-    }
-
     // If person changed to inactive, update the status
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
@@ -198,8 +169,8 @@ public class PersonResource {
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (WithStatus.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
-      Position existingPos = DaoUtils.getPosition(existing);
+    if (WithStatus.Status.INACTIVE.equals(p.getStatus())) {
+      final Position existingPos = DaoUtils.getPosition(existing);
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
         if (!user.getUuid().equals(p.getUuid())) {
@@ -208,7 +179,7 @@ public class PersonResource {
         }
         AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
             p, user);
-        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
+        positionDao.removePersonFromPositions(p.getUuid(), existingPos.getUuid());
       }
     }
 
@@ -221,11 +192,10 @@ public class PersonResource {
     }
 
     if (AuthUtils.isAdmin(user)) {
-      engine.getUserDao().updateUsers(p, p.getUsers());
+      userDao.updateUsers(p, p.getUsers());
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
-        p.getEmailAddresses());
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
         p.customSensitiveInformationKey(), p.getCustomSensitiveInformation());
@@ -242,17 +212,11 @@ public class PersonResource {
   public int updatePersonHistory(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Person existing = dao.getByUuid(p.getUuid());
-    assertCanUpdatePerson(user, existing);
+    AuthUtils.assertAdministrator(user);
 
     final String existingPositionUuid = DaoUtils.getUuid(p.getPosition());
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
         existingPositionUuid);
-
-    if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
 
     final int numRows = dao.updatePersonHistory(p);
     AnetAuditLogger.log("History updated for person {} by {}", p, user);
@@ -376,8 +340,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
-        p.getEmailAddresses());
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
     AnetAuditLogger.log("Person {} updated by themselves", p);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -387,7 +350,9 @@ public class PersonResource {
   @GraphQLMutation(name = "mergePeople")
   public Integer mergePeople(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
-      @GraphQLArgument(name = "winnerPerson") Person winner) {
+      @GraphQLArgument(name = "winnerPerson") Person winner,
+      @GraphQLArgument(name = "useWinnerPositionHistory",
+          defaultValue = "true") boolean useWinnerPositionHistory) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
 
@@ -407,17 +372,7 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
     }
 
-    // Do some additional sanity checks
-    final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
-    ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
-        winnerPositionUuid);
-
-    if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
-    int numRows = dao.mergePeople(winner, loser);
+    int numRows = dao.mergePeople(winner, loser, useWinnerPositionHistory);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged person relation information.");

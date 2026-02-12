@@ -28,7 +28,6 @@ import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -40,14 +39,8 @@ import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = SpringTestConfig.class,
-    useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   private final List<String> expectedIds = new ArrayList<>();

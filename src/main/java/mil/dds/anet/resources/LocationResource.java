@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -32,11 +33,14 @@ public class LocationResource {
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final LocationDao dao;
+  private final ApprovalStepDao approvalStepDao;
 
-  public LocationResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, LocationDao dao) {
+  public LocationResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, LocationDao dao,
+      ApprovalStepDao approvalStepDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.dao = dao;
+    this.approvalStepDao = approvalStepDao;
   }
 
   public static boolean hasPermission(final Person user, final String locationUuid) {
@@ -95,7 +99,7 @@ public class LocationResource {
       for (ApprovalStep step : l.getPlanningApprovalSteps()) {
         Utils.validateApprovalStep(step);
         step.setRelatedObjectUuid(created.getUuid());
-        engine.getApprovalStepDao().insertAtEnd(step);
+        approvalStepDao.insertAtEnd(step);
       }
     }
     if (l.getApprovalSteps() != null) {
@@ -103,7 +107,7 @@ public class LocationResource {
       for (ApprovalStep step : l.getApprovalSteps()) {
         Utils.validateApprovalStep(step);
         step.setRelatedObjectUuid(created.getUuid());
-        engine.getApprovalStepDao().insertAtEnd(step);
+        approvalStepDao.insertAtEnd(step);
       }
     }
 

@@ -392,7 +392,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       position.setOrganization(organization);
       position = positionDao.insert(position);
 
-      positionDao.setPersonInPosition(person.getUuid(), position.getUuid());
+      positionDao.setPersonInPosition(person.getUuid(), position.getUuid(), true, null);
 
       // Add MART person as author
       reportPeople.add(createReportPerson(person));

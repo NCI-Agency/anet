@@ -500,10 +500,14 @@ fields:
     users:
       label: User accounts
     position:
-      label: Current Position
-      placeholder: Fill in the person's current position
+      label: Primary Position
+      placeholder: Fill in the person's primary position
+    additionalPositions:
+      label: Additional Positions
     prevPositions:
       label: Previous Positions
+    prevAdditionalPositions:
+      label: Previous Additional Positions
     emailAddresses:
       label: Email addresses
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']
@@ -875,7 +879,9 @@ fields:
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
+        - additionalPositions
         - prevPositions
+        - prevAdditionalPositions
         - user
         - users
         - authorizationGroups
@@ -916,7 +922,9 @@ fields:
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
+        - additionalPositions
         - prevPositions
+        - prevAdditionalPositions
         - phoneNumber
         - country
         - birthday

@@ -22,6 +22,7 @@ interface MergeFieldProps {
   autoMerge?: boolean
   dispatchMergeActions?: (...args: unknown[]) => unknown
   className?: string
+  showAction: boolean
 }
 
 const MergeField = ({
@@ -33,7 +34,8 @@ const MergeField = ({
   mergeState,
   autoMerge,
   dispatchMergeActions,
-  className
+  className,
+  showAction = true
 }: MergeFieldProps) => {
   const fieldRef = useRef(null)
   const [height, setHeight] = useState("auto")
@@ -78,10 +80,11 @@ const MergeField = ({
   // show an action button for fields that need to be merged manually
   const actionButton = useMemo(
     () =>
+      showAction &&
       !canAutoMerge &&
       action &&
       getActionButton(action, align, mergeState, fieldName),
-    [canAutoMerge, action, align, fieldName, mergeState]
+    [showAction, canAutoMerge, action, align, fieldName, mergeState]
   )
 
   // get selected side (has side effect!)

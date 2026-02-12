@@ -19,6 +19,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -33,12 +34,14 @@ import org.springframework.stereotype.Component;
 public class AccountDeactivationWorker extends AbstractWorker {
 
   private final PersonDao dao;
+  private final PositionDao positionDao;
 
-  public AccountDeactivationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
-      PersonDao dao) {
+  public AccountDeactivationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, PersonDao dao,
+      PositionDao positionDao) {
     super(dict, jobHistoryDao,
         "Deactivation Warning Worker waking up to check for Future Account Deactivations");
     this.dao = dao;
+    this.positionDao = positionDao;
   }
 
   @Scheduled(
@@ -73,7 +76,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     query.setStatus(Status.ACTIVE);
     final Instant latestWarningDate = now.plus(daysBeforeLatestWarning, ChronoUnit.DAYS);
     query.setEndOfTourDateEnd(latestWarningDate);
-    final List<Person> persons = engine().getPersonDao().search(query).getList();
+    final List<Person> persons = dao.search(query).getList();
 
     // Make sure all email addresses are loaded
     CompletableFuture.allOf(persons.stream().map(p -> p.loadEmailAddresses(context, null))
@@ -152,9 +155,9 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
     Position existingPos = DaoUtils.getPosition(p);
     if (existingPos != null) {
-      AnetAuditLogger.log("Person {} removed from position by system because they are now inactive",
-          p);
-      engine().getPositionDao().removePersonFromPosition(existingPos.getUuid());
+      AnetAuditLogger
+          .log("Person {} removed from all positions by system because they are now inactive", p);
+      positionDao.removePersonFromPositions(p.getUuid(), existingPos.getUuid());
     }
 
     // Update

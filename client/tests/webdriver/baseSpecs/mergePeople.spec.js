@@ -20,8 +20,8 @@ const EXAMPLE_PEOPLE = {
     nationality: "Afghanistan",
     previousPositions: [
       {
-        name: "Chief of Merge People Test 1",
-        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
+        name: "Primary\nChief of Merge People Test 1",
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],
     biography: "Winner is a test person who will be merged",
@@ -47,8 +47,8 @@ const EXAMPLE_PEOPLE = {
     nationality: "Afghanistan",
     previousPositions: [
       {
-        name: "Chief of Merge People Test 2",
-        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
+        name: "Primary\nChief of Merge People Test 2",
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],
     biography: "Loser is a test person who will be merged",
@@ -74,8 +74,8 @@ const EXAMPLE_PEOPLE = {
     nationality: "United States",
     previousPositions: [
       {
-        name: "EF 1 Manager",
-        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
+        name: "Primary\nEF 1 Manager",
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -`
       }
     ],
     biography: "Andrew is the EF 1 Manager",
@@ -159,7 +159,7 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(EXAMPLE_PEOPLE.validLeft.user)
     expect(
       await (
-        await MergePeople.getColumnContent("left", "Current Position")
+        await MergePeople.getColumnContent("left", "Primary Position")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
     expect(await MergePeople.getPreviousPositions("left")).to.eql(
@@ -232,7 +232,7 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(EXAMPLE_PEOPLE.validRight.user)
     expect(
       await (
-        await MergePeople.getColumnContent("right", "Current Position")
+        await MergePeople.getColumnContent("right", "Primary Position")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.position)
     expect(await MergePeople.getPreviousPositions("right")).to.eql(
@@ -335,7 +335,7 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(EXAMPLE_PEOPLE.validLeft.user)
     expect(
       await (
-        await MergePeople.getColumnContent("mid", "Current Position")
+        await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
@@ -395,7 +395,7 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(EXAMPLE_PEOPLE.validRight.user)
     expect(
       await (
-        await MergePeople.getColumnContent("mid", "Current Position")
+        await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
@@ -450,16 +450,16 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
 
     await (
-      await MergePeople.getSelectButton("left", "Current Position")
+      await MergePeople.getSelectButton("left", "Primary Position")
     ).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.position,
       "mid",
-      "Current Position"
+      "Primary Position"
     )
     expect(
       await (
-        await MergePeople.getColumnContent("mid", "Current Position")
+        await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
 
@@ -528,7 +528,7 @@ describe("Merge people who are both non-users", () => {
     ).to.equal(EXAMPLE_PEOPLE.validLeft.biography)
 
     await (
-      await MergePeople.getSelectButton("left", "Previous Positions")
+      await MergePeople.getSelectButton("left", "Primary Position")
     ).click()
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
@@ -737,7 +737,7 @@ describe("Merge user with non-user", () => {
     ).to.eq(EXAMPLE_PEOPLE.validLeft.user)
     expect(
       await (
-        await MergePeople.getColumnContent("mid", "Current Position")
+        await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
@@ -809,7 +809,7 @@ describe("Merge user with non-user", () => {
     ).to.eq(EXAMPLE_PEOPLE.userRight.user)
     expect(
       await (
-        await MergePeople.getColumnContent("mid", "Current Position")
+        await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
@@ -863,10 +863,6 @@ describe("Merge user with non-user", () => {
         )
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.politicalPosition)
-  })
-
-  it("Should still display edit history button on the middle column", async () => {
-    await (await MergePeople.getEditHistoryButton()).waitForDisplayed()
   })
 
   it("Should be able to merge both people when winner is right person", async () => {

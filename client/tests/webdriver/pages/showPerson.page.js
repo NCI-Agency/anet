@@ -280,6 +280,10 @@ class ShowPerson extends Page {
   async getChangeAssignedPositionButton() {
     return browser.$("button.change-assigned-position")
   }
+
+  async getAdditionalPositionsTable() {
+    return browser.$("#additionalPositions table")
+  }
 }
 
 export default new ShowPerson()
