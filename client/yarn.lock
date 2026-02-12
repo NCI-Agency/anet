@@ -7284,11 +7284,11 @@ __metadata:
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.40.0"
-    slate: "npm:0.120.0"
-    slate-dom: "npm:0.119.0"
+    slate: "npm:0.123.0"
+    slate-dom: "npm:0.123.0"
     slate-history: "npm:0.113.1"
     slate-hyperscript: "npm:0.100.0"
-    slate-react: "npm:0.120.0"
+    slate-react: "npm:0.123.0"
     style-loader: "npm:4.0.0"
     sync-fetch: "npm:0.6.0"
     tap-xunit: "npm:2.4.1"
@@ -18315,9 +18315,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-dom@npm:0.119.0":
-  version: 0.119.0
-  resolution: "slate-dom@npm:0.119.0"
+"slate-dom@npm:0.123.0":
+  version: 0.123.0
+  resolution: "slate-dom@npm:0.123.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18327,8 +18327,8 @@ __metadata:
     scroll-into-view-if-needed: "npm:^3.1.0"
     tiny-invariant: "npm:1.3.1"
   peerDependencies:
-    slate: ">=0.99.0"
-  checksum: 10c0/ce0485ebecb26221faa844a8e05ebb042d25396e27076b070d41067f4be38ea20fae95c79658a3c7e71d356cdf7ed34f0f45bad1ccd4deaea96dfc14c5b90993
+    slate: ">=0.121.0"
+  checksum: 10c0/ca1fc5d1f8c2f51466267d4e71007bcf4427263fc641118be6057f5353b6ff6a75ebeb45c5fd4c914c1a3ae1370c58d88c81f675e5c2e0eb32a73e821e91ffd7
   languageName: node
   linkType: hard
 
@@ -18354,9 +18354,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.120.0":
-  version: 0.120.0
-  resolution: "slate-react@npm:0.120.0"
+"slate-react@npm:0.123.0":
+  version: 0.123.0
+  resolution: "slate-react@npm:0.123.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18367,16 +18367,16 @@ __metadata:
   peerDependencies:
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
-    slate: ">=0.114.0"
-    slate-dom: ">=0.119.0"
-  checksum: 10c0/12ddd34de61991fb9b1d0981f654be05cbde5f057edd93d53a2a4ef44c442920e7b0e70dad4a9a28f2c950ddbaee8718ea21e6d2b1064fe904c8bf1159d9451f
+    slate: ">=0.121.0"
+    slate-dom: ">=0.119.1"
+  checksum: 10c0/7b0aeb8f914bb3670423d09936ab84a7a9e3145e01cad79bd37cf485d7d64f5b4e97802345a87fbdbaf8596c66cd05ee9ac5ed20a281bff83460e34cae5b51e2
   languageName: node
   linkType: hard
 
-"slate@npm:0.120.0":
-  version: 0.120.0
-  resolution: "slate@npm:0.120.0"
-  checksum: 10c0/af83b41f2b076444eb441e4d8747f1d629a7a555b5234adf79cc12ea37b517a35722e779270a421eaec803b04b805a0a6f284e31f9da2b063b097ba99a4c9ecb
+"slate@npm:0.123.0":
+  version: 0.123.0
+  resolution: "slate@npm:0.123.0"
+  checksum: 10c0/c26d116f4db3e92b0baee9855ce77848542ef930b3173317141071b37cfe17ff100836af48c7c9bdd30cd1e0e09412c2623648122b8766344f7219c9577f4041
   languageName: node
   linkType: hard
 
