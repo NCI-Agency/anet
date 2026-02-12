@@ -97,7 +97,7 @@ export const EntityAvatarDisplay = ({
   }
 
   return (
-    <EntityAvatarStyledDiv
+    <EntityAvatarS
       imgHeight={height}
       rounded={avatarSettings?.rounded}
       style={style}
@@ -113,11 +113,11 @@ export const EntityAvatarDisplay = ({
           alt="Avatar"
         />
       )}
-    </EntityAvatarStyledDiv>
+    </EntityAvatarS>
   )
 }
 
-const EntityAvatarStyledDiv = styled.div`
+const EntityAvatarS = styled.span`
   display: inline-block;
   vertical-align: middle;
   max-width: 100%;

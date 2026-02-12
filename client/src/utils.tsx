@@ -429,6 +429,12 @@ export default {
     return { iconSize, iconImage, contentMissing }
   },
 
+  getImageAttachments: function (attachments = []) {
+    return attachments.filter(attachment =>
+      attachment?.mimeType?.startsWith("image/")
+    )
+  },
+
   stripExtension: function (fileName) {
     const index = fileName.lastIndexOf(".")
     return index === -1 ? fileName : fileName.substring(0, index)

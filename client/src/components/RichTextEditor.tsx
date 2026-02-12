@@ -37,9 +37,14 @@ import {
   LINK_TYPES
 } from "utils_links"
 
-const createSlateValue = value => {
+const createSlateValue = (value, readOnly) => {
   const document = new DOMParser().parseFromString(value || "", "text/html")
-  return deserialize(document.body)
+  const slateValue = deserialize(document.body)
+  if (!readOnly && !!value) {
+    // add empty text node at the end to ease appending new content
+    slateValue.push({ type: "paragraph", children: [{ text: "" }] })
+  }
+  return slateValue
 }
 
 const usePrevious = value => {
@@ -121,14 +126,16 @@ const RichTextEditor = ({
   const editableRef = useRef()
   const toolbarRef = useRef()
 
-  const [slateValue, setSlateValue] = useState(createSlateValue(value))
+  const [slateValue, setSlateValue] = useState(
+    createSlateValue(value, readOnly)
+  )
   const previousValue = usePrevious(value)
 
   useEffect(() => {
     if (readOnly && previousValue !== value) {
       // Only update editor when a new value comes in
       // (different from the one used for slateValue above)
-      editor.children = createSlateValue(value)
+      editor.children = createSlateValue(value, readOnly)
       editor.onChange()
     }
   }, [editor, previousValue, readOnly, disableFullSize, value])
@@ -229,15 +236,7 @@ const RichTextEditor = ({
 }
 
 const withHtml = editor => {
-  const { insertData, isInline, isVoid } = editor
-
-  editor.isInline = element =>
-    LINK_TYPES.includes(element.type) || isInline(element)
-  editor.isVoid = element =>
-    LINK_TYPES.includes(element.type) ||
-    element.type === "image" ||
-    isVoid(element)
-
+  const { insertData } = editor
   editor.insertData = data => {
     const html = data?.getData("text/html")
     if (html) {
@@ -383,6 +382,17 @@ const deserialize = (el, markAttributes = {}) => {
   }
 }
 
+function isImageAttachment(entity: any) {
+  return (
+    entity instanceof Models.Attachment &&
+    entity?.mimeType?.startsWith("image/")
+  )
+}
+
+function showIconCallback(entity: any) {
+  return !isImageAttachment(entity)
+}
+
 const displayCallback = modelInstance => {
   if (modelInstance instanceof Models.Report) {
     const title = utils.ellipsizeOnWords(
@@ -392,6 +402,18 @@ const displayCallback = modelInstance => {
     if (title) {
       return title
     }
+  } else if (isImageAttachment(modelInstance)) {
+    const caption = modelInstance.caption || modelInstance.fileName
+    return (
+      <span className="rich-text-image-wrapper">
+        <img
+          className="rich-text-image"
+          src={`/api/attachment/view/${modelInstance.uuid}`}
+          alt={caption}
+        />
+        <span className="rich-text-image-caption">{caption}</span>
+      </span>
+    )
   }
   return modelInstance.toString()
 }
@@ -414,6 +436,7 @@ const getLink = (
         type={element.entityType}
         uuid={element.entityUuid}
         displayCallback={displayCallback}
+        showIcon={showIconCallback}
         showAvatar={showAvatar}
       >
         {reducedChildren}
