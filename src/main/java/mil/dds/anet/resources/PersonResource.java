@@ -212,8 +212,7 @@ public class PersonResource {
   public int updatePersonHistory(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Person existing = dao.getByUuid(p.getUuid());
-    assertCanUpdatePerson(user, existing);
+    AuthUtils.assertAdministrator(user);
 
     final String existingPositionUuid = DaoUtils.getUuid(p.getPosition());
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,

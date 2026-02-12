@@ -190,7 +190,7 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
-    assertPermission(user, existing);
+    AuthUtils.assertAdministrator(user);
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
         existing.getPersonUuid());
