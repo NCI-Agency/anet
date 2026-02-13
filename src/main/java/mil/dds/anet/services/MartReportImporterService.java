@@ -128,15 +128,15 @@ public class MartReportImporterService implements IMartReportImporterService {
         logger.info("Report with UUID={} will be imported", reportDto.getUuid());
         processReportInfo(reportDto, newMartImportedReport, attachments);
         martImportedReportDao.insert(newMartImportedReport);
-      } else if (existingMartImportedReportSequences.getList().get(0)
+      } else if (existingMartImportedReportSequences.getList().getFirst()
           .getState() != MartImportedReport.State.SUBMITTED_OK) {
         // This report was last marked as failed or missing earlier, re-import
         logger.info("Report with UUID={} will be imported", reportDto.getUuid());
         processReportInfo(reportDto, newMartImportedReport, attachments);
-        if (Objects.equals(existingMartImportedReportSequences.getList().get(0).getSequence(),
+        if (Objects.equals(existingMartImportedReportSequences.getList().getFirst().getSequence(),
             newMartImportedReport.getSequence())) {
           // Replace existing import record
-          martImportedReportDao.delete(existingMartImportedReportSequences.getList().get(0));
+          martImportedReportDao.delete(existingMartImportedReportSequences.getList().getFirst());
         }
         martImportedReportDao.insert(newMartImportedReport);
       } else {
@@ -153,7 +153,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     for (final FileAttachment fileAttachment : attachments) {
       try {
         fileAttachment.load();
-        processAttachment(errors, anetReport.getUuid(), anetReport.getReportPeople().get(0),
+        processAttachment(errors, anetReport.getUuid(), anetReport.getReportPeople().getFirst(),
             fileAttachment);
       } catch (Exception e) {
         logger.error("Could not process report attachment from email", e);
@@ -253,28 +253,20 @@ public class MartReportImporterService implements IMartReportImporterService {
       List<FileAttachment> attachments) {
     final List<String> errors = new ArrayList<>();
 
-    // Validate author organization
-    final Organization organization = organizationDao.getByUuid(martReport.getOrganizationUuid());
-    if (organization == null) {
-      errors.add(String.format("Can not find submitter organization: '%s' with uuid: %s",
-          martReport.getOrganizationName(), martReport.getOrganizationUuid()));
-    }
+    Report anetReport = new Report();
 
-    // Validate report location
+    // Handle report people
+    handleReportPeople(anetReport, martReport, errors);
+
+    // Handle report location
     final Location location = locationDao.getByUuid(martReport.getLocationUuid());
     if (location == null) {
       errors.add(String.format("Can not find report location: '%s' with uuid: %s",
           martReport.getLocationName(), martReport.getLocationUuid()));
     }
-
-    // Move on with the report
-    Report anetReport = new Report();
-    // Location
     anetReport.setLocation(location);
-    final List<ReportPerson> reportPeople = handleReportPeople(martReport, organization, errors);
-    // Report people
-    anetReport.setReportPeople(reportPeople);
-    // Report generic details
+
+    // Handle report generic details
     anetReport.setUuid(martReport.getUuid());
     anetReport.setCreatedAt(martReport.getCreatedAt());
     anetReport.setIntent(martReport.getIntent());
@@ -283,17 +275,20 @@ public class MartReportImporterService implements IMartReportImporterService {
     }
     anetReport.setEngagementDate(martReport.getEngagementDate());
     anetReport.setReportText(martReport.getReportText());
+
     // Get classification from securityMarking property
     anetReport.setClassification(getClassificationFromReport(martReport, errors));
-    // Set advisor organization to the organization of the submitter
-    anetReport.setAdvisorOrg(organization);
+
     // Report tasks
     final List<Task> tasks = getTasks(martReport.getTasks(), errors);
     anetReport.setTasks(tasks);
+
     // Custom fields
     anetReport.setCustomFields(martReport.getCustomFields());
+
     // Set report to DRAFT
     anetReport.setState(Report.ReportState.DRAFT);
+
     // Sanitize!
     anetReport.checkAndFixCustomFields();
     anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
@@ -315,12 +310,12 @@ public class MartReportImporterService implements IMartReportImporterService {
 
     // Complete the MART imported report record
     martImportedReport.setReport(anetReport);
-    martImportedReport.setPerson(anetReport.getReportPeople().get(0));
+    martImportedReport.setPerson(anetReport.getReportPeople().getFirst());
 
     // Check errors to determine whether to submit or not and marImportedReport state
     if (errors.isEmpty()) {
       // All good, submit without warnings
-      reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+      reportDao.submit(anetReport, anetReport.getReportPeople().getFirst());
       martImportedReport.setState(MartImportedReport.State.SUBMITTED_OK);
     } else {
       String errorMsg = String.format("While importing report %s:", martReport.getUuid())
@@ -329,12 +324,12 @@ public class MartReportImporterService implements IMartReportImporterService {
       // Also add a comment to the report with the errors
       Comment comment = new Comment();
       comment.setText(errorMsg);
-      comment.setAuthor(anetReport.getReportPeople().get(0));
+      comment.setAuthor(anetReport.getReportPeople().getFirst());
       comment.setReportUuid(anetReport.getUuid());
       commentDao.insert(comment);
       // Submit the report only if the submitter organization is there
-      if (organization != null) {
-        reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+      if (anetReport.getAdvisorOrg() != null) {
+        reportDao.submit(anetReport, anetReport.getReportPeople().getFirst());
         martImportedReport.setState(MartImportedReport.State.SUBMITTED_WARNINGS);
       } else {
         martImportedReport.setState(MartImportedReport.State.NOT_SUBMITTED);
@@ -358,46 +353,84 @@ public class MartReportImporterService implements IMartReportImporterService {
     return null;
   }
 
-  private List<ReportPerson> handleReportPeople(ReportDto martReport, Organization organization,
-      List<String> errors) {
+  private void handleReportPeople(Report anetReport, ReportDto martReport, List<String> errors) {
+    // Validate organization coming from MART
+    Organization organizationForReport =
+        organizationDao.getByUuid(martReport.getOrganizationUuid());
+    if (organizationForReport == null) {
+      errors.add(
+          String.format("Can not find submitter organization coming from MART: '%s' with uuid: %s",
+              martReport.getOrganizationName(), martReport.getOrganizationUuid()));
+    }
     // Try to find the person/s with the email
     final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
     final List<ReportPerson> reportPeople = new ArrayList<>();
+    Person personForReport;
 
-    if (!matchingPersons.isEmpty()) {
-      // Put everybody with this email as report attendee
-      matchingPersons.forEach(person -> reportPeople.add(createReportPerson(person)));
+    if (matchingPersons.isEmpty()) {
+      // This is a new person -> CREATE from MART report information
+      personForReport = createNewPerson(martReport, errors);
+      createPositionForPerson(organizationForReport, martReport.getPositionName(), personForReport);
     } else {
-      // This is a new person -> CREATE from MART
-      Person person = new Person();
-      person.setName(martReport.getLastName().toUpperCase() + ", " + martReport.getFirstName());
-      person.setRank(martReport.getRank());
-      person.setStatus(WithStatus.Status.ACTIVE);
-      getPersonCountry(person, martReport, errors);
-      person = personDao.insert(person);
+      if (matchingPersons.size() > 1) {
+        errors.add(String.format("More than one ANET person has this email address: '%s'",
+            martReport.getEmail()));
+      }
+      // Grab the first person
+      personForReport = matchingPersons.getFirst();
+      if (personForReport.getPosition() != null
+          && personForReport.getPosition().getOrganizationUuid() != null) {
+        if (organizationForReport == null || !personForReport.getPosition().getOrganizationUuid()
+            .equals(organizationForReport.getUuid())) {
+          errors.add(
+              String.format("Organization for this person in ANET is different than in MART: '%s'",
+                  martReport.getEmail()));
+        }
+        organizationForReport =
+            organizationDao.getByUuid(personForReport.getPosition().getOrganizationUuid());
+      } else {
+        createPositionForPerson(organizationForReport, martReport.getPositionName(),
+            personForReport);
+        errors.add(String.format("Existing ANET user was assigned to MART position: '%s'",
+            martReport.getPositionName()));
+      }
+    }
+    // Add MART person as author
+    reportPeople.add(createReportPerson(personForReport));
+    // Assign report people
+    anetReport.setReportPeople(reportPeople);
+    // Set advisor organization
+    anetReport.setAdvisorOrg(organizationForReport);
+  }
 
-      // Update email address
-      final EmailAddress emailAddress = new EmailAddress();
-      emailAddress.setNetwork("Internet");
-      emailAddress.setAddress(martReport.getEmail());
-      emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
-          List.of(emailAddress));
+  private Person createNewPerson(ReportDto martReport, List<String> errors) {
+    Person person = new Person();
+    person.setName(martReport.getLastName().toUpperCase() + ", " + martReport.getFirstName());
+    person.setRank(martReport.getRank());
+    person.setStatus(WithStatus.Status.ACTIVE);
+    getPersonCountry(person, martReport, errors);
 
-      // Create person position
+    person = personDao.insert(person);
+    // Update email address
+    final EmailAddress emailAddress = new EmailAddress("Internet", martReport.getEmail());
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
+        List.of(emailAddress));
+    return person;
+  }
+
+  private void createPositionForPerson(Organization organization, String positionName,
+      Person person) {
+    if (organization != null) {
+      // Create person position if organization from MART exists
       Position position = new Position();
-      position.setName(martReport.getPositionName());
+      position.setName(positionName);
       position.setType(Position.PositionType.REGULAR);
       position.setStatus(WithStatus.Status.ACTIVE);
       position.setRole(Position.PositionRole.MEMBER);
       position.setOrganization(organization);
       position = positionDao.insert(position);
-
       positionDao.setPersonInPosition(person.getUuid(), position.getUuid());
-
-      // Add MART person as author
-      reportPeople.add(createReportPerson(person));
     }
-    return reportPeople;
   }
 
   private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
@@ -413,7 +446,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     if (countries.isEmpty()) {
       errors.add(String.format("Can not find submitter country: '%s'", martReport.getCountry()));
     } else {
-      person.setCountry(countries.get(0));
+      person.setCountry(countries.getFirst());
     }
   }
 
