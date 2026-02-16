@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ANET AI</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        font-family: var(--font-sans, sans-serif);
+        background: #f2f2f2;
+        color: #0f172a;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 12px;
+        line-height: 1.5;
+        border: 1px solid #e2e8f0;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      button {
+        appearance: none;
+        border: 1px solid #cbd5f5;
+        background: #ffffff;
+        color: #0f172a;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      button.primary {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+        color: #fff;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 12px;
+        color: #64748b;
+        padding-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-root"></div>
+    <script type="module" src="/src/mcp-app.ts"></script>
+  </body>
+</html>
