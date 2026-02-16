@@ -6,6 +6,7 @@
 </head>
 <body>
 <#include "common/securityBanner.ftlh">
+<#import "common/formatDate.ftlh" as fd>
 <#import "common/relatedObjectDisplay.ftlh" as rod>
 <#assign SPECIAL_MODELS = {
   "assessments": "an Assessment",
@@ -28,7 +29,7 @@ was updated, because
     <@rod.relatedObjectDisplay objectType=auditTrail.relatedObjectType objectUuid=auditTrail.relatedObjectUuid object=relatedObject specialModels=SPECIAL_MODELS />
   </#if>
   was <b>${AUDIT_TRAIL_UPDATE_TYPE_DESCRIPTION[auditTrail.updateType]}</b>
-  on ${(dateTimeFormatter.format(createdAt))!}
+  on <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=createdAt />
   <#if auditTrail.objectUuid??>
     <#assign person = (auditTrail.loadPerson(context).get())!>
     by <@rod.relatedObjectDisplay objectType="people" objectUuid=auditTrail.objectUuid object=person />

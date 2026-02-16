@@ -8,7 +8,7 @@
 <#include "common/securityBanner.ftlh">
 <#include "common/reportAuthors.ftlh">
 
-<p>Your report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent}</a>, has been approved and added to the daily rollup. </p>
+<p>Your report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent!}</a>, has been approved and added to the daily rollup. </p>
 
 <p>You can view the daily rollup by <a href="${serverUrl}/rollup">clicking here</a>.</p>
 

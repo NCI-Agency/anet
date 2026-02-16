@@ -233,6 +233,7 @@
 </head>
 <body>
 <#include "common/securityBanner.ftlh">
+<#import "common/formatDate.ftlh" as fd>
 
 <#if sender??>
   <p style="color: #555555;">
@@ -287,7 +288,7 @@
         <label for="engagementDate" class="col-sm-3 form-label">${fields.report.engagementDate.label!}</label>
         <div class="col-sm-9">
           <div id="engagementDate" class="form-control-static">
-            ${(engagementDateFormatter.format(report.engagementDate))!}
+            <@fd.formatDate dateFormatter=engagementDateFormatter timestamp=report.engagementDate />
           </div>
         </div>
       </div>
@@ -578,7 +579,7 @@
             <#if reportAction.createdAt??>
               <div>
                 <span>By ${(person.name)!SYSTEM_USER}</span><br>
-                <small>On ${(dateTimeFormatter.format(reportAction.createdAt))!}</small>
+                <small>On <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=reportAction.createdAt /></small>
               </div>
             </#if>
           </div>

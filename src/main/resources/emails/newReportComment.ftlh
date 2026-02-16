@@ -9,7 +9,7 @@
 <#include "common/reportAuthors.ftlh">
 
 <#assign commentAuthor = (comment.loadAuthor(context).get())!>
-<p>The following comment was added to your report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent}</a>, by ${commentAuthor.rank!} ${commentAuthor.name}:</p>
+<p>The following comment was added to your report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent!}</a>, by ${commentAuthor.rank!} ${commentAuthor.name}:</p>
 
 <p><i>"${comment.text}"</i></p>
 
