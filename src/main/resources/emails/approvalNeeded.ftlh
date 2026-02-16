@@ -10,7 +10,7 @@
 <p>Dear ${approvalStepName},</p>
 
 <div>
-  This report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent}</a>,
+  This report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent!}</a>,
   authored by
   <#assign reportAuthors = (report.loadAuthors(context).get())!>
   <#list reportAuthors as reportAuthor>
@@ -115,7 +115,7 @@
 
 <div>
   <div>
-    <p><strong>${fields.report.intent.label!}:</strong> ${report.intent}</p>
+    <p><strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}</p>
     <#if report.keyOutcomes??>
       <#if fields.report.keyOutcomes??>
         <p><strong>${fields.report.keyOutcomes.label!}:</strong> ${(report.keyOutcomes)!}</p>
