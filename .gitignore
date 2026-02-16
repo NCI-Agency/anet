@@ -45,3 +45,7 @@ errorShots/
 .metadata/
 
 .DS_Store
+
+# MCP UI
+mcp-ui/node_modules/
+mcp-ui/dist/
