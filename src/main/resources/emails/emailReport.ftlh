@@ -258,7 +258,7 @@
 
   <div>
     <h4 class="legend">
-      <span class="title-text ellipsized-text limit-title-text">Report <a href="${serverUrl}/reports/${report.uuid}">${report.intent}</a></span>
+      <span class="title-text ellipsized-text limit-title-text">Report <a href="${serverUrl}/reports/${report.uuid}">${(report.intent)!}</a></span>
     </h4>
 
     <fieldset class="show-report-overview">
