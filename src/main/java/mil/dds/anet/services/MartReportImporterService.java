@@ -318,8 +318,8 @@ public class MartReportImporterService implements IMartReportImporterService {
       reportDao.submit(anetReport, anetReport.getReportPeople().getFirst());
       martImportedReport.setState(MartImportedReport.State.SUBMITTED_OK);
     } else {
-      String errorMsg = String.format("While importing report %s:", martReport.getUuid())
-          + String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors));
+      final String errorMsg = String.format("While importing report %s:<ul><li>%s</li></ul>",
+          martReport.getUuid(), String.join("</li><li>", errors));
       martImportedReport.setErrors(errorMsg);
       // Also add a comment to the report with the errors
       Comment comment = new Comment();
@@ -365,7 +365,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     // Try to find the person/s with the email
     final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
     final List<ReportPerson> reportPeople = new ArrayList<>();
-    Person personForReport;
+    final Person personForReport;
 
     if (matchingPersons.isEmpty()) {
       // This is a new person -> CREATE from MART report information
