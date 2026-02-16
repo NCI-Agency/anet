@@ -157,7 +157,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     if (existingPos != null) {
       AnetAuditLogger
           .log("Person {} removed from all positions by system because they are now inactive", p);
-      positionDao.removePersonFromPositions(p.getUuid(), existingPos.getUuid());
+      positionDao.removePersonFromPositions(p.getUuid(), existingPos);
     }
 
     // Update
