@@ -21,11 +21,9 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.pg.PostgresqlPositionSearcher;
@@ -381,22 +379,22 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       if (primaryPosition != null) {
         handle
             .createUpdate("/* positionsRemovePerson.update */ UPDATE positions "
-                + "SET \"currentPersonUuid\" = NULL,"
-                + "type = CASE WHEN uuid = :positionUuid THEN :regularType ELSE type END,"
-                + "\"updatedAt\" = :updatedAt " + "WHERE \"currentPersonUuid\" = :personUuid")
+                + "SET \"currentPersonUuid\" = NULL, "
+                + "type = CASE WHEN uuid = :positionUuid THEN :regularType ELSE type END, "
+                + "\"updatedAt\" = :updatedAt WHERE \"currentPersonUuid\" = :personUuid")
             .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
             .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
             .bind("positionUuid", primaryPosition.getUuid()).execute();
       } else {
         handle
             .createUpdate("/* positionsRemovePerson.update */ UPDATE positions "
-                + "SET \"currentPersonUuid\" = NULL," + "\"updatedAt\" = :updatedAt "
+                + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
                 + "WHERE \"currentPersonUuid\" = :personUuid")
             .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
             .execute();
       }
       final String updateSql = "/* positionsRemovePerson.end */ UPDATE \"peoplePositions\" "
-          + "SET \"endedAt\" = :endedAt " + "WHERE \"personUuid\" = :personUuid "
+          + "SET \"endedAt\" = :endedAt WHERE \"personUuid\" = :personUuid "
           + "AND \"endedAt\" IS NULL";
 
       final int nr = handle.createUpdate(updateSql).bind("personUuid", personUuid)
