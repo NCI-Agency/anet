@@ -32,8 +32,8 @@
         <li>
           <a href="${serverUrl}/people/${position.person.uuid}">
             ${(position.person.rank)!} ${(position.person.name)!}, ${(position.name)!}
-            <#if position.loadOrganization(context).get()??>
-              <#assign organization = position.getOrganization()>
+            <#assign organization = (position.loadOrganization(context).get())!>
+            <#if organization.uuid??>
               @ ${(organization.shortName)!}
             </#if>
           </a>
