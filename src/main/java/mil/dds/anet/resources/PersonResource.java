@@ -177,8 +177,11 @@ public class PersonResource {
       }
       final Position userPrimaryPosition = DaoUtils.getPosition(existing);
       int numPositions = positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition);
-      AnetAuditLogger.log("Person {} removed from {} positions by {} because they are now inactive",
-          p, numPositions, user);
+      if (numPositions > 0) {
+        AnetAuditLogger.log(
+            "Person {} removed from {} position(s) by {} because they are now inactive", p,
+            numPositions, user);
+      }
     }
 
     p.setBiography(
