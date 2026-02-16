@@ -338,8 +338,8 @@
         <label for="event" class="col-sm-3 form-label">${fields.report.event.label!}</label>
         <div class="col-sm-9">
           <div id="event" class="form-control-static">
-            <#if report.loadEvent(context).get()??>
-              <#assign event = report.getEvent()>
+            <#assign event = (report.loadEvent(context).get())!>
+            <#if event.uuid??>
               <a href="${serverUrl}/events/${event.uuid}">${(event.name)!}</a>
             </#if>
           </div>
@@ -350,8 +350,8 @@
         <label for="location" class="col-sm-3 form-label">${fields.report.location.label!}</label>
         <div class="col-sm-9">
           <div id="location" class="form-control-static">
-            <#if report.loadLocation(context).get()??>
-              <#assign location = report.getLocation()>
+            <#assign location = (report.loadLocation(context).get())!>
+            <#if location.uuid??>
               <a href="${serverUrl}/locations/${location.uuid}">${(location.name)!}</a>
             </#if>
           </div>
@@ -377,8 +377,8 @@
         </#if>
       </div>
 
-      <#if report.loadReportCommunities(context).get()??>
-        <#assign reportCommunities = report.getReportCommunities()>
+      <#assign reportCommunities = (report.loadReportCommunities(context).get())!>
+      <#if (reportCommunities?size > 0)>
         <div class="form-group">
           <label for="reportCommunities" class="col-sm-3 form-label">${fields.report.reportCommunities.label!}</label>
           <div class="col-sm-9">
@@ -429,8 +429,8 @@
         <label for="advisorOrg" class="col-sm-3 form-label">${fields.advisor.org.name!}</label>
         <div class="col-sm-9">
           <div id="advisorOrg" class="form-control-static">
-            <#if report.loadAdvisorOrg(context).get()??>
-              <#assign advisorOrg = report.getAdvisorOrg()>
+            <#assign advisorOrg = (report.loadAdvisorOrg(context).get())!>
+            <#if advisorOrg.uuid??>
               <a href="${serverUrl}/organizations/${advisorOrg.uuid}">${(advisorOrg.shortName)!(advisorOrg.longName)!(advisorOrg.identificationCode)!}</a>
             </#if>
           </div>
@@ -441,8 +441,8 @@
         <label for="interlocutorOrg" class="col-sm-3 form-label">${fields.interlocutor.org.name!}</label>
         <div class="col-sm-9">
           <div id="interlocutorOrg" class="form-control-static">
-            <#if report.loadInterlocutorOrg(context).get()??>
-              <#assign interlocutorOrg = report.getInterlocutorOrg()>
+            <#assign interlocutorOrg = (report.loadInterlocutorOrg(context).get())!>
+            <#if interlocutorOrg.uuid??>
               <a href="${serverUrl}/organizations/${interlocutorOrg.uuid}">${(interlocutorOrg.shortName)!(interlocutorOrg.longName)!(interlocutorOrg.identificationCode)!}</a>
             </#if>
           </div>
@@ -482,8 +482,8 @@
               <a href="${serverUrl}/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
             </td>
             <td>
-              <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
-                <#assign position = attendee.getPosition()>
+              <#assign position = (attendee.loadPositionByDate(context, report.engagementDate).get())!>
+              <#if position.uuid??>
                 <a href="${serverUrl}/positions/${position.uuid}">${(position.name)!}</a>
               </#if>
             </td>
@@ -512,8 +512,8 @@
     </fieldset>
   </div>
 
-  <#if report.loadTasks(context).get()??>
-    <#assign tasks = report.getTasks()>
+  <#assign tasks = (report.loadTasks(context).get())!>
+  <#if (tasks?size > 0)>
     <div>
       <h4 class="legend">
         <span class="title-text">${fields.task.longLabel!}</span>
@@ -557,7 +557,7 @@
   </#if>
 
   <#assign workflow = (report.loadWorkflow(context).get())!>
-  <#if workflow??>
+  <#if (workflow?size > 0)>
     <div id="approvals">
       <h4 class="legend">
         <span class="title-text">Workflow</span>

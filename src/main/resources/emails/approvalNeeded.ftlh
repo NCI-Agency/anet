@@ -44,10 +44,10 @@
       <#if !attendee.interlocutor>
         <li>
           ${(attendee.name)!}
-          <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
-            <#assign position = attendee.getPosition()>
-            <#if position.loadOrganization(context).get()??>
-              <#assign organization = position.getOrganization()>
+          <#assign position = (attendee.loadPositionByDate(context, report.engagementDate).get())!>
+          <#if position.uuid??>
+            <#assign organization = (position.loadOrganization(context).get())!>
+            <#if organization.uuid??>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -71,10 +71,10 @@
       <#if attendee.interlocutor>
         <li>
           ${(attendee.name)!}
-          <#if attendee.loadPositionByDate(context, report.engagementDate).get()??>
-            <#assign position = attendee.getPosition()>
-            <#if position.loadOrganization(context).get()??>
-              <#assign organization = position.getOrganization()>
+          <#assign position = (attendee.loadPositionByDate(context, report.engagementDate).get())!>
+          <#if position.uuid??>
+            <#assign organization = (position.loadOrganization(context).get())!>
+            <#if organization.uuid??>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
