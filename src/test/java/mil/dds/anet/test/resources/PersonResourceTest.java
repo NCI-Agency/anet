@@ -401,43 +401,90 @@ public class PersonResourceTest extends AbstractResourceTest {
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
     assertThat(org.getUuid()).isNotNull();
 
-    final PositionInput newPosInput =
-        PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
-            .withName("Test Position").withOrganization(getOrganizationInput(org))
-            .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
-    final Position retPos = withCredentials(adminUser,
-        t -> mutationExecutor.createPosition(POSITION_FIELDS, newPosInput));
-    assertThat(retPos).isNotNull();
-    assertThat(retPos.getUuid()).isNotNull();
+    final PositionInput newPrimaryPositionInput = PositionInput.builder()
+        .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
+        .withName(
+            "A Test Position created by PersonResourceTest for testing primary position de-assigment")
+        .withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+    final Position newPrimaryPosition = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, newPrimaryPositionInput));
+    assertThat(newPrimaryPosition).isNotNull();
+    assertThat(newPrimaryPosition.getUuid()).isNotNull();
 
     final UserInput newUserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
     final PersonInput newPersonInput = PersonInput.builder().withName("Namey McNameface")
         .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUserInput)).build();
-    final Person retPerson =
+    final Person newUserForTestInactivation =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput));
-    assertThat(retPerson).isNotNull();
-    assertThat(retPerson.getUuid()).isNotNull();
-    assertThat(retPerson.getStatus()).isEqualTo(Status.ACTIVE);
-    assertThat(getDomainUsername(retPerson)).isEqualTo(getDomainUsername(newPersonInput));
-    assertThat(retPerson.getUser()).isEqualTo(newPersonInput.getUser());
+    assertThat(newUserForTestInactivation).isNotNull();
+    assertThat(newUserForTestInactivation.getUuid()).isNotNull();
+    assertThat(newUserForTestInactivation.getStatus()).isEqualTo(Status.ACTIVE);
+    assertThat(getDomainUsername(newUserForTestInactivation))
+        .isEqualTo(getDomainUsername(newPersonInput));
+    assertThat(newUserForTestInactivation.getUser()).isEqualTo(newPersonInput.getUser());
 
     // Put the person in this position
-    final Integer nrAssigned = withCredentials(adminUser, t -> mutationExecutor
-        .putPersonInPosition("", getPersonInput(retPerson), null, true, retPos.getUuid()));
+    final Integer nrAssigned =
+        withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+            getPersonInput(newUserForTestInactivation), null, true, newPrimaryPosition.getUuid()));
     assertThat(nrAssigned).isOne();
+    // Give him also additional position to make sure he is removed from it too
+    final PositionInput newNonPrimaryPositionInput = PositionInput.builder().withName(
+        "A Test Position created by PersonResourceTest for testing non primary position de-assigment")
+        .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+        .withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
 
-    retPerson.setStatus(Status.INACTIVE);
-    final Integer nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePerson("", false, getPersonInput(retPerson)));
+    final Position newNonPrimaryPosition = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, newNonPrimaryPositionInput));
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(newUserForTestInactivation), null, false, newNonPrimaryPosition.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
-    final Person retPerson2 =
-        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, retPerson.getUuid()));
-    assertThat(retPerson2.getStatus()).isEqualTo(Status.INACTIVE);
-    assertThat(getDomainUsername(retPerson2)).isEqualTo(getDomainUsername(retPerson));
-    assertThat(retPerson2.getUser()).isEqualTo(retPerson.getUser());
-    assertThat(retPerson2.getPosition()).isNull();
+    newUserForTestInactivation.setStatus(Status.INACTIVE);
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(newUserForTestInactivation)));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    final Person updateNewUserForTestInactivation = withCredentials(adminUser,
+        t -> queryExecutor.person(FIELDS, newUserForTestInactivation.getUuid()));
+    assertThat(updateNewUserForTestInactivation.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(getDomainUsername(updateNewUserForTestInactivation))
+        .isEqualTo(getDomainUsername(newUserForTestInactivation));
+    assertThat(updateNewUserForTestInactivation.getUser())
+        .isEqualTo(newUserForTestInactivation.getUser());
+    assertThat(updateNewUserForTestInactivation.getPosition()).isNull();
+    assertThat(updateNewUserForTestInactivation.getAdditionalPositions()).isNull();
+    // Get the positions and make sure currentPersonUuid = null
+    final Position updatedNewPrimaryPosition = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, newPrimaryPosition.getUuid()));
+    assertThat(updatedNewPrimaryPosition.getPerson()).isNull();
+    final Position updatedNewNonPrimaryPosition = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, newNonPrimaryPosition.getUuid()));
+    assertThat(updatedNewNonPrimaryPosition.getPerson()).isNull();
+
+    // Now test with somebody who only has additional position
+    final UserInput newUserInput2 =
+        UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
+    final PersonInput newPersonInput2 = PersonInput.builder().withName("Namey McNameface II")
+        .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUserInput2)).build();
+    final Person newUserForTestInactivation2 =
+        withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput2));
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(newUserForTestInactivation2), null, false, newNonPrimaryPosition.getUuid()));
+    assertThat(nrUpdated).isEqualTo(1);
+    newUserForTestInactivation2.setStatus(Status.INACTIVE);
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updatePerson("", false, getPersonInput(newUserForTestInactivation2)));
+    assertThat(nrUpdated).isEqualTo(1);
+    final Person updateNewUserForTestInactivation2 = withCredentials(adminUser,
+        t -> queryExecutor.person(FIELDS, newUserForTestInactivation2.getUuid()));
+    assertThat(updateNewUserForTestInactivation2.getAdditionalPositions()).isNull();
+    final Position updatedNewNonPrimaryPosition2 = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, newNonPrimaryPosition.getUuid()));
+    assertThat(updatedNewNonPrimaryPosition2.getPerson()).isNull();
   }
 
   @Test

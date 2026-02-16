@@ -170,17 +170,15 @@ public class PersonResource {
 
     // Automatically remove people from a position if they are inactive.
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())) {
-      final Position existingPos = DaoUtils.getPosition(existing);
-      if (existingPos != null) {
-        // A user can reset 'themselves' if the account was incorrect ("This is not me")
-        if (!user.getUuid().equals(p.getUuid())) {
-          // Otherwise needs to be at least superuser
-          AuthUtils.assertSuperuser(user);
-        }
-        AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
-            p, user);
-        positionDao.removePersonFromPositions(p.getUuid(), existingPos.getUuid());
+      // A user can reset 'themselves' if the account was incorrect ("This is not me")
+      if (!user.getUuid().equals(p.getUuid())) {
+        // Otherwise needs to be at least superuser
+        AuthUtils.assertSuperuser(user);
       }
+      final Position userPrimaryPosition = DaoUtils.getPosition(existing);
+      int numPositions = positionDao.removePersonFromPositions(p.getUuid(), userPrimaryPosition);
+      AnetAuditLogger.log("Person {} removed from {} positions by {} because they are now inactive",
+          p, numPositions, user);
     }
 
     p.setBiography(
