@@ -6,12 +6,13 @@
 </head>
 <body>
 <#include "common/securityBanner.ftlh">
+<#import "common/formatDate.ftlh" as fd>
 <#include "common/reportAuthors.ftlh">
 
 <p>Your report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent!}</a>, changes have been requested by ${rejector.rank!} ${rejector.name}. The following comment was provided:</p>
 <p>"${comment.text}"</p>
 
-<p><strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}</p>
+<p><strong>Engagement date and location:</strong> <@fd.formatDate dateFormatter=engagementDateFormatter timestamp=report.engagementDate /> @ ${(report.loadLocation(context).get().name)!}</p>
 
 <p>You can edit and re-submit your report by <a href="${serverUrl}/reports/${report.uuid}">clicking here</a>.</p>
 

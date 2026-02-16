@@ -6,13 +6,14 @@
 </head>
 <body>
 <#include "common/securityBanner.ftlh">
+<#import "common/formatDate.ftlh" as fd>
 
 <#assign rank = person.getRank()>
 <#assign name = person.getName()>
 <p>${rank} ${name},</p>
 
 <#assign endDate = person.getEndOfTourDate()>
-Your ANET end of tour date is ${(dateFormatter.format(endDate))!}. On this date, your ANET profile will be inactivated and you will no longer be able to use ANET.
+Your ANET end of tour date is <@fd.formatDate dateFormatter=dateFormatter timestamp=endDate />. On this date, your ANET profile will be inactivated and you will no longer be able to use ANET.
 
 If your end of tour is correct, no action is required.
 

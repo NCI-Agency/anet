@@ -6,6 +6,7 @@
 </head>
 <body>
 <#include "common/securityBanner.ftlh">
+<#import "common/formatDate.ftlh" as fd>
 
 <p>Dear ${approvalStepName},</p>
 
@@ -95,7 +96,7 @@
 </div>
 
 <div>
-  <strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
+  <strong>Engagement date and location:</strong> <@fd.formatDate dateFormatter=engagementDateFormatter timestamp=report.engagementDate /> @ ${(report.loadLocation(context).get().name)!}
 </div>
 
 <#if engagementsIncludeTimeAndDuration>
