@@ -1,8 +1,12 @@
 package mil.dds.anet.emails;
 
 import java.util.Map;
+import java.util.Objects;
+import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import org.apache.commons.lang3.StringUtils;
 
 public class ReportEmail implements AnetEmailAction {
@@ -33,6 +37,16 @@ public class ReportEmail implements AnetEmailAction {
     context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
     context.put("sender", sender);
     context.put("comment", comment);
+    // Override the classification
+    final AnetDictionary dict = ApplicationContextProvider.getDictionary();
+    final var siteClassification = ConfidentialityRecord.getConfidentialityLabelForChoice(dict,
+        (String) dict.getDictionaryEntry("siteClassification"));
+    final var reportClassification =
+        ConfidentialityRecord.getConfidentialityLabelForChoice(dict, r.getClassification());
+    final var classification = Objects.requireNonNullElse(reportClassification, siteClassification);
+    context.put("SECURITY_BANNER_CLASSIFICATION",
+        ConfidentialityRecord.create(classification).toString());
+    context.put("SECURITY_BANNER_COLOR", classification.get("color"));
 
     return context;
   }
