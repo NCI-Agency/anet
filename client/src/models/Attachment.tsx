@@ -1,5 +1,6 @@
 import { gqlAllAttachmentFields } from "constants/GraphQLDefinitions"
 import Model from "components/Model"
+import React from "react"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -59,6 +60,18 @@ export default class Attachment extends Model {
     if (typeof displayCallback === "function") {
       return displayCallback(this)
     }
-    return this.caption || this.fileName
+
+    return (
+      <span className="d-inline-flex flex-column align-middle">
+        {this.classification && (
+          <span className="attachment-classification">
+            {`[${utils.getConfidentialityLabelForChoice(this.classification)}]`}
+          </span>
+        )}
+        <span className="attachment-caption">
+          {this.caption || this.fileName}
+        </span>
+      </span>
+    )
   }
 }

@@ -50,7 +50,6 @@ const AttachmentTable = ({
             <tr>
               <th>Content</th>
               <th>Caption</th>
-              <th>{Settings.confidentialityLabel.label}</th>
               <th>Used In</th>
               {showOwner && <th>Owner</th>}
               <th>Uploaded</th>
@@ -79,11 +78,6 @@ const AttachmentTable = ({
                       model={attachment}
                       showIcon={false}
                     />
-                  </td>
-                  <td>
-                    {utils.getConfidentialityLabelForChoice(
-                      attachment.classification
-                    )}
                   </td>
                   <td>
                     <AttachmentRelatedObjectsTable
