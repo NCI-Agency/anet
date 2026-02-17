@@ -109,6 +109,10 @@ dependencyManagement {
 	}
 }
 
+configurations {
+	mockitoAgent
+}
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
@@ -183,6 +187,10 @@ dependencies {
 
 	testImplementation "org.junit.jupiter:junit-jupiter"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+	mockitoAgent("org.mockito:mockito-core") {
+		transitive = false
+	}
 }
 
 configurations.all {
@@ -195,6 +203,7 @@ configurations.all {
 
 test {
 	useJUnitPlatform()
+	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 	jacoco {
 		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
 	}
