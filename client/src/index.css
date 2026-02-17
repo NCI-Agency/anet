@@ -217,24 +217,6 @@ textarea.form-control {
   height: 34px;
 }
 
-.shortcut-list {
-  margin-top: -4px;
-}
-
-.shortcut-list .list-group-item {
-  text-align: left;
-  white-space: initial;
-  padding: 2px;
-}
-
-.shortcut-list .list-group-item .btn {
-  margin-right: 5px;
-}
-
-.shortcut-list .list-group-item .btn:focus {
-  box-shadow: none;
-}
-
 a.btn {
   text-decoration: none;
 }
