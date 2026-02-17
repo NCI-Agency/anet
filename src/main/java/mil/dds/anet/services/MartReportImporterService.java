@@ -122,26 +122,30 @@ public class MartReportImporterService implements IMartReportImporterService {
       query.setReportUuid(reportDto.getUuid());
       final AnetBeanList<MartImportedReport> existingMartImportedReportSequences =
           martImportedReportDao.search(query);
-
-      if (existingMartImportedReportSequences.getTotalCount() == 0) {
+      final boolean noExistingEntriesForMartReport =
+          existingMartImportedReportSequences.getList().isEmpty();
+      if (noExistingEntriesForMartReport) {
         // New report, import
         logger.info("Report with UUID={} will be imported", reportDto.getUuid());
         processReportInfo(reportDto, newMartImportedReport, attachments);
         martImportedReportDao.insert(newMartImportedReport);
-      } else if (existingMartImportedReportSequences.getList().getFirst()
-          .getState() != MartImportedReport.State.SUBMITTED_OK) {
-        // This report was last marked as failed or missing earlier, re-import
-        logger.info("Report with UUID={} will be imported", reportDto.getUuid());
-        processReportInfo(reportDto, newMartImportedReport, attachments);
-        if (Objects.equals(existingMartImportedReportSequences.getList().getFirst().getSequence(),
-            newMartImportedReport.getSequence())) {
-          // Replace existing import record
-          martImportedReportDao.delete(existingMartImportedReportSequences.getList().getFirst());
-        }
-        martImportedReportDao.insert(newMartImportedReport);
       } else {
-        // It was successfully imported, so it is a duplicate, do not import again
-        logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
+        final var firstMartImportedReportEntry =
+            existingMartImportedReportSequences.getList().getFirst();
+        if (firstMartImportedReportEntry.getState() == MartImportedReport.State.NOT_RECEIVED) {
+          // This report was last marked as failed or missing earlier, re-import
+          logger.info("Report with UUID={} will be imported", reportDto.getUuid());
+          processReportInfo(reportDto, newMartImportedReport, attachments);
+          if (Objects.equals(firstMartImportedReportEntry.getSequence(),
+              newMartImportedReport.getSequence())) {
+            // Replace existing import record
+            martImportedReportDao.delete(firstMartImportedReportEntry);
+          }
+          martImportedReportDao.insert(newMartImportedReport);
+        } else {
+          // It was successfully imported, so it is a duplicate, do not import again
+          logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
+        }
       }
     } catch (Exception e) {
       logger.error("Error loading MartImportedReport from {}", REPORT_JSON_ATTACHMENT, e);
@@ -309,13 +313,14 @@ public class MartReportImporterService implements IMartReportImporterService {
         .toList(), anetReport, errors);
 
     // Complete the MART imported report record
+    final ReportPerson reportPerson = anetReport.getReportPeople().getFirst();
     martImportedReport.setReport(anetReport);
-    martImportedReport.setPerson(anetReport.getReportPeople().getFirst());
+    martImportedReport.setPerson(reportPerson);
 
     // Check errors to determine whether to submit or not and marImportedReport state
     if (errors.isEmpty()) {
       // All good, submit without warnings
-      reportDao.submit(anetReport, anetReport.getReportPeople().getFirst());
+      reportDao.submit(anetReport, reportPerson);
       martImportedReport.setState(MartImportedReport.State.SUBMITTED_OK);
     } else {
       final String errorMsg = String.format("While importing report %s:<ul><li>%s</li></ul>",
@@ -324,12 +329,12 @@ public class MartReportImporterService implements IMartReportImporterService {
       // Also add a comment to the report with the errors
       Comment comment = new Comment();
       comment.setText(errorMsg);
-      comment.setAuthor(anetReport.getReportPeople().getFirst());
+      comment.setAuthor(reportPerson);
       comment.setReportUuid(anetReport.getUuid());
       commentDao.insert(comment);
       // Submit the report only if the submitter organization is there
       if (anetReport.getAdvisorOrg() != null) {
-        reportDao.submit(anetReport, anetReport.getReportPeople().getFirst());
+        reportDao.submit(anetReport, reportPerson);
         martImportedReport.setState(MartImportedReport.State.SUBMITTED_WARNINGS);
       } else {
         martImportedReport.setState(MartImportedReport.State.NOT_SUBMITTED);
@@ -364,10 +369,10 @@ public class MartReportImporterService implements IMartReportImporterService {
     }
     // Try to find the person/s with the email
     final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
-    final List<ReportPerson> reportPeople = new ArrayList<>();
     final Person personForReport;
+    final boolean isNewPerson = matchingPersons.isEmpty();
 
-    if (matchingPersons.isEmpty()) {
+    if (isNewPerson) {
       // This is a new person -> CREATE from MART report information
       personForReport = createNewPerson(martReport, errors);
       createPositionForPerson(organizationForReport, martReport.getPositionName(), personForReport);
@@ -395,10 +400,8 @@ public class MartReportImporterService implements IMartReportImporterService {
             martReport.getPositionName()));
       }
     }
-    // Add MART person as author
-    reportPeople.add(createReportPerson(personForReport));
-    // Assign report people
-    anetReport.setReportPeople(reportPeople);
+    // Assign report people with the MART author
+    anetReport.setReportPeople(List.of(createReportPerson(personForReport)));
     // Set advisor organization
     anetReport.setAdvisorOrg(organizationForReport);
   }
