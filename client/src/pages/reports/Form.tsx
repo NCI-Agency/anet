@@ -233,6 +233,136 @@ function getEventMinDate(eventStartDate?: Date) {
     : moment(eventStartDate).startOf("day").toDate()
 }
 
+type ApplySuggestionDetail = {
+  type?: string
+  fieldId?: string
+  fieldLabel?: string
+  value?: string
+  requestId?: string
+  source?: string
+}
+
+function normalizeFieldKey(value?: string) {
+  return (value ?? "")
+    .toString()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+}
+
+function resolveReportFieldName(
+  detail: ApplySuggestionDetail,
+  values: Record<string, any> | undefined,
+  aliasMap: Map<string, string>
+) {
+  if (!detail) {
+    return null
+  }
+
+  const direct = typeof detail.fieldId === "string" ? detail.fieldId : ""
+  if (
+    direct &&
+    values &&
+    Object.prototype.hasOwnProperty.call(values, direct)
+  ) {
+    return direct
+  }
+
+  const targetKey = normalizeFieldKey(detail.fieldId || detail.fieldLabel)
+  if (!targetKey) {
+    return null
+  }
+
+  const alias = aliasMap.get(targetKey)
+  if (alias && values && Object.prototype.hasOwnProperty.call(values, alias)) {
+    return alias
+  }
+
+  if (values) {
+    for (const key of Object.keys(values)) {
+      if (normalizeFieldKey(key) === targetKey) {
+        return key
+      }
+    }
+  }
+
+  return alias ?? null
+}
+
+type ReportApplySuggestionListenerProps = {
+  enabled: boolean
+  values?: Record<string, any>
+  aliasMap: Map<string, string>
+  counterConfig: Record<string, { id: string; maxLength: number }>
+  setFieldTouched: (
+    field: string,
+    touched: boolean,
+    shouldValidate?: boolean
+  ) => void
+  setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
+  validateField: (field: string) => void
+}
+
+const ReportApplySuggestionListener = ({
+  enabled,
+  values,
+  aliasMap,
+  counterConfig,
+  setFieldTouched,
+  setFieldValue,
+  validateField
+}: ReportApplySuggestionListenerProps) => {
+  useEffect(() => {
+    if (!enabled) {
+      return
+    }
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<ApplySuggestionDetail>).detail
+      if (!detail || detail.type !== "anet.applySuggestion") {
+        return
+      }
+      if (typeof detail.value !== "string") {
+        return
+      }
+
+      const fieldName = resolveReportFieldName(detail, values, aliasMap)
+      if (!fieldName) {
+        return
+      }
+
+      setFieldTouched(fieldName, true, false)
+      setFieldValue(fieldName, detail.value, false)
+      validateField(fieldName)
+
+      const counter = counterConfig[fieldName]
+      if (counter) {
+        const charsLeftElem = document.getElementById(counter.id)
+        if (charsLeftElem) {
+          charsLeftElem.innerHTML = String(
+            counter.maxLength - detail.value.length
+          )
+        }
+      }
+    }
+
+    window.addEventListener("anet-apply-suggestion", handler as EventListener)
+    return () =>
+      window.removeEventListener(
+        "anet-apply-suggestion",
+        handler as EventListener
+      )
+  }, [
+    enabled,
+    values,
+    aliasMap,
+    counterConfig,
+    setFieldTouched,
+    setFieldValue,
+    validateField
+  ])
+
+  return null
+}
+
 const ReportForm = ({
   pageDispatchers,
   edit = false,
@@ -292,9 +422,11 @@ const ReportForm = ({
         ?.map(t => t?.shortName || t?.longName || t?.uuid)
         .filter(Boolean) || []
     const keyOutcomes = Array.isArray(report.keyOutcomes)
-      ? report.keyOutcomes
-      : []
-    const nextSteps = Array.isArray(report.nextSteps) ? report.nextSteps : []
+      ? report.keyOutcomes.join("\n")
+      : (report.keyOutcomes ?? "")
+    const nextSteps = Array.isArray(report.nextSteps)
+      ? report.nextSteps.join("\n")
+      : (report.nextSteps ?? "")
 
     return {
       title: report.intent || "",
@@ -318,8 +450,8 @@ const ReportForm = ({
   const chatSuggestions = useMemo<ChatSuggestion[]>(
     () => [
       {
-        label: "Derive key outcomes",
-        prompt: "Derive key outcomes from the report information",
+        label: "Suggest key outcomes",
+        prompt: "Suggest key outcomes based on the report information",
         icon: "lightbulb",
         iconColor: "yellow"
       },
@@ -332,6 +464,21 @@ const ReportForm = ({
     ],
     []
   )
+
+  const reportFieldAliasMap = useMemo(() => {
+    const map = new Map<string, string>()
+    const reportFields = Settings.fields?.report ?? {}
+    Object.keys(reportFields).forEach(fieldName => {
+      const label = reportFields[fieldName]?.label
+      if (fieldName) {
+        map.set(normalizeFieldKey(fieldName), fieldName)
+      }
+      if (label) {
+        map.set(normalizeFieldKey(label), fieldName)
+      }
+    })
+    return map
+  }, [])
 
   const sendReportContextToAI = useCallback(
     (report: any) => {
@@ -689,14 +836,42 @@ const ReportForm = ({
           </>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
+        const nextStepsMaxLength = utils.getMaxTextFieldLength(
+          Settings.fields.report.nextSteps
+        )
+        const validateFieldHandler = validateFieldDebounced ?? validateField
+        const counterConfig = {
+          intent: {
+            id: "intentCharsLeft",
+            maxLength: Settings.maxTextFieldLength
+          },
+          keyOutcomes: {
+            id: "keyOutcomesCharsLeft",
+            maxLength: Settings.maxTextFieldLength
+          },
+          nextSteps: {
+            id: "nextStepsCharsLeft",
+            maxLength: nextStepsMaxLength
+          }
+        }
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
 
         return (
           <AttachmentContext.Provider value={values}>
-            {Settings.chatAssistant.enabled && <ReportChatContextSync />}
             <div className="report-form">
               {Settings.chatAssistant.enabled && <ReportChatContextSync />}
+              {Settings.chatAssistant.enabled && (
+                <ReportApplySuggestionListener
+                  enabled={!isFutureEngagement}
+                  values={values}
+                  aliasMap={reportFieldAliasMap}
+                  counterConfig={counterConfig}
+                  setFieldTouched={setFieldTouched}
+                  setFieldValue={setFieldValue}
+                  validateField={validateFieldHandler}
+                />
+              )}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <MessagesWithConflict
                 error={saveError}
