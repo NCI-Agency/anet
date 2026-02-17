@@ -64,7 +64,6 @@ const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
 
 const buildPayload = (ctx?: any, suggestions?: ChatSuggestion[]) => {
   const payload = {
-    application: "ANET",
     businessObject: { ...(ctx ?? DEFAULT_CONTEXT) },
     suggestions: suggestions ?? DEFAULT_SUGGESTIONS
   }
@@ -172,6 +171,12 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         return
       }
       const type = typeof ev.data === "string" ? ev.data : ev.data?.type
+      if (type === "anet.applySuggestion") {
+        window.dispatchEvent(
+          new CustomEvent("anet-apply-suggestion", { detail: ev.data })
+        )
+        return
+      }
       if (type === "ready") {
         if (!isReady) {
           setIsReady(true)
