@@ -28,6 +28,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -893,6 +894,7 @@ public class Utils {
   }
 
   public static String replaceAnetLinks(String htmlString) {
+    final AnetDictionary dict = ApplicationContextProvider.getDictionary();
     final String anetServerUrl = ApplicationContextProvider.getConfig().getServerUrl();
     final Document reportDoc = Jsoup.parse(htmlString);
     final Elements anchors = reportDoc.getElementsByTag(ANCHOR_TAG);
@@ -901,7 +903,7 @@ public class Utils {
           anchor.getElementsByAttributeValueStarting(HREF_ATTRIBUTE, ANET_LINK_PREFIX);
       anetLinks.forEach(anetLink -> {
         final TypeUuidTuple typeUuidTuple = replaceHref(anetLink, anetServerUrl);
-        replaceInnerHtml(anetLink, anetServerUrl, typeUuidTuple.type());
+        replaceInnerHtml(anetLink, dict, anetServerUrl, typeUuidTuple.type());
       });
     });
     return reportDoc.body().html();
@@ -924,12 +926,13 @@ public class Utils {
     return tut;
   }
 
-  private static void replaceInnerHtml(Element anetLink, String anetServerUrl, String tableName) {
+  private static void replaceInnerHtml(Element anetLink, AnetDictionary dict, String anetServerUrl,
+      String tableName) {
     final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(tableName);
     final TypeUuidTuple tut = getTypeUuidTuple(anetLink.html().split(":", 2));
     anetLink.empty();
-    anetLink
-        .appendChild(getInnerNode(daoEntityNameTuple.dao(), anetServerUrl, tut.type(), tut.uuid()));
+    anetLink.appendChild(
+        getInnerNode(daoEntityNameTuple.dao(), dict, anetServerUrl, tut.type(), tut.uuid()));
   }
 
   private record DaoEntityNameTuple(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
@@ -959,7 +962,7 @@ public class Utils {
   }
 
   private static Node getInnerNode(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
-      String anetServerUrl, String objectType, String objectUuid) {
+      AnetDictionary dict, String anetServerUrl, String objectType, String objectUuid) {
     if (dao != null) {
       final AbstractAnetBean obj = dao.getByUuid(objectUuid);
       if (obj == null) {
@@ -969,9 +972,15 @@ public class Utils {
         return new TextNode(subscribableObject.getObjectLabel());
       }
       if (obj instanceof Attachment attachment) {
+        final var attachmentClassification = ConfidentialityRecord
+            .getConfidentialityLabelForChoice(dict, attachment.getClassification());
+        final var classification = attachmentClassification == null ? ""
+            : String.format("[%s]", ConfidentialityRecord.create(attachmentClassification));
         final String label = attachment.getObjectLabel();
         final Element innerNode =
             new Element(SPAN_TAG).classNames(Set.of("rich-text-image-wrapper"));
+        innerNode.appendChild(new Element(SPAN_TAG)
+            .classNames(Set.of("rich-text-image-classification")).text(classification));
         innerNode.appendChild(new Element("img").classNames(Set.of("rich-text-image"))
             .attr("src", String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
             .attr("alt", label));
