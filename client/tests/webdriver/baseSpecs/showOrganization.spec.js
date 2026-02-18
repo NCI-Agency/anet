@@ -184,6 +184,7 @@ describe("Show organization page", () => {
 
       // Move to the previous period, the inactive eventSeries should no longer be shown
       await ShowTask.gotoPreviousPeriod()
+      await browser.pause(500) // Wait for data retrieval
       const eventSeriesPrev = await ShowTask.getEventMatrixEventSeries()
       const eventSeriesPrevText = (
         await eventSeriesPrev.map(async es => await es.getText())
