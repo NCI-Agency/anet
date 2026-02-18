@@ -20,6 +20,8 @@ import Settings from "settings"
 import utils from "utils"
 import ExportFieldsPanel from "./ExportFieldsPanel"
 
+export const NAME_SYNC_MATRIX_PERIOD = "SYNC_MATRIX_PERIOD"
+export const CATEGORY_SYNC_MATRIX = "sync-matrix"
 export const CATEGORY_EXPORT = "export"
 
 const GQL_GET_PREFERENCES = gql`
