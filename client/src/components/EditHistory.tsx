@@ -466,7 +466,7 @@ const EditHistory = ({
                             </div>
                           )
                         })}
-                        <div className="submit-buttons">
+                        <div className="submit-buttons mt-3">
                           <div>
                             <Button
                               onClick={onHide}

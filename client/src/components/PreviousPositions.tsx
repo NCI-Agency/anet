@@ -20,40 +20,40 @@ function PreviousPositions({
   canEditHistory,
   action
 }: PreviousPositionsProps) {
-  return _isEmpty(previousPositions) ? (
-    <em>No positions found</em>
-  ) : (
-    <>
-      <Table id="previous-positions" striped hover responsive>
-        <thead>
-          <tr>
-            <th>Position</th>
-            <th>Dates</th>
-          </tr>
-        </thead>
-        <tbody>
-          {previousPositions.map((pp, idx) => (
-            <tr key={idx} id={`previousPosition_${idx}`}>
-              <td>
-                {showPrimaryFlag && pp.primary && (
-                  <Badge bg="primary">Primary</Badge>
-                )}
-                <LinkTo modelType="Position" model={pp.position} />
-              </td>
-              <td>
-                {moment(pp.startTime).format(
-                  Settings.dateFormats.forms.displayShort.date
-                )}{" "}
-                -{" "}
-                {pp.endTime &&
-                  moment(pp.endTime).format(
-                    Settings.dateFormats.forms.displayShort.date
-                  )}
-              </td>
+  return (
+    <div>
+      {!_isEmpty(previousPositions) && (
+        <Table id="previous-positions" striped hover responsive>
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th>Dates</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {previousPositions.map((pp, idx) => (
+              <tr key={idx} id={`previousPosition_${idx}`}>
+                <td>
+                  {showPrimaryFlag && pp.primary && (
+                    <Badge bg="primary">Primary</Badge>
+                  )}
+                  <LinkTo modelType="Position" model={pp.position} />
+                </td>
+                <td>
+                  {moment(pp.startTime).format(
+                    Settings.dateFormats.forms.displayShort.date
+                  )}{" "}
+                  -{" "}
+                  {pp.endTime &&
+                    moment(pp.endTime).format(
+                      Settings.dateFormats.forms.displayShort.date
+                    )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
       {canEditHistory && (
         <div className="w-100">
           <div className="float-end">
@@ -71,7 +71,7 @@ function PreviousPositions({
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }
 
