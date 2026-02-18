@@ -50,10 +50,10 @@ export const INSIGHTS = [
   REPORTS_BY_TASK,
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
+  PUBLISHED_REPORTS_OVER_TIME,
   PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS,
-  CADENCE_DASHBOARD,
-  PUBLISHED_REPORTS_OVER_TIME
+  CADENCE_DASHBOARD
 ]
 
 const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
@@ -119,8 +119,12 @@ export const INSIGHT_DETAILS = {
     searchProps: REPORT_SEARCH_PROPS,
     component: PublishedReportsOverTime,
     navTitle: "Reports Published Over Time",
-    title: ""
+    title: "Reports Published Over Time"
   }
+}
+
+function getCurrentDateTime() {
+  return moment().clone()
 }
 
 interface InsightsShowProps {
@@ -257,10 +261,6 @@ const InsightsShow = ({
     const maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, "days").clone()
-  }
-
-  function getCurrentDateTime() {
-    return moment().clone()
   }
 
   function deserializeCallback(objectType, filters, text) {

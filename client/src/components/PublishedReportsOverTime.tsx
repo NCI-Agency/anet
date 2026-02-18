@@ -11,6 +11,7 @@ import {
 } from "components/Page"
 import _escape from "lodash/escape"
 import moment from "moment"
+import { WEEK_PERIOD_FORMAT, WEEK_PERIOD_KEY } from "periodUtils"
 import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { useResizeDetector } from "react-resize-detector"
@@ -41,9 +42,6 @@ function resolveDateValue(value) {
   }
   if (typeof value === "number") {
     return moment().add(value, "milliseconds")
-  }
-  if (moment.isMoment(value)) {
-    return value.clone()
   }
   return moment(value)
 }
@@ -79,7 +77,7 @@ const PublishedReportsOverTime = ({
   )
   const reportQuery = useMemo(
     () => ({
-      ...(queryParams || {}),
+      ...queryParams,
       pageSize: 0
     }),
     [queryParams]
@@ -113,7 +111,7 @@ const PublishedReportsOverTime = ({
       const key =
         granularity === GRANULARITY.MONTH
           ? releasedAt.format("YYYY-MM")
-          : getWeekKey(releasedAt, rangeStart)
+          : getWeekKey(releasedAt)
       acc[key] = (acc[key] || 0) + 1
       return acc
     }, {})
@@ -133,38 +131,37 @@ const PublishedReportsOverTime = ({
     (total, period) => total + period.reportsCount,
     0
   )
-  const periodCount = graphData.length
-  const containerWidth = width || 0
-  const chartWidth = containerWidth
+  const chartWidth = width || 0
   const barPadding = 0.1
   const hasData = graphData.length > 0
+  const rangeStartOfYear = moment(rangeStart).startOf("year")
   const isCurrentYearClampedRange =
     hasRange &&
-    rangeStart.isSame(rangeStart.clone().startOf("year"), "day") &&
+    rangeStart.isSame(rangeStartOfYear, "day") &&
     displayRangeEnd.isSame(todayEnd, "day") &&
     rangeStart.isSame(todayEnd, "year")
   const isFullYearRange =
     hasRange &&
-    rangeStart.isSame(rangeStart.clone().startOf("year"), "day") &&
-    displayRangeEnd.isSame(displayRangeEnd.clone().endOf("year"), "day")
+    rangeStart.isSame(rangeStartOfYear, "day") &&
+    displayRangeEnd.isSame(moment(displayRangeEnd).endOf("year"), "day")
   const getShiftedRange = direction => {
     if (!hasRange) {
       return null
     }
-    let nextStart = rangeStart.clone().add(direction, "year")
-    let nextEnd = displayRangeEnd.clone().add(direction, "year")
+    let nextStart = moment(rangeStart).add(direction, "year")
+    let nextEnd = moment(displayRangeEnd).add(direction, "year")
     if (direction < 0 && isCurrentYearClampedRange) {
       nextStart = nextStart.startOf("year")
-      nextEnd = nextStart.clone().endOf("year")
+      nextEnd = moment(nextStart).endOf("year")
     } else if (direction > 0 && isFullYearRange) {
       nextStart = nextStart.startOf("year")
       if (nextStart.isSame(todayEnd, "year")) {
-        nextEnd = todayEnd.clone()
+        nextEnd = moment(todayEnd)
       } else {
-        nextEnd = nextStart.clone().endOf("year")
+        nextEnd = moment(nextStart).endOf("year")
       }
     } else if (direction > 0 && nextEnd.isAfter(todayEnd)) {
-      nextEnd = todayEnd.clone()
+      nextEnd = moment(todayEnd)
     }
     if (direction > 0 && nextStart.isAfter(todayEnd, "day")) {
       return null
@@ -172,25 +169,24 @@ const PublishedReportsOverTime = ({
     return { start: nextStart, end: nextEnd }
   }
 
-  const canGoNewer = Boolean(getShiftedRange(1))
+  const canGoNext = Boolean(getShiftedRange(1))
   const canGoPrevious = Boolean(getShiftedRange(-1))
-  const updateQueryParams = nextQueryParams => setQueryParams?.(nextQueryParams)
   useEffect(() => {
     if (!rangeEnd || !rangeEnd.isAfter(todayEnd)) {
       return
     }
-    updateQueryParams({
-      ...(queryParams || {}),
+    setQueryParams({
+      ...queryParams,
       releasedAtEnd: todayEnd.toISOString()
     })
-  }, [queryParams, rangeEnd, todayEnd])
+  }, [queryParams, rangeEnd, setQueryParams, todayEnd])
   const shiftRange = direction => {
     const shifted = getShiftedRange(direction)
     if (!shifted) {
       return
     }
-    updateQueryParams({
-      ...(queryParams || {}),
+    setQueryParams({
+      ...queryParams,
       releasedAtStart: shifted.start.toISOString(),
       releasedAtEnd: shifted.end.toISOString()
     })
@@ -215,10 +211,10 @@ const PublishedReportsOverTime = ({
             <div className="fw-semibold">{displayedRangeLabel}</div>
             <Button
               variant="outline-secondary"
-              disabled={!canGoNewer}
+              disabled={!canGoNext}
               onClick={() => shiftRange(1)}
             >
-              newer year <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
+              next year <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
             </Button>
           </div>
           <ButtonToggleGroup value={granularity} onChange={setGranularity}>
@@ -242,7 +238,9 @@ const PublishedReportsOverTime = ({
           <em>
             Select a Release Date range in search filters to view results.
           </em>
-        ) : hasData ? (
+        ) : !hasData ? (
+          <em>No reports found for the selected range.</em>
+        ) : (
           <>
             <div ref={ref} style={{ overflowX: "auto" }}>
               <BarChart
@@ -281,8 +279,6 @@ const PublishedReportsOverTime = ({
               </Table>
             </div>
           </>
-        ) : (
-          <em>No reports found for the selected range.</em>
         )}
       </div>
     </div>
@@ -290,16 +286,16 @@ const PublishedReportsOverTime = ({
 }
 
 const buildMonthlyPeriods = (rangeStart, rangeEnd) => {
-  const startOfFirstMonth = rangeStart.clone().startOf("month")
-  const startOfLastMonth = rangeEnd.clone().startOf("month")
+  const startOfFirstMonth = moment(rangeStart).startOf("month")
+  const startOfLastMonth = moment(rangeEnd).startOf("month")
   const totalMonths = startOfLastMonth.diff(startOfFirstMonth, "months") + 1
   return Array.from({ length: totalMonths }, (_, index) => {
-    const start = startOfFirstMonth.clone().add(index, "month").startOf("month")
-    const monthEnd = start.clone().endOf("month")
+    const start = moment(startOfFirstMonth).add(index, "month").startOf("month")
+    const monthEnd = moment(start).endOf("month")
     const isFirst = index === 0
     const isLast = index === totalMonths - 1
-    const periodStart = isFirst ? rangeStart.clone() : start
-    const periodEnd = isLast ? rangeEnd.clone() : monthEnd
+    const periodStart = isFirst ? moment(rangeStart) : start
+    const periodEnd = isLast ? moment(rangeEnd) : monthEnd
     return {
       periodKey: start.format("YYYY-MM"),
       label: start.format("MMM"),
@@ -311,22 +307,22 @@ const buildMonthlyPeriods = (rangeStart, rangeEnd) => {
 }
 
 const buildWeeklyPeriods = (rangeStart, rangeEnd) => {
-  const startOfRange = rangeStart.clone().startOf("day")
-  const endOfRange = rangeEnd.clone().startOf("day")
+  const startOfRange = moment(rangeStart).startOf(WEEK_PERIOD_KEY)
+  const endOfRange = moment(rangeEnd).startOf(WEEK_PERIOD_KEY)
   const totalWeeks = endOfRange.diff(startOfRange, "weeks") + 1
   return Array.from({ length: totalWeeks }, (_, index) => {
-    const start = startOfRange.clone().add(index, "weeks")
+    const start = moment(startOfRange).add(index, "weeks")
     const isFirst = index === 0
     const isLast = index === totalWeeks - 1
-    const periodStart = isFirst ? rangeStart.clone() : start.clone()
-    let periodEnd = start.clone().add(6, "days").endOf("day")
+    const periodStart = isFirst ? moment(rangeStart) : moment(start)
+    let periodEnd = moment(start).endOf(WEEK_PERIOD_KEY)
     if (isLast || periodEnd.isAfter(rangeEnd)) {
-      periodEnd = rangeEnd.clone()
+      periodEnd = moment(rangeEnd)
     }
-    const weekLabel = String(index + 1).padStart(2, "0")
+    const weekLabel = getWeekKey(periodStart)
     return {
-      periodKey: `W${weekLabel}`,
-      label: `W${weekLabel}`,
+      periodKey: weekLabel,
+      label: weekLabel,
       periodRange: `${periodStart.format("MMM D")} - ${periodEnd.format(
         "MMM D"
       )}`
@@ -334,13 +330,6 @@ const buildWeeklyPeriods = (rangeStart, rangeEnd) => {
   })
 }
 
-const getWeekKey = (releasedAt, rangeStart) => {
-  const weekIndex = releasedAt
-    .clone()
-    .startOf("day")
-    .diff(rangeStart.clone().startOf("day"), "weeks")
-  const weekLabel = String(weekIndex + 1).padStart(2, "0")
-  return `W${weekLabel}`
-}
+const getWeekKey = date => date.format(WEEK_PERIOD_FORMAT)
 
 export default PublishedReportsOverTime
