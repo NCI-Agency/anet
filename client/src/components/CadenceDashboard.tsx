@@ -1,6 +1,6 @@
 import {
   gqlAllAuthorizationGroupFields,
-  gqlAuthorizationGroupMembersWithEmailFields,
+  gqlAuthorizationGroupMembersFields,
   gqlEntityFieldsMap
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -8,10 +8,9 @@ import API from "api"
 import { AuthorizationGroupOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import EngagementsBetweenCommunitiesMatrix from "components/EngagementsBetweenCommunitiesMatrix"
-import { mapPageDispatchersToProps } from "components/Page"
+import Messages from "components/Messages"
 import { AuthorizationGroup } from "models"
 import React, { useEffect, useState } from "react"
-import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
 import COMMUNITIES_ICON from "resources/communities.png"
 import Settings from "settings"
@@ -32,10 +31,15 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           ${gqlEntityFieldsMap.Person}
         }
       }
-      ${gqlAuthorizationGroupMembersWithEmailFields}
+      ${gqlAuthorizationGroupMembersFields}
     }
   }
 `
+
+enum QueryKey {
+  ADVISORS = "advisors",
+  INTERLOCUTORS = "interlocutors"
+}
 
 const CadenceDashboard = () => {
   const navigate = useNavigate()
@@ -45,11 +49,9 @@ const CadenceDashboard = () => {
     useState<AuthorizationGroup | null>(null)
   const [authorizationGroupInterlocutors, setAuthorizationGroupInterlocutors] =
     useState<AuthorizationGroup | null>(null)
+  const [fetchError, setFetchError] = useState(null)
 
-  const updateSingleQueryParam = (
-    key: "advisors" | "interlocutors",
-    value: string | null
-  ) => {
+  const updateSingleQueryParam = (key: QueryKey, value?: string) => {
     const params = new URLSearchParams(location.search)
 
     if (value) {
@@ -64,35 +66,33 @@ const CadenceDashboard = () => {
   const handleChangeAuthorizationGroup = async (
     selected,
     setter,
-    type: "advisors" | "interlocutors"
+    type: QueryKey
   ) => {
+    setFetchError(null)
     if (!selected?.uuid) {
       setter(null)
-      updateSingleQueryParam(type, null)
+      updateSingleQueryParam(type)
       return
     }
 
     try {
-      const result = await API.client.query({
-        query: GQL_GET_AUTHORIZATION_GROUP,
-        variables: { uuid: selected.uuid },
-        fetchPolicy: "network-only"
+      const result = await API.query(GQL_GET_AUTHORIZATION_GROUP, {
+        uuid: selected.uuid
       })
-
-      if (result?.data?.authorizationGroup) {
-        setter(result.data.authorizationGroup)
-        updateSingleQueryParam(type, result.data.authorizationGroup.uuid)
+      if (result?.authorizationGroup) {
+        setter(result.authorizationGroup)
+        updateSingleQueryParam(type, result.authorizationGroup.uuid)
       }
     } catch (err) {
-      console.error("Failed to fetch authorization group", err)
+      setFetchError(err)
     }
   }
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
 
-    const advisorsUuid = params.get("advisors")
-    const interlocutorsUuid = params.get("interlocutors")
+    const advisorsUuid = params.get(QueryKey.ADVISORS)
+    const interlocutorsUuid = params.get(QueryKey.INTERLOCUTORS)
 
     if (
       advisorsUuid &&
@@ -102,7 +102,7 @@ const CadenceDashboard = () => {
       handleChangeAuthorizationGroup(
         { uuid: advisorsUuid },
         setAuthorizationGroupAdvisors,
-        "advisors"
+        QueryKey.ADVISORS
       )
     }
 
@@ -114,7 +114,7 @@ const CadenceDashboard = () => {
       handleChangeAuthorizationGroup(
         { uuid: interlocutorsUuid },
         setAuthorizationGroupInterlocutors,
-        "interlocutors"
+        QueryKey.INTERLOCUTORS
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,13 +122,11 @@ const CadenceDashboard = () => {
 
   return (
     <>
-      <div style={{ display: "flex", gap: "24px" }}>
-        <div style={{ flex: 1 }}>
-          <label
-            htmlFor="authorizationGroupAdvisors"
-            style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}
-          >
-            Select the community with advisors
+      <Messages error={fetchError} />
+      <div className="d-flex" style={{ gap: "24px" }}>
+        <div className="flex-fill">
+          <label htmlFor="authorizationGroupAdvisors" className="form-label">
+            {`Select the community with ${QueryKey.ADVISORS}`}
           </label>
           <AdvancedSingleSelect
             fieldName="authorizationGroupAdvisors"
@@ -144,18 +142,18 @@ const CadenceDashboard = () => {
               handleChangeAuthorizationGroup(
                 selected,
                 setAuthorizationGroupAdvisors,
-                "advisors"
+                QueryKey.ADVISORS
               )
             }
           />
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div className="flex-fill">
           <label
             htmlFor="authorizationGroupInterlocutors"
-            style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}
+            className="form-label"
           >
-            Select the community with interlocutors
+            {`Select the community with ${QueryKey.INTERLOCUTORS}`}
           </label>
           <AdvancedSingleSelect
             fieldName="authorizationGroupInterlocutors"
@@ -171,13 +169,12 @@ const CadenceDashboard = () => {
               handleChangeAuthorizationGroup(
                 selected,
                 setAuthorizationGroupInterlocutors,
-                "interlocutors"
+                QueryKey.INTERLOCUTORS
               )
             }
           />
         </div>
       </div>
-
       {authorizationGroupAdvisors && authorizationGroupInterlocutors && (
         <EngagementsBetweenCommunitiesMatrix
           authorizationGroupAdvisors={authorizationGroupAdvisors}
@@ -187,4 +184,4 @@ const CadenceDashboard = () => {
     </>
   )
 }
-export default connect(null, mapPageDispatchersToProps)(CadenceDashboard)
+export default CadenceDashboard

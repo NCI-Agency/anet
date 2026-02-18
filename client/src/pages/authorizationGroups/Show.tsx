@@ -72,6 +72,7 @@ const AuthorizationGroupShow = ({
     matrixAuthorizationGroupInterlocutors,
     setMatrixAuthorizationGroupInterlocutors
   ] = useState(undefined)
+  const [fetchError, setFetchError] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
     { uuid }
@@ -117,24 +118,21 @@ const AuthorizationGroupShow = ({
   )
 
   const handleChangeAuthorizationGroupInterlocutors = async selected => {
-    if (!selected) {
+    setFetchError(null)
+    if (!selected?.uuid) {
       setMatrixAuthorizationGroupInterlocutors(null)
       return
     }
 
-    const uuid = selected.uuid
-
     try {
-      const result = await API.client.query({
-        query: GQL_GET_AUTHORIZATION_GROUP,
-        variables: { uuid },
-        fetchPolicy: "network-only"
+      const result = await API.query(GQL_GET_AUTHORIZATION_GROUP, {
+        uuid: selected.uuid
       })
-      if (result?.data?.authorizationGroup) {
-        setMatrixAuthorizationGroupInterlocutors(result.data.authorizationGroup)
+      if (result?.authorizationGroup) {
+        setMatrixAuthorizationGroupInterlocutors(result.authorizationGroup)
       }
     } catch (err) {
-      console.error("Failed to fetch authorization group", err)
+      setFetchError(err)
     }
   }
 
@@ -255,10 +253,8 @@ const AuthorizationGroupShow = ({
           id="engagementsBetweenCommunitiesMatrix"
           title={`Engagements matrix for ${authorizationGroup.name}`}
         >
-          <label
-            htmlFor="authorizationGroup"
-            style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}
-          >
+          <Messages error={fetchError} />
+          <label htmlFor="authorizationGroup" className="form-label">
             Select the community with interlocutors
           </label>
           <AdvancedSingleSelect

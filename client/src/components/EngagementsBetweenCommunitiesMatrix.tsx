@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client"
+import styled from "@emotion/styled"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -14,11 +15,9 @@ import Settings from "settings"
 
 const GET_ENGAGEMENTS_BETWEEN_COMMUNITIES = gql`
   query (
-    $getEngagementsBetweenCommunitiesQuery: EngagementsBetweenCommunitiesSearchQueryInput
+    $engagementsBetweenCommunitiesQuery: EngagementsBetweenCommunitiesSearchQueryInput
   ) {
-    getEngagementsBetweenCommunities(
-      query: $getEngagementsBetweenCommunitiesQuery
-    ) {
+    engagementsBetweenCommunities(query: $engagementsBetweenCommunitiesQuery) {
       engagementDate
       reportUuid
       advisor {
@@ -31,6 +30,51 @@ const GET_ENGAGEMENTS_BETWEEN_COMMUNITIES = gql`
       }
     }
   }
+`
+
+function getEngagementColor(engagementDate: string): string {
+  const engagementMoment = moment(engagementDate)
+  const now = moment()
+  const monthsAgo = now.diff(engagementMoment, "months")
+
+  if (monthsAgo < 3) {
+    return "#28a745"
+  } else if (monthsAgo < 6) {
+    return "#6c757d"
+  } else if (monthsAgo < 12) {
+    return "#ffc107"
+  } else if (monthsAgo < 24) {
+    return "#fd7e14"
+  } else {
+    return "#dc3545"
+  }
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace("#", "")
+  const r = Number.parseInt(normalized.slice(0, 2), 16)
+  const g = Number.parseInt(normalized.slice(2, 4), 16)
+  const b = Number.parseInt(normalized.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+enum EngagementType {
+  PLANNED = "planned",
+  RECENT = "recent"
+}
+
+const GradientDiv = styled.div`
+  background-image: ${props =>
+    `linear-gradient(90deg, ${props.engagementColor} 0%, ${props.engagementFade} 25%, ${props.engagementFade} 75%, ${props.engagementColor} 100%)`};
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+`
+
+const WrappedTh = styled.th`
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 `
 
 interface EngagementsBetweenCommunitiesMatrixProps {
@@ -52,11 +96,12 @@ const EngagementsBetweenCommunitiesMatrix = ({
 
   useEffect(() => {
     async function fetchEngagementsBetweenCommunities(
-      getEngagementsBetweenCommunitiesQuery
+      engagementsBetweenCommunitiesQuery
     ) {
+      setFetchError(null)
       try {
         return await API.query(GET_ENGAGEMENTS_BETWEEN_COMMUNITIES, {
-          getEngagementsBetweenCommunitiesQuery
+          engagementsBetweenCommunitiesQuery
         })
       } catch (error) {
         setFetchError(error)
@@ -69,18 +114,16 @@ const EngagementsBetweenCommunitiesMatrix = ({
       setInterlocutorEntities(
         authorizationGroupInterlocutors.authorizationGroupRelatedObjects
       )
-      const getEngagementsBetweenCommunitiesQuery = {
+      const engagementsBetweenCommunitiesQuery = {
         advisorAuthorizationGroupUuid: authorizationGroupAdvisors.uuid,
         interlocutorAuthorizationGroupUuid:
           authorizationGroupInterlocutors.uuid,
-        plannedEngagements: plannedEngagements
+        plannedEngagements
       }
       fetchEngagementsBetweenCommunities(
-        getEngagementsBetweenCommunitiesQuery
+        engagementsBetweenCommunitiesQuery
       ).then(response => {
-        setEngagementsBetweenCommunities(
-          response.getEngagementsBetweenCommunities
-        )
+        setEngagementsBetweenCommunities(response.engagementsBetweenCommunities)
       })
     }
   }, [
@@ -88,32 +131,6 @@ const EngagementsBetweenCommunitiesMatrix = ({
     authorizationGroupInterlocutors,
     plannedEngagements
   ])
-
-  function getEngagementColor(engagementDate: string): string {
-    const engagementMoment = moment(engagementDate)
-    const now = moment()
-    const monthsAgo = now.diff(engagementMoment, "months")
-
-    if (monthsAgo < 3) {
-      return "#28a745"
-    } else if (monthsAgo < 6) {
-      return "#6c757d"
-    } else if (monthsAgo < 12) {
-      return "#ffc107"
-    } else if (monthsAgo < 24) {
-      return "#fd7e14"
-    } else {
-      return "#dc3545"
-    }
-  }
-
-  function hexToRgba(hex: string, alpha: number): string {
-    const normalized = hex.replace("#", "")
-    const r = parseInt(normalized.slice(0, 2), 16)
-    const g = parseInt(normalized.slice(2, 4), 16)
-    const b = parseInt(normalized.slice(4, 6), 16)
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`
-  }
 
   function getEngagement(advisorEntityUuid, interlocutorEntityUuid) {
     const match = engagementsBetweenCommunities.find(
@@ -133,56 +150,47 @@ const EngagementsBetweenCommunitiesMatrix = ({
       )
     })
     return (
-      <div
-        style={{
-          backgroundImage: `linear-gradient(90deg, ${engagementColor} 0%, ${engagementFade} 25%, ${engagementFade} 75%, ${engagementColor} 100%)`,
-          padding: "0.25rem 0.5rem",
-          borderRadius: "4px",
-          textAlign: "center"
-        }}
+      <GradientDiv
+        engagementColor={engagementColor}
+        engagementFade={engagementFade}
       >
         <LinkTo modelType="Report" model={report} />
-      </div>
+      </GradientDiv>
     )
   }
 
   return (
     <>
       <Messages error={fetchError} />
-      <div
-        style={{
-          display: "flex",
-          marginTop: "1rem"
-        }}
-      >
-        <div style={{ textAlign: "left" }}>
-          <label
-            htmlFor="dashboard-type"
-            style={{
-              fontWeight: "bold",
-              marginRight: "0.5rem",
-              display: "block"
-            }}
-          >
+      <div className="d-flex mt-3">
+        <div className="text-start">
+          <label htmlFor="dashboard-type" className="form-label">
             Dashboard Type
           </label>
-
           <select
             id="dashboard-type"
-            value={plannedEngagements ? "planned" : "recent"}
-            onChange={e => setPlannedEngagements(e.target.value === "planned")}
+            value={
+              plannedEngagements
+                ? EngagementType.PLANNED
+                : EngagementType.RECENT
+            }
+            onChange={e =>
+              setPlannedEngagements(e.target.value === EngagementType.PLANNED)
+            }
             className="form-select"
-            style={{ width: "250px" }}
           >
-            <option value="recent">Most Recent Engagements</option>
-            <option value="planned">Planned Engagements</option>
+            <option value={EngagementType.RECENT}>
+              Most Recent Engagements
+            </option>
+            <option value={EngagementType.PLANNED}>Planned Engagements</option>
           </select>
         </div>
       </div>
-      <div style={{ clear: "both", marginTop: "1rem" }}>
+      <div className="clearfix mt-3">
         <div
           ref={scrollContainerRef}
-          style={{ overflowX: "auto", whiteSpace: "nowrap", width: "100%" }}
+          className="w-100"
+          style={{ overflowX: "auto", whiteSpace: "nowrap" }}
         >
           <Table
             className="event-matrix"
@@ -195,14 +203,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
               <tr id="event-series-table-header" className="table-primary">
                 <th />
                 {advisorEntities.map(advisorEntity => (
-                  <th
-                    key={advisorEntity.relatedObjectUuid}
-                    style={{
-                      whiteSpace: "normal",
-                      overflow: "anywhere",
-                      wordBreak: "break-word"
-                    }}
-                  >
+                  <WrappedTh key={advisorEntity.relatedObjectUuid}>
                     <LinkTo
                       modelType={advisorEntity.relatedObjectType}
                       model={{
@@ -210,7 +211,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
                         ...advisorEntity.relatedObject
                       }}
                     />
-                  </th>
+                  </WrappedTh>
                 ))}
               </tr>
               {_isEmpty(interlocutorEntities) ? (
@@ -224,13 +225,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
                       key={interlocutorEntity.relatedObjectUuid}
                       className="event-series-row"
                     >
-                      <td
-                        style={{
-                          whiteSpace: "normal",
-                          overflow: "anywhere",
-                          wordBreak: "break-word"
-                        }}
-                      >
+                      <WrappedTh>
                         <LinkTo
                           modelType={interlocutorEntity.relatedObjectType}
                           model={{
@@ -238,7 +233,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
                             ...interlocutorEntity.relatedObject
                           }}
                         />
-                      </td>
+                      </WrappedTh>
                       {advisorEntities.map(advisorEntity => (
                         <td
                           key={`${interlocutorEntity.relatedObjectUuid}-${advisorEntity.relatedObjectUuid}`}
