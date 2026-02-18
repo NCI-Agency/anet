@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
+import Settings from "../../../platform/node/settings"
 import AdvancedSearch from "../pages/advancedSearch.page"
 import Insights, { PUBLISHED_REPORTS_OVER_TIME } from "../pages/insights.page"
 
@@ -12,6 +13,7 @@ const TOTAL_REPORTS_SELECTOR = `//div[@id="${PUBLISHED_REPORTS_OVER_TIME}"]//div
 const CHART_ID = "reports_published_over_time"
 const BAR_SELECTOR = `#${CHART_ID} g.bars-group`
 const EXPECTED_PUBLISHED_RANGE = { min: 27, max: 29 }
+const WEEK_PERIOD_KEY = Settings.useISO8601 ? "isoWeek" : "week"
 
 describe("Published reports over time insight", () => {
   it("Should show the default release date range in the search summary", async () => {
@@ -147,8 +149,8 @@ function getExpectedPeriodCount(granularity) {
         .diff(startOfYear.clone().startOf("month"), "months") + 1
     )
   }
-  const startOfRange = startOfYear.clone().startOf("day")
-  const endOfRange = today.clone().startOf("day")
+  const startOfRange = startOfYear.clone().startOf(WEEK_PERIOD_KEY)
+  const endOfRange = today.clone().startOf(WEEK_PERIOD_KEY)
   return endOfRange.diff(startOfRange, "weeks") + 1
 }
 
