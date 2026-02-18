@@ -9,6 +9,7 @@ import {
 } from "components/Page"
 import _debounce from "lodash/debounce"
 import moment from "moment"
+import { WeekPeriodKey } from "periodUtils"
 import React, { useState } from "react"
 import Settings from "settings"
 
@@ -85,12 +86,12 @@ const FilterableAdvisorReportsTable = ({
   }
 
   function getWeekColumns() {
-    const dateEnd = moment().startOf("week").add(1, "week")
+    const dateEnd = moment().startOf(WeekPeriodKey.ISO_WEEK).add(1, "week")
     const dateStart = moment(dateEnd).subtract(weeksAgo, "weeks")
     let currentDate = dateStart
     const weekColumns = []
     while (currentDate.isBefore(dateEnd)) {
-      weekColumns.push(currentDate.week())
+      weekColumns.push(currentDate.isoWeek())
       currentDate = currentDate.add(1, "weeks")
     }
     return weekColumns
