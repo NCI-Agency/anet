@@ -319,7 +319,7 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   ('44ba17f5-fcf7-4743-a6b9-baf922b172c2', 'EF 1.1 Advisor for Interagency Advising', 0, NULL, 0, 0, '31cba227-f6c6-49e9-9483-fce441bea624', 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('c829e8bc-959e-4e57-9e6f-0a8fc128145f', 'EF 1.1 Superuser', 2, 0, 1, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('525d6c4b-deaa-4218-b8fd-abfb7c81a4c2', 'EF 1.2 Advisor', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.1 Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803', 'EF 2.1 Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor for Accounting', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor for Kites', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Superuser', 2, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -380,12 +380,12 @@ UPDATE positions SET "currentPersonUuid" = 'ff0cec0b-8eca-48ee-82fe-addce6136f3b
 
 -- Rotate an advisor through a billet ending up with Jack in the EF 2.1 Advisor B Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2020-01-01');
-UPDATE positions SET "currentPersonUuid" = 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9' WHERE name = 'EF 2.1 Advisor B';
-UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
+  ('92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9' WHERE uuid = '92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803';
+UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = '92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803';
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), 'b5d495af-44d5-4c35-851a-1039352a8307', '2021-01-01');
-UPDATE positions SET "currentPersonUuid" = 'b5d495af-44d5-4c35-851a-1039352a8307' WHERE name = 'EF 2.1 Advisor B';
+  ('92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803', 'b5d495af-44d5-4c35-851a-1039352a8307', '2021-01-01');
+UPDATE positions SET "currentPersonUuid" = 'b5d495af-44d5-4c35-851a-1039352a8307' WHERE uuid = '92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803';
 
 -- Rotate advisors through billets ending up with Dvisor in the EF 2.2 Advisor Sewing Facilities Billet and Selena in the EF 1.2 Advisor Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
@@ -859,7 +859,7 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'Chief of Police'), (SELECT uuid from people where name = 'Rogwell, Roger'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'Rogwell, Roger') WHERE name = 'Chief of Police';
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
-  ((SELECT uuid FROM positions WHERE name='EF 2.1 Advisor B'),
+  ('92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803',
   (SELECT uuid from positions WHERE name ='Chief of Police'),
   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
 
@@ -1255,22 +1255,16 @@ INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relat
   WHERE p.status = 1;
 
 -- Populate Key Advisors community with JACKSON - Jack , his organization and his position
-INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
-VALUES ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'people',  'b5d495af-44d5-4c35-851a-1039352a8307');
-INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
-VALUES ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'organizations',  'a267a964-e9a1-4dfd-baa4-0c57d35a6212');
-INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
-SELECT 'e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'positions', p.uuid
-FROM positions p
-WHERE p.name = 'EF 2.1 Advisor B';
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'people',  'b5d495af-44d5-4c35-851a-1039352a8307'),
+  ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'organizations',  'a267a964-e9a1-4dfd-baa4-0c57d35a6212'),
+  ('e2f93f4d-7e1c-4fb4-9338-45305c3869ca', 'positions', '92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803');
 
 -- Populate key interlocutors with CHRISVILLE - Chris, his organization and his position
-INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
-VALUES ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'people',  '5fa54ffd-cc90-493a-b4b1-73e9c4568177');
-INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
-VALUES ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'organizations',  'df85610c-c6fd-4381-a276-84238e81cb3e');
-INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
-VALUES ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'positions',  '18f42d92-ada7-11eb-8529-0242ac130003');
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'people',  '5fa54ffd-cc90-493a-b4b1-73e9c4568177'),
+  ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'organizations',  'df85610c-c6fd-4381-a276-84238e81cb3e'),
+  ('76ecf9ec-d198-4f0c-8ef3-3a155df92351', 'positions',  '18f42d92-ada7-11eb-8529-0242ac130003');
 
 -- Report authorized members for reports with sensitive information
 INSERT INTO "reportAuthorizedMembers" ("reportUuid", "relatedObjectType", "relatedObjectUuid") VALUES

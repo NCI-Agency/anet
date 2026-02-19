@@ -13,19 +13,22 @@ public class EngagementInformationMapper implements RowMapper<EngagementInformat
 
   @Override
   public EngagementInformation map(ResultSet r, StatementContext ctx) throws SQLException {
-    EngagementInformation engagementInformation = new EngagementInformation();
+    final EngagementInformation engagementInformation = new EngagementInformation();
     engagementInformation.setEngagementDate(getInstantAsLocalDateTime(r, "engagementDate"));
     engagementInformation.setReportUuid(r.getString("reportUuid"));
-    GenericRelatedObject advisorGenericRelatedObject = new GenericRelatedObject();
+
+    final GenericRelatedObject advisorGenericRelatedObject = new GenericRelatedObject();
     advisorGenericRelatedObject.setRelatedObjectType(r.getString("advisorRelatedObjectType"));
     advisorGenericRelatedObject.setRelatedObjectUuid(r.getString("advisorRelatedObjectUuid"));
     engagementInformation.setAdvisor(advisorGenericRelatedObject);
-    GenericRelatedObject interlocutorGenericRelatedObject = new GenericRelatedObject();
+
+    final GenericRelatedObject interlocutorGenericRelatedObject = new GenericRelatedObject();
     interlocutorGenericRelatedObject
         .setRelatedObjectType(r.getString("interlocutorRelatedObjectType"));
     interlocutorGenericRelatedObject
         .setRelatedObjectUuid(r.getString("interlocutorRelatedObjectUuid"));
     engagementInformation.setInterlocutor(interlocutorGenericRelatedObject);
+
     return engagementInformation;
   }
 }

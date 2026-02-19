@@ -528,92 +528,72 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       boolean plannedEngagements) {
     final Handle handle = getDbHandle();
     try {
-      final Map<String, Object> sqlArgs = new HashMap<>();
-      sqlArgs.put("advisorAuthorizationGroupUuid", advisorAuthorizationGroupUuid);
-      sqlArgs.put("interlocutorAuthorizationGroupUuid", interlocutorAuthorizationGroupUuid);
+      final Map<String, Object> sqlArgs = Map.of( // -
+          "advisorAuthorizationGroupUuid", advisorAuthorizationGroupUuid, // -
+          "interlocutorAuthorizationGroupUuid", interlocutorAuthorizationGroupUuid, // -
+          "approvedState", DaoUtils.getEnumId(ReportState.APPROVED), // -
+          "publishedState", DaoUtils.getEnumId(ReportState.PUBLISHED) // -
+      );
 
       final StringBuilder sql = new StringBuilder();
 
-      sql.append("/* getEngagementsBetweenCommunities */ ");
-      sql.append("SELECT DISTINCT ON (");
-      sql.append("        agro1.\"relatedObjectType\", ");
-      sql.append("        agro1.\"relatedObjectUuid\", ");
-      sql.append("        agro2.\"relatedObjectType\", ");
-      sql.append("        agro2.\"relatedObjectUuid\" ");
-      sql.append("    ) ");
-      sql.append("    r.uuid AS \"reportUuid\", ");
-      sql.append("    r.\"engagementDate\" AS \"engagementDate\", ");
-      sql.append("    agro1.\"relatedObjectType\" AS \"advisorRelatedObjectType\", ");
-      sql.append("    agro1.\"relatedObjectUuid\" AS \"advisorRelatedObjectUuid\", ");
-      sql.append("    agro2.\"relatedObjectType\" AS \"interlocutorRelatedObjectType\", ");
-      sql.append("    agro2.\"relatedObjectUuid\" AS \"interlocutorRelatedObjectUuid\" ");
+      sql.append("/* getEngagementsBetweenCommunities */ SELECT DISTINCT ON (");
+      sql.append(
+          "agroa.\"relatedObjectType\", agroa.\"relatedObjectUuid\", agroi.\"relatedObjectType\", agroi.\"relatedObjectUuid\"");
+      sql.append(") r.uuid AS \"reportUuid\", ");
+      sql.append(" r.\"engagementDate\" AS \"engagementDate\", ");
+      sql.append(" agroa.\"relatedObjectType\" AS \"advisorRelatedObjectType\", ");
+      sql.append(" agroa.\"relatedObjectUuid\" AS \"advisorRelatedObjectUuid\", ");
+      sql.append(" agroi.\"relatedObjectType\" AS \"interlocutorRelatedObjectType\", ");
+      sql.append(" agroi.\"relatedObjectUuid\" AS \"interlocutorRelatedObjectUuid\" ");
       sql.append("FROM reports r ");
-      sql.append("INNER JOIN \"authorizationGroupRelatedObjects\" agro1 ON (");
-      sql.append(
-          "        (agro1.\"relatedObjectType\" = 'organizations' AND agro1.\"relatedObjectUuid\" = r.\"advisorOrganizationUuid\") ");
-      sql.append(
-          "     OR (agro1.\"relatedObjectType\" = 'people' AND agro1.\"relatedObjectUuid\" IN (");
-      sql.append("            SELECT DISTINCT \"personUuid\" ");
-      sql.append("            FROM \"reportPeople\" rp ");
-      sql.append("            WHERE rp.\"reportUuid\" = r.uuid AND rp.\"isInterlocutor\" IS FALSE");
-      sql.append("        )) ");
-      sql.append(
-          "     OR (agro1.\"relatedObjectType\" = 'positions' AND agro1.\"relatedObjectUuid\" IN (");
-      sql.append("            SELECT DISTINCT \"positionUuid\" ");
-      sql.append("            FROM \"peoplePositions\" pp ");
-      sql.append(
-          "            WHERE pp.\"createdAt\" < r.\"engagementDate\" AND (pp.\"endedAt\" IS NULL OR pp.\"endedAt\" > r.\"engagementDate\") AND pp.\"personUuid\" IN (");
-      sql.append("                SELECT DISTINCT \"personUuid\" ");
-      sql.append("                FROM \"reportPeople\" rp ");
-      sql.append(
-          "                WHERE rp.\"reportUuid\" = r.uuid AND rp.\"isInterlocutor\" IS FALSE");
-      sql.append("            )");
-      sql.append("        )) ");
-      sql.append("    ) ");
-      sql.append("INNER JOIN \"authorizationGroupRelatedObjects\" agro2 ON (");
-      sql.append(
-          "        (agro2.\"relatedObjectType\" = 'organizations' AND agro2.\"relatedObjectUuid\" = r.\"interlocutorOrganizationUuid\") ");
-      sql.append(
-          "     OR (agro2.\"relatedObjectType\" = 'people' AND agro2.\"relatedObjectUuid\" IN (");
-      sql.append("            SELECT DISTINCT \"personUuid\" ");
-      sql.append("            FROM \"reportPeople\" rp ");
-      sql.append("            WHERE rp.\"reportUuid\" = r.uuid AND rp.\"isInterlocutor\" IS TRUE");
-      sql.append("        )) ");
-      sql.append(
-          "     OR (agro2.\"relatedObjectType\" = 'positions' AND agro2.\"relatedObjectUuid\" IN (");
-      sql.append("            SELECT DISTINCT \"positionUuid\" ");
-      sql.append("            FROM \"peoplePositions\" pp ");
-      sql.append(
-          "            WHERE pp.\"createdAt\" < r.\"engagementDate\" AND (pp.\"endedAt\" IS NULL OR pp.\"endedAt\" > r.\"engagementDate\") AND pp.\"personUuid\" IN (");
-      sql.append("                SELECT DISTINCT \"personUuid\" ");
-      sql.append("                FROM \"reportPeople\" rp ");
-      sql.append(
-          "                WHERE rp.\"reportUuid\" = r.uuid AND rp.\"isInterlocutor\" IS TRUE");
-      sql.append("            )");
-      sql.append("        )) ");
-      sql.append("    ) ");
-      sql.append(
-          "INNER JOIN \"authorizationGroups\" ag1 ON ag1.\"uuid\" = agro1.\"authorizationGroupUuid\" ");
-      sql.append(
-          "INNER JOIN \"authorizationGroups\" ag2 ON ag2.\"uuid\" = agro2.\"authorizationGroupUuid\" ");
-      sql.append("WHERE ag1.\"uuid\" = :advisorAuthorizationGroupUuid ");
-      sql.append("  AND ag2.\"uuid\" = :interlocutorAuthorizationGroupUuid ");
-      if (plannedEngagements) {
-        sql.append(" AND r.\"engagementDate\" > CURRENT_TIMESTAMP ");
-      } else {
-        sql.append(" AND r.\"engagementDate\" < CURRENT_TIMESTAMP AND r.state > 0 ");
-      }
-      sql.append("ORDER BY ");
-      sql.append("    agro1.\"relatedObjectType\", ");
-      sql.append("    agro1.\"relatedObjectUuid\", ");
-      sql.append("    agro2.\"relatedObjectType\", ");
-      sql.append("    agro2.\"relatedObjectUuid\", ");
-      if (plannedEngagements) {
-        sql.append("    r.\"engagementDate\" ASC ");
-      } else {
-        sql.append("    r.\"engagementDate\" DESC");
-      }
 
+      sql.append(
+          "LEFT JOIN \"reportPeople\" rpa ON rpa.\"reportUuid\" = r.uuid AND rpa.\"isInterlocutor\" IS NOT TRUE ");
+      sql.append("LEFT JOIN \"peoplePositions\" ppa ON ppa.\"personUuid\" = rpa.\"personUuid\" ");
+      sql.append(" AND ppa.\"createdAt\" < r.\"engagementDate\" ");
+      sql.append(" AND (ppa.\"endedAt\" IS NULL OR ppa.\"endedAt\" > r.\"engagementDate\") ");
+      sql.append(
+          "INNER JOIN \"authorizationGroupRelatedObjects\" agroa ON agroa.\"authorizationGroupUuid\" = :advisorAuthorizationGroupUuid AND ( ");
+      sql.append(
+          " (agroa.\"relatedObjectType\" = 'organizations' AND agroa.\"relatedObjectUuid\" = r.\"advisorOrganizationUuid\") ");
+      sql.append(
+          " OR (agroa.\"relatedObjectType\" = 'people' AND agroa.\"relatedObjectUuid\" = rpa.\"personUuid\") ");
+      sql.append(
+          " OR (agroa.\"relatedObjectType\" = 'positions' AND agroa.\"relatedObjectUuid\" = ppa.\"positionUuid\") ");
+      sql.append(") ");
+
+      sql.append(
+          "LEFT JOIN \"reportPeople\" rpi ON rpi.\"reportUuid\" = r.uuid AND rpi.\"isInterlocutor\" IS TRUE ");
+      sql.append("LEFT JOIN \"peoplePositions\" ppi ON ppi.\"personUuid\" = rpi.\"personUuid\" ");
+      sql.append(" AND ppi.\"createdAt\" < r.\"engagementDate\" ");
+      sql.append(" AND (ppi.\"endedAt\" IS NULL OR ppi.\"endedAt\" > r.\"engagementDate\") ");
+      sql.append(
+          "INNER JOIN \"authorizationGroupRelatedObjects\" agroi ON agroi.\"authorizationGroupUuid\" = :interlocutorAuthorizationGroupUuid AND ( ");
+      sql.append(
+          " (agroi.\"relatedObjectType\" = 'organizations' AND agroi.\"relatedObjectUuid\" = r.\"interlocutorOrganizationUuid\") ");
+      sql.append(
+          " OR (agroi.\"relatedObjectType\" = 'people' AND agroi.\"relatedObjectUuid\" = rpi.\"personUuid\") ");
+      sql.append(
+          " OR (agroi.\"relatedObjectType\" = 'positions' AND agroi.\"relatedObjectUuid\" = ppi.\"positionUuid\") ");
+      sql.append(") ");
+
+      sql.append("WHERE r.state in (:approvedState, :publishedState) ");
+      sql.append("AND r.\"engagementDate\" ");
+      if (plannedEngagements) {
+        sql.append(">");
+      } else {
+        sql.append("<");
+      }
+      sql.append(" CURRENT_TIMESTAMP ");
+
+      sql.append(
+          "ORDER BY agroa.\"relatedObjectType\", agroa.\"relatedObjectUuid\", agroi.\"relatedObjectType\", agroi.\"relatedObjectUuid\", r.\"engagementDate\" ");
+      if (plannedEngagements) {
+        sql.append("ASC");
+      } else {
+        sql.append("DESC");
+      }
 
       return handle.createQuery(sql.toString()).bindMap(sqlArgs)
           .map(new EngagementInformationMapper()).list();

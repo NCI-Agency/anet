@@ -877,14 +877,12 @@ public class ReportResource {
     return assessments.size();
   }
 
-  @GraphQLQuery(name = "getEngagementsBetweenCommunities")
+  @GraphQLQuery(name = "engagementsBetweenCommunities")
   public List<EngagementInformation> getEngagementsBetweenCommunities(
-      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") EngagementsBetweenCommunitiesSearchQuery query) {
     return reportDao.getEngagementsBetweenCommunities(query.getAdvisorAuthorizationGroupUuid(),
         query.getInterlocutorAuthorizationGroupUuid(), query.getPlannedEngagements());
   }
-
 
   private boolean checkReportPersonOrTask(Report r, GenericRelatedObject groReport,
       GenericRelatedObject groPersonOrTask) {

@@ -2666,7 +2666,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     List<mil.dds.anet.test.client.EngagementInformation> results =
         withCredentials(jackUser, t -> queryExecutor
-            .getEngagementsBetweenCommunities(ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS, query));
+            .engagementsBetweenCommunities(ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS, query));
     // Key advisors community contains one person, one organization and one position that engaged
     // with the
     // one person, one organization and one position in key interlocutors, therefore we expect 9
@@ -2690,7 +2690,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     query.setPlannedEngagements(true);
     // No planned engagements
     results = withCredentials(jackUser, t -> queryExecutor
-        .getEngagementsBetweenCommunities(ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS, query));
+        .engagementsBetweenCommunities(ENGAGEMENTS_BETWEEN_COMMUNITIES_FIELDS, query));
     assertThat(results).isNotNull().hasSize(0);
   }
 }

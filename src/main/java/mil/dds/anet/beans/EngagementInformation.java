@@ -1,27 +1,21 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
-import mil.dds.anet.views.AbstractAnetBean;
 
-public class EngagementInformation extends AbstractAnetBean {
-
-  @GraphQLQuery
-  @GraphQLInputField
-  String reportUuid;
+public class EngagementInformation {
 
   @GraphQLQuery
-  @GraphQLInputField
-  Instant engagementDate;
+  private String reportUuid;
 
   @GraphQLQuery
-  @GraphQLInputField
-  GenericRelatedObject advisor;
+  private Instant engagementDate;
 
   @GraphQLQuery
-  @GraphQLInputField
-  GenericRelatedObject interlocutor;
+  private GenericRelatedObject advisor;
+
+  @GraphQLQuery
+  private GenericRelatedObject interlocutor;
 
   public Instant getEngagementDate() {
     return engagementDate;
