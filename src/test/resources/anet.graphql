@@ -459,12 +459,9 @@ input EmailAddressInput {
 """"""
 type EngagementInformation {
   advisor: GenericRelatedObject
-  createdAt: Instant
   engagementDate: Instant
   interlocutor: GenericRelatedObject
   reportUuid: String
-  updatedAt: Instant
-  uuid: String
 }
 
 """"""
@@ -1302,12 +1299,12 @@ type Query {
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
+  engagementsBetweenCommunities(query: EngagementsBetweenCommunitiesSearchQueryInput): [EngagementInformation]
   event(uuid: String): Event
   eventList(query: EventSearchQueryInput): AnetBeanList_Event
   eventSeries(uuid: String): EventSeries
   eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
   eventTypes: [EventType]
-  getEngagementsBetweenCommunities(query: EngagementsBetweenCommunitiesSearchQueryInput): [EngagementInformation]
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   locations(uuids: [String]): [Location]
