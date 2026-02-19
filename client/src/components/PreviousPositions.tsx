@@ -22,7 +22,9 @@ function PreviousPositions({
 }: PreviousPositionsProps) {
   return (
     <div>
-      {!_isEmpty(previousPositions) && (
+      {_isEmpty(previousPositions) ? (
+        <em>No positions found</em>
+      ) : (
         <Table id="previous-positions" striped hover responsive>
           <thead>
             <tr>
