@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client"
+import { isMutationOperation } from "@apollo/client/utilities"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import {
@@ -11,6 +12,18 @@ import { GraphiQL } from "graphiql"
 import "graphiql/setup-workers/webpack"
 import React from "react"
 import { connect } from "react-redux"
+
+async function fetch(params) {
+  const { variables, query } = params
+  const operation = gql`
+    ${query}
+  `
+  if (isMutationOperation(operation)) {
+    return API.client.mutate({ mutation: operation, variables })
+  } else {
+    return API.client.query({ query: operation, variables })
+  }
+}
 
 interface GraphiQLContainerProps {
   pageDispatchers?: PageDispatchersPropType
@@ -28,14 +41,6 @@ const GraphiQLContainer = ({ pageDispatchers }: GraphiQLContainerProps) => {
       <GraphiQL fetcher={fetch} />
     </div>
   )
-
-  async function fetch(params) {
-    const { operationName, variables } = params
-    const query = gql`
-      ${params.query}
-    `
-    return API.client.query({ operationName, query, variables })
-  }
 }
 
 export default connect(null, mapPageDispatchersToProps)(GraphiQLContainer)
