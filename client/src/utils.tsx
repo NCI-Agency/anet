@@ -483,14 +483,14 @@ export default {
     return defaultValue
   },
 
-  findPositionAtDate: function (person, date) {
+  findPrimaryPositionAtDate: function (person, date) {
     if (!date) {
       return person.position
     }
     const when = moment(date).valueOf()
-    return (person.previousPositions ?? []).find(p => {
-      return p.startTime <= when && (!p.endTime || p.endTime > when)
-    })?.position
+    return (person.previousPositions ?? []).find(
+      p => p.primary && p.startTime <= when && (!p.endTime || p.endTime > when)
+    )?.position
   },
 
   getButtonsFromChoices: function (choices) {

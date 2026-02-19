@@ -91,7 +91,10 @@ const ReportPeople = ({
 
   function renderAttendeeRow(person) {
     const isCurrentEditor = Person.isEqual(person, currentUser)
-    const position = utils.findPositionAtDate(person, report.engagementDate)
+    const position = utils.findPrimaryPositionAtDate(
+      person,
+      report.engagementDate
+    )
     return (
       <tr key={person.uuid}>
         <td className="primary-attendee">

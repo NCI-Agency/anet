@@ -47,10 +47,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TaskApprovalTest extends AbstractResourceTest {
 
   private static final String EMAIL_ADDRESS_FIELDS = "{ network address }";

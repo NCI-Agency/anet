@@ -17,7 +17,10 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -38,10 +41,17 @@ public class OrganizationResource {
 
   private final AnetObjectEngine engine;
   private final OrganizationDao dao;
+  private final ApprovalStepDao approvalStepDao;
+  private final EmailAddressDao emailAddressDao;
+  private final TaskDao taskDao;
 
-  public OrganizationResource(AnetObjectEngine anetObjectEngine, OrganizationDao dao) {
+  public OrganizationResource(AnetObjectEngine anetObjectEngine, OrganizationDao dao,
+      ApprovalStepDao approvalStepDao, EmailAddressDao emailAddressDao, TaskDao taskDao) {
     this.engine = anetObjectEngine;
     this.dao = dao;
+    this.approvalStepDao = approvalStepDao;
+    this.emailAddressDao = emailAddressDao;
+    this.taskDao = taskDao;
   }
 
   public static boolean hasPermission(final Person user, final String organizationUuid) {
@@ -104,7 +114,7 @@ public class OrganizationResource {
     if (org.getTasks() != null) {
       // Assign all of these tasks to this organization.
       for (Task task : org.getTasks()) {
-        engine.getTaskDao().addTaskedOrganizationsToTask(org, task);
+        taskDao.addTaskedOrganizationsToTask(org, task);
       }
     }
     if (org.getPlanningApprovalSteps() != null) {
@@ -112,7 +122,7 @@ public class OrganizationResource {
       for (ApprovalStep step : org.getPlanningApprovalSteps()) {
         Utils.validateApprovalStep(step);
         step.setRelatedObjectUuid(created.getUuid());
-        engine.getApprovalStepDao().insertAtEnd(step);
+        approvalStepDao.insertAtEnd(step);
       }
     }
     if (org.getApprovalSteps() != null) {
@@ -120,11 +130,11 @@ public class OrganizationResource {
       for (ApprovalStep step : org.getApprovalSteps()) {
         Utils.validateApprovalStep(step);
         step.setRelatedObjectUuid(created.getUuid());
-        engine.getApprovalStepDao().insertAtEnd(step);
+        approvalStepDao.insertAtEnd(step);
       }
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, created.getUuid(),
+    emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, created.getUuid(),
         org.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
@@ -202,9 +212,8 @@ public class OrganizationResource {
       logger.debug("Editing tasks for {}", org);
       final List<Task> existingTasks = existing.loadTasks(engine.getContext()).join();
       Utils.addRemoveElementsByUuid(existingTasks, org.getTasks(),
-          newTask -> engine.getTaskDao().addTaskedOrganizationsToTask(org, newTask),
-          oldTask -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org.getUuid(),
-              DaoUtils.getUuid(oldTask)));
+          newTask -> taskDao.addTaskedOrganizationsToTask(org, newTask), oldTask -> taskDao
+              .removeTaskedOrganizationsFromTask(org.getUuid(), DaoUtils.getUuid(oldTask)));
     }
 
     if (AuthUtils.isAdmin(user) && org.getAdministratingPositions() != null) {
@@ -223,7 +232,7 @@ public class OrganizationResource {
     Utils.updateApprovalSteps(org, org.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
         org.getApprovalSteps(), existingApprovalSteps);
 
-    engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, org.getUuid(),
+    emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, org.getUuid(),
         org.getEmailAddresses());
 
     // Update any subscriptions

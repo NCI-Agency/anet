@@ -31,10 +31,10 @@ public class EventResource {
   private final AnetObjectEngine engine;
   private final EventDao dao;
 
-  public EventResource(AnetDictionary dict, AnetObjectEngine engine) {
+  public EventResource(AnetDictionary dict, AnetObjectEngine engine, EventDao dao) {
     this.dict = dict;
     this.engine = engine;
-    this.dao = engine.getEventDao();
+    this.dao = dao;
   }
 
   public static boolean hasPermission(final Person user, final String orgUuid) {

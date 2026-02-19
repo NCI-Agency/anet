@@ -11,9 +11,11 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -29,10 +31,13 @@ public class PositionResource {
 
   private final AnetObjectEngine engine;
   private final PositionDao dao;
+  private final EmailAddressDao emailAddressDao;
 
-  public PositionResource(AnetObjectEngine anetObjectEngine, PositionDao dao) {
+  public PositionResource(AnetObjectEngine anetObjectEngine, PositionDao dao,
+      EmailAddressDao emailAddressDao) {
     this.dao = dao;
     this.engine = anetObjectEngine;
+    this.emailAddressDao = emailAddressDao;
   }
 
   public static boolean hasPermission(final Person user, final String positionUuid) {
@@ -91,11 +96,7 @@ public class PositionResource {
 
     final Position created = dao.insert(pos);
 
-    if (pos.getPersonUuid() != null) {
-      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid());
-    }
-
-    engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
+    emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
         pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, created.getUuid(),
@@ -160,36 +161,20 @@ public class PositionResource {
           oldOrg -> dao.removeOrganizationFromPosition(DaoUtils.getUuid(oldOrg), pos));
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, pos.getUuid(),
+    emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.customSensitiveInformationKey(), pos.getCustomSensitiveInformation());
 
-    if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
-      if (existing != null) {
-        // Run the diff and see if anything changed and update.
-        if (pos.getPerson() != null) {
-          if (pos.getPersonUuid() == null) {
-            // Intentionally remove the person
-            dao.removePersonFromPosition(existing.getUuid());
-            AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPersonUuid(),
-                existing, user);
-          } else if (!Objects.equals(pos.getPersonUuid(), existing.getPersonUuid())) {
-            dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid());
-            AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), existing,
-                user);
-          }
-        }
-
-        if (Position.Status.INACTIVE.equals(pos.getStatus()) && existing.getPersonUuid() != null) {
-          // Remove this person from this position.
-          AnetAuditLogger.log(
-              "Person {} removed from position {} by {} because the position is now inactive",
-              existing.getPersonUuid(), existing, user);
-          dao.removePersonFromPosition(existing.getUuid());
-        }
-      }
+    // Automatically remove people from a position if the position is inactive.
+    if (WithStatus.Status.INACTIVE.equals(pos.getStatus()) && existing != null
+        && existing.getPersonUuid() != null) {
+      // Remove this person from this position.
+      AnetAuditLogger.log(
+          "Person {} removed from position {} by {} because the position is now inactive",
+          existing.getPersonUuid(), existing, user);
+      dao.removePersonFromPosition(existing.getUuid());
     }
 
     // Update any subscriptions
@@ -205,18 +190,11 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
-    assertPermission(user, existing);
+    AuthUtils.assertAdministrator(user);
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
         existing.getPersonUuid());
-
-    if (engine.getPersonDao().hasHistoryConflict(pos.getUuid(), null, pos.getPreviousPeople(),
-        false)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the positions in the history is occupied for the specified period.");
-    }
-
-    final int numRows = engine.getPositionDao().updatePositionHistory(pos);
+    final int numRows = dao.updatePositionHistory(pos);
     AnetAuditLogger.log("History updated for position {} by {}", pos, user);
     return numRows;
   }
@@ -224,7 +202,9 @@ public class PositionResource {
   @GraphQLMutation(name = "putPersonInPosition")
   public int putPersonInPosition(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String positionUuid,
-      @GraphQLArgument(name = "person") Person person) {
+      @GraphQLArgument(name = "person") Person person,
+      @GraphQLArgument(name = "primary", defaultValue = "true") boolean primary,
+      @GraphQLArgument(name = "previousPositionUuid") String previousPositionUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position pos = dao.getByUuid(positionUuid);
     if (pos == null) {
@@ -232,7 +212,8 @@ public class PositionResource {
     }
     AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid());
 
-    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
+    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid, primary,
+        previousPositionUuid);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
     return numRows;
   }
@@ -280,7 +261,7 @@ public class PositionResource {
     }
 
     // if position is active, reject
-    if (Position.Status.ACTIVE.equals(position.getStatus())) {
+    if (WithStatus.Status.ACTIVE.equals(position.getStatus())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete an active position");
     }
 
@@ -303,7 +284,10 @@ public class PositionResource {
   @GraphQLMutation(name = "mergePositions")
   public Integer mergePositions(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "winnerPosition") Position winnerPosition,
-      @GraphQLArgument(name = "loserUuid") String loserUuid) throws ResponseStatusException {
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "useWinnerPersonHistory",
+          defaultValue = "true") boolean useWinnerPersonHistory)
+      throws ResponseStatusException {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
     AuthUtils.assertAdministrator(user);
@@ -319,14 +303,9 @@ public class PositionResource {
 
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);
-    if (ApplicationContextProvider.getEngine().getPersonDao().hasHistoryConflict(
-        winnerPosition.getUuid(), loserUuid, winnerPosition.getPreviousPeople(), false)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "At least one of the people in the history is occupied for the specified period.");
-    }
     validatePosition(user, winnerPosition);
 
-    int numRows = dao.mergePositions(winnerPosition, loserPosition);
+    int numRows = dao.mergePositions(winnerPosition, loserPosition, useWinnerPersonHistory);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process merge operation, error occurred while updating merged position relation information.");
