@@ -3,59 +3,40 @@ package mil.dds.anet.database;
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.cache.Cache;
-import javax.cache.Cache.Entry;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.spi.CachingProvider;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.database.cache.PersonCache;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PersonPreferenceMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
 import mil.dds.anet.utils.AnetAuditLogger;
-import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
@@ -68,30 +49,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public static final String PERSON_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
 
-  private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
-  private static final String DOMAIN_USERS_CACHE = "domainUsersCache";
-  private static final int ACTIVITY_LOG_LIMIT = 10;
+  private final PersonCache personCache;
 
-  private Cache<String, Person> domainUsersCache;
-
-  public PersonDao(DatabaseHandler databaseHandler) {
+  public PersonDao(DatabaseHandler databaseHandler, PersonCache personCache) {
     super(databaseHandler);
-    try {
-      final CachingProvider cachingProvider = Caching.getCachingProvider();
-      final CacheManager manager = cachingProvider.getCacheManager(
-          PersonDao.class.getResource(EHCACHE_CONFIG).toURI(), PersonDao.class.getClassLoader());
-      domainUsersCache = manager.getCache(DOMAIN_USERS_CACHE, String.class, Person.class);
-      if (domainUsersCache == null) {
-        logger.warn("Caching config for {} not found in {}, proceeding without caching",
-            DOMAIN_USERS_CACHE, EHCACHE_CONFIG);
-      }
-    } catch (URISyntaxException | NullPointerException e) {
-      logger.warn("Caching config {} not found, proceeding without caching", EHCACHE_CONFIG);
-    }
-  }
-
-  public Cache<String, Person> getDomainUsersCache() {
-    return domainUsersCache;
+    this.personCache = personCache;
   }
 
   @Override
@@ -159,7 +121,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-      evictFromCache(p);
+      personCache.evictFromCache(p);
       return p;
     } finally {
       closeDbHandle(handle);
@@ -179,8 +141,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
       // Evict original person as well as current person
-      evictFromCache(findInCache(p));
-      evictFromCache(p);
+      personCache.evictFromCache(personCache.findInCache(p));
+      personCache.evictFromCache(p);
       // No need to update subscriptions, this is an internal change
       return nr;
     } finally {
@@ -205,8 +167,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
       // Evict original person as well as current person
-      evictFromCache(findInCache(p));
-      evictFromCache(p);
+      personCache.evictFromCache(personCache.findInCache(p));
+      personCache.evictFromCache(p);
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -250,7 +212,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       if (Utils.isEmptyOrNull(domainUsername)) {
         return Collections.emptyList();
       }
-      final Person person = getFromCache(domainUsername);
+      final Person person = personCache.getFromCache(domainUsername);
       if (person != null) {
         return Collections.singletonList(person);
       }
@@ -271,142 +233,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       }
       final List<Person> people = query.map(new PersonMapper()).list();
       // There should be at most one match since domainUsername must be unique
-      people.forEach(this::putInCache);
+      people.forEach(personCache::putInCache);
       return people;
     } finally {
       closeDbHandle(handle);
     }
-  }
-
-  public void logActivitiesByPersonUuid(String personUuid, Activity activity) {
-    final Person person = findInCacheByPersonUuid(personUuid);
-    if (person != null) {
-      final Deque<Activity> activities = person.getRecentActivities();
-      activities.addFirst(activity);
-      while (activities.size() > ACTIVITY_LOG_LIMIT) {
-        activities.removeLast();
-      }
-      person.setRecentActivities(activities);
-      person.getUsers().forEach(u -> domainUsersCache.replace(u.getDomainUsername(), person));
-    }
-  }
-
-  /**
-   * Evict the person from the cache.
-   *
-   * @param personUuid the uuid of the person to be evicted from the cache
-   */
-  public void evictFromCacheByPersonUuid(String personUuid) {
-    evictFromCache(findInCacheByPersonUuid(personUuid));
-  }
-
-  /**
-   * Evict the person holding the position from the cache.
-   *
-   * @param positionUuid the uuid of the position for the person to be evicted from the cache
-   */
-  public void evictFromCacheByPositionUuid(String positionUuid) {
-    evictFromCache(findInCacheByPositionUuid(positionUuid));
-  }
-
-  private Person getFromCache(String domainUsername) {
-    if (domainUsersCache == null || domainUsername == null) {
-      return null;
-    }
-    final Person person = domainUsersCache.get(domainUsername);
-    // defensively copy the person we return from the cache
-    return copyPerson(person);
-  }
-
-  private void putInCache(Person person) {
-    if (domainUsersCache != null && person != null && !Utils.isEmptyOrNull(person.getUsers())) {
-      // defensively copy the person we will be caching
-      final Person copy = copyPerson(person);
-      if (copy != null) {
-        person.getUsers().forEach(u -> domainUsersCache.put(u.getDomainUsername(), copy));
-      }
-    }
-  }
-
-  /**
-   * Just to be on the safe side, we only cache objects retrieved inside
-   * {@link #findByDomainUsername(String, boolean)}.
-   *
-   * @param person the person to be evicted from the domain users cache
-   */
-  private void evictFromCache(Person person) {
-    if (domainUsersCache != null && person != null && !Utils.isEmptyOrNull(person.getUsers())) {
-      person.getUsers().forEach(u -> domainUsersCache.remove(u.getDomainUsername()));
-    }
-  }
-
-  private Person findInCache(Person person) {
-    return findInCacheByPersonUuid(DaoUtils.getUuid(person));
-  }
-
-  private Person findInCacheByPersonUuid(String personUuid) {
-    if (domainUsersCache != null && personUuid != null) {
-      for (final Entry<String, Person> entry : domainUsersCache) {
-        if (entry != null && Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
-          return entry.getValue();
-        }
-      }
-    }
-    return null;
-  }
-
-  private Person findInCacheByPositionUuid(String positionUuid) {
-    if (domainUsersCache != null && positionUuid != null) {
-      for (final Entry<String, Person> entry : domainUsersCache) {
-        if (entry != null
-            && Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
-          return entry.getValue();
-        }
-      }
-    }
-    return null;
-  }
-
-  // Make a defensive copy of a person and their position
-  private Person copyPerson(Person person) {
-    if (person != null) {
-      try {
-        // Copy person
-        final Person personCopy = new Person();
-        for (final String prop : allFields) {
-          PropertyUtils.setSimpleProperty(personCopy, prop,
-              PropertyUtils.getSimpleProperty(person, prop));
-        }
-        personCopy.setName(person.getName());
-        // Copy users
-        if (!Utils.isEmptyOrNull(person.getUsers())) {
-          final List<User> usersCopy = new ArrayList<>();
-          for (final User user : person.getUsers()) {
-            final User userCopy = new User();
-            for (final String prop : UserDao.fields) {
-              PropertyUtils.setSimpleProperty(userCopy, prop,
-                  PropertyUtils.getSimpleProperty(user, prop));
-            }
-            usersCopy.add(userCopy);
-          }
-          personCopy.setUsers(usersCopy);
-        }
-        // Copy position
-        final Position position = person.getPosition();
-        if (position != null) {
-          final Position positionCopy = new Position();
-          for (final String prop : PositionDao.fields) {
-            PropertyUtils.setSimpleProperty(positionCopy, prop,
-                PropertyUtils.getSimpleProperty(position, prop));
-          }
-          personCopy.setPosition(positionCopy);
-        }
-        return personCopy;
-      } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-        logger.warn("Could not copy person", e);
-      }
-    }
-    return null;
   }
 
   @Transactional
@@ -418,7 +249,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               + " WHERE uuid = :personUuid")
           .bind("pendingVerification", false).bind("personUuid", personUuid).execute();
       // Evict the person from the domain users cache
-      evictFromCacheByPersonUuid(personUuid);
+      personCache.evictFromCacheByPersonUuid(personUuid);
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -433,7 +264,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final int nr = handle.createUpdate("DELETE FROM people WHERE uuid = :personUuid")
           .bind("personUuid", personUuid).execute();
       // Evict the person from the domain users cache
-      evictFromCacheByPersonUuid(personUuid);
+      personCache.evictFromCacheByPersonUuid(personUuid);
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -583,8 +414,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       }
 
       // E.g. positions may have been updated, so evict from the cache
-      evictFromCache(winner);
-      evictFromCache(loser);
+      personCache.evictFromCache(winner);
+      personCache.evictFromCache(loser);
       return nrDeleted;
     } finally {
       closeDbHandle(handle);
@@ -653,7 +484,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               "/* updatePersonBiography */ UPDATE people SET biography = NULL WHERE uuid = :uuid")
               .bind("uuid", p.getUuid()).execute();
           AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
-          evictFromCache(p);
+          personCache.evictFromCache(p);
         }
       }
     } finally {
@@ -664,18 +495,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid");
-  }
-
-  public String clearCache() {
-    if (domainUsersCache != null) {
-      domainUsersCache.removeAll();
-      if (!domainUsersCache.iterator().hasNext()) {
-        logger.info(AnetConstants.USERCACHE_MESSAGE);
-        return AnetConstants.USERCACHE_MESSAGE;
-      }
-    }
-    logger.warn(AnetConstants.USERCACHE_EMPTY_MESSAGE);
-    return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
   @Transactional

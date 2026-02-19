@@ -9,6 +9,7 @@ import static org.springframework.security.web.header.writers.ReferrerPolicyHead
 import jakarta.servlet.http.HttpServletMapping;
 import java.util.List;
 import java.util.Map;
+import mil.dds.anet.database.cache.PersonCache;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.utils.ResponseUtils;
@@ -45,6 +46,7 @@ public class SecurityConfig {
 
   private final AnetConfig anetConfig;
   private final AnetDictionary anetDictionary;
+  private final PersonCache personCache;
   private final BearerTokenAuthFilter bearerTokenAuthFilter;
 
   private final ContentSecurityPolicy webServiceCsp = ContentSecurityPolicy.of(
@@ -76,9 +78,10 @@ public class SecurityConfig {
       CspDirective.of("img-src", CSP_SELF, "data:", "%3$s"));
 
   public SecurityConfig(AnetConfig anetConfig, AnetDictionary anetDictionary,
-      BearerTokenService bearerTokenService) {
+      PersonCache personCache, BearerTokenService bearerTokenService) {
     this.anetConfig = anetConfig;
     this.anetDictionary = anetDictionary;
+    this.personCache = personCache;
     this.bearerTokenAuthFilter = new BearerTokenAuthFilter(bearerTokenService);
   }
 
@@ -135,7 +138,7 @@ public class SecurityConfig {
   @Bean
   @Order(30)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-    http.addFilterAfter(new UserActivityFilter(), AuthorizationFilter.class)
+    http.addFilterAfter(new UserActivityFilter(personCache), AuthorizationFilter.class)
         .authorizeHttpRequests(authorize -> authorize
             // These are public
             .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,
