@@ -11,7 +11,7 @@ import EngagementsBetweenCommunitiesMatrix from "components/EngagementsBetweenCo
 import Messages from "components/Messages"
 import { AuthorizationGroup } from "models"
 import React, { useEffect, useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import COMMUNITIES_ICON from "resources/communities.png"
 import Settings from "settings"
 
@@ -42,8 +42,7 @@ enum QueryKey {
 }
 
 const CadenceDashboard = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [authorizationGroupAdvisors, setAuthorizationGroupAdvisors] =
     useState<AuthorizationGroup | null>(null)
@@ -52,15 +51,12 @@ const CadenceDashboard = () => {
   const [fetchError, setFetchError] = useState(null)
 
   const updateSingleQueryParam = (key: QueryKey, value?: string) => {
-    const params = new URLSearchParams(location.search)
-
     if (value) {
-      params.set(key, value)
+      searchParams.set(key, value)
     } else {
-      params.delete(key)
+      searchParams.delete(key)
     }
-
-    navigate({ search: params.toString() }, { replace: true })
+    setSearchParams(searchParams, { replace: true })
   }
 
   const handleChangeAuthorizationGroup = async (
@@ -89,10 +85,8 @@ const CadenceDashboard = () => {
   }
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-
-    const advisorsUuid = params.get(QueryKey.ADVISORS)
-    const interlocutorsUuid = params.get(QueryKey.INTERLOCUTORS)
+    const advisorsUuid = searchParams.get(QueryKey.ADVISORS)
+    const interlocutorsUuid = searchParams.get(QueryKey.INTERLOCUTORS)
 
     if (
       advisorsUuid &&
@@ -118,7 +112,7 @@ const CadenceDashboard = () => {
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search])
+  }, [searchParams])
 
   return (
     <>
