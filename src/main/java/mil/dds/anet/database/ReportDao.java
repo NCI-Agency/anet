@@ -551,6 +551,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       sql.append(
           "LEFT JOIN \"reportPeople\" rpa ON rpa.\"reportUuid\" = r.uuid AND rpa.\"isInterlocutor\" IS NOT TRUE ");
       sql.append("LEFT JOIN \"peoplePositions\" ppa ON ppa.\"personUuid\" = rpa.\"personUuid\" ");
+      sql.append(" AND ppa.primary IS TRUE ");
       sql.append(" AND ppa.\"createdAt\" < r.\"engagementDate\" ");
       sql.append(" AND (ppa.\"endedAt\" IS NULL OR ppa.\"endedAt\" > r.\"engagementDate\") ");
       sql.append(
@@ -566,6 +567,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       sql.append(
           "LEFT JOIN \"reportPeople\" rpi ON rpi.\"reportUuid\" = r.uuid AND rpi.\"isInterlocutor\" IS TRUE ");
       sql.append("LEFT JOIN \"peoplePositions\" ppi ON ppi.\"personUuid\" = rpi.\"personUuid\" ");
+      sql.append(" AND ppi.primary IS TRUE ");
       sql.append(" AND ppi.\"createdAt\" < r.\"engagementDate\" ");
       sql.append(" AND (ppi.\"endedAt\" IS NULL OR ppi.\"endedAt\" > r.\"engagementDate\") ");
       sql.append(
