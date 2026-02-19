@@ -26,9 +26,9 @@ import mil.dds.anet.beans.recentActivity.RecentUserActivity;
 import mil.dds.anet.beans.search.UserActivitySearchQuery;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.UserActivityDao;
+import mil.dds.anet.database.cache.PersonCache;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.services.IMartDictionaryService;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -61,14 +61,17 @@ public class AdminResource {
 
   private final AnetConfig config;
   private final AnetDictionary dict;
+  private final PersonCache personCache;
   private final AdminDao adminDao;
   private final UserActivityDao userActivityDao;
   private final IMartDictionaryService martDictionaryService;
 
-  public AdminResource(AnetConfig config, AnetDictionary dict, AdminDao adminDao,
-      UserActivityDao userActivityDao, IMartDictionaryService martDictionaryService) {
+  public AdminResource(AnetConfig config, AnetDictionary dict, PersonCache personCache,
+      AdminDao adminDao, UserActivityDao userActivityDao,
+      IMartDictionaryService martDictionaryService) {
     this.config = config;
     this.dict = dict;
+    this.personCache = personCache;
     this.adminDao = adminDao;
     this.userActivityDao = userActivityDao;
     this.martDictionaryService = martDictionaryService;
@@ -169,7 +172,7 @@ public class AdminResource {
   public String clearCache(@GraphQLRootContext GraphQLContext context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    return ApplicationContextProvider.getEngine().getPersonDao().clearCache();
+    return personCache.clearCache();
   }
 
   /**
@@ -183,8 +186,7 @@ public class AdminResource {
     final List<RecentUserActivity> byActivity = new ArrayList<>();
     final List<RecentUserActivity> byUser = new ArrayList<>();
 
-    final Cache<String, Person> domainUsersCache =
-        ApplicationContextProvider.getEngine().getPersonDao().getDomainUsersCache();
+    final Cache<String, Person> domainUsersCache = personCache.getDomainUsersCache();
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       final Person person = entry.getValue();
       final Deque<Activity> activities = person.getRecentActivities();
