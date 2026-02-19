@@ -22,7 +22,9 @@ function PreviousPeople({
 }: PreviousPeopleProps) {
   return (
     <div>
-      {!_isEmpty(previousPeople) && (
+      {_isEmpty(previousPeople) ? (
+        <em>No people found</em>
+      ) : (
         <Table striped hover responsive>
           <thead>
             <tr>
