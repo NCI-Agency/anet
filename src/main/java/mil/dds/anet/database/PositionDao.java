@@ -24,6 +24,7 @@ import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.cache.PersonCache;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.pg.PostgresqlPositionSearcher;
@@ -53,8 +54,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       "Another position is already using this code and each position must have its own code. "
           + "Please double check that you entered the right code.";
 
-  public PositionDao(DatabaseHandler databaseHandler) {
+  private final PersonCache personCache;
+
+  public PositionDao(DatabaseHandler databaseHandler, PersonCache personCache) {
     super(databaseHandler);
+    this.personCache = personCache;
   }
 
   @Override
@@ -183,7 +187,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
         // Evict the person holding this position from the domain users cache, as their position has
         // changed
-        engine().getPersonDao().evictFromCacheByPositionUuid(DaoUtils.getUuid(p));
+        personCache.evictFromCacheByPositionUuid(DaoUtils.getUuid(p));
         return nr;
       } catch (UnableToExecuteStatementException e) {
         throw ResponseUtils.handleSqlException(e, DUPLICATE_POSITION_CODE);
@@ -296,7 +300,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           // Need to ensure this timestamp is greater than previous INSERT.
           .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
       // Evict this person from the domain users cache, as their position has changed
-      engine().getPersonDao().evictFromCacheByPersonUuid(personUuid);
+      personCache.evictFromCacheByPersonUuid(personUuid);
 
       // GraphQL mutations *have* to return something, so we return the number of inserted rows
       return nr;
@@ -364,7 +368,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 
       // Evict the person (previously) holding this position from the domain users cache
-      engine().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+      personCache.evictFromCacheByPositionUuid(positionUuid);
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -402,7 +406,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
       // Evict the person (previously) holding this primary position from the domain users cache
       if (primaryPosition != null) {
-        engine().getPersonDao().evictFromCacheByPositionUuid(primaryPosition.getUuid());
+        personCache.evictFromCacheByPositionUuid(primaryPosition.getUuid());
       }
       return nr;
     } finally {
@@ -572,7 +576,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       final int nr = handle.createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
           .bind("positionUuid", positionUuid).execute();
       // Evict the person (previously) holding this position from the domain users cache
-      instance.getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+      personCache.evictFromCacheByPositionUuid(positionUuid);
       return nr;
     } finally {
       closeDbHandle(handle);
@@ -745,9 +749,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       }
 
       // Evict the persons (previously) holding these positions from the domain users cache
-      final PersonDao personDao = engine.getPersonDao();
-      personDao.evictFromCacheByPositionUuid(loserUuid);
-      personDao.evictFromCacheByPositionUuid(winnerUuid);
+      personCache.evictFromCacheByPositionUuid(loserUuid);
+      personCache.evictFromCacheByPositionUuid(winnerUuid);
       return nrDeleted;
     } finally {
       closeDbHandle(handle);

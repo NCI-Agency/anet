@@ -10,6 +10,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.UserActivity;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.cache.PersonCache;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.SecurityUtils;
@@ -17,6 +18,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class UserActivityFilter extends OncePerRequestFilter {
+  private final PersonCache personCache;
+
+  public UserActivityFilter(PersonCache personCache) {
+    this.personCache = personCache;
+  }
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -27,8 +33,7 @@ public class UserActivityFilter extends OncePerRequestFilter {
       // Store recent user activities in Person bean
       final Activity activity = new Activity(ResponseUtils.getRemoteAddr(request),
           ResponseUtils.getReferer(request), DaoUtils.getCurrentMinute());
-      ApplicationContextProvider.getEngine().getPersonDao()
-          .logActivitiesByPersonUuid(DaoUtils.getUuid(person), activity);
+      personCache.logActivitiesByPersonUuid(DaoUtils.getUuid(person), activity);
       // Store this request in the database (only once per minute)
       final Position position = person.getPosition();
       final UserActivity userActivity = new UserActivity(person.getUuid(),
