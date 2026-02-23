@@ -150,19 +150,19 @@ async function createHierarchy(user, grow, args) {
 
     // Set some random APP6 data
     if (level === 0) {
-      setRandomApp6Value(org, "app6context", [[0.8, 0]])
+      setRandomApp6Value(org, "app6context", [[0.8, "0"]])
       setRandomApp6Value(org, "app6standardIdentity", [
-        [0.4, 3],
-        [0.6, 4]
+        [0.4, "3"],
+        [0.6, "4"]
       ])
       setRandomApp6Value(org, "app6symbolSet", [
-        [0.8, 10],
-        [0.5, 11]
+        [0.8, "10"],
+        [0.5, "11"]
       ])
       setRandomApp6Value(org, "app6hq", [
         [0.8, null],
-        [0.5, 2],
-        [0.5, 4]
+        [0.5, "2"],
+        [0.5, "4"]
       ])
     } else {
       setRandomApp6Value(org, "app6context", [[0.95, null]])
