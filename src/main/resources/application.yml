@@ -29,6 +29,8 @@ spring:
   shell:
     history:
       enabled: false
+    interactive:
+      enabled: false
 
   task:
     scheduling:
