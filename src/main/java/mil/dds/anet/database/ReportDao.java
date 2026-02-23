@@ -1104,12 +1104,15 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
                 + paramOrJoin("reports.uuid", isParam),
             // param is already added above
             Collections.emptyMap()));
-    // update reportPeople positions
+    // update reportPeople's primary positions at engagementDate
     update.getStmts()
         .add(new SubscriptionUpdateStatement("positions",
-            "SELECT uuid FROM positions WHERE \"currentPersonUuid\" in ("
-                + " SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
-                + paramOrJoin("reports.uuid", isParam) + " )",
+            "SELECT pp.\"positionUuid\" FROM \"peoplePositions\" pp"
+                + " JOIN \"reportPeople\" rp ON rp.\"personUuid\" = pp.\"personUuid\""
+                + " JOIN reports r ON r.uuid = rp.\"reportUuid\"" // -
+                + " WHERE r.uuid = " + paramOrJoin("reports.uuid", isParam)
+                + " AND pp.primary IS TRUE AND pp.\"createdAt\" <= r.\"engagementDate\""
+                + " AND (pp.\"endedAt\" IS NULL OR pp.\"endedAt\" > r.\"engagementDate\")",
             // param is already added above
             Collections.emptyMap()));
     // update organizations
