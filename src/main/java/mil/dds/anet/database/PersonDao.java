@@ -2,7 +2,6 @@ package mil.dds.anet.database;
 
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -436,8 +435,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     deleteForMerge("peoplePositions", "personUuid", personUuidForHistoryRemoval);
   }
 
-  public CompletableFuture<List<Position>> getAdditionalPositionsForPerson(
-      @GraphQLRootContext GraphQLContext context, String personUuid) {
+  public CompletableFuture<List<Position>> getAdditionalPositionsForPerson(GraphQLContext context,
+      String personUuid) {
     return new ForeignKeyFetcher<Position>().load(context,
         FkDataLoaderKey.PERSON_PERSON_ADDITIONAL_POSITIONS, personUuid);
   }

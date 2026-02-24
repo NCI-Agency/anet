@@ -1,7 +1,6 @@
 package mil.dds.anet.database;
 
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -103,7 +102,7 @@ public class CustomSensitiveInformationDao
   }
 
   public CompletableFuture<List<CustomSensitiveInformation>> getCustomSensitiveInformationForRelatedObject(
-      @GraphQLRootContext GraphQLContext context, String relatedObjectUuid) {
+      GraphQLContext context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
     return new ForeignKeyFetcher<CustomSensitiveInformation>()

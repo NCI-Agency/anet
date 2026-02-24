@@ -2,7 +2,6 @@ package mil.dds.anet.database;
 
 
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,8 +134,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
   }
 
-  public CompletableFuture<List<Note>> getNotesForRelatedObject(
-      @GraphQLRootContext GraphQLContext context, String relatedObjectUuid) {
+  public CompletableFuture<List<Note>> getNotesForRelatedObject(GraphQLContext context,
+      String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     return new ForeignKeyFetcher<Note>()
         .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)

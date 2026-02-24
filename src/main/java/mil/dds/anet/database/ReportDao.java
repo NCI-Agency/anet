@@ -4,7 +4,6 @@ import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRIN
 
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -357,8 +356,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     }
   }
 
-  public CompletableFuture<List<ReportPerson>> getPeopleForReport(
-      @GraphQLRootContext GraphQLContext context, String reportUuid) {
+  public CompletableFuture<List<ReportPerson>> getPeopleForReport(GraphQLContext context,
+      String reportUuid) {
     return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_PEOPLE,
         reportUuid);
   }
@@ -431,7 +430,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     }
   }
 
-  public CompletableFuture<List<Task>> getTasksForReport(@GraphQLRootContext GraphQLContext context,
+  public CompletableFuture<List<Task>> getTasksForReport(GraphQLContext context,
       String reportUuid) {
     return new ForeignKeyFetcher<Task>().load(context, FkDataLoaderKey.REPORT_TASKS, reportUuid);
   }
@@ -703,8 +702,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return new TasksBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<AuthorizationGroup>> getCommunitiesForReport(
-      @GraphQLRootContext GraphQLContext context, String reportUuid) {
+  public CompletableFuture<List<AuthorizationGroup>> getCommunitiesForReport(GraphQLContext context,
+      String reportUuid) {
     return new ForeignKeyFetcher<AuthorizationGroup>().load(context,
         FkDataLoaderKey.REPORT_REPORT_COMMUNITIES, reportUuid);
   }
