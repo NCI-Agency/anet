@@ -5,6 +5,7 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,12 +72,14 @@ public class LocationResource {
   @AllowUnverifiedUsers
   public AnetBeanList<Location> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") LocationSearchQuery query) {
-    final Person user = DaoUtils.getUserFromContext(context);
-    if (Boolean.TRUE.equals(user.getPendingVerification())) {
-      // Unverified users can only search for countries
-      query.setType(Location.LocationType.COUNTRY);
+    final Principal principal = DaoUtils.getPrincipalFromContext(context);
+    if (principal instanceof Person user) {
+      query.setUser(user);
+      if (Boolean.TRUE.equals(user.getPendingVerification())) {
+        // Unverified users can only search for countries
+        query.setType(Location.LocationType.COUNTRY);
+      }
     }
-    query.setUser(user);
     return dao.search(query);
   }
 
