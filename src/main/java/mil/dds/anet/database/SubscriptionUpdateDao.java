@@ -119,21 +119,24 @@ public class SubscriptionUpdateDao
     for (final SubscriptionUpdate subscriptionUpdate : subscriptionUpdates) {
       final Subscription subscription = subscriptionUpdate.loadSubscription(context).join();
       final Position subscribedPosition = subscription.loadSubscriber(context).join();
-      final List<String> addresses =
-          getEmailAddressesBasedOnPreference(List.of(subscribedPosition.getPersonUuid()),
-              PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
-      if (!addresses.isEmpty()) {
-        final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
-        action.setSubscriptionUuid(subscriptionUpdate.getSubscriptionUuid());
-        action.setUpdatedObjectType(subscriptionUpdate.getUpdatedObjectType());
-        action.setUpdatedObjectUuid(subscriptionUpdate.getUpdatedObjectUuid());
-        action.setAuditTrailUuid(subscriptionUpdate.getAuditTrailUuid());
-        action.setIsNote(subscriptionUpdate.getIsNote());
-        action.setCreatedAt(subscriptionUpdate.getCreatedAt());
-        final AnetEmail email = new AnetEmail();
-        email.setAction(action);
-        email.setToAddresses(addresses);
-        AnetEmailWorker.sendEmailAsync(email);
+      final String subscribedPersonUuid = subscribedPosition.getPersonUuid();
+      if (subscribedPersonUuid != null) {
+        final List<String> addresses =
+            getEmailAddressesBasedOnPreference(List.of(subscribedPersonUuid),
+                PreferenceDao.PREFERENCE_SUBSCRIPTIONS, PreferenceDao.CATEGORY_EMAILING);
+        if (!addresses.isEmpty()) {
+          final SubscriptionUpdateEmail action = new SubscriptionUpdateEmail();
+          action.setSubscriptionUuid(subscriptionUpdate.getSubscriptionUuid());
+          action.setUpdatedObjectType(subscriptionUpdate.getUpdatedObjectType());
+          action.setUpdatedObjectUuid(subscriptionUpdate.getUpdatedObjectUuid());
+          action.setAuditTrailUuid(subscriptionUpdate.getAuditTrailUuid());
+          action.setIsNote(subscriptionUpdate.getIsNote());
+          action.setCreatedAt(subscriptionUpdate.getCreatedAt());
+          final AnetEmail email = new AnetEmail();
+          email.setAction(action);
+          email.setToAddresses(addresses);
+          AnetEmailWorker.sendEmailAsync(email);
+        }
       }
     }
   }
