@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.1.2":
-  version: 4.1.2
-  resolution: "@apollo/client@npm:4.1.2"
+"@apollo/client@npm:4.1.6":
+  version: 4.1.6
+  resolution: "@apollo/client@npm:4.1.6"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/8c5b2f244e6aa57aee26c2841514dc72ddb3f89940706a633fc72e51241d7138c1876743dc7ab695a421ef3b83186312b4cb37df158e34abc2e762f8e5fb5e2f
+  checksum: 10c0/ff152317932cb0ba46423161d388d1a2bc0bbc6c8ec6e2e85e915bb2ec22f461effa6fd2bbc8b754babd75ac8b52843f1e3ddf8e501cbe1d9b857e4df2f2f2df
   languageName: node
   linkType: hard
 
@@ -7159,7 +7159,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.1.2"
+    "@apollo/client": "npm:4.1.6"
     "@babel/core": "npm:7.29.0"
     "@babel/eslint-parser": "npm:7.28.6"
     "@babel/plugin-proposal-decorators": "npm:7.29.0"
@@ -7258,7 +7258,7 @@ __metadata:
     geographiclib-mgrs: "npm:1.0.4"
     git-describe: "npm:4.1.1"
     graphiql: "npm:5.2.2"
-    graphql: "npm:16.12.0"
+    graphql: "npm:16.13.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
     html-to-image: "npm:1.11.11"
@@ -7269,9 +7269,9 @@ __metadata:
     jest-junit: "npm:16.0.0"
     js-yaml: "npm:4.1.1"
     json-loader: "npm:0.5.7"
-    jsonpath-plus: "npm:10.3.0"
+    jsonpath-plus: "npm:10.4.0"
     keycloak-connect: "npm:26.1.1"
-    keycloak-js: "npm:26.2.2"
+    keycloak-js: "npm:26.2.3"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.2"
@@ -12399,10 +12399,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:16.12.0":
-  version: 16.12.0
-  resolution: "graphql@npm:16.12.0"
-  checksum: 10c0/b6fffa4e8a4e4a9933ebe85e7470b346dbf49050c1a482fac5e03e4a1a7bed2ecd3a4c97e29f04457af929464bc5e4f2aac991090c2f320111eef26e902a5c75
+"graphql@npm:16.13.0":
+  version: 16.13.0
+  resolution: "graphql@npm:16.13.0"
+  checksum: 10c0/c20e7909c6c8d405a30f8caeae5aaf604b9f949bdcdf80bdb3d3561123e6099181c39eae697cf4fcdc5dd301ab215363b8def0aa0ff51f03cc7e4b48a8c2c2b1
   languageName: node
   linkType: hard
 
@@ -14441,9 +14441,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonpath-plus@npm:10.3.0":
-  version: 10.3.0
-  resolution: "jsonpath-plus@npm:10.3.0"
+"jsonpath-plus@npm:10.4.0":
+  version: 10.4.0
+  resolution: "jsonpath-plus@npm:10.4.0"
   dependencies:
     "@jsep-plugin/assignment": "npm:^1.3.0"
     "@jsep-plugin/regex": "npm:^1.0.4"
@@ -14451,7 +14451,7 @@ __metadata:
   bin:
     jsonpath: bin/jsonpath-cli.js
     jsonpath-plus: bin/jsonpath-cli.js
-  checksum: 10c0/f5ff53078ecab98e8afd1dcdb4488e528653fa5a03a32d671f52db1ae9c3236e6e072d75e1949a80929fd21b07603924a586f829b40ad35993fa0247fa4f7506
+  checksum: 10c0/500ace17c7b8d084f9e1284e96761722600909b8ddc1f3a5b18f9152ad9e1d63a61e3d713abd6d7141d4b61e1f632f1eb67b57be6a220b17b215b95ba050af07
   languageName: node
   linkType: hard
 
@@ -14514,10 +14514,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.2.2":
-  version: 26.2.2
-  resolution: "keycloak-js@npm:26.2.2"
-  checksum: 10c0/9a217fdd7f1c4894a517a90349a59320d4e9c13d09c1c9db55689f3dc3f2d73dd36b202e8a774ce725eaa9dd70a051f316e5413647d02f08b03aef6f4734c21c
+"keycloak-js@npm:26.2.3":
+  version: 26.2.3
+  resolution: "keycloak-js@npm:26.2.3"
+  checksum: 10c0/9c08a24c9667d31e0a599f19fc8f475499fe212fc399103a1d22c4a3aa87f5a9f43f62ed9a88929ae52ef9626ba695f02d97ab736d238668834e3f9a9de2096d
   languageName: node
   linkType: hard
 
