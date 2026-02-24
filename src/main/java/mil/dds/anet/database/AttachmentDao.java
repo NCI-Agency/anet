@@ -4,7 +4,6 @@ import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -179,8 +178,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
     }
   }
 
-  public CompletableFuture<List<Attachment>> getAttachmentsForRelatedObject(
-      @GraphQLRootContext GraphQLContext context, String relatedObjectUuid) {
+  public CompletableFuture<List<Attachment>> getAttachmentsForRelatedObject(GraphQLContext context,
+      String relatedObjectUuid) {
     return new ForeignKeyFetcher<Attachment>()
         .load(context, FkDataLoaderKey.ATTACHMENT_RELATED_OBJECT_ATTACHMENTS, relatedObjectUuid)
         .thenApply(ArrayList::new);
@@ -194,8 +193,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
     return new AttachmentRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(
-      @GraphQLRootContext GraphQLContext context, Attachment attachment) {
+  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
+      Attachment attachment) {
     return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
         FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS, attachment.getUuid());
   }

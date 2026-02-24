@@ -3,7 +3,6 @@ package mil.dds.anet.database;
 import static mil.dds.anet.utils.PendingAssessmentsHelper.JSON_ASSESSMENT_RECURRENCE;
 
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,8 +150,8 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
     }
   }
 
-  public CompletableFuture<List<Assessment>> getAssessmentsForRelatedObject(
-      @GraphQLRootContext GraphQLContext context, String relatedObjectUuid) {
+  public CompletableFuture<List<Assessment>> getAssessmentsForRelatedObject(GraphQLContext context,
+      String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
     return new ForeignKeyFetcher<Assessment>()
