@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,7 +18,9 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.client.AnetBeanList_Position;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.Event;
@@ -28,6 +31,7 @@ import mil.dds.anet.test.client.NoteInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionSearchQueryInput;
 import mil.dds.anet.test.client.ReportCancelledReason;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
@@ -35,8 +39,10 @@ import mil.dds.anet.test.client.Subscription;
 import mil.dds.anet.test.client.SubscriptionUpdate;
 import mil.dds.anet.test.client.SubscriptionUpdateSearchQueryInput;
 import mil.dds.anet.test.client.Task;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
 
@@ -58,6 +64,39 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       TaskDao.TABLE_NAME, this::updateTask, //
       AuthorizationGroupDao.TABLE_NAME, this::updateAuthorizationGroup, //
       EventDao.TABLE_NAME, this::updateEvent);
+
+  @Autowired
+  private SubscriptionDao subscriptionDao;
+
+  @Test
+  void testSubscriptionUpdateForUnfilledPosition() {
+    // Subscribe an unfilled position
+    final PositionSearchQueryInput query =
+        PositionSearchQueryInput.builder().withIsFilled(false).withPageSize(1).build();
+    final AnetBeanList_Position foundPositions = withCredentials(adminUser,
+        t -> queryExecutor.positionList(getListFields("{ uuid }"), query));
+    assertThat(foundPositions).isNotNull();
+    assertThat(foundPositions.getList()).hasSize(1);
+    final Position foundPosition = foundPositions.getList().getFirst();
+
+    // Create a subscription
+    final mil.dds.anet.beans.Subscription subscriptionInput = new mil.dds.anet.beans.Subscription();
+    subscriptionInput.setSubscriberUuid(foundPosition.getUuid());
+    subscriptionInput.setSubscribedObjectType(LocationDao.TABLE_NAME);
+    subscriptionInput.setSubscribedObjectUuid(SUBSCRIPTION_TESTS.get(LocationDao.TABLE_NAME));
+    final mil.dds.anet.beans.Subscription subscription = subscriptionDao.insert(subscriptionInput);
+
+    // Update the subscribed object
+    try {
+      UPDATERS.get(subscription.getSubscribedObjectType())
+          .accept(subscription.getSubscribedObjectUuid());
+    } catch (Exception e) {
+      fail("Unexpected exception", e);
+    }
+
+    // Unsubscribe
+    subscriptionDao.delete(subscription.getUuid());
+  }
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
