@@ -6,9 +6,7 @@ interface EventHostMembersTableProps {
   entity: any
 }
 
-export const EventHostMembersTable = ({
-  entity
-}: EventHostMembersTableProps) => {
+const EventHostMembersTable = ({ entity }: EventHostMembersTableProps) => {
   return (
     <>
       {entity?.hostRelatedObjects?.length > 0 ? (

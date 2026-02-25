@@ -6944,12 +6944,13 @@
 		</createTable>
 
 		<addForeignKeyConstraint
-				baseTableName="eventHostRelatedObjects"
-				constraintName="FK_eventHostRelatedObjects_event"
-				baseColumnNames="eventUuid"
-				referencedTableName="events"
-				referencedColumnNames="uuid"
-				onDelete="NO ACTION" onUpdate="NO ACTION" />
+			baseTableName="eventHostRelatedObjects"
+			constraintName="FK_eventHostRelatedObjects_event"
+			baseColumnNames="eventUuid"
+			referencedTableName="events"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
 
 		<!-- Migrate existing event host organizations -->
 		<sql>
@@ -6996,12 +6997,13 @@
 		</createTable>
 
 		<addForeignKeyConstraint
-				baseTableName="eventSeriesHostRelatedObjects"
-				constraintName="FK_eventSeriesHostRelatedObjects_event"
-				baseColumnNames="eventSeriesUuid"
-				referencedTableName="eventSeries"
-				referencedColumnNames="uuid"
-				onDelete="NO ACTION" onUpdate="NO ACTION" />
+			baseTableName="eventSeriesHostRelatedObjects"
+			constraintName="FK_eventSeriesHostRelatedObjects_event"
+			baseColumnNames="eventSeriesUuid"
+			referencedTableName="eventSeries"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
 
 		<!-- Migrate existing events eries host organizations -->
 		<sql>

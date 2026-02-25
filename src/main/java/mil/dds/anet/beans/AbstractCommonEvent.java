@@ -11,7 +11,7 @@ import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class AbstractCommonEvent extends AbstractCustomizableAnetBean
+public abstract class AbstractCommonEvent extends AbstractCustomizableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
   @GraphQLQuery
   @GraphQLInputField

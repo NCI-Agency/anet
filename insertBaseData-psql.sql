@@ -1517,7 +1517,8 @@ INSERT INTO "eventSeries" (uuid, name, description, status, "createdAt", "update
   ('b7b70191-54e4-462f-8e40-679dd2e71ec4', 'NMI PDT', 'NMI pre-deployment training', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b');
 
-INSERT INTO "eventSeriesHostRelatedObjects" SELECT uuid , 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b' FROM "eventSeries";
+INSERT INTO "eventSeriesHostRelatedObjects"
+  SELECT uuid , 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b' FROM "eventSeries";
 
 -- Add events
 INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "locationUuid", "eventSeriesUuid", "ownerOrgUuid", "adminOrgUuid", "startDate", "endDate", "eventTypeUuid") VALUES
@@ -1538,7 +1539,8 @@ INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    '2024-01-08 07:00', '2024-01-12 17:00', '92a69ee6-829e-4a67-88fb-3387f81b6d37');
 
-INSERT INTO "eventHostRelatedObjects" SELECT uuid , 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b' FROM events;
+INSERT INTO "eventHostRelatedObjects"
+  SELECT uuid , 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b' FROM events;
 
 -- Add attachments for event series
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES

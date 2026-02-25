@@ -185,14 +185,14 @@ const EventSeriesForm = ({
                   component={FieldHelper.SpecialField}
                   widget={
                     <RelatedObjectsTableInput
-                      title={pluralize.singular(
+                      title={
                         Settings.fields.eventSeries.hostRelatedObjects?.label
-                      )}
+                      }
                       relatedObjects={values.hostRelatedObjects}
                       objectType={ENTITY_TYPES.ORGANIZATIONS}
                       entityTypes={[
-                        ENTITY_TYPES.POSITIONS,
                         ENTITY_TYPES.ORGANIZATIONS,
+                        ENTITY_TYPES.POSITIONS,
                         ENTITY_TYPES.PEOPLE
                       ]}
                       setRelatedObjects={value =>
