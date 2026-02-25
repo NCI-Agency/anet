@@ -87,7 +87,7 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
           value={Event.humanNameOfStatus(event.status)}
         />
         <p>
-          <b>{Settings.fields.event.hostRelatedObjects}</b>
+          <b>{Settings.fields.event.hostRelatedObjects?.label}</b>
         </p>
         <div className="preview-section">
           <EventHostMembersTable entity={event} />

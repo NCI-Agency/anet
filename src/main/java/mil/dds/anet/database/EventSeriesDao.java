@@ -13,6 +13,7 @@ import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.search.pg.PostgresqlEventSeriesSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -93,8 +94,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
       final EventSeriesDao.EventSeriesBatch rb =
           handle.attach(EventSeriesDao.EventSeriesBatch.class);
 
-      if (eventSeries.getHostRelatedObjects() != null
-          && !eventSeries.getHostRelatedObjects().isEmpty()) {
+      if (!Utils.isEmptyOrNull(eventSeries.getHostRelatedObjects())) {
         rb.insertEventSeriesHostRelatedObjects(eventSeries.getUuid(),
             eventSeries.getHostRelatedObjects());
       }
@@ -124,9 +124,8 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
       final EventSeriesDao.EventSeriesBatch eb =
           handle.attach(EventSeriesDao.EventSeriesBatch.class);
       eb.deleteEventSeriesHostRelatedObjects(DaoUtils.getUuid(eventSeries)); // seems the easiest
-                                                                             // thing to
-      // do
-      if (eventSeries.getHostRelatedObjects() != null) {
+                                                                             // thing to do
+      if (!Utils.isEmptyOrNull(eventSeries.getHostRelatedObjects())) {
         eb.insertEventSeriesHostRelatedObjects(DaoUtils.getUuid(eventSeries),
             eventSeries.getHostRelatedObjects());
       }

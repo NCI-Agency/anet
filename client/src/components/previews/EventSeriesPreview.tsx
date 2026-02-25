@@ -63,7 +63,7 @@ const EventSeriesPreview = ({ className, uuid }: EventSeriesPreviewProps) => {
           value={EventSeries.humanNameOfStatus(eventSeries.status)}
         />
         <p>
-          <b>{Settings.fields.eventSeries.hostRelatedObjects}</b>
+          <b>{Settings.fields.eventSeries.hostRelatedObjects?.label}</b>
         </p>
         <div className="preview-section">
           <EventHostMembersTable entity={eventSeries} />

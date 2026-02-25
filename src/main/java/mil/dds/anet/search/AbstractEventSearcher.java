@@ -58,7 +58,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       addOwnerOrgQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getHostOrgUuid())) {
-      addHostQuery(query);
+      addHostOrgQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
       addAdminOrgQuery(query);
@@ -103,7 +103,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     }
   }
 
-  protected void addHostQuery(EventSearchQuery query) {
+  protected void addHostOrgQuery(EventSearchQuery query) {
     qb.addFromClause(
         "INNER JOIN \"eventHostRelatedObjects\" hosts ON hosts.\"relatedObjectType\" = 'organizations' AND hosts.\"eventUuid\" = events.uuid");
     if (query.getHostOrgUuid().size() == 1

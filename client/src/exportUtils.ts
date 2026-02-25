@@ -1,5 +1,4 @@
 import {
-  gqlHostMembers,
   gqlHostMembersForExport,
   gqlPaginationFields
 } from "constants/GraphQLDefinitions"

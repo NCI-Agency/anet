@@ -21,7 +21,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
 
   private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
   public static final String FIELDS =
-      "{ uuid updatedAt status name description ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid} adminOrg { uuid } }";
+      "{ uuid updatedAt status name description ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid } adminOrg { uuid } }";
 
   @Test
   void eventSeriesTestGraphQL() {
@@ -53,10 +53,10 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventSeriesInput.setOwnerOrg(getOrganizationInput(org));
     failCreateEventSeries(eventSeriesInput);
-    GenericRelatedObjectInput host1 =
+    final GenericRelatedObjectInput host1 =
         GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
             .withRelatedObjectUuid(org.getUuid()).build();
-    GenericRelatedObjectInput host2 =
+    final GenericRelatedObjectInput host2 =
         GenericRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
             .withRelatedObjectUuid(getJackJackson().getUuid()).build();
     eventSeriesInput.setHostRelatedObjects(List.of(host1, host2));

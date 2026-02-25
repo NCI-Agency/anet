@@ -19,6 +19,7 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.pg.PostgresqlEventSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -201,7 +202,7 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
     void insertEventHostRelatedObjects(@Bind("eventUuid") String eventUuid,
         @BindBean List<GenericRelatedObject> eventHostRelatedObjects);
 
-    @SqlUpdate("DELETE FROM \"eventHostRelatedObjects\"" + " WHERE \"eventUuid\" = :eventUuid")
+    @SqlUpdate("DELETE FROM \"eventHostRelatedObjects\" WHERE \"eventUuid\" = :eventUuid")
     void deleteEventHostRelatedObjects(@Bind("eventUuid") String eventUuid);
   }
 
@@ -210,9 +211,8 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
     final Handle handle = getDbHandle();
     try {
       final EventDao.EventBatch eb = handle.attach(EventDao.EventBatch.class);
-      eb.deleteEventHostRelatedObjects(DaoUtils.getUuid(event)); // seems the easiest thing to
-      // do
-      if (event.getHostRelatedObjects() != null && !event.getHostRelatedObjects().isEmpty()) {
+      eb.deleteEventHostRelatedObjects(DaoUtils.getUuid(event)); // seems the easiest thing to do
+      if (!Utils.isEmptyOrNull(event.getHostRelatedObjects())) {
         eb.insertEventHostRelatedObjects(DaoUtils.getUuid(event), event.getHostRelatedObjects());
       }
       return handle.createUpdate("/* updateEvent */ UPDATE events "
