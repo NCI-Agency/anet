@@ -109,14 +109,14 @@ public abstract class AbstractEventSeriesSearcher
         + " OR \"eventSeries\".\"adminOrgUuid\" IN ( <anyOrgUuid> )"
         + " OR events.\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
         + " OR events.\"adminOrgUuid\" IN ( <anyOrgUuid> )" + " OR EXISTS ("
-        + "     SELECT 1 FROM \"eventSeriesHostRelatedObjects\" es_hosts"
-        + "     WHERE es_hosts.\"eventSeriesUuid\" = \"eventSeries\".uuid"
-        + "     AND es_hosts.\"relatedObjectType\" = 'organizations'"
-        + "     AND es_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )" + " )" + " OR EXISTS ("
-        + "     SELECT 1 FROM \"eventHostRelatedObjects\" e_hosts"
-        + "     WHERE e_hosts.\"eventUuid\" = events.uuid"
-        + "     AND e_hosts.\"relatedObjectType\" = 'organizations'"
-        + "     AND e_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )" + " )" + ")");
+        + " SELECT 1 FROM \"eventSeriesHostRelatedObjects\" es_hosts"
+        + " WHERE es_hosts.\"eventSeriesUuid\" = \"eventSeries\".uuid"
+        + " AND es_hosts.\"relatedObjectType\" = 'organizations'"
+        + " AND es_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> ))" + " OR EXISTS ("
+        + " SELECT 1 FROM \"eventHostRelatedObjects\" e_hosts"
+        + " WHERE e_hosts.\"eventUuid\" = events.uuid"
+        + " AND e_hosts.\"relatedObjectType\" = 'organizations'"
+        + " AND e_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )))");
     qb.addListArg("anyOrgUuid", query.getAnyOrgUuid());
   }
 

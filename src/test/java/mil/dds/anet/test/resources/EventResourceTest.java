@@ -29,9 +29,9 @@ public class EventResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       "{ uuid shortName longName description category status customFields }";
   private static final String EVENT_SERIES_FIELDS =
-      "{ uuid status name description ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid} adminOrg { uuid } }";
+      "{ uuid status name description ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid } adminOrg { uuid } }";
   public static final String FIELDS =
-      "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid} adminOrg { uuid }"
+      "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid } adminOrg { uuid }"
           + " updatedAt startDate endDate eventType { uuid } organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
@@ -99,10 +99,10 @@ public class EventResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventInput.setOwnerOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
-    GenericRelatedObjectInput host1 =
+    final GenericRelatedObjectInput host1 =
         GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
             .withRelatedObjectUuid(org.getUuid()).build();
-    GenericRelatedObjectInput host2 =
+    final GenericRelatedObjectInput host2 =
         GenericRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
             .withRelatedObjectUuid(getJackJackson().getUuid()).build();
     eventInput.setHostRelatedObjects(List.of(host1, host2));

@@ -279,6 +279,66 @@ class Page {
     )
   }
 
+  async getOwnerOrganizationInput() {
+    return browser.$("#ownerOrg")
+  }
+
+  async getOwnerOrgAdvancedSelectFirstItem() {
+    return browser.$(
+      "#ownerOrg-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  async getAdminOrganizationInput() {
+    return browser.$("#adminOrg")
+  }
+
+  async getAdminOrgAdvancedSelectFirstItem() {
+    return browser.$(
+      "#adminOrg-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  async waitForOwnerOrgAdvancedSelectToChange(value) {
+    await (await this.getOwnerOrgAdvancedSelectFirstItem()).waitForExist()
+    return browser.waitUntil(
+      async () => {
+        return (
+          (await (
+            await this.getOwnerOrgAdvancedSelectFirstItem()
+          ).getText()) === value
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected owner org advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
+    )
+  }
+
+  async waitForAdminOrgAdvancedSelectToChange(value) {
+    await (await this.getAdminOrgAdvancedSelectFirstItem()).waitForExist()
+    return browser.waitUntil(
+      async () => {
+        return (
+          (await (
+            await this.getAdminOrgAdvancedSelectFirstItem()
+          ).getText()) === value
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected admin org advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
+    )
+  }
+
   async getRelatedObjectsAdvancedSelectFirstItem() {
     return browser.$(
       "#entitySelect-popover tbody tr:first-child td:nth-child(2) span"
@@ -287,6 +347,20 @@ class Page {
 
   async getMemberTypeButton(memberType) {
     return browser.$(`button=${memberType}`)
+  }
+
+  async getHostRelatedObjectsInput() {
+    return browser.$("#hostRelatedObjects")
+  }
+
+  async getRelatedObjectsTable() {
+    return browser.$(".related_objects_table")
+  }
+
+  async getRelatedObjectsTableEntry(relatedObjectText) {
+    return (await this.getRelatedObjectsTable()).$(
+      `.//tr/td/span//a[text()="${relatedObjectText}"]`
+    )
   }
 }
 

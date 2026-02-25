@@ -49,10 +49,10 @@ describe("Create event series page", () => {
         await CreateEventSeries.getOwnerOrgAdvancedSelectFirstItem()
       ).click()
 
-      await (await CreateEventSeries.getRelatedObjectsInput()).click()
+      await (await CreateEventSeries.getHostRelatedObjectsInput()).click()
       // Add an organization
       await (
-        await CreateEventSeries.getRelatedObjectsInput()
+        await CreateEventSeries.getHostRelatedObjectsInput()
       ).setValue(ORGANIZATION)
       await CreateEventSeries.waitForAdvancedSelectToChange(
         ORGANIZATION_COMPLETE,
@@ -78,10 +78,10 @@ describe("Create event series page", () => {
       // Add a position
       await (await CreateEventSeries.getMemberTypeButton("Positions")).click()
       await CreateEventSeries.deleteInput(
-        CreateEventSeries.getRelatedObjectsInput()
+        CreateEventSeries.getHostRelatedObjectsInput()
       )
       await (
-        await CreateEventSeries.getRelatedObjectsInput()
+        await CreateEventSeries.getHostRelatedObjectsInput()
       ).setValue(POSITION)
       await CreateEventSeries.waitForAdvancedSelectToChange(
         POSITION_COMPLETE,
@@ -109,11 +109,13 @@ describe("Create event series page", () => {
       ).to.be.true
 
       // Add a person
-      await (await CreateEventSeries.getHostTypeButton("People")).click()
+      await (await CreateEventSeries.getMemberTypeButton("People")).click()
       await CreateEventSeries.deleteInput(
-        CreateEventSeries.getRelatedObjectsInput()
+        CreateEventSeries.getHostRelatedObjectsInput()
       )
-      await (await CreateEventSeries.getRelatedObjectsInput()).setValue(PERSON)
+      await (
+        await CreateEventSeries.getHostRelatedObjectsInput()
+      ).setValue(PERSON)
       await CreateEventSeries.waitForAdvancedSelectToChange(
         PERSON_COMPLETE,
         CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem

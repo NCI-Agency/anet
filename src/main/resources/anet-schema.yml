@@ -802,7 +802,7 @@ properties:
           ownerOrg:
             "$ref": "#/$defs/inputField"
           hostOrg:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/labeledField"
           adminOrg:
             "$ref": "#/$defs/inputField"
           hostRelatedObjects:
@@ -831,7 +831,7 @@ properties:
           ownerOrg:
             "$ref": "#/$defs/inputField"
           hostOrg:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/labeledField"
           adminOrg:
             "$ref": "#/$defs/inputField"
           eventSeries:
