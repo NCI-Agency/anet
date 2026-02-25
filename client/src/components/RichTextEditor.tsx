@@ -413,6 +413,10 @@ const displayCallback = modelInstance => {
     const caption = modelInstance.caption || modelInstance.fileName
     return (
       <span className="rich-text-image-wrapper">
+        <span className="rich-text-image-classification">
+          {modelInstance.classification &&
+            `[${utils.getConfidentialityLabelForChoice(modelInstance.classification)}]`}
+        </span>
         <img
           className="rich-text-image"
           src={`/api/attachment/view/${modelInstance.uuid}`}
