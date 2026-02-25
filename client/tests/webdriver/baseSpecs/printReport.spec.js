@@ -195,14 +195,25 @@ describe("Show print report page", () => {
       })
     })
     it("Should display attachment images only when enabled", async () => {
-      const attachmentsSection = await browser.$("tr#imageAttachments")
-      expect(await attachmentsSection.isExisting()).to.equal(false)
+      expect(
+        await (await ShowReport.getAttachmentsSection()).isExisting()
+      ).to.equal(false)
 
       await ShowReport.selectOptionalField("imageAttachments")
-      await (await browser.$("tr#imageAttachments")).waitForDisplayed()
+      await (await ShowReport.getAttachmentsSection()).waitForDisplayed()
 
-      const attachmentImages = await browser.$$("tr#imageAttachments img")
-      expect(attachmentImages.length).to.be.equal(1)
+      const attachmentFigures = await ShowReport.getAttachmentFigures()
+      expect(attachmentFigures.length).to.be.equal(1)
+
+      const attachment = await attachmentFigures[0]
+      expect(
+        await (
+          await ShowReport.getAttachmentClassification(attachment)
+        ).getText()
+      ).to.equal("[NATO UNCLASSIFIED]")
+      expect(
+        await (await ShowReport.getAttachmentCaption(attachment)).getText()
+      ).to.equal("Arthur's test report")
     })
   })
   describe("When on the print page of a report without classification", () => {

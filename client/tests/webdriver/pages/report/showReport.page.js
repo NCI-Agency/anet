@@ -290,6 +290,22 @@ class ShowReport extends Page {
   async getNextStepsList() {
     return browser.$$("#nextSteps > ul > li")
   }
+
+  async getAttachmentsSection() {
+    return browser.$("tr#imageAttachments")
+  }
+
+  async getAttachmentFigures() {
+    return (await this.getAttachmentsSection()).$$("figure")
+  }
+
+  async getAttachmentClassification(attachment) {
+    return attachment.$("span")
+  }
+
+  async getAttachmentCaption(attachment) {
+    return attachment.$("figcaption")
+  }
 }
 
 export default new ShowReport()

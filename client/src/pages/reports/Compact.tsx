@@ -424,6 +424,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                       <AttachmentsListS>
                         {imageAttachmentsForSection.map(attachment => (
                           <AttachmentFigureS key={attachment.uuid}>
+                            <AttachmentClassificationS>
+                              {attachment.classification &&
+                                `[${utils.getConfidentialityLabelForChoice(attachment.classification)}]`}
+                            </AttachmentClassificationS>
                             <AttachmentImageS
                               src={`/api/attachment/view/${attachment.uuid}`}
                               alt={attachment.caption || attachment.fileName}
@@ -656,6 +660,8 @@ const AttachmentsListS = styled.div`
 `
 
 const AttachmentFigureS = styled.figure`
+  position: relative;
+  text-align: center;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -675,10 +681,19 @@ const AttachmentImageS = styled.img`
   object-fit: contain;
 `
 
-const AttachmentCaptionS = styled.figcaption`
-  font-size: 13px;
+const AttachmentClassificationS = styled.span`
+  font-size: 12px;
   color: #445566;
-  text-align: center;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+`
+
+const AttachmentCaptionS = styled.figcaption`
+  font-size: 12px;
+  color: #445566;
 `
 
 const OPTIONAL_FIELDS_INIT = {
