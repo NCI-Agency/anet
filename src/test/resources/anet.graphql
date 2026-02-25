@@ -1,23 +1,4 @@
 """"""
-type AbstractCommonEvent {
-  adminOrg: Organization
-  assessments: [Assessment]
-  attachments: [Attachment]
-  createdAt: Instant
-  customFields: String
-  customSensitiveInformation: [CustomSensitiveInformation]
-  description: String
-  entityAvatar: EntityAvatar
-  isSubscribed: Boolean
-  name: String
-  notes: [Note]
-  ownerOrg: Organization
-  status: Status
-  updatedAt: Instant
-  uuid: String
-}
-
-""""""
 type AccessToken {
   accessTokenActivities: [AccessTokenActivity]
   createdAt: Instant
@@ -1434,7 +1415,7 @@ enum RecurseStrategy {
 }
 
 """"""
-union RelatableObject = AbstractCommonEvent | AccessToken | Assessment | Attachment | AuthorizationGroup | Event | EventSeries | EventType | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
+union RelatableObject = AccessToken | Assessment | Attachment | AuthorizationGroup | Event | EventSeries | EventType | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
 
 """"""
 type Report {
@@ -1756,7 +1737,7 @@ enum Status {
 }
 
 """"""
-union SubscribableObject = AbstractCommonEvent | AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
+union SubscribableObject = AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
 
 """"""
 type Subscription {

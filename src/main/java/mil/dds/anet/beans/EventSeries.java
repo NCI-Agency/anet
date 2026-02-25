@@ -7,7 +7,8 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class EventSeries extends AbstractCommonEvent {
+public class EventSeries extends AbstractCommonEvent
+    implements RelatableObject, SubscribableObject {
   // annotated below
   private List<GenericRelatedObject> hostRelatedObjects;
 
@@ -30,5 +31,10 @@ public class EventSeries extends AbstractCommonEvent {
 
   public List<GenericRelatedObject> getHostRelatedObjects() {
     return hostRelatedObjects;
+  }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
   }
 }
