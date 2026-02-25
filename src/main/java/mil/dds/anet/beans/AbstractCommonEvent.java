@@ -12,7 +12,7 @@ import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
 public abstract class AbstractCommonEvent extends AbstractCustomizableAnetBean
-    implements RelatableObject, SubscribableObject, WithStatus {
+    implements WithStatus {
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
@@ -168,10 +168,5 @@ public abstract class AbstractCommonEvent extends AbstractCustomizableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), status, name, description, ownerOrg, adminOrg);
-  }
-
-  @Override
-  public String getObjectLabel() {
-    return getName();
   }
 }

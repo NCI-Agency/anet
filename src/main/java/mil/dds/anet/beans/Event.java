@@ -16,7 +16,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Event extends AbstractCommonEvent {
+public class Event extends AbstractCommonEvent implements RelatableObject, SubscribableObject {
 
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
@@ -305,5 +305,10 @@ public class Event extends AbstractCommonEvent {
   public int hashCode() {
     return Objects.hash(super.hashCode(), eventType, startDate, endDate, outcomes, tasks,
         organizations, people, eventSeries, location);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
   }
 }
