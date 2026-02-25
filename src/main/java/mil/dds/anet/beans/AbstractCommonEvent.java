@@ -12,7 +12,7 @@ import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
 public abstract class AbstractCommonEvent extends AbstractCustomizableAnetBean
-    implements RelatableObject, SubscribableObject, WithStatus {
+    implements WithStatus {
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
