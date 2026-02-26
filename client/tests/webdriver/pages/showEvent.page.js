@@ -68,7 +68,7 @@ class ShowEvent extends Page {
   }
 
   async getEditAttachmentsButton() {
-    return await browser.$("#edit-attachments")
+    return browser.$("#edit-attachments")
   }
 
   async getEntityAvatar() {
