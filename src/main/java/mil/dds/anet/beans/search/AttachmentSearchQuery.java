@@ -14,6 +14,9 @@ public class AttachmentSearchQuery extends SubscribableObjectSearchQuery<Attachm
   @GraphQLQuery
   @GraphQLInputField
   private String authorUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String relatedObjectUuid;
 
   public AttachmentSearchQuery() {
     super(AttachmentSearchSortBy.CREATED_AT);
@@ -42,6 +45,14 @@ public class AttachmentSearchQuery extends SubscribableObjectSearchQuery<Attachm
 
   public void setAuthorUuid(String authorUuid) {
     this.authorUuid = authorUuid;
+  }
+
+  public String getRelatedObjectUuid() {
+    return relatedObjectUuid;
+  }
+
+  public void setRelatedObjectUuid(String relatedObjectUuid) {
+    this.relatedObjectUuid = relatedObjectUuid;
   }
 
   @Override

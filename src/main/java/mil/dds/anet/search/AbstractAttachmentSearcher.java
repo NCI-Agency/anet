@@ -63,6 +63,14 @@ public abstract class AbstractAttachmentSearcher
 
     qb.addStringEqualsClause("authorUuid", "attachments.\"authorUuid\"", query.getAuthorUuid());
 
+    if (query.getRelatedObjectUuid() != null) {
+      // Search for attachments related to a given object
+      qb.addWhereClause("attachments.uuid IN"
+          + " (SELECT aro.\"attachmentUuid\" FROM \"attachmentRelatedObjects\" aro"
+          + " WHERE aro.\"relatedObjectUuid\" = :relatedObjectUuid)");
+      qb.addSqlArg("relatedObjectUuid", query.getRelatedObjectUuid());
+    }
+
     if (hasTextQuery(query)) {
       addTextQuery(query);
     }

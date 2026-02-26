@@ -15,6 +15,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as Models from "models"
 import pluralize from "pluralize"
@@ -84,8 +85,7 @@ const widgetPropsPosition = {
   addon: POSITIONS_ICON
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-const generateLocationFilters = (filter, _) => {
+const generateLocationFilters = filter => {
   if (!filter?.typeFilter) {
     return entityFilters
   } else {
@@ -129,8 +129,18 @@ const widgetPropsAuthorizationGroup = {
   addon: COMMUNITIES_ICON
 }
 
-const generateAttachmentFilters = (_, currentUser) => {
+const generateAttachmentFilters = (_, currentUser, mainObject) => {
+  const filters = {}
+  if (mainObject?.uuid) {
+    filters.objectAttachments = {
+      label: "Attached here",
+      queryVars: {
+        relatedObjectUuid: mainObject.uuid
+      }
+    }
+  }
   return {
+    ...filters,
     myAttachments: {
       label: "My attachments",
       queryVars: {
@@ -239,6 +249,7 @@ const MultiTypeAdvancedSelectComponent = ({
   className
 }: MultiTypeAdvancedSelectComponentProps) => {
   const { currentUser } = useContext(AppContext)
+  const mainObject = useContext(AttachmentContext)
   const [entityType, setEntityType] = useState(
     objectType ||
       ALL_ENTITY_TYPES.find(et => entityTypes.includes(et)) ||
@@ -265,7 +276,7 @@ const MultiTypeAdvancedSelectComponent = ({
   const filterElement = filters?.find(f => f?.[entityType])?.[entityType] ?? {}
   const filterDefs =
     typeof advancedSelectProps.filterDefs === "function"
-      ? advancedSelectProps.filterDefs(filterElement, currentUser)
+      ? advancedSelectProps.filterDefs(filterElement, currentUser, mainObject)
       : { ...advancedSelectProps.filterDefs, ...filterElement }
 
   return (

@@ -172,10 +172,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final CreateLocationAttachmentsResult result =
         testCreateLocationAttachments(testAttachmentInput);
 
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 3;
+    testFindAttachmentsByRelatedObject(testLocation.getUuid(), totalNrOfAttachments);
+
     // Check the location
     final Location location = withCredentials(jackUser,
         t -> queryExecutor.location(OBJECT_FIELDS, testLocation.getUuid()));
-    assertThat(location.getAttachments()).hasSize(nrOfAttachments + 3);
+    assertThat(location.getAttachments()).hasSize(totalNrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment superuserAttachment1 = location.getAttachments().stream()
         .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
@@ -297,10 +301,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final CreateOrganizationAttachmentsResult result =
         testCreateOrganizationAttachments(testAttachmentInput);
 
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 3;
+    testFindAttachmentsByRelatedObject(testOrganization.getUuid(), totalNrOfAttachments);
+
     // Check the organization
     final Organization organization = withCredentials(jackUser,
         t -> queryExecutor.organization(OBJECT_FIELDS, testOrganization.getUuid()));
-    assertThat(organization.getAttachments()).hasSize(nrOfAttachments + 3);
+    assertThat(organization.getAttachments()).hasSize(totalNrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment superuserAttachment1 = organization.getAttachments().stream()
         .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
@@ -436,10 +444,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final CreatePositionAttachmentsResult result =
         testCreatePositionAttachments(testAttachmentInput);
 
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 3;
+    testFindAttachmentsByRelatedObject(testPosition.getUuid(), totalNrOfAttachments);
+
     // Check the position
     final Position position = withCredentials(jackUser,
         t -> queryExecutor.position(OBJECT_FIELDS, testPosition.getUuid()));
-    assertThat(position.getAttachments()).hasSize(nrOfAttachments + 3);
+    assertThat(position.getAttachments()).hasSize(totalNrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment superuserAttachment1 = position.getAttachments().stream()
         .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
@@ -574,10 +586,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     // Test attachment create
     final CreateReportAttachmentsResult result = testCreateReportAttachment(testAttachmentInput);
 
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 2;
+    testFindAttachmentsByRelatedObject(testReport.getUuid(), totalNrOfAttachments);
+
     // Check the report
     final Report report =
         withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, testReport.getUuid()));
-    assertThat(report.getAttachments()).hasSize(nrOfAttachments + 2);
+    assertThat(report.getAttachments()).hasSize(totalNrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment authorAttachment = report.getAttachments().stream()
         .filter(a -> result.authorAttachmentUuid().equals(a.getUuid())).findAny().get();
@@ -677,10 +693,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     // Test attachment create
     final CreatePersonAttachmentsResult result = testCreatePersonAttachments(testAttachmentInput);
 
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 4;
+    testFindAttachmentsByRelatedObject(testPerson.getUuid(), totalNrOfAttachments);
+
     // Check the person
     final Person person =
         withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, testPerson.getUuid()));
-    assertThat(person.getAttachments()).hasSize(nrOfAttachments + 4);
+    assertThat(person.getAttachments()).hasSize(totalNrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment userAttachment = person.getAttachments().stream()
         .filter(a -> result.userAttachmentUuid().equals(a.getUuid())).findAny().get();
@@ -805,6 +825,17 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
     person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 4);
+  }
+
+  private void testFindAttachmentsByRelatedObject(String relatedObjectUuid, int nrOfAttachments) {
+    final AttachmentSearchQueryInput query = AttachmentSearchQueryInput.builder()
+        .withRelatedObjectUuid(relatedObjectUuid).withPageSize(0).build();
+    final AnetBeanList_Attachment result = withCredentials(jackUser,
+        t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), query));
+    assertThat(result.getTotalCount()).isEqualTo(nrOfAttachments);
+    assertThat(result.getList()).hasSize(nrOfAttachments);
+    assertThat(result.getList()).allMatch(a -> a.getAttachmentRelatedObjects().getFirst()
+        .getRelatedObjectUuid().equals(relatedObjectUuid));
   }
 
   @Test
