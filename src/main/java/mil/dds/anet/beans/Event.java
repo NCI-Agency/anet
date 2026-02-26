@@ -33,9 +33,6 @@ public class Event extends AbstractCommonEvent implements RelatableObject, Subsc
   // annotated below
   private List<GenericRelatedObject> hostRelatedObjects;
 
-  // annotated below
-  private EntityAvatar entityAvatar;
-
   // Lazy Loaded
   // annotated below
   List<Task> tasks;
@@ -240,28 +237,6 @@ public class Event extends AbstractCommonEvent implements RelatableObject, Subsc
     query.setBatchParams(new FkBatchParams<>("reports", "\"eventUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
     return engine().getReportDao().getReportsBySearch(context, uuid, query);
-  }
-
-  @GraphQLQuery(name = "entityAvatar")
-  public CompletableFuture<EntityAvatar> loadEntityAvatar(
-      @GraphQLRootContext GraphQLContext context) {
-    if (entityAvatar != null) {
-      return CompletableFuture.completedFuture(entityAvatar);
-    }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
-        .thenApply(o -> {
-          entityAvatar = o;
-          return o;
-        });
-  }
-
-  @GraphQLInputField(name = "entityAvatar")
-  public void setEntityAvatar(EntityAvatar entityAvatar) {
-    this.entityAvatar = entityAvatar;
-  }
-
-  public EntityAvatar getEntityAvatar() {
-    return this.entityAvatar;
   }
 
   @GraphQLQuery(name = "hostRelatedObjects")
