@@ -104,19 +104,19 @@ public abstract class AbstractEventSeriesSearcher
   }
 
   private void addAnyOrgQuery(EventSeriesSearchQuery query) {
+    qb.addFromClause("LEFT JOIN \"eventSeriesHostRelatedObjects\" es_hosts"
+        + " ON es_hosts.\"relatedObjectType\" = 'organizations'"
+        + " AND es_hosts.\"eventSeriesUuid\" = \"eventSeries\".uuid");
     qb.addFromClause("LEFT JOIN events ON \"eventSeries\".uuid = events.\"eventSeriesUuid\"");
+    qb.addFromClause("LEFT JOIN \"eventHostRelatedObjects\" e_hosts"
+        + " ON e_hosts.\"relatedObjectType\" = 'organizations'"
+        + " AND e_hosts.\"eventUuid\" = events.uuid");
     qb.addWhereClause("(\"eventSeries\".\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR es_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )"
         + " OR \"eventSeries\".\"adminOrgUuid\" IN ( <anyOrgUuid> )"
         + " OR events.\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
-        + " OR events.\"adminOrgUuid\" IN ( <anyOrgUuid> )" + " OR EXISTS ("
-        + " SELECT 1 FROM \"eventSeriesHostRelatedObjects\" es_hosts"
-        + " WHERE es_hosts.\"eventSeriesUuid\" = \"eventSeries\".uuid"
-        + " AND es_hosts.\"relatedObjectType\" = 'organizations'"
-        + " AND es_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> ))" + " OR EXISTS ("
-        + " SELECT 1 FROM \"eventHostRelatedObjects\" e_hosts"
-        + " WHERE e_hosts.\"eventUuid\" = events.uuid"
-        + " AND e_hosts.\"relatedObjectType\" = 'organizations'"
-        + " AND e_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )))");
+        + " OR e_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )"
+        + " OR events.\"adminOrgUuid\" IN ( <anyOrgUuid> ))");
     qb.addListArg("anyOrgUuid", query.getAnyOrgUuid());
   }
 
