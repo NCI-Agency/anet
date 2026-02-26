@@ -27,6 +27,7 @@ import {
 import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
@@ -560,498 +561,440 @@ const ReportForm = ({
           values.event?.uuid && values.event?.location?.uuid
 
         return (
-          <div className="report-form">
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <MessagesWithConflict
-              error={saveError}
-              objectType="Report"
-              onCancel={onCancel}
-              onConfirm={() => {
-                resetForm({ values, isSubmitting: true })
-                onSubmit(values, { resetForm, setSubmitting }, true)
-              }}
-            />
-            <LocationModal
-              show={showCreateLocationModal}
-              onHide={() => {
-                setShowCreateLocationModal(false)
-                setNewLocationCoords(null)
-              }}
-              coords={newLocationCoords}
-              setFieldTouched={setFieldTouched}
-              setFieldValue={setFieldValue}
-            />
+          <AttachmentContext.Provider value={values}>
+            <div className="report-form">
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <MessagesWithConflict
+                error={saveError}
+                objectType="Report"
+                onCancel={onCancel}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
+              <LocationModal
+                show={showCreateLocationModal}
+                onHide={() => {
+                  setShowCreateLocationModal(false)
+                  setNewLocationCoords(null)
+                }}
+                coords={newLocationCoords}
+                setFieldTouched={setFieldTouched}
+                setFieldValue={setFieldValue}
+              />
 
-            {showAssignedPositionWarning && (
-              <div className="alert alert-warning" style={alertStyle}>
-                You cannot submit a report: you do not have a primary position
-                assigned.
-                <br />
-                Please contact your organization's superuser(s) to be assigned
-                to one.
-                <br />
-                If you are unsure, you can also contact the support team{" "}
-                {supportEmailMessage}.
-              </div>
-            )}
+              {showAssignedPositionWarning && (
+                <div className="alert alert-warning" style={alertStyle}>
+                  You cannot submit a report: you do not have a primary position
+                  assigned.
+                  <br />
+                  Please contact your organization's superuser(s) to be assigned
+                  to one.
+                  <br />
+                  If you are unsure, you can also contact the support team{" "}
+                  {supportEmailMessage}.
+                </div>
+              )}
 
-            {showActivePositionWarning && (
-              <div className="alert alert-warning" style={alertStyle}>
-                You cannot submit a report: your assigned position has an
-                inactive status.
-                <br />
-                Please contact your organization's superusers and request them
-                to assign you to an active position.
-                <br />
-                If you are unsure, you can also contact the support team{" "}
-                {supportEmailMessage}.
-              </div>
-            )}
+              {showActivePositionWarning && (
+                <div className="alert alert-warning" style={alertStyle}>
+                  You cannot submit a report: your assigned position has an
+                  inactive status.
+                  <br />
+                  Please contact your organization's superusers and request them
+                  to assign you to an active position.
+                  <br />
+                  If you are unsure, you can also contact the support team{" "}
+                  {supportEmailMessage}.
+                </div>
+              )}
 
-            <Form className="form-horizontal" method="post">
-              <Fieldset title={title} action={action} />
-              <Fieldset>
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.confidentialityLabel}
-                  name="classification"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={classificationButtons}
-                  enableClear
-                  onChange={value => setFieldValue("classification", value)}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.report.intent}
-                  name="intent"
-                  component={FieldHelper.InputField}
-                  asA="textarea"
-                  maxLength={Settings.maxTextFieldLength}
-                  onChange={event => {
-                    setFieldTouched("intent", true, false)
-                    setFieldValue("intent", event.target.value, false)
-                    validateFieldDebounced("intent")
-                  }}
-                  onKeyUp={event =>
-                    countCharsLeft(
-                      "intentCharsLeft",
-                      Settings.maxTextFieldLength,
-                      event
-                    )
-                  }
-                  extraColElem={
-                    <>
-                      <span id="intentCharsLeft">
-                        {Settings.maxTextFieldLength -
-                          initialValues.intent.length}
-                      </span>{" "}
-                      characters remaining
-                    </>
-                  }
-                  className="meeting-goal"
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.report.engagementDate}
-                  name="engagementDate"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
-                    setFieldValue("engagementDate", value, true)
-                    setEngagementDate(value)
-                  }}
-                  onBlur={() => setFieldTouched("engagementDate")}
-                  widget={
-                    <CustomDateInput
-                      id="engagementDate"
-                      withTime={Settings.engagementsIncludeTimeAndDuration}
-                    />
-                  }
-                >
-                  {isFutureEngagement && (
-                    <FormBS.Text>
-                      <span className="text-success">
-                        This will create a planned engagement
-                      </span>
-                    </FormBS.Text>
-                  )}
-                </DictionaryField>
-
-                {Settings.engagementsIncludeTimeAndDuration && (
+              <Form className="form-horizontal" method="post">
+                <Fieldset title={title} action={action} />
+                <Fieldset>
                   <DictionaryField
                     wrappedComponent={FastField}
-                    dictProps={Settings.fields.report.duration}
-                    name="duration"
+                    dictProps={Settings.confidentialityLabel}
+                    name="classification"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={classificationButtons}
+                    enableClear
+                    onChange={value => setFieldValue("classification", value)}
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.report.intent}
+                    name="intent"
                     component={FieldHelper.InputField}
-                    inputType="number"
-                    onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
+                    asA="textarea"
+                    maxLength={Settings.maxTextFieldLength}
                     onChange={event => {
-                      const safeVal =
-                        utils.preventNegativeAndLongDigits(
-                          event.target.value,
-                          4
-                        ) || null
-                      setFieldTouched("duration", true, false)
-                      setFieldValue("duration", safeVal, false)
-                      validateFieldDebounced("duration")
+                      setFieldTouched("intent", true, false)
+                      setFieldValue("intent", event.target.value, false)
+                      validateFieldDebounced("intent")
                     }}
+                    onKeyUp={event =>
+                      countCharsLeft(
+                        "intentCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
+                    }
+                    extraColElem={
+                      <>
+                        <span id="intentCharsLeft">
+                          {Settings.maxTextFieldLength -
+                            initialValues.intent.length}
+                        </span>{" "}
+                        characters remaining
+                      </>
+                    }
+                    className="meeting-goal"
                   />
-                )}
 
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.report.event}
-                  name="event"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("event", value, true)
-                    if (value?.location?.uuid) {
-                      setFieldValue("location", value?.location)
-                      setLocationUuid(value?.location?.uuid)
-                    }
-                    // If event selected and engagementDate empty assign start date of the event
-                    if (value?.startDate && !engagementDate) {
-                      setFieldValue("engagementDate", value?.startDate)
-                    }
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="event"
-                      placeholder={Settings.fields.report.event.placeholder}
-                      value={values.event}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={EventOverlayRow}
-                      filterDefs={eventFilters}
-                      objectType={Event}
-                      fields={Event.autocompleteQuery}
-                      valueKey="name"
-                      addon={EVENTS_ICON}
-                    />
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.report.location}
-                  name="location"
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <>
-                      <AdvancedSingleSelect
-                        fieldName="location"
-                        placeholder={
-                          Settings.fields.report.location.placeholder
-                        }
-                        value={values.location}
-                        overlayColumns={["Name"]}
-                        overlayTable={HierarchicalLocationOverlayTable}
-                        restrictSelectableItems
-                        filterDefs={locationFilters}
-                        objectType={Location}
-                        fields={locationFields}
-                        valueKey="name"
-                        addon={LOCATIONS_ICON}
-                        pageSize={0}
-                        showRemoveButton={!locationDisabled}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value, true)
-                          setLocationUuid(value?.uuid)
-                        }}
-                        disabled={locationDisabled}
-                        createEntityComponent={
-                          !canCreateLocation
-                            ? null
-                            : (searchTerms, setDoReset) => (
-                                <CreateNewLocation
-                                  name={searchTerms}
-                                  setFieldTouched={setFieldTouched}
-                                  setFieldValue={setFieldValue}
-                                  setDoReset={setDoReset}
-                                />
-                              )
-                        }
-                      />
-                      {!locationDisabled && (
-                        <div className="mt-3">
-                          <LeafletWithSelection
-                            mapId="report-location"
-                            location={values.location}
-                            onSelectAnetLocation={(loc: any) => {
-                              setFieldTouched("location", true, false)
-                              setFieldValue("location", loc, true)
-                              setLocationUuid(loc.uuid)
-                            }}
-                            allowCreateLocation={canCreateLocation}
-                            onCreateLocation={({ lat, lng }) => {
-                              setNewLocationCoords({ lat, lng })
-                              setShowCreateLocationModal(true)
-                            }}
-                          />
-                        </div>
-                      )}
-                    </>
-                  }
-                  extraColElem={
-                    <>
-                      {visitBan ? (
-                        <Button variant="outline-secondary">
-                          <Icon
-                            icon={IconNames.WARNING_SIGN}
-                            intent={Intent.WARNING}
-                            size={IconSize.STANDARD}
-                            style={{ margin: "0 6px" }}
-                          />
-                          This location might not be available at the engagement
-                          date due to a visit ban!
-                        </Button>
-                      ) : undefined}
-                      <FieldHelper.FieldShortcuts
-                        title="Recent Locations"
-                        shortcuts={
-                          !values.event?.uuid &&
-                          recents.locations.filter(
-                            l => values.location?.uuid !== l.uuid
-                          )
-                        }
-                        fieldName="location"
-                        objectType={Location}
-                        curValue={values.location}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value, true)
-                          setLocationUuid(value?.uuid)
-                        }}
-                        handleAddItem={FieldHelper.handleSingleSelectAddItem}
-                      />
-                    </>
-                  }
-                />
-
-                {!isFutureEngagement && (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.report.cancelled}
-                    name="cancelled"
-                    component={FieldHelper.SpecialField}
-                    widget={
-                      <FormBS.Check
-                        type="checkbox"
-                        label="This engagement was cancelled"
-                        className="cancelled-checkbox"
-                        checked={values.cancelled}
-                        onClick={event =>
-                          event.target.checked &&
-                          !values.cancelledReason &&
-                          // set a default reason when cancelled has been checked and no reason has been selected
-                          setFieldValue(
-                            "cancelledReason",
-                            cancelledReasonOptions[0].value,
-                            true
-                          )
-                        }
-                      />
-                    }
-                  />
-                )}
-                {!isFutureEngagement && values.cancelled && (
                   <DictionaryField
                     wrappedComponent={Field}
-                    dictProps={Settings.fields.report.cancelledReason}
-                    name="cancelledReason"
+                    dictProps={Settings.fields.report.engagementDate}
+                    name="engagementDate"
                     component={FieldHelper.SpecialField}
-                    onChange={event => {
-                      // validation will be done by setFieldValue
-                      setFieldValue("cancelledReason", event.target.value, true)
+                    onChange={value => {
+                      setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
+                      setFieldValue("engagementDate", value, true)
+                      setEngagementDate(value)
                     }}
+                    onBlur={() => setFieldTouched("engagementDate")}
                     widget={
-                      <FormBS.Select className="cancelled-reason-form-group">
-                        {cancelledReasonOptions.map(reason => (
-                          <option key={reason.value} value={reason.value}>
-                            {reason.label}
-                          </option>
-                        ))}
-                      </FormBS.Select>
-                    }
-                  />
-                )}
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.report.reportCommunities}
-                  name="reportCommunities"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("reportCommunities", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("reportCommunities", value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="reportCommunities"
-                      value={values.reportCommunities}
-                      renderSelected={
-                        <AuthorizationGroupTable
-                          authorizationGroups={values.reportCommunities}
-                          noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected; click in the box above to select any`}
-                          showDelete
-                        />
-                      }
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={AuthorizationGroupOverlayRow}
-                      filterDefs={reportCommunitiesFilters}
-                      objectType={AuthorizationGroup}
-                      fields={AuthorizationGroup.autocompleteQuery}
-                      addon={COMMUNITIES_ICON}
-                    />
-                  }
-                />
-              </Fieldset>
-
-              <Fieldset
-                title={
-                  !values.cancelled && !isFutureEngagement
-                    ? "People involved in this engagement"
-                    : "People who will be involved in this planned engagement"
-                }
-                id="reportPeople-fieldset"
-              >
-                <Field
-                  name="reportPeople"
-                  label="Attendees"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    updateReportPeople(
-                      setFieldValue,
-                      setFieldTouched,
-                      "reportPeople",
-                      value
-                    )
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="reportPeople"
-                      placeholder="Search for people involved in this engagement…"
-                      value={values.reportPeople}
-                      renderSelected={
-                        <ReportPeople
-                          report={
-                            new Report({
-                              uuid: values.uuid,
-                              engagementDate: values.engagementDate,
-                              duration: Number.parseInt(values.duration) || 0,
-                              reportPeople: values.reportPeople
-                            })
-                          }
-                          onChange={value =>
-                            setFieldValue("reportPeople", value, true)
-                          }
-                          showDelete
-                        />
-                      }
-                      overlayColumns={[
-                        "Name",
-                        "Position",
-                        "Location",
-                        "Organization"
-                      ]}
-                      overlayRenderRow={item =>
-                        PersonDetailedOverlayRow(item, values.engagementDate)
-                      }
-                      filterDefs={reportPeopleFilters}
-                      objectType={Person}
-                      fields={reportPeopleAutocompleteQuery}
-                      addon={PEOPLE_ICON}
-                    />
-                  }
-                  extraColElem={
-                    <>
-                      <FieldHelper.FieldShortcuts
-                        title="Recent attendees"
-                        shortcuts={recents.persons.filter(
-                          ra =>
-                            !values.reportPeople?.find(
-                              person => person.uuid === ra.uuid
-                            )
-                        )}
-                        fieldName="reportPeople"
-                        objectType={Person}
-                        curValue={values.reportPeople}
-                        onChange={value => {
-                          updateReportPeople(
-                            setFieldValue,
-                            setFieldTouched,
-                            "reportPeople",
-                            value
-                          )
-                        }}
-                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                      <CustomDateInput
+                        id="engagementDate"
+                        withTime={Settings.engagementsIncludeTimeAndDuration}
                       />
-                    </>
-                  }
-                />
-              </Fieldset>
+                    }
+                  >
+                    {isFutureEngagement && (
+                      <FormBS.Text>
+                        <span className="text-success">
+                          This will create a planned engagement
+                        </span>
+                      </FormBS.Text>
+                    )}
+                  </DictionaryField>
 
-              {!_isEmpty(tasksFilters) && (
-                <Fieldset
-                  title={Settings.fields.task.longLabel}
-                  className="tasks-selector"
-                >
-                  <Field
-                    name="tasks"
-                    label={Settings.fields.task.longLabel}
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.report.duration}
+                      name="duration"
+                      component={FieldHelper.InputField}
+                      inputType="number"
+                      onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
+                      onChange={event => {
+                        const safeVal =
+                          utils.preventNegativeAndLongDigits(
+                            event.target.value,
+                            4
+                          ) || null
+                        setFieldTouched("duration", true, false)
+                        setFieldValue("duration", safeVal, false)
+                        validateFieldDebounced("duration")
+                      }}
+                    />
+                  )}
+
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.report.event}
+                    name="event"
                     component={FieldHelper.SpecialField}
                     onChange={value => {
                       // validation will be done by setFieldValue
-                      setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                      setFieldValue("tasks", value, true)
-                      setReportTasks(value)
+                      setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("event", value, true)
+                      if (value?.location?.uuid) {
+                        setFieldValue("location", value?.location)
+                        setLocationUuid(value?.location?.uuid)
+                      }
+                      // If event selected and engagementDate empty assign start date of the event
+                      if (value?.startDate && !engagementDate) {
+                        setFieldValue("engagementDate", value?.startDate)
+                      }
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="event"
+                        placeholder={Settings.fields.report.event.placeholder}
+                        value={values.event}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={EventOverlayRow}
+                        filterDefs={eventFilters}
+                        objectType={Event}
+                        fields={Event.autocompleteQuery}
+                        valueKey="name"
+                        addon={EVENTS_ICON}
+                      />
+                    }
+                  />
+
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.report.location}
+                    name="location"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <>
+                        <AdvancedSingleSelect
+                          fieldName="location"
+                          placeholder={
+                            Settings.fields.report.location.placeholder
+                          }
+                          value={values.location}
+                          overlayColumns={["Name"]}
+                          overlayTable={HierarchicalLocationOverlayTable}
+                          restrictSelectableItems
+                          filterDefs={locationFilters}
+                          objectType={Location}
+                          fields={locationFields}
+                          valueKey="name"
+                          addon={LOCATIONS_ICON}
+                          pageSize={0}
+                          showRemoveButton={!locationDisabled}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("location", value, true)
+                            setLocationUuid(value?.uuid)
+                          }}
+                          disabled={locationDisabled}
+                          createEntityComponent={
+                            !canCreateLocation
+                              ? null
+                              : (searchTerms, setDoReset) => (
+                                  <CreateNewLocation
+                                    name={searchTerms}
+                                    setFieldTouched={setFieldTouched}
+                                    setFieldValue={setFieldValue}
+                                    setDoReset={setDoReset}
+                                  />
+                                )
+                          }
+                        />
+                        {!locationDisabled && (
+                          <div className="mt-3">
+                            <LeafletWithSelection
+                              mapId="report-location"
+                              location={values.location}
+                              onSelectAnetLocation={(loc: any) => {
+                                setFieldTouched("location", true, false)
+                                setFieldValue("location", loc, true)
+                                setLocationUuid(loc.uuid)
+                              }}
+                              allowCreateLocation={canCreateLocation}
+                              onCreateLocation={({ lat, lng }) => {
+                                setNewLocationCoords({ lat, lng })
+                                setShowCreateLocationModal(true)
+                              }}
+                            />
+                          </div>
+                        )}
+                      </>
+                    }
+                    extraColElem={
+                      <>
+                        {visitBan ? (
+                          <Button variant="outline-secondary">
+                            <Icon
+                              icon={IconNames.WARNING_SIGN}
+                              intent={Intent.WARNING}
+                              size={IconSize.STANDARD}
+                              style={{ margin: "0 6px" }}
+                            />
+                            This location might not be available at the
+                            engagement date due to a visit ban!
+                          </Button>
+                        ) : undefined}
+                        <FieldHelper.FieldShortcuts
+                          title="Recent Locations"
+                          shortcuts={
+                            !values.event?.uuid &&
+                            recents.locations.filter(
+                              l => values.location?.uuid !== l.uuid
+                            )
+                          }
+                          fieldName="location"
+                          objectType={Location}
+                          curValue={values.location}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("location", value, true)
+                            setLocationUuid(value?.uuid)
+                          }}
+                          handleAddItem={FieldHelper.handleSingleSelectAddItem}
+                        />
+                      </>
+                    }
+                  />
+
+                  {!isFutureEngagement && (
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.report.cancelled}
+                      name="cancelled"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <FormBS.Check
+                          type="checkbox"
+                          label="This engagement was cancelled"
+                          className="cancelled-checkbox"
+                          checked={values.cancelled}
+                          onClick={event =>
+                            event.target.checked &&
+                            !values.cancelledReason &&
+                            // set a default reason when cancelled has been checked and no reason has been selected
+                            setFieldValue(
+                              "cancelledReason",
+                              cancelledReasonOptions[0].value,
+                              true
+                            )
+                          }
+                        />
+                      }
+                    />
+                  )}
+                  {!isFutureEngagement && values.cancelled && (
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.report.cancelledReason}
+                      name="cancelledReason"
+                      component={FieldHelper.SpecialField}
+                      onChange={event => {
+                        // validation will be done by setFieldValue
+                        setFieldValue(
+                          "cancelledReason",
+                          event.target.value,
+                          true
+                        )
+                      }}
+                      widget={
+                        <FormBS.Select className="cancelled-reason-form-group">
+                          {cancelledReasonOptions.map(reason => (
+                            <option key={reason.value} value={reason.value}>
+                              {reason.label}
+                            </option>
+                          ))}
+                        </FormBS.Select>
+                      }
+                    />
+                  )}
+
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.report.reportCommunities}
+                    name="reportCommunities"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("reportCommunities", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("reportCommunities", value)
                     }}
                     widget={
                       <AdvancedMultiSelect
-                        fieldName="tasks"
-                        placeholder={`Search for ${tasksLabel}…`}
-                        value={values.tasks}
+                        fieldName="reportCommunities"
+                        value={values.reportCommunities}
                         renderSelected={
-                          <NoPaginationTaskTable
-                            id="tasks-tasks"
-                            tasks={values.tasks}
+                          <AuthorizationGroupTable
+                            authorizationGroups={values.reportCommunities}
+                            noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected; click in the box above to select any`}
                             showDelete
-                            showDescription
-                            noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
                           />
                         }
-                        overlayColumns={[Settings.fields.task.shortLabel]}
-                        overlayTable={HierarchicalTaskOverlayTable}
-                        restrictSelectableItems
-                        filterDefs={tasksFilters}
-                        objectType={Task}
-                        fields={taskFields}
-                        addon={TASKS_ICON}
-                        pageSize={0}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={AuthorizationGroupOverlayRow}
+                        filterDefs={reportCommunitiesFilters}
+                        objectType={AuthorizationGroup}
+                        fields={AuthorizationGroup.autocompleteQuery}
+                        addon={COMMUNITIES_ICON}
+                      />
+                    }
+                  />
+                </Fieldset>
+
+                <Fieldset
+                  title={
+                    !values.cancelled && !isFutureEngagement
+                      ? "People involved in this engagement"
+                      : "People who will be involved in this planned engagement"
+                  }
+                  id="reportPeople-fieldset"
+                >
+                  <Field
+                    name="reportPeople"
+                    label="Attendees"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      updateReportPeople(
+                        setFieldValue,
+                        setFieldTouched,
+                        "reportPeople",
+                        value
+                      )
+                    }}
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="reportPeople"
+                        placeholder="Search for people involved in this engagement…"
+                        value={values.reportPeople}
+                        renderSelected={
+                          <ReportPeople
+                            report={
+                              new Report({
+                                uuid: values.uuid,
+                                engagementDate: values.engagementDate,
+                                duration: Number.parseInt(values.duration) || 0,
+                                reportPeople: values.reportPeople
+                              })
+                            }
+                            onChange={value =>
+                              setFieldValue("reportPeople", value, true)
+                            }
+                            showDelete
+                          />
+                        }
+                        overlayColumns={[
+                          "Name",
+                          "Position",
+                          "Location",
+                          "Organization"
+                        ]}
+                        overlayRenderRow={item =>
+                          PersonDetailedOverlayRow(item, values.engagementDate)
+                        }
+                        filterDefs={reportPeopleFilters}
+                        objectType={Person}
+                        fields={reportPeopleAutocompleteQuery}
+                        addon={PEOPLE_ICON}
                       />
                     }
                     extraColElem={
                       <>
                         <FieldHelper.FieldShortcuts
-                          title={`Recent ${tasksLabel}`}
-                          shortcuts={recents.tasks.filter(
-                            rt =>
-                              !values.tasks?.find(task => task.uuid === rt.uuid)
+                          title="Recent attendees"
+                          shortcuts={recents.persons.filter(
+                            ra =>
+                              !values.reportPeople?.find(
+                                person => person.uuid === ra.uuid
+                              )
                           )}
-                          fieldName="tasks"
-                          objectType={Task}
-                          curValue={values.tasks}
+                          fieldName="reportPeople"
+                          objectType={Person}
+                          curValue={values.reportPeople}
                           onChange={value => {
-                            // validation will be done by setFieldValue
-                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                            setFieldValue("tasks", value, true)
-                            setReportTasks(value)
+                            updateReportPeople(
+                              setFieldValue,
+                              setFieldTouched,
+                              "reportPeople",
+                              value
+                            )
                           }}
                           handleAddItem={FieldHelper.handleMultiSelectAddItem}
                         />
@@ -1059,69 +1002,177 @@ const ReportForm = ({
                     }
                   />
                 </Fieldset>
-              )}
 
-              <Fieldset title="Engagement details" id="meeting-details">
-                {!isFutureEngagement && !values.cancelled && (
-                  <>
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.report.atmosphere}
-                      name="atmosphere"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      enableClear={Settings.fields.report.atmosphere?.optional}
-                      buttons={atmosphereButtons}
-                      onChange={value =>
-                        setFieldValue("atmosphere", value, true)
-                      }
-                      className="atmosphere-form-group"
-                    />
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.report.atmosphereDetails}
-                      name="atmosphereDetails"
-                      component={FieldHelper.InputField}
-                      onChange={event => {
-                        setFieldTouched("atmosphereDetails", true, false)
-                        setFieldValue(
-                          "atmosphereDetails",
-                          event.target.value,
-                          false
-                        )
-                        validateFieldDebounced("atmosphereDetails")
+                {!_isEmpty(tasksFilters) && (
+                  <Fieldset
+                    title={Settings.fields.task.longLabel}
+                    className="tasks-selector"
+                  >
+                    <Field
+                      name="tasks"
+                      label={Settings.fields.task.longLabel}
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("tasks", value, true)
+                        setReportTasks(value)
                       }}
-                      className="atmosphere-details"
+                      widget={
+                        <AdvancedMultiSelect
+                          fieldName="tasks"
+                          placeholder={`Search for ${tasksLabel}…`}
+                          value={values.tasks}
+                          renderSelected={
+                            <NoPaginationTaskTable
+                              id="tasks-tasks"
+                              tasks={values.tasks}
+                              showDelete
+                              showDescription
+                              noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
+                            />
+                          }
+                          overlayColumns={[Settings.fields.task.shortLabel]}
+                          overlayTable={HierarchicalTaskOverlayTable}
+                          restrictSelectableItems
+                          filterDefs={tasksFilters}
+                          objectType={Task}
+                          fields={taskFields}
+                          addon={TASKS_ICON}
+                          pageSize={0}
+                        />
+                      }
+                      extraColElem={
+                        <>
+                          <FieldHelper.FieldShortcuts
+                            title={`Recent ${tasksLabel}`}
+                            shortcuts={recents.tasks.filter(
+                              rt =>
+                                !values.tasks?.find(
+                                  task => task.uuid === rt.uuid
+                                )
+                            )}
+                            fieldName="tasks"
+                            objectType={Task}
+                            curValue={values.tasks}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                              setFieldValue("tasks", value, true)
+                              setReportTasks(value)
+                            }}
+                            handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                          />
+                        </>
+                      }
                     />
-                  </>
+                  </Fieldset>
                 )}
 
-                {Settings.fields.report.keyOutcomes &&
-                  !isFutureEngagement &&
-                  !values.cancelled && (
+                <Fieldset title="Engagement details" id="meeting-details">
+                  {!isFutureEngagement && !values.cancelled && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.report.atmosphere}
+                        name="atmosphere"
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        enableClear={
+                          Settings.fields.report.atmosphere?.optional
+                        }
+                        buttons={atmosphereButtons}
+                        onChange={value =>
+                          setFieldValue("atmosphere", value, true)
+                        }
+                        className="atmosphere-form-group"
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.report.atmosphereDetails}
+                        name="atmosphereDetails"
+                        component={FieldHelper.InputField}
+                        onChange={event => {
+                          setFieldTouched("atmosphereDetails", true, false)
+                          setFieldValue(
+                            "atmosphereDetails",
+                            event.target.value,
+                            false
+                          )
+                          validateFieldDebounced("atmosphereDetails")
+                        }}
+                        className="atmosphere-details"
+                      />
+                    </>
+                  )}
+
+                  {Settings.fields.report.keyOutcomes &&
+                    !isFutureEngagement &&
+                    !values.cancelled && (
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.report.keyOutcomes}
+                        name="keyOutcomes"
+                        component={FieldHelper.InputField}
+                        asA="textarea"
+                        onChange={event => {
+                          setFieldTouched("keyOutcomes", true, false)
+                          setFieldValue(
+                            "keyOutcomes",
+                            event.target.value,
+                            false
+                          )
+                          validateFieldDebounced("keyOutcomes")
+                        }}
+                        maxLength={Settings.maxTextFieldLength}
+                        onKeyUp={event =>
+                          countCharsLeft(
+                            "keyOutcomesCharsLeft",
+                            Settings.maxTextFieldLength,
+                            event
+                          )
+                        }
+                        extraColElem={
+                          <>
+                            <span id="keyOutcomesCharsLeft">
+                              {Settings.maxTextFieldLength -
+                                initialValues.keyOutcomes.length}
+                            </span>{" "}
+                            characters remaining
+                          </>
+                        }
+                      />
+                    )}
+
+                  {!isFutureEngagement && (
                     <DictionaryField
                       wrappedComponent={FastField}
-                      dictProps={Settings.fields.report.keyOutcomes}
-                      name="keyOutcomes"
+                      dictProps={Settings.fields.report.nextSteps}
+                      name="nextSteps"
                       component={FieldHelper.InputField}
                       asA="textarea"
                       onChange={event => {
-                        setFieldTouched("keyOutcomes", true, false)
-                        setFieldValue("keyOutcomes", event.target.value, false)
-                        validateFieldDebounced("keyOutcomes")
+                        setFieldTouched("nextSteps", true, false)
+                        setFieldValue("nextSteps", event.target.value, false)
+                        validateFieldDebounced("nextSteps")
                       }}
-                      maxLength={Settings.maxTextFieldLength}
+                      maxLength={utils.getMaxTextFieldLength(
+                        Settings.fields.report.nextSteps
+                      )}
                       onKeyUp={event =>
                         countCharsLeft(
-                          "keyOutcomesCharsLeft",
-                          Settings.maxTextFieldLength,
+                          "nextStepsCharsLeft",
+                          utils.getMaxTextFieldLength(
+                            Settings.fields.report.nextSteps
+                          ),
                           event
                         )
                       }
                       extraColElem={
                         <>
-                          <span id="keyOutcomesCharsLeft">
-                            {Settings.maxTextFieldLength -
-                              initialValues.keyOutcomes.length}
+                          <span id="nextStepsCharsLeft">
+                            {utils.getMaxTextFieldLength(
+                              Settings.fields.report.nextSteps
+                            ) - initialValues.nextSteps.length}
                           </span>{" "}
                           characters remaining
                         </>
@@ -1129,278 +1180,244 @@ const ReportForm = ({
                     />
                   )}
 
-                {!isFutureEngagement && (
                   <DictionaryField
                     wrappedComponent={FastField}
-                    dictProps={Settings.fields.report.nextSteps}
-                    name="nextSteps"
-                    component={FieldHelper.InputField}
-                    asA="textarea"
-                    onChange={event => {
-                      setFieldTouched("nextSteps", true, false)
-                      setFieldValue("nextSteps", event.target.value, false)
-                      validateFieldDebounced("nextSteps")
-                    }}
-                    maxLength={utils.getMaxTextFieldLength(
-                      Settings.fields.report.nextSteps
-                    )}
-                    onKeyUp={event =>
-                      countCharsLeft(
-                        "nextStepsCharsLeft",
-                        utils.getMaxTextFieldLength(
-                          Settings.fields.report.nextSteps
-                        ),
-                        event
-                      )
-                    }
-                    extraColElem={
-                      <>
-                        <span id="nextStepsCharsLeft">
-                          {utils.getMaxTextFieldLength(
-                            Settings.fields.report.nextSteps
-                          ) - initialValues.nextSteps.length}
-                        </span>{" "}
-                        characters remaining
-                      </>
-                    }
-                  />
-                )}
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.report.reportText}
-                  name="reportText"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.reportText, value)) {
-                      setFieldValue("reportText", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("reportText", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      placeholder={
-                        Settings.fields.report.reportText?.placeholder
-                      }
-                    />
-                  }
-                />
-
-                {attachmentEditEnabled && (
-                  <Field
-                    name="uploadAttachments"
-                    label="Attachments"
+                    dictProps={Settings.fields.report.reportText}
+                    name="reportText"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // prevent initial unnecessary render of RichTextEditor
+                      if (!_isEqual(values.reportText, value)) {
+                        setFieldValue("reportText", value, true)
+                      }
+                    }}
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("reportText", true, false)
+                    }}
                     widget={
-                      <UploadAttachment
-                        attachments={attachmentList}
-                        updateAttachments={setAttachmentList}
-                        relatedObjectType={Report.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
-                        saveRelatedObject={() =>
-                          saveReportForm(
-                            values,
-                            touched,
-                            resetForm,
-                            setFieldTouched
-                          )
+                      <RichTextEditor
+                        className="reportTextField"
+                        placeholder={
+                          Settings.fields.report.reportText?.placeholder
                         }
                       />
                     }
-                    onHandleBlur={() => {
-                      setFieldTouched("uploadAttachments", true, false)
-                    }}
                   />
-                )}
 
-                <div style={{ textAlign: "center" }}>
-                  <Button
-                    variant="outline-secondary"
-                    className="center-block toggle-section-button"
-                    style={{
-                      marginBottom: "1rem"
-                    }}
-                    onClick={toggleReportText}
-                    id="toggleSensitiveInfo"
-                  >
-                    {showSensitiveInfo ? "Hide" : "Add"} sensitive information
-                  </Button>
-                </div>
-
-                <Collapse in={showSensitiveInfo}>
-                  {(values.reportSensitiveInformation || !edit) && (
-                    <div>
-                      <FastField
-                        name="reportSensitiveInformation.text"
-                        component={FieldHelper.SpecialField}
-                        label="Report sensitive information text"
-                        onChange={value => {
-                          const safeVal = value || null
-                          // prevent initial unnecessary render of RichTextEditor
-                          if (
-                            !_isEqual(
-                              values.reportSensitiveInformation.text,
-                              safeVal
-                            )
-                          ) {
-                            setFieldValue(
-                              "reportSensitiveInformation.text",
-                              safeVal,
-                              true
+                  {attachmentEditEnabled && (
+                    <Field
+                      name="uploadAttachments"
+                      label="Attachments"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <UploadAttachment
+                          attachments={attachmentList}
+                          updateAttachments={setAttachmentList}
+                          relatedObjectType={Report.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                          saveRelatedObject={() =>
+                            saveReportForm(
+                              values,
+                              touched,
+                              resetForm,
+                              setFieldTouched
                             )
                           }
-                        }}
-                        onHandleBlur={() => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched(
-                            "reportSensitiveInformation.text",
-                            true,
-                            false
-                          )
-                        }}
-                        widget={
-                          <RichTextEditor className="reportSensitiveInformationField" />
-                        }
-                      />
-                      <FastField
-                        name="authorizedMembers"
-                        label="Authorized Members"
-                        component={FieldHelper.SpecialField}
-                        widget={
-                          <RelatedObjectsTableInput
-                            title="Authorized Members"
-                            relatedObjects={values.authorizedMembers}
-                            objectType={ENTITY_TYPES.AUTHORIZATION_GROUPS}
-                            entityTypes={[
-                              ENTITY_TYPES.AUTHORIZATION_GROUPS,
-                              ENTITY_TYPES.POSITIONS,
-                              ENTITY_TYPES.ORGANIZATIONS,
-                              ENTITY_TYPES.PEOPLE
-                            ]}
-                            entityFilters={[
-                              {
-                                [ENTITY_TYPES.AUTHORIZATION_GROUPS]:
-                                  authorizationGroupsFilters
-                              }
-                            ]}
-                            setRelatedObjects={value =>
-                              setFieldValue("authorizedMembers", value)
-                            }
-                            showDelete
-                          />
-                        }
-                      />
-                    </div>
-                  )}
-                </Collapse>
-              </Fieldset>
-
-              {showCustomFields && (
-                <Fieldset title="Engagement information" id="custom-fields">
-                  <CustomFieldsContainer
-                    fieldsConfig={Settings.fields.report.customFields}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                    setShowCustomFields={setShowCustomFields}
-                  />
-                </Fieldset>
-              )}
-
-              {hasAssessments && (
-                <>
-                  <Fieldset
-                    title="Attendees engagement assessments"
-                    id="attendees-engagement-assessments"
-                  >
-                    <InstantAssessmentsContainerField
-                      entityType={Person}
-                      entities={values.reportPeople?.filter(rp => rp.attendee)}
-                      relatedObject={relatedObject}
-                      parentFieldName={
-                        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                        />
                       }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
+                  )}
+
+                  <div style={{ textAlign: "center" }}>
+                    <Button
+                      variant="outline-secondary"
+                      className="center-block toggle-section-button"
+                      style={{
+                        marginBottom: "1rem"
+                      }}
+                      onClick={toggleReportText}
+                      id="toggleSensitiveInfo"
+                    >
+                      {showSensitiveInfo ? "Hide" : "Add"} sensitive information
+                    </Button>
+                  </div>
+
+                  <Collapse in={showSensitiveInfo}>
+                    {(values.reportSensitiveInformation || !edit) && (
+                      <div>
+                        <FastField
+                          name="reportSensitiveInformation.text"
+                          component={FieldHelper.SpecialField}
+                          label="Report sensitive information text"
+                          onChange={value => {
+                            const safeVal = value || null
+                            // prevent initial unnecessary render of RichTextEditor
+                            if (
+                              !_isEqual(
+                                values.reportSensitiveInformation.text,
+                                safeVal
+                              )
+                            ) {
+                              setFieldValue(
+                                "reportSensitiveInformation.text",
+                                safeVal,
+                                true
+                              )
+                            }
+                          }}
+                          onHandleBlur={() => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched(
+                              "reportSensitiveInformation.text",
+                              true,
+                              false
+                            )
+                          }}
+                          widget={
+                            <RichTextEditor className="reportSensitiveInformationField" />
+                          }
+                        />
+                        <FastField
+                          name="authorizedMembers"
+                          label="Authorized Members"
+                          component={FieldHelper.SpecialField}
+                          widget={
+                            <RelatedObjectsTableInput
+                              title="Authorized Members"
+                              relatedObjects={values.authorizedMembers}
+                              objectType={ENTITY_TYPES.AUTHORIZATION_GROUPS}
+                              entityTypes={[
+                                ENTITY_TYPES.AUTHORIZATION_GROUPS,
+                                ENTITY_TYPES.POSITIONS,
+                                ENTITY_TYPES.ORGANIZATIONS,
+                                ENTITY_TYPES.PEOPLE
+                              ]}
+                              entityFilters={[
+                                {
+                                  [ENTITY_TYPES.AUTHORIZATION_GROUPS]:
+                                    authorizationGroupsFilters
+                                }
+                              ]}
+                              setRelatedObjects={value =>
+                                setFieldValue("authorizedMembers", value)
+                              }
+                              showDelete
+                            />
+                          }
+                        />
+                      </div>
+                    )}
+                  </Collapse>
+                </Fieldset>
+
+                {showCustomFields && (
+                  <Fieldset title="Engagement information" id="custom-fields">
+                    <CustomFieldsContainer
+                      fieldsConfig={Settings.fields.report.customFields}
                       formikProps={{
                         setFieldTouched,
                         setFieldValue,
                         values,
                         validateForm
                       }}
-                      canRead={canReadAssessments}
-                      canWrite={canWriteAssessments}
+                      setShowCustomFields={setShowCustomFields}
                     />
                   </Fieldset>
+                )}
 
-                  <Fieldset
-                    title={`${Settings.fields.task.longLabel} engagement assessments`}
-                    id="tasks-engagement-assessments"
-                  >
-                    <InstantAssessmentsContainerField
-                      entityType={Task}
-                      entities={values.tasks}
-                      relatedObject={relatedObject}
-                      parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
-                      formikProps={{
-                        setFieldTouched,
-                        setFieldValue,
-                        values,
-                        validateForm
-                      }}
-                      canRead={canReadAssessments}
-                      canWrite={canWriteAssessments}
-                    />
-                  </Fieldset>
-                </>
-              )}
+                {hasAssessments && (
+                  <>
+                    <Fieldset
+                      title="Attendees engagement assessments"
+                      id="attendees-engagement-assessments"
+                    >
+                      <InstantAssessmentsContainerField
+                        entityType={Person}
+                        entities={values.reportPeople?.filter(
+                          rp => rp.attendee
+                        )}
+                        relatedObject={relatedObject}
+                        parentFieldName={
+                          Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                        }
+                        formikProps={{
+                          setFieldTouched,
+                          setFieldValue,
+                          values,
+                          validateForm
+                        }}
+                        canRead={canReadAssessments}
+                        canWrite={canWriteAssessments}
+                      />
+                    </Fieldset>
 
-              <div className="submit-buttons">
-                <div>
-                  <Button onClick={onCancel} variant="outline-secondary">
-                    Cancel
-                  </Button>
+                    <Fieldset
+                      title={`${Settings.fields.task.longLabel} engagement assessments`}
+                      id="tasks-engagement-assessments"
+                    >
+                      <InstantAssessmentsContainerField
+                        entityType={Task}
+                        entities={values.tasks}
+                        relatedObject={relatedObject}
+                        parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                        formikProps={{
+                          setFieldTouched,
+                          setFieldValue,
+                          values,
+                          validateForm
+                        }}
+                        canRead={canReadAssessments}
+                        canWrite={canWriteAssessments}
+                      />
+                    </Fieldset>
+                  </>
+                )}
+
+                <div className="submit-buttons">
+                  <div>
+                    <Button onClick={onCancel} variant="outline-secondary">
+                      Cancel
+                    </Button>
+                  </div>
+                  <div>
+                    {autoSavedAt && (
+                      <div>
+                        Last autosaved at{" "}
+                        {autoSavedAt.format(
+                          Settings.dateFormats.forms.displayShort.withTime
+                        )}
+                      </div>
+                    )}
+                    {canDelete && (
+                      <ConfirmDestructive
+                        onConfirm={() => onConfirmDelete(values, resetForm)}
+                        objectType="report"
+                        objectDisplay={values.uuid}
+                        variant="danger"
+                        buttonLabel={`Delete this ${getReportType(values)}`}
+                        buttonDisabled={isSubmitting}
+                      />
+                    )}
+                    {/* Skip validation on save! */}
+                    <Button
+                      id="formBottomSubmit"
+                      variant="primary"
+                      onClick={() =>
+                        onSubmit(values, { resetForm, setSubmitting })
+                      }
+                      disabled={isSubmitting}
+                    >
+                      {submitText}
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  {autoSavedAt && (
-                    <div>
-                      Last autosaved at{" "}
-                      {autoSavedAt.format(
-                        Settings.dateFormats.forms.displayShort.withTime
-                      )}
-                    </div>
-                  )}
-                  {canDelete && (
-                    <ConfirmDestructive
-                      onConfirm={() => onConfirmDelete(values, resetForm)}
-                      objectType="report"
-                      objectDisplay={values.uuid}
-                      variant="danger"
-                      buttonLabel={`Delete this ${getReportType(values)}`}
-                      buttonDisabled={isSubmitting}
-                    />
-                  )}
-                  {/* Skip validation on save! */}
-                  <Button
-                    id="formBottomSubmit"
-                    variant="primary"
-                    onClick={() =>
-                      onSubmit(values, { resetForm, setSubmitting })
-                    }
-                    disabled={isSubmitting}
-                  >
-                    {submitText}
-                  </Button>
-                </div>
-              </div>
-            </Form>
-          </div>
+              </Form>
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>

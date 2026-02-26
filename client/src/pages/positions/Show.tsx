@@ -8,6 +8,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import AssociatedPositions from "components/AssociatedPositions"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -182,343 +183,345 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
   )
 
   return (
-    <div>
-      <div className="float-end">
-        <GuidedTour
-          title="Take a guided tour of this position's page."
-          tour={positionTour}
-          autostart={
-            localStorage.newUser === "true" &&
-            localStorage.hasSeenPositionTour !== "true"
-          }
-          onEnd={() => (localStorage.hasSeenPositionTour = "true")}
-        />
-      </div>
+    <AttachmentContext.Provider value={position}>
+      <div>
+        <div className="float-end">
+          <GuidedTour
+            title="Take a guided tour of this position's page."
+            tour={positionTour}
+            autostart={
+              localStorage.newUser === "true" &&
+              localStorage.hasSeenPositionTour !== "true"
+            }
+            onEnd={() => (localStorage.hasSeenPositionTour = "true")}
+          />
+        </div>
 
-      <Messages success={stateSuccess} error={stateError} />
-      <div className="form-horizontal">
-        <Fieldset
-          id="info"
-          title={
-            <>
-              {
-                <SubscriptionIcon
-                  subscribedObjectType="positions"
-                  subscribedObjectUuid={position.uuid}
-                  isSubscribed={position.isSubscribed}
-                  updatedAt={position.updatedAt}
-                  refetch={refetch}
-                  setError={error => {
-                    setStateError(error)
-                    jumpToTop()
-                  }}
-                  persistent
+        <Messages success={stateSuccess} error={stateError} />
+        <div className="form-horizontal">
+          <Fieldset
+            id="info"
+            title={
+              <>
+                {
+                  <SubscriptionIcon
+                    subscribedObjectType="positions"
+                    subscribedObjectUuid={position.uuid}
+                    isSubscribed={position.isSubscribed}
+                    updatedAt={position.updatedAt}
+                    refetch={refetch}
+                    setError={error => {
+                      setStateError(error)
+                      jumpToTop()
+                    }}
+                    persistent
+                  />
+                }{" "}
+                Position {position.name}
+              </>
+            }
+            action={action}
+          />
+          <Fieldset>
+            <Row>
+              <Col lg={4} xl={3} className="text-center">
+                <EntityAvatarDisplay
+                  avatar={avatar}
+                  defaultAvatar={Position.relatedObjectType}
                 />
-              }{" "}
-              Position {position.name}
-            </>
-          }
-          action={action}
-        />
-        <Fieldset>
-          <Row>
-            <Col lg={4} xl={3} className="text-center">
-              <EntityAvatarDisplay
-                avatar={avatar}
-                defaultAvatar={Position.relatedObjectType}
-              />
-            </Col>
-            <Col
-              lg={8}
-              xl={9}
-              className="d-flex flex-column justify-content-center"
-            >
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.position.type}
-                field={{ name: "type" }}
-                humanValue={Position.humanNameOfType(position.type)}
-              />
-              {position.type === Position.TYPE.SUPERUSER && (
+              </Col>
+              <Col
+                lg={8}
+                xl={9}
+                className="d-flex flex-column justify-content-center"
+              >
                 <DictionaryField
                   wrappedComponent={FieldHelper.ReadonlyField}
-                  dictProps={Settings.fields.position.superuserType}
-                  field={{ name: "superuserType" }}
-                  humanValue={Position.humanNameOfSuperuserType(
-                    position.superuserType
-                  )}
+                  dictProps={Settings.fields.position.type}
+                  field={{ name: "type" }}
+                  humanValue={Position.humanNameOfType(position.type)}
                 />
-              )}
+                {position.type === Position.TYPE.SUPERUSER && (
+                  <DictionaryField
+                    wrappedComponent={FieldHelper.ReadonlyField}
+                    dictProps={Settings.fields.position.superuserType}
+                    field={{ name: "superuserType" }}
+                    humanValue={Position.humanNameOfSuperuserType(
+                      position.superuserType
+                    )}
+                  />
+                )}
 
-              {position.organization && (
+                {position.organization && (
+                  <DictionaryField
+                    wrappedComponent={FieldHelper.ReadonlyField}
+                    dictProps={Settings.fields.position.organization}
+                    field={{ name: "organization" }}
+                    humanValue={
+                      position.organization && (
+                        <LinkTo
+                          modelType="Organization"
+                          model={position.organization}
+                        />
+                      )
+                    }
+                  />
+                )}
+
                 <DictionaryField
                   wrappedComponent={FieldHelper.ReadonlyField}
-                  dictProps={Settings.fields.position.organization}
-                  field={{ name: "organization" }}
+                  dictProps={Settings.fields.position.location}
+                  field={{ name: "location" }}
                   humanValue={
-                    position.organization && (
-                      <LinkTo
-                        modelType="Organization"
-                        model={position.organization}
-                      />
+                    position.location && (
+                      <LinkTo modelType="Location" model={position.location}>
+                        {`${Location.toString(position.location)} `}
+                        <Badge bg="secondary">
+                          {Location.humanNameOfType(position.location.type)}
+                        </Badge>
+                      </LinkTo>
                     )
                   }
                 />
-              )}
+              </Col>
+            </Row>
+          </Fieldset>
+          <Fieldset id="info" title="Additional Information">
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.position.code}
+              field={{ name: "code", value: position.code }}
+            />
 
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.position.location}
-                field={{ name: "location" }}
-                humanValue={
-                  position.location && (
-                    <LinkTo modelType="Location" model={position.location}>
-                      {`${Location.toString(position.location)} `}
-                      <Badge bg="secondary">
-                        {Location.humanNameOfType(position.location.type)}
-                      </Badge>
-                    </LinkTo>
-                  )
-                }
-              />
-            </Col>
-          </Row>
-        </Fieldset>
-        <Fieldset id="info" title="Additional Information">
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.position.code}
-            field={{ name: "code", value: position.code }}
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.position.emailAddresses}
-            field={{ name: "emailAddresses" }}
-            humanValue={
-              <EmailAddressTable
-                label={Settings.fields.position.emailAddresses.label}
-                emailAddresses={position.emailAddresses}
-              />
-            }
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.position.authorizationGroups}
-            field={{ name: "authorizationGroups" }}
-            humanValue={
-              <AuthorizationGroupTable
-                authorizationGroups={position.authorizationGroups}
-                showDistributionList
-                showForSensitiveInformation
-              />
-            }
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.position.status}
-            field={{ name: "status" }}
-            humanValue={Position.humanNameOfStatus(position.status)}
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.position.role}
-            field={{ name: "role" }}
-            humanValue={Position.humanNameOfRole(position.role)}
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.position.description}
-            field={{ name: "description" }}
-            humanValue={
-              <RichTextEditor readOnly value={position.description} />
-            }
-          />
-          {attachmentsEnabled && (
-            <FieldHelper.ReadonlyField
-              field={{ name: "attachments" }}
-              label="Attachments"
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.position.emailAddresses}
+              field={{ name: "emailAddresses" }}
               humanValue={
-                <AttachmentsDetailView
-                  attachments={attachments}
-                  updateAttachments={setAttachments}
-                  relatedObjectType={Position.relatedObjectType}
-                  relatedObjectUuid={position.uuid}
-                  allowEdit={canEdit}
+                <EmailAddressTable
+                  label={Settings.fields.position.emailAddresses.label}
+                  emailAddresses={position.emailAddresses}
                 />
               }
             />
-          )}
-        </Fieldset>
 
-        {Settings.fields.position.customFields && (
-          <Fieldset title="Position information" id="custom-fields">
-            <ReadonlyCustomFields
-              fieldsConfig={Settings.fields.position.customFields}
-              values={position}
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.position.authorizationGroups}
+              field={{ name: "authorizationGroups" }}
+              humanValue={
+                <AuthorizationGroupTable
+                  authorizationGroups={position.authorizationGroups}
+                  showDistributionList
+                  showForSensitiveInformation
+                />
+              }
             />
-          </Fieldset>
-        )}
 
-        <Fieldset
-          title="Current person holding this position"
-          id="assigned-person"
-          className={
-            !position.person || !position.person.uuid ? "warning" : undefined
-          }
-          style={{ textAlign: "center" }}
-          action={
-            position.person &&
-            position.person.uuid &&
-            canEdit && (
-              <Button
-                onClick={() => setShowAssignPersonModal(true)}
-                variant="outline-secondary"
-                className="change-current-person"
-              >
-                Change current person
-              </Button>
-            )
-          }
-        >
-          {position.person && position.person.uuid ? (
-            <div>
-              <h4 className="assigned-person-name">
-                <LinkTo modelType="Person" model={position.person} />
-              </h4>
-              <p />
-            </div>
-          ) : (
-            <div>
-              <p className="position-empty-message">
-                <em>{position.name} is currently empty.</em>
-              </p>
-              {canEdit && (
-                <p>
-                  <Button
-                    onClick={() => setShowAssignPersonModal(true)}
-                    variant="outline-secondary"
-                    className="assign-current-person"
-                  >
-                    Assign current person
-                  </Button>
-                </p>
-              )}
-            </div>
-          )}
-          <AssignPersonModal
-            position={position}
-            showModal={showAssignPersonModal}
-            onCancel={() => hideAssignPersonModal(false)}
-            onSuccess={() => hideAssignPersonModal(true)}
-          />
-        </Fieldset>
-
-        <Fieldset
-          title="Assigned counterparts"
-          id="assigned-counterpart"
-          action={
-            canEdit && (
-              <Button
-                onClick={() => setShowAssociatedPositionsModal(true)}
-                variant="outline-secondary"
-              >
-                Change assigned counterparts
-              </Button>
-            )
-          }
-        >
-          {(position.associatedPositions.length === 0 && (
-            <em>{position.name} has no counterparts assigned</em>
-          )) || (
-            <AssociatedPositions
-              associatedPositions={position.associatedPositions}
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.position.status}
+              field={{ name: "status" }}
+              humanValue={Position.humanNameOfStatus(position.status)}
             />
-          )}
 
-          {canEdit && (
-            <EditAssociatedPositionsModal
-              position={position}
-              showModal={showAssociatedPositionsModal}
-              onCancel={() => hideAssociatedPositionsModal(false)}
-              onSuccess={() => hideAssociatedPositionsModal(true)}
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.position.role}
+              field={{ name: "role" }}
+              humanValue={Position.humanNameOfRole(position.role)}
             />
-          )}
-        </Fieldset>
 
-        <Fieldset title="Previous position holders" id="previous-people">
-          <PreviousPeople
-            history={position.previousPeople}
-            canEditHistory={isAdmin}
-            action={() => setShowEditHistoryModal(true)}
-          />
-        </Fieldset>
-        {isAdmin && (
-          <EditHistory
-            historyEntityType="person"
-            parentEntityUuid={position.uuid}
-            mainTitle="Edit position history"
-            initialHistory={position.previousPeople}
-            showModal={showEditHistoryModal}
-            setShowModal={setShowEditHistoryModal}
-            setHistory={history => {
-              onSavePreviousPeople(history)
-            }}
-          />
-        )}
-        {isSuperuser && (
-          <Fieldset
-            id="organizationsAdministrated"
-            title={utils.sentenceCase(
-              Settings.fields.position.organizationsAdministrated.label
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.position.description}
+              field={{ name: "description" }}
+              humanValue={
+                <RichTextEditor readOnly value={position.description} />
+              }
+            />
+            {attachmentsEnabled && (
+              <FieldHelper.ReadonlyField
+                field={{ name: "attachments" }}
+                label="Attachments"
+                humanValue={
+                  <AttachmentsDetailView
+                    attachments={attachments}
+                    updateAttachments={setAttachments}
+                    relatedObjectType={Position.relatedObjectType}
+                    relatedObjectUuid={position.uuid}
+                    allowEdit={canEdit}
+                  />
+                }
+              />
             )}
+          </Fieldset>
+
+          {Settings.fields.position.customFields && (
+            <Fieldset title="Position information" id="custom-fields">
+              <ReadonlyCustomFields
+                fieldsConfig={Settings.fields.position.customFields}
+                values={position}
+              />
+            </Fieldset>
+          )}
+
+          <Fieldset
+            title="Current person holding this position"
+            id="assigned-person"
+            className={
+              !position.person || !position.person.uuid ? "warning" : undefined
+            }
+            style={{ textAlign: "center" }}
             action={
-              isAdmin && (
+              position.person &&
+              position.person.uuid &&
+              canEdit && (
                 <Button
-                  onClick={() => setShowOrganizationsAdministratedModal(true)}
+                  onClick={() => setShowAssignPersonModal(true)}
                   variant="outline-secondary"
+                  className="change-current-person"
                 >
-                  Edit{" "}
-                  {utils.noCase(
-                    Settings.fields.position.organizationsAdministrated.label
-                  )}
+                  Change current person
                 </Button>
               )
             }
           >
-            <OrganizationTable
-              organizations={position.organizationsAdministrated}
-              noOrganizationsMessage="No organizations selected"
-            />
-            <EditOrganizationsAdministratedModal
+            {position.person && position.person.uuid ? (
+              <div>
+                <h4 className="assigned-person-name">
+                  <LinkTo modelType="Person" model={position.person} />
+                </h4>
+                <p />
+              </div>
+            ) : (
+              <div>
+                <p className="position-empty-message">
+                  <em>{position.name} is currently empty.</em>
+                </p>
+                {canEdit && (
+                  <p>
+                    <Button
+                      onClick={() => setShowAssignPersonModal(true)}
+                      variant="outline-secondary"
+                      className="assign-current-person"
+                    >
+                      Assign current person
+                    </Button>
+                  </p>
+                )}
+              </div>
+            )}
+            <AssignPersonModal
               position={position}
-              showModal={showOrganizationsAdministratedModal}
-              onCancel={() => hideOrganizationsAdministratedModal(false)}
-              onSuccess={() => hideOrganizationsAdministratedModal(true)}
+              showModal={showAssignPersonModal}
+              onCancel={() => hideAssignPersonModal(false)}
+              onSuccess={() => hideAssignPersonModal(true)}
             />
           </Fieldset>
+
+          <Fieldset
+            title="Assigned counterparts"
+            id="assigned-counterpart"
+            action={
+              canEdit && (
+                <Button
+                  onClick={() => setShowAssociatedPositionsModal(true)}
+                  variant="outline-secondary"
+                >
+                  Change assigned counterparts
+                </Button>
+              )
+            }
+          >
+            {(position.associatedPositions.length === 0 && (
+              <em>{position.name} has no counterparts assigned</em>
+            )) || (
+              <AssociatedPositions
+                associatedPositions={position.associatedPositions}
+              />
+            )}
+
+            {canEdit && (
+              <EditAssociatedPositionsModal
+                position={position}
+                showModal={showAssociatedPositionsModal}
+                onCancel={() => hideAssociatedPositionsModal(false)}
+                onSuccess={() => hideAssociatedPositionsModal(true)}
+              />
+            )}
+          </Fieldset>
+
+          <Fieldset title="Previous position holders" id="previous-people">
+            <PreviousPeople
+              history={position.previousPeople}
+              canEditHistory={isAdmin}
+              action={() => setShowEditHistoryModal(true)}
+            />
+          </Fieldset>
+          {isAdmin && (
+            <EditHistory
+              historyEntityType="person"
+              parentEntityUuid={position.uuid}
+              mainTitle="Edit position history"
+              initialHistory={position.previousPeople}
+              showModal={showEditHistoryModal}
+              setShowModal={setShowEditHistoryModal}
+              setHistory={history => {
+                onSavePreviousPeople(history)
+              }}
+            />
+          )}
+          {isSuperuser && (
+            <Fieldset
+              id="organizationsAdministrated"
+              title={utils.sentenceCase(
+                Settings.fields.position.organizationsAdministrated.label
+              )}
+              action={
+                isAdmin && (
+                  <Button
+                    onClick={() => setShowOrganizationsAdministratedModal(true)}
+                    variant="outline-secondary"
+                  >
+                    Edit{" "}
+                    {utils.noCase(
+                      Settings.fields.position.organizationsAdministrated.label
+                    )}
+                  </Button>
+                )
+              }
+            >
+              <OrganizationTable
+                organizations={position.organizationsAdministrated}
+                noOrganizationsMessage="No organizations selected"
+              />
+              <EditOrganizationsAdministratedModal
+                position={position}
+                showModal={showOrganizationsAdministratedModal}
+                onCancel={() => hideOrganizationsAdministratedModal(false)}
+                onSuccess={() => hideOrganizationsAdministratedModal(true)}
+              />
+            </Fieldset>
+          )}
+        </div>
+
+        {canDelete && (
+          <div className="submit-buttons">
+            <div>
+              <ConfirmDestructive
+                onConfirm={onConfirmDelete}
+                objectType="position"
+                objectDisplay={"#" + position.uuid}
+                variant="danger"
+                buttonLabel="Delete position"
+                buttonClassName="float-end"
+              />
+            </div>
+          </div>
         )}
       </div>
-
-      {canDelete && (
-        <div className="submit-buttons">
-          <div>
-            <ConfirmDestructive
-              onConfirm={onConfirmDelete}
-              objectType="position"
-              objectDisplay={"#" + position.uuid}
-              variant="danger"
-              buttonLabel="Delete position"
-              buttonClassName="float-end"
-            />
-          </div>
-        </div>
-      )}
-    </div>
+    </AttachmentContext.Provider>
   )
 
   function hideAssignPersonModal(success) {
