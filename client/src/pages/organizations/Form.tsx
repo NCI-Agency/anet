@@ -14,6 +14,7 @@ import {
 import App6Symbol, { fieldsList as app6fieldsList } from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import {
@@ -204,463 +205,469 @@ const OrganizationForm = ({
         )
 
         return (
-          <div>
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <MessagesWithConflict
-              error={error}
-              objectType="Organization"
-              onCancel={onCancel}
-              onConfirm={() => {
-                resetForm({ values, isSubmitting: true })
-                onSubmit(values, { resetForm, setSubmitting }, true)
-              }}
-            />
-            <Form className="form-horizontal" method="post">
-              <Fieldset title={title} action={action} />
-              <Fieldset>
-                <Row>
-                  {edit && (
-                    <Col lg={4} xl={3} className="text-center">
-                      <EntityAvatarComponent
-                        initialAvatar={initialValues.entityAvatar}
-                        relatedObjectType="organizations"
-                        relatedObjectUuid={initialValues.uuid}
-                        relatedObjectName={initialValues.shortName}
-                        editMode={attachmentEditEnabled}
-                        imageAttachments={imageAttachments}
-                      />
-                    </Col>
-                  )}
-                  <Col
-                    lg={edit && 8}
-                    xl={edit && 9}
-                    className="d-flex flex-column justify-content-center"
-                  >
-                    <FormGroup>
-                      <Row
-                        style={{ marginBottom: "1rem", alignItems: "center" }}
-                      >
-                        <Col sm={7}>
-                          <Row>
-                            <Col>
-                              {!canAdministrateOrg ? (
-                                <>
-                                  <DictionaryField
-                                    wrappedComponent={FastField}
-                                    dictProps={
-                                      Settings.fields.organization.shortName
-                                    }
-                                    name="shortName"
-                                    component={FieldHelper.ReadonlyField}
-                                  />
-                                  <DictionaryField
-                                    wrappedComponent={FastField}
-                                    dictProps={
-                                      Settings.fields.organization.longName
-                                    }
-                                    name="longName"
-                                    component={FieldHelper.ReadonlyField}
-                                  />
-                                </>
-                              ) : (
-                                <>
-                                  <DictionaryField
-                                    wrappedComponent={FastField}
-                                    dictProps={
-                                      Settings.fields.organization.shortName
-                                    }
-                                    name="shortName"
-                                    component={FieldHelper.InputField}
-                                  />
-                                  <DictionaryField
-                                    wrappedComponent={FastField}
-                                    dictProps={
-                                      Settings.fields.organization.longName
-                                    }
-                                    name="longName"
-                                    component={FieldHelper.InputField}
-                                  />
-                                </>
-                              )}
-                            </Col>
-                          </Row>
-                        </Col>
-                        <Col
-                          sm={5}
-                          className="d-flex flex-column justify-content-center align-items-center"
+          <AttachmentContext.Provider value={values}>
+            <div>
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <MessagesWithConflict
+                error={error}
+                objectType="Organization"
+                onCancel={onCancel}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
+              <Form className="form-horizontal" method="post">
+                <Fieldset title={title} action={action} />
+                <Fieldset>
+                  <Row>
+                    {edit && (
+                      <Col lg={4} xl={3} className="text-center">
+                        <EntityAvatarComponent
+                          initialAvatar={initialValues.entityAvatar}
+                          relatedObjectType="organizations"
+                          relatedObjectUuid={initialValues.uuid}
+                          relatedObjectName={initialValues.shortName}
+                          editMode={attachmentEditEnabled}
+                          imageAttachments={imageAttachments}
+                        />
+                      </Col>
+                    )}
+                    <Col
+                      lg={edit && 8}
+                      xl={edit && 9}
+                      className="d-flex flex-column justify-content-center"
+                    >
+                      <FormGroup>
+                        <Row
+                          style={{ marginBottom: "1rem", alignItems: "center" }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              width: 160,
-                              gap: 30
-                            }}
+                          <Col sm={7}>
+                            <Row>
+                              <Col>
+                                {!canAdministrateOrg ? (
+                                  <>
+                                    <DictionaryField
+                                      wrappedComponent={FastField}
+                                      dictProps={
+                                        Settings.fields.organization.shortName
+                                      }
+                                      name="shortName"
+                                      component={FieldHelper.ReadonlyField}
+                                    />
+                                    <DictionaryField
+                                      wrappedComponent={FastField}
+                                      dictProps={
+                                        Settings.fields.organization.longName
+                                      }
+                                      name="longName"
+                                      component={FieldHelper.ReadonlyField}
+                                    />
+                                  </>
+                                ) : (
+                                  <>
+                                    <DictionaryField
+                                      wrappedComponent={FastField}
+                                      dictProps={
+                                        Settings.fields.organization.shortName
+                                      }
+                                      name="shortName"
+                                      component={FieldHelper.InputField}
+                                    />
+                                    <DictionaryField
+                                      wrappedComponent={FastField}
+                                      dictProps={
+                                        Settings.fields.organization.longName
+                                      }
+                                      name="longName"
+                                      component={FieldHelper.InputField}
+                                    />
+                                  </>
+                                )}
+                              </Col>
+                            </Row>
+                          </Col>
+                          <Col
+                            sm={5}
+                            className="d-flex flex-column justify-content-center align-items-center"
                           >
-                            <App6Symbol
-                              values={{
-                                ...values,
-                                app6context:
-                                  values.app6context || parentContext,
-                                app6standardIdentity:
-                                  values.app6standardIdentity ||
-                                  parentStandardIdentity,
-                                app6symbolSet:
-                                  values.app6symbolSet || parentSymbolSet
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                width: 160,
+                                gap: 30
                               }}
-                              size={120}
-                              maxHeight={250}
-                            />
-                            <Button
-                              onClick={() => setShowApp6Modal(true)}
-                              id="edit-app6-button"
                             >
-                              Edit APP-06 Symbol
-                            </Button>
-                          </div>
-                          <EditApp6SymbolModal
-                            values={values}
-                            showModal={showApp6Modal}
-                            onHide={() => setShowApp6Modal(false)}
-                            onSave={symbologyValues => {
-                              app6fieldsList.forEach(field => {
-                                setFieldValue(field, symbologyValues[field])
-                              })
-                              setShowApp6Modal(false)
-                            }}
-                          />
-                        </Col>
-                      </Row>
-                    </FormGroup>
-                  </Col>
-                </Row>
-              </Fieldset>
-              <Fieldset
-                title="Additional Information"
-                id="additional-information"
-              >
-                {!canAdministrateOrg ? (
-                  <>
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.parentOrg}
-                      name="parentOrg"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        values.parentOrg && (
-                          <LinkTo
-                            modelType="Organization"
-                            model={values.parentOrg}
-                          />
-                        )
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={
-                        Settings.fields.organization.identificationCode
-                      }
-                      name="identificationCode"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.location}
-                      name="location"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        values.location && (
-                          <LinkTo modelType="Location" model={values.location}>
-                            {`${Location.toString(values.location)} `}
-                            <Badge bg="secondary">
-                              {Location.humanNameOfType(values.location.type)}
-                            </Badge>
-                          </LinkTo>
-                        )
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.emailAddresses}
-                      name="emailAddresses"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <EmailAddressTable
-                          label={
-                            Settings.fields.organization.emailAddresses.label
-                          }
-                          emailAddresses={values.emailAddresses}
-                        />
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.status}
-                      name="status"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={Organization.humanNameOfStatus}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.profile}
-                      name="profile"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <RichTextEditor readOnly className="profile" />
-                      }
-                    />
-                  </>
-                ) : (
-                  <>
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.organization.parentOrg}
-                      name="parentOrg"
-                      component={FieldHelper.SpecialField}
-                      onChange={value => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
-                        setFieldValue("parentOrg", value)
-                      }}
-                      disabled={!canAdministrateParentOrg}
-                      widget={
-                        <AdvancedSingleSelect
-                          fieldName="parentOrg"
-                          placeholder={
-                            Settings.fields.organization.parentOrg.placeholder
-                          }
-                          showRemoveButton={canAdministrateParentOrg}
-                          value={values.parentOrg}
-                          overlayColumns={["Name"]}
-                          overlayRenderRow={OrganizationOverlayRow}
-                          filterDefs={organizationFilters}
-                          objectType={Organization}
-                          fields={autocompleteQuery}
-                          queryParams={orgSearchQuery}
-                          valueKey="shortName"
-                          addon={ORGANIZATIONS_ICON}
-                        />
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={
-                        Settings.fields.organization.identificationCode
-                      }
-                      name="identificationCode"
-                      component={FieldHelper.InputField}
-                    />
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.organization.location}
-                      name="location"
-                      component={FieldHelper.SpecialField}
-                      widget={
-                        <>
-                          <AdvancedSingleSelect
-                            fieldName="location"
-                            placeholder={
-                              Settings.fields.organization.location.placeholder
-                            }
-                            value={values.location}
-                            overlayColumns={["Name"]}
-                            overlayTable={HierarchicalLocationOverlayTable}
-                            restrictSelectableItems
-                            filterDefs={locationFilters}
-                            objectType={Location}
-                            fields={locationFields}
-                            valueKey="name"
-                            onChange={value => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                              setFieldValue("location", value)
-                            }}
-                            addon={LOCATIONS_ICON}
-                            pageSize={0}
-                          />
-                          <div className="mt-3">
-                            <LeafletWithSelection
-                              mapId="organization-location"
-                              location={values.location}
-                              onSelectAnetLocation={(loc: any) => {
-                                setFieldTouched("location", true, false)
-                                setFieldValue("location", loc, true)
+                              <App6Symbol
+                                values={{
+                                  ...values,
+                                  app6context:
+                                    values.app6context || parentContext,
+                                  app6standardIdentity:
+                                    values.app6standardIdentity ||
+                                    parentStandardIdentity,
+                                  app6symbolSet:
+                                    values.app6symbolSet || parentSymbolSet
+                                }}
+                                size={120}
+                                maxHeight={250}
+                              />
+                              <Button
+                                onClick={() => setShowApp6Modal(true)}
+                                id="edit-app6-button"
+                              >
+                                Edit APP-06 Symbol
+                              </Button>
+                            </div>
+                            <EditApp6SymbolModal
+                              values={values}
+                              showModal={showApp6Modal}
+                              onHide={() => setShowApp6Modal(false)}
+                              onSave={symbologyValues => {
+                                app6fieldsList.forEach(field => {
+                                  setFieldValue(field, symbologyValues[field])
+                                })
+                                setShowApp6Modal(false)
                               }}
                             />
-                          </div>
-                        </>
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      as="div"
-                      dictProps={Settings.fields.organization.emailAddresses}
-                      component={FieldHelper.SpecialField}
-                      widget={
-                        <EmailAddressInputTable
-                          emailAddresses={values.emailAddresses}
-                        />
-                      }
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.status}
-                      name="status"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      buttons={statusButtons}
-                      onChange={value => setFieldValue("status", value)}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.profile}
-                      name="profile"
-                      component={FieldHelper.SpecialField}
-                      onChange={value => {
-                        // prevent initial unnecessary render of RichTextEditor
-                        if (!_isEqual(values.profile, value)) {
-                          setFieldValue("profile", value, true)
+                          </Col>
+                        </Row>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </Fieldset>
+                <Fieldset
+                  title="Additional Information"
+                  id="additional-information"
+                >
+                  {!canAdministrateOrg ? (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.parentOrg}
+                        name="parentOrg"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          values.parentOrg && (
+                            <LinkTo
+                              modelType="Organization"
+                              model={values.parentOrg}
+                            />
+                          )
                         }
-                      }}
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("profile", true, false)
-                      }}
-                      widget={
-                        <RichTextEditor
-                          className="profile"
-                          placeholder={
-                            Settings.fields.organization.profile?.placeholder
-                          }
-                        />
-                      }
-                    />
-                  </>
-                )}
-
-                {edit && attachmentEditEnabled && (
-                  <Field
-                    name="uploadAttachments"
-                    label="Attachments"
-                    component={FieldHelper.SpecialField}
-                    widget={
-                      <UploadAttachment
-                        attachments={attachmentList}
-                        updateAttachments={setAttachmentList}
-                        relatedObjectType={Organization.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
                       />
-                    }
-                    onHandleBlur={() => {
-                      setFieldTouched("uploadAttachments", true, false)
-                    }}
-                  />
-                )}
-              </Fieldset>
-
-              <div>
-                <ApprovalsDefinition
-                  fieldName="planningApprovalSteps"
-                  values={values}
-                  title="Engagement planning approval process"
-                  addButtonLabel="Add a Planning Approval Step"
-                  setFieldTouched={setFieldTouched}
-                  setFieldValue={setFieldValue}
-                  approversFilters={approversFilters}
-                />
-              </div>
-
-              <div>
-                <ApprovalsDefinition
-                  fieldName="approvalSteps"
-                  values={values}
-                  title="Report publication approval process"
-                  addButtonLabel="Add a Publication Approval Step"
-                  setFieldTouched={setFieldTouched}
-                  setFieldValue={setFieldValue}
-                  approversFilters={approversFilters}
-                />
-
-                {Organization.isTaskEnabled(values.shortName) && (
-                  <Fieldset
-                    title={Settings.fields.task.longLabel}
-                    className="tasks-selector"
-                  >
-                    {!isAdmin ? (
-                      <NoPaginationTaskTable tasks={values.tasks} />
-                    ) : (
-                      <FastField
-                        name="tasks"
-                        label={Settings.fields.task.shortLabel}
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={
+                          Settings.fields.organization.identificationCode
+                        }
+                        name="identificationCode"
+                        component={FieldHelper.ReadonlyField}
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.location}
+                        name="location"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          values.location && (
+                            <LinkTo
+                              modelType="Location"
+                              model={values.location}
+                            >
+                              {`${Location.toString(values.location)} `}
+                              <Badge bg="secondary">
+                                {Location.humanNameOfType(values.location.type)}
+                              </Badge>
+                            </LinkTo>
+                          )
+                        }
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.emailAddresses}
+                        name="emailAddresses"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <EmailAddressTable
+                            label={
+                              Settings.fields.organization.emailAddresses.label
+                            }
+                            emailAddresses={values.emailAddresses}
+                          />
+                        }
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.status}
+                        name="status"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={Organization.humanNameOfStatus}
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.profile}
+                        name="profile"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <RichTextEditor readOnly className="profile" />
+                        }
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.organization.parentOrg}
+                        name="parentOrg"
                         component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
-                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tasks", value)
+                          setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("parentOrg", value)
                         }}
+                        disabled={!canAdministrateParentOrg}
                         widget={
-                          <AdvancedMultiSelect
-                            fieldName="tasks"
-                            placeholder={`Search for ${pluralize(
-                              Settings.fields.task.shortLabel
-                            )}…`}
-                            value={values.tasks}
-                            renderSelected={
-                              <NoPaginationTaskTable
-                                tasks={values.tasks}
-                                showDelete
-                              />
+                          <AdvancedSingleSelect
+                            fieldName="parentOrg"
+                            placeholder={
+                              Settings.fields.organization.parentOrg.placeholder
                             }
+                            showRemoveButton={canAdministrateParentOrg}
+                            value={values.parentOrg}
                             overlayColumns={["Name"]}
-                            overlayTable={HierarchicalTaskOverlayTable}
-                            restrictSelectableItems
-                            filterDefs={tasksFilters}
-                            objectType={Task}
-                            fields={taskFields}
-                            addon={TASKS_ICON}
-                            pageSize={0}
+                            overlayRenderRow={OrganizationOverlayRow}
+                            filterDefs={organizationFilters}
+                            objectType={Organization}
+                            fields={autocompleteQuery}
+                            queryParams={orgSearchQuery}
+                            valueKey="shortName"
+                            addon={ORGANIZATIONS_ICON}
                           />
                         }
                       />
-                    )}
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={
+                          Settings.fields.organization.identificationCode
+                        }
+                        name="identificationCode"
+                        component={FieldHelper.InputField}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.organization.location}
+                        name="location"
+                        component={FieldHelper.SpecialField}
+                        widget={
+                          <>
+                            <AdvancedSingleSelect
+                              fieldName="location"
+                              placeholder={
+                                Settings.fields.organization.location
+                                  .placeholder
+                              }
+                              value={values.location}
+                              overlayColumns={["Name"]}
+                              overlayTable={HierarchicalLocationOverlayTable}
+                              restrictSelectableItems
+                              filterDefs={locationFilters}
+                              objectType={Location}
+                              fields={locationFields}
+                              valueKey="name"
+                              onChange={value => {
+                                // validation will be done by setFieldValue
+                                setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                                setFieldValue("location", value)
+                              }}
+                              addon={LOCATIONS_ICON}
+                              pageSize={0}
+                            />
+                            <div className="mt-3">
+                              <LeafletWithSelection
+                                mapId="organization-location"
+                                location={values.location}
+                                onSelectAnetLocation={(loc: any) => {
+                                  setFieldTouched("location", true, false)
+                                  setFieldValue("location", loc, true)
+                                }}
+                              />
+                            </div>
+                          </>
+                        }
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        as="div"
+                        dictProps={Settings.fields.organization.emailAddresses}
+                        component={FieldHelper.SpecialField}
+                        widget={
+                          <EmailAddressInputTable
+                            emailAddresses={values.emailAddresses}
+                          />
+                        }
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.status}
+                        name="status"
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        buttons={statusButtons}
+                        onChange={value => setFieldValue("status", value)}
+                      />
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.organization.profile}
+                        name="profile"
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // prevent initial unnecessary render of RichTextEditor
+                          if (!_isEqual(values.profile, value)) {
+                            setFieldValue("profile", value, true)
+                          }
+                        }}
+                        onHandleBlur={() => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("profile", true, false)
+                        }}
+                        widget={
+                          <RichTextEditor
+                            className="profile"
+                            placeholder={
+                              Settings.fields.organization.profile?.placeholder
+                            }
+                          />
+                        }
+                      />
+                    </>
+                  )}
+
+                  {edit && attachmentEditEnabled && (
+                    <Field
+                      name="uploadAttachments"
+                      label="Attachments"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <UploadAttachment
+                          attachments={attachmentList}
+                          updateAttachments={setAttachmentList}
+                          relatedObjectType={Organization.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                        />
+                      }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
+                  )}
+                </Fieldset>
+
+                <div>
+                  <ApprovalsDefinition
+                    fieldName="planningApprovalSteps"
+                    values={values}
+                    title="Engagement planning approval process"
+                    addButtonLabel="Add a Planning Approval Step"
+                    setFieldTouched={setFieldTouched}
+                    setFieldValue={setFieldValue}
+                    approversFilters={approversFilters}
+                  />
+                </div>
+
+                <div>
+                  <ApprovalsDefinition
+                    fieldName="approvalSteps"
+                    values={values}
+                    title="Report publication approval process"
+                    addButtonLabel="Add a Publication Approval Step"
+                    setFieldTouched={setFieldTouched}
+                    setFieldValue={setFieldValue}
+                    approversFilters={approversFilters}
+                  />
+
+                  {Organization.isTaskEnabled(values.shortName) && (
+                    <Fieldset
+                      title={Settings.fields.task.longLabel}
+                      className="tasks-selector"
+                    >
+                      {!isAdmin ? (
+                        <NoPaginationTaskTable tasks={values.tasks} />
+                      ) : (
+                        <FastField
+                          name="tasks"
+                          label={Settings.fields.task.shortLabel}
+                          component={FieldHelper.SpecialField}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value)
+                          }}
+                          widget={
+                            <AdvancedMultiSelect
+                              fieldName="tasks"
+                              placeholder={`Search for ${pluralize(
+                                Settings.fields.task.shortLabel
+                              )}…`}
+                              value={values.tasks}
+                              renderSelected={
+                                <NoPaginationTaskTable
+                                  tasks={values.tasks}
+                                  showDelete
+                                />
+                              }
+                              overlayColumns={["Name"]}
+                              overlayTable={HierarchicalTaskOverlayTable}
+                              restrictSelectableItems
+                              filterDefs={tasksFilters}
+                              objectType={Task}
+                              fields={taskFields}
+                              addon={TASKS_ICON}
+                              pageSize={0}
+                            />
+                          }
+                        />
+                      )}
+                    </Fieldset>
+                  )}
+                </div>
+                {Settings.fields.organization.customFields && (
+                  <Fieldset title="Organization information" id="custom-fields">
+                    <CustomFieldsContainer
+                      fieldsConfig={Settings.fields.organization.customFields}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
                   </Fieldset>
                 )}
-              </div>
-              {Settings.fields.organization.customFields && (
-                <Fieldset title="Organization information" id="custom-fields">
-                  <CustomFieldsContainer
-                    fieldsConfig={Settings.fields.organization.customFields}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                  />
-                </Fieldset>
-              )}
 
-              <div className="submit-buttons">
-                <div>
-                  <Button onClick={onCancel} variant="outline-secondary">
-                    Cancel
-                  </Button>
-                </div>
-                {canAdministrateOrg && (
+                <div className="submit-buttons">
                   <div>
-                    <Button
-                      id="formBottomSubmit"
-                      variant="primary"
-                      onClick={submitForm}
-                      disabled={isSubmitting}
-                    >
-                      Save Organization
+                    <Button onClick={onCancel} variant="outline-secondary">
+                      Cancel
                     </Button>
                   </div>
-                )}
-              </div>
-            </Form>
-          </div>
+                  {canAdministrateOrg && (
+                    <div>
+                      <Button
+                        id="formBottomSubmit"
+                        variant="primary"
+                        onClick={submitForm}
+                        disabled={isSubmitting}
+                      >
+                        Save Organization
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </Form>
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>

@@ -16,6 +16,7 @@ import {
   taskFields
 } from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
 import AppContext from "components/AppContext"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import CustomDateInput from "components/CustomDateInput"
@@ -252,473 +253,479 @@ const EventForm = ({
         )
 
         return (
-          <div>
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <MessagesWithConflict
-              error={saveError}
-              objectType="Event"
-              onCancel={onCancel}
-              onConfirm={() => {
-                resetForm({ values, isSubmitting: true })
-                onSubmit(values, { resetForm, setSubmitting }, true)
-              }}
-            />
-            <Form className="form-horizontal" method="post">
-              <Fieldset title={title} action={action} />
-              <Fieldset>
-                <Row>
-                  {edit && (
-                    <Col lg={4} xl={3} className="text-center">
-                      <EntityAvatarComponent
-                        initialAvatar={initialValues.entityAvatar}
-                        relatedObjectType="events"
-                        relatedObjectUuid={initialValues.uuid}
-                        relatedObjectName={initialValues.shortName}
-                        editMode={attachmentEditEnabled}
-                        imageAttachments={imageAttachments}
-                      />
-                    </Col>
-                  )}
-                  <Col
-                    lg={edit && 8}
-                    xl={edit && 9}
-                    className="d-flex flex-column justify-content-center"
-                  >
-                    <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
-                        <Col sm={7}>
-                          <Row>
-                            <Col>
-                              <DictionaryField
-                                wrappedComponent={FastField}
-                                dictProps={Settings.fields.event.name}
-                                name="name"
-                                component={FieldHelper.InputField}
-                              />
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    </FormGroup>
-                  </Col>
-                </Row>
-              </Fieldset>
-              <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.eventSeries}
-                  name="eventSeries"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("eventSeries", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("eventSeries", value)
-                    setFieldValue("ownerOrg", value?.ownerOrg)
-                    setFieldValue("hostOrg", value?.hostOrg)
-                    setFieldValue("adminOrg", value?.adminOrg)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="eventSeries"
-                      placeholder={
-                        Settings.fields.event.eventSeries.placeholder
-                      }
-                      value={values.eventSeries}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={EventSeriesOverlayRow}
-                      filterDefs={eventSeriesFilters}
-                      objectType={EventSeries}
-                      fields={EventSeries.autocompleteQuery}
-                      queryParams={eventSeriesSearchQuery}
-                      valueKey="name"
-                      addon={EVENT_SERIES_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.ownerOrg}
-                  name="ownerOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("ownerOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="ownerOrg"
-                      placeholder={Settings.fields.event.ownerOrg.placeholder}
-                      value={values.ownerOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.hostOrg}
-                  name="hostOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("hostOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("hostOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="hostOrg"
-                      placeholder={Settings.fields.event.hostOrg.placeholder}
-                      value={values.hostOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.adminOrg}
-                  name="adminOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("adminOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("adminOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="adminOrg"
-                      placeholder={Settings.fields.event.adminOrg.placeholder}
-                      value={values.adminOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      queryParams={adminOrgSearchQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.location}
-                  name="location"
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <>
-                      <AdvancedSingleSelect
-                        fieldName="location"
-                        placeholder={Settings.fields.event.location.placeholder}
-                        value={values.location}
-                        overlayColumns={["Name"]}
-                        overlayTable={HierarchicalLocationOverlayTable}
-                        restrictSelectableItems
-                        filterDefs={locationFilters}
-                        objectType={Location}
-                        fields={locationFields}
-                        valueKey="name"
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value, true)
-                        }}
-                        addon={LOCATIONS_ICON}
-                        pageSize={0}
-                        createEntityComponent={
-                          !canCreateLocation
-                            ? null
-                            : (searchTerms, setDoReset) => (
-                                <CreateNewLocation
-                                  name={searchTerms}
-                                  setFieldTouched={setFieldTouched}
-                                  setFieldValue={setFieldValue}
-                                  setDoReset={setDoReset}
+          <AttachmentContext.Provider value={values}>
+            <div>
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <MessagesWithConflict
+                error={saveError}
+                objectType="Event"
+                onCancel={onCancel}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
+              <Form className="form-horizontal" method="post">
+                <Fieldset title={title} action={action} />
+                <Fieldset>
+                  <Row>
+                    {edit && (
+                      <Col lg={4} xl={3} className="text-center">
+                        <EntityAvatarComponent
+                          initialAvatar={initialValues.entityAvatar}
+                          relatedObjectType="events"
+                          relatedObjectUuid={initialValues.uuid}
+                          relatedObjectName={initialValues.shortName}
+                          editMode={attachmentEditEnabled}
+                          imageAttachments={imageAttachments}
+                        />
+                      </Col>
+                    )}
+                    <Col
+                      lg={edit && 8}
+                      xl={edit && 9}
+                      className="d-flex flex-column justify-content-center"
+                    >
+                      <FormGroup>
+                        <Row style={{ marginBottom: "1rem" }}>
+                          <Col sm={7}>
+                            <Row>
+                              <Col>
+                                <DictionaryField
+                                  wrappedComponent={FastField}
+                                  dictProps={Settings.fields.event.name}
+                                  name="name"
+                                  component={FieldHelper.InputField}
                                 />
-                              )
-                        }
-                      />
-                      <div className="mt-3">
-                        <LeafletWithSelection
-                          mapId="event-location"
-                          location={values.location}
-                          onSelectAnetLocation={(loc: any) => {
-                            setFieldTouched("location", true, false)
-                            setFieldValue("location", loc, true)
-                          }}
-                        />
-                      </div>
-                    </>
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.type}
-                  name="eventType"
-                  value={values.eventType?.uuid ?? ""}
-                  component={FieldHelper.SpecialField}
-                  onChange={event => {
-                    setFieldValue(
-                      "eventType",
-                      { uuid: event.target.value },
-                      true
-                    )
-                  }}
-                  widget={
-                    !activeEventTypes.length ? (
-                      <div className="text-danger mt-2">
-                        Could not load event types
-                      </div>
-                    ) : (
-                      <FormSelect className="location-type-form-group form-control">
-                        <option value="">Please select an event type</option>
-                        {activeEventTypes.map(t => (
-                          <option key={t.uuid} value={t.uuid}>
-                            {t.name}
-                          </option>
-                        ))}
-                      </FormSelect>
-                    )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.startDate}
-                  name="startDate"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    setFieldTouched("startDate", true, false) // onBlur doesn't work when selecting a date
-                    setFieldValue("startDate", value, true)
-                  }}
-                  onBlur={() => setFieldTouched("startDate")}
-                  widget={
-                    <CustomDateInput
-                      id="startDate"
-                      withTime={Settings.eventsIncludeStartAndEndTime}
-                      initialMonth={initialMonthForStartDate}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.endDate}
-                  name="endDate"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    setFieldTouched("endDate", true, false) // onBlur doesn't work when selecting a date
-                    setFieldValue("endDate", value, true)
-                  }}
-                  onBlur={() => setFieldTouched("endDate")}
-                  widget={
-                    <CustomDateInput
-                      id="endDate"
-                      withTime={Settings.eventsIncludeStartAndEndTime}
-                      initialMonth={initialMonthForEndDate}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.status}
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.description}
-                  name="description"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      placeholder={
-                        Settings.fields.event.description?.placeholder
-                      }
-                    />
-                  }
-                />
-                <Field
-                  name="organizations"
-                  label="Organizations attending"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("organizations", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("organizations", value, true)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="organizations"
-                      placeholder="Search for organizations…"
-                      value={values.organizations}
-                      renderSelected={
-                        <NoPaginationOrganizationTable
-                          id="events-organizations"
-                          organizations={values.organizations}
-                          showDelete
-                          noOrganizationsMessage="No Organizations currently assigned to this event. Click in the Organizations attending box to select organizations."
-                        />
-                      }
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <Field
-                  name="people"
-                  label="People attending"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("people", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("people", value, true)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="people"
-                      placeholder="Search for people…"
-                      value={values.people}
-                      renderSelected={
-                        <NoPaginationPersonTable
-                          id="events-people"
-                          people={values.people}
-                          showDelete
-                          noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select people."
-                        />
-                      }
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={PersonSimpleOverlayRow}
-                      filterDefs={peopleFilters}
-                      objectType={Person}
-                      fields={Person.autocompleteQuery}
-                      addon={PEOPLE_ICON}
-                    />
-                  }
-                />
-                {!_isEmpty(tasksFilters) && (
-                  <Field
-                    name="tasks"
-                    label={Settings.fields.task.longLabel}
+                              </Col>
+                            </Row>
+                          </Col>
+                        </Row>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </Fieldset>
+                <Fieldset>
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.eventSeries}
+                    name="eventSeries"
                     component={FieldHelper.SpecialField}
                     onChange={value => {
                       // validation will be done by setFieldValue
-                      setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                      setFieldValue("tasks", value, true)
+                      setFieldTouched("eventSeries", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("eventSeries", value)
+                      setFieldValue("ownerOrg", value?.ownerOrg)
+                      setFieldValue("hostOrg", value?.hostOrg)
+                      setFieldValue("adminOrg", value?.adminOrg)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="eventSeries"
+                        placeholder={
+                          Settings.fields.event.eventSeries.placeholder
+                        }
+                        value={values.eventSeries}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={EventSeriesOverlayRow}
+                        filterDefs={eventSeriesFilters}
+                        objectType={EventSeries}
+                        fields={EventSeries.autocompleteQuery}
+                        queryParams={eventSeriesSearchQuery}
+                        valueKey="name"
+                        addon={EVENT_SERIES_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.ownerOrg}
+                    name="ownerOrg"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("ownerOrg", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="ownerOrg"
+                        placeholder={Settings.fields.event.ownerOrg.placeholder}
+                        value={values.ownerOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.hostOrg}
+                    name="hostOrg"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("hostOrg", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("hostOrg", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="hostOrg"
+                        placeholder={Settings.fields.event.hostOrg.placeholder}
+                        value={values.hostOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.adminOrg}
+                    name="adminOrg"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("adminOrg", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("adminOrg", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="adminOrg"
+                        placeholder={Settings.fields.event.adminOrg.placeholder}
+                        value={values.adminOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        queryParams={adminOrgSearchQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.event.location}
+                    name="location"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <>
+                        <AdvancedSingleSelect
+                          fieldName="location"
+                          placeholder={
+                            Settings.fields.event.location.placeholder
+                          }
+                          value={values.location}
+                          overlayColumns={["Name"]}
+                          overlayTable={HierarchicalLocationOverlayTable}
+                          restrictSelectableItems
+                          filterDefs={locationFilters}
+                          objectType={Location}
+                          fields={locationFields}
+                          valueKey="name"
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("location", value, true)
+                          }}
+                          addon={LOCATIONS_ICON}
+                          pageSize={0}
+                          createEntityComponent={
+                            !canCreateLocation
+                              ? null
+                              : (searchTerms, setDoReset) => (
+                                  <CreateNewLocation
+                                    name={searchTerms}
+                                    setFieldTouched={setFieldTouched}
+                                    setFieldValue={setFieldValue}
+                                    setDoReset={setDoReset}
+                                  />
+                                )
+                          }
+                        />
+                        <div className="mt-3">
+                          <LeafletWithSelection
+                            mapId="event-location"
+                            location={values.location}
+                            onSelectAnetLocation={(loc: any) => {
+                              setFieldTouched("location", true, false)
+                              setFieldValue("location", loc, true)
+                            }}
+                          />
+                        </div>
+                      </>
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.event.type}
+                    name="eventType"
+                    value={values.eventType?.uuid ?? ""}
+                    component={FieldHelper.SpecialField}
+                    onChange={event => {
+                      setFieldValue(
+                        "eventType",
+                        { uuid: event.target.value },
+                        true
+                      )
+                    }}
+                    widget={
+                      !activeEventTypes.length ? (
+                        <div className="text-danger mt-2">
+                          Could not load event types
+                        </div>
+                      ) : (
+                        <FormSelect className="location-type-form-group form-control">
+                          <option value="">Please select an event type</option>
+                          {activeEventTypes.map(t => (
+                            <option key={t.uuid} value={t.uuid}>
+                              {t.name}
+                            </option>
+                          ))}
+                        </FormSelect>
+                      )
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.startDate}
+                    name="startDate"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      setFieldTouched("startDate", true, false) // onBlur doesn't work when selecting a date
+                      setFieldValue("startDate", value, true)
+                    }}
+                    onBlur={() => setFieldTouched("startDate")}
+                    widget={
+                      <CustomDateInput
+                        id="startDate"
+                        withTime={Settings.eventsIncludeStartAndEndTime}
+                        initialMonth={initialMonthForStartDate}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.endDate}
+                    name="endDate"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      setFieldTouched("endDate", true, false) // onBlur doesn't work when selecting a date
+                      setFieldValue("endDate", value, true)
+                    }}
+                    onBlur={() => setFieldTouched("endDate")}
+                    widget={
+                      <CustomDateInput
+                        id="endDate"
+                        withTime={Settings.eventsIncludeStartAndEndTime}
+                        initialMonth={initialMonthForEndDate}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.event.status}
+                    name="status"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={statusButtons}
+                    onChange={value => setFieldValue("status", value)}
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.event.description}
+                    name="description"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // prevent initial unnecessary render of RichTextEditor
+                      if (!_isEqual(values.description, value)) {
+                        setFieldValue("description", value, true)
+                      }
+                    }}
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("description", true, false)
+                    }}
+                    widget={
+                      <RichTextEditor
+                        className="reportTextField"
+                        placeholder={
+                          Settings.fields.event.description?.placeholder
+                        }
+                      />
+                    }
+                  />
+                  <Field
+                    name="organizations"
+                    label="Organizations attending"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("organizations", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("organizations", value, true)
                     }}
                     widget={
                       <AdvancedMultiSelect
-                        fieldName="tasks"
-                        placeholder={`Search for ${tasksLabel}…`}
-                        value={values.tasks}
+                        fieldName="organizations"
+                        placeholder="Search for organizations…"
+                        value={values.organizations}
                         renderSelected={
-                          <NoPaginationTaskTable
-                            id="events-tasks"
-                            tasks={values.tasks}
+                          <NoPaginationOrganizationTable
+                            id="events-organizations"
+                            organizations={values.organizations}
                             showDelete
-                            showDescription
-                            noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view ${tasksLabel}`}
+                            noOrganizationsMessage="No Organizations currently assigned to this event. Click in the Organizations attending box to select organizations."
                           />
                         }
-                        overlayColumns={[Settings.fields.task.shortLabel]}
-                        overlayTable={HierarchicalTaskOverlayTable}
-                        restrictSelectableItems
-                        filterDefs={tasksFilters}
-                        objectType={Task}
-                        fields={taskFields}
-                        addon={TASKS_ICON}
-                        pageSize={0}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        addon={ORGANIZATIONS_ICON}
                       />
                     }
                   />
-                )}
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.outcomes}
-                  name="outcomes"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.outcomes, value)) {
-                      setFieldValue("outcomes", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("outcomes", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      placeholder={Settings.fields.event.outcomes?.placeholder}
-                    />
-                  }
-                />
-
-                {edit && attachmentEditEnabled && (
                   <Field
-                    name="uploadAttachments"
-                    label="Attachments"
+                    name="people"
+                    label="People attending"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("people", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("people", value, true)
+                    }}
                     widget={
-                      <UploadAttachment
-                        attachments={attachmentList}
-                        updateAttachments={setAttachmentList}
-                        relatedObjectType={Event.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
+                      <AdvancedMultiSelect
+                        fieldName="people"
+                        placeholder="Search for people…"
+                        value={values.people}
+                        renderSelected={
+                          <NoPaginationPersonTable
+                            id="events-people"
+                            people={values.people}
+                            showDelete
+                            noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select people."
+                          />
+                        }
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={PersonSimpleOverlayRow}
+                        filterDefs={peopleFilters}
+                        objectType={Person}
+                        fields={Person.autocompleteQuery}
+                        addon={PEOPLE_ICON}
                       />
                     }
-                    onHandleBlur={() => {
-                      setFieldTouched("uploadAttachments", true, false)
-                    }}
                   />
-                )}
-              </Fieldset>
-              <div className="submit-buttons">
-                <div>
-                  <Button onClick={onCancel} variant="outline-secondary">
-                    Cancel
-                  </Button>
+                  {!_isEmpty(tasksFilters) && (
+                    <Field
+                      name="tasks"
+                      label={Settings.fields.task.longLabel}
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("tasks", value, true)
+                      }}
+                      widget={
+                        <AdvancedMultiSelect
+                          fieldName="tasks"
+                          placeholder={`Search for ${tasksLabel}…`}
+                          value={values.tasks}
+                          renderSelected={
+                            <NoPaginationTaskTable
+                              id="events-tasks"
+                              tasks={values.tasks}
+                              showDelete
+                              showDescription
+                              noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view ${tasksLabel}`}
+                            />
+                          }
+                          overlayColumns={[Settings.fields.task.shortLabel]}
+                          overlayTable={HierarchicalTaskOverlayTable}
+                          restrictSelectableItems
+                          filterDefs={tasksFilters}
+                          objectType={Task}
+                          fields={taskFields}
+                          addon={TASKS_ICON}
+                          pageSize={0}
+                        />
+                      }
+                    />
+                  )}
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.event.outcomes}
+                    name="outcomes"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // prevent initial unnecessary render of RichTextEditor
+                      if (!_isEqual(values.outcomes, value)) {
+                        setFieldValue("outcomes", value, true)
+                      }
+                    }}
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("outcomes", true, false)
+                    }}
+                    widget={
+                      <RichTextEditor
+                        className="reportTextField"
+                        placeholder={
+                          Settings.fields.event.outcomes?.placeholder
+                        }
+                      />
+                    }
+                  />
+
+                  {edit && attachmentEditEnabled && (
+                    <Field
+                      name="uploadAttachments"
+                      label="Attachments"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <UploadAttachment
+                          attachments={attachmentList}
+                          updateAttachments={setAttachmentList}
+                          relatedObjectType={Event.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                        />
+                      }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
+                  )}
+                </Fieldset>
+                <div className="submit-buttons">
+                  <div>
+                    <Button onClick={onCancel} variant="outline-secondary">
+                      Cancel
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                      id="formBottomSubmit"
+                      variant="primary"
+                      onClick={submitForm}
+                      disabled={isSubmitting}
+                    >
+                      Save Event
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Button
-                    id="formBottomSubmit"
-                    variant="primary"
-                    onClick={submitForm}
-                    disabled={isSubmitting}
-                  >
-                    Save Event
-                  </Button>
-                </div>
-              </div>
-            </Form>
-          </div>
+              </Form>
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>

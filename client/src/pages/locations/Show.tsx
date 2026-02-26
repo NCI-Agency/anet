@@ -4,6 +4,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -169,195 +170,197 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   )
 
   return (
-    <div>
-      <Messages success={stateSuccess} error={stateError} />
-      <div className="form-horizontal">
-        <Fieldset
-          title={
-            <>
-              {
-                <SubscriptionIcon
-                  subscribedObjectType="locations"
-                  subscribedObjectUuid={location.uuid}
-                  isSubscribed={location.isSubscribed}
-                  updatedAt={location.updatedAt}
-                  refetch={refetch}
-                  setError={error => {
-                    setStateError(error)
-                    jumpToTop()
-                  }}
-                  persistent
+    <AttachmentContext.Provider value={location}>
+      <div>
+        <Messages success={stateSuccess} error={stateError} />
+        <div className="form-horizontal">
+          <Fieldset
+            title={
+              <>
+                {
+                  <SubscriptionIcon
+                    subscribedObjectType="locations"
+                    subscribedObjectUuid={location.uuid}
+                    isSubscribed={location.isSubscribed}
+                    updatedAt={location.updatedAt}
+                    refetch={refetch}
+                    setError={error => {
+                      setStateError(error)
+                      jumpToTop()
+                    }}
+                    persistent
+                  />
+                }{" "}
+                Location {location.name}
+              </>
+            }
+            action={action}
+          />
+          <Fieldset>
+            <Row>
+              <Col lg={4} xl={3} className="text-center">
+                <EntityAvatarDisplay
+                  avatar={avatar}
+                  defaultAvatar={Location.relatedObjectType}
                 />
-              }{" "}
-              Location {location.name}
-            </>
-          }
-          action={action}
-        />
-        <Fieldset>
-          <Row>
-            <Col lg={4} xl={3} className="text-center">
-              <EntityAvatarDisplay
-                avatar={avatar}
-                defaultAvatar={Location.relatedObjectType}
-              />
-            </Col>
-            <Col
-              lg={8}
-              xl={9}
-              className="d-flex flex-column justify-content-center"
-            >
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.location.name}
-                field={{ name: "name", value: location.name }}
-              />
-
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.location.type}
-                field={{ name: "type" }}
-                humanValue={Location.humanNameOfType(location.type)}
-              />
-
-              {Location.hasCoordinates(location) && (
-                <GeoLocation
-                  coordinates={{
-                    lat: location.lat,
-                    lng: location.lng,
-                    displayedCoordinate: convertLatLngToMGRS(
-                      location.lat,
-                      location.lng
-                    )
-                  }}
-                  displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+              </Col>
+              <Col
+                lg={8}
+                xl={9}
+                className="d-flex flex-column justify-content-center"
+              >
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.location.name}
+                  field={{ name: "name", value: location.name }}
                 />
-              )}
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.location.status}
-                field={{ name: "status" }}
-                humanValue={Location.humanNameOfStatus(location.status)}
-              />
-            </Col>
-          </Row>
-        </Fieldset>
-        <Fieldset id="info" title="Additional Information">
-          {location.type === Location.LOCATION_TYPES.COUNTRY && (
-            <>
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.location.digram}
-                field={{ name: "digram", value: location.digram }}
-              />
 
-              <DictionaryField
-                wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.location.trigram}
-                field={{ name: "trigram", value: location.trigram }}
-              />
-            </>
-          )}
-
-          {!_isEmpty(location.parentLocations) && (
-            <FieldHelper.ReadonlyField
-              field={{ name: "parentLocations" }}
-              label="Parent locations"
-              humanValue={
-                <LocationTable
-                  id="location-parentLocations"
-                  locations={location.parentLocations}
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.location.type}
+                  field={{ name: "type" }}
+                  humanValue={Location.humanNameOfType(location.type)}
                 />
-              }
-            />
-          )}
 
-          {!_isEmpty(location.childrenLocations) && (
-            <FieldHelper.ReadonlyField
-              field={{ name: "childrenLocations" }}
-              label="Child locations"
-              humanValue={
-                <LocationTable
-                  id="location-childrenLocations"
-                  locations={location.childrenLocations}
+                {Location.hasCoordinates(location) && (
+                  <GeoLocation
+                    coordinates={{
+                      lat: location.lat,
+                      lng: location.lng,
+                      displayedCoordinate: convertLatLngToMGRS(
+                        location.lat,
+                        location.lng
+                      )
+                    }}
+                    displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+                  />
+                )}
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.location.status}
+                  field={{ name: "status" }}
+                  humanValue={Location.humanNameOfStatus(location.status)}
                 />
-              }
-            />
-          )}
-
-          {location.description && (
-            <DictionaryField
-              wrappedComponent={FieldHelper.ReadonlyField}
-              dictProps={Settings.fields.location.description}
-              field={{ name: "description" }}
-              humanValue={
-                <RichTextEditor readOnly value={location.description} />
-              }
-            />
-          )}
-
-          {attachmentsEnabled && (
-            <FieldHelper.ReadonlyField
-              field={{ name: "attachments" }}
-              label="Attachments"
-              humanValue={
-                <AttachmentsDetailView
-                  attachments={attachments}
-                  updateAttachments={setAttachments}
-                  relatedObjectType={Location.relatedObjectType}
-                  relatedObjectUuid={location.uuid}
-                  allowEdit={canEdit}
-                />
-              }
-            />
-          )}
-        </Fieldset>
-
-        {Settings.fields.location.customFields && (
-          <Fieldset title="Location information" id="custom-fields">
-            <ReadonlyCustomFields
-              fieldsConfig={Settings.fields.location.customFields}
-              values={location}
-            />
+              </Col>
+            </Row>
           </Fieldset>
-        )}
+          <Fieldset id="info" title="Additional Information">
+            {location.type === Location.LOCATION_TYPES.COUNTRY && (
+              <>
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.location.digram}
+                  field={{ name: "digram", value: location.digram }}
+                />
 
-        {(!_isEmpty(markers) || !_isEmpty(shapes)) && (
-          <Leaflet markers={markers} shapes={shapes} />
-        )}
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.location.trigram}
+                  field={{ name: "trigram", value: location.trigram }}
+                />
+              </>
+            )}
+
+            {!_isEmpty(location.parentLocations) && (
+              <FieldHelper.ReadonlyField
+                field={{ name: "parentLocations" }}
+                label="Parent locations"
+                humanValue={
+                  <LocationTable
+                    id="location-parentLocations"
+                    locations={location.parentLocations}
+                  />
+                }
+              />
+            )}
+
+            {!_isEmpty(location.childrenLocations) && (
+              <FieldHelper.ReadonlyField
+                field={{ name: "childrenLocations" }}
+                label="Child locations"
+                humanValue={
+                  <LocationTable
+                    id="location-childrenLocations"
+                    locations={location.childrenLocations}
+                  />
+                }
+              />
+            )}
+
+            {location.description && (
+              <DictionaryField
+                wrappedComponent={FieldHelper.ReadonlyField}
+                dictProps={Settings.fields.location.description}
+                field={{ name: "description" }}
+                humanValue={
+                  <RichTextEditor readOnly value={location.description} />
+                }
+              />
+            )}
+
+            {attachmentsEnabled && (
+              <FieldHelper.ReadonlyField
+                field={{ name: "attachments" }}
+                label="Attachments"
+                humanValue={
+                  <AttachmentsDetailView
+                    attachments={attachments}
+                    updateAttachments={setAttachments}
+                    relatedObjectType={Location.relatedObjectType}
+                    relatedObjectUuid={location.uuid}
+                    allowEdit={canEdit}
+                  />
+                }
+              />
+            )}
+          </Fieldset>
+
+          {Settings.fields.location.customFields && (
+            <Fieldset title="Location information" id="custom-fields">
+              <ReadonlyCustomFields
+                fieldsConfig={Settings.fields.location.customFields}
+                values={location}
+              />
+            </Fieldset>
+          )}
+
+          {(!_isEmpty(markers) || !_isEmpty(shapes)) && (
+            <Leaflet markers={markers} shapes={shapes} />
+          )}
+        </div>
+
+        <Approvals
+          relatedObject={location}
+          objectType="Location"
+          canEdit={canEdit}
+          refetch={refetch}
+        />
+
+        <Fieldset title="Organizations at this Location">
+          <OrganizationTable queryParams={{ locationUuid: uuid }} />
+        </Fieldset>
+
+        <Fieldset title="Positions at this Location">
+          <PositionTable queryParams={{ locationUuid: uuid }} />
+        </Fieldset>
+
+        <Fieldset title="Reports at this Location">
+          <ReportCollection
+            paginationKey={`r_${uuid}`}
+            queryParams={{ locationUuid: uuid }}
+            mapId="reports"
+          />
+        </Fieldset>
+        <Fieldset title="Events at this Location">
+          <EventCollection
+            paginationKey={`e_${uuid}`}
+            queryParams={{ locationUuid: uuid }}
+            mapId="events"
+            showEventSeries
+          />
+        </Fieldset>
       </div>
-
-      <Approvals
-        relatedObject={location}
-        objectType="Location"
-        canEdit={canEdit}
-        refetch={refetch}
-      />
-
-      <Fieldset title="Organizations at this Location">
-        <OrganizationTable queryParams={{ locationUuid: uuid }} />
-      </Fieldset>
-
-      <Fieldset title="Positions at this Location">
-        <PositionTable queryParams={{ locationUuid: uuid }} />
-      </Fieldset>
-
-      <Fieldset title="Reports at this Location">
-        <ReportCollection
-          paginationKey={`r_${uuid}`}
-          queryParams={{ locationUuid: uuid }}
-          mapId="reports"
-        />
-      </Fieldset>
-      <Fieldset title="Events at this Location">
-        <EventCollection
-          paginationKey={`e_${uuid}`}
-          queryParams={{ locationUuid: uuid }}
-          mapId="events"
-          showEventSeries
-        />
-      </Fieldset>
-    </div>
+    </AttachmentContext.Provider>
   )
 }
 

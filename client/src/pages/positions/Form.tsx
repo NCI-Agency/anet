@@ -9,6 +9,7 @@ import {
   locationFields
 } from "components/advancedSelectWidget/HierarchicalLocationOverlayTable"
 import AppContext from "components/AppContext"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import {
@@ -263,319 +264,321 @@ const PositionForm = ({
         const locationFilters = Location.getPositionLocationFilters()
 
         return (
-          <div>
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <MessagesWithConflict
-              error={error}
-              objectType="Position"
-              onCancel={onCancel}
-              onConfirm={() => {
-                resetForm({ values, isSubmitting: true })
-                onSubmit(values, { resetForm, setSubmitting }, true)
-              }}
-            />
-            <Form className="form-horizontal" method="post">
-              <Fieldset title={title} action={action} />
-              <Fieldset>
-                <Row>
-                  {edit && (
-                    <Col lg={4} xl={3} className="text-center">
-                      <EntityAvatarComponent
-                        initialAvatar={initialValues.entityAvatar}
-                        relatedObjectType={Position.relatedObjectType}
-                        relatedObjectUuid={initialValues.uuid}
-                        relatedObjectName={initialValues.name}
-                        editMode={attachmentEditEnabled}
-                        imageAttachments={imageAttachments}
+          <AttachmentContext.Provider value={values}>
+            <div>
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <MessagesWithConflict
+                error={error}
+                objectType="Position"
+                onCancel={onCancel}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
+              <Form className="form-horizontal" method="post">
+                <Fieldset title={title} action={action} />
+                <Fieldset>
+                  <Row>
+                    {edit && (
+                      <Col lg={4} xl={3} className="text-center">
+                        <EntityAvatarComponent
+                          initialAvatar={initialValues.entityAvatar}
+                          relatedObjectType={Position.relatedObjectType}
+                          relatedObjectUuid={initialValues.uuid}
+                          relatedObjectName={initialValues.name}
+                          editMode={attachmentEditEnabled}
+                          imageAttachments={imageAttachments}
+                        />
+                      </Col>
+                    )}
+                    <Col lg={edit && 8} xl={edit && 9}>
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.position.name}
+                        name="name"
+                        component={FieldHelper.InputField}
+                        onChange={event => {
+                          setFieldValue("name", event.target.value)
+                          setPositionName(event.target.value)
+                        }}
+                        extraColElem={
+                          showSimilarPositionsMessage ? (
+                            <>
+                              <Button
+                                onClick={() => setShowSimilarPositions(true)}
+                                variant="outline-secondary"
+                              >
+                                <Icon
+                                  icon={IconNames.WARNING_SIGN}
+                                  intent={Intent.WARNING}
+                                  size={IconSize.STANDARD}
+                                  style={{ margin: "0 6px" }}
+                                />
+                                Possible Duplicates
+                              </Button>
+                            </>
+                          ) : undefined
+                        }
+                      />
+
+                      {edit ? (
+                        <DictionaryField
+                          wrappedComponent={FastField}
+                          dictProps={Settings.fields.position.type}
+                          name="type"
+                          component={FieldHelper.ReadonlyField}
+                          humanValue={Position.humanNameOfType}
+                        />
+                      ) : (
+                        <DictionaryField
+                          wrappedComponent={FastField}
+                          dictProps={Settings.fields.position.type}
+                          name="type"
+                          component={FieldHelper.RadioButtonToggleGroupField}
+                          buttons={typeButtons}
+                          onChange={value => {
+                            setFieldValue("type", value)
+                          }}
+                        />
+                      )}
+
+                      <FastField
+                        name="permissions"
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        buttons={permissionsButtons}
+                        onChange={value => {
+                          setFieldValue("permissions", value)
+                          setFieldValue(
+                            "superuserType",
+                            value === Position.TYPE.SUPERUSER
+                              ? Position.SUPERUSER_TYPE.REGULAR
+                              : null
+                          )
+                          setPermissions(value)
+                        }}
+                      />
+                      {permissions === Position.TYPE.SUPERUSER && (
+                        <DictionaryField
+                          wrappedComponent={FastField}
+                          dictProps={Settings.fields.position.superuserType}
+                          name="superuserType"
+                          component={FieldHelper.RadioButtonToggleGroupField}
+                          buttons={positionSuperuserTypeButtons}
+                          onChange={value => {
+                            setFieldValue("superuserType", value)
+                          }}
+                        />
+                      )}
+
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.position.organization}
+                        name="organization"
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("organization", value)
+                        }}
+                        widget={
+                          <AdvancedSingleSelect
+                            fieldName="organization"
+                            placeholder={
+                              Settings.fields.position.organization.placeholder
+                            }
+                            value={values.organization}
+                            overlayColumns={["Name"]}
+                            overlayRenderRow={OrganizationOverlayRow}
+                            filterDefs={organizationFilters}
+                            objectType={Organization}
+                            fields={Organization.autocompleteQuery}
+                            queryParams={orgSearchQuery}
+                            valueKey="shortName"
+                            addon={ORGANIZATIONS_ICON}
+                          />
+                        }
+                      />
+
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.position.location}
+                        name="location"
+                        component={FieldHelper.SpecialField}
+                        widget={
+                          <>
+                            <AdvancedSingleSelect
+                              fieldName="location"
+                              placeholder={
+                                Settings.fields.position.location.placeholder
+                              }
+                              value={values.location}
+                              overlayColumns={["Name"]}
+                              overlayTable={HierarchicalLocationOverlayTable}
+                              restrictSelectableItems
+                              filterDefs={locationFilters}
+                              objectType={Location}
+                              fields={locationFields}
+                              valueKey="name"
+                              onChange={value => {
+                                // validation will be done by setFieldValue
+                                setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                                setFieldValue("location", value)
+                              }}
+                              addon={LOCATIONS_ICON}
+                              pageSize={0}
+                            />
+                            <div className="mt-3">
+                              <LeafletWithSelection
+                                mapId="position-location"
+                                location={values.location}
+                                onSelectAnetLocation={(loc: any) => {
+                                  setFieldTouched("location", true, false)
+                                  setFieldValue("location", loc, true)
+                                }}
+                              />
+                            </div>
+                          </>
+                        }
                       />
                     </Col>
-                  )}
-                  <Col lg={edit && 8} xl={edit && 9}>
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.position.name}
-                      name="name"
-                      component={FieldHelper.InputField}
-                      onChange={event => {
-                        setFieldValue("name", event.target.value)
-                        setPositionName(event.target.value)
-                      }}
-                      extraColElem={
-                        showSimilarPositionsMessage ? (
-                          <>
-                            <Button
-                              onClick={() => setShowSimilarPositions(true)}
-                              variant="outline-secondary"
-                            >
-                              <Icon
-                                icon={IconNames.WARNING_SIGN}
-                                intent={Intent.WARNING}
-                                size={IconSize.STANDARD}
-                                style={{ margin: "0 6px" }}
-                              />
-                              Possible Duplicates
-                            </Button>
-                          </>
-                        ) : undefined
-                      }
-                    />
+                  </Row>
+                </Fieldset>
+                <Fieldset title="Additional information">
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.position.code}
+                    name="code"
+                    component={FieldHelper.InputField}
+                  />
 
-                    {edit ? (
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.position.type}
-                        name="type"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={Position.humanNameOfType}
-                      />
-                    ) : (
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.position.type}
-                        name="type"
-                        component={FieldHelper.RadioButtonToggleGroupField}
-                        buttons={typeButtons}
-                        onChange={value => {
-                          setFieldValue("type", value)
-                        }}
-                      />
-                    )}
-
-                    <FastField
-                      name="permissions"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      buttons={permissionsButtons}
-                      onChange={value => {
-                        setFieldValue("permissions", value)
-                        setFieldValue(
-                          "superuserType",
-                          value === Position.TYPE.SUPERUSER
-                            ? Position.SUPERUSER_TYPE.REGULAR
-                            : null
-                        )
-                        setPermissions(value)
-                      }}
-                    />
-                    {permissions === Position.TYPE.SUPERUSER && (
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.position.superuserType}
-                        name="superuserType"
-                        component={FieldHelper.RadioButtonToggleGroupField}
-                        buttons={positionSuperuserTypeButtons}
-                        onChange={value => {
-                          setFieldValue("superuserType", value)
-                        }}
-                      />
-                    )}
-
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.position.organization}
-                      name="organization"
-                      component={FieldHelper.SpecialField}
-                      onChange={value => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
-                        setFieldValue("organization", value)
-                      }}
-                      widget={
-                        <AdvancedSingleSelect
-                          fieldName="organization"
-                          placeholder={
-                            Settings.fields.position.organization.placeholder
-                          }
-                          value={values.organization}
-                          overlayColumns={["Name"]}
-                          overlayRenderRow={OrganizationOverlayRow}
-                          filterDefs={organizationFilters}
-                          objectType={Organization}
-                          fields={Organization.autocompleteQuery}
-                          queryParams={orgSearchQuery}
-                          valueKey="shortName"
-                          addon={ORGANIZATIONS_ICON}
-                        />
-                      }
-                    />
-
-                    <DictionaryField
-                      wrappedComponent={Field}
-                      dictProps={Settings.fields.position.location}
-                      name="location"
-                      component={FieldHelper.SpecialField}
-                      widget={
-                        <>
-                          <AdvancedSingleSelect
-                            fieldName="location"
-                            placeholder={
-                              Settings.fields.position.location.placeholder
-                            }
-                            value={values.location}
-                            overlayColumns={["Name"]}
-                            overlayTable={HierarchicalLocationOverlayTable}
-                            restrictSelectableItems
-                            filterDefs={locationFilters}
-                            objectType={Location}
-                            fields={locationFields}
-                            valueKey="name"
-                            onChange={value => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                              setFieldValue("location", value)
-                            }}
-                            addon={LOCATIONS_ICON}
-                            pageSize={0}
-                          />
-                          <div className="mt-3">
-                            <LeafletWithSelection
-                              mapId="position-location"
-                              location={values.location}
-                              onSelectAnetLocation={(loc: any) => {
-                                setFieldTouched("location", true, false)
-                                setFieldValue("location", loc, true)
-                              }}
-                            />
-                          </div>
-                        </>
-                      }
-                    />
-                  </Col>
-                </Row>
-              </Fieldset>
-              <Fieldset title="Additional information">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.code}
-                  name="code"
-                  component={FieldHelper.InputField}
-                />
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  as="div"
-                  dictProps={Settings.fields.position.emailAddresses}
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <EmailAddressInputTable
-                      emailAddresses={values.emailAddresses}
-                    />
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.position.status}
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                >
-                  {willAutoKickPerson && (
-                    <FormBS.Text>
-                      <span className="text-danger">
-                        Setting this position to inactive will automatically
-                        remove{" "}
-                        <LinkTo modelType="Person" model={values.person} /> from
-                        this position.
-                      </span>
-                    </FormBS.Text>
-                  )}
-                </DictionaryField>
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.position.role}
-                  name="role"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={positionRoleButtons}
-                  onChange={value => setFieldValue("role", value)}
-                />
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.position.description}
-                  name="description"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="description"
-                      placeholder={
-                        Settings.fields.position.description?.placeholder
-                      }
-                    />
-                  }
-                />
-                {edit && attachmentEditEnabled && (
-                  <Field
-                    name="uploadAttachments"
-                    label="Attachments"
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    as="div"
+                    dictProps={Settings.fields.position.emailAddresses}
                     component={FieldHelper.SpecialField}
                     widget={
-                      <UploadAttachment
-                        attachments={attachmentList}
-                        updateAttachments={setAttachmentList}
-                        relatedObjectType={Position.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
+                      <EmailAddressInputTable
+                        emailAddresses={values.emailAddresses}
                       />
                     }
+                  />
+
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.position.status}
+                    name="status"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={statusButtons}
+                    onChange={value => setFieldValue("status", value)}
+                  >
+                    {willAutoKickPerson && (
+                      <FormBS.Text>
+                        <span className="text-danger">
+                          Setting this position to inactive will automatically
+                          remove{" "}
+                          <LinkTo modelType="Person" model={values.person} />{" "}
+                          from this position.
+                        </span>
+                      </FormBS.Text>
+                    )}
+                  </DictionaryField>
+
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.position.role}
+                    name="role"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={positionRoleButtons}
+                    onChange={value => setFieldValue("role", value)}
+                  />
+
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.position.description}
+                    name="description"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // prevent initial unnecessary render of RichTextEditor
+                      if (!_isEqual(values.description, value)) {
+                        setFieldValue("description", value, true)
+                      }
+                    }}
                     onHandleBlur={() => {
-                      setFieldTouched("uploadAttachments", true, false)
+                      // validation will be done by setFieldValue
+                      setFieldTouched("description", true, false)
+                    }}
+                    widget={
+                      <RichTextEditor
+                        className="description"
+                        placeholder={
+                          Settings.fields.position.description?.placeholder
+                        }
+                      />
+                    }
+                  />
+                  {edit && attachmentEditEnabled && (
+                    <Field
+                      name="uploadAttachments"
+                      label="Attachments"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <UploadAttachment
+                          attachments={attachmentList}
+                          updateAttachments={setAttachmentList}
+                          relatedObjectType={Position.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                        />
+                      }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
+                  )}
+                </Fieldset>
+
+                {Settings.fields.position.customFields && (
+                  <Fieldset title="Position information" id="custom-fields">
+                    <CustomFieldsContainer
+                      fieldsConfig={Settings.fields.position.customFields}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
+                )}
+                {showSimilarPositions && (
+                  <SimilarObjectsModal
+                    objectType="Position"
+                    userInput={`${values.name}`}
+                    onCancel={() => {
+                      setShowSimilarPositions(false)
                     }}
                   />
                 )}
-              </Fieldset>
-
-              {Settings.fields.position.customFields && (
-                <Fieldset title="Position information" id="custom-fields">
-                  <CustomFieldsContainer
-                    fieldsConfig={Settings.fields.position.customFields}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                  />
-                </Fieldset>
-              )}
-              {showSimilarPositions && (
-                <SimilarObjectsModal
-                  objectType="Position"
-                  userInput={`${values.name}`}
-                  onCancel={() => {
-                    setShowSimilarPositions(false)
-                  }}
-                />
-              )}
-              <div className="submit-buttons">
-                <div>
-                  <Button onClick={onCancel} variant="outline-secondary">
-                    Cancel
-                  </Button>
+                <div className="submit-buttons">
+                  <div>
+                    <Button onClick={onCancel} variant="outline-secondary">
+                      Cancel
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                      id="formBottomSubmit"
+                      variant="primary"
+                      onClick={submitForm}
+                      disabled={isSubmitting}
+                    >
+                      Save Position
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Button
-                    id="formBottomSubmit"
-                    variant="primary"
-                    onClick={submitForm}
-                    disabled={isSubmitting}
-                  >
-                    Save Position
-                  </Button>
-                </div>
-              </div>
-            </Form>
-          </div>
+              </Form>
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>
