@@ -288,8 +288,11 @@ const MultiTypeAdvancedSelectComponent = ({
           onChange={changeEntityType}
           style={{ marginBottom: "5px" }}
         >
-          {Object.entries(ENTITY_TYPES)
-            .filter(([, et]) => entityTypes.includes(et))
+          {entityTypes
+            .filter(et => ALL_ENTITY_TYPES.includes(et))
+            .map(et =>
+              Object.entries(ENTITY_TYPES).find(([, oet]) => et === oet)
+            )
             .map(([key, entityName]) => {
               const entityLabel = ENTITY_LABELS[ENTITY_TYPES[key]]
               return (
