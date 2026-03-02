@@ -312,7 +312,7 @@ const MultiTypeAdvancedSelectComponent = ({
         value={value}
         valueKey={valueKey}
         showEmbedded
-        keepSearchText={entityTypes.length > 1}
+        keepSearchText
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
         filterDefs={filterDefs}

@@ -150,11 +150,7 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestReferenceFieldAdvancedSelectFirstItem()
       ).click()
-      // Advanced select input gets empty, the selected element shown below the input
-      // eslint-disable-next-line no-unused-expressions
-      expect(await (await CreateReport.getTestReferenceField()).getValue()).to
-        .be.empty
-      // Value should exist now
+      // The selected element should be shown below the input
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (await CreateReport.getTestReferenceFieldValue()).isExisting()
@@ -174,6 +170,7 @@ describe("Create report form page", () => {
 
       // Select it again
       await (await CreateReport.getTestReferenceFieldLabel()).click()
+      await CreateReport.deleteInput(await CreateReport.getTestReferenceField())
       await (await CreateReport.getTestReferenceField()).setValue(REPORT)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
