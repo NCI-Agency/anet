@@ -383,6 +383,10 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  const [selectedSuggestionField, setSelectedSuggestionField] = useState<{
+    fieldId: string
+    fieldLabel: string
+  } | null>(null)
   const latestValuesRef = useRef<any>(initialValues)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
@@ -437,6 +441,8 @@ const ReportForm = ({
     return {
       title: report.intent || "",
       description: plainText,
+      suggestionTargetField: selectedSuggestionField,
+      suggestionFieldOptions,
       relatedContext: {
         classification: report.classification,
         engagementDate: report.engagementDate,
@@ -456,14 +462,16 @@ const ReportForm = ({
   const chatSuggestions = useMemo<ChatSuggestion[]>(
     () => [
       {
-        label: "Suggest key outcomes",
-        prompt: "Suggest key outcomes based on the report information",
+        label: "Suggest improvements",
+        prompt:
+          "Use the ANET field picker UI to choose which report field to improve, then provide the suggestion in the ANET suggestion tool UI.",
         icon: "lightbulb",
         iconColor: "yellow"
       },
       {
         label: "Suggest next steps",
-        prompt: "Suggest next steps based on the report information",
+        prompt:
+          "Suggest improvements for the Next Steps field using the ANET suggestion tool UI. Do not include the suggestion in chat.",
         icon: "lightbulb",
         iconColor: "yellow"
       }
@@ -486,13 +494,78 @@ const ReportForm = ({
     return map
   }, [])
 
+  const suggestionFieldOptions = useMemo(
+    () => [
+      {
+        id: "nextSteps",
+        label: Settings.fields.report.nextSteps?.label || "Next Steps"
+      },
+      {
+        id: "keyOutcomes",
+        label: Settings.fields.report.keyOutcomes?.label || "Key Outcomes"
+      },
+      {
+        id: "intent",
+        label: Settings.fields.report.intent?.label || "Engagement Purpose"
+      }
+    ],
+    []
+  )
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<SelectSuggestionFieldDetail>).detail
+      if (!detail || detail.type !== "anet.selectSuggestionField") {
+        return
+      }
+      if (typeof detail.fieldId !== "string") {
+        return
+      }
+      const label =
+        typeof detail.fieldLabel === "string"
+          ? detail.fieldLabel
+          : detail.fieldId
+      setSelectedSuggestionField({ fieldId: detail.fieldId, fieldLabel: label })
+    }
+
+    window.addEventListener(
+      "anet-select-suggestion-field",
+      handler as EventListener
+    )
+    return () =>
+      window.removeEventListener(
+        "anet-select-suggestion-field",
+        handler as EventListener
+      )
+  }, [])
   const sendReportContextToAI = useCallback(
     (report: any) => {
       const businessObject = buildReportBusinessObject(report)
       sendToChat(businessObject, chatSuggestions)
     },
-    [sendToChat, chatSuggestions]
+    [
+      sendToChat,
+      chatSuggestions,
+      selectedSuggestionField?.fieldId,
+      selectedSuggestionField?.fieldLabel
+    ]
   )
+
+  useEffect(() => {
+    if (!isReady) {
+      return
+    }
+    const currentValues = latestValuesRef.current
+    if (!currentValues) {
+      return
+    }
+    sendReportContextToAI(currentValues)
+  }, [
+    isReady,
+    selectedSuggestionField?.fieldId,
+    selectedSuggestionField?.fieldLabel,
+    sendReportContextToAI
+  ])
 
   const ReportChatContextSync = () => {
     const { values } = useFormikContext<any>()
@@ -513,32 +586,14 @@ const ReportForm = ({
         values?.reportPeople,
         values?.keyOutcomes,
         values?.nextSteps,
-        values?.authors
+        values?.authors,
+        selectedSuggestionField?.fieldId,
+        selectedSuggestionField?.fieldLabel
       ]
     )
     useChatPageContext(chatContext, chatSuggestions)
     return null
   }
-
-  useEffect(() => {
-    if (!isReady) {
-      return
-    }
-
-    const intervalId = window.setInterval(() => {
-      const currentValues = latestValuesRef.current
-      if (!currentValues) {
-        return
-      }
-
-      sendReportContextToAI(currentValues)
-    }, 5000)
-    sendReportContextToAI(latestValuesRef.current)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [isReady, sendReportContextToAI])
 
   const autoSaveActive = useRef(true)
   useEffect(() => {
