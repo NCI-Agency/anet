@@ -167,13 +167,25 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
 
   useEffect(() => {
     const onMessage = (ev: MessageEvent) => {
-      if (ev.origin !== chatAssistantOrigin.current) {
+      const type = typeof ev.data === "string" ? ev.data : ev.data?.type
+      const source = typeof ev.data === "string" ? undefined : ev.data?.source
+      const isMcpAppEvent =
+        source === "mcp-app" &&
+        (type === "anet.applySuggestion" ||
+          type === "anet.selectSuggestionField")
+
+      if (!isMcpAppEvent && ev.origin !== chatAssistantOrigin.current) {
         return
       }
-      const type = typeof ev.data === "string" ? ev.data : ev.data?.type
       if (type === "anet.applySuggestion") {
         window.dispatchEvent(
           new CustomEvent("anet-apply-suggestion", { detail: ev.data })
+        )
+        return
+      }
+      if (type === "anet.selectSuggestionField") {
+        window.dispatchEvent(
+          new CustomEvent("anet-select-suggestion-field", { detail: ev.data })
         )
         return
       }

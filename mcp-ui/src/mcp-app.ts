@@ -20,16 +20,15 @@ const app = new App({
   version: "0.1.0"
 })
 
+const rootEl = document.getElementById("app-root")
 if (!rootEl) {
-  throw new Error("Missing #app-root element");
+  throw new Error("Missing #app-root element")
 }
 
-const applySuggestionUI = createApplySuggestionUI(rootEl);
-
 const setStatus = (message: string) => {
-  const statusEl = rootEl.querySelector(".status");
-  if (statusEl) statusEl.textContent = message;
-};
+  const statusEl = rootEl.querySelector(".status")
+  if (statusEl) statusEl.textContent = message
+}
 
 const applySuggestionUI = createApplySuggestionUI(rootEl)
 const fieldPickerUI = createFieldPickerUI(rootEl, async (field: SuggestionField) => {
