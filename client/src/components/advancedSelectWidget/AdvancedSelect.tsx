@@ -3,9 +3,11 @@ import { gql } from "@apollo/client"
 import {
   Button as BlueprintButton,
   Classes as BlueprintClasses,
+  Icon,
   Popover,
   PopoverInteractionKind
 } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import classNames from "classnames"
 import Checkbox from "components/Checkbox"
@@ -468,6 +470,23 @@ const AdvancedSelect = ({
                     }}
                     disabled={disabled}
                   />
+                  {searchTerms && (
+                    <InputGroup.Text
+                      style={{
+                        maxHeight: "38px",
+                        textSizeAdjust: "10px",
+                        backgroundColor: "transparent"
+                      }}
+                    >
+                      <Icon
+                        icon={IconNames.CROSS}
+                        onClick={e => {
+                          changeSearchTerms(e)
+                          e.stopPropagation()
+                        }}
+                      />
+                    </InputGroup.Text>
+                  )}
                   {addon && (
                     <InputGroup.Text
                       style={{
