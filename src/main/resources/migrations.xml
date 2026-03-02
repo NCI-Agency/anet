@@ -7194,12 +7194,9 @@
 		<!-- Migrate existing event host organizations -->
 		<sql>
 			INSERT INTO "eventHostRelatedObjects" ("eventUuid", "relatedObjectType", "relatedObjectUuid")
-			SELECT
-				events.uuid,
-				'organizations',
-				events."hostOrgUuid"
-			FROM
-				events events;
+			SELECT uuid, 'organizations', "hostOrgUuid"
+			FROM events
+			WHERE "hostOrgUuid" IS NOT NULL;
 		</sql>
 		<dropForeignKeyConstraint
 				constraintName="FK_events_hostOrganization"
@@ -7244,15 +7241,12 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 		/>
 
-		<!-- Migrate existing events eries host organizations -->
+		<!-- Migrate existing event series host organizations -->
 		<sql>
 			INSERT INTO "eventSeriesHostRelatedObjects" ("eventSeriesUuid", "relatedObjectType", "relatedObjectUuid")
-			SELECT
-				eventSeries.uuid,
-				'organizations',
-				eventSeries."hostOrgUuid"
-			FROM
-				"eventSeries" eventSeries;
+			SELECT uuid, 'organizations', "hostOrgUuid"
+			FROM "eventSeries"
+			WHERE "hostOrgUuid" IS NOT NULL;
 		</sql>
 		<dropForeignKeyConstraint
 				constraintName="FK_eventSeries_hostOrganization"
