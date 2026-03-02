@@ -242,6 +242,12 @@ type ApplySuggestionDetail = {
   source?: string
 }
 
+type SelectSuggestionFieldDetail = {
+  type?: string
+  fieldId?: string
+  fieldLabel?: string
+  source?: string
+}
 function normalizeFieldKey(value?: string) {
   return (value ?? "")
     .toString()
