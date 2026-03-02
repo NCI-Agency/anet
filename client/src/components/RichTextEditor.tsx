@@ -30,6 +30,7 @@ import {
 } from "slate-react"
 import utils from "utils"
 import {
+  ANET_ATTACHMENT_LINK,
   ANET_LINK,
   EXTERNAL_LINK,
   getEntityInfoFromUrl,
@@ -113,6 +114,8 @@ const RichTextEditor = ({
   showAvatar = true
 }: RichTextEditorProps) => {
   const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
+  const [showAnetAttachmentLinksModal, setShowAnetAttachmentLinksModal] =
+    useState(false)
   const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
@@ -200,6 +203,8 @@ const RichTextEditor = ({
             <Toolbar
               showAnetLinksModal={showAnetLinksModal}
               setShowAnetLinksModal={setShowAnetLinksModal}
+              showAnetAttachmentLinksModal={showAnetAttachmentLinksModal}
+              setShowAnetAttachmentLinksModal={setShowAnetAttachmentLinksModal}
               showExternalLinksModal={showExternalLinksModal}
               setShowExternalLinksModal={setShowExternalLinksModal}
               showFullSize={showFullSize}
@@ -218,6 +223,7 @@ const RichTextEditor = ({
                 e,
                 editor,
                 setShowAnetLinksModal,
+                setShowAnetAttachmentLinksModal,
                 setShowExternalLinksModal,
                 handleFullSizeMode,
                 disableFullSize
@@ -301,6 +307,7 @@ const serialize = node => {
     case "block-quote":
       return `<blockquote>${children}</blockquote>`
     case ANET_LINK:
+    case ANET_ATTACHMENT_LINK:
       return `<a href="${getUrlFromEntityInfo(node)}">${node.entityType}:${
         node.entityUuid
       }</a>`
@@ -365,7 +372,7 @@ const deserialize = (el, markAttributes = {}) => {
 
   if (ELEMENT_TAGS[el.nodeName]) {
     const attrs = ELEMENT_TAGS[el.nodeName](el)
-    if (attrs.type === ANET_LINK) {
+    if ([ANET_LINK, ANET_ATTACHMENT_LINK].includes(attrs.type)) {
       attrs.url = getUrlFromEntityInfo(attrs)
       children = [{ text: "" }]
     }
@@ -430,22 +437,23 @@ const getLink = (
     (acc, child) => acc + child.text,
     ""
   )
-  const linkElement =
-    element.type === ANET_LINK ? (
-      <LinkAnetEntity
-        type={element.entityType}
-        uuid={element.entityUuid}
-        displayCallback={displayCallback}
-        showIcon={showIconCallback}
-        showAvatar={showAvatar}
-      >
-        {reducedChildren}
-      </LinkAnetEntity>
-    ) : (
-      <LinkExternalHref url={element.url} attributes={attributes}>
-        {reducedChildren}
-      </LinkExternalHref>
-    )
+  const linkElement = [ANET_LINK, ANET_ATTACHMENT_LINK].includes(
+    element.type
+  ) ? (
+    <LinkAnetEntity
+      type={element.entityType}
+      uuid={element.entityUuid}
+      displayCallback={displayCallback}
+      showIcon={showIconCallback}
+      showAvatar={showAvatar}
+    >
+      {reducedChildren}
+    </LinkAnetEntity>
+  ) : (
+    <LinkExternalHref url={element.url} attributes={attributes}>
+      {reducedChildren}
+    </LinkExternalHref>
+  )
 
   return (
     <span
@@ -495,6 +503,7 @@ const Element = ({
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
     case ANET_LINK:
+    case ANET_ATTACHMENT_LINK:
     case EXTERNAL_LINK:
       return getLink(
         element,

@@ -1,8 +1,10 @@
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import * as Models from "models"
 
 export const ANET_LINK = "anet-link"
+export const ANET_ATTACHMENT_LINK = "anet-attachment-link"
 export const EXTERNAL_LINK = "external-link"
-export const LINK_TYPES = [ANET_LINK, EXTERNAL_LINK]
+export const LINK_TYPES = [ANET_LINK, ANET_ATTACHMENT_LINK, EXTERNAL_LINK]
 
 const UUID_REGEX =
   /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
@@ -51,7 +53,14 @@ function getEntityFromUrlPattern(url, urlPath, entityPattern) {
   const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[entityMatch?.[1]]
   const entityUuid = entityMatch?.[2]
   if (entityType && UUID_REGEX.test(entityUuid)) {
-    return { type: ANET_LINK, entityType, entityUuid }
+    return {
+      type:
+        entityType === ENTITY_TYPES.ATTACHMENTS
+          ? ANET_ATTACHMENT_LINK
+          : ANET_LINK,
+      entityType,
+      entityUuid
+    }
   } else {
     return { type: EXTERNAL_LINK, url }
   }

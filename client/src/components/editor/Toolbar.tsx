@@ -1,11 +1,18 @@
 import { Icon, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import {
+  ALL_ENTITY_TYPES,
+  ENTITY_TYPES
+} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import React from "react"
 import { getSelectedParentNode } from "richTextUtils"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
-import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
-import LinkSourceAnet from "./LinkSourceAnet"
+import { ANET_ATTACHMENT_LINK, ANET_LINK, EXTERNAL_LINK } from "utils_links"
+import LinkSourceAnet, {
+  createAnetLinkNode,
+  createExternalLinkNode
+} from "./LinkSourceAnet"
 import "./RichTextEditor.css"
 
 const LIST_TYPES = ["bulleted-list", "numbered-list"]
@@ -19,6 +26,8 @@ const BUTTON_TYPES = {
 interface ToolbarProps {
   showAnetLinksModal: boolean
   setShowAnetLinksModal: (...args: unknown[]) => unknown
+  showAnetAttachmentLinksModal: boolean
+  setShowAnetAttachmentLinksModal: (...args: unknown[]) => unknown
   showExternalLinksModal: boolean
   setShowExternalLinksModal: (...args: unknown[]) => unknown
   showFullSize: boolean
@@ -30,6 +39,8 @@ interface ToolbarProps {
 const Toolbar = ({
   showAnetLinksModal,
   setShowAnetLinksModal,
+  showAnetAttachmentLinksModal,
+  setShowAnetAttachmentLinksModal,
   showExternalLinksModal,
   setShowExternalLinksModal,
   showFullSize,
@@ -39,6 +50,11 @@ const Toolbar = ({
 }: ToolbarProps) => {
   const editor = useSlate()
 
+  const linkAnetAttachmentEntityType = ENTITY_TYPES.ATTACHMENTS
+  const linkAnetAttachmentEntityTypes = [linkAnetAttachmentEntityType]
+  const linkAnetEntityTypes = ALL_ENTITY_TYPES.filter(
+    et => et !== linkAnetAttachmentEntityType
+  )
   return (
     <>
       <div className="toolbar" ref={toolbarRef}>
@@ -125,6 +141,15 @@ const Toolbar = ({
         <EditorToggleButton
           type={BUTTON_TYPES.MODAL}
           editor={editor}
+          format={ANET_ATTACHMENT_LINK}
+          icon={IconNames.PAPERCLIP}
+          showModal={showAnetAttachmentLinksModal}
+          setShowModal={setShowAnetAttachmentLinksModal}
+          tooltipText="Attachment (Ctrl + ⇧ + f)"
+        />
+        <EditorToggleButton
+          type={BUTTON_TYPES.MODAL}
+          editor={editor}
           format={EXTERNAL_LINK}
           icon={IconNames.LINK}
           showModal={showExternalLinksModal}
@@ -158,12 +183,25 @@ const Toolbar = ({
         editor={editor}
         showModal={showAnetLinksModal}
         setShowModal={setShowAnetLinksModal}
+        title="Link to ANET entity"
+        createLinkNode={createAnetLinkNode}
+        entityTypes={linkAnetEntityTypes}
+      />
+      <LinkSourceAnet
+        editor={editor}
+        showModal={showAnetAttachmentLinksModal}
+        setShowModal={setShowAnetAttachmentLinksModal}
+        title="Link to attachment"
+        createLinkNode={createAnetLinkNode}
+        entityTypes={linkAnetAttachmentEntityTypes}
       />
       <LinkSourceAnet
         editor={editor}
         showModal={showExternalLinksModal}
         setShowModal={setShowExternalLinksModal}
         external
+        title="Link to external"
+        createLinkNode={createExternalLinkNode}
       />
     </>
   )
@@ -295,6 +333,7 @@ export const handleOnKeyDown = (
   event,
   editor,
   setShowAnetLinksModal,
+  setShowAnetAttachmentLinksModal,
   setShowExternalLinksModal,
   setShowFullSize,
   disableFullSize
@@ -354,6 +393,10 @@ export const handleOnKeyDown = (
       case "K":
         event.preventDefault()
         setShowAnetLinksModal(true)
+        break
+      case "F":
+        event.preventDefault()
+        setShowAnetAttachmentLinksModal(true)
         break
       case "A":
         event.preventDefault()
