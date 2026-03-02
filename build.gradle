@@ -7,7 +7,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "10.0.0"
 	id "com.github.node-gradle.node" version "7.1.0"
 	id "com.diffplug.spotless" version "8.2.1"
-	id "com.graphql-java-generator.graphql-gradle-plugin3" version "4.0"
+	id "com.graphql-java-generator.graphql-gradle-plugin3" version "4.0.2"
 	id "org.beryx.runtime" version "2.0.1"
 	id "com.netflix.nebula.rpm" version "12.2.0"
 	id "org.springframework.boot" version "4.0.3" apply false
@@ -178,7 +178,7 @@ dependencies {
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:4.0'
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:4.0.2'
 	testImplementation "org.springframework.boot:spring-boot-starter-test"
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
