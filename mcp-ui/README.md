@@ -33,6 +33,10 @@ This MCP UI is designed to support multiple tools. Each tool should:
 
 The UI selects which view to render based on `toolName` in the tool arguments.
 
+Currently registered tools include:
+- `anet_field_picker` (choose a target field)
+- `anet_suggestion` (show suggestion + Apply)
+
 ## Tool input contract
 
 The tool expects:
