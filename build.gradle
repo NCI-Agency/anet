@@ -372,6 +372,7 @@ task dbInit(type: JavaExec, dependsOn: 'compileJava') {
 }
 
 task dbDropLargeObjects(type: DockerExecContainer) {
+	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Drop unreferenced large objects from the database"
 	containerId = dbContainerName
@@ -399,6 +400,7 @@ task dbLoad(type: JavaExec, dependsOn: pushPsqlImageData) {
 }
 
 task deleteDbDump(type: DockerExecContainer) {
+	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Deletes the database dump in the container"
 	containerId = dbContainerName
@@ -406,6 +408,7 @@ task deleteDbDump(type: DockerExecContainer) {
 }
 
 task dbDump(type: DockerExecContainer, dependsOn: deleteDbDump) {
+	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Dumps the ANET database in the container"
 	containerId = dbContainerName
@@ -429,6 +432,7 @@ task pushDbDump(type: DockerCopyFileToContainer) {
 }
 
 task dbRestore(type: DockerExecContainer, dependsOn: [pushDbDump, 'dockerDropAdditionalDB', 'dockerCreateAdditionalDB']) {
+	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Restores the ANET database in the container"
 	containerId = dbContainerName
@@ -481,6 +485,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: DockerCreateContainer) {
 }
 
 task dockerCreateAdditionalDB(type: DockerExecContainer) {
+	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Create PostgreSQL database" + run.environment["ANET_DB_NAME"]
 	containerId = dbContainerName
@@ -489,6 +494,7 @@ task dockerCreateAdditionalDB(type: DockerExecContainer) {
 dockerCreateAdditionalDB.mustRunAfter('dockerDropAdditionalDB')
 
 task dockerDropAdditionalDB(type: DockerExecContainer) {
+	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Drop PostgreSQL database" + run.environment["ANET_DB_NAME"]
 	containerId = dbContainerName
@@ -551,6 +557,7 @@ task dockerStartKeycloak(type: DockerStartContainer) {
 }
 
 task dockerCopyKeycloakRealmH2DB(type: DockerExecContainer) {
+	doNotTrackState("Needs to re-run every time")
 	group = "keycloak container"
 	description = "Copies ANET-Realm H2 DB inside ${keycloakContainerName} container."
 	containerId = keycloakContainerName
@@ -558,6 +565,7 @@ task dockerCopyKeycloakRealmH2DB(type: DockerExecContainer) {
 }
 
 task dockerExportKeycloakRealm(dependsOn: dockerCopyKeycloakRealmH2DB, type: DockerExecContainer) {
+	doNotTrackState("Needs to re-run every time")
 	group = "keycloak container"
 	description = "Exports ANET-Realm from ${keycloakContainerName} container."
 	containerId = keycloakContainerName
