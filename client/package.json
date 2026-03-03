@@ -58,7 +58,7 @@
     "chai": "6.2.2",
     "clean-webpack-plugin": "4.0.0",
     "config": "4.4.0",
-    "copy-webpack-plugin": "13.0.1",
+    "copy-webpack-plugin": "14.0.0",
     "countries-list": "3.2.2",
     "cross-fetch": "4.1.0",
     "cross-spawn": "7.0.6",
