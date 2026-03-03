@@ -1,6 +1,7 @@
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 import io.mateo.cxf.codegen.wsdl2java.Wsdl2Java
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
 	// https://github.com/bmuschko/gradle-docker-plugin
@@ -79,7 +80,7 @@ run.environment("ANET_MART_TRUSTED_SENDER", run.environment["ANET_MART_TRUSTED_S
 run.environment("ANET_MART_DISABLE_CERTIFICATE_VALIDATION", run.environment["ANET_MART_DISABLE_CERTIFICATE_VALIDATION"] ?: "false")
 run.environment("ANET_MART_MARK_AS_READ", run.environment["ANET_MART_MARK_AS_READ"] ?: "true")
 run.environment("ANET_MART_DISABLE", run.environment["ANET_MART_DISABLE"] ?: "true")
-String NON_DEFAULT_DB_PROFILE = run.environment["ANET_DB_NAME"] in [DEV_DB, TEST_DB] ? "" : "prod"
+String NON_DEFAULT_DB_PROFILE = run.environment["ANET_DB_NAME"] as String in [DEV_DB, TEST_DB] ? "" : "prod"
 run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIVE"] ?: isTestEnv ? "test" : (NON_DEFAULT_DB_PROFILE ?: "dev"))
 
 String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
@@ -105,7 +106,7 @@ repositories {
 // Let Spring manage the Spring (Boot) dependencies
 dependencyManagement {
 	imports {
-		mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+		mavenBom SpringBootPlugin.BOM_COORDINATES
 	}
 }
 
@@ -193,7 +194,7 @@ dependencies {
 	}
 }
 
-configurations.all {
+configurations.configureEach {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
 	exclude module: 'xalan'
 	// Also exclude XML API's to avoid (Eclipse) warnings like
@@ -205,7 +206,7 @@ test {
 	useJUnitPlatform()
 	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 	jacoco {
-		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
+		destinationFile = file("${layout.buildDirectory}/jacoco/test-${run.environment['DB_DRIVER']}.exec")
 	}
 }
 
@@ -214,7 +215,7 @@ jacoco {
 }
 
 jacocoTestReport {
-	executionData.setFrom project.fileTree(dir: "$buildDir", include: "jacoco/test-*.exec")
+	executionData.setFrom project.fileTree(dir: "${layout.buildDirectory}", include: "jacoco/test-*.exec")
 	reports {
 		xml.required = true
 		html.required = true
@@ -222,9 +223,9 @@ jacocoTestReport {
 }
 
 //Set project version to git tag
-def proc = "git describe".execute(null, projectDir);
-proc.waitFor();
-def projectVersion = proc.text.trim();
+def proc = "git describe".execute(null, projectDir)
+proc.waitFor()
+def projectVersion = proc.text.trim()
 project.version = projectVersion
 
 runtime {
@@ -268,9 +269,9 @@ processResources {
 }
 processResources.outputs.upToDateWhen{ false }
 
-def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
-projectBranch.waitFor();
-projectBranch = projectBranch.text.trim();
+def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir)
+projectBranch.waitFor()
+projectBranch = projectBranch.text.trim()
 
 project.group = "ncia"
 
@@ -303,40 +304,42 @@ cxfCodegen {
 	cxfVersion = "${cxfVersion}"
 }
 
-task cxfNvg20(type: Wsdl2Java) {
+tasks.register('cxfNvg20', Wsdl2Java) {
 	toolOptions {
 		wsdl.set("${projectDir}/src/main/resources/${mainWsdl}")
 		wsdlLocation.set("classpath:${mainWsdl}")
 		markGenerated.set(true)
 		outputDir.set(file(cxfSources))
 		packageNames.set([
-			'https://tide.act.nato.int/schemas/2012/10/nvg=nato.act.tide.wsdl.nvg20',
-			'https://tide.act.nato.int/wsdl/2012/nvg=nato.act.tide.wsdl.nvg20',
-			'urn:nato:common:wsdl:nvg20=nato.act.tide.wsdl.nvg20',
-			'urn:nato:stanag:4774:confidentialitymetadatalabel:1:0=nato.stanag4774.confidentialitymetadatalabel10',
-			'urn:nato:stanag:4778:bindinginformation:1:0=nato.stanag4778.bindinginformation10'
+				'https://tide.act.nato.int/schemas/2012/10/nvg=nato.act.tide.wsdl.nvg20',
+				'https://tide.act.nato.int/wsdl/2012/nvg=nato.act.tide.wsdl.nvg20',
+				'urn:nato:common:wsdl:nvg20=nato.act.tide.wsdl.nvg20',
+				'urn:nato:stanag:4774:confidentialitymetadatalabel:1:0=nato.stanag4774.confidentialitymetadatalabel10',
+				'urn:nato:stanag:4778:bindinginformation:1:0=nato.stanag4778.bindinginformation10'
 		])
 	}
 }
 
-task checkConfig(type: JavaExec, dependsOn: 'compileJava') {
+tasks.register('checkConfig', JavaExec) {
+	dependsOn 'compileJava'
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	mainClass = application.mainClass
 	args = ["check"]
 }
 
-task buildClient(dependsOn: 'yarn', type: YarnTask) {
+tasks.register('buildClient', YarnTask) {
+	dependsOn 'yarn'
 	group = "build"
 	description = "Builds the client application."
 	inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
-	outputs.dir("$buildDir/resources/main/assets/client")
-	outputs.file("$buildDir/resources/main/templates/index.ftlh")
+	outputs.dir("${layout.buildDirectory}/resources/main/assets/client")
+	outputs.file("${layout.buildDirectory}/resources/main/templates/index.ftlh")
 	outputs.cacheIf { true }
-	environment = [ "ANET_TEST_MODE": run.environment["ANET_TEST_MODE"] ]
+	environment = ["ANET_TEST_MODE": run.environment["ANET_TEST_MODE"]]
 	args = ['run', 'build']
 }
 
@@ -351,7 +354,8 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 // To see all options, run:
 //   ./gradlew dbInit -Pargs="--help"
 // which will print the help.
-task dbInit(type: JavaExec, dependsOn: 'compileJava') {
+tasks.register('dbInit', JavaExec) {
+	dependsOn 'compileJava'
 	group = "database runtime"
 	description = "Runs the ANET database initialization command."
 	classpath = sourceSets.main.runtimeClasspath
@@ -359,27 +363,27 @@ task dbInit(type: JavaExec, dependsOn: 'compileJava') {
 	mainClass = application.mainClass
 	def cmdline = ["init"]
 	if (project.hasProperty("args")) {
-		cmdline.addAll(project.args.split("\\s+"))
+		cmdline.addAll((project.args as String).split("\\s+"))
 	} else {
 		cmdline.addAll([
-			"--adminOrgName", adminOrgName,
-			"--adminPosName", adminPosName,
-			"--adminFullName", adminFullName,
-			"--adminDomainUsername", adminDomainUsername
+				"--adminOrgName", adminOrgName,
+				"--adminPosName", adminPosName,
+				"--adminFullName", adminFullName,
+				"--adminDomainUsername", adminDomainUsername
 		])
 	}
 	args cmdline
 }
 
-task dbDropLargeObjects(type: DockerExecContainer) {
+tasks.register('dbDropLargeObjects', DockerExecContainer) {
 	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Drop unreferenced large objects from the database"
 	containerId = dbContainerName
-	commands = [ ["vacuumlo", "-v", "-U", run.environment["ANET_DB_USERNAME"], run.environment["ANET_DB_NAME"]] as String[] ]
+	commands = [["vacuumlo", "-v", "-U", run.environment["ANET_DB_USERNAME"], run.environment["ANET_DB_NAME"]] as String[]]
 }
 
-task pushPsqlImageData(type: DockerCopyFileToContainer) {
+tasks.register('pushPsqlImageData', DockerCopyFileToContainer) {
 	group = "database runtime"
 	description = "Push SQL base data to PostgreSQL"
 	containerId = dbContainerName
@@ -387,11 +391,12 @@ task pushPsqlImageData(type: DockerCopyFileToContainer) {
 	remotePath = psqlPushDataPath
 }
 
-task dbLoad(type: JavaExec, dependsOn: pushPsqlImageData) {
+tasks.register('dbLoad', JavaExec) {
+	dependsOn pushPsqlImageData
 	group = "database runtime"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	classpath = sourceSets.main.runtimeClasspath
-	def dbLoadEnvironment = [*:run.environment]
+	def dbLoadEnvironment = [*: run.environment]
 	dbLoadEnvironment["ANET_DB_DROP"] = "false"
 	dbLoadEnvironment["ANET_DB_MIGRATE"] = "false"
 	environment(dbLoadEnvironment)
@@ -399,48 +404,52 @@ task dbLoad(type: JavaExec, dependsOn: pushPsqlImageData) {
 	args = ["dbScript", "-S", "insertBaseData-psql.sql"]
 }
 
-task deleteDbDump(type: DockerExecContainer) {
+tasks.register('deleteDbDump', DockerExecContainer) {
 	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Deletes the database dump in the container"
 	containerId = dbContainerName
-	commands = [ ["rm", "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
+	commands = [["rm", "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[]]
 }
 
-task dbDump(type: DockerExecContainer, dependsOn: deleteDbDump) {
+tasks.register('dbDump', DockerExecContainer) {
+	dependsOn deleteDbDump
 	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Dumps the ANET database in the container"
 	containerId = dbContainerName
-	commands = [ ["pg_dump", "-c", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
+	commands = [["pg_dump", "-c", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[]]
 }
 
-task extractDbDump(type: DockerCopyFileFromContainer, dependsOn: dbDump) {
+tasks.register('extractDbDump', DockerCopyFileFromContainer) {
+	dependsOn dbDump
 	group = "database runtime"
 	description = "Extracts the dumped database from the container"
 	containerId = dbContainerName
-	hostPath = "${buildDir}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
+	hostPath = "${layout.buildDirectory}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
 	remotePath = "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
 }
 
-task pushDbDump(type: DockerCopyFileToContainer) {
+tasks.register('pushDbDump', DockerCopyFileToContainer) {
 	group = "database runtime"
 	description = "Copies the database dump to the container"
 	containerId = dbContainerName
-	hostPath = "${buildDir}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
+	hostPath = "${layout.buildDirectory}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
 	remotePath = psqlPushDataPath
 }
 
-task dbRestore(type: DockerExecContainer, dependsOn: [pushDbDump, 'dockerDropAdditionalDB', 'dockerCreateAdditionalDB']) {
+tasks.register('dbRestore', DockerExecContainer) {
+	dependsOn pushDbDump, 'dockerDropAdditionalDB', 'dockerCreateAdditionalDB'
 	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Restores the ANET database in the container"
 	containerId = dbContainerName
-	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
+	commands = [["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[]]
 }
 dbRestore.finalizedBy('dbDropLargeObjects')
 
-task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
+tasks.register('dockerBuildImage', DockerBuildImage) {
+	dependsOn installDist
 	description = "Builds anet-app-server container image."
 	doFirst {
 		copy {
@@ -449,42 +458,43 @@ task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 		}
 	}
 	inputDir = project.file('build/install')
-	def resultTags = ["ncia/anet-app-server:${projectVersion}"]
-	if (projectBranch=="main")
+	List<String> resultTags = ["ncia/anet-app-server:${projectVersion}"]
+	if (projectBranch == "main")
 		resultTags << 'ncia/anet-app-server:latest'
-	images = resultTags
+	images.set(resultTags)
 }
 
-task dockerPushLatestImage(type: DockerPushImage) {
-	images = ['ncia/anet-app-server:latest']
+tasks.register('dockerPushLatestImage', DockerPushImage) {
+	images.set(['ncia/anet-app-server:latest'])
 }
 
-task dockerPushImage(type: DockerPushImage) {
-	images = ["ncia/anet-app-server:${projectVersion}"]
+tasks.register('dockerPushImage', DockerPushImage) {
+	images.set(["ncia/anet-app-server:${projectVersion}"])
 }
 
 // Database container (PostgreSQL)
 
-task dockerPullDB(type: DockerPullImage) {
+tasks.register('dockerPullDB', DockerPullImage) {
 	group = "database container"
 	image = "postgres:${run.environment['DB_VERSION']}"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
-task dockerCreateDB(dependsOn: dockerPullDB, type: DockerCreateContainer) {
+tasks.register('dockerCreateDB', DockerCreateContainer) {
+	dependsOn dockerPullDB
 	group = "database container"
 	imageId = dockerPullDB.getImage()
 	containerName = dbContainerName
 	description = "Creates an ANET SQL DB container named ${dbContainerName}."
-	hostConfig.shmSize = 1024*1024*1024L
-	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
-	withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
-	withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
-	withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
-	hostConfig.portBindings = ["${run.environment["ANET_DB_EXPOSED_PORT"]}:${run.environment["ANET_DB_PORT"]}"]
+	hostConfig.shmSize = 1024 * 1024 * 1024L
+	hostConfig.binds.set([projectDir: "/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:]) as Map<? extends String, ? extends String>)
+	withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"] as String)
+	withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"] as String)
+	withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"] as String)
+	hostConfig.portBindings.set(["${run.environment["ANET_DB_EXPOSED_PORT"]}:${run.environment["ANET_DB_PORT"]}"])
 }
 
-task dockerCreateAdditionalDB(type: DockerExecContainer) {
+tasks.register('dockerCreateAdditionalDB', DockerExecContainer) {
 	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Create PostgreSQL database" + run.environment["ANET_DB_NAME"]
@@ -493,7 +503,7 @@ task dockerCreateAdditionalDB(type: DockerExecContainer) {
 }
 dockerCreateAdditionalDB.mustRunAfter('dockerDropAdditionalDB')
 
-task dockerDropAdditionalDB(type: DockerExecContainer) {
+tasks.register('dockerDropAdditionalDB', DockerExecContainer) {
 	doNotTrackState("Needs to re-run every time")
 	group = "database runtime"
 	description = "Drop PostgreSQL database" + run.environment["ANET_DB_NAME"]
@@ -502,47 +512,50 @@ task dockerDropAdditionalDB(type: DockerExecContainer) {
 }
 
 // need to make this invoke dockerCreateDB if there is no ${dbContainerName} and possibly get newer image if available
-task dockerStartDB(type: DockerStartContainer, dependsOn: pushPsqlImageData) {
+tasks.register('dockerStartDB', DockerStartContainer) {
+	dependsOn pushPsqlImageData
 	group = "database container"
 	description = "Starts ${dbContainerName} container."
 	targetContainerId { dbContainerName }
+	mustRunAfter 'dockerCreateDB'
 }
-dockerStartDB.mustRunAfter('dockerCreateDB')
 
-task dockerStopDB(type: DockerStopContainer) {
+tasks.register('dockerStopDB', DockerStopContainer) {
 	group = "database container"
 	description = "Stops ${dbContainerName} container."
 	targetContainerId { dbContainerName }
 }
 
-task dockerRemoveDB(type: DockerRemoveContainer) {
+tasks.register('dockerRemoveDB', DockerRemoveContainer) {
 	group = "database container"
 	description = "Removes ${dbContainerName} container."
 	targetContainerId { dbContainerName }
+	mustRunAfter 'dockerStopDB'
 }
-dockerRemoveDB.mustRunAfter('dockerStopDB')
 
 // Keycloak container
 
-task dockerPullKeycloak(type: DockerPullImage) {
+tasks.register('dockerPullKeycloak', DockerPullImage) {
 	group = "keycloak container"
 	image = "quay.io/keycloak/keycloak:${run.environment['KEYCLOAK_VERSION']}"
 	description = "Pulls a docker image for keycloak from ${image}."
 }
 
-task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: DockerCreateContainer) {
+tasks.register('dockerCreateKeycloak', DockerCreateContainer) {
+	dependsOn dockerPullKeycloak
 	group = "keycloak container"
 	imageId = dockerPullKeycloak.getImage()
 	containerName = keycloakContainerName
 	description = "Creates a keycloak container named ${keycloakContainerName}."
-	hostConfig.portBindings = ["9080:8080", "9443:8443"]
-	hostConfig.binds = run.environment.get("DOCKER_MOUNTS", [:])
+	hostConfig.portBindings.set(["9080:8080", "9443:8443"])
+	hostConfig.binds.set(run.environment.get("DOCKER_MOUNTS", [:]) as Map<? extends String, ? extends String>)
 	withEnvVar("KEYCLOAK_ADMIN", "admin")
 	withEnvVar("KEYCLOAK_ADMIN_PASSWORD", "admin")
 	cmd = ["start-dev", "--import-realm"]
 }
 
-task dockerConfigureKeycloak(dependsOn: dockerCreateKeycloak, type: DockerCopyFileToContainer) {
+tasks.register('dockerConfigureKeycloak', DockerCopyFileToContainer) {
+	dependsOn dockerCreateKeycloak
 	group = "keycloak container"
 	description = "Push REALM configuration to Keycloak"
 	containerId = keycloakContainerName
@@ -550,42 +563,44 @@ task dockerConfigureKeycloak(dependsOn: dockerCreateKeycloak, type: DockerCopyFi
 	remotePath = keycloakPushDataPath
 }
 
-task dockerStartKeycloak(type: DockerStartContainer) {
+tasks.register('dockerStartKeycloak', DockerStartContainer) {
 	group = "keycloak container"
 	description = "Starts ${keycloakContainerName} container."
 	containerId = keycloakContainerName
 }
 
-task dockerCopyKeycloakRealmH2DB(type: DockerExecContainer) {
+tasks.register('dockerCopyKeycloakRealmH2DB', DockerExecContainer) {
 	doNotTrackState("Needs to re-run every time")
 	group = "keycloak container"
 	description = "Copies ANET-Realm H2 DB inside ${keycloakContainerName} container."
 	containerId = keycloakContainerName
-	commands = [ ["/bin/cp", "-rp", "${keycloakContainerPath}/data/h2", "/tmp"] as String[] ]
+	commands = [["/bin/cp", "-rp", "${keycloakContainerPath}/data/h2", "/tmp"] as String[]]
 }
 
-task dockerExportKeycloakRealm(dependsOn: dockerCopyKeycloakRealmH2DB, type: DockerExecContainer) {
+tasks.register('dockerExportKeycloakRealm', DockerExecContainer) {
+	dependsOn dockerCopyKeycloakRealmH2DB
 	doNotTrackState("Needs to re-run every time")
 	group = "keycloak container"
 	description = "Exports ANET-Realm from ${keycloakContainerName} container."
 	containerId = keycloakContainerName
-	commands = [ ["/bin/bash", "${keycloakContainerPath}/bin/kc.sh", "export", "--dir", "${keycloakPushDataPath}/export", "--users", "realm_file", "--db", "dev-file", "--db-url", "jdbc:h2:file:/tmp/h2/keycloakdb;NON_KEYWORDS=VALUE"] as String[] ]
+	commands = [["/bin/bash", "${keycloakContainerPath}/bin/kc.sh", "export", "--dir", "${keycloakPushDataPath}/export", "--users", "realm_file", "--db", "dev-file", "--db-url", "jdbc:h2:file:/tmp/h2/keycloakdb;NON_KEYWORDS=VALUE"] as String[]]
 }
 
-task dockerGetKeycloakConfiguration(dependsOn: dockerExportKeycloakRealm, type: DockerCopyFileFromContainer) {
+tasks.register('dockerGetKeycloakConfiguration', DockerCopyFileFromContainer) {
+	dependsOn dockerExportKeycloakRealm
 	description = "Pull REALM configuration from Keycloak"
 	containerId = keycloakContainerName
 	hostPath = "${hostKeycloakPath}/import/ANET-realm.json"
 	remotePath = "${keycloakPushDataPath}/export/ANET-realm.json"
 }
 
-task dockerStopKeycloak(type: DockerStopContainer) {
+tasks.register('dockerStopKeycloak', DockerStopContainer) {
 	group = "keycloak container"
 	description = "Stops ${keycloakContainerName} container."
 	containerId = keycloakContainerName
 }
 
-task dockerRemoveKeycloak(type: DockerRemoveContainer) {
+tasks.register('dockerRemoveKeycloak', DockerRemoveContainer) {
 	group = "keycloak container"
 	description = "Removes ${keycloakContainerName} container."
 	containerId = keycloakContainerName
@@ -594,34 +609,35 @@ dockerRemoveKeycloak.mustRunAfter('dockerStopKeycloak')
 
 // Fake SMTP server container
 
-task dockerPullFakeSmtpServer(type: DockerPullImage) {
+tasks.register('dockerPullFakeSmtpServer', DockerPullImage) {
 	group = "fake-smtp-server container"
 	image = "devoto13/fake-smtp-server:0.1.0" // No 'latest' available yet
 	description = "Pulls a docker image for the fake-smtp-server from ${image}."
 }
 
-task dockerCreateFakeSmtpServer(dependsOn: dockerPullFakeSmtpServer, type: DockerCreateContainer) {
+tasks.register('dockerCreateFakeSmtpServer', DockerCreateContainer) {
+	dependsOn dockerPullFakeSmtpServer
 	group = "fake-smtp-server container"
 	imageId = dockerPullFakeSmtpServer.getImage()
 	containerName = fakeSmtpContainerName
 	description = "Creates a fake-smtp-server container named ${fakeSmtpContainerName}."
 	exposePorts("tcp", [1025, 1080])
-	hostConfig.portBindings = ["${run.environment["ANET_SMTP_PORT"]}:1025", "${run.environment["ANET_SMTP_HTTP_PORT"]}:1080"]
+	hostConfig.portBindings.set(["${run.environment["ANET_SMTP_PORT"]}:1025", "${run.environment["ANET_SMTP_HTTP_PORT"]}:1080"])
 }
 
-task dockerStartFakeSmtpServer(type: DockerStartContainer) {
+tasks.register('dockerStartFakeSmtpServer', DockerStartContainer) {
 	group = "fake-smtp-server container"
 	description = "Starts ${fakeSmtpContainerName} container."
 	containerId = fakeSmtpContainerName
 }
 
-task dockerStopFakeSmtpServer(type: DockerStopContainer) {
+tasks.register('dockerStopFakeSmtpServer', DockerStopContainer) {
 	group = "fake-smtp-server container"
 	description = "Stops ${fakeSmtpContainerName} container."
 	containerId = fakeSmtpContainerName
 }
 
-task dockerRemoveFakeSmtpServer(type: DockerRemoveContainer) {
+tasks.register('dockerRemoveFakeSmtpServer', DockerRemoveContainer) {
 	group = "fake-smtp-server container"
 	description = "Removes ${fakeSmtpContainerName} container."
 	containerId = fakeSmtpContainerName
@@ -633,7 +649,8 @@ dockerRemoveFakeSmtpServer.mustRunAfter('dockerStopFakeSmtpServer')
 // To see all options, run just:
 //   ./gradlew dbMaintenance
 // which will print the help.
-task dbMaintenance(type: JavaExec, dependsOn: 'compileJava') {
+tasks.register('dbMaintenance', JavaExec) {
+	dependsOn 'compileJava'
 	group = "database runtime"
 	description = "Runs the ANET database maintenance command."
 	classpath = sourceSets.main.runtimeClasspath
@@ -641,7 +658,7 @@ task dbMaintenance(type: JavaExec, dependsOn: 'compileJava') {
 	mainClass = application.mainClass
 	def cmdline = ["maintenance"]
 	if (project.hasProperty("args")) {
-		cmdline.addAll(project.args.split("\\s+"))
+		cmdline.addAll((project.args as String).split("\\s+"))
 	} else {
 		cmdline << "--help"
 	}
@@ -671,7 +688,8 @@ eclipse.classpath.file {
 }
 
 // And remove the auto-added generated (re)sources from the main Java (re)source
-task prepareCompileJava(dependsOn: 'generateClientCode') {
+tasks.register('prepareCompileJava') {
+	dependsOn 'generateClientCode'
 	doFirst {
 		logger.info("De-registering generated folders for task prepareCompileJava")
 		def mainJavaSrcDirs = sourceSets.main.java.srcDirs.toList()
@@ -680,7 +698,8 @@ task prepareCompileJava(dependsOn: 'generateClientCode') {
 	}
 }
 compileJava.dependsOn prepareCompileJava
-task prepareProcessResources(dependsOn: 'generateClientCode') {
+tasks.register('prepareProcessResources') {
+	dependsOn 'generateClientCode'
 	doFirst {
 		logger.info("De-registering generated folders for task prepareProcessResources")
 		def mainResourceSrcDirs = sourceSets.main.resources.srcDirs.toList()
@@ -761,9 +780,9 @@ spotless {
 		custom 'Refuse wildcard imports', {
 			// Wildcard imports can't be resolved by spotless; developers should adhere to best practices.
 			if (it =~ /\nimport .*\*;/) {
-				throw new AssertionError("Do not use wildcard imports; note: 'spotlessApply' cannot resolve this issue.")
+				throw new IllegalArgumentException("Do not use wildcard imports; note: 'spotlessApply' cannot resolve this issue.")
 			}
-		}
+		} as Closure<String>
 	}
 }
 
@@ -798,11 +817,12 @@ node {
 	download = true
 }
 
-task prettierCheck(type: YarnTask) {
+tasks.register('prettierCheck', YarnTask) {
 	args = ["run", "prettier:check"]
 }
 
-task distRpm(dependsOn: "jpackageImage", type: Rpm) {
+tasks.register('distRpm', Rpm) {
+	dependsOn "jpackageImage"
 	release = '0'
 	prefix '/opt' // Relocations: /opt
 	arch = 'x86_64'
