@@ -30,9 +30,6 @@ export const usePollingRequest = () => {
 
   const adminSettings = useMemo(() => {
     const list = data?.adminSettings || []
-    if (!list.length) {
-      return undefined
-    }
     const output = {}
     for (const setting of list) {
       output[setting.key] = setting.value
