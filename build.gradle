@@ -147,8 +147,8 @@ dependencies {
 	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
 	implementation 'org.apache.tika:tika-core:3.2.3'
-        // For sanitizing SVG uploads
-        implementation 'io.github.borewit:svg-sanitizer:0.4.0'
+	// For sanitizing SVG uploads
+	implementation 'io.github.borewit:svg-sanitizer:0.4.0'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.22.1'
@@ -206,7 +206,7 @@ test {
 	useJUnitPlatform()
 	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 	jacoco {
-		destinationFile = file("${layout.buildDirectory}/jacoco/test-${run.environment['DB_DRIVER']}.exec")
+		destinationFile = layout.buildDirectory.file("jacoco/test-${run.environment['DB_DRIVER']}.exec").get().asFile
 	}
 }
 
@@ -215,7 +215,7 @@ jacoco {
 }
 
 jacocoTestReport {
-	executionData.setFrom project.fileTree(dir: "${layout.buildDirectory}", include: "jacoco/test-*.exec")
+	executionData.setFrom project.fileTree(dir: layout.buildDirectory, include: "jacoco/test-*.exec")
 	reports {
 		xml.required = true
 		html.required = true
@@ -311,11 +311,11 @@ tasks.register('cxfNvg20', Wsdl2Java) {
 		markGenerated.set(true)
 		outputDir.set(file(cxfSources))
 		packageNames.set([
-				'https://tide.act.nato.int/schemas/2012/10/nvg=nato.act.tide.wsdl.nvg20',
-				'https://tide.act.nato.int/wsdl/2012/nvg=nato.act.tide.wsdl.nvg20',
-				'urn:nato:common:wsdl:nvg20=nato.act.tide.wsdl.nvg20',
-				'urn:nato:stanag:4774:confidentialitymetadatalabel:1:0=nato.stanag4774.confidentialitymetadatalabel10',
-				'urn:nato:stanag:4778:bindinginformation:1:0=nato.stanag4778.bindinginformation10'
+			'https://tide.act.nato.int/schemas/2012/10/nvg=nato.act.tide.wsdl.nvg20',
+			'https://tide.act.nato.int/wsdl/2012/nvg=nato.act.tide.wsdl.nvg20',
+			'urn:nato:common:wsdl:nvg20=nato.act.tide.wsdl.nvg20',
+			'urn:nato:stanag:4774:confidentialitymetadatalabel:1:0=nato.stanag4774.confidentialitymetadatalabel10',
+			'urn:nato:stanag:4778:bindinginformation:1:0=nato.stanag4778.bindinginformation10'
 		])
 	}
 }
@@ -336,8 +336,8 @@ tasks.register('buildClient', YarnTask) {
 	inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
-	outputs.dir("${layout.buildDirectory}/resources/main/assets/client")
-	outputs.file("${layout.buildDirectory}/resources/main/templates/index.ftlh")
+	outputs.dir(layout.buildDirectory.dir("resources/main/assets/client"))
+	outputs.file(layout.buildDirectory.file("resources/main/templates/index.ftlh"))
 	outputs.cacheIf { true }
 	environment = ["ANET_TEST_MODE": run.environment["ANET_TEST_MODE"]]
 	args = ['run', 'build']
@@ -366,10 +366,10 @@ tasks.register('dbInit', JavaExec) {
 		cmdline.addAll((project.args as String).split("\\s+"))
 	} else {
 		cmdline.addAll([
-				"--adminOrgName", adminOrgName,
-				"--adminPosName", adminPosName,
-				"--adminFullName", adminFullName,
-				"--adminDomainUsername", adminDomainUsername
+			"--adminOrgName", adminOrgName,
+			"--adminPosName", adminPosName,
+			"--adminFullName", adminFullName,
+			"--adminDomainUsername", adminDomainUsername
 		])
 	}
 	args cmdline
@@ -426,7 +426,7 @@ tasks.register('extractDbDump', DockerCopyFileFromContainer) {
 	group = "database runtime"
 	description = "Extracts the dumped database from the container"
 	containerId = dbContainerName
-	hostPath = "${layout.buildDirectory}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
+	hostPath = layout.buildDirectory.file("db/${run.environment["ANET_DB_NAME"]}-db-dump.sql").get().asFile.path
 	remotePath = "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
 }
 
@@ -434,7 +434,7 @@ tasks.register('pushDbDump', DockerCopyFileToContainer) {
 	group = "database runtime"
 	description = "Copies the database dump to the container"
 	containerId = dbContainerName
-	hostPath = "${layout.buildDirectory}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
+	hostPath = layout.buildDirectory.file("db/${run.environment["ANET_DB_NAME"]}-db-dump.sql").get().asFile.path
 	remotePath = psqlPushDataPath
 }
 
