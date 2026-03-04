@@ -28,6 +28,8 @@ import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.User;
+import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
@@ -52,8 +54,10 @@ class PersonMergeTest extends AbstractResourceTest {
     final Location winnerCountry = locationList.getList().get(0);
 
     // Create a person
+    final UserInput loserUser =
+        UserInput.builder().withDomainUsername("loserUser." + UUID.randomUUID()).build();
     final PersonInput loserInput1 = PersonInput.builder().withName("Loser for Merging")
-        .withCountry(getLocationInput(loserCountry)).build();
+        .withCountry(getLocationInput(loserCountry)).withUsers(List.of(loserUser)).build();
     final Person loser1 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, loserInput1));
     assertThat(loser1).isNotNull();
@@ -118,6 +122,8 @@ class PersonMergeTest extends AbstractResourceTest {
         loser1.getUuid(), t -> mutationExecutor.updatePerson("", false, getPersonInput(loser1)));
 
     // Create a person
+    final UserInput winnerUser =
+        UserInput.builder().withDomainUsername("winnerUser." + UUID.randomUUID()).build();
     final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
         .withStatus(Status.ACTIVE)
         // set HTML of biography
@@ -127,7 +133,7 @@ class PersonMergeTest extends AbstractResourceTest {
         .withCountry(getLocationInput(winnerCountry)).withCode("1234568")
         .withEndOfTourDate(
             ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
-        .build();
+        .withUsers(List.of(winnerUser)).build();
 
     final Person winner =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, winnerInput));
@@ -168,6 +174,9 @@ class PersonMergeTest extends AbstractResourceTest {
     final String winnerSubscriptionUuid = addSubscription(subscribeToWinner, objectType,
         winner.getUuid(), t -> mutationExecutor.updatePerson("", false, getPersonInput(winner)));
 
+    // Try to set the users
+    winnerInput.setUsers(List.of(loserUser));
+
     // Merge the two persons
     winnerInput.setUuid(winner.getUuid());
     nrUpdated = withCredentials(adminUser,
@@ -186,6 +195,12 @@ class PersonMergeTest extends AbstractResourceTest {
     final Person mergedPerson =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, winnerInput.getUuid()));
     assertThat(mergedPerson.getAttachments()).hasSize(2);
+
+    // Check that the winner has all the users from both
+    final List<String> mergedDomainUsernames =
+        List.of(winnerUser.getDomainUsername(), loserUser.getDomainUsername());
+    assertThat(mergedPerson.getUsers().stream().map(User::getDomainUsername).toList())
+        .hasSameElementsAs(mergedDomainUsernames);
 
     // Check the subscriptions and updates
     checkSubscriptionsAndUpdatesAfterMerge(subscribeToLoser || subscribeToWinner, objectType,
