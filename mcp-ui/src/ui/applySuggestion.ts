@@ -15,6 +15,16 @@ type ApplyMessage = {
   source: "mcp-app"
 }
 
+type OpenDiffMessage = {
+  type: "anet.openSuggestionDiff"
+  fieldId: string
+  fieldLabel?: string
+  currentText?: string
+  suggestion: string
+  requestId?: string
+  source: "mcp-app"
+}
+
 type ApplySuggestionUI = {
   render: (args: SuggestionArgs) => void
   postApplyMessage: () => void
@@ -27,6 +37,7 @@ type ApplySuggestionElements = {
   suggestionEl: HTMLElement
   statusEl: HTMLElement
   applyBtn: HTMLButtonElement
+  pickBtn: HTMLButtonElement
 }
 
 function buildUI(root: HTMLElement): ApplySuggestionElements {
@@ -60,9 +71,11 @@ function buildUI(root: HTMLElement): ApplySuggestionElements {
   applyBtn.className = "primary"
   applyBtn.disabled = true
   applyBtn.textContent = "Apply to ANET"
+  const pickBtn = document.createElement("button")
+  pickBtn.textContent = "Pick and choose"
   const status = document.createElement("div")
   status.className = "status"
-  actions.append(applyBtn, status)
+  actions.append(applyBtn, pickBtn, status)
 
   card.append(fieldWrap, currentWrap, suggestionWrap, actions)
   root.replaceChildren(card)
@@ -73,23 +86,41 @@ function buildUI(root: HTMLElement): ApplySuggestionElements {
     currentEl: currentValue,
     suggestionEl: suggestionValue,
     statusEl: status,
-    applyBtn
+    applyBtn,
+    pickBtn
   }
 }
 
 export function createApplySuggestionUI(root: HTMLElement): ApplySuggestionUI {
-  const elements = buildUI(root)
+  let elements: ApplySuggestionElements | null = null
+  let isBound = false
   let currentArgs: SuggestionArgs | null = null
 
+  // Make sure elements are created and event listeners are bound
+  // before any rendering or posting occurs.
+  function ensureElements() {
+    if (!elements) {
+      elements = buildUI(root)
+    }
+    if (!isBound && elements.applyBtn && elements.pickBtn) {
+      elements.applyBtn.addEventListener("click", () => postApplyMessage())
+      elements.pickBtn.addEventListener("click", () => postOpenDiffMessage())
+      isBound = true
+    }
+    return elements
+  }
+
   function render(args: SuggestionArgs) {
+    const el = ensureElements()
     currentArgs = args
-    elements.fieldEl.textContent = args.fieldLabel ?? args.fieldId
-    elements.currentEl.textContent = args.currentText ?? ""
-    elements.suggestionEl.textContent = args.suggestion
-    elements.applyBtn.disabled = false
+    el.fieldEl.textContent = args.fieldLabel ?? args.fieldId
+    el.currentEl.textContent = args.currentText ?? ""
+    el.suggestionEl.textContent = args.suggestion
+    el.applyBtn.disabled = false
   }
 
   function postApplyMessage() {
+    const el = ensureElements()
     if (!currentArgs) return
 
     const payload: ApplyMessage = {
@@ -102,19 +133,42 @@ export function createApplySuggestionUI(root: HTMLElement): ApplySuggestionUI {
     }
 
     try {
-      if (window.parent) window.parent.postMessage(payload, "*")
-      if (window.top && window.top !== window.parent) {
-        window.top.postMessage(payload, "*")
+      if (!window.top || window.top === window) {
+        throw new Error("Missing top window")
       }
+      window.top.postMessage(payload, "*")
     } catch {
-      elements.statusEl.textContent = "Failed to apply"
+      el.statusEl.textContent = "Failed to apply"
       return
     }
 
-    elements.statusEl.textContent = "Applied to ANET"
+    el.statusEl.textContent = "Applied to ANET"
   }
 
-  elements.applyBtn.addEventListener("click", () => postApplyMessage())
+  function postOpenDiffMessage() {
+    const el = ensureElements()
+    if (!currentArgs) return
+
+    const payload: OpenDiffMessage = {
+      type: "anet.openSuggestionDiff",
+      fieldId: currentArgs.fieldId,
+      suggestion: currentArgs.suggestion,
+      fieldLabel: currentArgs.fieldLabel,
+      currentText: currentArgs.currentText,
+      requestId: currentArgs.requestId,
+      source: "mcp-app"
+    }
+
+    try {
+      if (!window.top || window.top === window) {
+        throw new Error("Missing top window")
+      }
+      window.top.postMessage(payload, "*")
+    } catch {
+      el.statusEl.textContent = "Failed to open picker"
+      return
+    }
+  }
 
   return {
     render,
