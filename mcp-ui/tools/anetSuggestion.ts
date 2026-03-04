@@ -35,10 +35,13 @@ export function registerAnetSuggestionTool(server: McpServer) {
         }
       }
     },
-    async (args: Record<string, unknown>) => {
-      const fieldId = typeof args.fieldId === "string" ? args.fieldId : "field"
+    async (args?: Record<string, unknown>) => {
+      const safeArgs = args ?? {}
+      const fieldId = typeof safeArgs.fieldId === "string" ? safeArgs.fieldId : "field"
       const suggestion =
-        typeof args.suggestion === "string" ? args.suggestion : "(no suggestion provided)"
+        typeof safeArgs.suggestion === "string"
+          ? safeArgs.suggestion
+          : "(no suggestion provided)"
 
       return {
         content: [
