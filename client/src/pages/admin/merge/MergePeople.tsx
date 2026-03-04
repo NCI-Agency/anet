@@ -76,6 +76,17 @@ const GQL_MERGE_PERSON = gql`
   }
 `
 
+function getMergedUsers(person1: any, person2: any) {
+  return [...(person1?.users ?? []), ...(person2?.users ?? [])]
+}
+
+function getPersonWithMergedUsers(person1: any, person2: any) {
+  return {
+    ...person1,
+    users: getMergedUsers(person1, person2)
+  }
+}
+
 interface MergePeopleProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -140,7 +151,12 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
           <MidColTitle>
             {getActionButton(
               () => {
-                dispatchMergeActions(selectAllFields(person1, MERGE_SIDES.LEFT))
+                dispatchMergeActions(
+                  selectAllFields(
+                    getPersonWithMergedUsers(person1, person2),
+                    MERGE_SIDES.LEFT
+                  )
+                )
                 dispatchMergeActions(
                   setAMergedField(
                     "pendingVerification",
@@ -166,7 +182,10 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
             {getActionButton(
               () => {
                 dispatchMergeActions(
-                  selectAllFields(person2, MERGE_SIDES.RIGHT)
+                  selectAllFields(
+                    getPersonWithMergedUsers(person2, person1),
+                    MERGE_SIDES.RIGHT
+                  )
                 )
                 dispatchMergeActions(
                   setAMergedField(
@@ -254,6 +273,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="users"
+                showAction={false}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -557,9 +577,18 @@ const PersonColumn = ({
           overlayColumns={["name"]}
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
-          onChange={value => {
+          onChange={(value: any) => {
             value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))
+            if (value && otherSide) {
+              dispatchMergeActions(
+                setAMergedField(
+                  "users",
+                  getMergedUsers(value, otherSide),
+                  align
+                )
+              )
+            }
           }}
           objectType={Person}
           valueKey="name"
@@ -650,13 +679,8 @@ const PersonColumn = ({
               />
             }
             align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField("users", person.users, align)
-              )
-            }}
+            showAction={false}
             mergeState={mergeState}
-            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
