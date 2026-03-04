@@ -189,6 +189,12 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         )
         return
       }
+      if (type === "anet.openSuggestionDiff") {
+        window.dispatchEvent(
+          new CustomEvent("anet-open-suggestion-diff", { detail: ev.data })
+        )
+        return
+      }
       if (type === "ready") {
         if (!isReady) {
           setIsReady(true)
