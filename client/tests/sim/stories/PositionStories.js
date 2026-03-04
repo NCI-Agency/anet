@@ -212,20 +212,22 @@ const _createPosition = async function (user) {
         u => u.domainUsername === specialUser.name
       )
   )
+  const primary = faker.datatype.boolean(0.75)
   console.debug(
-    `Putting ${person.name.green} in position of ${createdPosition.name.green}`
+    `Putting ${person.name.green} in ${primary ? "primary" : "additional"} position of ${createdPosition.name.green}`
   )
   await runGQL(user, {
     query: `
-      mutation($uuid: String!, $person: PersonInput!) {
-        putPersonInPosition(uuid: $uuid, person: $person)
+      mutation($uuid: String!, $person: PersonInput!, $primary: Boolean!) {
+        putPersonInPosition(uuid: $uuid, person: $person, primary: $primary)
       }
     `,
     variables: {
       person: {
         uuid: person.uuid
       },
-      uuid: createdPosition.uuid
+      uuid: createdPosition.uuid,
+      primary
     }
   })
 
