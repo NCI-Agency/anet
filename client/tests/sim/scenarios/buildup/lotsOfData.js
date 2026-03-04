@@ -12,7 +12,8 @@ const TEST_RUN = !!process.env.TEST_RUN
 const buildupLotsOfData = [
   {
     name: "Create location",
-    number: TEST_RUN ? 1 : 100,
+    nrOfParallelTasks: TEST_RUN ? 1 : 4,
+    number: TEST_RUN ? 1 : 25,
     runnable: createLocationHierarchy,
     preDelay: 0,
     userTypes: ["existingAdmin"],
@@ -23,7 +24,8 @@ const buildupLotsOfData = [
   },
   {
     name: "Create user",
-    number: TEST_RUN ? 1 : 2000,
+    nrOfParallelTasks: TEST_RUN ? 1 : 4,
+    number: TEST_RUN ? 1 : 500,
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
@@ -31,7 +33,8 @@ const buildupLotsOfData = [
   },
   {
     name: "Create active person",
-    number: TEST_RUN ? 1 : 10000,
+    nrOfParallelTasks: TEST_RUN ? 1 : 4,
+    number: TEST_RUN ? 1 : 2500,
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
@@ -39,7 +42,8 @@ const buildupLotsOfData = [
   },
   {
     name: "Create inactive person",
-    number: TEST_RUN ? 1 : 10000,
+    nrOfParallelTasks: TEST_RUN ? 1 : 4,
+    number: TEST_RUN ? 1 : 2500,
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
@@ -47,7 +51,8 @@ const buildupLotsOfData = [
   },
   {
     name: "Create organization",
-    number: TEST_RUN ? 1 : 100,
+    nrOfParallelTasks: TEST_RUN ? 1 : 4,
+    number: TEST_RUN ? 1 : 25,
     runnable: createOrganizationHierarchy,
     preDelay: 0,
     userTypes: ["existingAdmin"],
@@ -57,98 +62,20 @@ const buildupLotsOfData = [
     }
   },
   {
-    name: "Create position #1",
-    number: TEST_RUN ? 1 : 5000,
+    name: "Create position",
+    nrOfParallelTasks: TEST_RUN ? 1 : 16,
+    number: TEST_RUN ? 1 : 1250,
     runnable: createPosition,
-    preDelay: TEST_RUN ? 1 : 100,
+    preDelay: TEST_RUN ? 5 : 30,
     userTypes: ["existingAdmin"],
     arguments: {}
   },
   {
-    name: "Create position #2",
-    number: TEST_RUN ? 1 : 5000,
-    runnable: createPosition,
-    preDelay: TEST_RUN ? 2 : 200,
-    userTypes: ["existingAdmin"],
-    arguments: {}
-  },
-  {
-    name: "Create position #3",
-    number: TEST_RUN ? 1 : 5000,
-    runnable: createPosition,
-    preDelay: TEST_RUN ? 2 : 200,
-    userTypes: ["existingAdmin"],
-    arguments: {}
-  },
-  {
-    name: "Create position #4",
-    number: TEST_RUN ? 1 : 5000,
-    runnable: createPosition,
-    preDelay: TEST_RUN ? 2 : 200,
-    userTypes: ["existingAdmin"],
-    arguments: {}
-  },
-  {
-    name: "Create published report #1",
-    number: TEST_RUN ? 1 : 25000,
+    name: "Create published report",
+    nrOfParallelTasks: TEST_RUN ? 1 : 16,
+    number: TEST_RUN ? 1 : 12500,
     runnable: createReport,
-    preDelay: TEST_RUN ? 3 : 300,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #2",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 4 : 400,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #3",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 5 : 500,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #4",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #5",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 7 : 700,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #6",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 8 : 800,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #7",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { state: Report.STATE.PUBLISHED }
-  },
-  {
-    name: "Create published report #8",
-    number: TEST_RUN ? 1 : 25000,
-    runnable: createReport,
-    preDelay: TEST_RUN ? 10 : 1000,
+    preDelay: TEST_RUN ? 10 : 240,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -156,7 +83,7 @@ const buildupLotsOfData = [
     name: "Create authorizationGroup note",
     number: TEST_RUN ? 1 : 25,
     runnable: createNote,
-    preDelay: TEST_RUN ? 1 : 60,
+    preDelay: TEST_RUN ? 6 : 60,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "authorizationGroups" }
   },
@@ -164,7 +91,7 @@ const buildupLotsOfData = [
     name: "Create location note",
     number: TEST_RUN ? 1 : 1000,
     runnable: createNote,
-    preDelay: TEST_RUN ? 1 : 60,
+    preDelay: TEST_RUN ? 6 : 60,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "locations" }
   },
@@ -172,7 +99,7 @@ const buildupLotsOfData = [
     name: "Create organization note",
     number: TEST_RUN ? 1 : 1500,
     runnable: createNote,
-    preDelay: TEST_RUN ? 1 : 60,
+    preDelay: TEST_RUN ? 6 : 60,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "organizations" }
   },
@@ -180,7 +107,7 @@ const buildupLotsOfData = [
     name: "Create person note",
     number: TEST_RUN ? 1 : 1000,
     runnable: createNote,
-    preDelay: TEST_RUN ? 1 : 60,
+    preDelay: TEST_RUN ? 6 : 60,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "people" }
   },
@@ -188,7 +115,7 @@ const buildupLotsOfData = [
     name: "Create position note",
     number: TEST_RUN ? 1 : 1000,
     runnable: createNote,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 10 : 240,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "positions" }
   },
@@ -196,71 +123,16 @@ const buildupLotsOfData = [
     name: "Create task note",
     number: TEST_RUN ? 1 : 100,
     runnable: createNote,
-    preDelay: TEST_RUN ? 1 : 60,
+    preDelay: TEST_RUN ? 6 : 60,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "tasks" }
   },
   {
-    name: "Create report note #1",
+    name: "Create report note",
+    nrOfParallelTasks: TEST_RUN ? 1 : 8,
     number: TEST_RUN ? 1 : 1000,
     runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #2",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #3",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #4",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #5",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #6",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #7",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
-    userTypes: ["existingAdmin"],
-    arguments: { relatedObjectType: "reports" }
-  },
-  {
-    name: "Create report note #8",
-    number: TEST_RUN ? 1 : 1000,
-    runnable: createNote,
-    preDelay: TEST_RUN ? 9 : 900,
+    preDelay: TEST_RUN ? 10 : 480,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   }
