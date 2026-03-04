@@ -3,6 +3,7 @@ import API from "api"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import DictionaryField from "components/DictionaryField"
@@ -123,211 +124,213 @@ const EventSeriesForm = ({
         }
 
         return (
-          <div>
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <MessagesWithConflict
-              error={error}
-              objectType="Event Series"
-              onCancel={onCancel}
-              onConfirm={() => {
-                resetForm({ values, isSubmitting: true })
-                onSubmit(values, { resetForm, setSubmitting }, true)
-              }}
-            />
-            <Form className="form-horizontal" method="post">
-              <Fieldset title={title} action={action} />
-              <Fieldset>
-                <Row>
-                  {edit && (
-                    <Col lg={4} xl={3} className="text-center">
-                      <EntityAvatarComponent
-                        initialAvatar={initialValues.entityAvatar}
-                        relatedObjectType="eventSeries"
-                        relatedObjectUuid={initialValues.uuid}
-                        relatedObjectName={initialValues.shortName}
-                        editMode={attachmentEditEnabled}
-                        imageAttachments={imageAttachments}
-                      />
+          <AttachmentContext.Provider value={values}>
+            <div>
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <MessagesWithConflict
+                error={error}
+                objectType="Event Series"
+                onCancel={onCancel}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { resetForm, setSubmitting }, true)
+                }}
+              />
+              <Form className="form-horizontal" method="post">
+                <Fieldset title={title} action={action} />
+                <Fieldset>
+                  <Row>
+                    {edit && (
+                      <Col lg={4} xl={3} className="text-center">
+                        <EntityAvatarComponent
+                          initialAvatar={initialValues.entityAvatar}
+                          relatedObjectType="eventSeries"
+                          relatedObjectUuid={initialValues.uuid}
+                          relatedObjectName={initialValues.shortName}
+                          editMode={attachmentEditEnabled}
+                          imageAttachments={imageAttachments}
+                        />
+                      </Col>
+                    )}
+                    <Col
+                      lg={edit && 8}
+                      xl={edit && 9}
+                      className="d-flex flex-column justify-content-center"
+                    >
+                      <FormGroup>
+                        <Row style={{ marginBottom: "1rem" }}>
+                          <Col sm={7}>
+                            <Row>
+                              <Col>
+                                <DictionaryField
+                                  wrappedComponent={FastField}
+                                  dictProps={Settings.fields.eventSeries.name}
+                                  name="name"
+                                  component={FieldHelper.InputField}
+                                />
+                              </Col>
+                            </Row>
+                          </Col>
+                        </Row>
+                      </FormGroup>
                     </Col>
-                  )}
-                  <Col
-                    lg={edit && 8}
-                    xl={edit && 9}
-                    className="d-flex flex-column justify-content-center"
-                  >
-                    <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
-                        <Col sm={7}>
-                          <Row>
-                            <Col>
-                              <DictionaryField
-                                wrappedComponent={FastField}
-                                dictProps={Settings.fields.eventSeries.name}
-                                name="name"
-                                component={FieldHelper.InputField}
-                              />
-                            </Col>
-                          </Row>
-                        </Col>
-                      </Row>
-                    </FormGroup>
-                  </Col>
-                </Row>
-              </Fieldset>
-              <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.ownerOrg}
-                  name="ownerOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("ownerOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="ownerOrg"
-                      placeholder={
-                        Settings.fields.eventSeries.ownerOrg.placeholder
-                      }
-                      value={values.ownerOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.hostOrg}
-                  name="hostOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("hostOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("hostOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="hostOrg"
-                      placeholder={
-                        Settings.fields.eventSeries.hostOrg.placeholder
-                      }
-                      value={values.hostOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.eventSeries.adminOrg}
-                  name="adminOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("adminOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("adminOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="adminOrg"
-                      placeholder={
-                        Settings.fields.eventSeries.adminOrg.placeholder
-                      }
-                      value={values.adminOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      queryParams={adminOrgSearchQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.eventSeries.status}
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.eventSeries.description}
-                  name="description"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      placeholder={
-                        Settings.fields.eventSeries.description?.placeholder
-                      }
-                    />
-                  }
-                />
-
-                {edit && attachmentEditEnabled && (
-                  <Field
-                    name="uploadAttachments"
-                    label="Attachments"
+                  </Row>
+                </Fieldset>
+                <Fieldset>
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.eventSeries.ownerOrg}
+                    name="ownerOrg"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("ownerOrg", value)
+                    }}
                     widget={
-                      <UploadAttachment
-                        attachments={attachmentList}
-                        updateAttachments={setAttachmentList}
-                        relatedObjectType={EventSeries.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
+                      <AdvancedSingleSelect
+                        fieldName="ownerOrg"
+                        placeholder={
+                          Settings.fields.eventSeries.ownerOrg.placeholder
+                        }
+                        value={values.ownerOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
                       />
                     }
-                    onHandleBlur={() => {
-                      setFieldTouched("uploadAttachments", true, false)
-                    }}
                   />
-                )}
-              </Fieldset>
-              <div className="submit-buttons">
-                <div>
-                  <Button onClick={onCancel} variant="outline-secondary">
-                    Cancel
-                  </Button>
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.eventSeries.hostOrg}
+                    name="hostOrg"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("hostOrg", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("hostOrg", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="hostOrg"
+                        placeholder={
+                          Settings.fields.eventSeries.hostOrg.placeholder
+                        }
+                        value={values.hostOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.eventSeries.adminOrg}
+                    name="adminOrg"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("adminOrg", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("adminOrg", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="adminOrg"
+                        placeholder={
+                          Settings.fields.eventSeries.adminOrg.placeholder
+                        }
+                        value={values.adminOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        queryParams={adminOrgSearchQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.eventSeries.status}
+                    name="status"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={statusButtons}
+                    onChange={value => setFieldValue("status", value)}
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.eventSeries.description}
+                    name="description"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // prevent initial unnecessary render of RichTextEditor
+                      if (!_isEqual(values.description, value)) {
+                        setFieldValue("description", value, true)
+                      }
+                    }}
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("description", true, false)
+                    }}
+                    widget={
+                      <RichTextEditor
+                        className="reportTextField"
+                        placeholder={
+                          Settings.fields.eventSeries.description?.placeholder
+                        }
+                      />
+                    }
+                  />
+
+                  {edit && attachmentEditEnabled && (
+                    <Field
+                      name="uploadAttachments"
+                      label="Attachments"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <UploadAttachment
+                          attachments={attachmentList}
+                          updateAttachments={setAttachmentList}
+                          relatedObjectType={EventSeries.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                        />
+                      }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
+                  )}
+                </Fieldset>
+                <div className="submit-buttons">
+                  <div>
+                    <Button onClick={onCancel} variant="outline-secondary">
+                      Cancel
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                      id="formBottomSubmit"
+                      variant="primary"
+                      onClick={submitForm}
+                      disabled={isSubmitting}
+                    >
+                      Save Event Series
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Button
-                    id="formBottomSubmit"
-                    variant="primary"
-                    onClick={submitForm}
-                    disabled={isSubmitting}
-                  >
-                    Save Event Series
-                  </Button>
-                </div>
-              </div>
-            </Form>
-          </div>
+              </Form>
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>

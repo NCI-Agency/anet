@@ -16,6 +16,7 @@ import App6SymbolPreview from "components/App6SymbolPreview"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -393,325 +394,332 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   )
 
   return (
-    <div>
-      <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
+    <AttachmentContext.Provider value={organization}>
+      <div>
+        <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
-      <SubNav subnavElemId="all-org-nav">{!isMyOrg && orgSubNav}</SubNav>
+        <SubNav subnavElemId="all-org-nav">{!isMyOrg && orgSubNav}</SubNav>
 
-      {currentUser.isSuperuser() && (
-        <div className="float-end">
-          <GuidedTour
-            title="Take a guided tour of this organization's page."
-            tour={orgTour}
-            autostart={
-              (localStorage.newUser === "true" &&
-                localStorage.hasSeenOrgTour !== "true") ||
-              routerLocation?.state?.showGuidedTour === true
-            }
-            onEnd={() => (localStorage.hasSeenOrgTour = "true")}
-          />
-        </div>
-      )}
-
-      <Messages success={stateSuccess} error={stateError} />
-      <div className="form-horizontal">
-        <Fieldset
-          title={
-            <>
-              {
-                <SubscriptionIcon
-                  subscribedObjectType="organizations"
-                  subscribedObjectUuid={organization.uuid}
-                  isSubscribed={organization.isSubscribed}
-                  updatedAt={organization.updatedAt}
-                  refetch={refetch}
-                  setError={error => {
-                    setStateError(error)
-                    jumpToTop()
-                  }}
-                  persistent
-                />
-              }{" "}
-              Organization {organization.shortName}
-            </>
-          }
-          action={action}
-        />
-        <Fieldset>
-          <Row>
-            <Col lg={4} xl={3} className="text-center">
-              <EntityAvatarDisplay
-                avatar={avatar}
-                defaultAvatar={Organization.relatedObjectType}
-              />
-            </Col>
-            <Col
-              lg={8}
-              xl={9}
-              className="d-flex flex-column justify-content-center"
-            >
-              <FormGroup>
-                <Row style={{ marginBottom: "1rem", alignItems: "center" }}>
-                  <Col sm={7}>
-                    <Row>
-                      <Col>
-                        <DictionaryField
-                          wrappedComponent={FieldHelper.ReadonlyField}
-                          dictProps={Settings.fields.organization.shortName}
-                          field={{
-                            name: "shortName",
-                            value: organization.shortName
-                          }}
-                        />
-                        <DictionaryField
-                          wrappedComponent={FieldHelper.ReadonlyField}
-                          dictProps={Settings.fields.organization.longName}
-                          field={{
-                            name: "longName",
-                            value: organization.longName
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                  </Col>
-                  <Col
-                    sm={5}
-                    className="d-flex flex-column justify-content-center align-items-center"
-                  >
-                    <App6SymbolPreview
-                      values={organization}
-                      size={120}
-                      maxHeight={250}
-                    />
-                  </Col>
-                </Row>
-              </FormGroup>
-            </Col>
-          </Row>
-        </Fieldset>
-        <Fieldset id="info" title="Additional Information">
-          {organization.parentOrg && organization.parentOrg.uuid && (
-            <DictionaryField
-              wrappedComponent={FieldHelper.ReadonlyField}
-              dictProps={Settings.fields.organization.parentOrg}
-              field={{ name: "parentOrg" }}
-              humanValue={
-                organization.parentOrg && (
-                  <LinkTo
-                    modelType="Organization"
-                    model={organization.parentOrg}
-                  />
-                )
+        {currentUser.isSuperuser() && (
+          <div className="float-end">
+            <GuidedTour
+              title="Take a guided tour of this organization's page."
+              tour={orgTour}
+              autostart={
+                (localStorage.newUser === "true" &&
+                  localStorage.hasSeenOrgTour !== "true") ||
+                routerLocation?.state?.showGuidedTour === true
               }
+              onEnd={() => (localStorage.hasSeenOrgTour = "true")}
             />
-          )}
+          </div>
+        )}
 
-          {organization.childrenOrgs &&
-            organization.childrenOrgs.length > 0 && (
+        <Messages success={stateSuccess} error={stateError} />
+        <div className="form-horizontal">
+          <Fieldset
+            title={
+              <>
+                {
+                  <SubscriptionIcon
+                    subscribedObjectType="organizations"
+                    subscribedObjectUuid={organization.uuid}
+                    isSubscribed={organization.isSubscribed}
+                    updatedAt={organization.updatedAt}
+                    refetch={refetch}
+                    setError={error => {
+                      setStateError(error)
+                      jumpToTop()
+                    }}
+                    persistent
+                  />
+                }{" "}
+                Organization {organization.shortName}
+              </>
+            }
+            action={action}
+          />
+          <Fieldset>
+            <Row>
+              <Col lg={4} xl={3} className="text-center">
+                <EntityAvatarDisplay
+                  avatar={avatar}
+                  defaultAvatar={Organization.relatedObjectType}
+                />
+              </Col>
+              <Col
+                lg={8}
+                xl={9}
+                className="d-flex flex-column justify-content-center"
+              >
+                <FormGroup>
+                  <Row style={{ marginBottom: "1rem", alignItems: "center" }}>
+                    <Col sm={7}>
+                      <Row>
+                        <Col>
+                          <DictionaryField
+                            wrappedComponent={FieldHelper.ReadonlyField}
+                            dictProps={Settings.fields.organization.shortName}
+                            field={{
+                              name: "shortName",
+                              value: organization.shortName
+                            }}
+                          />
+                          <DictionaryField
+                            wrappedComponent={FieldHelper.ReadonlyField}
+                            dictProps={Settings.fields.organization.longName}
+                            field={{
+                              name: "longName",
+                              value: organization.longName
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col
+                      sm={5}
+                      className="d-flex flex-column justify-content-center align-items-center"
+                    >
+                      <App6SymbolPreview
+                        values={organization}
+                        size={120}
+                        maxHeight={250}
+                      />
+                    </Col>
+                  </Row>
+                </FormGroup>
+              </Col>
+            </Row>
+          </Fieldset>
+          <Fieldset id="info" title="Additional Information">
+            {organization.parentOrg && organization.parentOrg.uuid && (
               <DictionaryField
                 wrappedComponent={FieldHelper.ReadonlyField}
-                dictProps={Settings.fields.organization.childrenOrgs}
-                field={{ name: "childrenOrgs" }}
+                dictProps={Settings.fields.organization.parentOrg}
+                field={{ name: "parentOrg" }}
                 humanValue={
-                  <ListGroup>
-                    {organization.childrenOrgs.map(childOrg => (
-                      <ListGroupItem key={childOrg.uuid}>
-                        <LinkTo modelType="Organization" model={childOrg} />
-                      </ListGroupItem>
-                    ))}
-                  </ListGroup>
+                  organization.parentOrg && (
+                    <LinkTo
+                      modelType="Organization"
+                      model={organization.parentOrg}
+                    />
+                  )
                 }
               />
             )}
 
-          {renderLeadingPositions(
-            organization.positions,
-            PositionRole.LEADER.toString(),
-            pluralize(utils.titleCase(PositionRole.LEADER.humanNameOfRole()))
-          )}
+            {organization.childrenOrgs &&
+              organization.childrenOrgs.length > 0 && (
+                <DictionaryField
+                  wrappedComponent={FieldHelper.ReadonlyField}
+                  dictProps={Settings.fields.organization.childrenOrgs}
+                  field={{ name: "childrenOrgs" }}
+                  humanValue={
+                    <ListGroup>
+                      {organization.childrenOrgs.map(childOrg => (
+                        <ListGroupItem key={childOrg.uuid}>
+                          <LinkTo modelType="Organization" model={childOrg} />
+                        </ListGroupItem>
+                      ))}
+                    </ListGroup>
+                  }
+                />
+              )}
 
-          {renderLeadingPositions(
-            organization.positions,
-            PositionRole.DEPUTY.toString(),
-            pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
-          )}
+            {renderLeadingPositions(
+              organization.positions,
+              PositionRole.LEADER.toString(),
+              pluralize(utils.titleCase(PositionRole.LEADER.humanNameOfRole()))
+            )}
 
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.organization.identificationCode}
-            field={{
-              name: "identificationCode",
-              value: organization.identificationCode
-            }}
-          />
+            {renderLeadingPositions(
+              organization.positions,
+              PositionRole.DEPUTY.toString(),
+              pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
+            )}
 
-          {organization.location && (
             <DictionaryField
               wrappedComponent={FieldHelper.ReadonlyField}
-              dictProps={Settings.fields.organization.location}
-              field={{ name: "location" }}
-              humanValue={
-                organization.location && (
-                  <LinkTo modelType="Location" model={organization.location}>
-                    {`${Location.toString(organization.location)} `}
-                    <Badge bg="secondary">
-                      {Location.humanNameOfType(organization.location.type)}
-                    </Badge>
-                  </LinkTo>
-                )
-              }
+              dictProps={Settings.fields.organization.identificationCode}
+              field={{
+                name: "identificationCode",
+                value: organization.identificationCode
+              }}
             />
-          )}
 
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.organization.emailAddresses}
-            field={{ name: "emailAddresses" }}
-            humanValue={
-              <EmailAddressTable
-                label={Settings.fields.organization.emailAddresses.label}
-                emailAddresses={organization.emailAddresses}
+            {organization.location && (
+              <DictionaryField
+                wrappedComponent={FieldHelper.ReadonlyField}
+                dictProps={Settings.fields.organization.location}
+                field={{ name: "location" }}
+                humanValue={
+                  organization.location && (
+                    <LinkTo modelType="Location" model={organization.location}>
+                      {`${Location.toString(organization.location)} `}
+                      <Badge bg="secondary">
+                        {Location.humanNameOfType(organization.location.type)}
+                      </Badge>
+                    </LinkTo>
+                  )
+                }
               />
-            }
-          />
+            )}
 
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.organization.authorizationGroups}
-            field={{ name: "authorizationGroups" }}
-            humanValue={
-              <AuthorizationGroupTable
-                authorizationGroups={organization.authorizationGroups}
-                showDistributionList
-                showForSensitiveInformation
-              />
-            }
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.organization.status}
-            field={{ name: "status" }}
-            humanValue={Organization.humanNameOfStatus(organization.status)}
-          />
-
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.organization.profile}
-            field={{ name: "profile" }}
-            humanValue={
-              <RichTextEditor readOnly value={organization.profile} />
-            }
-          />
-
-          {attachmentsEnabled && (
-            <FieldHelper.ReadonlyField
-              field={{ name: "attachments" }}
-              label="Attachments"
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.organization.emailAddresses}
+              field={{ name: "emailAddresses" }}
               humanValue={
-                <AttachmentsDetailView
-                  attachments={attachments}
-                  updateAttachments={setAttachments}
-                  relatedObjectType={Organization.relatedObjectType}
-                  relatedObjectUuid={organization.uuid}
-                  allowEdit={canAdministrateOrg}
+                <EmailAddressTable
+                  label={Settings.fields.organization.emailAddresses.label}
+                  emailAddresses={organization.emailAddresses}
                 />
               }
             />
-          )}
-        </Fieldset>
 
-        {Settings.fields.organization.customFields && (
-          <Fieldset title="Organization information" id="custom-fields">
-            <ReadonlyCustomFields
-              fieldsConfig={Settings.fields.organization.customFields}
-              values={organization}
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.organization.authorizationGroups}
+              field={{ name: "authorizationGroups" }}
+              humanValue={
+                <AuthorizationGroupTable
+                  authorizationGroups={organization.authorizationGroups}
+                  showDistributionList
+                  showForSensitiveInformation
+                />
+              }
             />
+
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.organization.status}
+              field={{ name: "status" }}
+              humanValue={Organization.humanNameOfStatus(organization.status)}
+            />
+
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.organization.profile}
+              field={{ name: "profile" }}
+              humanValue={
+                <RichTextEditor readOnly value={organization.profile} />
+              }
+            />
+
+            {attachmentsEnabled && (
+              <FieldHelper.ReadonlyField
+                field={{ name: "attachments" }}
+                label="Attachments"
+                humanValue={
+                  <AttachmentsDetailView
+                    attachments={attachments}
+                    updateAttachments={setAttachments}
+                    relatedObjectType={Organization.relatedObjectType}
+                    relatedObjectUuid={organization.uuid}
+                    allowEdit={canAdministrateOrg}
+                  />
+                }
+              />
+            )}
           </Fieldset>
-        )}
 
-        <OrganizationLaydown organization={organization} refetch={refetch} />
+          {Settings.fields.organization.customFields && (
+            <Fieldset title="Organization information" id="custom-fields">
+              <ReadonlyCustomFields
+                fieldsConfig={Settings.fields.organization.customFields}
+                values={organization}
+              />
+            </Fieldset>
+          )}
 
-        <Approvals
-          relatedObject={organization}
-          objectType="Organization"
-          canEdit={canAdministrateOrg}
-          refetch={refetch}
-        />
+          <OrganizationLaydown organization={organization} refetch={refetch} />
 
-        {organization.isTaskEnabled() && (
-          <OrganizationTasks
-            organization={organization}
-            queryParams={{
-              pageSize: 10,
-              taskedOrgUuid: organization.uuid
-            }}
+          <Approvals
+            relatedObject={organization}
+            objectType="Organization"
+            canEdit={canAdministrateOrg}
+            refetch={refetch}
           />
-        )}
 
-        <Fieldset
-          id="events"
-          title={`Events hosted by ${organization.shortName}`}
-        >
-          <EventCollection
-            paginationKey={`e_${uuid}`}
-            queryParams={eventQueryParams}
-            mapId="events"
-            showEventSeries
-          />
-        </Fieldset>
+          {organization.isTaskEnabled() && (
+            <OrganizationTasks
+              organization={organization}
+              queryParams={{
+                pageSize: 10,
+                taskedOrgUuid: organization.uuid
+              }}
+            />
+          )}
 
-        {(!!allTasks.length || !!allEventSeries.length) && (
           <Fieldset
-            id="syncMatrix"
-            title={`Sync matrix for ${organization.shortName}`}
+            id="events"
+            title={`Events hosted by ${organization.shortName}`}
           >
-            <EventMatrix tasks={allTasks} eventSeries={allEventSeries} />
+            <EventCollection
+              paginationKey={`e_${uuid}`}
+              queryParams={eventQueryParams}
+              mapId="events"
+              showEventSeries
+            />
           </Fieldset>
-        )}
 
-        <Fieldset id="reports" title={`Reports from ${organization.shortName}`}>
-          <ReportCollection
-            paginationKey={`r_${uuid}`}
-            queryParams={reportQueryParams}
-            mapId="reports"
-            reportsFilter={
-              <>
-                <Button
-                  value="toggle-filter"
-                  size="sm"
-                  onClick={() =>
-                    setFilterPendingApproval(!filterPendingApproval)
-                  }
-                  variant="outline-secondary"
-                >
-                  {filterPendingApproval
-                    ? "Show all reports"
-                    : "Show pending approval"}
-                </Button>
-                <FormCheck
-                  type="checkbox"
-                  label="include reports from sub-orgs"
-                  checked={includeChildrenOrgs}
-                  onChange={() => setIncludeChildrenOrgs(!includeChildrenOrgs)}
-                />
-              </>
-            }
-          />
-        </Fieldset>
+          {(!!allTasks.length || !!allEventSeries.length) && (
+            <Fieldset
+              id="syncMatrix"
+              title={`Sync matrix for ${organization.shortName}`}
+            >
+              <EventMatrix tasks={allTasks} eventSeries={allEventSeries} />
+            </Fieldset>
+          )}
+
+          <Fieldset
+            id="reports"
+            title={`Reports from ${organization.shortName}`}
+          >
+            <ReportCollection
+              paginationKey={`r_${uuid}`}
+              queryParams={reportQueryParams}
+              mapId="reports"
+              reportsFilter={
+                <>
+                  <Button
+                    value="toggle-filter"
+                    size="sm"
+                    onClick={() =>
+                      setFilterPendingApproval(!filterPendingApproval)
+                    }
+                    variant="outline-secondary"
+                  >
+                    {filterPendingApproval
+                      ? "Show all reports"
+                      : "Show pending approval"}
+                  </Button>
+                  <FormCheck
+                    type="checkbox"
+                    label="include reports from sub-orgs"
+                    checked={includeChildrenOrgs}
+                    onChange={() =>
+                      setIncludeChildrenOrgs(!includeChildrenOrgs)
+                    }
+                  />
+                </>
+              }
+            />
+          </Fieldset>
+        </div>
+
+        <AssessmentResultsContainer
+          entity={organization}
+          entityType={Organization}
+          canAddPeriodicAssessment={canAdministrateOrg}
+          canAddOndemandAssessment={canAdministrateOrg}
+          onUpdateAssessment={() => {
+            loadAppData()
+            refetch()
+          }}
+        />
       </div>
-
-      <AssessmentResultsContainer
-        entity={organization}
-        entityType={Organization}
-        canAddPeriodicAssessment={canAdministrateOrg}
-        canAddOndemandAssessment={canAdministrateOrg}
-        onUpdateAssessment={() => {
-          loadAppData()
-          refetch()
-        }}
-      />
-    </div>
+    </AttachmentContext.Provider>
   )
 
   function renderLeadingPositions(positions, role, label) {
