@@ -1,5 +1,6 @@
 import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import classNames from "classnames"
 import AssignPositionModal from "components/AssignPositionModal"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
@@ -100,7 +101,7 @@ const PositionsTable = ({
         </Table>
       )}
       {(!hasPositions || canAssignPosition) && (
-        <div className="w-100">
+        <div className={classNames({ canAssignPosition: "w-100" })}>
           <span>
             {!hasPositions && <em>No {label.toLowerCase()} assigned</em>}
           </span>

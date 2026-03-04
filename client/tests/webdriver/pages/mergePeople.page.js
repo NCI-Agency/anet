@@ -157,6 +157,10 @@ class MergePeople extends Page {
     }
     return areExist
   }
+
+  async getUserAccountsField() {
+    return browser.$("#fg-users")
+  }
 }
 
 export default new MergePeople()

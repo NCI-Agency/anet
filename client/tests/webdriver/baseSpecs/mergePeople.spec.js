@@ -129,6 +129,7 @@ describe("Merge people who are both non-users", () => {
     await (await browser.$(".btn-danger")).click()
     await MergePeople.logout()
   })
+
   it("Should display fields values of the left person", async () => {
     // Open merge people page.
     await MergePeople.openPage()
@@ -316,6 +317,14 @@ describe("Merge people who are both non-users", () => {
         )
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.politicalPosition)
+  })
+
+  it("Should autoMerge the user accounts field from both persons", async () => {
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "User accounts")
+      ).getText()
+    ).to.eq("No user accounts available")
   })
 
   it("Should be able to select all fields from left person", async () => {
@@ -657,6 +666,14 @@ describe("Merge user with non-user", () => {
     ).to.eq(EXAMPLE_PEOPLE.userRight.gender)
   })
 
+  it("Should autoMerge the user accounts field from both persons", async () => {
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "User accounts")
+      ).getText()
+    ).to.eq("Domain username\nandrew")
+  })
+
   it("should be able to individually select email addresses", async () => {
     // select all left
     const selectAllEmailsLeftButton = await MergePeople.getSingleSelectButton(
@@ -791,6 +808,13 @@ describe("Merge user with non-user", () => {
         )
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.politicalPosition)
+
+    // It should still have the merged user accounts field from both persons!
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "User accounts")
+      ).getText()
+    ).to.eq("Domain username\nandrew")
   })
 
   it("Should be able to select all fields from right person", async () => {
@@ -863,6 +887,13 @@ describe("Merge user with non-user", () => {
         )
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.politicalPosition)
+
+    // It should still have the merged user accounts field from both persons!
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "User accounts")
+      ).getText()
+    ).to.eq("Domain username\nandrew")
   })
 
   it("Should be able to merge both people when winner is right person", async () => {
@@ -882,6 +913,12 @@ describe("Merge user with non-user", () => {
         ...EXAMPLE_PEOPLE.userRight.notes
       ])
     ).to.eq(true)
+  })
+
+  it("Should have the merged user accounts from both persons", async () => {
+    expect(await (await MergePeople.getUserAccountsField()).getText()).to.eq(
+      "User accounts\nDomain username\nandrew"
+    )
   })
 
   it("Should have deleted the loser person", async () => {
