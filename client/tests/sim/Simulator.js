@@ -79,6 +79,29 @@ const simulate = async args => {
   await runStories(scenario, cycle, runningTime)
 }
 
+async function runTask(buildup, user, n) {
+  for (let i = 1; i <= buildup.number; i++) {
+    try {
+      await buildup.runnable(user, null, buildup.arguments)
+    } catch (e) {
+      console.log(
+        colors.red(
+          `Buildup '${buildup.name} #${n}' iteration ${i} failed: ${e}`
+        )
+      )
+      process.exitCode = 1
+    }
+  }
+}
+
+async function runTasks(buildup, user, nrOfParallelTasks) {
+  await Promise.all(
+    Array(nrOfParallelTasks)
+      .keys()
+      .map(n => runTask(buildup, user, n + 1))
+  )
+}
+
 // Buildup mechanism: generates a set amount of data
 async function runBuildup(scenario) {
   if (scenario.buildup === undefined || scenario.buildup.length === 0) {
@@ -94,22 +117,19 @@ async function runBuildup(scenario) {
     if (userType) {
       const user = await userType.userFunction()
       await sleep(buildup.preDelay)
-      for (let i = 0; i < buildup.number; i++) {
-        try {
-          await buildup.runnable(user, null, buildup.arguments)
-        } catch (e) {
-          console.log(
-            colors.red(`Buildup '${buildup.name}' iteration ${i} failed: ${e}`)
-          )
-          process.exitCode = 1
-        }
-      }
+      const nrOfParallelTasks = buildup.nrOfParallelTasks ?? 1
+      await runTasks(buildup, user, nrOfParallelTasks)
     }
   })
 
-  Aigle.resolve(scenario.buildup).each(buildup =>
-    console.log(`Executed '${buildup.name}' ${buildup.number} times`)
-  )
+  Aigle.resolve(scenario.buildup).each(buildup => {
+    const nrOfParallelTasks = buildup.nrOfParallelTasks ?? 1
+    const nrExecutions = nrOfParallelTasks * buildup.number
+    console.log(
+      `Executed '${buildup.name}' ${nrExecutions} time(s)` +
+        ` [${nrOfParallelTasks} parallel task(s) with ${buildup.number} execution(s)]`
+    )
+  })
 }
 
 // Stories mechanism: generates data during a set amount of time with a certain frequency
