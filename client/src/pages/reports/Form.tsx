@@ -42,6 +42,7 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import DiffModal from "components/DiffModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import { LeafletWithSelection } from "components/Leaflet"
@@ -69,7 +70,7 @@ import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
 import {
   AuthorizationGroup,
-  Event,
+  Event as EventEntity,
   Location,
   Person,
   Position,
@@ -248,6 +249,17 @@ type SelectSuggestionFieldDetail = {
   fieldLabel?: string
   source?: string
 }
+
+type OpenSuggestionDiffDetail = {
+  type?: string
+  fieldId?: string
+  fieldLabel?: string
+  currentText?: string
+  suggestion?: string
+  requestId?: string
+  source?: string
+}
+
 function normalizeFieldKey(value?: string) {
   return (value ?? "")
     .toString()
@@ -322,6 +334,9 @@ const ReportApplySuggestionListener = ({
       return
     }
     const handler = (event: Event) => {
+      if (!("detail" in event)) {
+        return
+      }
       const detail = (event as CustomEvent<ApplySuggestionDetail>).detail
       if (!detail || detail.type !== "anet.applySuggestion") {
         return
@@ -350,12 +365,8 @@ const ReportApplySuggestionListener = ({
       }
     }
 
-    window.addEventListener("anet-apply-suggestion", handler as EventListener)
-    return () =>
-      window.removeEventListener(
-        "anet-apply-suggestion",
-        handler as EventListener
-      )
+    window.addEventListener("anet-apply-suggestion", handler)
+    return () => window.removeEventListener("anet-apply-suggestion", handler)
   }, [
     enabled,
     values,
@@ -387,6 +398,10 @@ const ReportForm = ({
     fieldId: string
     fieldLabel: string
   } | null>(null)
+  const [diffModalOpen, setDiffModalOpen] = useState(false)
+  const [diffDetail, setDiffDetail] = useState<OpenSuggestionDiffDetail | null>(
+    null
+  )
   const latestValuesRef = useRef<any>(initialValues)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
@@ -512,8 +527,39 @@ const ReportForm = ({
     []
   )
 
+  const openDiffModal = useCallback((detail: OpenSuggestionDiffDetail) => {
+    setDiffDetail(detail)
+    setDiffModalOpen(true)
+  }, [])
+
+  const applyDiffSelection = useCallback(
+    (mergedValue: string) => {
+      if (!diffDetail?.fieldId) {
+        return
+      }
+
+      const payload: ApplySuggestionDetail = {
+        type: "anet.applySuggestion",
+        fieldId: diffDetail.fieldId,
+        fieldLabel: diffDetail.fieldLabel,
+        value: mergedValue,
+        requestId: diffDetail.requestId,
+        source: "mcp-app"
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("anet-apply-suggestion", { detail: payload })
+      )
+      setDiffModalOpen(false)
+    },
+    [diffDetail]
+  )
+
   useEffect(() => {
     const handler = (event: Event) => {
+      if (!("detail" in event)) {
+        return
+      }
       const detail = (event as CustomEvent<SelectSuggestionFieldDetail>).detail
       if (!detail || detail.type !== "anet.selectSuggestionField") {
         return
@@ -528,16 +574,34 @@ const ReportForm = ({
       setSelectedSuggestionField({ fieldId: detail.fieldId, fieldLabel: label })
     }
 
-    window.addEventListener(
-      "anet-select-suggestion-field",
-      handler as EventListener
-    )
+    window.addEventListener("anet-select-suggestion-field", handler)
     return () =>
-      window.removeEventListener(
-        "anet-select-suggestion-field",
-        handler as EventListener
-      )
+      window.removeEventListener("anet-select-suggestion-field", handler)
   }, [])
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      if (!("detail" in event)) {
+        return
+      }
+      const detail = (event as CustomEvent<OpenSuggestionDiffDetail>).detail
+      if (!detail || detail.type !== "anet.openSuggestionDiff") {
+        return
+      }
+      if (typeof detail.fieldId !== "string") {
+        return
+      }
+      if (typeof detail.suggestion !== "string") {
+        return
+      }
+      openDiffModal(detail)
+    }
+
+    window.addEventListener("anet-open-suggestion-diff", handler)
+    return () =>
+      window.removeEventListener("anet-open-suggestion-diff", handler)
+  }, [openDiffModal])
+
   const sendReportContextToAI = useCallback(
     (report: any) => {
       const businessObject = buildReportBusinessObject(report)
@@ -1097,8 +1161,8 @@ const ReportForm = ({
                         overlayColumns={["Name"]}
                         overlayRenderRow={EventOverlayRow}
                         filterDefs={eventFilters}
-                        objectType={Event}
-                        fields={Event.autocompleteQuery}
+                        objectType={EventEntity}
+                        fields={EventEntity.autocompleteQuery}
                         valueKey="name"
                         addon={EVENTS_ICON}
                       />
