@@ -2,32 +2,29 @@ import Page from "../page"
 
 class TaskFilter extends Page {
   async addTaskFilter() {
-    const searchLink = await browser.$(
-      ".search-popover-target.bp6-popover-target"
-    )
-    await searchLink.waitForDisplayed()
-    await searchLink.click()
+    const searchLink = browser.$(".search-popover-target.bp6-popover-target")
+    await (await searchLink).waitForDisplayed()
+    await (await searchLink).click()
 
-    const reportsButton = await browser.$(
-      '.btn-group > button[value="REPORTS"]'
-    )
-    await reportsButton.waitForDisplayed()
-    await reportsButton.click()
+    const reportsButton = browser.$('.btn-group > button[value="REPORTS"]')
+    await (await reportsButton).waitForDisplayed()
+    await (await reportsButton).click()
 
     const removeFilterButtons = await browser.$$(
       '.form-group button[title="Remove this filter"]'
     )
     for (const removeFilterButton of removeFilterButtons) {
-      await removeFilterButton.waitForDisplayed()
-      await removeFilterButton.click()
+      await (await removeFilterButton).waitForDisplayed()
+      await (await removeFilterButton).click()
     }
 
-    const addFilterButton = await browser.$("#addFilterDropdown")
-    await addFilterButton.waitForDisplayed()
-    await addFilterButton.click()
+    const addFilterButton = browser.$("#addFilterDropdown")
+    await (await addFilterButton).waitForDisplayed()
+    await (await addFilterButton).click()
 
-    const withinObjectiveButton = await browser.$("a*=Within Objective")
-    await withinObjectiveButton.click()
+    const withinObjectiveButton = browser.$("a*=Within Objective")
+    await (await withinObjectiveButton).waitForDisplayed()
+    await (await withinObjectiveButton).click()
   }
 
   async getTaskCount() {
@@ -40,9 +37,9 @@ class TaskFilter extends Page {
   }
 
   async openTaskFilter() {
-    const openFilterButton = await browser.$("input[name='taskUuid']")
-    await openFilterButton.waitForDisplayed()
-    await openFilterButton.click()
+    const openFilterButton = browser.$("input[name='taskUuid']")
+    await (await openFilterButton).waitForDisplayed()
+    await (await openFilterButton).click()
   }
 
   async openAllCollapsedTasks() {
@@ -54,8 +51,8 @@ class TaskFilter extends Page {
       "#taskUuid-popover .bp6-icon-chevron-right"
     )
     while (expandibleTasks.length > 0) {
-      const task = await expandibleTasks[0]
-      await task.click()
+      const task = expandibleTasks[0]
+      await (await task).click()
       expandibleTasks = await browser.$$(
         "#taskUuid-popover .bp6-icon-chevron-right"
       )
@@ -71,7 +68,7 @@ class TaskFilter extends Page {
       "#taskUuid-popover .bp6-icon-chevron-right"
     )
     for (const task of expandibleTasks) {
-      await task.click()
+      await (await task).click()
     }
   }
 
@@ -85,14 +82,15 @@ class TaskFilter extends Page {
   }
 
   async closeTaskFilter() {
-    const closeButton = await browser.$(".bp6-icon.bp6-icon-cross")
-    await closeButton.waitForDisplayed()
-    await closeButton.click()
+    const closeButton = browser.$(".bp6-icon.bp6-icon-cross")
+    await (await closeButton).waitForDisplayed()
+    await (await closeButton).click()
   }
 
   async clickInclInactiveCheckbox() {
-    const inclInactiveCheckbox = await browser.$("#taskUuid-inclInactive")
-    await inclInactiveCheckbox.click()
+    const inclInactiveCheckbox = browser.$("#taskUuid-inclInactive")
+    await (await inclInactiveCheckbox).waitForDisplayed()
+    await (await inclInactiveCheckbox).click()
   }
 }
 
