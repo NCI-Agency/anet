@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 
 import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,9 +65,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   @Override
   public Note insert(Note obj) {
     DaoUtils.setInsertFields(obj);
-    final Note note = insertInternal(obj);
-    updateSubscriptions(1, note);
-    return note;
+    return insertInternal(obj);
   }
 
   @Override
@@ -91,9 +90,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   @Override
   public int update(Note obj) {
     DaoUtils.setUpdateFields(obj);
-    final int numRows = updateInternal(obj);
-    updateSubscriptions(numRows, obj);
-    return numRows;
+    return updateInternal(obj);
   }
 
   @Override
@@ -115,10 +112,6 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   @Transactional
   @Override
   public int delete(String uuid) {
-    final Note note = getByUuid(uuid);
-    note.loadNoteRelatedObjects(engine().getContext()).join();
-    DaoUtils.setUpdateFields(note);
-    updateSubscriptions(1, note);
     return deleteInternal(uuid);
   }
 
@@ -269,17 +262,18 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     };
   }
 
-  private void updateSubscriptions(int numRows, Note obj) {
-    if (numRows > 0) {
-      final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj);
-      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
-      for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
-        subscriptionDao.updateSubscriptions(subscriptionUpdate);
-      }
+  @Transactional
+  public void updateSubscriptions(Note obj, String auditTrailUuid, boolean isDelete) {
+    final List<SubscriptionUpdateGroup> subscriptionUpdates =
+        getSubscriptionUpdates(obj, auditTrailUuid, isDelete);
+    final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
+    for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
+      subscriptionDao.updateSubscriptions(subscriptionUpdate, auditTrailUuid);
     }
   }
 
-  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj) {
+  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj, String auditTrailUuid,
+      boolean isDelete) {
     final String paramTpl = "noteRelatedObject%1$d";
     final List<SubscriptionUpdateGroup> updates = new ArrayList<>();
     final ListIterator<GenericRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
@@ -289,8 +283,9 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       final SubscriptionUpdateStatement stmt =
           AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(true,
               nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);
-      updates.add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(),
-          nro.getRelatedObjectUuid(), obj.getUpdatedAt(), stmt, true));
+      updates
+          .add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(), nro.getRelatedObjectUuid(),
+              auditTrailUuid, isDelete ? Instant.now() : obj.getUpdatedAt(), stmt, true));
     }
     return updates;
   }

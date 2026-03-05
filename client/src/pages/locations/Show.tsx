@@ -18,6 +18,7 @@ import LinkTo from "components/LinkTo"
 import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import ObjectHistory from "components/ObjectHistory"
 import OrganizationTable from "components/OrganizationTable"
 import {
   jumpToTop,
@@ -165,6 +166,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
           }
         }
       />
+      <ObjectHistory objectUuid={location.uuid} />
     </>
   )
 

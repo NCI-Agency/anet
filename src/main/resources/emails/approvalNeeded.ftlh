@@ -1,29 +1,17 @@
-<html>
+<html lang="en">
 <head>
-<style type="text/css">
-  body {
-    font-family: Arial, Helvetica, SourceSansPro-Regular;
-    color: #000000;
-    font-size: 11px
-  }
-  h1 {
-    font-size: 20px
-  }
-  h2 {
-    font-size: 16px;
-  }
-  a {
-    color:#0072BD;
-  }
-</style>
+  <style>
+    <#include "common/emailStyle.css" parse="false">
+  </style>
 </head>
 <body>
-<p style="font-size:12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+<#include "common/securityBanner.ftlh">
+<#import "common/formatDate.ftlh" as fd>
 
 <p>Dear ${approvalStepName},</p>
-<br><br>
+
 <div>
-  This report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>,
+  This report, <a href="${serverUrl}/reports/${report.uuid}" class="report-intent">${reportIntent!}</a>,
   authored by
   <#assign reportAuthors = (report.loadAuthors(context).get())!>
   <#list reportAuthors as reportAuthor>
@@ -57,10 +45,10 @@
       <#if !attendee.interlocutor>
         <li>
           ${(attendee.name)!}
-          <#if attendee.loadPosition()??>
-            <#assign position = attendee.loadPosition()>
-            <#if position.loadOrganization(context).get()??>
-              <#assign organization = position.getOrganization()>
+          <#assign position = (attendee.loadPositionByDate(context, report.engagementDate).get())!>
+          <#if position.uuid??>
+            <#assign organization = (position.loadOrganization(context).get())!>
+            <#if organization.uuid??>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -82,12 +70,12 @@
   <ul>
     <#list attendees as attendee>
       <#if attendee.interlocutor>
-         <li>
+        <li>
           ${(attendee.name)!}
-          <#if attendee.loadPosition()??>
-            <#assign position = attendee.loadPosition()>
-            <#if position.loadOrganization(context).get()??>
-              <#assign organization = position.getOrganization()>
+          <#assign position = (attendee.loadPositionByDate(context, report.engagementDate).get())!>
+          <#if position.uuid??>
+            <#assign organization = (position.loadOrganization(context).get())!>
+            <#if organization.uuid??>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -108,7 +96,7 @@
 </div>
 
 <div>
-  <strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
+  <strong>Engagement date and location:</strong> <@fd.formatDate dateFormatter=engagementDateFormatter timestamp=report.engagementDate /> @ ${(report.loadLocation(context).get().name)!}
 </div>
 
 <#if engagementsIncludeTimeAndDuration>
@@ -121,16 +109,14 @@
 <#list tasks as task>
 <div>
   <div>
-    <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
     <strong>${fields.task.shortLabel}:</strong> ${(task.longName)!}
-    <#-- </a> -->
   </div>
 </div>
 </#list>
 
 <div>
   <div>
-    <p><strong>${fields.report.intent.label!}:</strong> ${report.intent}</p>
+    <p><strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}</p>
     <#if report.keyOutcomes??>
       <#if fields.report.keyOutcomes??>
         <p><strong>${fields.report.keyOutcomes.label!}:</strong> ${(report.keyOutcomes)!}</p>
@@ -142,12 +128,6 @@
   </div>
 </div>
 
-<p>ANET Support Team
-<#if SUPPORT_EMAIL_ADDR??>
-  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
-</#if></p>
-
-<p>The email is automatically sent by ANET. If you no longer wish to receive these emails you can adjust your <a href="${serverUrl}/preferences"><em><strong>notification preferences</strong></em></a></p>
-
+<#include "common/notificationFooter.ftlh">
 </body>
 </html>

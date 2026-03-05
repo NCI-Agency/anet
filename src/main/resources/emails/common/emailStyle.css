@@ -1,0 +1,28 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #000000;
+  font-size: 15px !important;
+}
+
+a {
+  color: #215db0;
+}
+
+.security-banner {
+  font-size: 12px;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.support-footer {
+  font-size: 12px;
+  font-style: italic;
+}
+
+.report-intent {
+  font-weight: bold;
+  font-style: italic;
+  &::before, &::after {
+    content: "\"";
+  }
+}
