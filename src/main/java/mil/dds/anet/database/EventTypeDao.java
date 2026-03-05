@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Collections;
 import java.util.List;
 import mil.dds.anet.beans.EventType;
 import mil.dds.anet.database.mappers.EventTypeMapper;
@@ -29,7 +30,10 @@ public class EventTypeDao extends AbstractDao {
     }
   }
 
-  @Transactional
+  public EventType getByUuid(String uuid) {
+    return getByIds(Collections.singletonList(uuid)).get(0);
+  }
+
   public List<EventType> getByIds(List<String> uuids) {
     return new SelfIdBatcher().getByIds(uuids);
   }
@@ -46,17 +50,18 @@ public class EventTypeDao extends AbstractDao {
   }
 
   @Transactional
-  public int insert(EventType eventType) {
+  public EventType insert(EventType eventType) {
     DaoUtils.setInsertFields(eventType);
     final Handle handle = getDbHandle();
     try {
-      return handle
+      handle
           .createUpdate("/* insertEventType */ INSERT INTO \"" + TABLE_NAME + "\" "
               + "(uuid, status, name, \"createdAt\", \"updatedAt\") "
               + "VALUES (:uuid, :status, :name, :createdAt, :updatedAt)")
           .bindBean(eventType).bind("status", DaoUtils.getEnumId(eventType.getStatus()))
           .bind("createdAt", DaoUtils.asLocalDateTime(eventType.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(eventType.getUpdatedAt())).execute();
+      return eventType;
     } finally {
       closeDbHandle(handle);
     }

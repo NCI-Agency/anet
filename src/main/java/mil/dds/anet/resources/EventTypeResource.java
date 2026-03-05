@@ -27,6 +27,15 @@ public class EventTypeResource {
     this.dao = dao;
   }
 
+  @GraphQLQuery(name = "eventType")
+  public EventType getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
+    final EventType eventType = dao.getByUuid(uuid);
+    if (eventType == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event type not found");
+    }
+    return eventType;
+  }
+
   @GraphQLQuery(name = "eventTypes")
   public List<EventType> getAll() {
     return dao.getAll();
@@ -43,19 +52,27 @@ public class EventTypeResource {
           "Please enter a name for the event type");
     }
 
+    final EventType created;
     try {
-      dao.insert(eventType);
+      created = dao.insert(eventType);
     } catch (UnableToExecuteStatementException e) {
       throw ResponseUtils.handleSqlException(e, "Duplicate event type name");
     }
-    return eventType;
+    return created;
   }
 
   @GraphQLMutation(name = "updateEventType")
-  public int updateStatus(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "eventType") EventType eventType) {
+  public int updateEventType(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "eventType") EventType eventType,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final EventType existing = dao.getByUuid(eventType.getUuid());
+    if (existing == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event type not found");
+    }
+
     AuthUtils.assertAdministrator(user);
+    DaoUtils.assertObjectIsFresh(eventType, existing, force);
 
     return dao.update(eventType);
   }
@@ -64,6 +81,11 @@ public class EventTypeResource {
   public int deleteEventType(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final EventType eventType = dao.getByUuid(uuid);
+    if (eventType == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event type not found");
+    }
+
     AuthUtils.assertAdministrator(user);
 
     try {
