@@ -164,11 +164,24 @@ public final class BatchingUtils {
             (BatchLoader<String, List<Person>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getEventDao().getPeople(foreignKeys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.EVENT_EVENT_HOST_RELATED_OBJECTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getEventDao().getEventHostRelatedObjects(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.EVENT_SERIES.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, EventSeries>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getEventSeriesDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry
+        .register(FkDataLoaderKey.EVENT_SERIES_EVENT_SERIES_HOST_RELATED_OBJECTS.toString(),
+            DataLoaderFactory.newDataLoader(
+                (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                    .supplyAsync(() -> engine.getEventSeriesDao()
+                        .getEventSeriesHostRelatedObjects(foreignKeys), dispatcherService),
+                dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.EVENT_TYPE.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, EventType>) keys -> CompletableFuture

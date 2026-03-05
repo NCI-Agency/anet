@@ -15,6 +15,7 @@ import {
   HierarchicalTaskOverlayTable,
   taskFields
 } from "components/advancedSelectWidget/HierarchicalTaskOverlayTable"
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
@@ -35,6 +36,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -214,22 +216,7 @@ const EventForm = ({
           }
         }
 
-        if (values.hostOrg && values.hostOrg.uuid !== values.ownerOrg?.uuid) {
-          tasksFilters.assignedToHostOrg = {
-            label: `Assigned to ${values.hostOrg.shortName}`,
-            queryVars: {
-              ...taskSearchQuery,
-              taskedOrgUuid: values.hostOrg.uuid,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
-            }
-          }
-        }
-
-        if (
-          values.adminOrg &&
-          values.adminOrg.uuid !== values.ownerOrg?.uuid &&
-          values.adminOrg.uuid !== values.hostOrg?.uuid
-        ) {
+        if (values.adminOrg && values.adminOrg.uuid !== values.ownerOrg?.uuid) {
           tasksFilters.assignedToAdminOrg = {
             label: `Assigned to ${values.adminOrg.shortName}`,
             queryVars: {
@@ -314,7 +301,10 @@ const EventForm = ({
                     setFieldTouched("eventSeries", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("eventSeries", value)
                     setFieldValue("ownerOrg", value?.ownerOrg)
-                    setFieldValue("hostOrg", value?.hostOrg)
+                    setFieldValue(
+                      "hostRelatedObjects",
+                      value?.hostRelatedObjects
+                    )
                     setFieldValue("adminOrg", value?.adminOrg)
                   }}
                   widget={
@@ -337,6 +327,28 @@ const EventForm = ({
                 />
                 <DictionaryField
                   wrappedComponent={Field}
+                  dictProps={Settings.fields.event.hostRelatedObjects}
+                  name="hostRelatedObjects"
+                  component={FieldHelper.SpecialField}
+                  widget={
+                    <RelatedObjectsTableInput
+                      title={Settings.fields.event.hostRelatedObjects?.label}
+                      relatedObjects={values.hostRelatedObjects}
+                      objectType={ENTITY_TYPES.ORGANIZATIONS}
+                      entityTypes={[
+                        ENTITY_TYPES.ORGANIZATIONS,
+                        ENTITY_TYPES.POSITIONS,
+                        ENTITY_TYPES.PEOPLE
+                      ]}
+                      setRelatedObjects={value =>
+                        setFieldValue("hostRelatedObjects", value)
+                      }
+                      showDelete
+                    />
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.event.ownerOrg}
                   name="ownerOrg"
                   component={FieldHelper.SpecialField}
@@ -350,31 +362,6 @@ const EventForm = ({
                       fieldName="ownerOrg"
                       placeholder={Settings.fields.event.ownerOrg.placeholder}
                       value={values.ownerOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.event.hostOrg}
-                  name="hostOrg"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("hostOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("hostOrg", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="hostOrg"
-                      placeholder={Settings.fields.event.hostOrg.placeholder}
-                      value={values.hostOrg}
                       overlayColumns={["Name"]}
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
@@ -766,10 +753,12 @@ const EventForm = ({
     event.people = values.people.map(t => utils.getReference(t))
     event.eventType = utils.getReference(event.eventType)
     event.ownerOrg = utils.getReference(event.ownerOrg)
-    event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
     event.location = utils.getReference(event.location)
     event.eventSeries = utils.getReference(event.eventSeries)
+    event.hostRelatedObjects = event.hostRelatedObjects.map(ro =>
+      Object.without(ro, "relatedObject")
+    )
     return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
       event,
       force

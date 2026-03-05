@@ -15,8 +15,8 @@ class ShowEventSeries extends Page {
     return browser.$('div[id="ownerOrg"]')
   }
 
-  async getHostOrganization() {
-    return browser.$('div[id="hostOrg"]')
+  async getHostRelatedObjects() {
+    return browser.$('div[id="hosts"]')
   }
 
   async getAdminOrganization() {
@@ -41,7 +41,7 @@ class ShowEventSeries extends Page {
   }
 
   async getEditAttachmentsButton() {
-    return await browser.$("#edit-attachments")
+    return browser.$("#edit-attachments")
   }
 
   async getEntityAvatar() {

@@ -3,6 +3,14 @@ import CreateEvent from "../pages/createNewEvent.page"
 
 const ORG = "ANET Admin"
 const ORG_COMPLETE = "ANET Administrators"
+const POSITION = "anet"
+const POSITION_COMPLETE = "ANET Administrator"
+const ORGANIZATION = "moi"
+const ORGANIZATION_COMPLETE = "MoI | Ministry of Interior"
+const PERSON = "jacob"
+const PERSON_COMPLETE = "CIV JACOBSON, Jacob"
+
+const SHORT_WAIT_MS = 200
 
 describe("Create event page", () => {
   describe("When creating an event as admin", () => {
@@ -50,15 +58,81 @@ describe("Create event page", () => {
         await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).getText()
       ).to.include(ORG_COMPLETE)
       await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).click()
-
-      await (await CreateEvent.getHostOrganizationInput()).click()
-      await (await CreateEvent.getHostOrganizationInput()).setValue(ORG)
-      await CreateEvent.waitForHostOrgAdvancedSelectToChange(ORG_COMPLETE)
+      await (await CreateEvent.getHostRelatedObjectsInput()).click()
+      // Add an organization
+      await (
+        await CreateEvent.getHostRelatedObjectsInput()
+      ).setValue(ORGANIZATION)
+      await CreateEvent.waitForAdvancedSelectToChange(
+        ORGANIZATION_COMPLETE,
+        CreateEvent.getRelatedObjectsAdvancedSelectFirstItem
+      )
       expect(
-        await (await CreateEvent.getHostOrgAdvancedSelectFirstItem()).getText()
-      ).to.include(ORG_COMPLETE)
-      await (await CreateEvent.getHostOrgAdvancedSelectFirstItem()).click()
+        await (
+          await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(ORGANIZATION_COMPLETE)
+      await (
+        await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      await browser.pause(SHORT_WAIT_MS)
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateEvent.getRelatedObjectsTableEntry(ORGANIZATION_COMPLETE)
+        ).isExisting()
+      ).to.be.true
+      // Add a position
+      await (await CreateEvent.getMemberTypeButton("Positions")).click()
+      await CreateEvent.deleteInput(CreateEvent.getHostRelatedObjectsInput())
+      await (await CreateEvent.getHostRelatedObjectsInput()).setValue(POSITION)
+      await CreateEvent.waitForAdvancedSelectToChange(
+        POSITION_COMPLETE,
+        CreateEvent.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(POSITION_COMPLETE)
+      await (
+        await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      await browser.pause(SHORT_WAIT_MS)
+      // The position is added to a table underneath, so relatedObjects table exists now
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await CreateEvent.getRelatedObjectsTable()).isExisting()).to
+        .be.true
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateEvent.getRelatedObjectsTableEntry(POSITION_COMPLETE)
+        ).isExisting()
+      ).to.be.true
 
+      // Add a person
+      await (await CreateEvent.getMemberTypeButton("People")).click()
+      await CreateEvent.deleteInput(CreateEvent.getHostRelatedObjectsInput())
+      await (await CreateEvent.getHostRelatedObjectsInput()).setValue(PERSON)
+      await CreateEvent.waitForAdvancedSelectToChange(
+        PERSON_COMPLETE,
+        CreateEvent.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(PERSON_COMPLETE)
+      await (
+        await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      await browser.pause(SHORT_WAIT_MS)
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateEvent.getRelatedObjectsTableEntry(PERSON_COMPLETE)
+        ).isExisting()
+      ).to.be.true
       await (await CreateEvent.getAdminOrganizationInput()).click()
       await (await CreateEvent.getAdminOrganizationInput()).setValue(ORG)
       await CreateEvent.waitForAdminOrgAdvancedSelectToChange(ORG_COMPLETE)

@@ -1,4 +1,7 @@
-import { gqlPaginationFields } from "constants/GraphQLDefinitions"
+import {
+  gqlHostMembersForExport,
+  gqlPaginationFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
@@ -336,16 +339,7 @@ const getEventFragment = (fields: string[] = []) => `
             identificationCode
           }`
         )}
-        ${shouldInclude(
-          fields,
-          "hostOrg",
-          `hostOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }`
-        )}
+        ${shouldInclude(fields, "hostRelatedObjects", gqlHostMembersForExport)}
         ${shouldInclude(
           fields,
           "adminOrg",
@@ -395,16 +389,7 @@ const getEventSeriesFragment = (fields: string[] = []) => `
             identificationCode
           }`
         )}
-        ${shouldInclude(
-          fields,
-          "hostOrg",
-          `hostOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }`
-        )}
+        ${shouldInclude(fields, "hostRelatedObjects", gqlHostMembersForExport)}
         ${shouldInclude(
           fields,
           "adminOrg",

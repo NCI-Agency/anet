@@ -5,13 +5,17 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Event;
 import mil.dds.anet.test.client.Event;
 import mil.dds.anet.test.client.EventInput;
 import mil.dds.anet.test.client.EventSearchQueryInput;
 import mil.dds.anet.test.client.EventTypeInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.utils.UtilsTest;
@@ -25,9 +29,9 @@ public class EventResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       "{ uuid shortName longName description category status customFields }";
   private static final String EVENT_SERIES_FIELDS =
-      "{ uuid status name description ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid } }";
+      "{ uuid status name description ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid } adminOrg { uuid } }";
   public static final String FIELDS =
-      "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostOrg { uuid } adminOrg { uuid }"
+      "{ uuid status name description eventSeries { uuid } ownerOrg { uuid } hostRelatedObjects { relatedObjectType relatedObjectUuid } adminOrg { uuid }"
           + " updatedAt startDate endDate eventType { uuid } organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
@@ -36,7 +40,7 @@ public class EventResourceTest extends AbstractResourceTest {
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     final EventInput eInput = TestData.createEventInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org));
     final Event created = succeedCreateEvent(eInput);
 
     // Update an event field
@@ -52,7 +56,7 @@ public class EventResourceTest extends AbstractResourceTest {
     updated.setEventSeries(withCredentials(adminUser,
         t -> mutationExecutor.createEventSeries(EVENT_SERIES_FIELDS,
             TestData.createEventSeriesInput("Event Series", "Event Series Description",
-                getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org)))));
+                getOrganizationInput(org), getOrganizationInput(org)))));
     updated.setOrganizations(Collections.singletonList(org));
     updated.setPeople(Collections.singletonList(getJackJackson()));
     updated.setTasks(Collections.singletonList(withCredentials(adminUser,
@@ -95,7 +99,13 @@ public class EventResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventInput.setOwnerOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
-    eventInput.setHostOrg(getOrganizationInput(org));
+    final GenericRelatedObjectInput host1 =
+        GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
+            .withRelatedObjectUuid(org.getUuid()).build();
+    final GenericRelatedObjectInput host2 =
+        GenericRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
+            .withRelatedObjectUuid(getJackJackson().getUuid()).build();
+    eventInput.setHostRelatedObjects(List.of(host1, host2));
     failCreateEvent(eventInput);
     eventInput.setAdminOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
@@ -110,7 +120,7 @@ public class EventResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     // Jack is not an admin of this new organization, will fail
     final EventInput eInput = TestData.createEventInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org));
     failCreateEvent(eInput);
     failUpdateEvent(eInput);
   }

@@ -515,7 +515,7 @@ type Event {
   entityAvatar: EntityAvatar
   eventSeries: EventSeries
   eventType: EventType
-  hostOrg: Organization
+  hostRelatedObjects: [GenericRelatedObject]
   isSubscribed: Boolean
   location: Location
   name: String
@@ -543,7 +543,7 @@ input EventInput {
   entityAvatar: EntityAvatarInput
   eventSeries: EventSeriesInput
   eventType: EventTypeInput
-  hostOrg: OrganizationInput
+  hostRelatedObjects: [GenericRelatedObjectInput]
   location: LocationInput
   name: String
   organizations: [OrganizationInput]
@@ -599,7 +599,7 @@ type EventSeries {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   entityAvatar: EntityAvatar
-  hostOrg: Organization
+  hostRelatedObjects: [GenericRelatedObject]
   isSubscribed: Boolean
   name: String
   notes: [Note]
@@ -617,7 +617,7 @@ input EventSeriesInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   entityAvatar: EntityAvatarInput
-  hostOrg: OrganizationInput
+  hostRelatedObjects: [GenericRelatedObjectInput]
   name: String
   ownerOrg: OrganizationInput
   status: Status

@@ -393,7 +393,6 @@ fields:
       placeholder: Search for the organization that owns the event series…
     hostOrg:
       label: Host Organization
-      placeholder: Search for the organization hosting the event series…
     adminOrg:
       label: Admin Organization
       placeholder: Search for the organization that will manage the event series in ANET…
@@ -403,6 +402,8 @@ fields:
     description:
       label: Description
       placeholder: The description of the event series
+    hostRelatedObjects:
+      label: Hosts
 
   event:
     status:
@@ -415,7 +416,6 @@ fields:
       placeholder: Search for the organization that owns the event…
     hostOrg:
       label: Host Organization
-      placeholder: Search for the organization hosting the event…
     adminOrg:
       label: Admin Organization
       placeholder: Search for the organization that will manage the event in ANET…
@@ -449,6 +449,8 @@ fields:
     tasks:
       label: Objectives
       placeholder: Objectives of the event
+    hostRelatedObjects:
+      label: Hosts
 
   report:
     canUnpublishReports: true
