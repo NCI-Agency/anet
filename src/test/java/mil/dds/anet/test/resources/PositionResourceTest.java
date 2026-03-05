@@ -235,6 +235,15 @@ public class PositionResourceTest extends AbstractResourceTest {
         t -> mutationExecutor.updatePosition("", false, getPositionInput(updatedTashkil)));
     assertThat(nrUpdated).isEqualTo(1);
 
+    // Try to delete this position as a regular user
+    try {
+      withCredentials(jackUser, t -> mutationExecutor.deletePosition("", updatedTashkil.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Now delete this as admin
     nrDeleted = withCredentials(adminUser,
         t -> mutationExecutor.deletePosition("", updatedTashkil.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
