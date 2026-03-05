@@ -14,7 +14,6 @@ import {
 import RemoveButton from "components/RemoveButton"
 import { deserializeQueryParams } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
-import { Event } from "models"
 import moment from "moment"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
@@ -22,6 +21,14 @@ import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import AddNewEventTypeModal from "./AddNewEventTypeModal"
+
+const GQL_GET_EVENT_TYPES = gql`
+  query {
+    eventTypes {
+      ${gqlAllEventTypeFields}
+    }
+  }
+`
 
 const GQL_CREATE_EVENT_TYPE = gql`
   mutation ($eventType: EventTypeInput!) {
@@ -55,9 +62,7 @@ const EventTypeTable = ({
   const [showAddModal, setShowAddModal] = useState(false)
   const navigate = useNavigate()
 
-  const { loading, error, data, refetch } = API.useApiQuery(
-    Event.getEventTypesQuery
-  )
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_EVENT_TYPES)
 
   const { done, result } = useBoilerplate({
     loading,
