@@ -87,23 +87,13 @@ class Page {
   async _open(pathName, credentials) {
     await browser.url(pathName)
     // Wait for page load or login redirect
-    await browser.pause(1000)
+    await browser.pause(2000)
     if (await (await this.getLoginForm()).isExisting()) {
       await this.login(credentials)
+      // Wait for login redirect
+      await browser.pause(2000)
     }
     await this.waitUntilLoaded()
-  }
-
-  async openWithoutWaiting(
-    pathName = "/",
-    credentials = Page.DEFAULT_CREDENTIALS.user
-  ) {
-    await browser.url(pathName)
-    // Wait for page load or login redirect
-    await browser.pause(1000)
-    if (await (await this.getLoginForm()).isExisting()) {
-      await this.login(credentials)
-    }
   }
 
   async open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
