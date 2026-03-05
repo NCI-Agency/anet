@@ -868,7 +868,7 @@ type Mutation {
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput, force: Boolean = false): Int
   updateEvent(event: EventInput, force: Boolean = false): Int
   updateEventSeries(eventSeries: EventSeriesInput, force: Boolean = false): Int
-  updateEventType(eventType: EventTypeInput): Int!
+  updateEventType(eventType: EventTypeInput, force: Boolean = false): Int!
   updateLocation(force: Boolean = false, location: LocationInput): Int
   updateMe(force: Boolean = false, person: PersonInput): Int
   updateNote(force: Boolean = false, note: NoteInput): Note
@@ -1304,6 +1304,7 @@ type Query {
   eventList(query: EventSearchQueryInput): AnetBeanList_Event
   eventSeries(uuid: String): EventSeries
   eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
+  eventType(uuid: String): EventType
   eventTypes: [EventType]
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location

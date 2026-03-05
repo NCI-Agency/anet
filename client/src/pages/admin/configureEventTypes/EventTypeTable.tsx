@@ -5,6 +5,7 @@ import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
 import Fieldset from "components/Fieldset"
+import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -19,7 +20,6 @@ import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
 import AddNewEventTypeModal from "./AddNewEventTypeModal"
 
 const GQL_GET_EVENT_TYPES = gql`
@@ -30,17 +30,9 @@ const GQL_GET_EVENT_TYPES = gql`
   }
 `
 
-const GQL_CREATE_EVENT_TYPE = gql`
-  mutation ($eventType: EventTypeInput!) {
-    createEventType(eventType: $eventType) {
-      ${gqlAllEventTypeFields}
-    }
-  }
-`
-
 const GQL_UPDATE_EVENT_TYPE = gql`
-  mutation ($eventType: EventTypeInput!) {
-    updateEventType(eventType: $eventType)
+  mutation ($eventType: EventTypeInput!, $force: Boolean) {
+    updateEventType(eventType: $eventType, force: $force)
   }
 `
 
@@ -59,8 +51,11 @@ const EventTypeTable = ({
   pageDispatchers,
   setSearchQuery
 }: EventTypeTableProps) => {
-  const [showAddModal, setShowAddModal] = useState(false)
   const navigate = useNavigate()
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [stateSuccess, setStateSuccess] = useState(null)
+  const [stateError, setStateError] = useState(null)
+  const [selectedEventType, setSelectedEventType] = useState(null)
 
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_EVENT_TYPES)
 
@@ -81,48 +76,36 @@ const EventTypeTable = ({
     return result
   }
 
-  const updateStatus = async (uuid, status) => {
+  const updateStatus = async (eventType: any, force?: boolean) => {
+    setSelectedEventType(eventType)
     const newStatus =
-      status === Model.STATUS.ACTIVE
+      eventType.status === Model.STATUS.ACTIVE
         ? Model.STATUS.INACTIVE
         : Model.STATUS.ACTIVE
-    await API.mutation(GQL_UPDATE_EVENT_TYPE, {
-      eventType: {
-        uuid,
-        status: newStatus
-      }
-    })
-    toast.success(
-      `Event type ${newStatus === Model.STATUS.ACTIVE ? "activated" : "deactivated"} successfully`
-    )
-    refetch()
-  }
-
-  const addNewEventType = async values => {
     try {
-      await API.mutation(GQL_CREATE_EVENT_TYPE, {
+      await API.mutation(GQL_UPDATE_EVENT_TYPE, {
         eventType: {
-          status: Model.STATUS.ACTIVE,
-          name: values.name
-        }
+          ...Object.without(eventType, "relatedEventsCount"),
+          status: newStatus
+        },
+        force
       })
-      toast.success("Event type created successfully")
-    } catch (error) {
-      toast.error(`Could not create event type: ${error?.message}`)
-    } finally {
-      setShowAddModal(false)
+      setSuccess(
+        `Event type ${newStatus === Model.STATUS.ACTIVE ? "activated" : "deactivated"} successfully`
+      )
       refetch()
+    } catch (error) {
+      setError(error)
     }
   }
 
   const deleteEventType = async (uuid: string) => {
     try {
       await API.mutation(GQL_DELETE_EVENT_TYPE, { uuid })
-      toast.success("Event type deleted successfully")
-    } catch (error) {
-      toast.error(`Could not delete event type: ${error?.message}`)
-    } finally {
+      setSuccess("Event type deleted successfully")
       refetch()
+    } catch (error) {
+      setError(error)
     }
   }
 
@@ -145,9 +128,9 @@ const EventTypeTable = ({
   return (
     <>
       <AddNewEventTypeModal
-        show={showAddModal}
-        onHide={() => setShowAddModal(false)}
-        onSave={addNewEventType}
+        showModal={showAddModal}
+        onCancel={() => hideAddModal(false)}
+        onSuccess={() => hideAddModal(true)}
         validateName={validateName}
       />
       <Fieldset
@@ -158,6 +141,17 @@ const EventTypeTable = ({
           </Button>
         }
       >
+        <MessagesWithConflict
+          error={stateError}
+          success={stateSuccess}
+          objectType="EventType"
+          onCancel={() => {
+            setSuccess(null)
+          }}
+          onConfirm={() => {
+            updateStatus(selectedEventType, true)
+          }}
+        />
         {_isEmpty(eventTypes) ? (
           <em>No event types found</em>
         ) : (
@@ -207,9 +201,7 @@ const EventTypeTable = ({
                       <Button
                         variant={`${eventType.status === Model.STATUS.ACTIVE ? "danger" : "primary"}`}
                         style={{ width: 100 }}
-                        onClick={() =>
-                          updateStatus(eventType.uuid, eventType.status)
-                        }
+                        onClick={() => updateStatus(eventType)}
                       >
                         {eventType.status === Model.STATUS.ACTIVE
                           ? "Deactivate"
@@ -230,6 +222,25 @@ const EventTypeTable = ({
       </Fieldset>
     </>
   )
+
+  function setSuccess(msg) {
+    setStateSuccess(msg)
+    setStateError(null)
+    setSelectedEventType(null)
+  }
+
+  function setError(msg) {
+    setStateError(msg)
+    setStateSuccess(null)
+  }
+
+  function hideAddModal(success) {
+    setShowAddModal(false)
+    if (success) {
+      setStateSuccess("Event type created")
+      refetch()
+    }
+  }
 }
 
 const mapDispatchToProps = dispatch => ({

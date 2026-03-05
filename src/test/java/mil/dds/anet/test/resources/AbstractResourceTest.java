@@ -28,6 +28,8 @@ import mil.dds.anet.test.client.Event;
 import mil.dds.anet.test.client.EventInput;
 import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.EventSeriesInput;
+import mil.dds.anet.test.client.EventType;
+import mil.dds.anet.test.client.EventTypeInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.Note;
@@ -415,6 +417,10 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
 
   protected static EventSeriesInput getEventSeriesInput(final EventSeries eventSeries) {
     return getInput(eventSeries, EventSeriesInput.class);
+  }
+
+  protected static EventTypeInput getEventTypeInput(EventType eventType) {
+    return getInput(eventType, EventTypeInput.class);
   }
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {
