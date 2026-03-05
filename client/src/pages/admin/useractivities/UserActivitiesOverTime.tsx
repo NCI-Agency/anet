@@ -20,13 +20,13 @@ import {
 } from "components/Page"
 import _escape from "lodash/escape"
 import moment from "moment"
+import { WeekPeriodFormat, WeekPeriodKey } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
 import { useNavigate } from "react-router-dom"
-import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_USER_ACTIVITY_COUNT = gql`
@@ -41,9 +41,14 @@ const GQL_GET_USER_ACTIVITY_COUNT = gql`
   }
 `
 
+const AGGREGATION_DATE_KEYS = {
+  DAY: "day",
+  WEEK: WeekPeriodKey.ISO_WEEK,
+  MONTH: "month"
+}
 const AGGREGATION_DATE_FORMATS = {
   DAY: "D MMMM YYYY",
-  WEEK: Settings.useISO8601 ? "[week] W GGGG" : "[week] w gggg",
+  WEEK: WeekPeriodFormat.ISO_WEEK,
   MONTH: "MMMM YYYY"
 }
 const DEFAULT_AGGREGATION_PERIOD = "MONTH"
@@ -58,6 +63,12 @@ const SEARCH_TYPES = {
   TOP_LEVEL_ORGANIZATION: "TOP_LEVEL_ORGANIZATION"
 }
 const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.PERSON
+
+function getAggregationLabel(aggregationPeriod) {
+  return aggregationPeriod === "WEEK"
+    ? "ISO week"
+    : utils.noCase(aggregationPeriod)
+}
 
 interface UserActivitiesOverTimeProps {
   pageDispatchers?: PageDispatchersPropType
@@ -84,7 +95,7 @@ const UserActivitiesOverTime = ({
   const endDate = moment
     .utc(startDate)
     .add(timeWindow, aggregationPeriod)
-    .endOf(aggregationPeriod)
+    .endOf(AGGREGATION_DATE_KEYS[aggregationPeriod])
   const [searchType, setSearchType] = useState(
     userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
   )
@@ -134,10 +145,8 @@ const UserActivitiesOverTime = ({
   }\u00A0${searchType === SEARCH_TYPES.PERSON ? "people" : "organizations"}`
   const searchTypePlural = pluralize(utils.noCase(searchType))
   const tableHeader = `${searchTypePlural} active`
-  const tableTitle = `Activity per ${utils.noCase(aggregationPeriod)}`
-  const chartTitle = `Number of ${searchTypePlural} per ${utils.noCase(
-    aggregationPeriod
-  )}`
+  const tableTitle = `Activity per ${getAggregationLabel(aggregationPeriod)}`
+  const chartTitle = `Number of ${searchTypePlural} per ${getAggregationLabel(aggregationPeriod)}`
   const VISUALIZATIONS = [
     {
       id: "ua-table",
@@ -332,15 +341,28 @@ const UserActivitiesOverTime = ({
 
   function startOfCurrentPeriod(period) {
     // always in UTC!
-    return moment.utc().subtract(timeWindow, period).startOf(period)
+    return moment
+      .utc()
+      .subtract(timeWindow, period)
+      .startOf(AGGREGATION_DATE_KEYS[period])
   }
 
   function showNextPeriod(period) {
-    changeStartDate(moment.utc(startDate).add(1, period).startOf(period))
+    changeStartDate(
+      moment
+        .utc(startDate)
+        .add(1, period)
+        .startOf(AGGREGATION_DATE_KEYS[period])
+    )
   }
 
   function showPreviousPeriod(period) {
-    changeStartDate(moment.utc(startDate).subtract(1, period).startOf(period))
+    changeStartDate(
+      moment
+        .utc(startDate)
+        .subtract(1, period)
+        .startOf(AGGREGATION_DATE_KEYS[period])
+    )
   }
 
   function showToday(period) {
@@ -363,7 +385,7 @@ const UserActivitiesOverTime = ({
         .utc()
         .min(now, endDate)
         .subtract(newTimeWindow, newPeriod)
-        .startOf(newPeriod)
+        .startOf(AGGREGATION_DATE_KEYS[newPeriod])
     )
     setUserActivitiesState({
       ...userActivitiesState,

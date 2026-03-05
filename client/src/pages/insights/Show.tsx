@@ -18,6 +18,7 @@ import {
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
 import PendingAssessmentsByPosition from "components/PendingAssessmentsByPosition"
+import PublishedReportsOverTime from "components/PublishedReportsOverTime"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
 import {
@@ -41,6 +42,7 @@ export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
 export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 export const ADVISOR_REPORTS = "advisor-reports"
 export const CADENCE_DASHBOARD = "cadence-dashboard"
+export const PUBLISHED_REPORTS_OVER_TIME = "published-reports-over-time"
 
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS,
@@ -48,6 +50,7 @@ export const INSIGHTS = [
   REPORTS_BY_TASK,
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
+  PUBLISHED_REPORTS_OVER_TIME,
   PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS,
   CADENCE_DASHBOARD
@@ -111,7 +114,17 @@ export const INSIGHT_DETAILS = {
     component: CadenceDashboard,
     navTitle: "Cadence Dashboard",
     title: "Cadence Dashboard"
+  },
+  [PUBLISHED_REPORTS_OVER_TIME]: {
+    searchProps: REPORT_SEARCH_PROPS,
+    component: PublishedReportsOverTime,
+    navTitle: "Reports Published Over Time",
+    title: "Reports Published Over Time"
   }
+}
+
+function getCurrentDateTime() {
+  return moment().clone()
 }
 
 interface InsightsShowProps {
@@ -200,7 +213,12 @@ const InsightsShow = ({
       ...orgQuery
     },
     [ADVISOR_REPORTS]: {},
-    [CADENCE_DASHBOARD]: {}
+    [CADENCE_DASHBOARD]: {},
+    [PUBLISHED_REPORTS_OVER_TIME]: {
+      state: [Report.STATE.PUBLISHED],
+      releasedAtStart: getCurrentDateTime().startOf("year").toISOString(),
+      releasedAtEnd: getCurrentDateTime().endOf("year").toISOString()
+    }
   }
   let queryParams
   if (searchQuery === DEFAULT_SEARCH_QUERY) {
@@ -212,6 +230,14 @@ const InsightsShow = ({
   }
   const insightConfig = INSIGHT_DETAILS[insight]
   const InsightComponent = insightConfig.component
+  const searchObjectType = insightConfig.searchProps.searchObjectTypes?.[0]
+  const setInsightQueryParams = nextQueryParams => {
+    deserializeQueryParams(
+      searchObjectType,
+      nextQueryParams,
+      deserializeCallback
+    )
+  }
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: insightConfig.searchProps,
@@ -225,6 +251,7 @@ const InsightsShow = ({
           pageDispatchers={pageDispatchers}
           style={mosaicLayoutStyle}
           queryParams={queryParams}
+          setQueryParams={setInsightQueryParams}
         />
       </Fieldset>
     </div>
@@ -234,10 +261,6 @@ const InsightsShow = ({
     const maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, "days").clone()
-  }
-
-  function getCurrentDateTime() {
-    return moment().clone()
   }
 
   function deserializeCallback(objectType, filters, text) {
