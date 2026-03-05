@@ -43,6 +43,8 @@ const Messages = ({
 
 interface MessagesWithConflictProps {
   error?: object
+  warning?: string
+  success?: string
   objectType: string
   onCancel: () => void
   onConfirm: () => void
@@ -50,12 +52,19 @@ interface MessagesWithConflictProps {
 
 export const MessagesWithConflict = ({
   error,
+  warning,
+  success,
   objectType,
   onCancel,
   onConfirm
 }: MessagesWithConflictProps) => {
   return (
-    <Messages error={error} className="w-100 d-flex justify-content-between">
+    <Messages
+      error={error}
+      warning={warning}
+      success={success}
+      className="w-100 d-flex justify-content-between"
+    >
       {utils.isConflictError(error) && (
         <div className="float-end align-items-center">
           <Button
