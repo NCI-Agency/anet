@@ -17,7 +17,8 @@ public class ReportEmail implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-    return "Sharing a report in ANET";
+    final Report r = (Report) context.get("report");
+    return String.format("ANET report: %s", r == null ? "None" : r.getObjectLabel());
   }
 
   @Override
