@@ -2,38 +2,35 @@ import Page from "../page"
 
 class LocationFilter extends Page {
   async openLocationFilter() {
-    const searchLink = await browser.$(
-      ".search-popover-target.bp6-popover-target"
-    )
-    await searchLink.waitForDisplayed()
-    await searchLink.click()
+    const searchLink = browser.$(".search-popover-target.bp6-popover-target")
+    await (await searchLink).waitForDisplayed()
+    await (await searchLink).click()
 
-    const reportsButton = await browser.$(
-      '.btn-group > button[value="REPORTS"]'
-    )
-    await reportsButton.waitForDisplayed()
-    await reportsButton.click()
+    const reportsButton = browser.$('.btn-group > button[value="REPORTS"]')
+    await (await reportsButton).waitForDisplayed()
+    await (await reportsButton).click()
 
     const removeFilterButtons = await browser.$$(
       '.form-group button[title="Remove this filter"]'
     )
     for (const removeFilterButton of removeFilterButtons) {
-      await removeFilterButton.waitForDisplayed()
-      await removeFilterButton.click()
+      await (await removeFilterButton).waitForDisplayed()
+      await (await removeFilterButton).click()
     }
 
-    const addFilterButton = await browser.$("#addFilterDropdown")
-    await addFilterButton.waitForDisplayed()
-    await addFilterButton.click()
+    const addFilterButton = browser.$("#addFilterDropdown")
+    await (await addFilterButton).waitForDisplayed()
+    await (await addFilterButton).click()
 
-    const withinLocationButton = await browser.$("a*=Within Location")
-    await withinLocationButton.click()
+    const withinLocationButton = browser.$("a*=Within Location")
+    await (await withinLocationButton).waitForDisplayed()
+    await (await withinLocationButton).click()
   }
 
   async getLocationCount() {
-    const openFilterButton = await browser.$("input[name='locationUuid']")
-    await openFilterButton.waitForDisplayed()
-    await openFilterButton.click()
+    const openFilterButton = browser.$("input[name='locationUuid']")
+    await (await openFilterButton).waitForDisplayed()
+    await (await openFilterButton).click()
 
     await browser.waitUntil(
       async () =>
@@ -52,8 +49,8 @@ class LocationFilter extends Page {
       "#locationUuid-popover .bp6-icon-chevron-right"
     )
     while (expandibleLocations.length > 0) {
-      const location = await expandibleLocations[0]
-      await location.click()
+      const location = expandibleLocations[0]
+      await (await location).click()
       expandibleLocations = await browser.$$(
         "#locationUuid-popover .bp6-icon-chevron-right"
       )
@@ -61,9 +58,9 @@ class LocationFilter extends Page {
   }
 
   async searchLocations(searchText) {
-    const openFilterButton = await browser.$("input[name='locationUuid']")
-    await openFilterButton.waitForDisplayed()
-    await openFilterButton.click()
+    const openFilterButton = browser.$("input[name='locationUuid']")
+    await (await openFilterButton).waitForDisplayed()
+    await (await openFilterButton).click()
     await browser.keys(searchText)
     await browser.pause(1000) // wait for the searchText to be processed
     await browser.waitUntil(
@@ -73,9 +70,9 @@ class LocationFilter extends Page {
   }
 
   async closeLocationFilter() {
-    const closeButton = await browser.$(".bp6-icon.bp6-icon-cross")
-    await closeButton.waitForDisplayed()
-    await closeButton.click()
+    const closeButton = browser.$(".bp6-icon.bp6-icon-cross")
+    await (await closeButton).waitForDisplayed()
+    await (await closeButton).click()
   }
 }
 
