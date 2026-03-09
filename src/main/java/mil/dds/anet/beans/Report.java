@@ -428,6 +428,11 @@ public class Report extends AbstractCustomizableAnetBean
     this.reportText = Utils.trimStringReturnNull(reportText);
   }
 
+  @JsonIgnore
+  public String getReportTextWithLinks() {
+    return Utils.replaceAnetLinks(reportText);
+  }
+
   public String getNextSteps() {
     return nextSteps;
   }
@@ -912,5 +917,10 @@ public class Report extends AbstractCustomizableAnetBean
   @Override
   public String toString() {
     return String.format("[uuid:%s, intent:%s]", uuid, intent);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    return Objects.requireNonNullElse(getIntent(), "None");
   }
 }

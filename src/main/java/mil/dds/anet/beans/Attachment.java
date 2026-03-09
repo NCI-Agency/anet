@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -147,6 +148,10 @@ public class Attachment extends AbstractAnetBean {
   public String toString() {
     return String.format("[uuid:%s, file name:%s, mime type:%s]", uuid, getFileName(),
         getMimeType());
+  }
+
+  public String getObjectLabel() {
+    return Objects.requireNonNullElse(this.getCaption(), this.getFileName());
   }
 
 }

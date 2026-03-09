@@ -223,6 +223,37 @@ table hr.attendee-divider {
 }
 </style>
 
+  <style>
+    /* minimal copies from RichTextEditor CSS: */
+    .rich-text-image-wrapper {
+      display: block;
+      text-align: center;
+      @media print {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      & .rich-text-image {
+        max-width: 400px;
+        max-height: 400px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        margin: 6px 0 4px;
+      }
+
+      & .rich-text-image-wrapper {
+        margin: 6px 0 12px;
+      }
+
+      & .rich-text-image-caption {
+        display: block;
+        font-size: 12px;
+        color: #445566;
+      }
+    }
+  </style>
+
 <style type="text/css">
 /* some local overrides: */
 td {
@@ -519,7 +550,7 @@ td {
       <fieldset>
         <div>
           <p>
-            ${report.reportText?no_esc}
+            ${report.reportTextWithLinks?no_esc}
           </p>
         </div>
       </fieldset>

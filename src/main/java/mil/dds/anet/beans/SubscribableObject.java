@@ -4,4 +4,5 @@ import io.leangen.graphql.annotations.types.GraphQLUnion;
 
 @GraphQLUnion(name = "SubscribableObject", possibleTypeAutoDiscovery = true)
 public interface SubscribableObject {
+  String getObjectLabel();
 }
