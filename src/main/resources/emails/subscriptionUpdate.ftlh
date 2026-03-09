@@ -35,7 +35,7 @@ was updated, because
     by <@rod.relatedObjectDisplay objectType="people" objectUuid=auditTrail.objectUuid object=person />
   </#if>
   <#if auditTrail.updateDescription??>: ${auditTrail.updateDescription}</#if>
-  <#if auditTrail.updateDetails??>, with details: ${auditTrail.updateDetails}</#if>
+  <#if auditTrail.updateDetails??>, with details:<p>${auditTrail.updateDetailsWithLinks?no_esc}</p></#if>
 <#else>
   <#if isNote??>
     of a <b>note/assessment</b> on it

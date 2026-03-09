@@ -13,6 +13,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
+import org.jsoup.nodes.Node;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class AuditTrailDao extends AnetBaseDao<AuditTrail, AuditTrailSearchQuery
 
   @Transactional
   public String logCreate(Person p, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getInsertedUuid(
         AuditTrail.getCreateInstance(p, relatedObjectType, o, updateDescription, updateDetails));
   }
@@ -74,14 +75,14 @@ public class AuditTrailDao extends AnetBaseDao<AuditTrail, AuditTrailSearchQuery
 
   @Transactional
   public String logUpdate(Person p, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getInsertedUuid(
         AuditTrail.getUpdateInstance(p, relatedObjectType, o, updateDescription, updateDetails));
   }
 
   @Transactional
   public String logUpdate(Person p, Instant timestamp, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getInsertedUuid(AuditTrail.getUpdateInstance(p, timestamp, relatedObjectType, o,
         updateDescription, updateDetails));
   }
@@ -100,7 +101,7 @@ public class AuditTrailDao extends AnetBaseDao<AuditTrail, AuditTrailSearchQuery
 
   @Transactional
   public String logDelete(Person p, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getInsertedUuid(
         AuditTrail.getDeleteInstance(p, relatedObjectType, o, updateDescription, updateDetails));
   }

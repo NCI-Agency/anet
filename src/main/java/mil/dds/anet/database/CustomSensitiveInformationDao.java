@@ -180,8 +180,7 @@ public class CustomSensitiveInformationDao
       // Insert and audit
       insert(csi);
       AnetAuditLogger.log(AuditTrail.getCreateInstance(user, TABLE_NAME, csi, null,
-          String.format("linked to entity %s of type %s", csi.getRelatedObjectUuid(),
-              csi.getRelatedObjectType())));
+          Utils.getLinkedToDetails(csi.getRelatedObjectType(), csi.getRelatedObjectUuid())));
     }
   }
 
@@ -196,15 +195,22 @@ public class CustomSensitiveInformationDao
           "user tried to update non-existing row, refused", null, user, TABLE_NAME, csi));
     } else if (!existingCsi.getCustomFieldName().equals(csi.getCustomFieldName())) {
       // Audit and ignore
-      AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
-          "user tried to update row with a different customFieldName, refused",
-          String.format("from %s to %s", existingCsi, csi), user, TABLE_NAME, existingCsi));
+      AnetAuditLogger
+          .log(
+              AuditTrail.getInstance(Instant.now(), null,
+                  "user tried to update row with a different customFieldName, refused",
+                  Utils.getTextDetails(String.format("from %s to %s",
+                      existingCsi.getCustomFieldName(), csi.getCustomFieldName())),
+                  user, TABLE_NAME, existingCsi));
     } else if (!existingCsi.getRelatedObjectType().equals(relatedObjectType)
         || !existingCsi.getRelatedObjectUuid().equals(relatedObjectUuid)) {
       // Audit and ignore
       AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null,
           "user tried to update row with a different relatedObject, refused",
-          String.format("from %s to %s", existingCsi, csi), user, TABLE_NAME, existingCsi));
+          Utils.getFromToDetails(existingCsi.getRelatedObjectType(),
+              existingCsi.getRelatedObjectUuid(), csi.getRelatedObjectType(),
+              csi.getRelatedObjectUuid()),
+          user, TABLE_NAME, existingCsi));
     } else if (!hasCustomSensitiveInformationAuthorization(user, userAuthorizationGroupUuids,
         csi)) {
       // Audit and ignore
@@ -215,8 +221,7 @@ public class CustomSensitiveInformationDao
       // Update and audit
       update(csi);
       AnetAuditLogger.log(AuditTrail.getUpdateInstance(user, TABLE_NAME, csi, null,
-          String.format("linked to entity %s of type %s", csi.getRelatedObjectUuid(),
-              csi.getRelatedObjectType())));
+          Utils.getLinkedToDetails(csi.getRelatedObjectType(), csi.getRelatedObjectUuid())));
     }
   }
 

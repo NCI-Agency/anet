@@ -109,7 +109,7 @@ public class AttachmentResource {
 
     // Log the change
     auditTrailDao.logCreate(user, AttachmentDao.TABLE_NAME, attachment, null,
-        String.format("linked to %s", attachment.getAttachmentRelatedObjects()));
+        Utils.getLinkedToDetails(attachment.getAttachmentRelatedObjects()));
     return DaoUtils.getUuid(attachment);
   }
 
@@ -211,7 +211,7 @@ public class AttachmentResource {
 
     // Log the change
     auditTrailDao.logUpdate(user, AttachmentDao.TABLE_NAME, attachment, null,
-        String.format("linked to %s", attachment.getAttachmentRelatedObjects()));
+        Utils.getLinkedToDetails(attachment.getAttachmentRelatedObjects()));
     return DaoUtils.getUuid(attachment);
   }
 
@@ -233,7 +233,7 @@ public class AttachmentResource {
 
     // Log the change
     auditTrailDao.logDelete(user, AttachmentDao.TABLE_NAME, existing, null,
-        String.format("unlinked from %s", existing.getAttachmentRelatedObjects()));
+        Utils.getUnlinkedFromDetails(existing.getAttachmentRelatedObjects()));
     return numRows;
   }
 

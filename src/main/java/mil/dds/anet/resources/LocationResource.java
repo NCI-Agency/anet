@@ -216,9 +216,10 @@ public class LocationResource {
     }
 
     // Log the change
-    final String auditTrailUuid = auditTrailDao.logUpdate(user, LocationDao.TABLE_NAME,
-        winnerLocation, "a location has been merged into it",
-        String.format("merged location %s", loserLocation));
+    final String auditTrailUuid =
+        auditTrailDao.logUpdate(user, LocationDao.TABLE_NAME, winnerLocation,
+            "a location has been merged into it", Utils.getElementDetails("merged location: ",
+                LocationDao.TABLE_NAME, loserLocation.getUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(winnerLocation, auditTrailUuid, false);
 

@@ -204,7 +204,7 @@ public class TaskResource {
         // Log the change
         auditTrailDao.logUpdate(user, TaskDao.TABLE_NAME, t,
             "task has been set to inactive, updated its descendants",
-            String.format("updated %d descendants", updatedDescendants));
+            Utils.getTextDetails(String.format("updated %d descendant(s)", updatedDescendants)));
       }
 
       // Update positions:
@@ -285,7 +285,8 @@ public class TaskResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, TaskDao.TABLE_NAME, winnerTask,
-        "a task has been merged into it", String.format("merged task %s", loserTask));
+        "a task has been merged into it",
+        Utils.getElementDetails("merged task: ", TaskDao.TABLE_NAME, loserTask.getUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(winnerTask, auditTrailUuid, false);
 

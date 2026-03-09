@@ -12,6 +12,7 @@ import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.NoteDao.UpdateType;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
+import mil.dds.anet.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,7 +41,7 @@ public class NoteResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logCreate(user, NoteDao.TABLE_NAME, n, null,
-        String.format("linked to %s", n.getNoteRelatedObjects()));
+        Utils.getLinkedToDetails(n.getNoteRelatedObjects()));
     // Update any subscriptions
     dao.updateSubscriptions(n, auditTrailUuid, false);
 
@@ -75,7 +76,7 @@ public class NoteResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, NoteDao.TABLE_NAME, n, null,
-        String.format("linked to %s", n.getNoteRelatedObjects()));
+        Utils.getLinkedToDetails(n.getNoteRelatedObjects()));
     // Update any subscriptions
     dao.updateSubscriptions(n, auditTrailUuid, false);
 
@@ -100,7 +101,7 @@ public class NoteResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logDelete(user, NoteDao.TABLE_NAME, n, null,
-        String.format("unlinked from %s", n.getNoteRelatedObjects()));
+        Utils.getUnlinkedFromDetails(n.getNoteRelatedObjects()));
     // Update any subscriptions
     dao.updateSubscriptions(n, auditTrailUuid, true);
 

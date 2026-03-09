@@ -1,6 +1,5 @@
 package mil.dds.anet.resources;
 
-import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -200,7 +199,8 @@ public class PersonResource {
             String.format(
                 "person has been removed from %s position(s) because they are now inactive",
                 numPositions),
-            String.format("from position(s) %s", Joiner.on(", ").join(allUserPositions)));
+            Utils.getUnlinkedFromDetails("removed from: ", PositionDao.TABLE_NAME,
+                allUserPositions));
         // Update any subscriptions
         allUserPositions
             .forEach(userPos -> positionDao.updateSubscriptions(userPos, auditTrailUuid, false));
@@ -252,10 +252,8 @@ public class PersonResource {
     // Log the change
     final Instant now = Instant.now();
     final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PersonDao.TABLE_NAME, p,
-        "position history has been updated",
-        String.format("from %s to %s",
-            DaoUtils.formatPreviousPositions(existing.getPreviousPositions(), true),
-            DaoUtils.formatPreviousPositions(p.getPreviousPositions(), true)));
+        "position history has been updated", Utils.getPreviousPositionsDetails(
+            existing.getPreviousPositions(), p.getPreviousPositions(), true));
     // Update any subscriptions
     p.setUpdatedAt(now);
     dao.updateSubscriptions(p, auditTrailUuid, false);
@@ -434,7 +432,8 @@ public class PersonResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, winner,
-        "a person has been merged into it", String.format("merged person %s", loser));
+        "a person has been merged into it",
+        Utils.getElementDetails("merged person: ", PersonDao.TABLE_NAME, loser.getUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(winner, auditTrailUuid, false);
 

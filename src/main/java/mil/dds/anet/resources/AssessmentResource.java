@@ -12,6 +12,7 @@ import mil.dds.anet.database.AssessmentDao.UpdateType;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
+import mil.dds.anet.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -41,7 +42,7 @@ public class AssessmentResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logCreate(user, AssessmentDao.TABLE_NAME, a, null,
-        String.format("linked to %s", a.getAssessmentRelatedObjects()));
+        Utils.getLinkedToDetails(a.getAssessmentRelatedObjects()));
     // Update any subscriptions
     dao.updateSubscriptions(a, auditTrailUuid, false);
 
@@ -77,7 +78,7 @@ public class AssessmentResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, AssessmentDao.TABLE_NAME, a, null,
-        String.format("linked to %s", a.getAssessmentRelatedObjects()));
+        Utils.getLinkedToDetails(a.getAssessmentRelatedObjects()));
     // Update any subscriptions
     dao.updateSubscriptions(a, auditTrailUuid, false);
 
@@ -102,7 +103,7 @@ public class AssessmentResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logDelete(user, AssessmentDao.TABLE_NAME, a, null,
-        String.format("unlinked from %s", a.getAssessmentRelatedObjects()));
+        Utils.getUnlinkedFromDetails(a.getAssessmentRelatedObjects()));
     // Update any subscriptions
     dao.updateSubscriptions(a, auditTrailUuid, true);
 
