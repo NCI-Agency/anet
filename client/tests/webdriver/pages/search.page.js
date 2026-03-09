@@ -84,18 +84,18 @@ class Search extends Page {
   }
 
   async selectReportTable() {
-    const tableTab = await this.getReportTableButton()
-    await tableTab.waitForExist()
-    await tableTab.waitForDisplayed()
-    await tableTab.click()
+    const tableTab = this.getReportTableButton()
+    await (await tableTab).waitForExist()
+    await (await tableTab).waitForDisplayed()
+    await (await tableTab).click()
   }
 
   async selectReport(linkText) {
     await this.selectReportTable()
-    const reportLink = await this.linkOfReportFound(linkText)
-    await reportLink.waitForExist()
-    await reportLink.waitForDisplayed()
-    await reportLink.click()
+    const reportLink = this.linkOfReportFound(linkText)
+    await (await reportLink).waitForExist()
+    await (await reportLink).waitForDisplayed()
+    await (await reportLink).click()
     await super.waitUntilLoaded()
   }
 }
