@@ -30,4 +30,8 @@ public class ApplicationContextProvider implements ApplicationContextAware {
   public static AnetDictionary getDictionary() {
     return getBean(AnetDictionary.class);
   }
+
+  public static AnetConfig getConfig() {
+    return getBean(AnetConfig.class);
+  }
 }

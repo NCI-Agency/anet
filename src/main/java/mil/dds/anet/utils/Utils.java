@@ -26,15 +26,36 @@ import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
+import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AnetBaseDao;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
+import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
@@ -62,6 +83,11 @@ public class Utils {
   private static final String DICT_KEY_QUESTIONS = "questions";
   private static final String DICT_KEY_QUESTION_SETS = "questionSets";
   private static final String TYPE_RICH_TEXT = "rich_text";
+
+  // For parsing/rewriting ANET links in HTML
+  private static final String ANCHOR_TAG = "a";
+  private static final String HREF_ATTRIBUTE = "href";
+  private static final String ANET_LINK_PREFIX = "urn:anet:";
 
   /**
    * Crude method to check whether a uuid is purely integer, in which case it is probably a legacy
@@ -744,5 +770,89 @@ public class Utils {
     }
 
     return trimmedStr + "…";
+  }
+
+  public static String replaceAnetLinks(String htmlString) {
+    final String anetServerUrl = ApplicationContextProvider.getConfig().getServerUrl();
+    final Document reportDoc = Jsoup.parse(htmlString);
+    final Elements anchors = reportDoc.getElementsByTag(ANCHOR_TAG);
+    anchors.forEach(anchor -> {
+      final Elements anetLinks =
+          anchor.getElementsByAttributeValueStarting(HREF_ATTRIBUTE, ANET_LINK_PREFIX);
+      anetLinks.forEach(anetLink -> {
+        final TypeUuidTuple typeUuidTuple = replaceHref(anetLink, anetServerUrl);
+        replaceInnerHtml(anetLink, anetServerUrl, typeUuidTuple.type());
+      });
+    });
+    return reportDoc.body().html();
+  }
+
+  private record TypeUuidTuple(String type, String uuid) {
+  }
+
+  private static TypeUuidTuple getTypeUuidTuple(String[] linkParts) {
+    final String tableName = linkParts.length > 0 ? linkParts[0] : "";
+    final String objectUuid = linkParts.length > 1 ? linkParts[1] : "";
+    return new TypeUuidTuple(tableName, objectUuid);
+  }
+
+  private static TypeUuidTuple replaceHref(Element anetLink, String anetServerUrl) {
+    final Attribute href = anetLink.attribute(HREF_ATTRIBUTE);
+    final TypeUuidTuple tut = getTypeUuidTuple(
+        Objects.requireNonNull(href).getValue().replace(ANET_LINK_PREFIX, "").split(":", 2));
+    anetLink.attr(HREF_ATTRIBUTE, String.format("%s/%s/%s", anetServerUrl, tut.type(), tut.uuid()));
+    return tut;
+  }
+
+  private static void replaceInnerHtml(Element anetLink, String anetServerUrl, String tableName) {
+    final AnetBaseDao<? extends AbstractAnetBean, ?> dao = getDao(tableName);
+    final TypeUuidTuple tut = getTypeUuidTuple(anetLink.html().split(":", 2));
+    anetLink.empty();
+    anetLink.appendChild(getInnerNode(dao, anetServerUrl, tut.type(), tut.uuid()));
+  }
+
+  private static AnetBaseDao<? extends AbstractAnetBean, ?> getDao(String tableName) {
+    final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
+    return switch (tableName) {
+      case AttachmentDao.TABLE_NAME -> engine.getAttachmentDao();
+      // Match both the old and the new URL
+      case AuthorizationGroupDao.TABLE_NAME, "communities" -> engine.getAuthorizationGroupDao();
+      case EventDao.TABLE_NAME -> engine.getEventDao();
+      case EventSeriesDao.TABLE_NAME -> engine.getEventSeriesDao();
+      case LocationDao.TABLE_NAME -> engine.getLocationDao();
+      case OrganizationDao.TABLE_NAME -> engine.getOrganizationDao();
+      case PersonDao.TABLE_NAME -> engine.getPersonDao();
+      case PositionDao.TABLE_NAME -> engine.getPositionDao();
+      case ReportDao.TABLE_NAME -> engine.getReportDao();
+      case TaskDao.TABLE_NAME -> engine.getTaskDao();
+      default -> null;
+    };
+  }
+
+  private static Node getInnerNode(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
+      String anetServerUrl, String objectType, String objectUuid) {
+    if (dao != null) {
+      final AbstractAnetBean obj = dao.getByUuid(objectUuid);
+      if (obj == null) {
+        return new TextNode(String.format("[deleted %s::%s]", objectType, objectUuid));
+      }
+      if (obj instanceof SubscribableObject subscribableObject) {
+        return new TextNode(subscribableObject.getObjectLabel());
+      }
+      if (obj instanceof Attachment attachment) {
+        final String label = attachment.getObjectLabel();
+        final Element innerNode = new Element(new Tag("span"), null,
+            new Attributes().add("class", "rich-text-image-wrapper"));
+        innerNode.appendChild(new Element(new Tag("img"), null,
+            new Attributes()
+                .add("src",
+                    String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
+                .add("alt", label)));
+        innerNode.appendChild(new Element(new Tag("span"), null,
+            new Attributes().add("class", "rich-text-image-caption")).text(label));
+        return innerNode;
+      }
+    }
+    return new TextNode(String.format("entity %s::%s", objectType, objectUuid));
   }
 }
