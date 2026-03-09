@@ -334,4 +334,9 @@ public class Task extends AbstractCustomizableAnetBean
         category, getParentTaskUuid());
   }
 
+  @Override
+  public String getObjectLabel() {
+    return getShortName();
+  }
+
 }

@@ -203,4 +203,9 @@ public class EventSeries extends AbstractCustomizableAnetBean
   public int hashCode() {
     return Objects.hash(super.hashCode(), status, name, description, ownerOrg, hostOrg, adminOrg);
   }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
+  }
 }

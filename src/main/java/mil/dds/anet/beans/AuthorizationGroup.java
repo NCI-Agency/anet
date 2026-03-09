@@ -141,4 +141,9 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
   public String toString() {
     return String.format("(%s) - %s", uuid, name);
   }
+
+  @Override
+  public String getObjectLabel() {
+    return Objects.requireNonNullElse(getName(), getDescription());
+  }
 }
