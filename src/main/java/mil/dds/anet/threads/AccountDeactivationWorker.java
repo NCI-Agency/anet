@@ -1,6 +1,5 @@
 package mil.dds.anet.threads;
 
-import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -170,7 +169,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
       auditTrailDao.logUpdate(null, now, PersonDao.TABLE_NAME, p, String.format(
           "person has been removed from %s position(s) by the system because they are now inactive",
           numPositions),
-          String.format("from position(s) %s", Joiner.on(", ").join(allUserPositions)));
+          Utils.getUnlinkedFromDetails("removed from: ", PositionDao.TABLE_NAME, allUserPositions));
     }
 
     // Send email to inform user

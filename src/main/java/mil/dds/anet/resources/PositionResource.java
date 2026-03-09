@@ -136,7 +136,7 @@ public class PositionResource {
       // Log the change
       final Instant now = Instant.now();
       final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PositionDao.TABLE_NAME, pos,
-          "positions associations have been changed", String.format("from %s to %s",
+          "positions associations have been changed", Utils.getFromToDetails(PositionDao.TABLE_NAME,
               current.getAssociatedPositions(), pos.getAssociatedPositions()));
       // Update any subscriptions
       pos.setUpdatedAt(now);
@@ -191,7 +191,7 @@ public class PositionResource {
       // Log the change
       final String auditTrailUuid = auditTrailDao.logUpdate(user, PositionDao.TABLE_NAME, existing,
           "person has been removed from this position because the position is now inactive",
-          String.format("from person %s", existingPerson));
+          Utils.getUnlinkedFromDetails(PersonDao.TABLE_NAME, existingPerson.getUuid()));
       // Update any subscriptions
       dao.updateSubscriptions(existing, auditTrailUuid, false);
       existingPerson.setUpdatedAt(existing.getUpdatedAt());
@@ -223,10 +223,8 @@ public class PositionResource {
     // Log the change
     final Instant now = Instant.now();
     final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PositionDao.TABLE_NAME,
-        existing, "position history has been updated",
-        String.format("from %s to %s",
-            DaoUtils.formatPreviousPositions(existing.getPreviousPeople(), false),
-            DaoUtils.formatPreviousPositions(pos.getPreviousPeople(), false)));
+        existing, "position history has been updated", Utils.getPreviousPositionsDetails(
+            existing.getPreviousPeople(), pos.getPreviousPeople(), false));
     // Update any subscriptions
     pos.setUpdatedAt(now);
     dao.updateSubscriptions(pos, auditTrailUuid, false);
@@ -255,7 +253,7 @@ public class PositionResource {
     final String auditTrailUuid = auditTrailDao.logUpdate(user, now, PositionDao.TABLE_NAME, pos,
         String.format("person has been assigned this %s position",
             primary ? "primary" : "additional"),
-        String.format("to person %s", person));
+        Utils.getLinkedToDetails(PersonDao.TABLE_NAME, person.getUuid()));
     // Update any subscriptions
     pos.setUpdatedAt(now);
     dao.updateSubscriptions(pos, auditTrailUuid, false);
@@ -285,7 +283,7 @@ public class PositionResource {
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, PositionDao.TABLE_NAME, pos,
         "person has been removed from this position",
-        String.format("from person %s", pos.getPersonUuid()));
+        Utils.getUnlinkedFromDetails(PersonDao.TABLE_NAME, pos.getPersonUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(pos, auditTrailUuid, false);
     person.setUpdatedAt(pos.getUpdatedAt());
@@ -370,9 +368,10 @@ public class PositionResource {
     }
 
     // Log the change
-    final String auditTrailUuid = auditTrailDao.logUpdate(user, PositionDao.TABLE_NAME,
-        winnerPosition, "a position has been merged into it",
-        String.format("merged position %s", loserPosition));
+    final String auditTrailUuid =
+        auditTrailDao.logUpdate(user, PositionDao.TABLE_NAME, winnerPosition,
+            "a position has been merged into it", Utils.getElementDetails("merged position: ",
+                PositionDao.TABLE_NAME, loserPosition.getUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(winnerPosition, auditTrailUuid, false);
 

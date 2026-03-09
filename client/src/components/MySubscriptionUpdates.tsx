@@ -18,6 +18,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
+import RichTextEditor from "components/RichTextEditor"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
@@ -212,7 +213,13 @@ const MySubscriptionUpdates = ({
                                 <>: {at.updateDescription}</>
                               )}
                               {at.updateDetails && (
-                                <>, with details: {at.updateDetails}</>
+                                <>
+                                  , with details:{" "}
+                                  <RichTextEditor
+                                    readOnly
+                                    value={at.updateDetails}
+                                  />
+                                </>
                               )}
                             </>
                           ) : (

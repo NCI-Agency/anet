@@ -19,6 +19,7 @@ import {
 } from "components/Page"
 import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import RemoveButton from "components/RemoveButton"
+import RichTextEditor from "components/RichTextEditor"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -316,7 +317,11 @@ const AuditTrailTable = ({ pageDispatchers }: AuditTrailTableProps) => {
                     )}
                   </td>
                   <td>{at.updateDescription}</td>
-                  <td>{showDetails && at.updateDetails}</td>
+                  <td>
+                    {showDetails && (
+                      <RichTextEditor readOnly value={at.updateDetails} />
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

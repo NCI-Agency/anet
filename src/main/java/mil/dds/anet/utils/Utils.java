@@ -9,6 +9,7 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import jakarta.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +28,10 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.config.AnetDictionary;
@@ -49,12 +52,10 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
-import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -88,6 +89,13 @@ public class Utils {
   private static final String ANCHOR_TAG = "a";
   private static final String HREF_ATTRIBUTE = "href";
   private static final String ANET_LINK_PREFIX = "urn:anet:";
+  private static final String SPAN_TAG = "span";
+  private static final String LIST_TAG = "ul";
+  private static final String LIST_ITEM_TAG = "li";
+  private static final String FROM_PREFIX = "from:";
+  private static final String TO_PREFIX = "to:";
+  private static final String LINKED_TO_PREFIX = "linked to:";
+  private static final String UNLINKED_FROM_PREFIX = "unlinked from:";
 
   /**
    * Crude method to check whether a uuid is purely integer, in which case it is probably a legacy
@@ -772,6 +780,118 @@ public class Utils {
     return trimmedStr + "…";
   }
 
+  public static Element getTextDetails(String details) {
+    return new Element(SPAN_TAG).text(details);
+  }
+
+  public static Element getFromToDetails(String oldRelatedObjectType, String oldRelatedObjectUuid,
+      String newRelatedObjectType, String newRelatedObjectUuid) {
+    return getElementDetails(FROM_PREFIX, oldRelatedObjectType, oldRelatedObjectUuid)
+        .appendChild(getElementDetails(TO_PREFIX, newRelatedObjectType, newRelatedObjectUuid));
+  }
+
+  public static Element getLinkedToDetails(String relatedObjectType, String relatedObjectUuid) {
+    return getElementDetails(LINKED_TO_PREFIX, relatedObjectType, relatedObjectUuid);
+  }
+
+  public static Element getLinkedToDetails(List<GenericRelatedObject> relatedObjects) {
+    return getElementListDetails(LINKED_TO_PREFIX, relatedObjects);
+  }
+
+  public static Element getUnlinkedFromDetails(String relatedObjectType, String relatedObjectUuid) {
+    return getElementDetails(UNLINKED_FROM_PREFIX, relatedObjectType, relatedObjectUuid);
+  }
+
+  public static Element getUnlinkedFromDetails(List<GenericRelatedObject> relatedObjects) {
+    return getElementListDetails(UNLINKED_FROM_PREFIX, relatedObjects);
+  }
+
+  public static Element getEntityUrn(String relatedObjectType, String relatedObjectUuid) {
+    final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(relatedObjectType);
+    return new Element(ANCHOR_TAG)
+        .attr(HREF_ATTRIBUTE,
+            String.format("%1$s%2$s:%3$s", ANET_LINK_PREFIX, relatedObjectType, relatedObjectUuid))
+        .appendChild(new TextNode(
+            String.format("%1$s:%2$s", daoEntityNameTuple.entityName(), relatedObjectUuid)));
+  }
+
+  public static Element getElementDetails(String prefix, String relatedObjectType,
+      String relatedObjectUuid) {
+    return new Element(SPAN_TAG).text(prefix)
+        .appendChild(getEntityUrn(relatedObjectType, relatedObjectUuid));
+  }
+
+  public static Element getElementListDetails(String prefix,
+      List<GenericRelatedObject> relatedObjects) {
+    final Element element = new Element(SPAN_TAG);
+    if (Utils.isEmptyOrNull(relatedObjects)) {
+      element.text(prefix + " - ");
+    } else {
+      final Element list = new Element(LIST_TAG);
+      relatedObjects.forEach(ro -> list.appendChild(new Element(LIST_ITEM_TAG)
+          .appendChild(getEntityUrn(ro.getRelatedObjectType(), ro.getRelatedObjectUuid()))));
+      element.text(prefix).appendChild(list);
+    }
+    return element;
+  }
+
+  public static Element getFromToDetails(String relatedObjectType,
+      List<? extends AbstractAnetBean> oldRelatedObjects,
+      List<? extends AbstractAnetBean> newRelatedObjects) {
+    return getElementListDetails(FROM_PREFIX, relatedObjectType, oldRelatedObjects)
+        .appendChild(getElementListDetails(TO_PREFIX, relatedObjectType, newRelatedObjects));
+  }
+
+  public static Element getUnlinkedFromDetails(String prefix, String relatedObjectType,
+      List<? extends AbstractAnetBean> relatedObjects) {
+    return getElementListDetails(prefix, relatedObjectType, relatedObjects);
+  }
+
+  public static Element getElementListDetails(String prefix, String relatedObjectType,
+      List<? extends AbstractAnetBean> relatedObjects) {
+    final Element element = new Element(SPAN_TAG);
+    if (Utils.isEmptyOrNull(relatedObjects)) {
+      element.text(prefix + " - ");
+    } else {
+      final Element list = new Element(LIST_TAG);
+      relatedObjects.forEach(ro -> list.appendChild(
+          new Element(LIST_ITEM_TAG).appendChild(getEntityUrn(relatedObjectType, ro.getUuid()))));
+      element.text(prefix).appendChild(list);
+    }
+    return element;
+  }
+
+  public static Element getPreviousPositionsDetails(
+      List<PersonPositionHistory> oldPreviousPositions,
+      List<PersonPositionHistory> newPreviousPositions, boolean forPerson) {
+    return getPreviousPositionsDetails(FROM_PREFIX, oldPreviousPositions, forPerson)
+        .appendChild(getPreviousPositionsDetails(TO_PREFIX, newPreviousPositions, forPerson));
+  }
+
+  private static Element getPreviousPositionsDetails(String prefix,
+      List<PersonPositionHistory> previousPositions, boolean forPerson) {
+    final Element element = new Element(SPAN_TAG);
+    if (Utils.isEmptyOrNull(previousPositions)) {
+      element.text(prefix + " - ");
+    } else {
+      final Element list = new Element(LIST_TAG);
+      previousPositions.forEach(pp -> list.appendChild(new Element(LIST_ITEM_TAG)
+          .appendChild(getEntityUrn(forPerson ? PositionDao.TABLE_NAME : PersonDao.TABLE_NAME,
+              forPerson ? pp.getPositionUuid() : pp.getPersonUuid()))
+          .appendChild(new TextNode(String.format(", %s, start time: %s, end time: %s",
+              Boolean.TRUE.equals(pp.getPrimary()) ? "primary" : "additional",
+              formatDateTime(pp.getStartTime()), formatDateTime(pp.getEndTime()))))));
+      element.text(prefix).appendChild(list);
+    }
+    return element;
+  }
+
+  private static String formatDateTime(Instant instant) {
+    final DateTimeFormatter dateTimeFormatter = getDateTimeFormatter(
+        ApplicationContextProvider.getDictionary(), "dateFormats.email.withTime");
+    return instant == null ? "-" : dateTimeFormatter.format(instant);
+  }
+
   public static String replaceAnetLinks(String htmlString) {
     final String anetServerUrl = ApplicationContextProvider.getConfig().getServerUrl();
     final Document reportDoc = Jsoup.parse(htmlString);
@@ -805,27 +925,36 @@ public class Utils {
   }
 
   private static void replaceInnerHtml(Element anetLink, String anetServerUrl, String tableName) {
-    final AnetBaseDao<? extends AbstractAnetBean, ?> dao = getDao(tableName);
+    final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(tableName);
     final TypeUuidTuple tut = getTypeUuidTuple(anetLink.html().split(":", 2));
     anetLink.empty();
-    anetLink.appendChild(getInnerNode(dao, anetServerUrl, tut.type(), tut.uuid()));
+    anetLink
+        .appendChild(getInnerNode(daoEntityNameTuple.dao(), anetServerUrl, tut.type(), tut.uuid()));
   }
 
-  private static AnetBaseDao<? extends AbstractAnetBean, ?> getDao(String tableName) {
+  private record DaoEntityNameTuple(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
+      String entityName) {
+  }
+
+  private static DaoEntityNameTuple getDaoEntityNameTuple(String tableName) {
     final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
     return switch (tableName) {
-      case AttachmentDao.TABLE_NAME -> engine.getAttachmentDao();
+      case AttachmentDao.TABLE_NAME ->
+        new DaoEntityNameTuple(engine.getAttachmentDao(), "Attachment");
       // Match both the old and the new URL
-      case AuthorizationGroupDao.TABLE_NAME, "communities" -> engine.getAuthorizationGroupDao();
-      case EventDao.TABLE_NAME -> engine.getEventDao();
-      case EventSeriesDao.TABLE_NAME -> engine.getEventSeriesDao();
-      case LocationDao.TABLE_NAME -> engine.getLocationDao();
-      case OrganizationDao.TABLE_NAME -> engine.getOrganizationDao();
-      case PersonDao.TABLE_NAME -> engine.getPersonDao();
-      case PositionDao.TABLE_NAME -> engine.getPositionDao();
-      case ReportDao.TABLE_NAME -> engine.getReportDao();
-      case TaskDao.TABLE_NAME -> engine.getTaskDao();
-      default -> null;
+      case AuthorizationGroupDao.TABLE_NAME, "communities" ->
+        new DaoEntityNameTuple(engine.getAuthorizationGroupDao(), "AuthorizationGroup");
+      case EventDao.TABLE_NAME -> new DaoEntityNameTuple(engine.getEventDao(), "Event");
+      case EventSeriesDao.TABLE_NAME ->
+        new DaoEntityNameTuple(engine.getEventSeriesDao(), "EventSeries");
+      case LocationDao.TABLE_NAME -> new DaoEntityNameTuple(engine.getLocationDao(), "Location");
+      case OrganizationDao.TABLE_NAME ->
+        new DaoEntityNameTuple(engine.getOrganizationDao(), "Organization");
+      case PersonDao.TABLE_NAME -> new DaoEntityNameTuple(engine.getPersonDao(), "Person");
+      case PositionDao.TABLE_NAME -> new DaoEntityNameTuple(engine.getPositionDao(), "Position");
+      case ReportDao.TABLE_NAME -> new DaoEntityNameTuple(engine.getReportDao(), "Report");
+      case TaskDao.TABLE_NAME -> new DaoEntityNameTuple(engine.getTaskDao(), "Task");
+      default -> new DaoEntityNameTuple(null, tableName);
     };
   }
 
@@ -841,15 +970,13 @@ public class Utils {
       }
       if (obj instanceof Attachment attachment) {
         final String label = attachment.getObjectLabel();
-        final Element innerNode = new Element(new Tag("span"), null,
-            new Attributes().add("class", "rich-text-image-wrapper"));
-        innerNode.appendChild(new Element(new Tag("img"), null,
-            new Attributes()
-                .add("src",
-                    String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
-                .add("alt", label)));
-        innerNode.appendChild(new Element(new Tag("span"), null,
-            new Attributes().add("class", "rich-text-image-caption")).text(label));
+        final Element innerNode =
+            new Element(SPAN_TAG).classNames(Set.of("rich-text-image-wrapper"));
+        innerNode.appendChild(new Element("img")
+            .attr("src", String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
+            .attr("alt", label));
+        innerNode.appendChild(
+            new Element(SPAN_TAG).classNames(Set.of("rich-text-image-caption")).text(label));
         return innerNode;
       }
     }

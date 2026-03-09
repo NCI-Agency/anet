@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -8,8 +9,11 @@ import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
 
 public class AuditTrail extends GenericRelatedObject {
 
@@ -52,10 +56,21 @@ public class AuditTrail extends GenericRelatedObject {
   }
 
   public static AuditTrail getInstance(Instant timestamp, AuditTrailUpdateType updateType,
-      String updateDescription, String updateDetails, Person p, String relatedObjectType,
+      String updateDescription, Node updateDetails, Person p, String relatedObjectType,
       AbstractAnetBean o) {
-    return new AuditTrail(timestamp, updateType, updateDescription, updateDetails,
-        DaoUtils.getUuid(p), relatedObjectType, DaoUtils.getUuid(o));
+    return new AuditTrail(timestamp, updateType, updateDescription,
+        formatUpdateDetails(updateDetails), DaoUtils.getUuid(p), relatedObjectType,
+        DaoUtils.getUuid(o));
+  }
+
+  private static String formatUpdateDetails(Node updateDetails) {
+    if (updateDetails == null) {
+      return null;
+    }
+    final Document doc = new Document("");
+    doc.outputSettings().prettyPrint(false);
+    doc.appendChild(updateDetails);
+    return doc.html();
   }
 
   public static AuditTrail getCreateInstance(Person p, String relatedObjectType,
@@ -69,7 +84,7 @@ public class AuditTrail extends GenericRelatedObject {
   }
 
   public static AuditTrail getCreateInstance(Person p, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getInstance(o.getCreatedAt(), AuditTrailUpdateType.CREATE, updateDescription,
         updateDetails, p, relatedObjectType, o);
   }
@@ -95,13 +110,13 @@ public class AuditTrail extends GenericRelatedObject {
   }
 
   public static AuditTrail getUpdateInstance(Person p, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getUpdateInstance(p, o.getUpdatedAt(), relatedObjectType, o, updateDescription,
         updateDetails);
   }
 
   public static AuditTrail getUpdateInstance(Person p, Instant timestamp, String relatedObjectType,
-      AbstractAnetBean o, String updateDescription, String updateDetails) {
+      AbstractAnetBean o, String updateDescription, Node updateDetails) {
     return getInstance(timestamp, AuditTrailUpdateType.UPDATE, updateDescription, updateDetails, p,
         relatedObjectType, o);
   }
@@ -117,7 +132,7 @@ public class AuditTrail extends GenericRelatedObject {
   }
 
   public static AuditTrail getDeleteInstance(Person p, String relatedObjectType, AbstractAnetBean o,
-      String updateDescription, String updateDetails) {
+      String updateDescription, Node updateDetails) {
     return getInstance(Instant.now(), AuditTrailUpdateType.DELETE, updateDescription, updateDetails,
         p, relatedObjectType, o);
   }
@@ -156,10 +171,17 @@ public class AuditTrail extends GenericRelatedObject {
     this.updateDetails = updateDetails;
   }
 
+  @JsonIgnore
+  public String getUpdateDetailsWithLinks() {
+    return Utils.replaceAnetLinks(updateDetails);
+  }
+
+  @Override
   public Instant getCreatedAt() {
     return createdAt;
   }
 
+  @Override
   public void setCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
   }

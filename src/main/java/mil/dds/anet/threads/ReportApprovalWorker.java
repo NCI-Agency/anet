@@ -14,10 +14,12 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -77,7 +79,8 @@ public class ReportApprovalWorker extends AbstractWorker {
                 } else {
                   auditTrailDao.logUpdate(null, ReportDao.TABLE_NAME, r,
                       "report has been automatically approved by the ReportApprovalWorker",
-                      String.format("approval step %s", DaoUtils.getUuid(approvalStep)));
+                      Utils.getElementDetails("approval step: ", ApprovalStepDao.TABLE_NAME,
+                          approvalStep.getUuid()));
                 }
               } catch (Exception e) {
                 logger.error("Exception when approving report", e);

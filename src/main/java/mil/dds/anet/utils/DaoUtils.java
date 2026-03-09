@@ -20,7 +20,6 @@ import java.util.UUID;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuthorizationGroupDao;
@@ -97,30 +96,6 @@ public class DaoUtils {
     final DateTimeFormatter dateTimeFormatter = Utils.getDateTimeFormatter(
         ApplicationContextProvider.getDictionary(), "dateFormats.upToDateCheck");
     return updatedAt == null ? "unknown time" : dateTimeFormatter.format(updatedAt);
-  }
-
-  public static String formatPreviousPositions(List<PersonPositionHistory> previousPositions,
-      boolean forPerson) {
-    final StringBuilder fmt = new StringBuilder("[");
-    if (previousPositions != null) {
-      previousPositions.forEach(pp -> {
-        if (forPerson) {
-          fmt.append(String.format("[position:%s", pp.getPositionUuid()));
-        } else {
-          fmt.append(String.format("[person:%s", pp.getPersonUuid()));
-        }
-        fmt.append(String.format(" primary:%s startTime:%s endTime:%s]", pp.getPrimary(),
-            formatDateTime(pp.getStartTime()), formatDateTime(pp.getEndTime())));
-      });
-    }
-    fmt.append("]");
-    return fmt.toString();
-  }
-
-  private static String formatDateTime(Instant instant) {
-    final DateTimeFormatter dateTimeFormatter = Utils.getDateTimeFormatter(
-        ApplicationContextProvider.getDictionary(), "dateFormats.email.withTime");
-    return instant == null ? "" : dateTimeFormatter.format(instant);
   }
 
   public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {

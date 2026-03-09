@@ -14,6 +14,7 @@ import {
 } from "components/Page"
 import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
+import RichTextEditor from "components/RichTextEditor"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment/moment"
@@ -137,7 +138,11 @@ const ObjectHistoryList = ({
               </td>
               <td>{at.updateType}</td>
               <td>{at.updateDescription}</td>
-              <td>{showDetails && at.updateDetails}</td>
+              <td>
+                {showDetails && (
+                  <RichTextEditor readOnly value={at.updateDetails} />
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

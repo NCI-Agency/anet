@@ -83,7 +83,7 @@ public class ReportSensitiveInformationDao
           .bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
           .bind("reportUuid", report.getUuid()).execute();
       AnetAuditLogger.log(AuditTrail.getCreateInstance(user, TABLE_NAME, rsi, null,
-          String.format("linked to report %s", report)));
+          Utils.getLinkedToDetails(TABLE_NAME, report.getUuid())));
       return rsi;
     } finally {
       closeDbHandle(handle);
@@ -107,7 +107,7 @@ public class ReportSensitiveInformationDao
         numRows = handle.createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
             + TABLE_NAME + "\" WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
         AnetAuditLogger.log(AuditTrail.getDeleteInstance(user, TABLE_NAME, rsi, null,
-            String.format("unlinked from report %s", report)));
+            Utils.getUnlinkedFromDetails(TABLE_NAME, report.getUuid())));
       } else {
         // Update relevant fields, but do not allow the reportUuid to be updated by the query!
         rsi.setUpdatedAt(Instant.now());
@@ -117,7 +117,7 @@ public class ReportSensitiveInformationDao
             .bindBean(rsi).bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
             .execute();
         AnetAuditLogger.log(AuditTrail.getUpdateInstance(user, TABLE_NAME, rsi, null,
-            String.format("linked to report %s", report)));
+            Utils.getLinkedToDetails(TABLE_NAME, report.getUuid())));
       }
       return numRows;
     } finally {
@@ -141,7 +141,7 @@ public class ReportSensitiveInformationDao
           ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
           if (rsi != null) {
             AnetAuditLogger.log(AuditTrail.getInstance(Instant.now(), null, "user retrieved row",
-                String.format("linked to report %s", report), user, TABLE_NAME, rsi));
+                Utils.getLinkedToDetails(TABLE_NAME, report.getUuid()), user, TABLE_NAME, rsi));
           } else {
             rsi = new ReportSensitiveInformation();
           }

@@ -272,8 +272,8 @@ public class OrganizationResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, OrganizationDao.TABLE_NAME,
-        winnerOrganization, "an organization has been merged into it",
-        String.format("merged organization %s", loserOrganization));
+        winnerOrganization, "an organization has been merged into it", Utils.getElementDetails(
+            "merged organization: ", OrganizationDao.TABLE_NAME, loserOrganization.getUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(winnerOrganization, auditTrailUuid, false);
 
