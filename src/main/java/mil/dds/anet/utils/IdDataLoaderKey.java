@@ -34,7 +34,7 @@ public enum IdDataLoaderKey {
   ENTITY_AVATARS(EntityAvatarDao.TABLE_NAME), // -
   EVENTS(EventDao.TABLE_NAME), // -
   EVENT_SERIES(EventSeriesDao.TABLE_NAME), // -
-  EVENT_TYPE(EventTypeDao.TABLE_NAME), // -
+  EVENT_TYPES(EventTypeDao.TABLE_NAME), // -
   LOCATIONS(LocationDao.TABLE_NAME), // -
   NOTES(NoteDao.TABLE_NAME), // -
   ORGANIZATIONS(OrganizationDao.TABLE_NAME), // -
