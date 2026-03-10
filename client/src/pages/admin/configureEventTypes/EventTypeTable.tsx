@@ -229,8 +229,8 @@ const EventTypeTable = ({
     setSelectedEventType(null)
   }
 
-  function setError(msg) {
-    setStateError(msg)
+  function setError(err) {
+    setStateError(err)
     setStateSuccess(null)
   }
 
