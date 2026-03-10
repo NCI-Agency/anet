@@ -6,6 +6,7 @@ type AccessToken {
   name: String
   scope: TokenScope
   tokenHash: String
+  updatedAt: Instant
   uuid: String
 }
 
@@ -17,6 +18,7 @@ input AccessTokenInput {
   name: String
   scope: TokenScope
   tokenHash: String
+  updatedAt: Instant
   uuid: String
 }
 
@@ -866,7 +868,7 @@ type Mutation {
   approvePerson(uuid: String): Int
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
-  createAccessToken(accessToken: AccessTokenInput): Int
+  createAccessToken(accessToken: AccessTokenInput): AccessToken
   createAssessment(assessment: AssessmentInput): Assessment
   createAttachment(attachment: AttachmentInput): String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
@@ -883,7 +885,7 @@ type Mutation {
   createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
-  deleteAccessToken(accessToken: AccessTokenInput): Int
+  deleteAccessToken(uuid: String): Int
   deleteAssessment(uuid: String): Int
   deleteAttachment(uuid: String): Int
   deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
@@ -1403,7 +1405,7 @@ enum RecurseStrategy {
 }
 
 """"""
-union RelatableObject = Assessment | Attachment | AuthorizationGroup | Event | EventSeries | EventType | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
+union RelatableObject = AccessToken | Assessment | Attachment | AuthorizationGroup | Event | EventSeries | EventType | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
 
 """"""
 type Report {

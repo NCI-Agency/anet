@@ -7123,6 +7123,16 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-updatedAt-to-accessTokens-table" author="gjvoosten">
+		<addColumn tableName="accessTokens">
+			<column name="updatedAt" type="datetime" />
+		</addColumn>
+		<sql>
+			UPDATE "accessTokens"
+			SET "updatedAt" = "createdAt";
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

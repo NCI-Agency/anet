@@ -7,8 +7,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
+import mil.dds.anet.views.AbstractAnetBean;
 
-public class AccessToken {
+public class AccessToken extends AbstractAnetBean implements RelatableObject {
 
   public static final int ACCESS_TOKEN_LENGTH = 32;
 
@@ -20,9 +21,6 @@ public class AccessToken {
 
   @GraphQLQuery
   @GraphQLInputField
-  private String uuid;
-  @GraphQLQuery
-  @GraphQLInputField
   private String name;
   @GraphQLQuery
   @GraphQLInputField
@@ -32,21 +30,10 @@ public class AccessToken {
   private String tokenHash;
   @GraphQLQuery
   @GraphQLInputField
-  private Instant createdAt;
-  @GraphQLQuery
-  @GraphQLInputField
   private Instant expiresAt;
   @GraphQLQuery
   @GraphQLInputField
   private TokenScope scope;
-
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
 
   public String getName() {
     return name;
@@ -70,14 +57,6 @@ public class AccessToken {
 
   public void setTokenHash(String tokenHash) {
     this.tokenHash = tokenHash;
-  }
-
-  public Instant getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(Instant createdAt) {
-    this.createdAt = createdAt;
   }
 
   public Instant getExpiresAt() {

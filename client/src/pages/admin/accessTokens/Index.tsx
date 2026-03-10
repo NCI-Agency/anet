@@ -1,3 +1,4 @@
+import { gqlAllAccessTokenFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -36,25 +37,22 @@ import * as yup from "yup"
 const GQL_GET_ACCESS_TOKEN_LIST = gql`
   query {
     accessTokenList {
-      uuid
-      name
-      scope
-      description
-      createdAt
-      expiresAt
+      ${gqlAllAccessTokenFields}
     }
   }
 `
 
 const GQL_CREATE_ACCESS_TOKEN = gql`
   mutation ($accessToken: AccessTokenInput!) {
-    createAccessToken(accessToken: $accessToken)
+    createAccessToken(accessToken: $accessToken) {
+      ${gqlAllAccessTokenFields}
+    }
   }
 `
 
 const GQL_DELETE_ACCESS_TOKEN = gql`
-  mutation ($accessToken: AccessTokenInput!) {
-    deleteAccessToken(accessToken: $accessToken)
+  mutation ($uuid: String!) {
+    deleteAccessToken(uuid: $uuid)
   }
 `
 
@@ -217,7 +215,7 @@ const AccessTokensTable = ({
               </td>
               <td style={{ verticalAlign: "middle" }}>
                 <ConfirmDestructive
-                  onConfirm={() => onDelete(at)}
+                  onConfirm={() => onDelete(at.uuid)}
                   objectType="web service access token"
                   objectDisplay={at.name}
                   variant="outline-danger"
@@ -524,8 +522,8 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
       })
   }
 
-  function deleteAccessToken(accessToken) {
-    return API.mutation(GQL_DELETE_ACCESS_TOKEN, { accessToken })
+  function deleteAccessToken(uuid: string) {
+    return API.mutation(GQL_DELETE_ACCESS_TOKEN, { uuid })
       .then(() => {
         setSuccess("Web service access token successfully deleted")
         refetch()
