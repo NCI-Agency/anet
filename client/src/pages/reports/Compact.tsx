@@ -54,7 +54,6 @@ import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
-import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
 import { getAttachmentUuidsFromRichText } from "utils_links"
@@ -548,7 +547,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       ) : (
         report.tasks.map((task, i) => (
           <React.Fragment key={task.uuid}>
-            {i > 0 && <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />}
+            {i > 0 && <span className="ms-2 px-1 text-muted">|</span>}
             <BreadcrumbTrail
               modelType="Task"
               leaf={task}
