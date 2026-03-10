@@ -47,32 +47,49 @@ const fieldPickerUI = createFieldPickerUI(rootEl, async (field: SuggestionField)
     // Host may not support update-model-context ignore.
   }
 
-  // Ask the host to generate a suggestion and invoke anet_suggestion.
-  const currentTextBlock = field.currentText
-    ? `\n\nCurrent text:\n"""\n${field.currentText}\n"""`
-    : ""
-
-  const prompt =
-    `Generate improved text for the ANET field "${field.label}" (fieldId: ${field.id}).` +
-    currentTextBlock +
-    `\n\nThen call the MCP tool \"anet_suggestion\" with arguments:` +
-    `\n{` +
-    `\n  \"fieldId\": \"${field.id}\",` +
-    `\n  \"fieldLabel\": \"${field.label}\",` +
-    (field.currentText
-      ? `\n  \"currentText\": ${JSON.stringify(field.currentText)},`
-      : "") +
-    `\n  \"suggestion\": \"<your suggestion>\"` +
-    `\n}`
-
-  setStatus(`Requesting suggestion for ${field.label}…`)
+  setStatus(`Generating suggestion for ${field.label}…`)
   try {
-    await app.sendMessage({
-      role: "user",
-      content: [{ type: "text", text: prompt }]
+    const result = await app.callServerTool({
+      name: "anet_agent_suggestion",
+      arguments: {
+        toolName: "anet_agent_suggestion",
+        fieldId: field.id,
+        fieldLabel: field.label,
+        currentText: field.currentText ?? undefined
+      }
     })
+
+    if (result.isError) {
+      setStatus("Suggestion tool failed.")
+      return
+    }
+
+    let structured = (result.structuredContent ?? {}) as Record<string, unknown>
+
+    if (!structured.fieldId || !structured.suggestion) {
+      const textBlocks = (result.content ?? []).filter(block => block.type === "text")
+      for (const block of textBlocks) {
+        const text = "text" in block ? String(block.text ?? "") : ""
+        const trimmed = text.trim()
+        if (!trimmed) continue
+        const jsonPayload = trimmed.startsWith("ANET_SUGGESTION_JSON:")
+          ? trimmed.slice("ANET_SUGGESTION_JSON:".length)
+          : trimmed
+        try {
+          const parsed = JSON.parse(jsonPayload)
+          if (parsed && typeof parsed === "object") {
+            structured = parsed as Record<string, unknown>
+            break
+          }
+        } catch {
+          continue
+        }
+      }
+    }
+
+    renderApplySuggestionFromArgs(applySuggestionUI, structured, setStatus)
   } catch {
-    throw new Error("Failed to send message to host")
+    throw new Error("Failed to call agent tool")
   }
 })
 

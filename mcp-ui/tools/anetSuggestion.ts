@@ -1,10 +1,10 @@
-import { z } from "zod"
+import { z, type ZodTypeAny } from "zod/v3"
 import { registerAppTool } from "@modelcontextprotocol/ext-apps/server"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 
 const RESOURCE_URI = "ui://anet-mcp-ui/app"
 
-const inputSchema = z
+const inputSchema: ZodTypeAny = z
   .object({
     toolName: z
       .string()
