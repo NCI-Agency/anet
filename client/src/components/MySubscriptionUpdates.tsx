@@ -163,33 +163,41 @@ const MySubscriptionUpdates = ({
                           />
                         </td>
                         <td>
-                          {"Your subscription to "}
-                          <RelatedObjectDisplay
-                            relatedObjectType={
-                              subscription.subscribedObjectType
-                            }
-                            relatedObjectUuid={
-                              subscription.subscribedObjectUuid
-                            }
-                            relatedObject={subscription.subscribedObject}
-                          />
-                          {" was updated "}
-                          {moment(subscriptionUpdate.createdAt).fromNow()},
-                          {" because "}
                           {at ? (
                             <>
                               {at.relatedObjectType ===
                                 subscription.subscribedObjectType &&
                               at.relatedObjectUuid ===
                                 subscription.subscribedObjectUuid ? (
-                                "it"
-                              ) : (
                                 <RelatedObjectDisplay
                                   relatedObjectType={at.relatedObjectType}
                                   relatedObjectUuid={at.relatedObjectUuid}
                                   relatedObject={at.relatedObject}
                                   specialModels={SPECIAL_MODELS}
                                 />
+                              ) : (
+                                <>
+                                  {"Update on "}
+                                  <RelatedObjectDisplay
+                                    relatedObjectType={
+                                      subscription.subscribedObjectType
+                                    }
+                                    relatedObjectUuid={
+                                      subscription.subscribedObjectUuid
+                                    }
+                                    relatedObject={
+                                      subscription.subscribedObject
+                                    }
+                                  />
+                                  :
+                                  <br />
+                                  <RelatedObjectDisplay
+                                    relatedObjectType={at.relatedObjectType}
+                                    relatedObjectUuid={at.relatedObjectUuid}
+                                    relatedObject={at.relatedObject}
+                                    specialModels={SPECIAL_MODELS}
+                                  />
+                                </>
                               )}
                               {" was "}
                               <b>
@@ -208,7 +216,8 @@ const MySubscriptionUpdates = ({
                                     relatedObject={at.person}
                                   />
                                 </>
-                              )}
+                              )}{" "}
+                              {moment(subscriptionUpdate.createdAt).fromNow()}
                               {at.updateDescription && (
                                 <>: {at.updateDescription}</>
                               )}
