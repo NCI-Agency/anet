@@ -8,11 +8,14 @@
     "serve": "node dist/main.js"
   },
   "dependencies": {
+    "@openai/agents": "^0.0.16",
     "@modelcontextprotocol/ext-apps": "^1.0.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
     "express": "^5.2.1",
-    "zod": "^4.3.6"
+    "openai": "^5.10.1",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
