@@ -19,11 +19,10 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
     // Create new access token
     final AccessTokenInput input = TestData.createAccessTokenInput("New GRAPHQL Token",
         TokenScope.GRAPHQL, "6m8dyZqNPRoYTjRzV8ppb0WSKS/ER9pVHFh5fsiv53Y=");
-    final Integer created =
-        withCredentials(adminUser, t -> mutationExecutor.createAccessToken("", input));
+    final AccessToken created =
+        withCredentials(adminUser, t -> mutationExecutor.createAccessToken(_TOKEN_FIELDS, input));
     assertThat(created).isNotNull();
-    assertThat(created).isEqualTo(1);
-    List<mil.dds.anet.test.client.AccessToken> accessTokens =
+    List<AccessToken> accessTokens =
         withCredentials(adminUser, t -> queryExecutor.accessTokenList(_TOKEN_FIELDS));
     final Optional<AccessToken> accessTokenOptional = accessTokens.stream()
         .filter(token -> token.getName().equals("New GRAPHQL Token")).findFirst();
@@ -41,7 +40,7 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
         .isTrue();
     // Delete
     final Integer deleted =
-        withCredentials(adminUser, t -> mutationExecutor.deleteAccessToken("", input));
+        withCredentials(adminUser, t -> mutationExecutor.deleteAccessToken("", input.getUuid()));
     assertThat(deleted).isNotNull();
     assertThat(deleted).isEqualTo(1);
     accessTokens = withCredentials(adminUser, t -> queryExecutor.accessTokenList(_TOKEN_FIELDS));

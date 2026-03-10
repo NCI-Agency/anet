@@ -9,16 +9,21 @@ import java.util.List;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.AccessTokenDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class AccessTokenResource {
 
+  private final AuditTrailDao auditTrailDao;
   private final AccessTokenDao accessTokenDao;
 
-  public AccessTokenResource(AccessTokenDao accessTokenDao) {
+  public AccessTokenResource(AuditTrailDao auditTrailDao, AccessTokenDao accessTokenDao) {
+    this.auditTrailDao = auditTrailDao;
     this.accessTokenDao = accessTokenDao;
   }
 
@@ -30,27 +35,59 @@ public class AccessTokenResource {
   }
 
   @GraphQLMutation(name = "createAccessToken")
-  public Integer createAccessToken(@GraphQLRootContext GraphQLContext context,
+  public AccessToken createAccessToken(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "accessToken") AccessToken at) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    return accessTokenDao.insert(at);
+    final AccessToken created = accessTokenDao.insert(at);
+
+    // Log the change
+    auditTrailDao.logCreate(user, AccessTokenDao.TABLE_NAME, created);
+    return created;
   }
 
   @GraphQLMutation(name = "updateAccessToken")
   public Integer updateAccessToken(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "accessToken") AccessToken at) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final AccessToken existing = accessTokenDao.getByUuid(at.getUuid());
+    if (existing == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
+    }
+
     AuthUtils.assertAdministrator(user);
-    return accessTokenDao.update(at);
+
+    final int numRows = accessTokenDao.update(at);
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process access token update");
+    }
+
+    // Log the change
+    auditTrailDao.logUpdate(user, AccessTokenDao.TABLE_NAME, at);
+    return numRows;
   }
 
   @GraphQLMutation(name = "deleteAccessToken")
   public Integer deleteAccessToken(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "accessToken") AccessToken at) {
+      @GraphQLArgument(name = "uuid") String uuid) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final AccessToken existing = accessTokenDao.getByUuid(uuid);
+    if (existing == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
+    }
+
     AuthUtils.assertAdministrator(user);
-    return accessTokenDao.delete(at);
+
+    final int numRows = accessTokenDao.delete(uuid);
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process access token delete");
+    }
+
+    // Log the change
+    auditTrailDao.logDelete(user, AccessTokenDao.TABLE_NAME, existing);
+    return numRows;
   }
 
 }

@@ -15,6 +15,24 @@ const gqlCommonSubscribableEntityFields = `
   isSubscribed
 `
 
+// AccessToken
+export const gqlMinimalAccessTokenFields = `
+  uuid
+  name
+  scope
+  description
+  expiresAt
+`
+
+export const gqlBasicAccessTokenFields = `
+  ${gqlMinimalAccessTokenFields}
+  ${gqlCommonEntityFields}
+`
+
+export const gqlAllAccessTokenFields = `
+  ${gqlBasicAccessTokenFields}
+`
+
 // Attachment
 export const gqlMinimalAttachmentFields = `
   uuid

@@ -19,6 +19,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AssessmentDao;
@@ -185,6 +186,10 @@ public class AnetObjectEngine {
 
   public PreferenceDao getPreferenceDao() {
     return ApplicationContextProvider.getBean(PreferenceDao.class);
+  }
+
+  public AccessTokenDao getAccessTokenDao() {
+    return ApplicationContextProvider.getBean(AccessTokenDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,

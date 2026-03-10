@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AssessmentDao;
 import mil.dds.anet.database.AttachmentDao;
@@ -25,6 +26,7 @@ import mil.dds.anet.database.TaskDao;
 
 // ID batching data loaders
 public enum IdDataLoaderKey {
+  ACCESS_TOKENS(AccessTokenDao.TABLE_NAME), // -
   APPROVAL_STEPS(ApprovalStepDao.TABLE_NAME), // -
   ASSESSMENTS(AssessmentDao.TABLE_NAME), // -
   ATTACHMENTS(AttachmentDao.TABLE_NAME), // -

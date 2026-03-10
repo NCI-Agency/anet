@@ -1,6 +1,6 @@
 package mil.dds.anet.database;
 
-import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import mil.dds.anet.beans.AccessToken;
@@ -14,22 +14,42 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class AccessTokenDao extends AbstractDao {
 
+  public static final String TABLE_NAME = "accessTokens";
+
   public AccessTokenDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
   }
 
+  class SelfIdBatcher extends IdBatcher<AccessToken> {
+    private static final String SQL = "/* batch.getAccessTokensByUuids */ SELECT * FROM \""
+        + TABLE_NAME + "\" WHERE uuid IN ( <uuids> )";
+
+    public SelfIdBatcher() {
+      super(AccessTokenDao.this.databaseHandler, SQL, "uuids", new AccessTokenMapper());
+    }
+  }
+
+  public AccessToken getByUuid(String uuid) {
+    return getByIds(Collections.singletonList(uuid)).get(0);
+  }
+
+  public List<AccessToken> getByIds(List<String> uuids) {
+    return new SelfIdBatcher().getByIds(uuids);
+  }
+
   @Transactional
-  public int insert(AccessToken accessToken) {
+  public AccessToken insert(AccessToken accessToken) {
+    DaoUtils.setInsertFields(accessToken);
     final Handle handle = getDbHandle();
     try {
-      return handle
-          .createUpdate("/* insertAccessToken */ INSERT INTO \"accessTokens\" "
-              + "(uuid, name, description, \"tokenHash\", \"createdAt\", \"expiresAt\", scope) "
-              + "VALUES (:uuid, :name, :description, :tokenHash, :createdAt, :expiresAt, :scope)")
-          .bindBean(accessToken).bind("uuid", DaoUtils.getNewUuid())
-          .bind("scope", DaoUtils.getEnumId(accessToken.getScope()))
-          .bind("createdAt", DaoUtils.asLocalDateTime(Instant.now()))
+      handle.createUpdate("/* insertAccessToken */ INSERT INTO \"" + TABLE_NAME + "\" "
+          + "(uuid, name, description, \"tokenHash\", \"createdAt\", \"updatedAt\", \"expiresAt\", scope) "
+          + "VALUES (:uuid, :name, :description, :tokenHash, :createdAt, :updatedAt, :expiresAt, :scope)")
+          .bindBean(accessToken).bind("scope", DaoUtils.getEnumId(accessToken.getScope()))
+          .bind("createdAt", DaoUtils.asLocalDateTime(accessToken.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(accessToken.getUpdatedAt()))
           .bind("expiresAt", DaoUtils.asLocalDateTime(accessToken.getExpiresAt())).execute();
+      return accessToken;
     } finally {
       closeDbHandle(handle);
     }
@@ -37,13 +57,15 @@ public class AccessTokenDao extends AbstractDao {
 
   @Transactional
   public int update(AccessToken accessToken) {
+    DaoUtils.setUpdateFields(accessToken);
     final Handle handle = getDbHandle();
     try {
       return handle
-          .createUpdate("/* updateAccessToken */ UPDATE \"accessTokens\" "
+          .createUpdate("/* updateAccessToken */ UPDATE \"" + TABLE_NAME + "\" "
               + "SET name = :name, description = :description, \"expiresAt\" = :expiresAt, "
-              + "scope = :scope WHERE uuid = :uuid")
+              + "scope = :scope, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(accessToken).bind("scope", DaoUtils.getEnumId(accessToken.getScope()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(accessToken.getUpdatedAt()))
           .bind("expiresAt", DaoUtils.asLocalDateTime(accessToken.getExpiresAt())).execute();
     } finally {
       closeDbHandle(handle);
@@ -51,12 +73,13 @@ public class AccessTokenDao extends AbstractDao {
   }
 
   @Transactional
-  public int delete(AccessToken accessToken) {
+  public int delete(String uuid) {
     final Handle handle = getDbHandle();
     try {
       return handle
-          .createUpdate("/* deleteAccessToken */ DELETE FROM \"accessTokens\" WHERE uuid = :uuid")
-          .bindBean(accessToken).execute();
+          .createUpdate(
+              "/* deleteAccessToken */ DELETE FROM \"" + TABLE_NAME + "\" WHERE uuid = :uuid")
+          .bind("uuid", uuid).execute();
     } finally {
       closeDbHandle(handle);
     }
@@ -69,8 +92,8 @@ public class AccessTokenDao extends AbstractDao {
       final String tokenHash = AccessToken.computeTokenHash(tokenValue);
       try {
         return handle
-            .createQuery("/* getAccessTokenByValue */ "
-                + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash")
+            .createQuery("/* getAccessTokenByValue */ " + "SELECT * FROM \"" + TABLE_NAME
+                + "\" WHERE \"tokenHash\" = :tokenHash")
             .bind("tokenHash", tokenHash).map(new AccessTokenMapper()).one();
       } catch (IllegalStateException e) {
         return null;
@@ -96,7 +119,7 @@ public class AccessTokenDao extends AbstractDao {
     final Handle handle = getDbHandle();
     try {
       return handle
-          .createQuery("/* getAccessTokens */ SELECT * FROM \"accessTokens\" ORDER BY name")
+          .createQuery("/* getAccessTokens */ SELECT * FROM \"" + TABLE_NAME + "\" ORDER BY name")
           .map(new AccessTokenMapper()).list();
     } finally {
       closeDbHandle(handle);
