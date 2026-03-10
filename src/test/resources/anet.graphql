@@ -1403,7 +1403,7 @@ enum RecurseStrategy {
 }
 
 """"""
-union RelatableObject = Assessment | Attachment | AuthorizationGroup | Event | EventSeries | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
+union RelatableObject = Assessment | Attachment | AuthorizationGroup | Event | EventSeries | EventType | Location | Note | Organization | Person | Position | Report | ReportPerson | SavedSearch | Subscription | Task
 
 """"""
 type Report {

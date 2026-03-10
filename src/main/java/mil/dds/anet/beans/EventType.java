@@ -5,7 +5,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class EventType extends AbstractAnetBean implements WithStatus {
+public class EventType extends AbstractAnetBean implements RelatableObject, WithStatus {
 
   @GraphQLQuery
   @GraphQLInputField

@@ -8,6 +8,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import mil.dds.anet.beans.EventType;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventTypeDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -21,9 +22,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class EventTypeResource {
 
+  private final AuditTrailDao auditTrailDao;
   private final EventTypeDao dao;
 
-  public EventTypeResource(EventTypeDao dao) {
+  public EventTypeResource(AuditTrailDao auditTrailDao, EventTypeDao dao) {
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -58,6 +61,9 @@ public class EventTypeResource {
     } catch (UnableToExecuteStatementException e) {
       throw ResponseUtils.handleSqlException(e, "Duplicate event type name");
     }
+
+    // Log the change
+    auditTrailDao.logCreate(user, EventTypeDao.TABLE_NAME, created);
     return created;
   }
 
@@ -74,7 +80,14 @@ public class EventTypeResource {
     AuthUtils.assertAdministrator(user);
     DaoUtils.assertObjectIsFresh(eventType, existing, force);
 
-    return dao.update(eventType);
+    final int numRows = dao.update(eventType);
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process event type update");
+    }
+
+    // Log the change
+    auditTrailDao.logUpdate(user, EventTypeDao.TABLE_NAME, eventType);
+    return numRows;
   }
 
   @GraphQLMutation(name = "deleteEventType")
@@ -88,11 +101,20 @@ public class EventTypeResource {
 
     AuthUtils.assertAdministrator(user);
 
+    final int numRows;
     try {
-      return dao.delete(uuid);
+      numRows = dao.delete(uuid);
     } catch (UnableToExecuteStatementException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event type is in use");
     }
+
+    if (numRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process event type delete");
+    }
+
+    // Log the change
+    auditTrailDao.logDelete(user, EventTypeDao.TABLE_NAME, eventType);
+    return numRows;
   }
 
 }
