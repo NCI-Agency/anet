@@ -10,6 +10,7 @@ import {
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 
 import { registerAnetSuggestionTool } from "./tools/anetSuggestion.js"
+import { registerAgentSuggestionTool } from "./tools/agentSuggestion.js"
 import { registerFieldPickerTool } from "./tools/fieldPicker.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -31,6 +32,7 @@ export function createServer() {
   })
 
   registerAnetSuggestionTool(server)
+  registerAgentSuggestionTool(server)
   registerFieldPickerTool(server)
 
   registerAppResource(
