@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z, type ZodTypeAny } from "zod/v3"
 import { registerAppTool } from "@modelcontextprotocol/ext-apps/server"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 
@@ -14,7 +14,7 @@ const fieldSchema = z.object({
     .describe("Optional current text for the field (used to request a better suggestion).")
 })
 
-const inputSchema = z
+const inputSchema: ZodTypeAny = z
   .object({
     toolName: z
       .string()

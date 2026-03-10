@@ -7,7 +7,7 @@ This MCP App hosts interactive UI views for ANET tools and can emit UI events (f
 From this folder:
 
 ```bash
-npm install @modelcontextprotocol/ext-apps @modelcontextprotocol/sdk cors express
+npm install @modelcontextprotocol/ext-apps @modelcontextprotocol/sdk @openai/agents openai cors express
 npm install zod
 npm install -D typescript tsx vite vite-plugin-singlefile concurrently cross-env @types/node @types/express @types/cors
 ```
@@ -36,6 +36,14 @@ The UI selects which view to render based on `toolName` in the tool arguments.
 Currently registered tools include:
 - `anet_field_picker` (choose a target field)
 - `anet_suggestion` (show suggestion + Apply)
+- `anet_agent_suggestion` (generate suggestion server-side)
+
+### Agent tool configuration
+
+`anet_agent_suggestion` requires these environment variables:
+- `ANET_AGENT_BASE_URL` (or `OPENAI_BASE_URL`)
+- `ANET_AGENT_API_KEY` (or `OPENAI_API_KEY`)
+- `ANET_AGENT_MODEL` (or `OPENAI_MODEL`)
 
 ## Tool input contract
 
