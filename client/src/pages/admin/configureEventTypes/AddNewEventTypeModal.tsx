@@ -122,6 +122,7 @@ const AddNewEventTypeModal = ({
   async function onSubmit(values, form, force) {
     try {
       await save(values, form, force)
+      form.setFieldValue("name", "")
       return onSuccess()
     } catch (error) {
       form.setSubmitting(false)
