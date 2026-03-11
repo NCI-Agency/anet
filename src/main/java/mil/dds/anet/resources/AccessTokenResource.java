@@ -27,6 +27,15 @@ public class AccessTokenResource {
     this.accessTokenDao = accessTokenDao;
   }
 
+  @GraphQLQuery(name = "accessToken")
+  public AccessToken getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
+    final AccessToken accessToken = accessTokenDao.getByUuid(uuid);
+    if (accessToken == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
+    }
+    return accessToken;
+  }
+
   @GraphQLQuery(name = "accessTokenList")
   public List<AccessToken> getAccessTokenList(@GraphQLRootContext GraphQLContext context) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -48,7 +57,8 @@ public class AccessTokenResource {
 
   @GraphQLMutation(name = "updateAccessToken")
   public Integer updateAccessToken(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "accessToken") AccessToken at) {
+      @GraphQLArgument(name = "accessToken") AccessToken at,
+      @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
     final AccessToken existing = accessTokenDao.getByUuid(at.getUuid());
     if (existing == null) {
@@ -56,6 +66,7 @@ public class AccessTokenResource {
     }
 
     AuthUtils.assertAdministrator(user);
+    DaoUtils.assertObjectIsFresh(at, existing, force);
 
     final int numRows = accessTokenDao.update(at);
     if (numRows == 0) {

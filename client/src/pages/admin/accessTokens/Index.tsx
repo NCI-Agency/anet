@@ -8,7 +8,7 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
+import Messages, { MessagesWithConflict } from "components/Messages"
 import { yupDate } from "components/Model"
 import {
   jumpToTop,
@@ -19,7 +19,6 @@ import {
 } from "components/Page"
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
-import { clone } from "lodash/lang"
 import moment from "moment"
 import React, { useState } from "react"
 import {
@@ -57,8 +56,8 @@ const GQL_DELETE_ACCESS_TOKEN = gql`
 `
 
 const GQL_UPDATE_ACCESS_TOKEN = gql`
-  mutation ($accessToken: AccessTokenInput!) {
-    updateAccessToken(accessToken: $accessToken)
+  mutation ($accessToken: AccessTokenInput!, $force: Boolean) {
+    updateAccessToken(accessToken: $accessToken, force: $force)
   }
 `
 
@@ -102,7 +101,7 @@ function createShortcut(label: string, date: Date, includeTime: boolean) {
 function createExpirationShortcuts(withTime: boolean) {
   const now = new Date()
   const makeDate = (action: (d: Date) => void) => {
-    const date = clone(now)
+    const date = new Date(now)
     action(date)
     return date
   }
@@ -154,7 +153,7 @@ function createExpirationShortcuts(withTime: boolean) {
 interface AccessTokensTableProps {
   accessTokens?: any[]
   onDelete: (...args: unknown[]) => unknown
-  onUpdate: (...args: unknown[]) => unknown
+  onUpdate: (...args: unknown[]) => Promise<unknown>
 }
 
 const AccessTokensTable = ({
@@ -251,10 +250,7 @@ const AccessTokensTable = ({
         title="Update web service access token"
         show={showUpdateAccessTokenDialog}
         setShow={setShowUpdateAccessTokenDialog}
-        onConfirm={values => {
-          setShowUpdateAccessTokenDialog(false)
-          onUpdate(values)
-        }}
+        onConfirm={async (values, force) => onUpdate(values, force)}
       />
     </>
   )
@@ -276,7 +272,7 @@ interface AccessTokenModalProps {
   title: string
   show: boolean
   setShow: (...args: unknown[]) => unknown
-  onConfirm: (...args: unknown[]) => unknown
+  onConfirm: (...args: unknown[]) => Promise<unknown>
 }
 
 const AccessTokenModal = ({
@@ -287,6 +283,7 @@ const AccessTokenModal = ({
   setShow,
   onConfirm
 }: AccessTokenModalProps) => {
+  const [error, setError] = useState(null)
   if (isNew) {
     accessToken = {
       name: "",
@@ -302,21 +299,38 @@ const AccessTokenModal = ({
       enableReinitialize
       initialValues={accessToken}
       validationSchema={yupSchema}
-      onSubmit={onConfirm}
+      onSubmit={onSubmit}
     >
-      {({ isSubmitting, setFieldValue, setFieldTouched, submitForm }) => (
+      {({
+        values,
+        isSubmitting,
+        setSubmitting,
+        setFieldValue,
+        setFieldTouched,
+        resetForm,
+        submitForm
+      }) => (
         <Modal
           backdrop="static"
           centered
           size="lg"
           show={show}
-          onHide={() => setShow(false)}
+          onHide={() => close(resetForm)}
         >
           <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div>
+              <MessagesWithConflict
+                error={error}
+                objectType="AccessToken"
+                onCancel={() => close(resetForm)}
+                onConfirm={() => {
+                  resetForm({ values, isSubmitting: true })
+                  onSubmit(values, { setSubmitting }, true)
+                }}
+              />
               <Form className="form-horizontal" method="post">
                 <Fieldset>
                   <FastField
@@ -406,7 +420,7 @@ const AccessTokenModal = ({
               <Button
                 className="float-start"
                 variant="outline-secondary"
-                onClick={() => setShow(false)}
+                onClick={() => close(resetForm)}
               >
                 Cancel
               </Button>
@@ -426,6 +440,31 @@ const AccessTokenModal = ({
       )}
     </Formik>
   )
+
+  function close(resetForm) {
+    // Reset state before closing (cancel)
+    setError(null)
+    resetForm(accessToken)
+    setShow(false)
+  }
+
+  function onSubmit(values, form, force) {
+    onConfirm(values, force)
+      .then(() => {
+        setError(null)
+        setShow(false)
+      })
+      .catch(error => {
+        form.setSubmitting(false)
+        setError(error)
+      })
+  }
+}
+
+async function getSha256Digest(string) {
+  return await crypto.subtle
+    .digest("SHA-256", new TextEncoder().encode(string))
+    .then(digest => new Uint8Array(digest))
 }
 
 interface AccessTokensListProps {
@@ -478,10 +517,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
         title="Create new web service access token"
         show={showCreateAccessTokenDialog}
         setShow={setShowCreateAccessTokenDialog}
-        onConfirm={values => {
-          setShowCreateAccessTokenDialog(false)
-          createAccessToken(values)
-        }}
+        onConfirm={async values => createAccessToken(values)}
       />
     </>
   )
@@ -491,20 +527,14 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
     setStateError(null)
   }
 
-  function setError(msg) {
-    setStateError(msg)
+  function setError(err) {
+    setStateError(err)
     setStateSuccess(null)
   }
 
-  function createAccessToken(accessToken) {
-    async function getSha256Digest(string) {
-      return await crypto.subtle
-        .digest("SHA-256", new TextEncoder().encode(string))
-        .then(digest => new Uint8Array(digest))
-    }
-
-    getSha256Digest(accessToken.tokenValue)
-      .then(digest => {
+  async function createAccessToken(accessToken) {
+    return getSha256Digest(accessToken.tokenValue)
+      .then(async digest => {
         delete accessToken.tokenValue
         accessToken.tokenHash = b64(digest)
         return API.mutation(GQL_CREATE_ACCESS_TOKEN, { accessToken })
@@ -518,7 +548,9 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
           })
       })
       .catch(error => {
-        setError(`Can't generate new web service access token: ${error}`)
+        setError({
+          message: `Can't generate new web service access token: ${error}`
+        })
       })
   }
 
@@ -534,16 +566,13 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
       })
   }
 
-  function updateAccessToken(accessToken) {
-    return API.mutation(GQL_UPDATE_ACCESS_TOKEN, { accessToken })
-      .then(() => {
+  async function updateAccessToken(accessToken, force) {
+    return API.mutation(GQL_UPDATE_ACCESS_TOKEN, { accessToken, force }).then(
+      () => {
         setSuccess("Web service access token successfully updated")
         refetch()
-      })
-      .catch(error => {
-        setError(error)
-        jumpToTop()
-      })
+      }
+    )
   }
 }
 
