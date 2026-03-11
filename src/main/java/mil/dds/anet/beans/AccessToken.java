@@ -28,6 +28,9 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   private String name;
   @GraphQLQuery
   @GraphQLInputField
+  private String pointOfContact;
+  @GraphQLQuery
+  @GraphQLInputField
   private String description;
   @GraphQLQuery
   @GraphQLInputField
@@ -47,6 +50,14 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getPointOfContact() {
+    return pointOfContact;
+  }
+
+  public void setPointOfContact(String pointOfContact) {
+    this.pointOfContact = pointOfContact;
   }
 
   public String getDescription() {

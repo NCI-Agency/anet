@@ -71,6 +71,7 @@ const yupSchema = yup.object().shape({
     .string()
     .required("You must give a web service access token a name")
     .default(""),
+  pointOfContact: yup.string().nullable().default(""),
   description: yup.string().nullable().default(""),
   expiresAt: yupDate
     .nullable()
@@ -356,6 +357,7 @@ const AccessTokenModal = ({
     accessToken = {
       name: "",
       scope: null,
+      pointOfContact: null,
       description: null,
       expiresAt: null,
       tokenValue: b64(getRandomBytes(24))
@@ -417,11 +419,20 @@ const AccessTokenModal = ({
                     }}
                   />
                   <FastField
+                    name="pointOfContact"
+                    label="Point of contact"
+                    component={FieldHelper.InputField}
+                    extraColElem={null}
+                    asA="textarea"
+                    style={{ minHeight: "4lh" }}
+                  />
+                  <FastField
                     name="description"
                     label="Description"
                     component={FieldHelper.InputField}
                     extraColElem={null}
                     asA="textarea"
+                    style={{ minHeight: "4lh" }}
                   />
                   <FastField
                     name="expiresAt"

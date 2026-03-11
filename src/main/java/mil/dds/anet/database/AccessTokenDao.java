@@ -42,9 +42,12 @@ public class AccessTokenDao extends AbstractDao {
     DaoUtils.setInsertFields(accessToken);
     final Handle handle = getDbHandle();
     try {
-      handle.createUpdate("/* insertAccessToken */ INSERT INTO \"" + TABLE_NAME + "\" "
-          + "(uuid, name, description, \"tokenHash\", \"createdAt\", \"updatedAt\", \"expiresAt\", scope) "
-          + "VALUES (:uuid, :name, :description, :tokenHash, :createdAt, :updatedAt, :expiresAt, :scope)")
+      handle
+          .createUpdate("/* insertAccessToken */ INSERT INTO \"" + TABLE_NAME + "\" "
+              + "(uuid, name, \"pointOfContact\", description, \"tokenHash\", "
+              + "\"createdAt\", \"updatedAt\", \"expiresAt\", scope) "
+              + "VALUES (:uuid, :name, :pointOfContact, :description, :tokenHash, "
+              + ":createdAt, :updatedAt, :expiresAt, :scope)")
           .bindBean(accessToken).bind("scope", DaoUtils.getEnumId(accessToken.getScope()))
           .bind("createdAt", DaoUtils.asLocalDateTime(accessToken.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(accessToken.getUpdatedAt()))
@@ -60,11 +63,11 @@ public class AccessTokenDao extends AbstractDao {
     DaoUtils.setUpdateFields(accessToken);
     final Handle handle = getDbHandle();
     try {
-      return handle
-          .createUpdate("/* updateAccessToken */ UPDATE \"" + TABLE_NAME + "\" "
-              + "SET name = :name, description = :description, \"expiresAt\" = :expiresAt, "
-              + "scope = :scope, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-          .bindBean(accessToken).bind("scope", DaoUtils.getEnumId(accessToken.getScope()))
+      return handle.createUpdate("/* updateAccessToken */ UPDATE \"" + TABLE_NAME + "\" "
+          + "SET name = :name, \"pointOfContact\" = :pointOfContact, description = :description, "
+          + "\"expiresAt\" = :expiresAt, scope = :scope, \"updatedAt\" = :updatedAt"
+          + " WHERE uuid = :uuid").bindBean(accessToken)
+          .bind("scope", DaoUtils.getEnumId(accessToken.getScope()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(accessToken.getUpdatedAt()))
           .bind("expiresAt", DaoUtils.asLocalDateTime(accessToken.getExpiresAt())).execute();
     } finally {
