@@ -3,7 +3,6 @@ const merge = require("webpack-merge")
 const TerserPlugin = require("terser-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const webpack = require("webpack")
-const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const paths = require("./paths")
 const common = require("./webpack.common")
 
@@ -181,7 +180,6 @@ const clientConfig = merge.merge(common.clientConfig, {
     hints: false
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify("production")
     }),
