@@ -29,15 +29,12 @@
     <#assign relatedObject = (auditTrail.loadRelatedObject(context).get())!>
     <@rod.relatedObjectDisplay objectType=auditTrail.relatedObjectType objectUuid=auditTrail.relatedObjectUuid object=relatedObject specialModels=SPECIAL_MODELS />
   </#if>
-  <@rod.relatedObjectDisplay objectType=subscription.subscribedObjectType objectUuid=subscription.subscribedObjectUuid object=subscribedObject />
   was <b>${AUDIT_TRAIL_UPDATE_TYPE_DESCRIPTION[auditTrail.updateType]}</b>
   <#if auditTrail.objectUuid??>
     <#assign person = (auditTrail.loadPerson(context).get())!>
     by <@rod.relatedObjectDisplay objectType="people" objectUuid=auditTrail.objectUuid object=person />
   </#if>
-  on <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=createdAt />
-  <#if auditTrail.updateDescription??>: ${auditTrail.updateDescription}</#if>
-  <#if auditTrail.updateDetails??>, with details:<br/>${auditTrail.updateDetailsWithLinks?no_esc}</#if>
+  on <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=createdAt /><#if auditTrail.updateDescription??>: ${auditTrail.updateDescription}</#if><#if auditTrail.updateDetails??>, with details:<br/>${auditTrail.updateDetailsWithLinks?no_esc}</#if>
 <#else>
   <#if isNote??>
     of a <b>note/assessment</b> on it

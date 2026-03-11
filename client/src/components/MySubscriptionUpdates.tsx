@@ -173,7 +173,6 @@ const MySubscriptionUpdates = ({
                                   relatedObjectType={at.relatedObjectType}
                                   relatedObjectUuid={at.relatedObjectUuid}
                                   relatedObject={at.relatedObject}
-                                  specialModels={SPECIAL_MODELS}
                                 />
                               ) : (
                                 <>
