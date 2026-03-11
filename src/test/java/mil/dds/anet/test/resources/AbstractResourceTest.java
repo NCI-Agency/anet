@@ -15,6 +15,8 @@ import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.GraphQLPluginConfiguration;
+import mil.dds.anet.test.client.AccessToken;
+import mil.dds.anet.test.client.AccessTokenInput;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Subscription;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
@@ -421,6 +423,10 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
 
   protected static EventTypeInput getEventTypeInput(EventType eventType) {
     return getInput(eventType, EventTypeInput.class);
+  }
+
+  protected static AccessTokenInput getAccessTokenInput(AccessToken accessToken) {
+    return getInput(accessToken, AccessTokenInput.class);
   }
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {

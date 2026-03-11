@@ -911,7 +911,7 @@ type Mutation {
   saveAdminSettings(settings: [AdminSettingInput]): Int
   submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
-  updateAccessToken(accessToken: AccessTokenInput): Int
+  updateAccessToken(accessToken: AccessTokenInput, force: Boolean = false): Int
   updateAssessment(assessment: AssessmentInput, force: Boolean = false): Assessment
   updateAssociatedPosition(position: PositionInput): Int
   updateAttachment(attachment: AttachmentInput, force: Boolean = false): String
@@ -1341,6 +1341,7 @@ enum PreferenceSearchSortBy {
 
 """Query root"""
 type Query {
+  accessToken(uuid: String): AccessToken
   accessTokenList: [AccessToken]
   adminSettings: [AdminSetting]
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
