@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
+import java.util.Optional;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,10 +20,16 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import mil.dds.anet.beans.AccessTokenActivity;
+import mil.dds.anet.database.AccessTokenActivityDao;
+import mil.dds.anet.ws.security.AccessTokenAuthentication;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -224,5 +231,21 @@ public class ResponseUtils {
   public static String getReferer(final HttpServletRequest request) {
     final String referer = request.getHeader(HttpHeaders.REFERER);
     return referer == null ? "-" : referer;
+  }
+
+  public static void logAccessTokenActivity(AccessTokenActivityDao dao,
+      Optional<AccessTokenPrincipal> tokenOpt, HttpServletRequest request) {
+    if (tokenOpt.isEmpty()) {
+      return;
+    }
+
+    // Log the access
+    final var token = tokenOpt.get();
+    dao.insert(new AccessTokenActivity(token.getUuid(), DaoUtils.getCurrentMinute(),
+        getRemoteAddr(request)));
+
+    // Set the authentication in the security context
+    final Authentication authentication = new AccessTokenAuthentication(token);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 }

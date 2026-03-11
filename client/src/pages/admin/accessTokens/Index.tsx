@@ -26,6 +26,7 @@ import {
   Col,
   Modal,
   OverlayTrigger,
+  Popover,
   Table,
   Tooltip
 } from "react-bootstrap"
@@ -37,6 +38,10 @@ const GQL_GET_ACCESS_TOKEN_LIST = gql`
   query {
     accessTokenList {
       ${gqlAllAccessTokenFields}
+      accessTokenActivities {
+        visitedAt
+        remoteAddress
+      }
     }
   }
 `
@@ -176,9 +181,10 @@ const AccessTokensTable = ({
           <tr>
             <th>Name</th>
             <th>Scope</th>
-            <th>Description</th>
             <th>Created</th>
             <th>Expires</th>
+            <th>Last used</th>
+            <th>From</th>
             <th />
           </tr>
         </thead>
@@ -187,7 +193,6 @@ const AccessTokensTable = ({
             <tr key={at.uuid}>
               <td>{at.name}</td>
               <td>{humanNameOfTokenScope(at.scope)}</td>
-              <td>{at.description}</td>
               <td>
                 {moment(at.createdAt).format(
                   Settings.dateFormats.forms.displayShort.withTime
@@ -212,6 +217,69 @@ const AccessTokensTable = ({
                   Settings.dateFormats.forms.displayShort.withTime
                 )}
               </td>
+              <td>
+                {!at?.accessTokenActivities?.[0]?.visitedAt ? (
+                  <em>never</em>
+                ) : (
+                  <>
+                    {moment(at.accessTokenActivities[0].visitedAt).format(
+                      Settings.dateFormats.forms.displayShort.withTime
+                    )}
+                    <OverlayTrigger
+                      placement="auto"
+                      trigger="click"
+                      rootClose
+                      overlay={
+                        <Popover style={{ zIndex: 1300 }}>
+                          <Popover.Header as="h3">
+                            Last {Settings.maxShownAccessTokenActivities}{" "}
+                            accesses
+                          </Popover.Header>
+                          <Popover.Body
+                            className="pt-0 pb-0 overflow-scroll"
+                            style={{ maxHeight: "75vh" }}
+                          >
+                            <Table striped hover>
+                              <thead>
+                                <tr>
+                                  <th className="position-sticky top-0">
+                                    Used at
+                                  </th>
+                                  <th className="position-sticky top-0">
+                                    From
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {at.accessTokenActivities.map(lta => (
+                                  <tr key={lta.visitedAt}>
+                                    <td className="text-nowrap">
+                                      {moment(lta.visitedAt).format(
+                                        Settings.dateFormats.forms.displayShort
+                                          .withTime
+                                      )}
+                                    </td>
+                                    <td className="text-nowrap">
+                                      {lta.remoteAddress}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </Table>
+                          </Popover.Body>
+                        </Popover>
+                      }
+                    >
+                      <Icon
+                        icon={IconNames.TIME}
+                        className="ms-1"
+                        style={{ cursor: "pointer" }}
+                      />
+                    </OverlayTrigger>
+                  </>
+                )}
+              </td>
+              <td>{at?.accessTokenActivities?.[0]?.remoteAddress}</td>
               <td style={{ verticalAlign: "middle" }}>
                 <ConfirmDestructive
                   onConfirm={() => onDelete(at.uuid)}
@@ -567,12 +635,13 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
   }
 
   async function updateAccessToken(accessToken, force) {
-    return API.mutation(GQL_UPDATE_ACCESS_TOKEN, { accessToken, force }).then(
-      () => {
-        setSuccess("Web service access token successfully updated")
-        refetch()
-      }
-    )
+    return API.mutation(GQL_UPDATE_ACCESS_TOKEN, {
+      accessToken: Object.without(accessToken, "accessTokenActivities"),
+      force
+    }).then(() => {
+      setSuccess("Web service access token successfully updated")
+      refetch()
+    })
   }
 }
 

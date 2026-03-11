@@ -1,7 +1,11 @@
 package mil.dds.anet.ws;
 
+import jakarta.annotation.Resource;
 import jakarta.jws.WebService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.handler.MessageContext;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -10,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -30,13 +35,16 @@ import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AccessTokenActivityDao;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.graphql.GraphQLRequest;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.ws.security.AccessTokenAuthentication;
 import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import mil.dds.anet.ws.security.WebServiceGrantedAuthority;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
@@ -75,7 +83,6 @@ import nato.stanag4778.bindinginformation10.MetadataType;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.core.type.TypeReference;
@@ -228,14 +235,20 @@ public class Nvg20WebService implements NVGPortType2012 {
   private final AnetDictionary dict;
   private final GraphQLResource graphQLResource;
   private final AccessTokenDao accessTokenDao;
+  private final AccessTokenActivityDao accessTokenActivityDao;
   private final TaskDao taskDao;
 
+  @Resource
+  private WebServiceContext webServiceContext;
+
   public Nvg20WebService(AnetConfig config, AnetDictionary dict, GraphQLResource graphQLResource,
-      AccessTokenDao accessTokenDao, TaskDao taskDao) {
+      AccessTokenDao accessTokenDao, AccessTokenActivityDao accessTokenActivityDao,
+      TaskDao taskDao) {
     this.config = config;
     this.dict = dict;
     this.graphQLResource = graphQLResource;
     this.accessTokenDao = accessTokenDao;
+    this.accessTokenActivityDao = accessTokenActivityDao;
     this.taskDao = taskDao;
   }
 
@@ -283,12 +296,22 @@ public class Nvg20WebService implements NVGPortType2012 {
     // If we get authentication through a bearer token, use it,
     // else fall back to the access token in the SOAP request
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    final String accessToken =
-        authentication instanceof BearerTokenAuthenticationToken bat ? bat.getToken()
-            : nvgConfig.getAccessToken();
-    final var principal = this.accessTokenDao.getAccessTokenPrincipal(accessToken);
+    final Optional<AccessTokenPrincipal> principal;
+    if (authentication instanceof AccessTokenAuthentication accessTokenAuthentication) {
+      principal = Optional.of(accessTokenAuthentication.getPrincipal());
+      // Access has already been logged by the interceptor
+    } else {
+      principal = this.accessTokenDao.getAccessTokenPrincipal(nvgConfig.getAccessToken());
+      if (principal.isPresent()) {
+        final MessageContext messageContext = webServiceContext.getMessageContext();
+        final HttpServletRequest request =
+            (HttpServletRequest) messageContext.get(MessageContext.SERVLET_REQUEST);
+        ResponseUtils.logAccessTokenActivity(accessTokenActivityDao, principal, request);
+      }
+    }
     if (principal.isPresent()) {
-      if (!principal.get().authorities().contains(WebServiceGrantedAuthority.NVG)) {
+      final AccessTokenPrincipal accessTokenPrincipal = principal.get();
+      if (!accessTokenPrincipal.authorities().contains(WebServiceGrantedAuthority.NVG)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Scope mismatch");
       }
       if (!App6Symbology.isValidApp6Version(nvgConfig.getApp6Version())) {
@@ -297,7 +320,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       }
 
       final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-      response.setNvg(makeNvg(principal.get(), nvgConfig, getTasksLabel(), getAllTasks(true)));
+      response.setNvg(makeNvg(accessTokenPrincipal, nvgConfig, getTasksLabel(), getAllTasks(true)));
       return response;
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,

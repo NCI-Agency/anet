@@ -5,8 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import mil.dds.anet.database.AccessTokenActivityDao;
+import mil.dds.anet.utils.ResponseUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -15,9 +15,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class BearerTokenAuthFilter extends OncePerRequestFilter {
 
   private final BearerTokenService bearerTokenService;
+  private final AccessTokenActivityDao accessTokenActivityDao;
 
-  public BearerTokenAuthFilter(BearerTokenService bearerTokenService) {
+  public BearerTokenAuthFilter(BearerTokenService bearerTokenService,
+      AccessTokenActivityDao accessTokenActivityDao) {
     this.bearerTokenService = bearerTokenService;
+    this.accessTokenActivityDao = accessTokenActivityDao;
   }
 
   @Override
@@ -27,12 +30,7 @@ public class BearerTokenAuthFilter extends OncePerRequestFilter {
 
     final var tokenOpt = bearerTokenService.getAccessPrincipalFromAuthHeader(authHeader);
     if (tokenOpt.isPresent()) {
-      final var token = tokenOpt.get();
-
-      // You can use info from token.getUser(), token.getScope(), etc.
-      final Authentication authentication = new AccessTokenAuthentication(token);
-
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      ResponseUtils.logAccessTokenActivity(accessTokenActivityDao, tokenOpt, request);
       filterChain.doFilter(request, response);
       return;
     }

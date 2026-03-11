@@ -1,4 +1,5 @@
 -- Do a cascading TRUNCATE of all tables created for ANET
+TRUNCATE TABLE "accessTokenActivities" CASCADE;
 TRUNCATE TABLE "accessTokens" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;

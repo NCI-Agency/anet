@@ -1,28 +1,46 @@
 package mil.dds.anet.ws.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import mil.dds.anet.database.AccessTokenActivityDao;
+import mil.dds.anet.database.AccessTokenDao;
+import mil.dds.anet.utils.ResponseUtils;
 import org.apache.cxf.binding.soap.interceptor.SoapHeaderInterceptor;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.transport.http.AbstractHTTPDestination;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 
 public class AuthorizationHeaderInterceptor extends SoapHeaderInterceptor {
 
+  private final AccessTokenDao accessTokenDao;
+  private final AccessTokenActivityDao accessTokenActivityDao;
+
+  public AuthorizationHeaderInterceptor(AccessTokenDao accessTokenDao,
+      AccessTokenActivityDao accessTokenActivityDao) {
+    this.accessTokenDao = accessTokenDao;
+    this.accessTokenActivityDao = accessTokenActivityDao;
+  }
+
   @Override
   public void handleMessage(Message message) {
+    final Optional<String> tokenString;
     final AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
+
     if (policy != null) {
       // Inject the HTTP Basic Auth password field as a bearer token
-      SecurityContextHolder.getContext()
-          .setAuthentication(new BearerTokenAuthenticationToken(policy.getPassword()));
+      tokenString = Optional.of(policy.getPassword());
     } else {
       // Inject the HTTP Bearer token if present
-      getBearerToken(message).ifPresent(bearerToken -> SecurityContextHolder.getContext()
-          .setAuthentication(new BearerTokenAuthenticationToken(bearerToken)));
+      tokenString = getBearerToken(message);
+    }
+    if (tokenString.isPresent()) {
+      final var tokenOpt = accessTokenDao.getAccessTokenPrincipal(tokenString.get());
+      final HttpServletRequest request =
+          (HttpServletRequest) message.get(AbstractHTTPDestination.HTTP_REQUEST);
+      ResponseUtils.logAccessTokenActivity(accessTokenActivityDao, tokenOpt, request);
     }
   }
 

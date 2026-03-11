@@ -9,7 +9,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.UserActivity;
 import mil.dds.anet.beans.recentActivity.Activity;
-import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.database.cache.PersonCache;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
@@ -19,9 +19,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class UserActivityFilter extends OncePerRequestFilter {
   private final PersonCache personCache;
+  private final UserActivityDao userActivityDao;
 
-  public UserActivityFilter(PersonCache personCache) {
+  public UserActivityFilter(PersonCache personCache, UserActivityDao userActivityDao) {
     this.personCache = personCache;
+    this.userActivityDao = userActivityDao;
   }
 
   @Override
@@ -38,7 +40,7 @@ public class UserActivityFilter extends OncePerRequestFilter {
       final Position position = person.getPosition();
       final UserActivity userActivity = new UserActivity(person.getUuid(),
           position == null ? null : position.getOrganizationUuid(), DaoUtils.getCurrentMinute());
-      ApplicationContextProvider.getEngine().getUserActivityDao().insert(userActivity);
+      userActivityDao.insert(userActivity);
     }
     filterChain.doFilter(request, response);
   }

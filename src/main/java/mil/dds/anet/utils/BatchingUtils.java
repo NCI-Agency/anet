@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.AccessTokenActivity;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
@@ -83,6 +84,13 @@ public final class BatchingUtils {
             (BatchLoader<String, AccessToken>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getAccessTokenDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry
+        .register(FkDataLoaderKey.ACCESS_TOKEN_ACTIVITY_ACCESS_TOKEN.toString(),
+            DataLoaderFactory.newDataLoader(
+                (BatchLoader<String, List<AccessTokenActivity>>) foreignKeys -> CompletableFuture
+                    .supplyAsync(() -> engine.getAccessTokenActivityDao()
+                        .getAccessTokenActivity(foreignKeys), dispatcherService),
+                dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.APPROVAL_STEPS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, ApprovalStep>) keys -> CompletableFuture

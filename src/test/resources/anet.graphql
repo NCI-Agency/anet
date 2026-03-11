@@ -1,5 +1,6 @@
 """"""
 type AccessToken {
+  accessTokenActivities: [AccessTokenActivity]
   createdAt: Instant
   description: String
   expiresAt: Instant
@@ -8,6 +9,13 @@ type AccessToken {
   tokenHash: String
   updatedAt: Instant
   uuid: String
+}
+
+""""""
+type AccessTokenActivity {
+  accessTokenUuid: String
+  remoteAddress: String
+  visitedAt: Instant
 }
 
 """"""
