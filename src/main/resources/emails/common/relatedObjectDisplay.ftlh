@@ -1,4 +1,5 @@
 <#macro relatedObjectDisplay objectType objectUuid object specialModels={}>
+<#compress>
   <#assign subscribableObjectTypes = {
     "authorizationGroups": "AuthorizationGroup",
     "events": "Event",
@@ -22,4 +23,5 @@
   <#else>
     entity ${objectType}::${objectUuid}
   </#if>
+</#compress>
 </#macro>
