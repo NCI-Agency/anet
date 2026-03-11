@@ -20,6 +20,7 @@ export const gqlMinimalAccessTokenFields = `
   uuid
   name
   scope
+  pointOfContact
   description
   expiresAt
 `
