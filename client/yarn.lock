@@ -2734,9 +2734,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/delegate@npm:^12.0.8":
-  version: 12.0.8
-  resolution: "@graphql-tools/delegate@npm:12.0.8"
+"@graphql-tools/delegate@npm:^12.0.9":
+  version: 12.0.9
+  resolution: "@graphql-tools/delegate@npm:12.0.9"
   dependencies:
     "@graphql-tools/batch-execute": "npm:^10.0.5"
     "@graphql-tools/executor": "npm:^1.4.13"
@@ -2748,7 +2748,7 @@ __metadata:
     tslib: "npm:^2.8.1"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/2fc17f354d31f088d9cc1aabb789877866840caebf6a48de8bc3a55d9acd22fc3593068e4c04da6dc54a2a72d899e889678eaca9d43cba75d0e1a47b47c67218
+  checksum: 10c0/670a23f1a6883e36646e363f60fd2b96e3db5ca94a49877709a7f986009be05e9f5997a1bba33f764f96d06b6de6bfcb59eb699b3584b198725cb76119d0eb12
   languageName: node
   linkType: hard
 
@@ -3035,17 +3035,17 @@ __metadata:
   linkType: hard
 
 "@graphql-tools/wrap@npm:^11.1.1":
-  version: 11.1.8
-  resolution: "@graphql-tools/wrap@npm:11.1.8"
+  version: 11.1.9
+  resolution: "@graphql-tools/wrap@npm:11.1.9"
   dependencies:
-    "@graphql-tools/delegate": "npm:^12.0.8"
+    "@graphql-tools/delegate": "npm:^12.0.9"
     "@graphql-tools/schema": "npm:^10.0.29"
     "@graphql-tools/utils": "npm:^11.0.0"
     "@whatwg-node/promise-helpers": "npm:^1.3.2"
     tslib: "npm:^2.8.1"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/be0f994a3bb2d472d570979bd4c571538f6c0d77468f1f8247bb3f3a7b52a21f1c8b6e064a1173c8fc36513321627ab7bab35ec2829d352cde313345c92e8438
+  checksum: 10c0/ff533984b08a5eaa6fd765d3ce652f6c0e8218290ee7b6fff6eaa7a6dc841d50aaa88b5cc6ef9dd3532d5929826d05c892e7045558653606629e0a5897820176
   languageName: node
   linkType: hard
 
@@ -6744,14 +6744,14 @@ __metadata:
   linkType: hard
 
 "@whatwg-node/node-fetch@npm:^0.8.3":
-  version: 0.8.4
-  resolution: "@whatwg-node/node-fetch@npm:0.8.4"
+  version: 0.8.5
+  resolution: "@whatwg-node/node-fetch@npm:0.8.5"
   dependencies:
     "@fastify/busboy": "npm:^3.1.1"
     "@whatwg-node/disposablestack": "npm:^0.0.6"
     "@whatwg-node/promise-helpers": "npm:^1.3.2"
     tslib: "npm:^2.6.3"
-  checksum: 10c0/dfe4123d5080364594ed1b6614a32a68e84b45db4f372c9b6b96dcc61321a6b3b35457fc88b6cac09b644391b9c3426c2fd209962525e9dc16f2337dadbcd4b0
+  checksum: 10c0/9f0d944476cc40f5cfed79057cff269ddacf52bd4dda36017fe922cbf3e0a98850f26cb9c4e7990e87e6097f2f9dd94a20c6cc11f95d57652a516e99a5ccafc2
   languageName: node
   linkType: hard
 
@@ -8035,7 +8035,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^2.0.1":
+"brace-expansion@npm:^2.0.1, brace-expansion@npm:^2.0.2":
   version: 2.0.2
   resolution: "brace-expansion@npm:2.0.2"
   dependencies:
@@ -8045,11 +8045,11 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^5.0.2":
-  version: 5.0.3
-  resolution: "brace-expansion@npm:5.0.3"
+  version: 5.0.4
+  resolution: "brace-expansion@npm:5.0.4"
   dependencies:
     balanced-match: "npm:^4.0.2"
-  checksum: 10c0/e474d300e581ec56851b3863ff1cf18573170c6d06deb199ccbd03b2119c36975f6ce2abc7b770f5bebddc1ab022661a9fea9b4d56f33315d7bef54d8793869e
+  checksum: 10c0/359cbcfa80b2eb914ca1f3440e92313fbfe7919ee6b274c35db55bec555aded69dac5ee78f102cec90c35f98c20fa43d10936d0cd9978158823c249257e1643a
   languageName: node
   linkType: hard
 
@@ -15073,29 +15073,29 @@ __metadata:
   linkType: hard
 
 "minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "minimatch@npm:3.1.2"
+  version: 3.1.5
+  resolution: "minimatch@npm:3.1.5"
   dependencies:
     brace-expansion: "npm:^1.1.7"
-  checksum: 10c0/0262810a8fc2e72cca45d6fd86bd349eee435eb95ac6aa45c9ea2180e7ee875ef44c32b55b5973ceabe95ea12682f6e3725cbb63d7a2d1da3ae1163c8b210311
+  checksum: 10c0/2ecbdc0d33f07bddb0315a8b5afbcb761307a8778b48f0b312418ccbced99f104a2d17d8aca7573433c70e8ccd1c56823a441897a45e384ea76ef401a26ace70
   languageName: node
   linkType: hard
 
 "minimatch@npm:^5.0.1, minimatch@npm:^5.1.0, minimatch@npm:^5.1.6":
-  version: 5.1.6
-  resolution: "minimatch@npm:5.1.6"
+  version: 5.1.9
+  resolution: "minimatch@npm:5.1.9"
   dependencies:
     brace-expansion: "npm:^2.0.1"
-  checksum: 10c0/3defdfd230914f22a8da203747c42ee3c405c39d4d37ffda284dac5e45b7e1f6c49aa8be606509002898e73091ff2a3bbfc59c2c6c71d4660609f63aa92f98e3
+  checksum: 10c0/4202718683815a7288b13e470160a4f9560cf392adef4f453927505817e01ef6b3476ecde13cfcaed17e7326dd3b69ad44eb2daeb19a217c5500f9277893f1d6
   languageName: node
   linkType: hard
 
 "minimatch@npm:^9.0.4":
-  version: 9.0.5
-  resolution: "minimatch@npm:9.0.5"
+  version: 9.0.9
+  resolution: "minimatch@npm:9.0.9"
   dependencies:
-    brace-expansion: "npm:^2.0.1"
-  checksum: 10c0/de96cf5e35bdf0eab3e2c853522f98ffbe9a36c37797778d2665231ec1f20a9447a7e567cb640901f89e4daaa95ae5d70c65a9e8aa2bb0019b6facbc3c0575ed
+    brace-expansion: "npm:^2.0.2"
+  checksum: 10c0/0b6a58530dbb00361745aa6c8cffaba4c90f551afe7c734830bd95fd88ebf469dd7355a027824ea1d09e37181cfeb0a797fb17df60c15ac174303ac110eb7e86
   languageName: node
   linkType: hard
 
