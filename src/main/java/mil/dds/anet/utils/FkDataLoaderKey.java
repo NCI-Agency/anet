@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 // Foreign key batching data loaders
 public enum FkDataLoaderKey {
+  ACCESS_TOKEN_ACTIVITY_ACCESS_TOKEN, // accessTokenActivity.accessToken
   APPROVAL_STEP_APPROVERS, // approvalStep.approvers
   ASSESSMENT_ASSESSMENT_RELATED_OBJECTS, // assessment.assessmentRelatedObject
   ASSESSMENT_RELATED_OBJECT_ASSESSMENTS, // assessmentRelatedObject.assessments
