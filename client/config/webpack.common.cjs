@@ -17,6 +17,9 @@ const commonConfig = {
       ".mjs": [".mjs", ".mts"]
     }
   },
+  output: {
+    clean: true
+  },
   module: {
     rules: [
       {
