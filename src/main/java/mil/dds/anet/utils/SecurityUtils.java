@@ -79,7 +79,8 @@ public class SecurityUtils {
 
     // Not found, first time this user has ever logged in
     return createPerson(dao, username, (String) claims.get(StandardClaimNames.EMAIL),
-        getCombinedName(claims));
+        Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.FAMILY_NAME)),
+        Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.GIVEN_NAME)));
   }
 
   private static Person updatePerson(final PersonDao dao, final Person person,
@@ -99,13 +100,14 @@ public class SecurityUtils {
   }
 
   private static Person createPerson(final PersonDao dao, final String username, final String email,
-      final String name) {
+      final String familyName, String givenName) {
     final Person newPerson = new Person();
     logger.trace("creating new user with domainUsername={} and email={}", username, email);
     newPerson.setUser(true);
     newPerson.setPendingVerification(true);
     // Copy some data from the authentication token
-    newPerson.setName(name);
+    newPerson.setFamilyName(familyName);
+    newPerson.setGivenName(givenName);
     /*
      * Note: there's also token.getGender(), but that's not generally available in AD/LDAP, and
      * token.getPhoneNumber(), but that requires scope="openid phone" on the authentication request,
@@ -133,33 +135,5 @@ public class SecurityUtils {
     auditTrailDao.logCreate(person, PersonDao.TABLE_NAME, person,
         "person signed in for the first time");
     return person;
-  }
-
-  private static String getCombinedName(Map<String, Object> claims) {
-    final StringBuilder combinedName = new StringBuilder();
-    // Try to combine FamilyName, GivenName MiddleName
-    final String fn =
-        Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.FAMILY_NAME));
-    if (!Utils.isEmptyOrNull(fn)) {
-      combinedName.append(fn);
-      final String gn =
-          Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.GIVEN_NAME));
-      if (!Utils.isEmptyOrNull(gn)) {
-        combinedName.append(", ");
-        combinedName.append(gn);
-      }
-      final String mn =
-          Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.MIDDLE_NAME));
-      if (!Utils.isEmptyOrNull(mn)) {
-        combinedName.append(" ");
-        combinedName.append(mn);
-      }
-    }
-    if (combinedName.isEmpty()
-        && !Utils.isEmptyOrNull((String) claims.get(StandardClaimNames.NAME))) {
-      // Fall back to just the name
-      combinedName.append(claims.get(StandardClaimNames.NAME));
-    }
-    return combinedName.toString();
   }
 }

@@ -459,16 +459,16 @@ export default class Report extends Model {
         return `No primary ${roleName} has been provided for the Engagement`
       }
     } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
-      return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
+      return `The primary ${roleName} - ${Person.fullName(primaryAttendee)} - needs to have an active profile`
     } else if (
       primaryAttendee.endOfTourDate &&
       moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf("day"))
     ) {
-      return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
+      return `The primary ${roleName}'s - ${Person.fullName(primaryAttendee)} - end of tour date has passed`
     } else if (!primaryAttendee.position) {
-      return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
+      return `The primary ${roleName} - ${Person.fullName(primaryAttendee)} - needs to be assigned to a position`
     } else if (primaryAttendee.position.status !== Model.STATUS.ACTIVE) {
-      return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
+      return `The primary ${roleName} - ${Person.fullName(primaryAttendee)} - needs to be in an active position`
     }
   }
 
@@ -508,7 +508,11 @@ export default class Report extends Model {
       } else if (rp1.author !== rp2.author) {
         return rp1.author ? -1 : 1
       }
-      return (rp1.name || rp1.uuid).localeCompare(rp2.name || rp2.uuid)
+      return (
+        rp1.familyName?.localeCompare(rp2.familyName) ||
+        rp1.givenName?.localeCompare(rp2.givenName) ||
+        rp1.uuid?.localeCompare(rp2.uuid)
+      )
     })
   }
 

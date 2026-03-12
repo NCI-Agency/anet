@@ -100,9 +100,9 @@ const NORMAL_FIELD_OPTIONS = Object.entries(
     Settings.fields.person,
     "ranks",
     "customFields",
-    "customSensitiveInformation",
-    "lastName",
-    "firstName"
+    "familyName",
+    "givenName",
+    "customSensitiveInformation"
   )
 ).reduce((accum, [k, v]) => {
   if (!v?.exclude) {
@@ -201,9 +201,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle(
-    data?.person && `Print | ${data.person.rank} ${data.person.name}`
-  )
+  usePageTitle(data?.person && `Print | ${Person.toString(data.person)}`)
   if (done) {
     return result
   }
@@ -241,7 +239,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     optionalFields.name.active && (
       <CompactRow
         key="fullName"
-        content={<Name>{`${person.rank} ${person.name}`}</Name>}
+        content={<Name>{Person.toString(person)}</Name>}
         className="d-flex justify-content-center"
       />
     ),

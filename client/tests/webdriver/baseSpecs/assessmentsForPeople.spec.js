@@ -26,7 +26,7 @@ const ERROR_MESSAGES = [
 
 const ASSESSED_PEOPLE = [
   {
-    name: "ANDERSON, Andrew",
+    name: "Andrew Anderson",
     visibleAssessments: [
       {
         key: "advisorPeriodic",
@@ -54,7 +54,7 @@ const ASSESSED_PEOPLE = [
     ]
   },
   {
-    name: "KYLESON, Kyle",
+    name: "Kyle Kyleson",
     visibleAssessments: [
       {
         key: "interlocutorMonthly",
@@ -92,7 +92,7 @@ const ASSESSED_PEOPLE = [
     ]
   },
   {
-    name: "GUIST, Lin",
+    name: "Lin Guist",
     visibleAssessments: [
       { key: "personOnceReportLinguist", recurrence: "monthly" },
       { key: "personOnceReportLinguistLin", recurrence: "monthly" },
@@ -108,7 +108,7 @@ const ASSESSED_PEOPLE = [
     ]
   },
   {
-    name: "PRETER, Inter",
+    name: "Inter Preter",
     visibleAssessments: [
       { key: "personOnceReportLinguist", recurrence: "monthly" },
       { key: "advisorPeriodic", recurrence: "monthly" },

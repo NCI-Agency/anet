@@ -177,7 +177,7 @@ const MartImportedReportTable = ({
                 filterDefs={peopleFilters}
                 onChange={handleAuthorChange}
                 objectType={Person}
-                valueKey="name"
+                valueFunc={Person.fullName}
                 fields={Person.autocompleteQuery}
                 addon={PEOPLE_ICON}
               />

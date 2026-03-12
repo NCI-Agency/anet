@@ -224,7 +224,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     // set things up
     final Person input = new Person();
     input.setStatus(WithStatus.Status.ACTIVE);
-    input.setName("testPerson");
+    input.setFamilyName("testPerson");
     input.setBiography(getRichText(PersonDao.TABLE_NAME, testOldUuid));
     input.setCustomFields(getJsonString(PersonDao.TABLE_NAME, testOldUuid));
     final Person created = personDao.insert(input);

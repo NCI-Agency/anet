@@ -39,7 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
   // Must always retrieve these e.g. for ORDER BY
-  public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
+  public static final String[] minimalFields =
+      {"uuid", "familyName", "givenName", "rank", "createdAt"};
   public static final String[] additionalFields =
       {"status", "user", "phoneNumber", "biography", "obsoleteCountry", "countryUuid", "gender",
           "endOfTourDate", "pendingVerification", "code", "updatedAt", "customFields"};
@@ -110,10 +111,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     final Handle handle = getDbHandle();
     try {
       final String sql = "/* personInsert */ INSERT INTO people "
-          + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
+          + "(uuid, \"familyName\", \"givenName\", status, \"user\", \"phoneNumber\", rank, "
           + "\"pendingVerification\", gender, \"countryUuid\", code, \"endOfTourDate\", biography, "
           + "\"createdAt\", \"updatedAt\", \"customFields\") "
-          + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
+          + "VALUES (:uuid, :familyName, :givenName, :status, :user, :phoneNumber, :rank, "
           + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
           + ":createdAt, :updatedAt, :customFields)";
       handle.createUpdate(sql).bindBean(p)
@@ -155,8 +156,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     final Handle handle = getDbHandle();
     try {
       final String sql = "/* personUpdate */ UPDATE people "
-          + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, "
-          + "\"obsoleteCountry\" = :obsoleteCountry, \"countryUuid\" = :countryUuid, "
+          + "SET \"familyName\" = :familyName, \"givenName\" = :givenName, status = :status, \"user\" = :user, "
+          + "gender = :gender, \"obsoleteCountry\" = :obsoleteCountry, \"countryUuid\" = :countryUuid, "
           + "code = :code, \"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
           + "\"pendingVerification\" = :pendingVerification, "
           + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "

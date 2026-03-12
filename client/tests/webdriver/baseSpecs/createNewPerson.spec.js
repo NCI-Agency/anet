@@ -3,23 +3,23 @@ import moment from "moment"
 import CreatePerson from "../pages/createNewPerson.page"
 
 const VALID_PERSON_INTERLOCUTOR = {
-  lastName: "Doe",
+  familyName: "Doe",
   country: "Denmark"
 }
 const VALID_PERSON_ADVISOR = {
-  lastName: "Roe",
-  firstName: "Jane",
+  familyName: "Roe",
+  givenName: "Jane",
   country: "Canada",
   emailAddresses: ["", "test@NATO.INT"]
 }
 const NOT_SIMILAR_PERSON_ADVISOR = {
-  lastName: "XXX",
-  firstName: "XXX"
+  familyName: "XXX",
+  givenName: "XXX"
 }
 
 const SIMILAR_PERSON_ADVISOR = {
-  lastName: "ERINSON",
-  firstName: "Erin"
+  familyName: "Erinson",
+  givenName: "Erin"
 }
 
 describe("Create new Person form page", () => {
@@ -35,12 +35,12 @@ describe("Create new Person form page", () => {
     })
 
     it("Should not save a person without gender being filled in", async () => {
-      await (await CreatePerson.getLastName()).waitForDisplayed()
+      await (await CreatePerson.getFamilyName()).waitForDisplayed()
       await (
-        await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_INTERLOCUTOR.lastName)
+        await CreatePerson.getFamilyName()
+      ).setValue(VALID_PERSON_INTERLOCUTOR.familyName)
       await (await CreatePerson.getGender()).click()
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       const errorMessage = await browser.$(
         'select[name="gender"] + div.invalid-feedback'
       )
@@ -86,10 +86,10 @@ describe("Create new Person form page", () => {
       expect(alertMessage).to.equal("Person saved")
     })
     it("Should save a person without first name", async () => {
-      await (await CreatePerson.getLastName()).waitForDisplayed()
+      await (await CreatePerson.getFamilyName()).waitForDisplayed()
       await (
-        await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_INTERLOCUTOR.lastName)
+        await CreatePerson.getFamilyName()
+      ).setValue(VALID_PERSON_INTERLOCUTOR.familyName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -126,10 +126,10 @@ describe("Create new Person form page", () => {
       expect(alertMessage).to.equal("Person saved")
     })
     it("Should not save a person without a valid email address", async () => {
-      await (await CreatePerson.getLastName()).waitForDisplayed()
+      await (await CreatePerson.getFamilyName()).waitForDisplayed()
       await (
-        await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_INTERLOCUTOR.lastName)
+        await CreatePerson.getFamilyName()
+      ).setValue(VALID_PERSON_INTERLOCUTOR.familyName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -159,7 +159,7 @@ describe("Create new Person form page", () => {
       ).waitForExist({ reverse: true })
 
       await (await CreatePerson.getEmailAddress(0)).setValue("notValidEmail@")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       const errorMessage = await CreatePerson.getEmailAddressMessage(0)
       await errorMessage.waitForExist()
       await errorMessage.waitForDisplayed()
@@ -170,7 +170,7 @@ describe("Create new Person form page", () => {
       // perform submit form to prevent warning dialog
       await CreatePerson.deleteInput(CreatePerson.getEmailAddress(0))
       await (await CreatePerson.getEmailAddress(0)).setValue("test@example.com")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = await (
@@ -185,14 +185,14 @@ describe("Create new Person form page", () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
-      await (await CreatePerson.getLastName()).waitForDisplayed()
+      await (await CreatePerson.getFamilyName()).waitForDisplayed()
       await (
-        await CreatePerson.getLastName()
-      ).setValue(SIMILAR_PERSON_ADVISOR.lastName)
-      await (await CreatePerson.getFirstName()).waitForDisplayed()
+        await CreatePerson.getFamilyName()
+      ).setValue(SIMILAR_PERSON_ADVISOR.familyName)
+      await (await CreatePerson.getGivenName()).waitForDisplayed()
       await (
-        await CreatePerson.getFirstName()
-      ).setValue(SIMILAR_PERSON_ADVISOR.firstName)
+        await CreatePerson.getGivenName()
+      ).setValue(SIMILAR_PERSON_ADVISOR.givenName)
       await (await CreatePerson.getDuplicatesButton()).waitForDisplayed()
       await (await CreatePerson.getDuplicatesButton()).click()
       await (await CreatePerson.getModalContent()).waitForDisplayed()
@@ -203,7 +203,7 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getModalContent()
       ).waitForDisplayed({ reverse: true })
-      expect(similar).to.equal("CIV ERINSON, Erin")
+      expect(similar).to.equal("CIV Erin Erinson")
     })
     it("Should display a warning message specific for duplicate accounts", async () => {
       // Only admin users can create an advisor user
@@ -223,11 +223,11 @@ describe("Create new Person form page", () => {
     it("Should save even if endOfTourDate is not filled in", async () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (
-        await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_ADVISOR.lastName)
+        await CreatePerson.getFamilyName()
+      ).setValue(VALID_PERSON_ADVISOR.familyName)
       await (
-        await CreatePerson.getFirstName()
-      ).setValue(VALID_PERSON_ADVISOR.firstName)
+        await CreatePerson.getGivenName()
+      ).setValue(VALID_PERSON_ADVISOR.givenName)
       await (await CreatePerson.getUserTrueButton()).waitForExist()
       await (await CreatePerson.getUserTrueButton()).click()
       for (const [
@@ -266,7 +266,7 @@ describe("Create new Person form page", () => {
       ).waitForExist({ reverse: true })
 
       await (await CreatePerson.getEndOfTourDate()).setValue("")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
         const errorMessage = await CreatePerson.getEmailAddressMessage(index)
         // element should *not* be visible!
@@ -284,7 +284,7 @@ describe("Create new Person form page", () => {
         await CreatePerson.deleteInput(CreatePerson.getEmailAddress(index))
         await (await CreatePerson.getEmailAddress(index)).setValue(address)
       }
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
         const errorMessage = await CreatePerson.getEmailAddressMessage(index)
         // element should *not* be visible!
@@ -294,7 +294,7 @@ describe("Create new Person form page", () => {
       const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
       await CreatePerson.deleteInput(CreatePerson.getEndOfTourDate())
       await (await CreatePerson.getEndOfTourDate()).setValue(tomorrow)
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = await (
@@ -308,14 +308,14 @@ describe("Create new Person form page", () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
-      await (await CreatePerson.getLastName()).waitForDisplayed()
+      await (await CreatePerson.getFamilyName()).waitForDisplayed()
       await (
-        await CreatePerson.getLastName()
-      ).setValue(NOT_SIMILAR_PERSON_ADVISOR.lastName)
-      await (await CreatePerson.getFirstName()).waitForDisplayed()
+        await CreatePerson.getFamilyName()
+      ).setValue(NOT_SIMILAR_PERSON_ADVISOR.familyName)
+      await (await CreatePerson.getGivenName()).waitForDisplayed()
       await (
-        await CreatePerson.getFirstName()
-      ).setValue(NOT_SIMILAR_PERSON_ADVISOR.firstName)
+        await CreatePerson.getGivenName()
+      ).setValue(NOT_SIMILAR_PERSON_ADVISOR.givenName)
       // eslint-disable-next-line no-unused-expressions
       expect(await (await CreatePerson.getDuplicatesButton()).isExisting()).to
         .be.false

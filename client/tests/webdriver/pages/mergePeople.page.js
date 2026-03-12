@@ -28,7 +28,7 @@ class MergePeople extends Page {
   }
 
   async getPersonHeaderFromPopover() {
-    return browser.$('//table//th[contains(text(), "name")]')
+    return browser.$('//table//th[contains(text(), "Name")]')
   }
 
   async getFirstItemFromAdvancedSelect() {

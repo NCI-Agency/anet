@@ -1,5 +1,6 @@
 package mil.dds.anet.resources;
 
+import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -17,8 +18,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdvisorReportsEntry;
 import mil.dds.anet.beans.AdvisorReportsStats;
@@ -787,23 +786,23 @@ public class ReportResource {
         reportDao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
 
     final String groupName = "stats";
-    final String topLevelField;
     final String groupCol;
+    final List<String> topLevelFields;
     if (Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
-      topLevelField = "organizationShortName";
+      topLevelFields = List.of("organizationShortName");
       groupCol = "organizationUuid";
     } else {
-      topLevelField = "name";
+      topLevelFields = List.of("givenName", "familyName");
       groupCol = "personUuid";
     }
-    final Set<String> tlf = Stream.of(topLevelField).collect(Collectors.toSet());
     final List<Map<String, Object>> groupedResults =
-        Utils.resultGrouper(list, groupName, groupCol, tlf);
+        Utils.resultGrouper(list, groupName, groupCol, topLevelFields);
     final List<AdvisorReportsEntry> result = new LinkedList<>();
     for (final Map<String, Object> group : groupedResults) {
       final AdvisorReportsEntry entry = new AdvisorReportsEntry();
       entry.setUuid((String) group.get(groupCol));
-      entry.setName((String) group.get(topLevelField));
+      entry.setName(
+          Joiner.on(" ").skipNulls().join(topLevelFields.stream().map(group::get).toList()));
       final List<AdvisorReportsStats> stats = new LinkedList<>();
       @SuppressWarnings("unchecked")
       final List<Map<String, Object>> groupStats = (List<Map<String, Object>>) group.get(groupName);

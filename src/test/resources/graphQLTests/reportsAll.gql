@@ -13,7 +13,8 @@ reportList(query:{pageSize:100}) {
     state
     authors {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -26,7 +27,8 @@ reportList(query:{pageSize:100}) {
     }
     primaryAdvisor {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -39,7 +41,8 @@ reportList(query:{pageSize:100}) {
     }
     primaryInterlocutor {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -84,7 +87,8 @@ reportList(query:{pageSize:100}) {
           name
           person {
             uuid
-            name
+            familyName
+            givenName
             rank
             entityAvatar {
               attachmentUuid
@@ -99,7 +103,8 @@ reportList(query:{pageSize:100}) {
       }
       person {
         uuid
-        name
+        familyName
+        givenName
         rank
         entityAvatar {
           attachmentUuid

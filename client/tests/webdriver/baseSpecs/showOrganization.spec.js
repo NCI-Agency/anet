@@ -38,9 +38,9 @@ const EF2_MATRIX_TASKS = ["EF 2", "»\n2.A", "»\n2.B", "»\n2.C", "»\n2.D"]
 const EF2_2_ASSIGNED_TASKS = ["No matching Objective"]
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
-const LEADER_PERSON_TEXT = "CTR BECCABON, Rebecca"
+const LEADER_PERSON_TEXT = "CTR Rebecca Beccabon"
 const DEPUTY_POSITION_TEXT = "EF 2.2 Superuser"
-const DEPUTY_PERSON_TEXT = "CIV JACOBSON, Jacob"
+const DEPUTY_PERSON_TEXT = "CIV Jacob Jacobson"
 
 describe("Show organization page", () => {
   describe("As an admin", () => {

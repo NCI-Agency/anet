@@ -1,7 +1,8 @@
 personList(query:{pageSize:0}) {
   list {
     uuid
-    name
+    familyName
+    givenName
     rank
     entityAvatar {
       attachmentUuid

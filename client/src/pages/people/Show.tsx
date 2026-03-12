@@ -128,7 +128,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle(data?.person && `${data.person.rank} ${data?.person.name}`)
+  usePageTitle(data?.person && Person.toString(data?.person))
   useEffect(() => {
     setAttachments(data?.person?.attachments || [])
   }, [data])
@@ -184,7 +184,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     attachments?.some(a => a.uuid === person?.entityAvatar?.attachmentUuid) &&
     person.entityAvatar
 
-  const searchText = [person.name, person.code].join(" ")
+  const searchText = [person.familyName, person.givenName, person.code].join(
+    " "
+  )
   const action = (
     <>
       {isAdmin && (
@@ -285,7 +287,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                     persistent
                   />
                 }{" "}
-                {person.rank} {Person.militaryName(person.name)}
+                {person.rank} {Person.fullName(person)}
               </>
             }
             action={action}
@@ -384,7 +386,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             />
           </Fieldset>
           <Fieldset
-            title={`Reports attended by ${person.name}`}
+            title={`Reports attended by ${Person.fullName(person)}`}
             id="reports-attended"
           >
             <ReportCollection

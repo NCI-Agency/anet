@@ -60,11 +60,11 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _POSITION_FIELDS =
       String.format("uuid updatedAt name code type role status organization { uuid } %1$s",
           _EMAIL_ADDRESSES_FIELDS);
-  private static final String _PERSON_FIELDS = String.format(
-      "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } code"
-          + " gender endOfTourDate users { uuid domainUsername } pendingVerification createdAt updatedAt"
-          + " preferences { value } customFields %1$s",
-      _EMAIL_ADDRESSES_FIELDS);
+  private static final String _PERSON_FIELDS = String
+      .format("uuid familyName givenName status user phoneNumber rank biography obsoleteCountry"
+          + " country { uuid name } code gender endOfTourDate"
+          + " users { uuid domainUsername } pendingVerification createdAt updatedAt"
+          + " preferences { value } customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
@@ -81,8 +81,8 @@ public class PersonResourceTest extends AbstractResourceTest {
   void testCreatePerson() {
     final UserInput newUserInput =
         UserInput.builder().withDomainUsername("testCreatePerson").build();
-    final PersonInput newPersonInput = PersonInput.builder().withName("testCreatePerson Person")
-        .withStatus(Status.ACTIVE)
+    final PersonInput newPersonInput = PersonInput.builder()
+        .withFamilyName("testCreatePerson Person").withStatus(Status.ACTIVE)
         // set user/users
         .withUser(true).withUsers(List.of(newUserInput))
         // set HTML of biography
@@ -97,7 +97,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput));
     assertThat(newPerson).isNotNull();
     assertThat(newPerson.getUuid()).isNotNull();
-    assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
+    assertThat(newPerson.getFamilyName()).isEqualTo("testCreatePerson Person");
     // check that admin can set user/domainUsername
     assertThat(newPerson.getUser()).isTrue();
     assertThat(getDomainUsername(newPerson)).isEqualTo("testCreatePerson");
@@ -110,11 +110,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     final PersonInput updatedNewPersonInput = getPersonInput(newPerson);
-    updatedNewPersonInput.setName("testCreatePerson updated name");
+    updatedNewPersonInput.setFamilyName("testCreatePerson updated name");
     updatedNewPersonInput.setCode("A123456");
 
     // update domainUsername
-    updatedNewPersonInput.setName("testCreatePersonUpdated");
+    updatedNewPersonInput.setFamilyName("testCreatePersonUpdated");
     // update HTML of biography
     updatedNewPersonInput.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
     // update JSON of customFields
@@ -126,7 +126,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final Person updatedNewPerson = withCredentials(jackUser,
         t -> queryExecutor.person(FIELDS, updatedNewPersonInput.getUuid()));
-    assertThat(updatedNewPerson.getName()).isEqualTo(updatedNewPersonInput.getName());
+    assertThat(updatedNewPerson.getFamilyName()).isEqualTo(updatedNewPersonInput.getFamilyName());
     assertThat(updatedNewPerson.getCode()).isEqualTo(updatedNewPersonInput.getCode());
     // check that admin can update domainUsername
     assertThat(getDomainUsername(updatedNewPerson))
@@ -151,7 +151,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final UserInput newUser2Input =
         UserInput.builder().withDomainUsername("testcreateperson").build();
-    final PersonInput newPerson2Input = PersonInput.builder().withName("Namey McNameface")
+    final PersonInput newPerson2Input = PersonInput.builder().withFamilyName("Namey McNameface")
         .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUser2Input)).build();
     final Person newPerson2 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPerson2Input));
@@ -245,7 +245,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     AnetBeanList_Person searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query1));
     assertThat(searchResults.getTotalCount()).isPositive();
-    assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("Bobtown, Bob"))
+    assertThat(searchResults.getList().stream().filter(p -> p.getFamilyName().equals("Bobtown"))
         .findFirst()).isNotEmpty();
 
     final OrganizationSearchQueryInput queryOrgs =
@@ -311,9 +311,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     String prevName = null;
     for (final Person p : searchResults.getList()) {
       if (prevName != null) {
-        assertThat(collator.compare(p.getName(), prevName)).isNotPositive();
+        assertThat(collator.compare(p.getFamilyName(), prevName)).isNotPositive();
       }
-      prevName = p.getName();
+      prevName = p.getFamilyName();
     }
 
     // Search for a person with the name "A Dvisor"
@@ -322,7 +322,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
     long matchCount =
-        searchResults.getList().stream().filter(p -> p.getName().equals("Dvisor, A")).count();
+        searchResults.getList().stream().filter(p -> p.getFamilyName().equals("Dvisor")).count();
     assertThat(matchCount).isEqualTo(1);
 
     // Search for same person from an autocomplete box.
@@ -330,7 +330,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
     matchCount =
-        searchResults.getList().stream().filter(p -> p.getName().equals("Dvisor, A")).count();
+        searchResults.getList().stream().filter(p -> p.getFamilyName().equals("Dvisor")).count();
     assertThat(matchCount).isEqualTo(1);
 
 
@@ -387,7 +387,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final PersonSearchQueryInput q = PersonSearchQueryInput.builder().withAssessment(aq).build();
     final AnetBeanList_Person results =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), q));
-    assertThat(results.getList()).map(Person::getName).hasSameElementsAs(matchingNames);
+    assertThat(results.getList()).map(Person::getFamilyName).hasSameElementsAs(matchingNames);
   }
 
   @Test
@@ -414,7 +414,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final UserInput newUserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
-    final PersonInput newPersonInput = PersonInput.builder().withName("Namey McNameface")
+    final PersonInput newPersonInput = PersonInput.builder().withFamilyName("Namey McNameface")
         .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUserInput)).build();
     final Person newUserForTestInactivation =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput));
@@ -468,8 +468,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Now test with somebody who only has additional position
     final UserInput newUserInput2 =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
-    final PersonInput newPersonInput2 = PersonInput.builder().withName("Namey McNameface II")
-        .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUserInput2)).build();
+    final PersonInput newPersonInput2 =
+        PersonInput.builder().withFamilyName("McNameface II").withGivenName("Namey")
+            .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(newUserInput2)).build();
     final Person newUserForTestInactivation2 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput2));
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
@@ -576,7 +577,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // interlocutor
     final UserInput interlocutorUserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
-    final PersonInput interlocutorInput = PersonInput.builder().withName("Namey McNameface")
+    final PersonInput interlocutorInput = PersonInput.builder().withFamilyName("Namey McNameface")
         .withStatus(Status.ACTIVE).withUser(true).withUsers(List.of(interlocutorUserInput)).build();
 
     try {
@@ -601,8 +602,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     final UserInput advisorNoPositionUserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
     final PersonInput advisorNoPositionInput =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
-            .withUsers(List.of(advisorNoPositionUserInput)).build();
+        PersonInput.builder().withFamilyName("Namey McNameface").withStatus(Status.ACTIVE)
+            .withUser(true).withUsers(List.of(advisorNoPositionUserInput)).build();
 
     try {
       final Person anp = withCredentials(getDomainUsername(user),
@@ -626,8 +627,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     final UserInput advisorPositionUserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
     final PersonInput advisorPositionInput =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
-            .withUsers(List.of(advisorPositionUserInput)).build();
+        PersonInput.builder().withFamilyName("Namey McNameface").withStatus(Status.ACTIVE)
+            .withUser(true).withUsers(List.of(advisorPositionUserInput)).build();
 
     final Person ap = assertCreatePerson(user, advisorPositionInput, isSuperuser);
     final PositionSearchQueryInput query = PositionSearchQueryInput.builder()
@@ -657,8 +658,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     final UserInput advisorPosition2UserInput =
         UserInput.builder().withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
     final PersonInput advisorPosition2Input =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE).withUser(true)
-            .withUsers(List.of(advisorPosition2UserInput)).build();
+        PersonInput.builder().withFamilyName("Namey McNameface").withStatus(Status.ACTIVE)
+            .withUser(true).withUsers(List.of(advisorPosition2UserInput)).build();
 
     final Person ap2 = assertCreatePerson(user, advisorPosition2Input, isSuperuser);
     final List<PositionType> positionTypes = new ArrayList<>();
@@ -743,7 +744,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(org.getUuid()).isNotNull();
 
     final PersonInput persInput =
-        PersonInput.builder().withName("Test person for edit history").build();
+        PersonInput.builder().withFamilyName("Test person for edit history").build();
     final Person person =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, persInput));
     assertThat(person).isNotNull();

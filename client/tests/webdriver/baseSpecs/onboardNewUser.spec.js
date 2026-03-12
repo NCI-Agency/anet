@@ -5,8 +5,8 @@ import OnboardPage from "../pages/onboard.page"
 const REPORT_URL = "/reports/59be259b-30b9-4d04-9e21-e8ceb58cbe9c"
 
 const ONBOARD_USER = {
-  lastName: "Bonnsdottir",
-  firstName: "Bonny",
+  familyName: "Bonnsdottir",
+  givenName: "Bonny",
   emailAddresses: ["", "bonny@example.com"]
 }
 
@@ -34,15 +34,15 @@ describe("Onboard new user login", () => {
     await browser.pause(500) // wait for the page transition and rendering of custom fields
 
     // Check that these are properly copied from the authentication server
-    await (await OnboardPage.getLastName()).waitForExist()
-    await (await OnboardPage.getLastName()).waitForDisplayed()
-    expect(await (await OnboardPage.getLastName()).getValue()).to.equal(
-      ONBOARD_USER.lastName
+    await (await OnboardPage.getFamilyName()).waitForExist()
+    await (await OnboardPage.getFamilyName()).waitForDisplayed()
+    expect(await (await OnboardPage.getFamilyName()).getValue()).to.equal(
+      ONBOARD_USER.familyName
     )
-    await (await OnboardPage.getFirstName()).waitForExist()
-    await (await OnboardPage.getFirstName()).waitForDisplayed()
-    expect(await (await OnboardPage.getFirstName()).getValue()).to.equal(
-      ONBOARD_USER.firstName
+    await (await OnboardPage.getGivenName()).waitForExist()
+    await (await OnboardPage.getGivenName()).waitForDisplayed()
+    expect(await (await OnboardPage.getGivenName()).getValue()).to.equal(
+      ONBOARD_USER.givenName
     )
     await (await OnboardPage.getEmailAddress(0)).waitForExist()
     await (await OnboardPage.getEmailAddress(0)).waitForDisplayed()
@@ -64,7 +64,7 @@ describe("Onboard new user login", () => {
     await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())
     await (await OnboardPage.getEndOfTourDate()).setValue(yesterday)
 
-    await (await OnboardPage.getLastName()).click()
+    await (await OnboardPage.getFamilyName()).click()
     const errorMessage = await (await OnboardPage.getEndOfTourDate())
       .parentElement()
       .parentElement()
@@ -103,7 +103,7 @@ describe("Onboard new user login", () => {
     await (
       await OnboardPage.getEndOfTourDate()
     ).setValue(personDetails.endOfTourDate)
-    await (await OnboardPage.getLastName()).click()
+    await (await OnboardPage.getFamilyName()).click()
     await browser.pause(500) // wait for the error message to disappear
     await OnboardPage.submitForm()
   })

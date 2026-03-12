@@ -218,8 +218,8 @@ public class Nvg20WebService implements NVGPortType2012 {
       + " totalCount list {" // -
       + " uuid state intent engagementDate duration" // -
       + " keyOutcomes nextSteps classification updatedAt" // -
-      + " primaryAdvisor { uuid name rank }" // -
-      + " primaryInterlocutor { uuid name rank }" // -
+      + " primaryAdvisor { uuid familyName givenName rank }" // -
+      + " primaryInterlocutor { uuid familyName givenName rank }" // -
       + " advisorOrg { uuid shortName longName identificationCode }" // -
       + " interlocutorOrg { uuid shortName longName identificationCode }" // -
       + " location { uuid name lat lng type }" // -

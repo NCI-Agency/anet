@@ -7,25 +7,25 @@ import ShowPerson from "../pages/showPerson.page"
 const DEFAULT_USERNAME = "jack"
 
 const NON_COUNTERPART_INTERLOCUTOR = {
-  name: "Steve",
+  name: "Steve Steveson",
   birthday: "9 September 1999",
   politicalPosition: "Left"
 }
 const COUNTERPART_INTERLOCUTOR = {
-  name: "Roger",
+  name: "Roger Rogwell",
   birthday: "1 January 2001",
   politicalPosition: "Right"
 }
 
 const NEW_PERSON_FIELDS_1 = {
-  lastname: "sensitivePerson1",
+  familyName: "sensitivePerson1",
   rank: "CIV",
   gender: "FEMALE",
   country: "Türkiye"
 }
 
 const NEW_PERSON_FIELDS_2 = {
-  lastname: "sensitivePerson2",
+  familyName: "sensitivePerson2",
   rank: "CIV",
   gender: "MALE",
   country: "Türkiye"
@@ -165,8 +165,8 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getForm()).waitForDisplayed()
       // fill other required fields at the beginning
       await (
-        await CreatePerson.getLastName()
-      ).setValue(NEW_PERSON_FIELDS_1.lastname)
+        await CreatePerson.getFamilyName()
+      ).setValue(NEW_PERSON_FIELDS_1.familyName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute("value", NEW_PERSON_FIELDS_1.rank)
@@ -200,7 +200,7 @@ describe("Creating and editing custom sensitive information", () => {
     it("Should be able to create a new person with sensitive information", async () => {
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).setValue("08-06-1963")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
@@ -213,7 +213,7 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getForm()).waitForDisplayed()
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).setValue("01-01-1956")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
@@ -232,8 +232,8 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getForm()).waitForDisplayed()
       // fill other required fields at the beginning
       await (
-        await CreatePerson.getLastName()
-      ).setValue(NEW_PERSON_FIELDS_2.lastname)
+        await CreatePerson.getFamilyName()
+      ).setValue(NEW_PERSON_FIELDS_2.familyName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute("value", NEW_PERSON_FIELDS_2.rank)
@@ -259,7 +259,7 @@ describe("Creating and editing custom sensitive information", () => {
     it("Should be able to create a new person with sensitive information", async () => {
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).setValue("01-01-1956")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       await (await CreatePerson.getMiddleButton()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
@@ -276,7 +276,7 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getForm()).waitForDisplayed()
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).setValue("08-06-1963")
-      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getFamilyName()).click()
       await (await CreatePerson.getLeftButton()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()

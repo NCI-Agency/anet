@@ -530,7 +530,7 @@ public class Utils {
    * @return the grouped results from the query
    */
   public static List<Map<String, Object>> resultGrouper(List<Map<String, Object>> results,
-      String groupName, String groupingField, Set<String> topLevelFields) {
+      String groupName, String groupingField, List<String> topLevelFields) {
     final List<Map<String, Object>> groupedResults = new ArrayList<>();
     final Map<Object, Map<String, Object>> seenResults = new HashMap<>();
     for (final Map<String, Object> result : results) {
