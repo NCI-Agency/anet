@@ -31,8 +31,6 @@ TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
 TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
--- ANET Importer user is inserted by the migrations!
-DELETE FROM "people" WHERE name != 'ANET Importer';
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 -- Skip preferences, as these are inserted by the migrations
@@ -54,6 +52,9 @@ TRUNCATE TABLE "users" CASCADE;
 
 -- Countries are inserted by the migrations!
 DELETE FROM "locations" WHERE type != 'PAC';
+
+-- ANET Importer user is inserted by the migrations!
+DELETE FROM "people" WHERE name != 'ANET Importer';
 
 -- Make sure everything is in UTC
 SET time zone 'UTC';
