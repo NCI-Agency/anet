@@ -32,22 +32,20 @@ const GET_ENGAGEMENTS_BETWEEN_COMMUNITIES = gql`
   }
 `
 
+const CADENCE_COLOR_RANGES = [
+  { label: "< 3 months", maxMonths: 3, color: "#28a745" },
+  { label: "3 - 6 months", maxMonths: 6, color: "#5C9BD5" },
+  { label: "6 - 12 months", maxMonths: 12, color: "#ffc107" },
+  { label: "12 - 24 months", maxMonths: 24, color: "#fd7e14" },
+  { label: "> 24 months", maxMonths: Infinity, color: "#dc3545" }
+]
+
 function getEngagementColor(engagementDate: string): string {
   const engagementMoment = moment(engagementDate)
   const now = moment()
   const monthsAgo = now.diff(engagementMoment, "months")
-
-  if (monthsAgo < 3) {
-    return "#28a745"
-  } else if (monthsAgo < 6) {
-    return "#6c757d"
-  } else if (monthsAgo < 12) {
-    return "#ffc107"
-  } else if (monthsAgo < 24) {
-    return "#fd7e14"
-  } else {
-    return "#dc3545"
-  }
+  const match = CADENCE_COLOR_RANGES.find(r => monthsAgo < r.maxMonths)
+  return match?.color ?? "#dc3545"
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -69,6 +67,14 @@ const GradientDiv = styled.div`
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   text-align: center;
+`
+
+const LegendSwatch = styled.span`
+  width: 32px;
+  height: 12px;
+  border-radius: 2px;
+  background-image: ${props =>
+    `linear-gradient(90deg, ${props.color} 0%, ${props.fade} 100%)`};
 `
 
 const WrappedTh = styled.th`
@@ -93,6 +99,11 @@ const EngagementsBetweenCommunitiesMatrix = ({
   const [engagementsBetweenCommunities, setEngagementsBetweenCommunities] =
     useState([])
   const [fetchError, setFetchError] = useState(null)
+
+  const legendItems = CADENCE_COLOR_RANGES.map(item => ({
+    ...item,
+    fade: hexToRgba(item.color, 0.25)
+  }))
 
   useEffect(() => {
     async function fetchEngagementsBetweenCommunities(
@@ -162,7 +173,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
   return (
     <>
       <Messages error={fetchError} />
-      <div className="d-flex mt-3">
+      <div className="d-flex mt-3 align-items-end flex-wrap gap-3">
         <div className="text-start">
           <label htmlFor="dashboard-type" className="form-label">
             Dashboard Type
@@ -185,6 +196,15 @@ const EngagementsBetweenCommunitiesMatrix = ({
             <option value={EngagementType.PLANNED}>Planned Engagements</option>
           </select>
         </div>
+        <div className="d-flex align-items-center flex-wrap mb-2 ms-2 gap-3">
+          <span className="text-muted">Legend:</span>
+          {legendItems.map(item => (
+            <div key={item.label} className="d-flex align-items-center gap-2">
+              <LegendSwatch color={item.color} fade={item.fade} />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="clearfix mt-3">
         <div
@@ -193,7 +213,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
           style={{ overflowX: "auto", whiteSpace: "nowrap" }}
         >
           <Table
-            className="event-matrix"
+            className="event-matrix cadence-dashboard"
             responsive
             hover
             id="events-matrix"
