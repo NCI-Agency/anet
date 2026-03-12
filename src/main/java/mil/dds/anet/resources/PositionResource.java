@@ -309,6 +309,8 @@ public class PositionResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Position not found");
     }
 
+    assertPermission(user, position);
+
     // if there is a person in this position, reject
     if (position.getPersonUuid() != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
