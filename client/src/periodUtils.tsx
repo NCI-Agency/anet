@@ -12,6 +12,21 @@ moment.updateLocale("en", {
   }
 })
 
+export enum WeekPeriodKey {
+  ISO_WEEK = "isoWeek",
+  WEEK = "week"
+}
+export const WEEK_PERIOD_KEY = Settings.useISO8601
+  ? WeekPeriodKey.ISO_WEEK
+  : WeekPeriodKey.WEEK
+export enum WeekPeriodFormat {
+  ISO_WEEK = "[W]WW GGGG",
+  WEEK = "[W]ww gggg"
+}
+export const WEEK_PERIOD_FORMAT = Settings.useISO8601
+  ? WeekPeriodFormat.ISO_WEEK
+  : WeekPeriodFormat.WEEK
+
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
 export function formatPeriodBoundary(periodBoundary) {
@@ -55,13 +70,13 @@ export const PERIOD_FACTORIES = {
     end: date.clone().subtract(offset, "days").endOf("day")
   }),
   [RECURRENCE_TYPE.WEEKLY]: (date, offset) => ({
-    start: date.clone().subtract(offset, "weeks").startOf("week"),
-    end: date.clone().subtract(offset, "weeks").endOf("week")
+    start: date.clone().subtract(offset, "weeks").startOf(WEEK_PERIOD_KEY),
+    end: date.clone().subtract(offset, "weeks").endOf(WEEK_PERIOD_KEY)
   }),
   [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
     // every biweekly period's start is even number of weeks apart from reference monday
-    const refMonday = moment(refMondayForBiweekly).startOf("week")
-    const curWeekMonday = date.clone().startOf("week")
+    const refMonday = moment(refMondayForBiweekly).startOf(WEEK_PERIOD_KEY)
+    const curWeekMonday = date.clone().startOf(WEEK_PERIOD_KEY)
 
     const diffInWeeks = refMonday.diff(curWeekMonday, "weeks")
     // current biweekly period's start has to be even number of weeks apart from reference monday
@@ -73,7 +88,7 @@ export const PERIOD_FACTORIES = {
     const curBiweeklyEnd = curBiweeklyStart
       .clone()
       .add(1, "weeks")
-      .endOf("week")
+      .endOf(WEEK_PERIOD_KEY)
 
     return {
       start: curBiweeklyStart.clone().subtract(2 * offset, "weeks"),

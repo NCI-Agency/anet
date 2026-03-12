@@ -26,13 +26,13 @@ import {
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import moment from "moment"
+import { WeekPeriodFormat } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
 import { useLocation } from "react-router-dom"
-import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
@@ -74,7 +74,7 @@ const DEFAULT_PAGESIZE = 25
 
 const AGGREGATION_DATE_FORMATS = {
   DAY: "D MMMM YYYY",
-  WEEK: Settings.useISO8601 ? "[week] W GGGG" : "[week] w gggg",
+  WEEK: WeekPeriodFormat.ISO_WEEK,
   MONTH: "MMMM YYYY"
 }
 const DEFAULT_AGGREGATION_PERIOD = "MONTH"
