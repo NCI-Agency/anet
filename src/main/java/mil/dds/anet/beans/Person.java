@@ -261,24 +261,19 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @GraphQLQuery(name = "position")
-  public CompletableFuture<Position> loadPositionBatched(
-      @GraphQLRootContext GraphQLContext context) {
+  public CompletableFuture<Position> loadPosition(@GraphQLRootContext GraphQLContext context) {
+    return loadPositionByDate(context, null);
+  }
+
+  public CompletableFuture<Position> loadPositionByDate(GraphQLContext context, Instant when) {
     if (position != null) {
       return CompletableFuture.completedFuture(position);
     }
-    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid).thenApply(o -> {
-      position = o;
-      return o;
-    });
-  }
-
-  /* When loaded through means other than GraphQL */
-  public synchronized Position loadPosition() {
-    if (position != null) {
-      return position;
-    }
-    position = engine().getPositionDao().getCurrentPositionForPerson(uuid);
-    return position;
+    return engine().getPositionDao().getPrimaryPositionForPerson(context, uuid, when)
+        .thenApply(o -> {
+          position = o;
+          return o;
+        });
   }
 
   @GraphQLInputField(name = "position")
@@ -386,7 +381,7 @@ public class Person extends AbstractEmailableAnetBean
     if (entityAvatar != null) {
       return CompletableFuture.completedFuture(entityAvatar);
     }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATARS, uuid)
         .thenApply(o -> {
           entityAvatar = o;
           return o;

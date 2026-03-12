@@ -14,10 +14,12 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,11 +28,14 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false}")
 public class ReportApprovalWorker extends AbstractWorker {
 
+  private final AuditTrailDao auditTrailDao;
   private final ReportDao dao;
 
-  public ReportApprovalWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, ReportDao dao) {
+  public ReportApprovalWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
+      AuditTrailDao auditTrailDao, ReportDao dao) {
     super(dict, jobHistoryDao,
         "Report Approval Worker waking up to check for reports to be approved");
+    this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }
 
@@ -72,9 +77,10 @@ public class ReportApprovalWorker extends AbstractWorker {
                   logger.error("Couldn't process report approval for report {} step {}",
                       r.getUuid(), DaoUtils.getUuid(approvalStep));
                 } else {
-                  AnetAuditLogger.log(
-                      "report {} step {} automatically approved by the ReportApprovalWorker",
-                      r.getUuid(), DaoUtils.getUuid(approvalStep));
+                  auditTrailDao.logUpdate(null, ReportDao.TABLE_NAME, r,
+                      "report has been automatically approved by the ReportApprovalWorker",
+                      Utils.getElementDetails("approval step: ", ApprovalStepDao.TABLE_NAME,
+                          approvalStep.getUuid()));
                 }
               } catch (Exception e) {
                 logger.error("Exception when approving report", e);

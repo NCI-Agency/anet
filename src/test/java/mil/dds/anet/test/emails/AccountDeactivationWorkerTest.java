@@ -18,6 +18,7 @@ import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
@@ -42,6 +43,7 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
 
   private JobHistoryDao jobHistoryDao;
   private AnetDictionary dict;
+  private AuditTrailDao auditTrailDao;
   private PersonDao personDao;
   private PositionDao positionDao;
 
@@ -49,6 +51,7 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
   public void setup() {
     jobHistoryDao = ApplicationContextProvider.getEngine().getJobHistoryDao();
     dict = Mockito.mock(AnetDictionary.class, Mockito.RETURNS_MOCKS);
+    auditTrailDao = Mockito.mock(AuditTrailDao.class, Mockito.RETURNS_MOCKS);
     personDao = Mockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);
     positionDao = Mockito.mock(PositionDao.class, Mockito.RETURNS_MOCKS);
 
@@ -106,7 +109,7 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(dict, jobHistoryDao, personDao, positionDao);
+        new AccountDeactivationWorker(dict, jobHistoryDao, auditTrailDao, personDao, positionDao);
     accountDeactivationWorker.run();
 
     // Verify
@@ -143,7 +146,7 @@ class AccountDeactivationWorkerTest extends AbstractResourceTest {
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(dict, jobHistoryDao, personDao, positionDao);
+        new AccountDeactivationWorker(dict, jobHistoryDao, auditTrailDao, personDao, positionDao);
     accountDeactivationWorker.run();
 
     // Verify

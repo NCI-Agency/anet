@@ -15,6 +15,24 @@ const gqlCommonSubscribableEntityFields = `
   isSubscribed
 `
 
+// AccessToken
+export const gqlMinimalAccessTokenFields = `
+  uuid
+  name
+  scope
+  description
+  expiresAt
+`
+
+export const gqlBasicAccessTokenFields = `
+  ${gqlMinimalAccessTokenFields}
+  ${gqlCommonEntityFields}
+`
+
+export const gqlAllAccessTokenFields = `
+  ${gqlBasicAccessTokenFields}
+`
+
 // Attachment
 export const gqlMinimalAttachmentFields = `
   uuid
@@ -423,7 +441,7 @@ export const gqlSubscriptionUpdateFields = `
   updatedObjectUuid
 `
 
-export const gqlRelatedObjectFields = `
+export const gqlSubscribableObjectFields = `
   ... on AuthorizationGroup {
     ${gqlEntityFieldsMap.AuthorizationGroup}
   }
@@ -453,6 +471,13 @@ export const gqlRelatedObjectFields = `
   }
 `
 
+export const gqlRelatedObjectFields = `
+  ${gqlSubscribableObjectFields}
+  ... on Attachment {
+    ${gqlEntityFieldsMap.Attachment}
+  }
+`
+
 export const gqlApprovalStepFields = `
   uuid
   name
@@ -463,6 +488,20 @@ export const gqlApprovalStepFields = `
     person {
       ${gqlEntityFieldsMap.Person}
     }
+  }
+`
+
+export const gqlAuditTrailFields = `
+  uuid
+  createdAt
+  updateType
+  objectUuid
+  updateDescription
+  updateDetails
+  relatedObjectType
+  relatedObjectUuid
+  person {
+    ${gqlEntityFieldsMap.Person}
   }
 `
 

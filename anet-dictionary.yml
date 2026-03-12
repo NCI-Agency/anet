@@ -15,8 +15,8 @@ calendarOptions:
 useISO8601: true
 dateFormats:
   email:
-    date: d MMMM yyyy Z
-    withTime: d MMMM yyyy @ HH:mm Z
+    date: d MMMM yyyy
+    withTime: d MMMM yyyy @ HH:mm
   excel: d MMMM yyyy
   upToDateCheck: dd-MM-yyyy HH:mm:ss.SSS
   forms:

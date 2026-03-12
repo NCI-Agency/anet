@@ -34,6 +34,7 @@ import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
@@ -159,6 +160,7 @@ const OrganizationForm = ({
               Save Organization
             </Button>
             {notesComponent}
+            {edit && <ObjectHistory objectUuid={values.uuid} />}
           </>
         )
         const tasksFilters = {

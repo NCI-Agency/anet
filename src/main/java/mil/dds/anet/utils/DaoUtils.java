@@ -125,7 +125,8 @@ public class DaoUtils {
   }
 
   public static Position getPosition(final Person user) {
-    return user == null ? null : user.loadPosition();
+    return user == null ? null
+        : user.loadPosition(ApplicationContextProvider.getEngine().getContext()).join();
   }
 
   public static void saveCustomSensitiveInformation(final Person user, final String tableName,

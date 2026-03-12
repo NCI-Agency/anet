@@ -31,7 +31,6 @@ TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
 TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
-TRUNCATE TABLE "people" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 -- Skip preferences, as these are inserted by the migrations
@@ -53,6 +52,9 @@ TRUNCATE TABLE "users" CASCADE;
 
 -- Countries are inserted by the migrations!
 DELETE FROM "locations" WHERE type != 'PAC';
+
+-- ANET Importer user is inserted by the migrations!
+DELETE FROM "people" WHERE name != 'ANET Importer';
 
 -- Make sure everything is in UTC
 SET time zone 'UTC';
@@ -1167,12 +1169,12 @@ INSERT INTO "adminSettings" (key, value) VALUES
 
 -- System user, used when importing data that can't be linked to any specific user
 INSERT INTO PEOPLE (uuid, name, status, "createdAt", "updatedAt")
-  SELECT 'a163cd6f-98ac-4a61-896c-9444dd1293af', 'ANET Importer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+  SELECT uuid_generate_v4(), 'ANET Importer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
   WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer');
 
 -- Tag some reports
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as bribery - Giving/Promising money or something valuable to corrupt the behavior of a public official',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1182,7 +1184,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as embezzlement - Steal or misappropriate money from the organization the person works for',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1192,7 +1194,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('01463629-8670-475f-9e0a-a1bf594f9eda', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('01463629-8670-475f-9e0a-a1bf594f9eda', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as patronage - Leaders illegally appointing someone to a position',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1202,7 +1204,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
-  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
+  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', (SELECT uuid FROM people WHERE name = 'ANET Importer'),
     'Previously tagged as facilitation payment - Payment made to a government official that acts as an incentive to complete an action quickly',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1588,13 +1590,13 @@ UPDATE reports SET "eventUuid" = 'e850846e-9741-40e8-bc51-4dccc30cf47f' WHERE uu
 -- Insert Web Service tokens
 -- you can generate new tokens with e.g.:
 -- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
-INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt", "scope") VALUES
+INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "updatedAt", "expiresAt", "scope") VALUES
   -- NVG token value is 'XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv'
-  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token for NVG', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 0),
+  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token for NVG', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 0),
   -- GRAPHQL token value is W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf
-  ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 1),
+  ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 1),
   -- GRAPHQL expired token value is 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn
-  ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
+  ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
 
 -- Test data for assessments
 

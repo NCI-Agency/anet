@@ -204,7 +204,7 @@ public class Event extends EventSeries {
       return CompletableFuture.completedFuture(eventType.getForeignObject());
     }
     return new UuidFetcher<EventType>()
-        .load(context, IdDataLoaderKey.EVENT_TYPE, eventType.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.EVENT_TYPES, eventType.getForeignUuid()).thenApply(o -> {
           eventType.setForeignObject(o);
           return o;
         });
@@ -246,7 +246,7 @@ public class Event extends EventSeries {
     if (entityAvatar != null) {
       return CompletableFuture.completedFuture(entityAvatar);
     }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATARS, uuid)
         .thenApply(o -> {
           entityAvatar = o;
           return o;
