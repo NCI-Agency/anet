@@ -972,7 +972,7 @@ public class Utils {
         final String label = attachment.getObjectLabel();
         final Element innerNode =
             new Element(SPAN_TAG).classNames(Set.of("rich-text-image-wrapper"));
-        innerNode.appendChild(new Element("img")
+        innerNode.appendChild(new Element("img").classNames(Set.of("rich-text-image"))
             .attr("src", String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
             .attr("alt", label));
         innerNode.appendChild(
