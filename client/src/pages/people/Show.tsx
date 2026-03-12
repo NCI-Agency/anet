@@ -13,6 +13,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -251,160 +252,162 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
 
   return (
-    <div>
-      <div className="float-end">
-        <GuidedTour
-          title="Take a guided tour of this person's page."
-          tour={personTour}
-          autostart={
-            localStorage.newUser === "true" &&
-            localStorage.hasSeenPersonTour !== "true"
-          }
-          onEnd={() => (localStorage.hasSeenPersonTour = "true")}
-        />
-      </div>
-      <Messages error={stateError} success={stateSuccess} />
-      <div className="form-horizontal">
-        <Fieldset
-          id="info"
-          title={
-            <>
-              {
-                <SubscriptionIcon
-                  subscribedObjectType="people"
-                  subscribedObjectUuid={person.uuid}
-                  isSubscribed={person.isSubscribed}
-                  updatedAt={person.updatedAt}
-                  refetch={refetch}
-                  setError={error => {
-                    setStateError(error)
-                    jumpToTop()
-                  }}
-                  persistent
-                />
-              }{" "}
-              {person.rank} {Person.militaryName(person.name)}
-            </>
-          }
-          action={action}
-        />
-        <Fieldset>
-          <Container fluid>
-            <Row>
-              <Col md={6}>
-                <div className="text-center">
-                  <EntityAvatarDisplay
-                    avatar={avatar}
-                    defaultAvatar={Person.relatedObjectType}
-                  />
-                </div>
-                {leftColumnUnderAvatar}
-              </Col>
-              <Col md={6}>{rightColumn}</Col>
-            </Row>
-            <Row>
-              <Col md={12}>{fullWidthFields}</Col>
-              {attachmentsEnabled && (
-                <Col md={12}>
-                  <FieldHelper.ReadonlyField
-                    field={{ name: "attachments" }}
-                    label="Attachments"
-                    humanValue={
-                      <AttachmentsDetailView
-                        attachments={attachments}
-                        updateAttachments={setAttachments}
-                        relatedObjectType={Person.relatedObjectType}
-                        relatedObjectUuid={person.uuid}
-                        allowEdit={canEdit}
-                      />
-                    }
-                  />
-                </Col>
-              )}
-            </Row>
-          </Container>
-        </Fieldset>
-
-        {canEditPosition && (
-          <AssignPositionModal
-            showModal={showAssignPositionModal}
-            person={person}
-            currentPosition={person?.position}
-            primary
-            onCancel={() => hideAssignPositionModal(false)}
-            onSuccess={() => hideAssignPositionModal(true)}
-          />
-        )}
-
-        {hasPosition && (
-          <Fieldset
-            title="Assigned counterparts"
-            action={
-              canEdit && (
-                <Button
-                  onClick={() => setShowAssociatedPositionsModal(true)}
-                  variant="outline-secondary"
-                >
-                  Change assigned counterparts
-                </Button>
-              )
+    <AttachmentContext.Provider value={person}>
+      <div>
+        <div className="float-end">
+          <GuidedTour
+            title="Take a guided tour of this person's page."
+            tour={personTour}
+            autostart={
+              localStorage.newUser === "true" &&
+              localStorage.hasSeenPersonTour !== "true"
             }
-          >
-            {renderCounterparts(position)}
-            {canEdit && (
-              <EditAssociatedPositionsModal
-                position={position}
-                showModal={showAssociatedPositionsModal}
-                onCancel={() => hideAssociatedPositionsModal(false)}
-                onSuccess={() => hideAssociatedPositionsModal(true)}
-              />
-            )}
+            onEnd={() => (localStorage.hasSeenPersonTour = "true")}
+          />
+        </div>
+        <Messages error={stateError} success={stateSuccess} />
+        <div className="form-horizontal">
+          <Fieldset
+            id="info"
+            title={
+              <>
+                {
+                  <SubscriptionIcon
+                    subscribedObjectType="people"
+                    subscribedObjectUuid={person.uuid}
+                    isSubscribed={person.isSubscribed}
+                    updatedAt={person.updatedAt}
+                    refetch={refetch}
+                    setError={error => {
+                      setStateError(error)
+                      jumpToTop()
+                    }}
+                    persistent
+                  />
+                }{" "}
+                {person.rank} {Person.militaryName(person.name)}
+              </>
+            }
+            action={action}
+          />
+          <Fieldset>
+            <Container fluid>
+              <Row>
+                <Col md={6}>
+                  <div className="text-center">
+                    <EntityAvatarDisplay
+                      avatar={avatar}
+                      defaultAvatar={Person.relatedObjectType}
+                    />
+                  </div>
+                  {leftColumnUnderAvatar}
+                </Col>
+                <Col md={6}>{rightColumn}</Col>
+              </Row>
+              <Row>
+                <Col md={12}>{fullWidthFields}</Col>
+                {attachmentsEnabled && (
+                  <Col md={12}>
+                    <FieldHelper.ReadonlyField
+                      field={{ name: "attachments" }}
+                      label="Attachments"
+                      humanValue={
+                        <AttachmentsDetailView
+                          attachments={attachments}
+                          updateAttachments={setAttachments}
+                          relatedObjectType={Person.relatedObjectType}
+                          relatedObjectUuid={person.uuid}
+                          allowEdit={canEdit}
+                        />
+                      }
+                    />
+                  </Col>
+                )}
+              </Row>
+            </Container>
           </Fieldset>
-        )}
-        {isAdmin && (
-          <EditHistory
-            historyEntityType="position"
-            parentEntityUuid={person.uuid}
-            mainTitle="Edit position history"
-            initialHistory={person.previousPositions}
-            showModal={showHistoryModal}
-            setShowModal={setShowHistoryModal}
-            setHistory={history => onSavePreviousPositions(history)}
-          />
-        )}
-        <Fieldset title="Reports authored" id="reports-authored">
-          <ReportCollection
-            paginationKey={`r_authored_${uuid}`}
-            queryParams={{
-              authorUuid: uuid
-            }}
-            mapId="reports-authored"
-          />
-        </Fieldset>
-        <Fieldset
-          title={`Reports attended by ${person.name}`}
-          id="reports-attended"
-        >
-          <ReportCollection
-            paginationKey={`r_attended_${uuid}`}
-            queryParams={{
-              attendeeUuid: uuid
-            }}
-            mapId="reports-attended"
-          />
-        </Fieldset>
+
+          {canEditPosition && (
+            <AssignPositionModal
+              showModal={showAssignPositionModal}
+              person={person}
+              currentPosition={person?.position}
+              primary
+              onCancel={() => hideAssignPositionModal(false)}
+              onSuccess={() => hideAssignPositionModal(true)}
+            />
+          )}
+
+          {hasPosition && (
+            <Fieldset
+              title="Assigned counterparts"
+              action={
+                canEdit && (
+                  <Button
+                    onClick={() => setShowAssociatedPositionsModal(true)}
+                    variant="outline-secondary"
+                  >
+                    Change assigned counterparts
+                  </Button>
+                )
+              }
+            >
+              {renderCounterparts(position)}
+              {canEdit && (
+                <EditAssociatedPositionsModal
+                  position={position}
+                  showModal={showAssociatedPositionsModal}
+                  onCancel={() => hideAssociatedPositionsModal(false)}
+                  onSuccess={() => hideAssociatedPositionsModal(true)}
+                />
+              )}
+            </Fieldset>
+          )}
+          {isAdmin && (
+            <EditHistory
+              historyEntityType="position"
+              parentEntityUuid={person.uuid}
+              mainTitle="Edit position history"
+              initialHistory={person.previousPositions}
+              showModal={showHistoryModal}
+              setShowModal={setShowHistoryModal}
+              setHistory={history => onSavePreviousPositions(history)}
+            />
+          )}
+          <Fieldset title="Reports authored" id="reports-authored">
+            <ReportCollection
+              paginationKey={`r_authored_${uuid}`}
+              queryParams={{
+                authorUuid: uuid
+              }}
+              mapId="reports-authored"
+            />
+          </Fieldset>
+          <Fieldset
+            title={`Reports attended by ${person.name}`}
+            id="reports-attended"
+          >
+            <ReportCollection
+              paginationKey={`r_attended_${uuid}`}
+              queryParams={{
+                attendeeUuid: uuid
+              }}
+              mapId="reports-attended"
+            />
+          </Fieldset>
+        </div>
+        <AssessmentResultsContainer
+          entity={person}
+          entityType={Person}
+          canAddPeriodicAssessment={canAddPeriodicAssessment}
+          canAddOndemandAssessment={canAddOndemandAssessment}
+          onUpdateAssessment={() => {
+            loadAppData()
+            refetch()
+          }}
+        />
       </div>
-      <AssessmentResultsContainer
-        entity={person}
-        entityType={Person}
-        canAddPeriodicAssessment={canAddPeriodicAssessment}
-        canAddOndemandAssessment={canAddOndemandAssessment}
-        onUpdateAssessment={() => {
-          loadAppData()
-          refetch()
-        }}
-      />
-    </div>
+    </AttachmentContext.Provider>
   )
 
   function orderPersonFields() {

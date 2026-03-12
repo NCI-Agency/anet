@@ -1,5 +1,5 @@
 import MultiTypeAdvancedSelectComponent, {
-  ALL_ENTITY_TYPES
+  ENTITY_TYPES
 } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import * as FieldHelper from "components/FieldHelper"
 import { FastField, Form, Formik } from "formik"
@@ -8,7 +8,12 @@ import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { getSelectedParentNode } from "richTextUtils"
 import { Transforms } from "slate"
 import { ReactEditor } from "slate-react"
-import { ANET_LINK, EXTERNAL_LINK, getEntityInfoFromUrl } from "utils_links"
+import {
+  ANET_ATTACHMENT_LINK,
+  ANET_LINK,
+  EXTERNAL_LINK,
+  getEntityInfoFromUrl
+} from "utils_links"
 import * as yup from "yup"
 
 interface LinkSourceAnetProps {
@@ -16,15 +21,21 @@ interface LinkSourceAnetProps {
   showModal?: boolean
   setShowModal: (...args: unknown[]) => unknown
   external?: boolean
+  title: string
+  createLinkNode: (...args: unknown[]) => unknown
+  entityTypes?: any[]
 }
 
 const LinkSourceAnet = ({
   editor,
   showModal,
   setShowModal,
-  external = false
+  external = false,
+  title,
+  createLinkNode,
+  entityTypes
 }: LinkSourceAnetProps) => {
-  const insertAnetLink = useCallback(
+  const insertLink = useCallback(
     node => {
       ReactEditor.focus(editor)
       if (editor.selection) {
@@ -64,9 +75,7 @@ const LinkSourceAnet = ({
       onHide={() => setShowModal(false)}
     >
       <Modal.Header closeButton>
-        <Modal.Title>
-          {external ? "Link to external" : "Link to ANET entity"}
-        </Modal.Title>
+        <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {external ? (
@@ -75,24 +84,21 @@ const LinkSourceAnet = ({
             text={value?.text}
             // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
             onConfirm={(values, form) => {
-              const externalLinkNode = createExternalLinkNode(
-                values.url,
-                values.text
-              )
-              insertAnetLink(externalLinkNode)
+              const externalLinkNode = createLinkNode(values.url, values.text)
+              insertLink(externalLinkNode)
             }}
             onCancel={() => setShowModal(false)}
           />
         ) : (
           <MultiTypeAdvancedSelectComponent
             objectType={value?.objectType}
-            entityTypes={ALL_ENTITY_TYPES}
+            entityTypes={entityTypes}
             value={value?.object}
             valueKey="uuid"
             onConfirm={(value, objectType) => {
               if (value?.uuid) {
-                const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
-                insertAnetLink(anetLinkNode)
+                const anetLinkNode = createLinkNode(objectType, value.uuid)
+                insertLink(anetLinkNode)
               }
             }}
           />
@@ -159,16 +165,19 @@ const ExternalLinkForm = ({
   )
 }
 
-function createAnetLinkNode(entityType, entityUuid) {
+export function createAnetLinkNode(entityType, entityUuid) {
   return {
-    type: ANET_LINK,
+    type:
+      entityType === ENTITY_TYPES.ATTACHMENTS
+        ? ANET_ATTACHMENT_LINK
+        : ANET_LINK,
     entityType,
     entityUuid,
     children: [{ text: "" }]
   }
 }
 
-function createExternalLinkNode(url, text) {
+export function createExternalLinkNode(url, text) {
   const entityInfo = getEntityInfoFromUrl(url)
   if (entityInfo.type === ANET_LINK) {
     return createAnetLinkNode(entityInfo.entityType, entityInfo.entityUuid)
@@ -189,7 +198,10 @@ function getParentNodeProps(editor, external) {
       url: selectedParent.url,
       text: selectedParent.children?.[0]?.text
     }
-  } else if (!external && selectedParent?.type === ANET_LINK) {
+  } else if (
+    !external &&
+    [ANET_LINK, ANET_ATTACHMENT_LINK].includes(selectedParent?.type)
+  ) {
     value = {
       objectType: selectedParent.entityType,
       object: selectedParent.entityUuid

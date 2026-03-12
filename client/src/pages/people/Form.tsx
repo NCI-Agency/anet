@@ -5,6 +5,7 @@ import API from "api"
 import { CountryOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import CustomDateInput from "components/CustomDateInput"
@@ -245,586 +246,595 @@ const PersonForm = ({
         )
 
         return (
-          <>
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
-            <Form className="form-horizontal" method="post">
-              <MessagesWithConflict
-                error={error}
-                objectType="Person"
-                onCancel={onCancel}
-                onConfirm={() => {
-                  resetForm({ values, isSubmitting: true })
-                  onSubmit(values, { resetForm, setSubmitting }, true)
-                }}
-              />
-              <Fieldset title={title} action={action} />
-              <Fieldset>
-                {/* Main Row for the first FieldSet */}
-                <Row>
-                  {edit && (
-                    /* Col contains the avatar and edit button */
-                    <Col lg={4} xl={3} className="text-center">
-                      <EntityAvatarComponent
-                        initialAvatar={initialValues.entityAvatar}
-                        relatedObjectType="people"
-                        relatedObjectUuid={initialValues.uuid}
-                        relatedObjectName={initialValues.name}
-                        editMode={attachmentEditEnabled}
-                        imageAttachments={imageAttachments}
-                      />
-                    </Col>
-                  )}
-                  {/* Col contains the rest of the fields for the first FieldSet */}
-                  <Col
-                    lg={8}
-                    xl={9}
-                    className="d-flex flex-column justify-content-center"
-                  >
-                    <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
-                        <Col sm={2} as={FormLabel} htmlFor="lastName">
-                          Name
-                        </Col>
-                        <Col sm={7}>
-                          <Row>
-                            <Col>
-                              <DictionaryField
-                                wrappedComponent={Field}
-                                dictProps={Settings.fields.person.lastName}
-                                name="lastName"
-                                component={FieldHelper.InputFieldNoLabel}
-                                display="inline"
-                                disabled={!canEditName}
-                                onKeyDown={handleLastNameOnKeyDown}
-                                onChange={event => {
-                                  setFieldValue("lastName", event.target.value)
-                                  setPersonLastName(event.target.value)
-                                }}
-                              />
-                            </Col>
-                            ,
-                            <Col>
-                              <DictionaryField
-                                wrappedComponent={Field}
-                                dictProps={Settings.fields.person.firstName}
-                                name="firstName"
-                                component={FieldHelper.InputFieldNoLabel}
-                                display="inline"
-                                disabled={!canEditName}
-                                onChange={event => {
-                                  setFieldValue("firstName", event.target.value)
-                                  setPersonFirstName(event.target.value)
-                                }}
-                              />
-                            </Col>
-                          </Row>
-                        </Col>
-                        {showSimilarPeopleMessage && (
-                          <Col>
-                            <Button
-                              variant="outline-secondary"
-                              onClick={() => setShowSimilarPeople(true)}
-                            >
-                              <Icon
-                                icon={IconNames.WARNING_SIGN}
-                                intent={Intent.WARNING}
-                                size={IconSize.STANDARD}
-                                style={{ margin: "0 6px" }}
-                              />
-                              Possible Duplicates
-                            </Button>
+          <AttachmentContext.Provider value={values}>
+            <div>
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <Form className="form-horizontal" method="post">
+                <MessagesWithConflict
+                  error={error}
+                  objectType="Person"
+                  onCancel={onCancel}
+                  onConfirm={() => {
+                    resetForm({ values, isSubmitting: true })
+                    onSubmit(values, { resetForm, setSubmitting }, true)
+                  }}
+                />
+                <Fieldset title={title} action={action} />
+                <Fieldset>
+                  {/* Main Row for the first FieldSet */}
+                  <Row>
+                    {edit && (
+                      /* Col contains the avatar and edit button */
+                      <Col lg={4} xl={3} className="text-center">
+                        <EntityAvatarComponent
+                          initialAvatar={initialValues.entityAvatar}
+                          relatedObjectType="people"
+                          relatedObjectUuid={initialValues.uuid}
+                          relatedObjectName={initialValues.name}
+                          editMode={attachmentEditEnabled}
+                          imageAttachments={imageAttachments}
+                        />
+                      </Col>
+                    )}
+                    {/* Col contains the rest of the fields for the first FieldSet */}
+                    <Col
+                      lg={8}
+                      xl={9}
+                      className="d-flex flex-column justify-content-center"
+                    >
+                      <FormGroup>
+                        <Row style={{ marginBottom: "1rem" }}>
+                          <Col sm={2} as={FormLabel} htmlFor="lastName">
+                            Name
                           </Col>
-                        )}
+                          <Col sm={7}>
+                            <Row>
+                              <Col>
+                                <DictionaryField
+                                  wrappedComponent={Field}
+                                  dictProps={Settings.fields.person.lastName}
+                                  name="lastName"
+                                  component={FieldHelper.InputFieldNoLabel}
+                                  display="inline"
+                                  disabled={!canEditName}
+                                  onKeyDown={handleLastNameOnKeyDown}
+                                  onChange={event => {
+                                    setFieldValue(
+                                      "lastName",
+                                      event.target.value
+                                    )
+                                    setPersonLastName(event.target.value)
+                                  }}
+                                />
+                              </Col>
+                              ,
+                              <Col>
+                                <DictionaryField
+                                  wrappedComponent={Field}
+                                  dictProps={Settings.fields.person.firstName}
+                                  name="firstName"
+                                  component={FieldHelper.InputFieldNoLabel}
+                                  display="inline"
+                                  disabled={!canEditName}
+                                  onChange={event => {
+                                    setFieldValue(
+                                      "firstName",
+                                      event.target.value
+                                    )
+                                    setPersonFirstName(event.target.value)
+                                  }}
+                                />
+                              </Col>
+                            </Row>
+                          </Col>
+                          {showSimilarPeopleMessage && (
+                            <Col>
+                              <Button
+                                variant="outline-secondary"
+                                onClick={() => setShowSimilarPeople(true)}
+                              >
+                                <Icon
+                                  icon={IconNames.WARNING_SIGN}
+                                  intent={Intent.WARNING}
+                                  size={IconSize.STANDARD}
+                                  style={{ margin: "0 6px" }}
+                                />
+                                Possible Duplicates
+                              </Button>
+                            </Col>
+                          )}
 
-                        {!forOnboarding && edit && (
-                          <Col>
-                            <TriggerableConfirm
-                              onConfirm={async () => {
-                                // Have to wait until field value is updated before we can submit the form
-                                await setFieldValue(
-                                  "status",
-                                  Model.STATUS.INACTIVE
-                                )
-                                setOnSaveRedirectToHome(
-                                  wrongPersonOptionValue === "needNewAccount"
-                                )
-                                await submitForm()
-                              }}
-                              title="Confirm to reset account"
-                              body="Are you sure you want to reset this account?"
-                              confirmText={confirmLabel}
-                              cancelText="No, I am not entirely sure at this point"
-                              variant="warning"
-                              buttonLabel="Reset account"
-                              buttonClassName="visually-hidden"
-                              buttonRef={confirmHasReplacementButton}
-                            />
-                            <Button
-                              id="wrongPerson"
-                              variant="outline-secondary"
-                              onClick={() => setShowWrongPersonModal(true)}
-                            >
-                              {nameMessage}
-                            </Button>
-                            <OptionListModal
-                              title={modalTitle}
-                              showModal={showWrongPersonModal}
-                              onCancel={() => hideWrongPersonModal(null)}
-                              onSuccess={optionValue =>
-                                hideWrongPersonModal(optionValue)
+                          {!forOnboarding && edit && (
+                            <Col>
+                              <TriggerableConfirm
+                                onConfirm={async () => {
+                                  // Have to wait until field value is updated before we can submit the form
+                                  await setFieldValue(
+                                    "status",
+                                    Model.STATUS.INACTIVE
+                                  )
+                                  setOnSaveRedirectToHome(
+                                    wrongPersonOptionValue === "needNewAccount"
+                                  )
+                                  await submitForm()
+                                }}
+                                title="Confirm to reset account"
+                                body="Are you sure you want to reset this account?"
+                                confirmText={confirmLabel}
+                                cancelText="No, I am not entirely sure at this point"
+                                variant="warning"
+                                buttonLabel="Reset account"
+                                buttonClassName="visually-hidden"
+                                buttonRef={confirmHasReplacementButton}
+                              />
+                              <Button
+                                id="wrongPerson"
+                                variant="outline-secondary"
+                                onClick={() => setShowWrongPersonModal(true)}
+                              >
+                                {nameMessage}
+                              </Button>
+                              <OptionListModal
+                                title={modalTitle}
+                                showModal={showWrongPersonModal}
+                                onCancel={() => hideWrongPersonModal(null)}
+                                onSuccess={optionValue =>
+                                  hideWrongPersonModal(optionValue)
+                                }
+                              >
+                                {(isSelf && (
+                                  <div>
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="needNewAccount"
+                                      label={
+                                        <>
+                                          <em>{fullName}</em> has left and is
+                                          replaced by me. I need to set up a new
+                                          account.
+                                        </>
+                                      }
+                                      id="wrongPerson-needNewAccount"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="haveAccount"
+                                      label={
+                                        <>
+                                          <em>{fullName}</em> has left and is
+                                          replaced by me. I already have an
+                                          account.
+                                        </>
+                                      }
+                                      id="wrongPerson-haveAccount"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="transferAccount"
+                                      label={
+                                        <>
+                                          <em>{fullName}</em> is still active,
+                                          but this should be my account.
+                                        </>
+                                      }
+                                      id="wrongPerson-transferAccount"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="misspelledName"
+                                      label={
+                                        <>
+                                          I am <em>{fullName}</em>, but my name
+                                          is misspelled.
+                                        </>
+                                      }
+                                      id="wrongPerson-misspelledName"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="otherError"
+                                      label="Something else is wrong."
+                                      id="wrongPerson-otherError"
+                                    />
+                                  </div>
+                                )) || (
+                                  <div>
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="leftVacant"
+                                      label={
+                                        <>
+                                          <em>{fullName}</em> has left and the
+                                          position is vacant.
+                                        </>
+                                      }
+                                      id="wrongPerson-leftVacant"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="hasReplacement"
+                                      label={
+                                        <>
+                                          <em>{fullName}</em> has left and has a
+                                          replacement.
+                                        </>
+                                      }
+                                      id="wrongPerson-hasReplacement"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="misspelledName"
+                                      label={
+                                        <>
+                                          The name of <em>{fullName}</em> is
+                                          misspelled.
+                                        </>
+                                      }
+                                      id="wrongPerson-misspelledName"
+                                    />
+                                    <FormCheck
+                                      type="radio"
+                                      name="wrongPerson"
+                                      value="otherError"
+                                      label="Something else is wrong."
+                                      id="wrongPerson-otherError"
+                                    />
+                                  </div>
+                                )}
+                              </OptionListModal>
+                            </Col>
+                          )}
+                        </Row>
+                      </FormGroup>
+
+                      {!forOnboarding && isAdmin && (
+                        <>
+                          <DictionaryField
+                            wrappedComponent={FastField}
+                            dictProps={Settings.fields.person.user}
+                            name="user"
+                            component={FieldHelper.RadioButtonToggleGroupField}
+                            buttons={[
+                              {
+                                id: "isUser",
+                                value: true,
+                                label: "Yes"
+                              },
+                              {
+                                id: "isNotUser",
+                                value: false,
+                                label: "No"
                               }
-                            >
-                              {(isSelf && (
-                                <div>
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="needNewAccount"
-                                    label={
-                                      <>
-                                        <em>{fullName}</em> has left and is
-                                        replaced by me. I need to set up a new
-                                        account.
-                                      </>
-                                    }
-                                    id="wrongPerson-needNewAccount"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="haveAccount"
-                                    label={
-                                      <>
-                                        <em>{fullName}</em> has left and is
-                                        replaced by me. I already have an
-                                        account.
-                                      </>
-                                    }
-                                    id="wrongPerson-haveAccount"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="transferAccount"
-                                    label={
-                                      <>
-                                        <em>{fullName}</em> is still active, but
-                                        this should be my account.
-                                      </>
-                                    }
-                                    id="wrongPerson-transferAccount"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="misspelledName"
-                                    label={
-                                      <>
-                                        I am <em>{fullName}</em>, but my name is
-                                        misspelled.
-                                      </>
-                                    }
-                                    id="wrongPerson-misspelledName"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="otherError"
-                                    label="Something else is wrong."
-                                    id="wrongPerson-otherError"
-                                  />
-                                </div>
-                              )) || (
-                                <div>
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="leftVacant"
-                                    label={
-                                      <>
-                                        <em>{fullName}</em> has left and the
-                                        position is vacant.
-                                      </>
-                                    }
-                                    id="wrongPerson-leftVacant"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="hasReplacement"
-                                    label={
-                                      <>
-                                        <em>{fullName}</em> has left and has a
-                                        replacement.
-                                      </>
-                                    }
-                                    id="wrongPerson-hasReplacement"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="misspelledName"
-                                    label={
-                                      <>
-                                        The name of <em>{fullName}</em> is
-                                        misspelled.
-                                      </>
-                                    }
-                                    id="wrongPerson-misspelledName"
-                                  />
-                                  <FormCheck
-                                    type="radio"
-                                    name="wrongPerson"
-                                    value="otherError"
-                                    label="Something else is wrong."
-                                    id="wrongPerson-otherError"
-                                  />
-                                </div>
-                              )}
-                            </OptionListModal>
-                          </Col>
-                        )}
-                      </Row>
-                    </FormGroup>
+                            ]}
+                            onChange={value => setFieldValue("user", value)}
+                          >
+                            {values.user && (
+                              <Alert variant="warning">
+                                Creating a user in ANET could result in
+                                duplicate accounts if this person logs in later.
+                                If you notice duplicate accounts you should take
+                                action.
+                              </Alert>
+                            )}
+                          </DictionaryField>
 
-                    {!forOnboarding && isAdmin && (
-                      <>
+                          {values.user && (
+                            <DictionaryField
+                              wrappedComponent={FastField}
+                              as="div"
+                              dictProps={Settings.fields.person.users}
+                              component={FieldHelper.SpecialField}
+                              extraColElem={
+                                <span className="text-danger">
+                                  Be careful when editing this field; you might
+                                  lock someone out.
+                                </span>
+                              }
+                              widget={<UserInputTable users={values.users} />}
+                            />
+                          )}
+                        </>
+                      )}
+
+                      {disableStatusChange ? (
                         <DictionaryField
                           wrappedComponent={FastField}
-                          dictProps={Settings.fields.person.user}
-                          name="user"
+                          dictProps={Settings.fields.person.status}
+                          name="status"
+                          component={FieldHelper.ReadonlyField}
+                          humanValue={Person.humanNameOfStatus(values.status)}
+                        />
+                      ) : (
+                        <DictionaryField
+                          wrappedComponent={Field}
+                          dictProps={Settings.fields.person.status}
+                          name="status"
                           component={FieldHelper.RadioButtonToggleGroupField}
-                          buttons={[
-                            {
-                              id: "isUser",
-                              value: true,
-                              label: "Yes"
-                            },
-                            {
-                              id: "isNotUser",
-                              value: false,
-                              label: "No"
-                            }
-                          ]}
-                          onChange={value => setFieldValue("user", value)}
+                          buttons={statusButtons}
+                          onChange={value => setFieldValue("status", value)}
                         >
-                          {values.user && (
+                          {willAutoKickPosition && (
                             <Alert variant="warning">
-                              Creating a user in ANET could result in duplicate
-                              accounts if this person logs in later. If you
-                              notice duplicate accounts you should take action.
+                              <p>
+                                {`Setting this person to inactive will automatically remove them
++                               from the following ${pluralize("position", getNumberOfPositions(values))}:`}
+                              </p>
+
+                              <ul className="mb-0">
+                                {values.position?.name && (
+                                  <li>
+                                    <strong>{values.position.name}</strong>
+                                  </li>
+                                )}
+
+                                {values.additionalPositions?.map(p => (
+                                  <li key={p.id ?? p.name}>
+                                    <strong>{p.name}</strong>
+                                  </li>
+                                ))}
+                              </ul>
                             </Alert>
                           )}
                         </DictionaryField>
+                      )}
+                    </Col>
+                  </Row>
+                </Fieldset>
 
-                        {values.user && (
-                          <DictionaryField
-                            wrappedComponent={FastField}
-                            as="div"
-                            dictProps={Settings.fields.person.users}
-                            component={FieldHelper.SpecialField}
-                            extraColElem={
-                              <span className="text-danger">
-                                Be careful when editing this field; you might
-                                lock someone out.
-                              </span>
-                            }
-                            widget={<UserInputTable users={values.users} />}
-                          />
-                        )}
-                      </>
-                    )}
-
-                    {disableStatusChange ? (
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.person.status}
-                        name="status"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={Person.humanNameOfStatus(values.status)}
-                      />
-                    ) : (
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={Settings.fields.person.status}
-                        name="status"
-                        component={FieldHelper.RadioButtonToggleGroupField}
-                        buttons={statusButtons}
-                        onChange={value => setFieldValue("status", value)}
-                      >
-                        {willAutoKickPosition && (
-                          <Alert variant="warning">
-                            <p>
-                              {`Setting this person to inactive will automatically remove them
-+                               from the following ${pluralize("position", getNumberOfPositions(values))}:`}
-                            </p>
-
-                            <ul className="mb-0">
-                              {values.position?.name && (
-                                <li>
-                                  <strong>{values.position.name}</strong>
-                                </li>
-                              )}
-
-                              {values.additionalPositions?.map(p => (
-                                <li key={p.id ?? p.name}>
-                                  <strong>{p.name}</strong>
-                                </li>
-                              ))}
-                            </ul>
-                          </Alert>
-                        )}
-                      </DictionaryField>
-                    )}
-                  </Col>
-                </Row>
-              </Fieldset>
-
-              <Fieldset title="Additional information">
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  as="div"
-                  dictProps={Settings.fields.person.emailAddresses}
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <EmailAddressInputTable
-                      emailAddresses={values.emailAddresses}
-                    />
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.phoneNumber}
-                  name="phoneNumber"
-                  component={FieldHelper.InputField}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.rank}
-                  name="rank"
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <FormSelect>
-                      <option />
-                      {ranks.map(rank => (
-                        <option key={rank.value} value={rank.value}>
-                          {rank.value}{" "}
-                          {rank.description && ` - ( ${rank.description} )`}
-                        </option>
-                      ))}
-                    </FormSelect>
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.gender}
-                  name="gender"
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <FormSelect>
-                      <option />
-                      {genderOptions.map(genderOption => (
-                        <option
-                          key={genderOption.value}
-                          value={genderOption.value}
-                        >
-                          {genderOption.label}
-                        </option>
-                      ))}
-                    </FormSelect>
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.person.country}
-                  name="country"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("country", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("country", value)
-                    if (value) {
-                      setFieldValue("obsoleteCountry", null, false)
-                    }
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="country"
-                      placeholder={Settings.fields.person.country.placeholder}
-                      value={values.country}
-                      overlayColumns={[
-                        Settings.fields.location.name?.label,
-                        Settings.fields.location.digram?.label,
-                        Settings.fields.location.trigram?.label
-                      ]}
-                      overlayRenderRow={CountryOverlayRow}
-                      filterDefs={countryFilters}
-                      objectType={Location}
-                      fields={Location.autocompleteQuery}
-                      valueKey="name"
-                      addon={<Icon icon={IconNames.FLAG} />}
-                      showRemoveButton
-                    />
-                  }
-                  extraColElem={
-                    values.obsoleteCountry ? (
-                      <>
-                        <Tooltip
-                          content="Click here if the new value is correct, or select the correct value on the left."
-                          intent={Intent.PRIMARY}
-                        >
-                          <Button
-                            variant="link"
-                            onClick={() => {
-                              setFieldValue("obsoleteCountry", null)
-                              toast.info(
-                                `Cleared out old value for ${Settings.fields.person.country?.label}; don't forget to save!`
-                              )
-                            }}
-                          >
-                            <em>old value: {values.obsoleteCountry}</em>
-                          </Button>
-                        </Tooltip>
-                      </>
-                    ) : undefined
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.code}
-                  name="code"
-                  component={FieldHelper.InputField}
-                  disabled={!isAdmin}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.endOfTourDate}
-                  name="endOfTourDate"
-                  component={FieldHelper.SpecialField}
-                  value={values.endOfTourDate}
-                  onChange={value => {
-                    setFieldTouched("endOfTourDate", true, false) // onBlur doesn't work when selecting a date
-                    setFieldValue(
-                      "endOfTourDate",
-                      value && moment(value).endOf("day").toDate()
-                    )
-                  }}
-                  onBlur={() => setFieldTouched("endOfTourDate")}
-                  widget={
-                    <CustomDateInput id="endOfTourDate" canClearSelection />
-                  }
-                >
-                  {endOfTourDateInPast && (
-                    <Alert variant="warning">
-                      Be aware that the end of tour date is in the past.
-                    </Alert>
-                  )}
-                </DictionaryField>
-                {!forOnboarding && (
+                <Fieldset title="Additional information">
                   <DictionaryField
                     wrappedComponent={FastField}
-                    dictProps={Settings.fields.person.biography}
-                    name="biography"
+                    as="div"
+                    dictProps={Settings.fields.person.emailAddresses}
                     component={FieldHelper.SpecialField}
-                    value={values.biography}
+                    widget={
+                      <EmailAddressInputTable
+                        emailAddresses={values.emailAddresses}
+                      />
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.person.phoneNumber}
+                    name="phoneNumber"
+                    component={FieldHelper.InputField}
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.person.rank}
+                    name="rank"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <FormSelect>
+                        <option />
+                        {ranks.map(rank => (
+                          <option key={rank.value} value={rank.value}>
+                            {rank.value}{" "}
+                            {rank.description && ` - ( ${rank.description} )`}
+                          </option>
+                        ))}
+                      </FormSelect>
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.person.gender}
+                    name="gender"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <FormSelect>
+                        <option />
+                        {genderOptions.map(genderOption => (
+                          <option
+                            key={genderOption.value}
+                            value={genderOption.value}
+                          >
+                            {genderOption.label}
+                          </option>
+                        ))}
+                      </FormSelect>
+                    }
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.person.country}
+                    name="country"
+                    component={FieldHelper.SpecialField}
                     onChange={value => {
-                      // prevent initial unnecessary render of RichTextEditor
-                      if (!_isEqual(value, values.biography)) {
-                        setFieldValue("biography", value)
+                      // validation will be done by setFieldValue
+                      setFieldTouched("country", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("country", value)
+                      if (value) {
+                        setFieldValue("obsoleteCountry", null, false)
                       }
                     }}
-                    onHandleBlur={() => {
-                      // validation will be done by setFieldValue
-                      setFieldTouched("biography", true, false)
-                    }}
                     widget={
-                      <RichTextEditor
-                        className="biography"
-                        placeholder={
-                          Settings.fields.person.biography?.placeholder
-                        }
+                      <AdvancedSingleSelect
+                        fieldName="country"
+                        placeholder={Settings.fields.person.country.placeholder}
+                        value={values.country}
+                        overlayColumns={[
+                          Settings.fields.location.name?.label,
+                          Settings.fields.location.digram?.label,
+                          Settings.fields.location.trigram?.label
+                        ]}
+                        overlayRenderRow={CountryOverlayRow}
+                        filterDefs={countryFilters}
+                        objectType={Location}
+                        fields={Location.autocompleteQuery}
+                        valueKey="name"
+                        addon={<Icon icon={IconNames.FLAG} />}
+                        showRemoveButton
                       />
                     }
+                    extraColElem={
+                      values.obsoleteCountry ? (
+                        <>
+                          <Tooltip
+                            content="Click here if the new value is correct, or select the correct value on the left."
+                            intent={Intent.PRIMARY}
+                          >
+                            <Button
+                              variant="link"
+                              onClick={() => {
+                                setFieldValue("obsoleteCountry", null)
+                                toast.info(
+                                  `Cleared out old value for ${Settings.fields.person.country?.label}; don't forget to save!`
+                                )
+                              }}
+                            >
+                              <em>old value: {values.obsoleteCountry}</em>
+                            </Button>
+                          </Tooltip>
+                        </>
+                      ) : undefined
+                    }
                   />
-                )}
-
-                {edit && attachmentEditEnabled && (
-                  <Field
-                    name="uploadAttachments"
-                    label="Attachments"
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.person.code}
+                    name="code"
+                    component={FieldHelper.InputField}
+                    disabled={!isAdmin}
+                  />
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.person.endOfTourDate}
+                    name="endOfTourDate"
                     component={FieldHelper.SpecialField}
+                    value={values.endOfTourDate}
+                    onChange={value => {
+                      setFieldTouched("endOfTourDate", true, false) // onBlur doesn't work when selecting a date
+                      setFieldValue(
+                        "endOfTourDate",
+                        value && moment(value).endOf("day").toDate()
+                      )
+                    }}
+                    onBlur={() => setFieldTouched("endOfTourDate")}
                     widget={
-                      <UploadAttachment
-                        attachments={attachmentList}
-                        updateAttachments={setAttachmentList}
-                        relatedObjectType={Person.relatedObjectType}
-                        relatedObjectUuid={values.uuid}
-                      />
+                      <CustomDateInput id="endOfTourDate" canClearSelection />
                     }
-                    onHandleBlur={() => {
-                      setFieldTouched("uploadAttachments", true, false)
+                  >
+                    {endOfTourDateInPast && (
+                      <Alert variant="warning">
+                        Be aware that the end of tour date is in the past.
+                      </Alert>
+                    )}
+                  </DictionaryField>
+                  {!forOnboarding && (
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.person.biography}
+                      name="biography"
+                      component={FieldHelper.SpecialField}
+                      value={values.biography}
+                      onChange={value => {
+                        // prevent initial unnecessary render of RichTextEditor
+                        if (!_isEqual(value, values.biography)) {
+                          setFieldValue("biography", value)
+                        }
+                      }}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("biography", true, false)
+                      }}
+                      widget={
+                        <RichTextEditor
+                          className="biography"
+                          placeholder={
+                            Settings.fields.person.biography?.placeholder
+                          }
+                        />
+                      }
+                    />
+                  )}
+
+                  {edit && attachmentEditEnabled && (
+                    <Field
+                      name="uploadAttachments"
+                      label="Attachments"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <UploadAttachment
+                          attachments={attachmentList}
+                          updateAttachments={setAttachmentList}
+                          relatedObjectType={Person.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                        />
+                      }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
+                  )}
+                </Fieldset>
+
+                {!forOnboarding && !_isEmpty(Person.customFields) && (
+                  <Fieldset title="Person information" id="custom-fields">
+                    <CustomFieldsContainer
+                      fieldsConfig={Person.customFields}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
+                )}
+
+                {!forOnboarding && !_isEmpty(authorizedSensitiveFields) && (
+                  <Fieldset title="Sensitive information" id="sensitive-fields">
+                    <CustomFieldsContainer
+                      fieldsConfig={authorizedSensitiveFields}
+                      parentFieldName={SENSITIVE_CUSTOM_FIELDS_PARENT}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
+                )}
+                {showSimilarPeople && (
+                  <SimilarObjectsModal
+                    objectType="Person"
+                    userInput={`${values.lastName} ${values.firstName}`}
+                    onCancel={() => {
+                      setShowSimilarPeople(false)
                     }}
                   />
                 )}
-              </Fieldset>
 
-              {!forOnboarding && !_isEmpty(Person.customFields) && (
-                <Fieldset title="Person information" id="custom-fields">
-                  <CustomFieldsContainer
-                    fieldsConfig={Person.customFields}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                  />
-                </Fieldset>
-              )}
-
-              {!forOnboarding && !_isEmpty(authorizedSensitiveFields) && (
-                <Fieldset title="Sensitive information" id="sensitive-fields">
-                  <CustomFieldsContainer
-                    fieldsConfig={authorizedSensitiveFields}
-                    parentFieldName={SENSITIVE_CUSTOM_FIELDS_PARENT}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                  />
-                </Fieldset>
-              )}
-              {showSimilarPeople && (
-                <SimilarObjectsModal
-                  objectType="Person"
-                  userInput={`${values.lastName} ${values.firstName}`}
-                  onCancel={() => {
-                    setShowSimilarPeople(false)
-                  }}
-                />
-              )}
-
-              <div className="submit-buttons">
-                <div>
-                  <Button variant="outline-secondary" onClick={onCancel}>
-                    Cancel
-                  </Button>
+                <div className="submit-buttons">
+                  <div>
+                    <Button variant="outline-secondary" onClick={onCancel}>
+                      Cancel
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                      id="formBottomSubmit"
+                      variant="primary"
+                      onClick={submitForm}
+                      disabled={isSubmitting}
+                    >
+                      {saveText}
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Button
-                    id="formBottomSubmit"
-                    variant="primary"
-                    onClick={submitForm}
-                    disabled={isSubmitting}
-                  >
-                    {saveText}
-                  </Button>
-                </div>
-              </div>
-            </Form>
-          </>
+              </Form>
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>

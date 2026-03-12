@@ -340,6 +340,7 @@ input AttachmentSearchQueryInput {
   mimeType: String
   pageNum: Int
   pageSize: Int
+  relatedObjectUuid: String
   sortBy: AttachmentSearchSortBy
   sortOrder: SortOrder
   status: Status

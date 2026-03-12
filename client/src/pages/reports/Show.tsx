@@ -22,6 +22,7 @@ import {
 import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
@@ -372,499 +373,512 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
         const reportTitle = report.intent || `#${report.uuid}`
         return (
-          <div className="report-show">
-            <Formik
-              enableReinitialize
-              onSubmit={onSubmitEmailReport}
-              initialValues={{ to: "", comment: "", toAnetUsers: [] }}
-            >
-              {formikProps => renderEmailModal(formikProps)}
-            </Formik>
-
-            <Messages success={saveSuccess} error={saveError} />
-
-            {report.classification && (
-              <div
-                style={{ width: "100%", fontSize: "18px", textAlign: "center" }}
+          <AttachmentContext.Provider value={report}>
+            <div className="report-show">
+              <Formik
+                enableReinitialize
+                onSubmit={onSubmitEmailReport}
+                initialValues={{ to: "", comment: "", toAnetUsers: [] }}
               >
-                <span className="fw-bold me-1" id="report-classification">
-                  {utils.getPolicyAndClassificationForChoice(
-                    report.classification
-                  )}
-                </span>
-                <span>
-                  {utils.getReleasableToForChoice(report.classification)}
-                </span>
-              </div>
-            )}
+                {formikProps => renderEmailModal(formikProps)}
+              </Formik>
 
-            {report.isPublished() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>
-                <p>
-                  This report has been approved and published to the ANET
-                  community on{" "}
-                  {moment(report.releasedAt).format(
-                    Settings.dateFormats.forms.displayShort.withTime
-                  )}
-                </p>
-              </Fieldset>
-            )}
+              <Messages success={saveSuccess} error={saveError} />
 
-            {report.isRejected() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This {reportType} has CHANGES REQUESTED.
-                </h4>
-                <p>
-                  You can review the comments below, fix the report and
-                  re-submit
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages()}
+              {report.classification && (
+                <div
+                  style={{
+                    width: "100%",
+                    fontSize: "18px",
+                    textAlign: "center"
+                  }}
+                >
+                  <span className="fw-bold me-1" id="report-classification">
+                    {utils.getPolicyAndClassificationForChoice(
+                      report.classification
+                    )}
+                  </span>
+                  <span>
+                    {utils.getReleasableToForChoice(report.classification)}
+                  </span>
                 </div>
-              </Fieldset>
-            )}
+              )}
 
-            {report.isDraft() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This is a DRAFT {reportType} and hasn't been submitted.
-                </h4>
-                <p>
-                  You can review the draft below to make sure all the details
-                  are correct.
-                </p>
-                {(!hasAssignedPosition || !hasActivePosition) &&
-                  renderNoPositionAssignedText()}
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages()}
-                </div>
-              </Fieldset>
-            )}
-
-            {report.isPending() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This {reportType} is PENDING approvals.
-                </h4>
-                <p>
-                  It won't be available in the ANET database until your{" "}
-                  <AnchorLink to="workflow">approval organization</AnchorLink>{" "}
-                  marks it as approved.
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages("approving")}
-                </div>
-              </Fieldset>
-            )}
-
-            {report.isApproved() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">This {reportType} is APPROVED.</h4>
-                <p>
-                  This report has been approved and will be automatically
-                  published to the ANET community in{" "}
-                  {moment(report.getReportApprovedAt())
-                    .add(
-                      Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                      "hours"
-                    )
-                    .toNow(true)}
-                </p>
-                {canPublish && (
+              {report.isPublished() && (
+                <Fieldset style={{ textAlign: "center" }}>
+                  <h4 className="text-danger">
+                    This {reportType} is PUBLISHED.
+                  </h4>
                   <p>
-                    You can also {renderPublishButton(!isValid)} it immediately.
+                    This report has been approved and published to the ANET
+                    community on{" "}
+                    {moment(report.releasedAt).format(
+                      Settings.dateFormats.forms.displayShort.withTime
+                    )}
                   </p>
-                )}
-              </Fieldset>
-            )}
+                </Fieldset>
+              )}
 
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={
-                  <>
-                    {(report.isPublished() || report.isCancelled()) && (
-                      <SubscriptionIcon
-                        subscribedObjectType="reports"
-                        subscribedObjectUuid={report.uuid}
-                        isSubscribed={report.isSubscribed}
-                        updatedAt={report.updatedAt}
-                        refetch={refetch}
-                        setError={error => {
-                          setSaveError(error)
-                          jumpToTop()
-                        }}
-                        persistent
-                      />
-                    )}{" "}
-                    Report {reportTitle}
-                  </>
-                }
-                action={action}
-              />
-              <Fieldset className="show-report-overview">
-                <FieldHelper.SpecialField
-                  label="Summary"
-                  field={{ name: "summary" }}
-                  widget={
-                    <div id="report-summary">
-                      <DictionaryField
-                        wrappedComponent={FieldHelper.ReadonlyField}
-                        dictProps={Settings.fields.report.intent}
-                        field={{ name: "intent", value: report.intent }}
-                        style={{ marginBottom: 0 }}
-                      />
-                      <DictionaryField
-                        wrappedComponent={FieldHelper.ReadonlyField}
-                        dictProps={Settings.fields.report.keyOutcomes}
-                        field={{ name: "keyOutcomes" }}
-                        style={{ marginBottom: 0 }}
-                        humanValue={<ListItems value={report.keyOutcomes} />}
-                      />
-                      <DictionaryField
-                        wrappedComponent={FieldHelper.ReadonlyField}
-                        dictProps={Settings.fields.report.nextSteps}
-                        field={{ name: "nextSteps" }}
-                        style={{ marginBottom: 0 }}
-                        humanValue={<ListItems value={report.nextSteps} />}
-                      />
-                    </div>
-                  }
-                />
+              {report.isRejected() && (
+                <Fieldset style={{ textAlign: "center" }}>
+                  <h4 className="text-danger">
+                    This {reportType} has CHANGES REQUESTED.
+                  </h4>
+                  <p>
+                    You can review the comments below, fix the report and
+                    re-submit
+                  </p>
+                  <div style={{ textAlign: "left" }}>
+                    {renderValidationMessages()}
+                  </div>
+                </Fieldset>
+              )}
 
-                <DictionaryField
-                  wrappedComponent={FieldHelper.ReadonlyField}
-                  dictProps={Settings.fields.report.engagementDate}
-                  field={{ name: "engagementDate" }}
-                  humanValue={
+              {report.isDraft() && (
+                <Fieldset style={{ textAlign: "center" }}>
+                  <h4 className="text-danger">
+                    This is a DRAFT {reportType} and hasn't been submitted.
+                  </h4>
+                  <p>
+                    You can review the draft below to make sure all the details
+                    are correct.
+                  </p>
+                  {(!hasAssignedPosition || !hasActivePosition) &&
+                    renderNoPositionAssignedText()}
+                  <div style={{ textAlign: "left" }}>
+                    {renderValidationMessages()}
+                  </div>
+                </Fieldset>
+              )}
+
+              {report.isPending() && (
+                <Fieldset style={{ textAlign: "center" }}>
+                  <h4 className="text-danger">
+                    This {reportType} is PENDING approvals.
+                  </h4>
+                  <p>
+                    It won't be available in the ANET database until your{" "}
+                    <AnchorLink to="workflow">approval organization</AnchorLink>{" "}
+                    marks it as approved.
+                  </p>
+                  <div style={{ textAlign: "left" }}>
+                    {renderValidationMessages("approving")}
+                  </div>
+                </Fieldset>
+              )}
+
+              {report.isApproved() && (
+                <Fieldset style={{ textAlign: "center" }}>
+                  <h4 className="text-danger">
+                    This {reportType} is APPROVED.
+                  </h4>
+                  <p>
+                    This report has been approved and will be automatically
+                    published to the ANET community in{" "}
+                    {moment(report.getReportApprovedAt())
+                      .add(
+                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                        "hours"
+                      )
+                      .toNow(true)}
+                  </p>
+                  {canPublish && (
+                    <p>
+                      You can also {renderPublishButton(!isValid)} it
+                      immediately.
+                    </p>
+                  )}
+                </Fieldset>
+              )}
+
+              <Form className="form-horizontal" method="post">
+                <Fieldset
+                  title={
                     <>
-                      {report.engagementDate &&
-                        moment(report.engagementDate).format(
-                          Report.getEngagementDateFormat()
-                        )}
-                      <PlanningConflictForReport report={report} largeIcon />
+                      {(report.isPublished() || report.isCancelled()) && (
+                        <SubscriptionIcon
+                          subscribedObjectType="reports"
+                          subscribedObjectUuid={report.uuid}
+                          isSubscribed={report.isSubscribed}
+                          updatedAt={report.updatedAt}
+                          refetch={refetch}
+                          setError={error => {
+                            setSaveError(error)
+                            jumpToTop()
+                          }}
+                          persistent
+                        />
+                      )}{" "}
+                      Report {reportTitle}
                     </>
                   }
+                  action={action}
                 />
+                <Fieldset className="show-report-overview">
+                  <FieldHelper.SpecialField
+                    label="Summary"
+                    field={{ name: "summary" }}
+                    widget={
+                      <div id="report-summary">
+                        <DictionaryField
+                          wrappedComponent={FieldHelper.ReadonlyField}
+                          dictProps={Settings.fields.report.intent}
+                          field={{ name: "intent", value: report.intent }}
+                          style={{ marginBottom: 0 }}
+                        />
+                        <DictionaryField
+                          wrappedComponent={FieldHelper.ReadonlyField}
+                          dictProps={Settings.fields.report.keyOutcomes}
+                          field={{ name: "keyOutcomes" }}
+                          style={{ marginBottom: 0 }}
+                          humanValue={<ListItems value={report.keyOutcomes} />}
+                        />
+                        <DictionaryField
+                          wrappedComponent={FieldHelper.ReadonlyField}
+                          dictProps={Settings.fields.report.nextSteps}
+                          field={{ name: "nextSteps" }}
+                          style={{ marginBottom: 0 }}
+                          humanValue={<ListItems value={report.nextSteps} />}
+                        />
+                      </div>
+                    }
+                  />
 
-                {Settings.engagementsIncludeTimeAndDuration && (
                   <DictionaryField
                     wrappedComponent={FieldHelper.ReadonlyField}
-                    dictProps={Settings.fields.report.duration}
-                    field={{ name: "duration", value: report.duration }}
+                    dictProps={Settings.fields.report.engagementDate}
+                    field={{ name: "engagementDate" }}
+                    humanValue={
+                      <>
+                        {report.engagementDate &&
+                          moment(report.engagementDate).format(
+                            Report.getEngagementDateFormat()
+                          )}
+                        <PlanningConflictForReport report={report} largeIcon />
+                      </>
+                    }
                   />
-                )}
 
-                <FieldHelper.ReadonlyField
-                  field={{ name: "authors" }}
-                  humanValue={report.authors?.map(a => (
-                    <React.Fragment key={a.uuid}>
-                      <LinkTo modelType="Person" model={a} />
-                      <br />
-                    </React.Fragment>
-                  ))}
-                />
-
-                <FieldHelper.ReadonlyField
-                  field={{ name: "advisorOrg" }}
-                  label={Settings.fields.advisor.org.name}
-                  humanValue={
-                    <LinkTo
-                      modelType="Organization"
-                      model={report.advisorOrg}
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.duration}
+                      field={{ name: "duration", value: report.duration }}
                     />
-                  }
-                />
+                  )}
 
-                <FieldHelper.ReadonlyField
-                  field={{ name: "interlocutorOrg" }}
-                  label={Settings.fields.interlocutor.org.name}
-                  humanValue={
-                    <LinkTo
-                      modelType="Organization"
-                      model={report.interlocutorOrg}
-                    />
-                  }
-                />
+                  <FieldHelper.ReadonlyField
+                    field={{ name: "authors" }}
+                    humanValue={report.authors?.map(a => (
+                      <React.Fragment key={a.uuid}>
+                        <LinkTo modelType="Person" model={a} />
+                        <br />
+                      </React.Fragment>
+                    ))}
+                  />
 
-                <DictionaryField
-                  wrappedComponent={FieldHelper.ReadonlyField}
-                  dictProps={Settings.fields.report.event}
-                  field={{ name: "event" }}
-                  humanValue={
-                    report.event && (
-                      <LinkTo modelType="Event" model={report.event} />
-                    )
-                  }
-                />
+                  <FieldHelper.ReadonlyField
+                    field={{ name: "advisorOrg" }}
+                    label={Settings.fields.advisor.org.name}
+                    humanValue={
+                      <LinkTo
+                        modelType="Organization"
+                        model={report.advisorOrg}
+                      />
+                    }
+                  />
 
-                <DictionaryField
-                  wrappedComponent={FieldHelper.ReadonlyField}
-                  dictProps={Settings.fields.report.location}
-                  field={{ name: "location" }}
-                  humanValue={
-                    report.location && (
-                      <LinkTo modelType="Location" model={report.location} />
-                    )
-                  }
-                />
+                  <FieldHelper.ReadonlyField
+                    field={{ name: "interlocutorOrg" }}
+                    label={Settings.fields.interlocutor.org.name}
+                    humanValue={
+                      <LinkTo
+                        modelType="Organization"
+                        model={report.interlocutorOrg}
+                      />
+                    }
+                  />
 
-                {report.cancelled && (
                   <DictionaryField
                     wrappedComponent={FieldHelper.ReadonlyField}
-                    dictProps={Settings.fields.report.cancelledReason}
-                    field={{ name: "cancelledReason" }}
-                    humanValue={utils.sentenceCase(report.cancelledReason)}
+                    dictProps={Settings.fields.report.event}
+                    field={{ name: "event" }}
+                    humanValue={
+                      report.event && (
+                        <LinkTo modelType="Event" model={report.event} />
+                      )
+                    }
                   />
-                )}
 
-                {!report.cancelled && (
+                  <DictionaryField
+                    wrappedComponent={FieldHelper.ReadonlyField}
+                    dictProps={Settings.fields.report.location}
+                    field={{ name: "location" }}
+                    humanValue={
+                      report.location && (
+                        <LinkTo modelType="Location" model={report.location} />
+                      )
+                    }
+                  />
+
+                  {report.cancelled && (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.cancelledReason}
+                      field={{ name: "cancelledReason" }}
+                      humanValue={utils.sentenceCase(report.cancelledReason)}
+                    />
+                  )}
+
+                  {!report.cancelled && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FieldHelper.ReadonlyField}
+                        dictProps={Settings.fields.report.atmosphere}
+                        field={{ name: "atmosphere" }}
+                        humanValue={utils.sentenceCase(report.atmosphere)}
+                      />
+                      <DictionaryField
+                        wrappedComponent={FieldHelper.ReadonlyField}
+                        dictProps={Settings.fields.report.atmosphereDetails}
+                        field={{
+                          name: "atmosphereDetails",
+                          value: report.atmosphereDetails
+                        }}
+                      />
+                    </>
+                  )}
+
+                  <DictionaryField
+                    wrappedComponent={FieldHelper.ReadonlyField}
+                    dictProps={Settings.fields.report.reportCommunities}
+                    field={{ name: "reportCommunities" }}
+                    humanValue={
+                      <AuthorizationGroupTable
+                        authorizationGroups={report.reportCommunities}
+                        noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
+                      />
+                    }
+                  />
+
+                  {attachmentsEnabled && (
+                    <FieldHelper.ReadonlyField
+                      field={{ name: "attachments" }}
+                      label="Attachments"
+                      humanValue={
+                        <AttachmentsDetailView
+                          attachments={attachments}
+                          updateAttachments={setAttachments}
+                          relatedObjectType={Report.relatedObjectType}
+                          relatedObjectUuid={report.uuid}
+                          allowEdit={canEdit}
+                        />
+                      }
+                    />
+                  )}
+                </Fieldset>
+                <Fieldset
+                  title={
+                    report.isFuture()
+                      ? "People who will be involved in this planned engagement"
+                      : "People involved in this engagement"
+                  }
+                >
+                  <ReportPeople report={report} disabled />
+                </Fieldset>
+                <Fieldset title={Settings.fields.task.longLabel}>
+                  <NoPaginationTaskTable
+                    tasks={report.tasks}
+                    noTasksMessage={`No ${tasksLabel} selected`}
+                  />
+                </Fieldset>
+                {report.reportText && (
+                  <Fieldset
+                    title={Settings.fields.report.reportText?.label}
+                    id="report-text"
+                  >
+                    <RichTextEditor readOnly value={report.reportText} />
+                  </Fieldset>
+                )}
+                {report.reportSensitiveInformation?.text && (
+                  <Fieldset title="Sensitive information">
+                    <RichTextEditor
+                      readOnly
+                      value={report.reportSensitiveInformation.text}
+                    />
+                    <RelatedObjectsTable
+                      title="Authorized Members"
+                      relatedObjects={report.authorizedMembers}
+                    />
+                  </Fieldset>
+                )}
+                {showCustomFields && (
+                  <Fieldset title="Engagement information" id="custom-fields">
+                    <ReadonlyCustomFields
+                      fieldsConfig={Settings.fields.report.customFields}
+                      values={report}
+                      setShowCustomFields={setShowCustomFields}
+                    />
+                  </Fieldset>
+                )}
+                {hasAssessments && (
                   <>
-                    <DictionaryField
-                      wrappedComponent={FieldHelper.ReadonlyField}
-                      dictProps={Settings.fields.report.atmosphere}
-                      field={{ name: "atmosphere" }}
-                      humanValue={utils.sentenceCase(report.atmosphere)}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FieldHelper.ReadonlyField}
-                      dictProps={Settings.fields.report.atmosphereDetails}
-                      field={{
-                        name: "atmosphereDetails",
-                        value: report.atmosphereDetails
-                      }}
-                    />
+                    <Fieldset
+                      title="Attendees engagement assessments"
+                      id="attendees-engagement-assessments"
+                    >
+                      <InstantAssessmentsContainerField
+                        entityType={Person}
+                        entities={report.reportPeople?.filter(
+                          rp => rp.attendee
+                        )}
+                        relatedObject={report}
+                        parentFieldName={
+                          Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                        }
+                        formikProps={{
+                          values: report
+                        }}
+                        canRead={canReadAssessments}
+                        readonly
+                      />
+                    </Fieldset>
+
+                    <Fieldset
+                      title={`${Settings.fields.task.longLabel} engagement assessments`}
+                      id="tasks-engagement-assessments"
+                    >
+                      <InstantAssessmentsContainerField
+                        entityType={Task}
+                        entities={report.tasks}
+                        relatedObject={report}
+                        parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                        formikProps={{
+                          values: report
+                        }}
+                        canRead={canReadAssessments}
+                        readonly
+                      />
+                    </Fieldset>
                   </>
                 )}
-
-                <DictionaryField
-                  wrappedComponent={FieldHelper.ReadonlyField}
-                  dictProps={Settings.fields.report.reportCommunities}
-                  field={{ name: "reportCommunities" }}
-                  humanValue={
-                    <AuthorizationGroupTable
-                      authorizationGroups={report.reportCommunities}
-                      noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
-                    />
-                  }
-                />
-
-                {attachmentsEnabled && (
-                  <FieldHelper.ReadonlyField
-                    field={{ name: "attachments" }}
-                    label="Attachments"
-                    humanValue={
-                      <AttachmentsDetailView
-                        attachments={attachments}
-                        updateAttachments={setAttachments}
-                        relatedObjectType={Report.relatedObjectType}
-                        relatedObjectUuid={report.uuid}
-                        allowEdit={canEdit}
-                      />
-                    }
-                  />
+                {report.showWorkflow() && (
+                  <ReportFullWorkflow workflow={report.workflow} />
                 )}
-              </Fieldset>
-              <Fieldset
-                title={
-                  report.isFuture()
-                    ? "People who will be involved in this planned engagement"
-                    : "People involved in this engagement"
-                }
-              >
-                <ReportPeople report={report} disabled />
-              </Fieldset>
-              <Fieldset title={Settings.fields.task.longLabel}>
-                <NoPaginationTaskTable
-                  tasks={report.tasks}
-                  noTasksMessage={`No ${tasksLabel} selected`}
-                />
-              </Fieldset>
-              {report.reportText && (
-                <Fieldset
-                  title={Settings.fields.report.reportText?.label}
-                  id="report-text"
-                >
-                  <RichTextEditor readOnly value={report.reportText} />
-                </Fieldset>
-              )}
-              {report.reportSensitiveInformation?.text && (
-                <Fieldset title="Sensitive information">
-                  <RichTextEditor
-                    readOnly
-                    value={report.reportSensitiveInformation.text}
-                  />
-                  <RelatedObjectsTable
-                    title="Authorized Members"
-                    relatedObjects={report.authorizedMembers}
-                  />
-                </Fieldset>
-              )}
-              {showCustomFields && (
-                <Fieldset title="Engagement information" id="custom-fields">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.report.customFields}
-                    values={report}
-                    setShowCustomFields={setShowCustomFields}
-                  />
-                </Fieldset>
-              )}
-              {hasAssessments && (
-                <>
-                  <Fieldset
-                    title="Attendees engagement assessments"
-                    id="attendees-engagement-assessments"
-                  >
-                    <InstantAssessmentsContainerField
-                      entityType={Person}
-                      entities={report.reportPeople?.filter(rp => rp.attendee)}
-                      relatedObject={report}
-                      parentFieldName={
-                        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
-                      }
-                      formikProps={{
-                        values: report
-                      }}
-                      canRead={canReadAssessments}
-                      readonly
-                    />
-                  </Fieldset>
+                {canSubmit && (
+                  <Fieldset>
+                    <Col md={9}>
+                      {_isEmpty(validationErrors) && (
+                        <p>
+                          By pressing submit, this {reportType} will be sent to
+                          <strong>
+                            {" "}
+                            {Object.get(report, "advisorOrg.shortName") ||
+                              "your organization approver"}{" "}
+                          </strong>
+                          to go through the approval workflow.
+                        </p>
+                      )}
+                      {renderValidationMessages()}
+                    </Col>
 
-                  <Fieldset
-                    title={`${Settings.fields.task.longLabel} engagement assessments`}
-                    id="tasks-engagement-assessments"
-                  >
-                    <InstantAssessmentsContainerField
-                      entityType={Task}
-                      entities={report.tasks}
-                      relatedObject={report}
-                      parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
-                      formikProps={{
-                        values: report
-                      }}
-                      canRead={canReadAssessments}
-                      readonly
-                    />
+                    <Col md={3}>
+                      {renderSubmitButton(
+                        !isValid,
+                        "large",
+                        "submitReportButton"
+                      )}
+                    </Col>
                   </Fieldset>
-                </>
-              )}
-              {report.showWorkflow() && (
-                <ReportFullWorkflow workflow={report.workflow} />
-              )}
-              {canSubmit && (
-                <Fieldset>
-                  <Col md={9}>
-                    {_isEmpty(validationErrors) && (
-                      <p>
-                        By pressing submit, this {reportType} will be sent to
-                        <strong>
+                )}
+                <Fieldset className="report-sub-form" title="Comments">
+                  {report.comments.map(comment => {
+                    const createdAt = moment(comment.createdAt)
+                    return (
+                      <p key={comment.uuid}>
+                        <LinkTo modelType="Person" model={comment.author} />,
+                        <span
+                          title={createdAt.format(
+                            Settings.dateFormats.forms.displayShort.withTime
+                          )}
+                        >
                           {" "}
-                          {Object.get(report, "advisorOrg.shortName") ||
-                            "your organization approver"}{" "}
-                        </strong>
-                        to go through the approval workflow.
+                          {createdAt.format(
+                            Settings.dateFormats.forms.displayShort.withTime
+                          )}
+                          :{" "}
+                        </span>
+                        "{comment.text}"
                       </p>
-                    )}
-                    {renderValidationMessages()}
-                  </Col>
+                    )
+                  })}
 
-                  <Col md={3}>
-                    {renderSubmitButton(
-                      !isValid,
-                      "large",
-                      "submitReportButton"
-                    )}
-                  </Col>
-                </Fieldset>
-              )}
-              <Fieldset className="report-sub-form" title="Comments">
-                {report.comments.map(comment => {
-                  const createdAt = moment(comment.createdAt)
-                  return (
-                    <p key={comment.uuid}>
-                      <LinkTo modelType="Person" model={comment.author} />,
-                      <span
-                        title={createdAt.format(
-                          Settings.dateFormats.forms.displayShort.withTime
-                        )}
-                      >
-                        {" "}
-                        {createdAt.format(
-                          Settings.dateFormats.forms.displayShort.withTime
-                        )}
-                        :{" "}
-                      </span>
-                      "{comment.text}"
-                    </p>
-                  )
-                })}
+                  {!report.comments.length && <p>There are no comments yet.</p>}
 
-                {!report.comments.length && <p>There are no comments yet.</p>}
-
-                <Field
-                  name="newComment"
-                  label="Add a comment"
-                  component={FieldHelper.InputField}
-                  asA="textarea"
-                  placeholder="Type a comment here"
-                  className="add-new-comment"
-                />
-                <div className="right-button">
-                  <Button
-                    variant="primary"
-                    onClick={() =>
-                      submitComment(values.newComment, setFieldValue)
-                    }
-                  >
-                    Save comment
-                  </Button>
-                </div>
-              </Fieldset>
-              {canApprove &&
-                renderApprovalForm(
-                  values,
-                  !_isEmpty(validationErrors),
-                  warnApproveOwnReport
-                )}
-              {!canApprove &&
-                canRequestChanges &&
-                renderRequestChangesForm(
-                  values,
-                  !_isEmpty(validationErrors),
-                  warnApproveOwnReport
-                )}
-            </Form>
-
-            {currentUser.isAdmin() && (
-              <div className="submit-buttons">
-                {report.isPublished() &&
-                  Settings.fields.report.canUnpublishReports && (
-                    <div>
-                      <ConfirmDestructive
-                        onConfirm={onConfirmUnpublish}
-                        objectType="report"
-                        operation="unpublish"
-                        objectDisplay={"#" + uuid}
-                        variant="warning"
-                        buttonLabel={`Unpublish ${reportType}`}
-                        buttonClassName="float-start"
-                      />
-                    </div>
-                  )}
-                <div>
-                  <ConfirmDestructive
-                    onConfirm={onConfirmDelete}
-                    objectType="report"
-                    objectDisplay={"#" + uuid}
-                    variant="danger"
-                    buttonLabel={`Delete ${reportType}`}
-                    buttonClassName="float-end"
+                  <Field
+                    name="newComment"
+                    label="Add a comment"
+                    component={FieldHelper.InputField}
+                    asA="textarea"
+                    placeholder="Type a comment here"
+                    className="add-new-comment"
                   />
+                  <div className="right-button">
+                    <Button
+                      variant="primary"
+                      onClick={() =>
+                        submitComment(values.newComment, setFieldValue)
+                      }
+                    >
+                      Save comment
+                    </Button>
+                  </div>
+                </Fieldset>
+                {canApprove &&
+                  renderApprovalForm(
+                    values,
+                    !_isEmpty(validationErrors),
+                    warnApproveOwnReport
+                  )}
+                {!canApprove &&
+                  canRequestChanges &&
+                  renderRequestChangesForm(
+                    values,
+                    !_isEmpty(validationErrors),
+                    warnApproveOwnReport
+                  )}
+              </Form>
+
+              {currentUser.isAdmin() && (
+                <div className="submit-buttons">
+                  {report.isPublished() &&
+                    Settings.fields.report.canUnpublishReports && (
+                      <div>
+                        <ConfirmDestructive
+                          onConfirm={onConfirmUnpublish}
+                          objectType="report"
+                          operation="unpublish"
+                          objectDisplay={"#" + uuid}
+                          variant="warning"
+                          buttonLabel={`Unpublish ${reportType}`}
+                          buttonClassName="float-start"
+                        />
+                      </div>
+                    )}
+                  <div>
+                    <ConfirmDestructive
+                      onConfirm={onConfirmDelete}
+                      objectType="report"
+                      objectDisplay={"#" + uuid}
+                      variant="danger"
+                      buttonLabel={`Delete ${reportType}`}
+                      buttonClassName="float-end"
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </AttachmentContext.Provider>
         )
       }}
     </Formik>
