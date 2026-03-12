@@ -16,7 +16,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Event extends EventSeries {
+public class Event extends AbstractCommonEvent implements RelatableObject, SubscribableObject {
 
   /** Pseudo uuid to represent 'no event'. */
   public static final String DUMMY_EVENT_UUID = "-1";
@@ -30,9 +30,8 @@ public class Event extends EventSeries {
   @GraphQLQuery
   @GraphQLInputField
   String outcomes;
-
   // annotated below
-  private EntityAvatar entityAvatar;
+  private List<GenericRelatedObject> hostRelatedObjects;
 
   // Lazy Loaded
   // annotated below
@@ -240,26 +239,25 @@ public class Event extends EventSeries {
     return engine().getReportDao().getReportsBySearch(context, uuid, query);
   }
 
-  @GraphQLQuery(name = "entityAvatar")
-  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+  @GraphQLQuery(name = "hostRelatedObjects")
+  public CompletableFuture<List<GenericRelatedObject>> loadHostRelatedObjects(
       @GraphQLRootContext GraphQLContext context) {
-    if (entityAvatar != null) {
-      return CompletableFuture.completedFuture(entityAvatar);
+    if (hostRelatedObjects != null) {
+      return CompletableFuture.completedFuture(hostRelatedObjects);
     }
-    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATARS, uuid)
-        .thenApply(o -> {
-          entityAvatar = o;
-          return o;
-        });
+    return engine().getEventDao().getRelatedObjects(context, this).thenApply(o -> {
+      hostRelatedObjects = o;
+      return o;
+    });
   }
 
-  @GraphQLInputField(name = "entityAvatar")
-  public void setEntityAvatar(EntityAvatar entityAvatar) {
-    this.entityAvatar = entityAvatar;
+  @GraphQLInputField(name = "hostRelatedObjects")
+  public void setHostRelatedObjects(List<GenericRelatedObject> relatedObjects) {
+    this.hostRelatedObjects = relatedObjects;
   }
 
-  public EntityAvatar getEntityAvatar() {
-    return this.entityAvatar;
+  public List<GenericRelatedObject> getHostRelatedObjects() {
+    return hostRelatedObjects;
   }
 
   @Override
@@ -282,5 +280,10 @@ public class Event extends EventSeries {
   public int hashCode() {
     return Objects.hash(super.hashCode(), eventType, startDate, endDate, outcomes, tasks,
         organizations, people, eventSeries, location);
+  }
+
+  @Override
+  public String getObjectLabel() {
+    return getName();
   }
 }

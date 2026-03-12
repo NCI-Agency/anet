@@ -360,8 +360,9 @@ public class OrganizationDao
       // Update event owner organizations
       updateForMerge("events", "ownerOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
 
-      // Update event host organizations
-      updateForMerge("events", "hostOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+      // Update event hosts
+      updateM2mForMerge("eventHostRelatedObjects", "eventUuid", "relatedObjectUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
 
       // Update event admin organizations
       updateForMerge("events", "adminOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
@@ -369,8 +370,9 @@ public class OrganizationDao
       // Update eventSeries owner organizations
       updateForMerge("eventSeries", "ownerOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
 
-      // Update eventSeries host organizations
-      updateForMerge("eventSeries", "hostOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);
+      // Update eventSeries hosts
+      updateM2mForMerge("eventSeriesHostRelatedObjects", "eventSeriesUuid", "relatedObjectUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
 
       // Update eventSeries admin organizations
       updateForMerge("eventSeries", "adminOrgUuid", winnerOrganizationUuid, loserOrganizationUuid);

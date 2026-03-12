@@ -1,15 +1,12 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.types.GraphQLUnion;
-
-@GraphQLUnion(name = "WithStatus", possibleTypeAutoDiscovery = true)
 public interface WithStatus {
 
-  public static enum Status {
+  enum Status {
     ACTIVE, INACTIVE
   }
 
-  public Status getStatus();
+  Status getStatus();
 
-  public void setStatus(Status status);
+  void setStatus(Status status);
 }
