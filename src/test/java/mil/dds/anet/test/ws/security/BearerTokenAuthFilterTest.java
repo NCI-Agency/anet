@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import mil.dds.anet.database.AccessTokenActivityDao;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.ws.security.AccessTokenAuthentication;
 import mil.dds.anet.ws.security.BearerTokenAuthFilter;
@@ -27,8 +28,9 @@ class BearerTokenAuthFilterTest extends AbstractResourceTest {
   private final BearerTokenAuthFilter filter;
 
   @Autowired
-  public BearerTokenAuthFilterTest(BearerTokenService tokenService) {
-    this.filter = new BearerTokenAuthFilter(tokenService);
+  public BearerTokenAuthFilterTest(BearerTokenService tokenService,
+      AccessTokenActivityDao accessTokenActivityDao) {
+    this.filter = new BearerTokenAuthFilter(tokenService, accessTokenActivityDao);
   }
 
   @AfterEach

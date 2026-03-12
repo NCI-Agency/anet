@@ -1,4 +1,5 @@
 -- Do a cascading TRUNCATE of all tables created for ANET
+TRUNCATE TABLE "accessTokenActivities" CASCADE;
 TRUNCATE TABLE "accessTokens" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
@@ -1590,13 +1591,13 @@ UPDATE reports SET "eventUuid" = 'e850846e-9741-40e8-bc51-4dccc30cf47f' WHERE uu
 -- Insert Web Service tokens
 -- you can generate new tokens with e.g.:
 -- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
-INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "updatedAt", "expiresAt", "scope") VALUES
+INSERT INTO "accessTokens" (uuid, name, "pointOfContact", description, "tokenHash", "createdAt", "updatedAt", "expiresAt", "scope") VALUES
   -- NVG token value is 'XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv'
-  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token for NVG', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 0),
+  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token for NVG', 'Arthur Dmin <arthur@example.ns>', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 0),
   -- GRAPHQL token value is W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf
-  ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 1),
+  ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'Rebecca Beccabon, +2-456-7324', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 1),
   -- GRAPHQL expired token value is 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn
-  ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
+  ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', NULL, 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
 
 -- Test data for assessments
 

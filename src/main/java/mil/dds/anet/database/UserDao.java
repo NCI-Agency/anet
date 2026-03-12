@@ -128,6 +128,6 @@ public class UserDao extends AnetBaseDao<User, AbstractSearchQuery<?>> {
   }
 
   public List<List<User>> getUsers(List<String> foreignKeys) {
-    return new UserDao.UsersBatcher().getByForeignKeys(foreignKeys);
+    return new UsersBatcher().getByForeignKeys(foreignKeys);
   }
 }

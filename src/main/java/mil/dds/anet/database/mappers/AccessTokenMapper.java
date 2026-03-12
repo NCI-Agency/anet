@@ -14,6 +14,7 @@ public class AccessTokenMapper implements RowMapper<AccessToken> {
     accessToken.setUuid(rs.getString("uuid"));
     accessToken.setName(rs.getString("name"));
     accessToken.setScope(MapperUtils.getEnumIdx(rs, "scope", TokenScope.class));
+    accessToken.setPointOfContact(MapperUtils.getOptionalString(rs, "pointOfContact"));
     accessToken.setDescription(MapperUtils.getOptionalString(rs, "description"));
     accessToken.setTokenHash(rs.getString("tokenHash"));
     accessToken.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));

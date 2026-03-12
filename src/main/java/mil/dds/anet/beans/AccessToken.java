@@ -1,12 +1,16 @@
 package mil.dds.anet.beans;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class AccessToken extends AbstractAnetBean implements RelatableObject {
@@ -24,6 +28,9 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   private String name;
   @GraphQLQuery
   @GraphQLInputField
+  private String pointOfContact;
+  @GraphQLQuery
+  @GraphQLInputField
   private String description;
   @GraphQLQuery
   @GraphQLInputField
@@ -34,6 +41,8 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   @GraphQLQuery
   @GraphQLInputField
   private TokenScope scope;
+  // annotated below
+  private List<AccessTokenActivity> accessTokenActivities;
 
   public String getName() {
     return name;
@@ -41,6 +50,14 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getPointOfContact() {
+    return pointOfContact;
+  }
+
+  public void setPointOfContact(String pointOfContact) {
+    this.pointOfContact = pointOfContact;
   }
 
   public String getDescription() {
@@ -74,6 +91,25 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   public void setScope(TokenScope scope) {
     this.scope = scope;
   }
+
+  @GraphQLQuery(name = "accessTokenActivities")
+  public CompletableFuture<List<AccessTokenActivity>> loadAccessTokenActivities(
+      @GraphQLRootContext GraphQLContext context) {
+    if (accessTokenActivities != null) {
+      return CompletableFuture.completedFuture(accessTokenActivities);
+    } else {
+      return engine().getAccessTokenActivityDao().getAccessTokenActivities(context, uuid)
+          .thenApply(o -> {
+            accessTokenActivities = o;
+            return o;
+          });
+    }
+  }
+
+  public List<AccessTokenActivity> getAccessTokenActivities() {
+    return accessTokenActivities;
+  }
+
 
   public static String computeTokenHash(final String tokenValue) {
     try {
