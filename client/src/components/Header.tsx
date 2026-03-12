@@ -35,15 +35,20 @@ const Header = ({
             </span>
           ) : (
             <Link
-              className="logo d-none d-sm-block"
+              className="logo d-none d-sm-inline-block"
               to="/"
               onClick={onHomeClick}
             >
               <img src={logo} alt="ANET logo" />
             </Link>
           )}
-          <span className="logo d-xs-block d-sm-none">
-            <img src={menuLogo} alt="ANET Menu" onClick={toggleMenuAction} />
+          <span className="logo d-inline-block d-sm-none">
+            <img
+              src={menuLogo}
+              alt="ANET Menu"
+              className="pointer"
+              onClick={toggleMenuAction}
+            />
           </span>
         </Col>
 
