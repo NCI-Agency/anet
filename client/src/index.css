@@ -1449,6 +1449,34 @@ table.cadence-dashboard > :not(caption) > * > * {
   vertical-align: middle;
 }
 
+table.cadence-dashboard {
+  margin-bottom: 0;
+}
+
+table.cadence-dashboard thead th {
+  position: sticky;
+  top: 0;
+}
+
+table.cadence-dashboard thead tr.table-primary {
+  border-top: 0;
+}
+
+.cadence-dashboard-panel.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: #f2f2f2;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cadence-dashboard-panel.fullscreen label,
+.cadence-dashboard-panel.fullscreen select {
+  display: none;
+}
+
 .event-series-task-row > td a {
   display: inline-block;
   width: var(--task-link-width);

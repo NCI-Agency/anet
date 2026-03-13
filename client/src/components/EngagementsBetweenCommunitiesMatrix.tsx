@@ -99,6 +99,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
   const [engagementsBetweenCommunities, setEngagementsBetweenCommunities] =
     useState([])
   const [fetchError, setFetchError] = useState(null)
+  const [isFullScreen, setIsFullScreen] = useState(false)
 
   const legendItems = CADENCE_COLOR_RANGES.map(item => ({
     ...item,
@@ -173,40 +174,55 @@ const EngagementsBetweenCommunitiesMatrix = ({
   return (
     <>
       <Messages error={fetchError} />
-      <div className="d-flex mt-3 align-items-end flex-wrap gap-3">
+      <div
+        className={`mt-4 cadence-dashboard-panel${isFullScreen ? " fullscreen" : ""}`}
+      >
         <div className="text-start">
           <label htmlFor="dashboard-type" className="form-label">
             Dashboard Type
           </label>
-          <select
-            id="dashboard-type"
-            value={
-              plannedEngagements
-                ? EngagementType.PLANNED
-                : EngagementType.RECENT
-            }
-            onChange={e =>
-              setPlannedEngagements(e.target.value === EngagementType.PLANNED)
-            }
-            className="form-select"
-          >
-            <option value={EngagementType.RECENT}>
-              Most Recent Engagements
-            </option>
-            <option value={EngagementType.PLANNED}>Planned Engagements</option>
-          </select>
-        </div>
-        <div className="d-flex align-items-center flex-wrap mb-2 ms-2 gap-3">
-          <span className="text-muted">Legend:</span>
-          {legendItems.map(item => (
-            <div key={item.label} className="d-flex align-items-center gap-2">
-              <LegendSwatch color={item.color} fade={item.fade} />
-              <span>{item.label}</span>
+          <div className="d-flex mb-2 flex-wrap justify-content-between">
+            <select
+              id="dashboard-type"
+              style={{ width: "unset" }}
+              value={
+                plannedEngagements
+                  ? EngagementType.PLANNED
+                  : EngagementType.RECENT
+              }
+              onChange={e =>
+                setPlannedEngagements(e.target.value === EngagementType.PLANNED)
+              }
+              className="form-select"
+            >
+              <option value={EngagementType.RECENT}>
+                Most Recent Engagements
+              </option>
+              <option value={EngagementType.PLANNED}>
+                Planned Engagements
+              </option>
+            </select>
+            <div className="d-flex align-items-center gap-3">
+              <span className="text-muted my-2">Legend:</span>
+              {legendItems.map(item => (
+                <div
+                  key={item.label}
+                  className="d-flex align-items-center gap-2"
+                >
+                  <LegendSwatch color={item.color} fade={item.fade} />
+                  <span>{item.label}</span>
+                </div>
+              ))}
             </div>
-          ))}
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm my-2"
+              onClick={() => setIsFullScreen(prev => !prev)}
+            >
+              {isFullScreen ? "Exit fullscreen" : "View in fullscreen"}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="clearfix mt-3">
         <div
           ref={scrollContainerRef}
           className="w-100"
@@ -214,12 +230,11 @@ const EngagementsBetweenCommunitiesMatrix = ({
         >
           <Table
             className="event-matrix cadence-dashboard"
-            responsive
             hover
             id="events-matrix"
             style={{ minWidth: `${advisorEntities.length * 220}px` }}
           >
-            <tbody>
+            <thead>
               <tr id="event-series-table-header" className="table-primary">
                 <th />
                 {advisorEntities.map(advisorEntity => (
@@ -234,6 +249,8 @@ const EngagementsBetweenCommunitiesMatrix = ({
                   </WrappedTh>
                 ))}
               </tr>
+            </thead>
+            <tbody>
               {_isEmpty(interlocutorEntities) ? (
                 <tr className="event-series-row">
                   <td colSpan={8}>No interlocutor entities</td>
