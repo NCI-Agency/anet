@@ -317,19 +317,17 @@ const EditHistory = ({
                                           }
                                         ]}
                                         onChange={value => {
-                                          const updatedHistory =
-                                            values.history.map((h, i) =>
-                                              i === idx
-                                                ? { ...h, primary: value }
-                                                : h
-                                            )
-                                          setFieldValue(
-                                            "history",
-                                            sortHistory(
+                                          setValues(prev => ({
+                                            ...prev,
+                                            history: sortHistory(
                                               historyEntityType,
-                                              updatedHistory
+                                              prev.history.map((h, i) =>
+                                                i === idx
+                                                  ? { ...h, primary: value }
+                                                  : h
+                                              )
                                             )
-                                          )
+                                          }))
                                         }}
                                       />
                                     </>
@@ -358,20 +356,17 @@ const EditHistory = ({
                                       const newValue =
                                         value && moment(value).valueOf()
 
-                                      const updatedHistory = values.history.map(
-                                        (h, i) =>
-                                          i === idx
-                                            ? { ...h, startTime: newValue }
-                                            : h
-                                      )
-
-                                      setFieldValue(
-                                        "history",
-                                        sortHistory(
+                                      setValues(prev => ({
+                                        ...prev,
+                                        history: sortHistory(
                                           historyEntityType,
-                                          updatedHistory
+                                          prev.history.map((h, i) =>
+                                            i === idx
+                                              ? { ...h, startTime: newValue }
+                                              : h
+                                          )
                                         )
-                                      )
+                                      }))
                                     }}
                                     component={FieldHelper.SpecialField}
                                     widget={
@@ -423,20 +418,17 @@ const EditHistory = ({
                                         const newValue =
                                           value && moment(value).valueOf()
 
-                                        const updatedHistory =
-                                          values.history.map((h, i) =>
-                                            i === idx
-                                              ? { ...h, endTime: newValue }
-                                              : h
-                                          )
-
-                                        setFieldValue(
-                                          "history",
-                                          sortHistory(
+                                        setValues(prev => ({
+                                          ...prev,
+                                          history: sortHistory(
                                             historyEntityType,
-                                            updatedHistory
+                                            prev.history.map((h, i) =>
+                                              i === idx
+                                                ? { ...h, endTime: newValue }
+                                                : h
+                                            )
                                           )
-                                        )
+                                        }))
                                       }}
                                       component={FieldHelper.SpecialField}
                                       widget={
@@ -719,7 +711,7 @@ function getHistoryConflicts(
       }
       if (
         current.position?.uuid &&
-        current.position.uuid === other.position?.uuids
+        current.position.uuid === other.position?.uuid
       ) {
         addConflict(current, "SAME_POSITION_OVERLAP")
         addConflict(other, "SAME_POSITION_OVERLAP")
