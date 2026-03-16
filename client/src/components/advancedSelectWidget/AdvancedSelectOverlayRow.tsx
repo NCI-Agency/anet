@@ -16,6 +16,7 @@ interface AsLinkProps {
   modelType: string
   model?: any
   whenUnspecified?: string
+  showIcon?: boolean
   children?: React.ReactNode
 }
 
@@ -23,6 +24,7 @@ const AsLink = ({
   modelType,
   model,
   whenUnspecified,
+  showIcon = true,
   children
 }: AsLinkProps) =>
   modelType === Task.resourceName ? (
@@ -39,6 +41,7 @@ const AsLink = ({
       modelType={modelType}
       model={model}
       whenUnspecified={whenUnspecified}
+      showIcon={showIcon}
       isLink={false}
       style={cursorStyle}
     >
@@ -63,7 +66,7 @@ export const AttachmentOverlayRow = (item: any) => {
         </div>
       </td>
       <td>
-        <AsLink modelType="Attachment" model={item} />
+        <AsLink modelType="Attachment" model={item} showIcon={false} />
       </td>
       <td>
         <span>
