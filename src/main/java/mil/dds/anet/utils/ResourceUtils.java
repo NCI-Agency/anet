@@ -105,13 +105,12 @@ public class ResourceUtils {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "There cannot be more than one primary history entry without an end time.");
     }
-
-    if (latestEntityInHistoryUuid != null && currentEntityInHistoryUuid != null
+    // This check only applies to person history
+    if (isCheckingPersonHistory && latestEntityInHistoryUuid != null
+        && currentEntityInHistoryUuid != null
         && !latestEntityInHistoryUuid.equals(currentEntityInHistoryUuid)) {
-      final String message = isCheckingPersonHistory
-          ? "Last primary position history entry must be identical to person's current primary position."
-          : "Last primary position history entry must be identical to position's current person.";
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Last primary position history entry must be identical to person's current primary position.");
     }
 
     if (countCurrentPrimary > 0 && currentEntityInHistoryUuid == null) {

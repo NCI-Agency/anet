@@ -62,7 +62,7 @@ class ResourceUtilsTest {
         {"null endTime without current relation", false, false, "uuid", null, "pphUuid",
             "2004-02-27T00:00:00.000Z", null, true},
 
-        {"null endTime with wrong relation", false, false, "uuid", "relUuid", "pphUuid",
+        {"null endTime with wrong relation", false, true, "uuid", "relUuid", "pphUuid",
             "2004-02-27T00:00:00.000Z", null, true},
 
         {"endTime before startTime 1", false, false, "uuid", null, "pphUuid",
@@ -186,7 +186,7 @@ class ResourceUtilsTest {
         pph.setPrimary((boolean) testItem[i++]);
         hist.add(pph);
       }
-      logger.debug("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);
+      logger.info("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);
       try {
         ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, relationUuid);
         if (!isValid) {
