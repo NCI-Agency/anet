@@ -203,12 +203,21 @@ public class TestData {
   public static ReportDto createMartReportCompletelyWrong(long sequence) {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setSequence(sequence);
+    reportDto.setEmail("mart-user-4@kfor.nato.int");
+    reportDto.setRank("OF-3");
     reportDto.setUuid("68077002-b766-4a79-bcf2-40b7dbffe6e6");
     reportDto.setOrganizationUuid("does not exist");
     reportDto.setOrganizationName("does not exist");
     reportDto.setLocationUuid("does not exist");
     reportDto.setLocationName("does not exist");
     reportDto.setSubmittedAt(Instant.now());
+    return reportDto;
+  }
+
+  public static ReportDto createGoodMartReportForUserWithoutPosition(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setEmail("mart-user-4@kfor.nato.int");
+    reportDto.setUuid("66d22a2f-0d42-4c67-a2b3-a16d50dbe9a1");
     return reportDto;
   }
 
