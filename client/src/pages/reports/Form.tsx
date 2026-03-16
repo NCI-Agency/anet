@@ -557,8 +557,6 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
-        const locationDisabled =
-          values.event?.uuid && values.event?.location?.uuid
 
         return (
           <AttachmentContext.Provider value={values}>
@@ -757,14 +755,12 @@ const ReportForm = ({
                           valueKey="name"
                           addon={LOCATIONS_ICON}
                           pageSize={0}
-                          showRemoveButton={!locationDisabled}
                           onChange={value => {
                             // validation will be done by setFieldValue
                             setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
                             setFieldValue("location", value, true)
                             setLocationUuid(value?.uuid)
                           }}
-                          disabled={locationDisabled}
                           createEntityComponent={
                             !canCreateLocation
                               ? null
@@ -778,24 +774,22 @@ const ReportForm = ({
                                 )
                           }
                         />
-                        {!locationDisabled && (
-                          <div className="mt-3">
-                            <LeafletWithSelection
-                              mapId="report-location"
-                              location={values.location}
-                              onSelectAnetLocation={(loc: any) => {
-                                setFieldTouched("location", true, false)
-                                setFieldValue("location", loc, true)
-                                setLocationUuid(loc.uuid)
-                              }}
-                              allowCreateLocation={canCreateLocation}
-                              onCreateLocation={({ lat, lng }) => {
-                                setNewLocationCoords({ lat, lng })
-                                setShowCreateLocationModal(true)
-                              }}
-                            />
-                          </div>
-                        )}
+                        <div className="mt-3">
+                          <LeafletWithSelection
+                            mapId="report-location"
+                            location={values.location}
+                            onSelectAnetLocation={(loc: any) => {
+                              setFieldTouched("location", true, false)
+                              setFieldValue("location", loc, true)
+                              setLocationUuid(loc.uuid)
+                            }}
+                            allowCreateLocation={canCreateLocation}
+                            onCreateLocation={({ lat, lng }) => {
+                              setNewLocationCoords({ lat, lng })
+                              setShowCreateLocationModal(true)
+                            }}
+                          />
+                        </div>
                       </>
                     }
                     extraColElem={
