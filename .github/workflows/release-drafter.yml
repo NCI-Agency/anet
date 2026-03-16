@@ -22,8 +22,8 @@ jobs:
       # uses default config template .github/release-drafter.yml
       - uses: release-drafter/release-drafter@v7
         id: release-drafter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify release-drafter status
         if: steps.release-drafter.outputs.id == ''
