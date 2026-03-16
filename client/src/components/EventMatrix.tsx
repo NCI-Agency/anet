@@ -636,10 +636,18 @@ const EventMatrix = ({
                   const ascendantTaskUuids = new Set(
                     hideParents ? ascendantTasks.map(t => t.uuid) : [taskUuid]
                   )
+                  const paddingLeft = Math.min(task.level * 20, 200)
+                  const linkWidth =
+                    300 - paddingLeft - (task.level === 0 ? 0 : 30)
 
                   return (
                     <tr key={task.uuid} className="event-series-task-row">
-                      <td style={{ paddingLeft: `${task.level * 20}px` }}>
+                      <td
+                        style={{
+                          paddingLeft: `${paddingLeft}px`,
+                          ["--task-link-width" as any]: `${linkWidth}px`
+                        }}
+                      >
                         <BreadcrumbTrail
                           modelType="Task"
                           leaf={task}
