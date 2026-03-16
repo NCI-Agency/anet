@@ -636,9 +636,9 @@ const EventMatrix = ({
                   const ascendantTaskUuids = new Set(
                     hideParents ? ascendantTasks.map(t => t.uuid) : [taskUuid]
                   )
-                  const paddingLeft = task.level * 20
+                  const paddingLeft = Math.min(task.level * 20, 200)
                   const linkWidth =
-                    300 - (paddingLeft + (task.level > 0 ? 30 : 0))
+                    300 - paddingLeft - (task.level === 0 ? 0 : 30)
 
                   return (
                     <tr key={task.uuid} className="event-series-task-row">
