@@ -107,7 +107,7 @@
     "typescript": "5.9.3",
     "webdriverio": "9.24.0",
     "webpack": "5.105.4",
-    "webpack-cli": "6.0.1",
+    "webpack-cli": "7.0.0",
     "webpack-dev-server": "5.2.3",
     "webpack-merge": "6.0.1",
     "xhr2": "0.2.1"
