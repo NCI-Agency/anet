@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import AppContext from "../../../src/components/AppContext"
+import PollingContext from "../../../src/components/PollingContext"
 import SecurityBanner from "../../../src/components/SecurityBanner"
 
 const Wrapper = connection => {
@@ -11,8 +12,10 @@ const Wrapper = connection => {
 
   return (
     <BrowserRouter>
-      <AppContext.Provider value={{ connection, currentUser }}>
-        <SecurityBanner />
+      <AppContext.Provider value={{ currentUser }}>
+        <PollingContext.Provider value={{ connection }}>
+          <SecurityBanner />
+        </PollingContext.Provider>
       </AppContext.Provider>
     </BrowserRouter>
   )
