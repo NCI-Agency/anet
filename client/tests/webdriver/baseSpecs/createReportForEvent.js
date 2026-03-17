@@ -102,3 +102,13 @@ describe("When creating a report for an event with engagement date outside of ev
     )
   })
 })
+describe("When creating a report for an event", () => {
+  it("Should allow the user to override the location", async () => {
+    await CreateReport.open()
+    await browser.pause(500) // wait for the page transition and rendering of custom fields
+    await CreateReport.fillForm(REPORT_FIELDS)
+    await browser.pause(500)
+    // We should be able to select a different location
+    await CreateReport.selectLocation("Fort Amherst")
+  })
+})
