@@ -290,11 +290,14 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
           dictProps={Settings.fields.report.reportCommunities}
           extraColForValue
           value={
-            <AuthorizationGroupTable
-              authorizationGroups={report.reportCommunities}
-              noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
-            />
+            report.reportCommunities?.length > 0 && (
+              <AuthorizationGroupTable
+                authorizationGroups={report.reportCommunities}
+                noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
+              />
+            )
           }
+          hideIfEmpty
         />
       </div>
       <h4>
