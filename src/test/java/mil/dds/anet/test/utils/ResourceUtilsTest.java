@@ -15,19 +15,23 @@ import java.util.List;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
 
-class ResourceUtilsTest {
+class ResourceUtilsTest extends AnetApplicationTest {
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Test
-  void testValidateHistoryInput() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void testValidateHistoryInput(boolean checkPerson) {
     // We test the following conditions:
     // - Uuid cannot be null.
     // - Start time cannot be empty.
@@ -43,121 +47,139 @@ class ResourceUtilsTest {
         // { label, isValidPerson, isValidPosition, uuid, relationUuid, (pphUuid, start time, end
         // time, primary)… }
 
-        {"null uuid", false, false, null, null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-28T00:00:00.000Z", true},
-        {"null uuid 2", false, false, null, "relUuid", "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-28T00:00:00.000Z", true},
+        {"null uuid", false, false, null, null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-28T00:00:00.000Z", true},
+        {"null uuid 2", false, false, null, "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-28T00:00:00.000Z", true},
 
-        {"null startTime 1", false, false, "uuid", null, "pphUuid", null,
-            "2004-02-28T00:00:00.000Z", true},
-        {"null startTime 2", false, false, "uuid", "relUuid", "pphUuid", null,
-            "2004-02-28T00:00:00.000Z", true},
+        {"null startTime 1", false, false, "uuid", null, // -
+            "pphUuid", null, "2004-02-28T00:00:00.000Z", true},
+        {"null startTime 2", false, false, "uuid", "relUuid", // -
+            "pphUuid", null, "2004-02-28T00:00:00.000Z", true},
 
-        {"two null endTimes 1", false, false, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            null, true, "pphUuid", "2004-02-27T00:00:00.000Z", null, true},
-        {"two null endTimes 2", false, false, "uuid", "relUuid", "relUuid",
-            "2004-02-27T00:00:00.000Z", null, true, "relUuid", "2004-02-27T00:00:00.000Z", null,
-            true},
+        {"two null endTimes 1", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", null, true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", null, true},
+        {"two null endTimes 2", false, false, "uuid", "relUuid", // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true, // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true},
 
-        {"null endTime without current relation", false, false, "uuid", null, "pphUuid",
+        {"null endTime without current relation", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", null, true},
+
+        {"null endTime with wrong person relation", false, true, "uuid", "relUuid", "pphUuid",
             "2004-02-27T00:00:00.000Z", null, true},
 
-        {"null endTime with wrong relation", false, true, "uuid", "relUuid", "pphUuid",
-            "2004-02-27T00:00:00.000Z", null, true},
-
-        {"endTime before startTime 1", false, false, "uuid", null, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-26T23:59:59.999Z", true},
-        {"endTime before startTime 2", false, false, "uuid", "relUuid", "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-26T23:59:59.999Z", true},
+        {"endTime before startTime 1", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-26T23:59:59.999Z", true},
+        {"endTime before startTime 2", false, false, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-26T23:59:59.999Z", true},
 
         {"no history but with relation", false, false, "uuid", "relUuid"},
 
-        {"overlap 1", false, false, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T02:00:00.000Z", true, "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T03:00:00.000Z", true},
-        {"overlap 2", false, false, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T02:00:00.000Z", true, "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T01:30:00.000Z", true},
-        {"overlap 3", false, false, "uuid", null, "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T03:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T02:00:00.000Z", true},
-        {"overlap 4", false, false, "uuid", null, "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T03:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T04:00:00.000Z", true},
-        {"overlap 5", false, false, "uuid", "relUuid", "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T03:00:00.000Z", true, "relUuid", "2004-02-27T00:00:00.000Z", null, true},
-        {"overlap 6", false, false, "uuid", "relUuid", "relUuid", "2004-02-27T00:00:00.000Z", null,
-            true, "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z", true},
+        {"overlap 1", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T02:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z", true},
+        {"overlap 2", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T02:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T01:30:00.000Z", true},
+        {"overlap 3", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T02:00:00.000Z", true},
+        {"overlap 4", false, false, "uuid", null, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T04:00:00.000Z", true},
+        {"overlap 5", false, false, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z", true, // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true},
+        {"overlap 6", false, false, "uuid", "relUuid", // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z", true},
 
-        {"very long history with overlap", false, false, "uuid", "relUuid", "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.001Z", true, "relUuid",
-            "2004-02-27T00:00:00.000Z", null, true},
+        {"very long history with overlap", false, false, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.001Z", true, // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true},
 
         {"no history and without relation", true, true, "uuid", null},
 
-        {"valid history 1", true, true, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true},
-        {"valid history 2", true, true, "uuid", "relUuid", "relUuid", "2004-02-27T00:00:00.000Z",
-            null, true},
-        {"valid history 3", true, true, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true},
-        {"valid history 4", true, true, "uuid", "relUuid", "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "relUuid", "2004-02-27T00:00:00.000Z", null, true},
-        {"valid history 5", true, true, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T01:00:00.000Z", true, "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T02:00:00.000Z", true},
-        {"valid history 6", true, true, "uuid", "relUuid", "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T01:00:00.000Z", true, "relUuid", "2004-02-27T01:00:00.000Z", null, true},
+        {"valid history 1", true, true, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true},
+        {"valid history 2", true, true, "uuid", "relUuid", // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true},
+        {"valid history 3", true, true, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true},
+        {"valid history 4", true, true, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true},
+        {"valid history 5", true, true, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T02:00:00.000Z", true},
+        {"valid history 6", true, true, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, // -
+            "relUuid", "2004-02-27T01:00:00.000Z", null, true},
+        {"valid history 7", true, true, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", false, // -
+            "relUuid", "2004-02-27T01:00:00.000Z", null, true},
+        {"valid history 8", true, true, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", false, // -
+            "relUuid", "2004-02-27T01:00:00.000Z", null, false},
+        {"valid history 9", true, true, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, // -
+            "relUuid", "2004-02-27T01:00:00.000Z", null, false},
+        {"valid history 10 only for position", false, true, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, // -
+            "relUuid", "2004-02-27T01:00:00.000Z", null, false},
         // - very long history
-        {"very long history 1", true, true, "uuid", null, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", true, "pphUuid", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T01:00:00.000Z", true, "pphUuid", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T02:00:00.000Z", true, "pphUuid", "2004-02-27T03:00:00.000Z",
-            "2004-02-27T04:00:00.000Z", true, "pphUuid", "2004-02-27T02:00:00.000Z",
-            "2004-02-27T03:00:00.000Z", true},
-        {"very long history 2", true, true, "uuid", "relUuid", "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, "pphUuid",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, "pphUuid",
-            "2004-02-27T01:00:00.000Z", "2004-02-27T02:00:00.000Z", true, "pphUuid",
-            "2004-02-27T03:00:00.000Z", "2004-02-27T04:00:00.000Z", true, "pphUuid",
-            "2004-02-27T02:00:00.000Z", "2004-02-27T03:00:00.000Z", true, "relUuid",
-            "2004-02-27T04:00:00.000Z", null, true},
+        {"very long history 1", true, true, "uuid", null, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T02:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T03:00:00.000Z", "2004-02-27T04:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T02:00:00.000Z", "2004-02-27T03:00:00.000Z", true},
+        {"very long history 2", true, true, "uuid", "relUuid", // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T02:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T03:00:00.000Z", "2004-02-27T04:00:00.000Z", true, // -
+            "pphUuid", "2004-02-27T02:00:00.000Z", "2004-02-27T03:00:00.000Z", true, // -
+            "relUuid", "2004-02-27T04:00:00.000Z", null, true},
         {"history with overlap but ok for person because only one primary and different entities, not ok for position",
-            true, false, "uuid", "relUuid", "pphUuid", "2004-01-01T00:00:00.000Z",
-            "2004-01-29T00:00:00.000Z", false, "pphUuid2", "2004-01-15T00:00:00.000Z",
-            "2004-01-17T00:00:00.000Z", false, "relUuid", "2004-02-27T00:00:00.000Z", null, true},
+            true, false, "uuid", "relUuid", // -
+            "pphUuid", "2004-01-01T00:00:00.000Z", "2004-01-29T00:00:00.000Z", false, // -
+            "pphUuid2", "2004-01-15T00:00:00.000Z", "2004-01-17T00:00:00.000Z", false, // -
+            "relUuid", "2004-02-27T00:00:00.000Z", null, true},
         {"history with overlap of non primary but same entity, not ok for both", false, false,
-            "uuid", "relUuid", "pphUuid", "2004-01-01T00:00:00.000Z", "2004-01-29T00:00:00.000Z",
-            true, "pphUuid", "2004-01-15T00:00:00.000Z", "2004-01-17T00:00:00.000Z", false,
+            "uuid", "relUuid", // -
+            "pphUuid", "2004-01-01T00:00:00.000Z", "2004-01-29T00:00:00.000Z", true, // -
+            "pphUuid", "2004-01-15T00:00:00.000Z", "2004-01-17T00:00:00.000Z", false, // -
             "relUuid", "2004-02-27T00:00:00.000Z", null, true},
         // end
     };
 
-    validateHistory(testData, true);
-    validateHistory(testData, false);
+    validateHistory(testData, checkPerson);
   }
 
   private void validateHistory(final Object[][] testData, final boolean checkPerson) {
@@ -186,7 +208,7 @@ class ResourceUtilsTest {
         pph.setPrimary((boolean) testItem[i++]);
         hist.add(pph);
       }
-      logger.info("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);
+      logger.debug("checking {} with checkPerson={}", Arrays.toString(testItem), checkPerson);
       try {
         ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, relationUuid);
         if (!isValid) {
