@@ -13,8 +13,11 @@ const INTERLOCUTORS_WITH_ASSESSMENTS = INTERLOCUTORS
 const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
 const ADVISORS_WITH_ASSESSMENTS = ["CIV GUIST, Lin"]
 
-const TASKS = ["EF 1\n»\nEF 1.2\n»\n1.2.A", "EF 1\n»\nEF 1.2\n»\n1.2.B"]
-const TASKS_WITH_ASSESSMENTS = TASKS
+const TASKS = [
+  ["EF 1", "EF 1.2", "1.2.A"],
+  ["EF 1", "EF 1.2", "1.2.B"]
+]
+const TASKS_WITH_ASSESSMENTS = TASKS.map(task => task.join("\n»\n"))
 
 const DEFAULT_REPORT_CLASSIFICATION = "DEMO USE ONLY"
 
@@ -149,9 +152,19 @@ describe("Show print report page", () => {
       }
     })
     it("Should display all tasks", async () => {
-      const displayedTasks = await ShowReport.getCompactViewElements("tasks")
+      const items = await browser.$$("#tasks > td > ul > li")
+      const displayedTasks = []
+      for (const item of items) {
+        const links = await item.$$("a")
+        const linkTexts = []
+        for (const link of links) {
+          linkTexts.push(await link.getText())
+        }
+        displayedTasks.push(linkTexts)
+      }
+      expect(displayedTasks.length).to.equal(TASKS.length)
       for (const task of TASKS) {
-        expect(displayedTasks).to.contain(task)
+        expect(displayedTasks).to.deep.include(task)
       }
     })
     it("Should display all tasks when assessments are shown", async () => {
