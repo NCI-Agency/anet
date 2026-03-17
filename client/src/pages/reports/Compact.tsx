@@ -317,10 +317,12 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
               wrappedComponent={CompactRow}
               dictProps={Settings.fields.report.reportCommunities}
               content={
-                <AuthorizationGroupTable
-                  id="reportCommunities"
-                  authorizationGroups={report.reportCommunities}
-                />
+                report.reportCommunities?.length > 0 && (
+                  <AuthorizationGroupTable
+                    id="reportCommunities"
+                    authorizationGroups={report.reportCommunities}
+                  />
+                )
               }
               className="reportField"
               hideIfEmpty
