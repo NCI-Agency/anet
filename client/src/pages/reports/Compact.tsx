@@ -549,17 +549,18 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
           readonly
         />
       ) : (
-        report.tasks.map((task, i) => (
-          <React.Fragment key={task.uuid}>
-            {i > 0 && <span className="ms-2 px-1 text-muted">|</span>}
-            <BreadcrumbTrail
-              modelType="Task"
-              leaf={task}
-              ascendantObjects={task.ascendantTasks}
-              parentField="parentTask"
-            />
-          </React.Fragment>
-        ))
+        <ul className="mb-0 ps-4">
+          {report.tasks.map(task => (
+            <li key={task.uuid}>
+              <BreadcrumbTrail
+                modelType="Task"
+                leaf={task}
+                ascendantObjects={task.ascendantTasks}
+                parentField="parentTask"
+              />
+            </li>
+          ))}
+        </ul>
       )
     )
   }
