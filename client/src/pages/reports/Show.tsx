@@ -654,11 +654,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     dictProps={Settings.fields.report.reportCommunities}
                     field={{ name: "reportCommunities" }}
                     humanValue={
-                      <AuthorizationGroupTable
-                        authorizationGroups={report.reportCommunities}
-                        noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
-                      />
+                      report.reportCommunities?.length > 0 && (
+                        <AuthorizationGroupTable
+                          authorizationGroups={report.reportCommunities}
+                          noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
+                        />
+                      )
                     }
+                    hideIfEmpty
                   />
 
                   {attachmentsEnabled && (
