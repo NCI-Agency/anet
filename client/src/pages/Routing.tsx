@@ -1,4 +1,5 @@
-import AppContext from "components/AppContext"
+import ProtectedRoute from "components/ProtectedRoute"
+import ResponsiveLayout from "components/ResponsiveLayout"
 import _isEmpty from "lodash/isEmpty"
 import AccessTokensList from "pages/admin/accessTokens/Index"
 import AuditTrailTable from "pages/admin/auditTrail/Index"
@@ -70,188 +71,352 @@ import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import TopTasks from "pages/tasks/Top"
 import { PAGE_URLS } from "pages/util"
-import React, { useContext } from "react"
-import { Navigate, Route, Routes } from "react-router-dom"
+import React from "react"
+import { Navigate } from "react-router-dom"
 import Settings from "settings"
 
-const Routing = () => {
-  const { currentUser } = useContext(AppContext)
-  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const attachmentEditEnabled =
-    attachmentsEnabled &&
-    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
-  return (
-    <Routes>
-      <Route index path={PAGE_URLS.HOME} element={<Home />} />
-      <Route path={PAGE_URLS.ROLLUP} element={<RollupShow />} />
-      <Route path={PAGE_URLS.HELP} element={<Help />} />
-      <Route path={PAGE_URLS.SEARCH}>
-        <Route index element={<Search />} />
-        <Route path="mine" element={<MySavedSearches />} />
-      </Route>
-      <Route path={PAGE_URLS.REPORTS}>
-        <Route path="mine" element={<MyReports />} />
-        <Route path="new" element={<ReportNew />} />
-        <Route path=":uuid">
-          <Route index element={<ReportShow />} />
-          <Route path="compact" element={<ReportCompact />} />
-          <Route path="edit" element={<ReportEdit />} />
-          {/* TODO: Backwards-compatibility; this route can be removed at some point */}
-          <Route path="min" element={<ReportShow />} />
-        </Route>
-      </Route>
-      {attachmentsEnabled && (
-        <Route path={PAGE_URLS.ATTACHMENTS}>
-          <Route path="mine" element={<MyAttachments />} />
-          <Route path=":uuid">
-            <Route index element={<AttachmentShow />} />
-            {attachmentEditEnabled && (
-              <Route path="edit" element={<AttachmentEdit />} />
-            )}
-          </Route>
-        </Route>
-      )}
-      <Route path={PAGE_URLS.PEOPLE}>
-        <Route path="new" element={<PersonNew />} />
-        <Route path=":uuid">
-          <Route index element={<PersonShow />} />
-          <Route path="compact" element={<PersonCompact />} />
-          <Route path="edit" element={<PersonEdit />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.ORGANIZATIONS}>
-        <Route path="new" element={<OrganizationNew />} />
-        <Route path=":uuid">
-          <Route index element={<OrganizationShow />} />
-          <Route path=":action" element={<OrganizationShow />} />
-          <Route path="edit" element={<OrganizationEdit />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.LOCATIONS}>
-        <Route path="new" element={<LocationNew />} />
-        <Route path=":uuid">
-          <Route index element={<LocationShow />} />
-          <Route path="edit" element={<LocationEdit />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.POSITIONS}>
-        {currentUser.position?.uuid && (
-          <Route path="counterparts" element={<MyCounterparts />} />
-        )}
-        <Route path="new" element={<PositionNew />} />
-        <Route path=":uuid">
-          <Route index element={<PositionShow />} />
-          <Route path="edit" element={<PositionEdit />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.TASKS}>
-        {currentUser.position?.uuid && (
-          <Route path="mine" element={<MyTasks />} />
-        )}
-        <Route path="new" element={<TaskNew />} />
-        <Route path=":uuid">
-          <Route index element={<TaskShow />} />
-          <Route path="edit" element={<TaskEdit />} />
-        </Route>
-      </Route>
-      <Route path="communities">
-        {currentUser.isAdmin() && (
-          <Route path="new" element={<AuthorizationGroupNew />} />
-        )}
-        <Route path=":uuid">
-          <Route index element={<AuthorizationGroupShow />} />
-          <Route path="edit" element={<AuthorizationGroupEdit />} />
-        </Route>
-        {!_isEmpty(currentUser?.position?.authorizationGroupsAdministrated) && (
-          <Route path="mine" element={<MyAuthorizationGroups />} />
-        )}
-      </Route>
-      {currentUser.isAdmin() && (
-        <Route path={PAGE_URLS.ADMIN}>
-          <Route index element={<AdminIndex />} />
-          {!Settings.automaticallyAllowAllNewUsers && (
-            <Route
-              path="usersPendingVerification"
-              element={<UsersPendingVerification />}
-            />
-          )}
-          <Route path="merge">
-            <Route path="people" element={<MergePeople />} />
-            <Route path="positions" element={<MergePositions />} />
-            <Route path="locations" element={<MergeLocations />} />
-            <Route path="organizations" element={<MergeOrganizations />} />
-            <Route path="tasks" element={<MergeTasks />} />
-          </Route>
-          <Route path="userActivities">
-            <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
-            <Route path="overTime" element={<UserActivitiesOverTime />} />
-          </Route>
-          <Route path="auditTrail" element={<AuditTrailTable />} />
-          <Route path="pendingEmails" element={<PendingEmailsShow />} />
-          <Route path="accessTokens" element={<AccessTokensList />} />
-          <Route
-            path="configureEventTypes"
-            element={<ConfigureEventTypesShow />}
+const routes = [
+  {
+    element: <ResponsiveLayout />,
+    children: [
+      { index: true, path: PAGE_URLS.HOME, element: <Home /> },
+      { path: PAGE_URLS.ROLLUP, element: <RollupShow /> },
+      { path: PAGE_URLS.HELP, element: <Help /> },
+      {
+        path: PAGE_URLS.SEARCH,
+        children: [
+          { index: true, element: <Search /> },
+          { path: "mine", element: <MySavedSearches /> }
+        ]
+      },
+      {
+        path: PAGE_URLS.REPORTS,
+        children: [
+          { path: "mine", element: <MyReports /> },
+          { path: "new", element: <ReportNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <ReportShow /> },
+              { path: "compact", element: <ReportCompact /> },
+              { path: "edit", element: <ReportEdit /> },
+              /* TODO: Backwards-compatibility; this route can be removed at some point */
+              { path: "min", element: <ReportShow /> }
+            ]
+          }
+        ]
+      },
+      {
+        element: (
+          <ProtectedRoute
+            authorizationCallback={() =>
+              !Settings.fields.attachment.featureDisabled
+            }
           />
-          {Settings.featureMartGuiEnabled && (
-            <Route path="martImporter" element={<MartImporterShow />} />
-          )}
-          <Route path="graphiql" element={<GraphiQL />} />
-          <Route path="preferences" element={<Preferences />} />
-        </Route>
-      )}
-      <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />
-      <Route path={PAGE_URLS.EVENTS} element={<EventsList />} />
-      <Route path={PAGE_URLS.INSIGHTS}>
-        <Route path=":insight" element={<InsightsShow />} />
-      </Route>
-      <Route path={PAGE_URLS.DASHBOARDS}>
-        <Route path="kanban">
-          <Route path=":dashboard" element={<KanbanDashboard />} />
-        </Route>
-        <Route path="decisives">
-          <Route path=":dashboard" element={<DecisivesDashboard />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.ONBOARDING}>
-        {currentUser.isPendingVerification() ? (
-          <>
-            <Route index path="new" element={<OnboardingNew />} />
-            <Route path="edit" element={<OnboardingEdit />} />
-            <Route path="show" element={<OnboardingShow />} />
-          </>
-        ) : (
-          // Replace with home if user account exists already.
-          // Some users bookmark the onboarding - the very first page they hit.
-          <Route
-            index
-            path="*"
-            element={<Navigate replace to={PAGE_URLS.HOME} />}
+        ),
+        children: [
+          {
+            path: PAGE_URLS.ATTACHMENTS,
+            children: [
+              { path: "mine", element: <MyAttachments /> },
+              {
+                path: ":uuid",
+                children: [
+                  { index: true, element: <AttachmentShow /> },
+                  {
+                    element: (
+                      <ProtectedRoute
+                        authorizationCallback={currentUser =>
+                          !Settings.fields.attachment.featureDisabled &&
+                          (!Settings.fields.attachment.restrictToAdmins ||
+                            currentUser.isAdmin())
+                        }
+                      />
+                    ),
+                    children: [{ path: "edit", element: <AttachmentEdit /> }]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.PEOPLE,
+        children: [
+          { path: "new", element: <PersonNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <PersonShow /> },
+              { path: "compact", element: <PersonCompact /> },
+              { path: "edit", element: <PersonEdit /> }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.ORGANIZATIONS,
+        children: [
+          { path: "new", element: <OrganizationNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <OrganizationShow /> },
+              { path: ":action", element: <OrganizationShow /> },
+              { path: "edit", element: <OrganizationEdit /> }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.LOCATIONS,
+        children: [
+          { path: "new", element: <LocationNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <LocationShow /> },
+              { path: "edit", element: <LocationEdit /> }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.POSITIONS,
+        children: [
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  currentUser?.position?.uuid
+                }
+              />
+            ),
+            children: [{ path: "counterparts", element: <MyCounterparts /> }]
+          },
+          { path: "new", element: <PositionNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <PositionShow /> },
+              { path: "edit", element: <PositionEdit /> }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.TASKS,
+        children: [
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  currentUser?.position?.uuid
+                }
+              />
+            ),
+            children: [{ path: "mine", element: <MyTasks /> }]
+          },
+          { path: "new", element: <TaskNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <TaskShow /> },
+              { path: "edit", element: <TaskEdit /> }
+            ]
+          }
+        ]
+      },
+      {
+        path: "communities",
+        children: [
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser => currentUser?.isAdmin()}
+              />
+            ),
+            children: [{ path: "new", element: <AuthorizationGroupNew /> }]
+          },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <AuthorizationGroupShow /> },
+              { path: "edit", element: <AuthorizationGroupEdit /> }
+            ]
+          },
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  !_isEmpty(
+                    currentUser?.position?.authorizationGroupsAdministrated
+                  )
+                }
+              />
+            ),
+            children: [{ path: "mine", element: <MyAuthorizationGroups /> }]
+          }
+        ]
+      },
+      {
+        element: (
+          <ProtectedRoute
+            authorizationCallback={currentUser => currentUser?.isAdmin()}
           />
-        )}
-      </Route>
-      <Route path={PAGE_URLS.SUBSCRIPTIONS}>
-        <Route path="mine" element={<MySubscriptions />} />
-      </Route>
-      <Route path={PAGE_URLS.MISSING} element={<PageMissing />} />
-      <Route path={PAGE_URLS.EVENT_SERIES}>
-        <Route path="new" element={<EventSeriesNew />} />
-        <Route path=":uuid">
-          <Route index element={<EventSeriesShow />} />
-          <Route path="edit" element={<EventSeriesEdit />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.EVENTS}>
-        <Route path="mine" element={<MyEvents />} />
-        <Route path="new" element={<EventNew />} />
-        <Route path=":uuid">
-          <Route index element={<EventShow />} />
-          <Route path="edit" element={<EventEdit />} />
-        </Route>
-      </Route>
-      <Route path={PAGE_URLS.PREFERENCES} element={<MyPreferences />} />
-    </Routes>
-  )
-}
+        ),
+        children: [
+          {
+            path: PAGE_URLS.ADMIN,
+            children: [
+              { index: true, element: <AdminIndex /> },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={() =>
+                      !Settings.automaticallyAllowAllNewUsers
+                    }
+                  />
+                ),
+                children: [
+                  {
+                    path: "usersPendingVerification",
+                    element: <UsersPendingVerification />
+                  }
+                ]
+              },
+              {
+                path: "merge",
+                children: [
+                  { path: "people", element: <MergePeople /> },
+                  { path: "positions", element: <MergePositions /> },
+                  { path: "locations", element: <MergeLocations /> },
+                  { path: "organizations", element: <MergeOrganizations /> },
+                  { path: "tasks", element: <MergeTasks /> }
+                ]
+              },
+              {
+                path: "userActivities",
+                children: [
+                  { path: "perPeriod", element: <UserActivitiesPerPeriod /> },
+                  { path: "overTime", element: <UserActivitiesOverTime /> }
+                ]
+              },
+              { path: "auditTrail", element: <AuditTrailTable /> },
+              { path: "pendingEmails", element: <PendingEmailsShow /> },
+              { path: "accessTokens", element: <AccessTokensList /> },
+              {
+                path: "configureEventTypes",
+                element: <ConfigureEventTypesShow />
+              },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={() => Settings.featureMartGuiEnabled}
+                  />
+                ),
+                children: [
+                  { path: "martImporter", element: <MartImporterShow /> }
+                ]
+              },
+              { path: "graphiql", element: <GraphiQL /> },
+              { path: "preferences", element: <Preferences /> }
+            ]
+          }
+        ]
+      },
+      { path: PAGE_URLS.TOP_TASKS, element: <TopTasks /> },
+      { path: PAGE_URLS.EVENTS, element: <EventsList /> },
+      {
+        path: PAGE_URLS.INSIGHTS,
+        children: [{ path: ":insight", element: <InsightsShow /> }]
+      },
+      {
+        path: PAGE_URLS.DASHBOARDS,
+        children: [
+          {
+            path: "kanban",
+            children: [{ path: ":dashboard", element: <KanbanDashboard /> }]
+          },
+          {
+            path: "decisives",
+            children: [{ path: ":dashboard", element: <DecisivesDashboard /> }]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.ONBOARDING,
+        children: [
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  currentUser?.isPendingVerification()
+                }
+              />
+            ),
+            children: [
+              { index: true, path: "new", element: <OnboardingNew /> },
+              { path: "edit", element: <OnboardingEdit /> },
+              { path: "show", element: <OnboardingShow /> }
+            ]
+          },
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  !currentUser?.isPendingVerification()
+                }
+              />
+            ),
+            children: [
+              // Replace with home if user account exists already.
+              // Some users bookmark the onboarding - the very first page they hit.
+              {
+                index: true,
+                path: "*",
+                element: <Navigate replace to={PAGE_URLS.HOME} />
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.SUBSCRIPTIONS,
+        children: [{ path: "mine", element: <MySubscriptions /> }]
+      },
+      {
+        path: PAGE_URLS.EVENT_SERIES,
+        children: [
+          { path: "new", element: <EventSeriesNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <EventSeriesShow /> },
+              { path: "edit", element: <EventSeriesEdit /> }
+            ]
+          }
+        ]
+      },
+      {
+        path: PAGE_URLS.EVENTS,
+        children: [
+          { path: "mine", element: <MyEvents /> },
+          { path: "new", element: <EventNew /> },
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <EventShow /> },
+              { path: "edit", element: <EventEdit /> }
+            ]
+          }
+        ]
+      },
+      { path: PAGE_URLS.PREFERENCES, element: <MyPreferences /> },
+      { path: PAGE_URLS.MISSING, element: <PageMissing /> }
+    ]
+  }
+]
 
-export default Routing
+export default routes
