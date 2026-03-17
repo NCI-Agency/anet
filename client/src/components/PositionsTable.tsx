@@ -101,7 +101,7 @@ const PositionsTable = ({
         </Table>
       )}
       {(!hasPositions || canAssignPosition) && (
-        <div className={classNames({ canAssignPosition: "w-100" })}>
+        <div className={classNames({ "w-100": canAssignPosition })}>
           <span>
             {!hasPositions && <em>No {label.toLowerCase()} assigned</em>}
           </span>
