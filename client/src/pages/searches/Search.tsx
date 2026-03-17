@@ -27,6 +27,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PollingContext from "components/PollingContext"
 import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
 import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
@@ -225,7 +226,8 @@ const Search = ({
   pagination,
   setPagination
 }: SearchProps) => {
-  const { currentUser, appSettings } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)

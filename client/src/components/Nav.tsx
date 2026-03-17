@@ -1,6 +1,7 @@
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
+import PollingContext from "components/PollingContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import ms from "milsymbol"
@@ -198,7 +199,8 @@ const Navigation = ({
   resetPages,
   clearSearchQuery
 }: NavigationProps) => {
-  const { appSettings, currentUser, notifications } = useContext(AppContext)
+  const { currentUser, notifications } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   const [isMenuLinksOpened, setIsMenuLinksOpened] = useState(false)
   useEffect(() => scrollSpy.update(), [])
 

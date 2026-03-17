@@ -9,6 +9,7 @@ import GeneralBanner, {
 } from "components/GeneralBanner"
 import Header from "components/Header"
 import NoPositionBanner from "components/NoPositionBanner"
+import PollingContext from "components/PollingContext"
 import SecurityBanner from "components/SecurityBanner"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
@@ -28,7 +29,8 @@ const TopBar = ({
   toggleMenuAction,
   handleSecurityBannerBottom
 }: TopBarProps) => {
-  const { appSettings, currentUser } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   const [bannerVisibility, setBannerVisibility] = useState(false)
   const [height, setHeight] = useState(0)
   const topbarDiv = useRef()

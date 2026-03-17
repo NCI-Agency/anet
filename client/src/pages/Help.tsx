@@ -12,6 +12,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PollingContext from "components/PollingContext"
 import RichTextEditor from "components/RichTextEditor"
 import { Position } from "models"
 import React, { useContext } from "react"
@@ -58,7 +59,8 @@ interface HelpProps {
 }
 
 const Help = ({ pageDispatchers }: HelpProps) => {
-  const { appSettings, currentUser } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   usePageTitle("Help")
   if (
     currentUser.uuid &&
