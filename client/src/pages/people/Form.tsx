@@ -807,7 +807,7 @@ const PersonForm = ({
                 {showSimilarPeople && (
                   <SimilarObjectsModal
                     objectType="Person"
-                    userInput={`${values.familyName} ${values.givenName}`}
+                    userInput={Person.fullName(values)}
                     onCancel={() => {
                       setShowSimilarPeople(false)
                     }}
@@ -935,7 +935,7 @@ const PersonForm = ({
     ) {
       const personQuery = {
         pageSize: 1,
-        text: `${givenName} ${familyName}`
+        text: Person.fullName({ givenName, familyName })
       }
       try {
         const response = await API.query(GQL_GET_PERSON_COUNT, {

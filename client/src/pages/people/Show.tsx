@@ -184,9 +184,6 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     attachments?.some(a => a.uuid === person?.entityAvatar?.attachmentUuid) &&
     person.entityAvatar
 
-  const searchText = [person.familyName, person.givenName, person.code].join(
-    " "
-  )
   const action = (
     <>
       {isAdmin && (
@@ -213,7 +210,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           Edit
         </LinkTo>
       )}
-      <FindObjectsButton objectLabel="Person" searchText={searchText} />
+      <FindObjectsButton
+        objectLabel="Person"
+        searchText={Person.fullName(person)}
+      />
       <RelatedObjectNotes
         notes={person.notes}
         relatedObject={

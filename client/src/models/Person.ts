@@ -375,23 +375,29 @@ export default class Person extends Model {
   }
 
   static fullName(person, doTrim = false) {
+    // A person's full name, combine givenName and familyName (optionally in all caps)
+    const allCaps = Settings.fields.person.familyName.allCaps
     if (person?.familyName && person?.givenName) {
-      return `${Person.formattedName(person.givenName, doTrim)} ${Person.formattedName(person.familyName, doTrim)}`
+      return `${Person.formattedName(person.givenName, doTrim)} ${Person.formattedName(person.familyName, doTrim, allCaps)}`
     } else if (person?.familyName) {
-      return Person.formattedName(person.familyName)
+      return Person.formattedName(person.familyName, doTrim, allCaps)
     } else if (person?.givenName) {
-      return Person.formattedName(person.givenName)
+      return Person.formattedName(person.givenName, doTrim)
     } else {
       return ""
     }
   }
 
-  static formattedName(name, doTrim = false) {
+  static formattedName(
+    name: string,
+    doTrim: boolean = false,
+    allCaps: boolean = false
+  ) {
     let r = name
     if (doTrim) {
       r = r.trim()
     }
-    return r
+    return allCaps ? r.toUpperCase() : r
   }
 
   getNumberOfFieldsInLeftColumn() {

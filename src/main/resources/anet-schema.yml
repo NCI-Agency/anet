@@ -942,7 +942,12 @@ properties:
           givenName:
             "$ref": "#/$defs/inputField"
           familyName:
-            "$ref": "#/$defs/inputField"
+            required: [allCaps]
+            allOf:
+              - "$ref": "#/$defs/extensibleInputField"
+              - properties:
+                  allCaps:
+                    type: boolean
           position:
             "$ref": "#/$defs/inputField"
           additionalPositions:

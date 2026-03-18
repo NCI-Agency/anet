@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
@@ -118,8 +119,11 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   @AllowUnverifiedUsers
   public String getName() {
-    // Principal name, combine givenName and familyName
-    return Joiner.on(" ").skipNulls().join(givenName, familyName);
+    // Principal name, combine givenName and familyName (optionally in all caps)
+    final boolean allCaps = (boolean) ApplicationContextProvider.getDictionary()
+        .getDictionaryEntry("fields.person.familyName.allCaps");
+    return Joiner.on(" ").skipNulls().join(givenName,
+        (familyName != null && allCaps) ? familyName.toUpperCase() : familyName);
   }
 
   @AllowUnverifiedUsers

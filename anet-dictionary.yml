@@ -654,6 +654,7 @@ fields:
     familyName:
       label: Family name
       placeholder: Family name
+      allCaps: false
     user:
       label: ANET user
     users:

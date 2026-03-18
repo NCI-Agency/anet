@@ -788,7 +788,8 @@ public class ReportResource {
     final String groupName = "stats";
     final String groupCol;
     final List<String> topLevelFields;
-    if (Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
+    final boolean isForOrganizations = Organization.DUMMY_ORG_UUID.equals(orgUuid);
+    if (isForOrganizations) {
       topLevelFields = List.of("organizationShortName");
       groupCol = "organizationUuid";
     } else {
@@ -801,8 +802,15 @@ public class ReportResource {
     for (final Map<String, Object> group : groupedResults) {
       final AdvisorReportsEntry entry = new AdvisorReportsEntry();
       entry.setUuid((String) group.get(groupCol));
-      entry.setName(
-          Joiner.on(" ").skipNulls().join(topLevelFields.stream().map(group::get).toList()));
+      if (isForOrganizations) {
+        entry.setName(
+            Joiner.on(" ").skipNulls().join(topLevelFields.stream().map(group::get).toList()));
+      } else {
+        final Person p = new Person();
+        p.setFamilyName((String) group.get("familyName"));
+        p.setGivenName((String) group.get("givenName"));
+        entry.setName(p.getName());
+      }
       final List<AdvisorReportsStats> stats = new LinkedList<>();
       @SuppressWarnings("unchecked")
       final List<Map<String, Object>> groupStats = (List<Map<String, Object>>) group.get(groupName);
