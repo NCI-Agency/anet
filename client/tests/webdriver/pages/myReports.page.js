@@ -30,27 +30,27 @@ class MyReports extends Page {
 
   async selectReport(linkText, reportState) {
     const sectionId = reportState.id
-    const tableTab = await browser.$(
+    const tableTab = browser.$(
       `#${sectionId} .report-collection div header div button[value='table']`
     )
-    await tableTab.waitForExist()
-    await tableTab.waitForDisplayed()
-    await tableTab.click()
-    const reportLink = await browser.$(`*=${linkText}`)
-    await reportLink.waitForExist()
-    await reportLink.waitForDisplayed()
-    await reportLink.click()
+    await (await tableTab).waitForExist()
+    await (await tableTab).waitForDisplayed()
+    await (await tableTab).click()
+    const reportLink = browser.$(`*=${linkText}`)
+    await (await reportLink).waitForExist()
+    await (await reportLink).waitForDisplayed()
+    await (await reportLink).click()
     await super.waitUntilLoaded()
   }
 
   async selectReportsTable(reportState) {
     const sectionId = reportState.id
-    const tableTab = await browser.$(
+    const tableTab = browser.$(
       `#${sectionId} .report-collection div header div button[value='table']`
     )
-    await tableTab.waitForExist()
-    await tableTab.waitForDisplayed()
-    await tableTab.click()
+    await (await tableTab).waitForExist()
+    await (await tableTab).waitForDisplayed()
+    await (await tableTab).click()
     await super.waitUntilLoaded()
   }
 
@@ -74,12 +74,12 @@ class MyReports extends Page {
 
   async selectReportsSummary(reportState) {
     const sectionId = reportState.id
-    const summaryTab = await browser.$(
+    const summaryTab = browser.$(
       `#${sectionId} .report-collection div header div button[value='summary']`
     )
-    await summaryTab.waitForExist()
-    await summaryTab.waitForDisplayed()
-    await summaryTab.click()
+    await (await summaryTab).waitForExist()
+    await (await summaryTab).waitForDisplayed()
+    await (await summaryTab).click()
     await super.waitUntilLoaded()
   }
 
