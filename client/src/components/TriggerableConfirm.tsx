@@ -44,9 +44,7 @@ const TriggerableConfirm = ({
   const [show, setShow] = useState(showDialog)
   const handleClose = () => {
     setShow(false)
-    if (typeof onCancel === "function") {
-      onCancel()
-    }
+    onCancel?.()
   }
   const handleShow = () => setShow(true)
   const ButtonElement = (
@@ -104,8 +102,8 @@ const TriggerableConfirm = ({
               className="float-end"
               variant="danger"
               onClick={() => {
+                setShow(false)
                 onConfirm()
-                handleClose()
               }}
             >
               {confirmText}
