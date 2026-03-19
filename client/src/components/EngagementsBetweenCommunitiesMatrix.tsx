@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import API from "api"
+import classNames from "classnames"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { mapPageDispatchersToProps } from "components/Page"
@@ -175,7 +176,9 @@ const EngagementsBetweenCommunitiesMatrix = ({
     <>
       <Messages error={fetchError} />
       <div
-        className={`mt-4 cadence-dashboard-panel${isFullScreen ? " fullscreen" : ""}`}
+        className={classNames("mt-4 cadence-dashboard-panel", {
+          fullscreen: isFullScreen
+        })}
       >
         <div className="text-start">
           <label htmlFor="dashboard-type" className="form-label">
