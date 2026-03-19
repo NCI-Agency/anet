@@ -2044,6 +2044,8 @@ imagery:
       default: true
       type: tile
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+      options:
+        referrerPolicy: strict-origin-when-cross-origin
     - name: OpenStreetMap - local
       default: false
       type: tile
