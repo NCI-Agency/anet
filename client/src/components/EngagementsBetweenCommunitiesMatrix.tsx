@@ -1,16 +1,19 @@
 import { gql } from "@apollo/client"
+import { Icon, Tooltip } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import API from "api"
 import classNames from "classnames"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { mapPageDispatchersToProps } from "components/Page"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import AuthorizationGroup from "models/AuthorizationGroup"
 import moment from "moment/moment"
-import React, { useEffect, useRef, useState } from "react"
-import { Table } from "react-bootstrap"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
 
@@ -101,6 +104,7 @@ const EngagementsBetweenCommunitiesMatrix = ({
     useState([])
   const [fetchError, setFetchError] = useState(null)
   const [isFullScreen, setIsFullScreen] = useState(false)
+  const { securityBannerOffset } = useContext(ResponsiveLayoutContext)
 
   const legendItems = CADENCE_COLOR_RANGES.map(item => ({
     ...item,
@@ -179,6 +183,9 @@ const EngagementsBetweenCommunitiesMatrix = ({
         className={classNames("mt-4 cadence-dashboard-panel", {
           fullscreen: isFullScreen
         })}
+        style={{
+          ["--banner-height" as any]: `${securityBannerOffset}px`
+        }}
       >
         <div className="text-start">
           <label htmlFor="dashboard-type" className="form-label">
@@ -217,13 +224,20 @@ const EngagementsBetweenCommunitiesMatrix = ({
                 </div>
               ))}
             </div>
-            <button
-              type="button"
-              className="btn btn-outline-secondary btn-sm my-2"
-              onClick={() => setIsFullScreen(prev => !prev)}
+            <Tooltip
+              content={isFullScreen ? "Exit fullscreen" : "View in fullscreen"}
             >
-              {isFullScreen ? "Exit fullscreen" : "View in fullscreen"}
-            </button>
+              <Button
+                variant="outline-secondary"
+                onClick={() => setIsFullScreen(prev => !prev)}
+              >
+                <Icon
+                  icon={
+                    isFullScreen ? IconNames.MINIMIZE : IconNames.FULLSCREEN
+                  }
+                />
+              </Button>
+            </Tooltip>
           </div>
         </div>
         <div

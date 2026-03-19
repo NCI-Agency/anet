@@ -1463,13 +1463,20 @@ table.cadence-dashboard thead tr.table-primary {
 }
 
 .cadence-dashboard-panel.fullscreen {
-  position: fixed;
-  inset: 0;
-  z-index: 1050;
+  position: absolute;
+  top: var(--banner-height);
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: calc(100% - var(--banner-height));
+  max-height: calc(100% - var(--banner-height));
+  z-index: 10;
   background: #f2f2f2;
-  padding: 2rem;
+  margin: 0 !important;
+  padding: 1rem 2rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .cadence-dashboard-panel.fullscreen label,
