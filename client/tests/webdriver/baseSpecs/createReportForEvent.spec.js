@@ -100,6 +100,7 @@ describe("When creating a report for an event with engagement date outside of ev
     expect(await ShowReport.getReportStatusText()).to.equal(
       ShowReport.REPORT_IS_APPROVED
     )
+    await ShowReport.logout(true)
   })
 })
 describe("When creating a report for an event", () => {
