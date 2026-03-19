@@ -88,30 +88,25 @@ public class ResourceUtils {
               "History entries should not overlap.");
         }
       }
-      // Update counters
-      if (Boolean.TRUE.equals(current.getPrimary()) && current.getEndTime() == null) {
-        countCurrentPrimary++;
-      }
+      // Keep track of primary entries
       if (Boolean.TRUE.equals(current.getPrimary())) {
+        if (current.getEndTime() == null) {
+          countCurrentPrimary++;
+        }
         if (isCheckingPersonHistory) {
           latestEntityInHistoryUuid = current.getPosition().getUuid();
-        } else {
-          latestEntityInHistoryUuid = current.getPerson().getUuid();
         }
       }
-
     }
+
     if (countCurrentPrimary > 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "There cannot be more than one primary history entry without an end time.");
     }
-
     if (latestEntityInHistoryUuid != null && currentEntityInHistoryUuid != null
         && !latestEntityInHistoryUuid.equals(currentEntityInHistoryUuid)) {
-      final String message = isCheckingPersonHistory
-          ? "Last primary position history entry must be identical to person's current primary position."
-          : "Last primary position history entry must be identical to position's current person.";
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Last primary position history entry must be identical to person's current primary position.");
     }
 
     if (countCurrentPrimary > 0 && currentEntityInHistoryUuid == null) {
