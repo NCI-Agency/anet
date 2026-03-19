@@ -64,9 +64,10 @@ describe("Merge positions page", () => {
     )
     await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one position is selected, should allow to leave
-    await (await browser.$("#anet-logo")).click()
+    await MergePositions.clickLogo()
     // eslint-disable-next-line no-unused-expressions
-    expect(await (await browser.$(".modal-dialog")).isExisting()).to.be.false
+    expect(await (await MergePositions.getModalDialog()).isExisting()).to.be
+      .false
 
     await MergePositions.openPage()
     await (await MergePositions.getTitle()).waitForExist()
@@ -86,10 +87,10 @@ describe("Merge positions page", () => {
     )
     await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when both positions are selected, should show warning
-    await (await browser.$("#anet-logo")).click()
-    const modalDialog = await browser.$(".modal-dialog")
+    await MergePositions.clickLogo()
     // eslint-disable-next-line no-unused-expressions
-    expect(await modalDialog.isExisting()).to.be.true
+    expect(await (await MergePositions.getModalDialog()).isExisting()).to.be
+      .true
     await (await browser.$(".btn-danger")).click()
   })
   it("Should display fields values of the left position", async () => {

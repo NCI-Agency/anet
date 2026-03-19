@@ -29,7 +29,7 @@ describe("When using the task filter on the reports search", () => {
   it("Should include the inactive tasks", async () => {
     await TaskFilter.openTaskFilter()
     await TaskFilter.clickInclInactiveCheckbox()
-    await browser.pause(500) // wait for contents to be rendered
+    await browser.pause(1000) // wait for contents to be rendered
 
     expect(await TaskFilter.getTaskCount()).to.equal(NR_OF_TOP_LEVEL_TASKS)
 

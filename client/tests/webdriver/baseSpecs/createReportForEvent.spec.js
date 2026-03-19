@@ -47,6 +47,7 @@ describe("When creating a report for an event with engagement date outside of ev
     expect(await ShowReport.getReportStatusText()).to.equal(
       ShowReport.REPORT_IS_PENDING_APPROVALS
     )
+    await ShowReport.logout()
   })
   it("Should show engagement date outside of event warning to initial approver", async () => {
     await MyReports.open("erin")
@@ -77,7 +78,7 @@ describe("When creating a report for an event with engagement date outside of ev
     )
     await (await ShowReport.getConfirmApproveButton()).click()
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
-    await ShowReport.logout()
+    await ShowReport.logout(true)
   })
   it("Should show engagement date outside of event warning to task owner", async () => {
     await Home.open("/", "henry")
@@ -100,7 +101,7 @@ describe("When creating a report for an event with engagement date outside of ev
     expect(await ShowReport.getReportStatusText()).to.equal(
       ShowReport.REPORT_IS_APPROVED
     )
-    await ShowReport.logout(true)
+    await ShowReport.logout()
   })
 })
 describe("When creating a report for an event", () => {

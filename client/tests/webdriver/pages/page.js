@@ -27,8 +27,17 @@ class Page {
     return browser.$("#kc-logout")
   }
 
+  async getLoggedOutForm() {
+    return browser.$(".logout-container")
+  }
+
   async getLogo() {
-    return browser.$("#topbar .logo")
+    return browser.$("#anet-logo .logo")
+  }
+
+  async clickLogo() {
+    await (await this.getLogo()).click()
+    await browser.pause(1500)
   }
 
   async getAttachments() {
@@ -45,6 +54,10 @@ class Page {
 
   async getImageClick() {
     return browser.$(".image-preview")
+  }
+
+  async getModalDialog() {
+    return browser.$(".modal-dialog")
   }
 
   async loginFormSubmit() {
@@ -66,12 +79,13 @@ class Page {
   async logout(resetRedux = false) {
     // Reset redux state before logout
     if (resetRedux) {
-      await (await this.getLogo()).click()
-      await browser.pause(1000)
+      await this.clickLogo()
     }
     await browser.url("/api/logout")
     await browser.pause(1000)
     await (await this.getLogoutFormSubmitButton()).click()
+    await (await this.getLoggedOutForm()).waitForExist()
+    await (await this.getLoggedOutForm()).waitForDisplayed()
   }
 
   async waitUntilLoaded() {

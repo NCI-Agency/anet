@@ -9,12 +9,12 @@ class SavedSearch extends Page {
     const reportsButton = browser.$('.btn-group > button[value="TASKS"]')
     await (await reportsButton).waitForDisplayed()
     await (await reportsButton).click()
-    await browser.pause(1000) // wait for filters to be updated
+    await browser.pause(1500) // wait for filters to be updated
 
     const addFilterButton = browser.$("#addFilterDropdown")
     await (await addFilterButton).waitForDisplayed()
     await (await addFilterButton).click()
-    await browser.pause(1000) // wait for filters to be shown
+    await browser.pause(1500) // wait for filters to be shown
 
     const withinOrganizationButton = browser.$("a*=Within Organization")
     await (await withinOrganizationButton).waitForDisplayed()

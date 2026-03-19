@@ -91,9 +91,9 @@ describe("Merge tasks page", () => {
     )
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
     // attempt to leave when only one task is selected, should allow to leave
-    await (await $("#anet-logo")).click()
+    await MergeTasks.clickLogo()
     // eslint-disable-next-line no-unused-expressions
-    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+    expect(await (await MergeTasks.getModalDialog()).isExisting()).to.be.false
 
     await MergeTasks.openPage()
     await (await MergeTasks.getTitle()).waitForExist()
@@ -115,10 +115,9 @@ describe("Merge tasks page", () => {
     )
     // attempt to leave when both tasks are selected, should show warning
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
-    await (await $("#anet-logo")).click()
-    const modalDialog = await $(".modal-dialog")
+    await MergeTasks.clickLogo()
     // eslint-disable-next-line no-unused-expressions
-    expect(await modalDialog.isExisting()).to.be.true
+    expect(await (await MergeTasks.getModalDialog()).isExisting()).to.be.true
     await $(".btn-danger").click()
   })
   it("Should display field values of the left task", async () => {
