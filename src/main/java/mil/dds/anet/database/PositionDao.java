@@ -191,7 +191,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @Transactional
-  public int setPersonInPosition(String personUuid, String positionUuid) {
+  public int setPersonInPosition(String personUuid, String positionUuid,
+      Instant positionStartTime) {
     final Handle handle = getDbHandle();
     try {
       // Get new position data from database (we need its type)
@@ -254,7 +255,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
               + "VALUES (:positionUuid, :personUuid, :createdAt)")
           .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
           // Need to ensure this timestamp is greater than previous INSERT.
-          .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+          .bind("createdAt", DaoUtils.asLocalDateTime(positionStartTime.plusMillis(1))).execute();
       // Evict this person from the domain users cache, as their position has changed
       engine().getPersonDao().evictFromCacheByPersonUuid(personUuid);
 

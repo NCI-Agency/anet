@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
@@ -94,7 +95,7 @@ public class PositionResource {
     final Position created = dao.insert(pos);
 
     if (pos.getPersonUuid() != null) {
-      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid());
+      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid(), Instant.now());
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
@@ -178,7 +179,7 @@ public class PositionResource {
             AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPersonUuid(),
                 existing, user);
           } else if (!Objects.equals(pos.getPersonUuid(), existing.getPersonUuid())) {
-            dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid());
+            dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid(), Instant.now());
             AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), existing,
                 user);
           }
@@ -234,7 +235,8 @@ public class PositionResource {
     }
     AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid());
 
-    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
+    final int numRows =
+        dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid, Instant.now());
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
     return numRows;
   }

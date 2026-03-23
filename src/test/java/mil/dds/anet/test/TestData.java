@@ -137,7 +137,7 @@ public class TestData {
     reportDto.setLocationName("General Hospital");
     reportDto.setCountry("ESP");
     reportDto.setPositionName("MART Team Member");
-    reportDto.setSubmittedAt(Instant.now());
+    reportDto.setSubmittedAt(Instant.now().minus(1, ChronoUnit.DAYS));
     reportDto.setAtmosphere("Positive");
     reportDto.setSecurityMarking("NU");
 
@@ -152,7 +152,7 @@ public class TestData {
     return reportDto;
   }
 
-  public static ReportDto createGoodMartReportWithDifferentUser(long sequence) {
+  public static ReportDto createGoodOldMartReportWithDifferentUser(long sequence) {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setUuid("545dc623-114e-4edd-be4f-8a000109791a");
     reportDto.setRank("OF-5");
@@ -160,6 +160,7 @@ public class TestData {
     reportDto.setFirstName("Reggie");
     reportDto.setLastName("Miller");
     reportDto.setCountry("Spain");
+    reportDto.setEngagementDate(Instant.now().minus(40, ChronoUnit.DAYS));
     return reportDto;
   }
 
@@ -180,6 +181,12 @@ public class TestData {
     reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
     reportDto.getTasks().put("does not exist", "does not exist");
     reportDto.setSecurityMarking(null);
+    return reportDto;
+  }
+
+  public static ReportDto createGoodMartReportALongTimeAgo(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setEngagementDate(Instant.now().minus(2, ChronoUnit.MONTHS));
     return reportDto;
   }
 

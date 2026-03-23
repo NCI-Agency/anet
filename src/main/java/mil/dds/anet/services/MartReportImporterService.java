@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailAddressDao;
@@ -60,6 +62,7 @@ import org.springframework.stereotype.Component;
 public class MartReportImporterService implements IMartReportImporterService {
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+  public static final int DEFAULT_MART_NEW_POSITION_DAYS_IN_PAST = 30;
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
 
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
@@ -77,7 +80,9 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final EmailAddressDao emailAddressDao;
   private final CommentDao commentDao;
 
-  public MartReportImporterService(ReportDao reportDao, PersonDao personDao,
+  public int martNewPositionDaysInThePast;
+
+  public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
       PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
       LocationDao locationDao, MartImportedReportDao martImportedReportDao,
       AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao) {
@@ -91,6 +96,12 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
     this.commentDao = commentDao;
+
+    Object martNewPositionDaysInThePastDictEntry =
+        dict.getDictionaryEntry("martNewPositionDaysInThePast");
+    this.martNewPositionDaysInThePast = (martNewPositionDaysInThePastDictEntry instanceof Integer)
+        ? (Integer) martNewPositionDaysInThePastDictEntry
+        : DEFAULT_MART_NEW_POSITION_DAYS_IN_PAST;
   }
 
   @Override
@@ -392,7 +403,11 @@ public class MartReportImporterService implements IMartReportImporterService {
       position.setOrganization(organization);
       position = positionDao.insert(position);
 
-      positionDao.setPersonInPosition(person.getUuid(), position.getUuid());
+      Instant engagementDate = martReport.getEngagementDate().minus(1, ChronoUnit.DAYS);;
+      Instant cutoffDate = Instant.now().minus(martNewPositionDaysInThePast, ChronoUnit.DAYS);
+      Instant earliestDate = engagementDate.isBefore(cutoffDate) ? engagementDate : cutoffDate;
+
+      positionDao.setPersonInPosition(person.getUuid(), position.getUuid(), earliestDate);
 
       // Add MART person as author
       reportPeople.add(createReportPerson(person));
