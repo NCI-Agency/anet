@@ -39,7 +39,7 @@ test("Home Page", async t => {
 
   const $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()
-  const $guidedTourTitle = await $("div.react-joyride__tooltip h1")
+  const $guidedTourTitle = await $("div.react-joyride__tooltip h4")
   await assertElementText(
     t,
     $guidedTourTitle,
@@ -50,12 +50,12 @@ test("Home Page", async t => {
   const $guidedTourNext = await $("div.react-joyride__tooltip > div > button")
   await $guidedTourNext.click()
 
-  const $guidedTourOverlay = await $("div.react-joyride__spotlight")
-  await $guidedTourOverlay.click()
+  const $guidedTourClose = await $('button[data-testid="button-close"]')
+  await $guidedTourClose.click()
   await assertElementNotPresent(
     t,
     "div.react-joyride__tooltip",
-    "Clicking outside the dialog clears the Guided Tour",
+    "Closing the dialog clears the Guided Tour",
     shortWaitMs
   )
 
