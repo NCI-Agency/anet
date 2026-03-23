@@ -221,13 +221,16 @@ const PendingApprovalReports = ({
     }
   ]
   const INITIAL_LAYOUT = {
+    type: "split",
     direction: "column",
-    first: {
-      direction: "row",
-      first: VISUALIZATIONS[0].id,
-      second: VISUALIZATIONS[1].id
-    },
-    second: VISUALIZATIONS[2].id
+    children: [
+      {
+        type: "split",
+        direction: "row",
+        children: [VISUALIZATIONS[0].id, VISUALIZATIONS[1].id]
+      },
+      VISUALIZATIONS[2].id
+    ]
   }
   const DESCRIPTION = `The reports are grouped by ${advisorOrgLabel}.
     In order to see the list of pending approval reports for an organization,

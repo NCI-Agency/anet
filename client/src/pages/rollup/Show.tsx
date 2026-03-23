@@ -354,9 +354,9 @@ const RollupShow = ({
     }
   ]
   const INITIAL_LAYOUT = {
+    type: "split",
     direction: "row",
-    first: VISUALIZATIONS[0].id,
-    second: VISUALIZATIONS[1].id
+    children: [VISUALIZATIONS[0].id, VISUALIZATIONS[1].id]
   }
   const DESCRIPTION = "Number of reports released per organization."
   const flexStyle = {

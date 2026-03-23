@@ -162,10 +162,10 @@ const UserActivitiesOverTime = ({
     }
   ]
   const INITIAL_LAYOUT = {
+    type: "split",
     direction: "row",
-    first: VISUALIZATIONS[0].id,
-    second: VISUALIZATIONS[1].id,
-    splitPercentage: 25
+    splitPercentages: [25, 75],
+    children: [VISUALIZATIONS[0].id, VISUALIZATIONS[1].id]
   }
   const DESCRIPTION = "User Activities"
   const flexStyle = {
