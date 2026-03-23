@@ -200,7 +200,7 @@ test.beforeEach(t => {
         throw e
       }
     }
-    const actualText = (await $elem.getText()).trim()
+    const actualText = (await (await $elem).getText()).trim()
     if (_isRegExp(expectedText)) {
       t.regex(actualText, expectedText, actualText, message)
     } else {

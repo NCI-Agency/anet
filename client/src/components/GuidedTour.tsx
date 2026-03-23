@@ -1,7 +1,7 @@
 import AppContext from "components/AppContext"
 import React, { useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
-import Joyride, { ACTIONS, EVENTS, STATUS } from "react-joyride"
+import { ACTIONS, EVENTS, Joyride, STATUS } from "react-joyride"
 import { useNavigate } from "react-router-dom"
 import TOUR_ICON from "resources/tour-icon.png"
 
@@ -41,16 +41,14 @@ const GuidedTour = ({ autostart, title, tour, onEnd }: GuidedTourProps) => {
         steps={currentTour.steps}
         stepIndex={stepIndex}
         run={runningTour}
-        callback={handleCallback}
+        onEvent={handleCallback}
         continuous
         scrollToFirstStep
-        showSkipButton
-        showProgress
-        disableScrollParentFix
-        styles={{
-          options: {
-            zIndex: 10000
-          }
+        options={{
+          buttons: ["back", "close", "primary", "skip"],
+          showProgress: true,
+          skipBeacon: true,
+          zIndex: 10000
         }}
       />
     </>
