@@ -22,7 +22,7 @@ import _isEqual from "lodash/isEqual"
 import moment from "moment"
 import React, { useRef } from "react"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {

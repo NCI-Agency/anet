@@ -65,7 +65,7 @@ import {
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { Link, useLocation, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"

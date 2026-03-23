@@ -31,7 +31,7 @@ import { Report } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 

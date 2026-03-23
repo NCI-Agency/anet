@@ -2,7 +2,7 @@ import { gqlAdminSettingsFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import API from "api"
 import { useEffect, useMemo, useRef } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router"
 import Version from "version"
 
 const GQL_POLLING_REQUEST = gql`

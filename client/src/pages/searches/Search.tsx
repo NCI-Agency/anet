@@ -63,7 +63,7 @@ import {
   Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import { toast } from "react-toastify"
 import COMMUNITIES_ICON from "resources/communities.png"
 import DOWNLOAD_ICON from "resources/download.png"

@@ -15,7 +15,7 @@ import {
 import { Attachment } from "models"
 import React from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import AttachmentForm from "./Form"
 
 const GQL_GET_ATTACHMENT = gql`

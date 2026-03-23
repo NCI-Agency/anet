@@ -40,7 +40,7 @@ import { Location } from "models"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Col, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { Link, useLocation, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router"
 import Settings from "settings"
 import utils from "utils"
 

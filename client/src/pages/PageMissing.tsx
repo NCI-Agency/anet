@@ -8,7 +8,7 @@ import {
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router"
 
 interface PageMissingProps {
   pageDispatchers?: PageDispatchersPropType

@@ -7,7 +7,7 @@ import {
 } from "components/aggregations/utils"
 import _isEmpty from "lodash/isEmpty"
 import React, { useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import "../Calendar.css"
 
 const DATE_FORMAT = "YYYY-MM-DD"

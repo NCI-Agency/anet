@@ -27,7 +27,7 @@ import moment from "moment"
 import React, { useEffect, useMemo, useState } from "react"
 import { Card, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LISTS = gql`

@@ -1,6 +1,6 @@
 import TriggerableConfirm from "components/TriggerableConfirm"
 import React, { useCallback, useEffect } from "react"
-import { useBlocker } from "react-router-dom"
+import { useBlocker } from "react-router"
 
 const handleRouteChange = (event: BeforeUnloadEvent) => {
   event.preventDefault()

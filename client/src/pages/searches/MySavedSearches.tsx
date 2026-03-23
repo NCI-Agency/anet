@@ -27,7 +27,7 @@ import { Button, Table } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import utils from "utils"
 
 const GQL_GET_SAVED_SEARCHES = gql`

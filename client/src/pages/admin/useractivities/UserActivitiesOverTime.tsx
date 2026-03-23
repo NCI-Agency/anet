@@ -26,7 +26,7 @@ import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import utils from "utils"
 
 const GQL_GET_USER_ACTIVITY_COUNT = gql`

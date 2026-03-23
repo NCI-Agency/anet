@@ -11,7 +11,7 @@ import {
 import { Event, EventSeries } from "models"
 import React from "react"
 import { connect } from "react-redux"
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router"
 import Settings from "settings"
 import utils from "utils"
 import EventForm from "./Form"

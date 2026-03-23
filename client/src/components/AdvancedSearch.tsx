@@ -23,7 +23,7 @@ import {
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 
 interface CustomToggleProps {
   onClick: (...args: unknown[]) => unknown

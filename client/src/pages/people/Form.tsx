@@ -48,7 +48,7 @@ import {
   FormSelect,
   Row
 } from "react-bootstrap"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"

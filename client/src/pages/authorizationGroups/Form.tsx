@@ -19,7 +19,7 @@ import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Alert, Button, FormCheck } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 

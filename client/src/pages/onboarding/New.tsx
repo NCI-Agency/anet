@@ -8,7 +8,7 @@ import {
 import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router"
 import Settings from "settings"
 
 interface OnboardingNewProps {

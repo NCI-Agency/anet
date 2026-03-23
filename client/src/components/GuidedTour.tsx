@@ -2,7 +2,7 @@ import AppContext from "components/AppContext"
 import React, { useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import { ACTIONS, EVENTS, Joyride, STATUS } from "react-joyride"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import TOUR_ICON from "resources/tour-icon.png"
 
 const iconCss = {

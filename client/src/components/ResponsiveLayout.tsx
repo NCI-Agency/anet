@@ -7,7 +7,7 @@ import { usePollingRequest } from "pollingUtils"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { connect } from "react-redux"
 import LoadingBar from "react-redux-loading-bar"
-import { Navigate, Outlet, useLocation } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router"
 import { Element } from "react-scroll"
 
 const anetContainer = {

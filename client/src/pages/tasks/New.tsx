@@ -12,7 +12,7 @@ import {
 import { Organization, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router"
 import Settings from "settings"
 import utils from "utils"
 import TaskForm from "./Form"

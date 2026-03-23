@@ -11,7 +11,7 @@ import EngagementsBetweenCommunitiesMatrix from "components/EngagementsBetweenCo
 import Messages from "components/Messages"
 import { AuthorizationGroup } from "models"
 import React, { useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router"
 import COMMUNITIES_ICON from "resources/communities.png"
 import Settings from "settings"
 

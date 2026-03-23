@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import React from "react"
-import { BrowserRouter } from "react-router-dom"
+import { BrowserRouter } from "react-router"
 import AppContext from "../../../src/components/AppContext"
 import PollingContext from "../../../src/components/PollingContext"
 import SecurityBanner from "../../../src/components/SecurityBanner"
