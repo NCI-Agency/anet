@@ -31,7 +31,7 @@ java {
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.2.0"
-String jdbi3Version = "3.51.0"
+String jdbi3Version = "3.52.0"
 String poiVersion = "5.5.1"
 String simplejavamailVersion = "8.12.6"
 String springShellVersion = "4.0.1"
@@ -146,7 +146,7 @@ dependencies {
 	implementation "org.apache.poi:poi:${poiVersion}"
 	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:3.2.3'
+	implementation 'org.apache.tika:tika-core:3.3.0'
 	// For sanitizing SVG uploads
 	implementation 'io.github.borewit:svg-sanitizer:0.4.0'
 
