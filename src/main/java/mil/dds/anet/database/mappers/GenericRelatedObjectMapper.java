@@ -3,6 +3,7 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.GenericRelatedObject;
+import mil.dds.anet.database.mappers.MapperUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -21,6 +22,9 @@ public class GenericRelatedObjectMapper implements RowMapper<GenericRelatedObjec
     gro.setObjectUuid(rs.getString(uuidField));
     gro.setRelatedObjectType(rs.getString("relatedObjectType"));
     gro.setRelatedObjectUuid(rs.getString("relatedObjectUuid"));
+    if (MapperUtils.containsColumnNamed(rs, "priority")) {
+      gro.setPriority(MapperUtils.getOptionalDouble(rs, "priority"));
+    }
     return gro;
   }
 

@@ -368,6 +368,7 @@ type AuditTrail {
   createdAt: Instant
   objectUuid: String
   person: Person
+  priority: Float
   relatedObject: RelatableObject
   relatedObjectType: String
   relatedObjectUuid: String
@@ -732,6 +733,7 @@ input EventTypeInput {
 """"""
 type GenericRelatedObject {
   objectUuid: String
+  priority: Float
   relatedObject: RelatableObject
   relatedObjectType: String
   relatedObjectUuid: String
@@ -740,6 +742,7 @@ type GenericRelatedObject {
 """"""
 input GenericRelatedObjectInput {
   objectUuid: String
+  priority: Float
   relatedObjectType: String
   relatedObjectUuid: String
 }

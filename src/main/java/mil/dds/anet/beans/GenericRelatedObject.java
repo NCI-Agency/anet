@@ -26,6 +26,9 @@ public class GenericRelatedObject extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private String relatedObjectUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Double priority;
   // annotated below
   private RelatableObject relatedObject;
 
@@ -92,6 +95,14 @@ public class GenericRelatedObject extends AbstractAnetBean {
     this.relatedObjectUuid = relatedObjectUuid;
   }
 
+  public Double getPriority() {
+    return priority;
+  }
+
+  public void setPriority(Double priority) {
+    this.priority = priority;
+  }
+
   @GraphQLQuery(name = "relatedObject")
   public CompletableFuture<RelatableObject> loadRelatedObject(
       @GraphQLRootContext GraphQLContext context) {
@@ -114,12 +125,13 @@ public class GenericRelatedObject extends AbstractAnetBean {
       return false;
     return Objects.equals(objectUuid, that.objectUuid)
         && Objects.equals(relatedObjectType, that.relatedObjectType)
-        && Objects.equals(relatedObjectUuid, that.relatedObjectUuid);
+        && Objects.equals(relatedObjectUuid, that.relatedObjectUuid)
+        && Objects.equals(priority, that.priority);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(objectUuid, relatedObjectType, relatedObjectUuid);
+    return Objects.hash(objectUuid, relatedObjectType, relatedObjectUuid, priority);
   }
 
   @Override

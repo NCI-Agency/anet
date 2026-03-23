@@ -109,8 +109,8 @@ public class AuthorizationGroupDao
 
   public interface AuthorizationGroupBatch {
     @SqlBatch("INSERT INTO \"authorizationGroupRelatedObjects\""
-        + " (\"authorizationGroupUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
-        + " VALUES (:authorizationGroupUuid, :relatedObjectType, :relatedObjectUuid)")
+        + " (\"authorizationGroupUuid\", \"relatedObjectType\", \"relatedObjectUuid\", priority)"
+        + " VALUES (:authorizationGroupUuid, :relatedObjectType, :relatedObjectUuid, :priority)")
     void insertAuthorizationGroupRelatedObjects(
         @Bind("authorizationGroupUuid") String authorizationGroupUuid,
         @BindBean List<GenericRelatedObject> authorizationGroupRelatedObjects);
@@ -187,7 +187,7 @@ public class AuthorizationGroupDao
   class AuthorizationGroupRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
     private static final String SQL =
         "/* batch.getAuthorizationGroupRelatedObjects */ SELECT * FROM \"authorizationGroupRelatedObjects\" "
-            + "WHERE \"authorizationGroupUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
+            + "WHERE \"authorizationGroupUuid\" IN ( <foreignKeys> ) ORDER BY priority NULLS LAST, \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public AuthorizationGroupRelatedObjectsBatcher() {
       super(AuthorizationGroupDao.this.databaseHandler, SQL, "foreignKeys",
