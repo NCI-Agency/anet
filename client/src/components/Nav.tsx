@@ -16,7 +16,7 @@ import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useMatch, useNavigate } from "react-router"
+import { Link, useLocation, useMatch } from "react-router"
 import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"
 import Settings from "settings"
@@ -121,48 +121,6 @@ export const AnchorNavItem = ({
   )
 }
 
-const isModifiedEvent = event =>
-  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-
-interface LinkContainerProps {
-  children: React.ReactElement
-  onClick?: (event: any) => void
-  to: string
-  isActive?: boolean
-  style?: object
-}
-const LinkContainer = ({
-  children,
-  onClick,
-  to,
-  isActive,
-  style
-}: LinkContainerProps) => {
-  const navigate = useNavigate()
-  const match = useMatch(to)
-  const active = isActive ?? match
-
-  const handleClick = event => {
-    onClick?.(event)
-
-    if (
-      !event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore right clicks
-      !isModifiedEvent(event) // ignore clicks with modifier keys
-    ) {
-      event.preventDefault()
-      navigate(to)
-    }
-  }
-
-  return React.cloneElement(children, {
-    className: classNames({ active }),
-    href: to,
-    style,
-    onClick: handleClick
-  })
-}
-
 interface SidebarLinkProps {
   linkTo: string
   children?: React.ReactNode
@@ -179,20 +137,29 @@ const SidebarLink = ({
   id,
   setIsMenuLinksOpened,
   isActive
-}: SidebarLinkProps) => (
-  <Nav.Item
-    onClick={() => {
-      handleOnClick?.()
-      setIsMenuLinksOpened?.()
-    }}
-  >
-    <LinkContainer to={linkTo} isActive={isActive}>
-      <Nav.Link id={id} eventKey={id} active={false}>
+}: SidebarLinkProps) => {
+  const match = useMatch(linkTo)
+  const active = isActive ?? !!match
+  return (
+    <Nav.Item
+      onClick={() => {
+        handleOnClick?.()
+        setIsMenuLinksOpened?.()
+      }}
+    >
+      <Nav.Link
+        id={id}
+        eventKey={id}
+        as={Link}
+        to={linkTo}
+        active={active}
+        className={classNames({ active })}
+      >
         <span>{children}</span>
       </Nav.Link>
-    </LinkContainer>
-  </Nav.Item>
-)
+    </Nav.Item>
+  )
+}
 
 interface SidebarContainerProps {
   linkTo: string
@@ -209,17 +176,22 @@ const SidebarContainer = ({
   setIsMenuLinksOpened,
   style
 }: SidebarContainerProps) => {
+  const match = useMatch(linkTo)
+  const active = !!match
   return (
-    <LinkContainer
-      to={linkTo}
+    <NavDropdown.Item
       onClick={() => {
         handleOnClick?.()
         setIsMenuLinksOpened?.()
       }}
+      as={Link}
+      to={linkTo}
+      active={active}
+      className={classNames({ active })}
       style={style}
     >
-      <NavDropdown.Item>{children}</NavDropdown.Item>
-    </LinkContainer>
+      {children}
+    </NavDropdown.Item>
   )
 }
 
