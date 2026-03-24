@@ -62,7 +62,6 @@ import org.springframework.stereotype.Component;
 public class MartReportImporterService implements IMartReportImporterService {
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  public static final int DEFAULT_MART_NEW_POSITION_DAYS_IN_PAST = 30;
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
 
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
@@ -80,7 +79,7 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final EmailAddressDao emailAddressDao;
   private final CommentDao commentDao;
 
-  public int martNewPositionDaysInThePast;
+  private final int martNewPositionDaysInThePast;
 
   public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
       PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
@@ -97,11 +96,8 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.emailAddressDao = emailAddressDao;
     this.commentDao = commentDao;
 
-    Object martNewPositionDaysInThePastDictEntry =
-        dict.getDictionaryEntry("martNewPositionDaysInThePast");
-    this.martNewPositionDaysInThePast = (martNewPositionDaysInThePastDictEntry instanceof Integer)
-        ? (Integer) martNewPositionDaysInThePastDictEntry
-        : DEFAULT_MART_NEW_POSITION_DAYS_IN_PAST;
+    this.martNewPositionDaysInThePast =
+        (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
   }
 
   @Override
@@ -403,9 +399,12 @@ public class MartReportImporterService implements IMartReportImporterService {
       position.setOrganization(organization);
       position = positionDao.insert(position);
 
-      Instant engagementDate = martReport.getEngagementDate().minus(1, ChronoUnit.DAYS);;
-      Instant cutoffDate = Instant.now().minus(martNewPositionDaysInThePast, ChronoUnit.DAYS);
-      Instant earliestDate = engagementDate.isBefore(cutoffDate) ? engagementDate : cutoffDate;
+      final Instant now = Instant.now();
+      final Instant dayBeforeEngagementDate =
+          Objects.requireNonNullElse(martReport.getEngagementDate(), now).minus(1, ChronoUnit.DAYS);
+      final Instant cutoffDate = now.minus(martNewPositionDaysInThePast, ChronoUnit.DAYS);
+      final Instant earliestDate =
+          dayBeforeEngagementDate.isBefore(cutoffDate) ? dayBeforeEngagementDate : cutoffDate;
 
       positionDao.setPersonInPosition(person.getUuid(), position.getUuid(), earliestDate);
 

@@ -482,7 +482,7 @@ properties:
 
   martNewPositionDaysInThePast:
     type: integer
-    default: 30
+    minimum: 1
     title: Offset in days in the past for new position
     description: Used for MART; determines the offset of days in the past for a new position created for MART
 
