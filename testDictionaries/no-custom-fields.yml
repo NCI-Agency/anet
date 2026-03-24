@@ -6,6 +6,7 @@ regularUsersCanCreateLocations: true
 engagementsIncludeTimeAndDuration: true
 eventsIncludeStartAndEndTime: true
 featureMartGuiEnabled: true
+martNewPositionDaysInThePast: 30
 
 calendarOptions:
   attendeesType: advisor
