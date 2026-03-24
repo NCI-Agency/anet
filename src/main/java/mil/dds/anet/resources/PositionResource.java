@@ -246,7 +246,7 @@ public class PositionResource {
     AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid());
 
     final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid, primary,
-        previousPositionUuid);
+        previousPositionUuid, Instant.now());
 
     // Log the change
     final Instant now = Instant.now();
