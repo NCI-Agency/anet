@@ -69,7 +69,7 @@ const DraggableRow = ({
           opacity: dragActive ? 0.4 : 1,
           background: dragActive ? "#f0f4ff" : undefined,
           cursor: "pointer",
-          verticalAlign: "baseline",
+          verticalAlign: "middle",
           textAlign: "center"
         }}
       >
