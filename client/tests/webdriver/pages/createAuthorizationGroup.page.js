@@ -50,7 +50,9 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getRelatedObjectsInput() {
-    return browser.$("#authorizationGroupRelatedObjects")
+    return browser.$(
+      '.related_objects input[name="authorizationGroupRelatedObjects"]'
+    )
   }
 
   async getRelatedObjectsTable() {
@@ -60,6 +62,12 @@ class CreateAuthorizationGroup extends Page {
   async getRelatedObjectsTableEntry(relatedObjectText) {
     return (await this.getRelatedObjectsTable()).$(
       `.//tr/td/span//a[text()="${relatedObjectText}"]`
+    )
+  }
+
+  async getRelatedObjectsAdvancedSelectFirstItem() {
+    return browser.$(
+      "#authorizationGroupRelatedObjects-popover tbody tr:first-child"
     )
   }
 
@@ -104,6 +112,20 @@ class CreateAuthorizationGroup extends Page {
   async open() {
     // Only admin users can create communities
     await super.openAsAdminUser(PAGE_URL)
+  }
+
+  async waitForAdvancedSelectToChange(value, getFirstItemCallback) {
+    return browser.waitUntil(
+      async () => {
+        const el = await getFirstItemCallback()
+        return (await el.getText()).includes(value)
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected advanced select input to contain "' + value + '" after 5s'
+      }
+    )
   }
 
   async submitForm() {
