@@ -7056,7 +7056,7 @@ __metadata:
     geographiclib-mgrs: "npm:1.0.4"
     git-describe: "npm:4.1.1"
     graphiql: "npm:5.2.2"
-    graphql: "npm:16.13.1"
+    graphql: "npm:16.13.2"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
     html-to-image: "npm:1.11.11"
@@ -7074,7 +7074,7 @@ __metadata:
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.4.0"
     leaflet-gesture-handling: "npm:1.2.2"
-    leaflet.fullscreen: "npm:5.3.0"
+    leaflet.fullscreen: "npm:5.3.1"
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.23"
@@ -12134,10 +12134,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:16.13.1":
-  version: 16.13.1
-  resolution: "graphql@npm:16.13.1"
-  checksum: 10c0/0c7a9aea59504fbf3e0674f13ddb82935780f2a388e1db0ef41c3711c0ff8cb0a871c50d30d2d5288f32b946af3570d6f9ba8d13b03a330336f27121f9ac7a6b
+"graphql@npm:16.13.2":
+  version: 16.13.2
+  resolution: "graphql@npm:16.13.2"
+  checksum: 10c0/64e822a0a0e4398781e4bc9765b88d370c08261498b517add4b878038ef7be2005b6b394a79a5102b9379d57052f60bc7f23fec8f39808d101984a74772ebd9d
   languageName: node
   linkType: hard
 
@@ -14301,12 +14301,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.fullscreen@npm:5.3.0":
-  version: 5.3.0
-  resolution: "leaflet.fullscreen@npm:5.3.0"
+"leaflet.fullscreen@npm:5.3.1":
+  version: 5.3.1
+  resolution: "leaflet.fullscreen@npm:5.3.1"
   peerDependencies:
     leaflet: ^1.7.0 || >=2.0.0-alpha.1
-  checksum: 10c0/a2dd713677ff342d43be20147c111f6268814ff4857dc29012ae9f7a012f36544a627c14d1059f900905a2b03fd13dcf95f2f1f281504a590cb5684f83656c00
+  checksum: 10c0/e28c988b8e1195e21b2f98e900e9a6adeb3fac0430810b8991114a6ba7997a19c060a32aebfdd83147fe4e530acc4067b00170f8346e35382fe5127a7873fc73
   languageName: node
   linkType: hard
 
