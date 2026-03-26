@@ -21,6 +21,7 @@ const commonConfig = {
     clean: true
   },
   module: {
+    exprContextCritical: false,
     rules: [
       {
         test: /\.hbs$/,
