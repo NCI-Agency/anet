@@ -11,7 +11,7 @@ import { Event } from "models"
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import SEARCH_ICON from "resources/search-alt.png"
 
 interface SearchPopoverProps {

@@ -9,7 +9,7 @@ import {
 import { EventSeries } from "models"
 import React from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import EventSeriesForm from "./Form"
 
 interface EventSeriesEditProps {

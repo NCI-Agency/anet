@@ -16,7 +16,7 @@ import {
 import { LAST_MONTH } from "dateUtils"
 import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import Settings from "settings"
 
 const GQL_GET_TASK_LIST = gql`

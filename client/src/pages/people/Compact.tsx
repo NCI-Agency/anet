@@ -47,7 +47,7 @@ import moment from "moment"
 import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router"
 import Settings from "settings"
 import utils from "utils"
 

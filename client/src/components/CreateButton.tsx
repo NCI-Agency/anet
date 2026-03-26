@@ -2,7 +2,7 @@ import AppContext from "components/AppContext"
 import * as Models from "models"
 import React, { useContext } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 
 const DEFAULT_ACTIONS = [Models.Report]
 

@@ -46,7 +46,7 @@ import { Location } from "models"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 

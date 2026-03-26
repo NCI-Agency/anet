@@ -8,7 +8,7 @@ import {
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router"
 
 interface PageMissingProps {
   pageDispatchers?: PageDispatchersPropType
@@ -16,13 +16,14 @@ interface PageMissingProps {
 
 const PageMissing = ({ pageDispatchers }: PageMissingProps) => {
   const params = useParams()
+  const { pathname } = useLocation()
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
   usePageTitle("Page not found")
-  const page = params?.[0] ?? params?.["*"] ?? ""
+  const page = params?.[0] ?? params?.["*"] ?? pathname ?? ""
 
   return <NotFound text={`Page ${page} not found.`} />
 }

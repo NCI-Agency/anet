@@ -27,6 +27,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PollingContext from "components/PollingContext"
 import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
 import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
@@ -62,7 +63,7 @@ import {
   Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import { toast } from "react-toastify"
 import COMMUNITIES_ICON from "resources/communities.png"
 import DOWNLOAD_ICON from "resources/download.png"
@@ -225,7 +226,8 @@ const Search = ({
   pagination,
   setPagination
 }: SearchProps) => {
-  const { currentUser, appSettings } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)

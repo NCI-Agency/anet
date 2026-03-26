@@ -57,14 +57,6 @@ class ShowReport extends Page {
       .$(`./following-sibling::tr[${i}]/td`)
   }
 
-  async getTask12BUrl() {
-    return (await browser.$("*=1.2.B")).getAttribute("href")
-  }
-
-  async getTaskEF1Url() {
-    return (await browser.$("*=EF 1")).getAttribute("href")
-  }
-
   async getDefaultReportView() {
     return browser.$(".report-show")
   }

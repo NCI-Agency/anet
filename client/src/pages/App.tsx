@@ -16,17 +16,15 @@ import {
   useBoilerplate
 } from "components/Page"
 import "components/previews/RegisterPreviewComponents"
-import ResponsiveLayout from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
 import {
   getNotifications,
   GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS
 } from "notificationsUtils"
-import Routing from "pages/Routing"
-import { usePollingRequest } from "pollingUtils"
-import React from "react"
+import routes from "pages/Routing"
+import React, { useMemo } from "react"
 import { connect } from "react-redux"
-import { Navigate, useLocation, useNavigate } from "react-router-dom"
+import { createBrowserRouter, RouterProvider } from "react-router"
 import { ToastContainer } from "react-toastify"
 import { D3Tooltip } from "../components/D3Tooltip"
 import "../components/D3Tooltip.css"
@@ -145,23 +143,61 @@ const GQL_GET_APP_DATA = gql`
   }
 `
 
+const router = createBrowserRouter(routes)
+
+function sortOrganizations(organizations) {
+  organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
+}
+
+function getSortedOrganizationsFromData(organizationsData) {
+  let organizations = organizationsData?.list || []
+  organizations = Organization.fromArray(organizations)
+  sortOrganizations(organizations)
+  return organizations
+}
+
+function processData(data) {
+  if (!data) {
+    return {}
+  }
+  const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
+  const currentUser = new Person(data.me)
+  const notifications = getNotifications(currentUser.position)
+  return {
+    currentUser,
+    allOrganizations,
+    notifications
+  }
+}
+
 interface AppProps {
   pageDispatchers?: PageDispatchersPropType
   pageProps?: any
 }
 
 const App = ({ pageDispatchers, pageProps }: AppProps) => {
-  const navigate = useNavigate()
-  const routerLocation = useLocation()
-
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
-  const { adminSettings, ...connectionInfo } = usePollingRequest()
   const { done, result } = useBoilerplate({
     loading,
     error,
     pageProps,
     pageDispatchers
   })
+  const appState = processData(data)
+  const appContext = useMemo(
+    () => ({
+      currentUser: appState.currentUser,
+      allOrganizations: appState.allOrganizations,
+      loadAppData: refetch,
+      notifications: appState.notifications
+    }),
+    [
+      appState.allOrganizations,
+      appState.currentUser,
+      appState.notifications,
+      refetch
+    ]
+  )
 
   if (done) {
     return result
@@ -170,67 +206,14 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
   if (!data) {
     return <Messages error={{ message: "Could not load initial data" }} />
   }
-  const appState = processData(data)
 
-  // if this is a new user, redirect to onboarding
-  if (
-    appState.currentUser.isPendingVerification() &&
-    !routerLocation.pathname.startsWith("/onboarding")
-  ) {
-    return (
-      <Navigate
-        replace
-        to="/onboarding/new"
-        state={{ nextUrl: routerLocation }}
-      />
-    )
-  }
   return (
-    <AppContext.Provider
-      value={{
-        appSettings: adminSettings,
-        currentUser: appState.currentUser,
-        loadAppData: refetch,
-        notifications: appState.notifications,
-        connection: { ...connectionInfo }
-      }}
-    >
-      <ResponsiveLayout
-        pageProps={pageProps}
-        pageHistory={navigate}
-        location={routerLocation}
-        sidebarData={{
-          allOrganizations: appState.allOrganizations
-        }}
-      >
-        <ToastContainer theme="colored" />
-        <D3Tooltip />
-        <Routing />
-      </ResponsiveLayout>
+    <AppContext.Provider value={appContext}>
+      <ToastContainer theme="colored" />
+      <D3Tooltip />
+      <RouterProvider router={router} unstable_useTransitions={false} />
     </AppContext.Provider>
   )
-
-  function processData(data) {
-    function sortOrganizations(organizations) {
-      organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
-    }
-
-    function getSortedOrganizationsFromData(organizationsData) {
-      let organizations = (organizationsData && organizationsData.list) || []
-      organizations = Organization.fromArray(organizations)
-      sortOrganizations(organizations)
-      return organizations
-    }
-
-    const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
-    const currentUser = new Person(data.me)
-    const notifications = getNotifications(currentUser.position)
-    return {
-      currentUser,
-      allOrganizations,
-      notifications
-    }
-  }
 }
 
 const mapStateToProps = state => ({

@@ -100,9 +100,9 @@ describe("Merge people who are both non-users", () => {
     )
     await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one person is selected, should allow to leave
-    await (await browser.$("#anet-logo")).click()
+    await MergePeople.clickLogo()
     // eslint-disable-next-line no-unused-expressions
-    expect(await (await browser.$(".modal-dialog")).isExisting()).to.be.false
+    expect(await (await MergePeople.getModalDialog()).isExisting()).to.be.false
 
     await MergePeople.openPage()
     await (await MergePeople.getTitle()).waitForExist()
@@ -122,10 +122,9 @@ describe("Merge people who are both non-users", () => {
     )
     await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when both people are selected, should show warning
-    await (await browser.$("#anet-logo")).click()
-    const modalDialog = await browser.$(".modal-dialog")
+    await MergePeople.clickLogo()
     // eslint-disable-next-line no-unused-expressions
-    expect(await modalDialog.isExisting()).to.be.true
+    expect(await (await MergePeople.getModalDialog()).isExisting()).to.be.true
     await (await browser.$(".btn-danger")).click()
     await MergePeople.logout()
   })

@@ -18,6 +18,7 @@ import {
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
 import PendingAssessmentsByPosition from "components/PendingAssessmentsByPosition"
+import PollingContext from "components/PollingContext"
 import PublishedReportsOverTime from "components/PublishedReportsOverTime"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
@@ -30,7 +31,7 @@ import { Report } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
@@ -138,7 +139,8 @@ const InsightsShow = ({
   searchQuery,
   setSearchQuery
 }: InsightsShowProps) => {
-  const { appSettings, currentUser } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   const { insight } = useParams()
   const flexStyle = {
     display: "flex",

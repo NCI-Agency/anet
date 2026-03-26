@@ -2,7 +2,7 @@ import CreateButton from "components/CreateButton"
 import SearchBar from "components/SearchBar"
 import React from "react"
 import { Col, Container, Row } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 import menuLogo from "resources/anet-menu.svg"
 import logo from "../../public/favicon/logo.svg"
 

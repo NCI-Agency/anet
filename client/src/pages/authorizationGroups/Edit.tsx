@@ -15,7 +15,7 @@ import {
 import { AuthorizationGroup } from "models"
 import React from "react"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router"
 import AuthorizationGroupForm from "./Form"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`

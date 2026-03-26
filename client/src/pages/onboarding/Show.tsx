@@ -26,7 +26,7 @@ import moment from "moment"
 import React, { useContext } from "react"
 import { Alert, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router"
 import Settings from "settings"
 
 const GQL_GET_SELF = gql`

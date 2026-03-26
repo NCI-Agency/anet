@@ -88,6 +88,8 @@ class Search extends Page {
     await (await tableTab).waitForExist()
     await (await tableTab).waitForDisplayed()
     await (await tableTab).click()
+    await super.waitUntilLoaded()
+    await browser.pause(1000) // wait for table to load/render
   }
 
   async selectReport(linkText) {

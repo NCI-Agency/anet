@@ -1,6 +1,8 @@
 import { clearSearchQuery, resetPages } from "actions"
+import classNames from "classnames"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
+import PollingContext from "components/PollingContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import ms from "milsymbol"
@@ -14,8 +16,7 @@ import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
 import { connect } from "react-redux"
-import { LinkContainer } from "react-router-bootstrap"
-import { useLocation } from "react-router-dom"
+import { Link, useLocation, useMatch } from "react-router"
 import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"
 import Settings from "settings"
@@ -121,7 +122,7 @@ export const AnchorNavItem = ({
 }
 
 interface SidebarLinkProps {
-  linkTo?: any | string
+  linkTo: string
   children?: React.ReactNode
   handleOnClick?: (...args: unknown[]) => unknown
   setIsMenuLinksOpened?: (...args: unknown[]) => unknown
@@ -136,23 +137,32 @@ const SidebarLink = ({
   id,
   setIsMenuLinksOpened,
   isActive
-}: SidebarLinkProps) => (
-  <Nav.Item
-    onClick={() => {
-      handleOnClick?.()
-      setIsMenuLinksOpened?.()
-    }}
-  >
-    <LinkContainer to={linkTo} isActive={isActive}>
-      <Nav.Link id={id} eventKey={id} active={false}>
+}: SidebarLinkProps) => {
+  const match = useMatch(linkTo)
+  const active = isActive ?? !!match
+  return (
+    <Nav.Item
+      onClick={() => {
+        handleOnClick?.()
+        setIsMenuLinksOpened?.()
+      }}
+    >
+      <Nav.Link
+        id={id}
+        eventKey={id}
+        as={Link}
+        to={linkTo}
+        active={active}
+        className={classNames({ active })}
+      >
         <span>{children}</span>
       </Nav.Link>
-    </LinkContainer>
-  </Nav.Item>
-)
+    </Nav.Item>
+  )
+}
 
 interface SidebarContainerProps {
-  linkTo?: any | string
+  linkTo: string
   children?: React.ReactNode
   handleOnClick?: (...args: unknown[]) => unknown
   setIsMenuLinksOpened?: (...args: unknown[]) => unknown
@@ -166,17 +176,22 @@ const SidebarContainer = ({
   setIsMenuLinksOpened,
   style
 }: SidebarContainerProps) => {
+  const match = useMatch(linkTo)
+  const active = !!match
   return (
-    <LinkContainer
-      to={linkTo}
+    <NavDropdown.Item
       onClick={() => {
         handleOnClick?.()
         setIsMenuLinksOpened?.()
       }}
+      as={Link}
+      to={linkTo}
+      active={active}
+      className={classNames({ active })}
       style={style}
     >
-      <NavDropdown.Item>{children}</NavDropdown.Item>
-    </LinkContainer>
+      {children}
+    </NavDropdown.Item>
   )
 }
 
@@ -198,7 +213,8 @@ const Navigation = ({
   resetPages,
   clearSearchQuery
 }: NavigationProps) => {
-  const { appSettings, currentUser, notifications } = useContext(AppContext)
+  const { currentUser, notifications } = useContext(AppContext)
+  const { appSettings } = useContext(PollingContext)
   const [isMenuLinksOpened, setIsMenuLinksOpened] = useState(false)
   useEffect(() => scrollSpy.update(), [])
 
@@ -305,7 +321,7 @@ const Navigation = ({
           {currentUser.uuid && (
             <SidebarLink
               id="my-reports-nav"
-              linkTo={{ pathname: "/reports/mine" }}
+              linkTo="/reports/mine"
               handleOnClick={resetPages}
             >
               My Reports
@@ -318,7 +334,7 @@ const Navigation = ({
             <>
               <SidebarLink
                 id="my-tasks-nav"
-                linkTo={{ pathname: "/tasks/mine" }}
+                linkTo="/tasks/mine"
                 handleOnClick={resetPages}
               >
                 {`My ${tasksShortLabel}`}
@@ -330,7 +346,7 @@ const Navigation = ({
               </SidebarLink>
               <SidebarLink
                 id="my-counterparts-nav"
-                linkTo={{ pathname: "/positions/counterparts" }}
+                linkTo="/positions/counterparts"
                 handleOnClick={resetPages}
               >
                 My Counterparts
@@ -357,20 +373,20 @@ const Navigation = ({
           <Nav id="myorg-nav" style={{ lineHeight: "10px" }} />
           <SidebarLink
             id="my-attachments-nav"
-            linkTo={{ pathname: "/attachments/mine" }}
+            linkTo="/attachments/mine"
             handleOnClick={resetPages}
           >
             My Attachments
           </SidebarLink>
           <SidebarLink
-            linkTo={{ pathname: "/subscriptions/mine" }}
+            linkTo="/subscriptions/mine"
             handleOnClick={resetPages}
             id="my-subscriptions"
           >
             My Subscriptions
           </SidebarLink>
           <SidebarLink
-            linkTo={{ pathname: "/search/mine" }}
+            linkTo="/search/mine"
             handleOnClick={resetPages}
             id="my-searches"
           >
@@ -381,7 +397,7 @@ const Navigation = ({
           ) && (
             <SidebarLink
               id="my-communities-nav"
-              linkTo={{ pathname: "/communities/mine" }}
+              linkTo="/communities/mine"
               handleOnClick={resetPages}
             >
               My Communities
@@ -391,7 +407,7 @@ const Navigation = ({
             !_isEmpty(currentUser?.position?.organizationsAdministrated)) && (
             <SidebarLink
               id="my-events-nav"
-              linkTo={{ pathname: "/events/mine" }}
+              linkTo="/events/mine"
               handleOnClick={resetPages}
             >
               My Events

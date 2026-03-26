@@ -32,7 +32,7 @@ import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router"
 import utils from "utils"
 
 const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`

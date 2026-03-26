@@ -1,6 +1,5 @@
+import Home from "./home.page"
 import Page from "./page"
-
-const PAGE_URL = "/reports/mine"
 
 export const REPORT_STATES = {
   DRAFT: {
@@ -25,17 +24,14 @@ export const REPORT_STATES = {
 
 class MyReports extends Page {
   async open(credentials) {
-    await super.open(PAGE_URL, credentials)
+    await super.open("/", credentials)
+    await (await Home.getLinksMenuButton()).click()
+    await (await Home.getMyReportsLink()).waitForDisplayed()
+    await (await Home.getMyReportsLink()).click()
   }
 
   async selectReport(linkText, reportState) {
-    const sectionId = reportState.id
-    const tableTab = browser.$(
-      `#${sectionId} .report-collection div header div button[value='table']`
-    )
-    await (await tableTab).waitForExist()
-    await (await tableTab).waitForDisplayed()
-    await (await tableTab).click()
+    await this.selectReportsTable(reportState)
     const reportLink = browser.$(`*=${linkText}`)
     await (await reportLink).waitForExist()
     await (await reportLink).waitForDisplayed()
@@ -52,6 +48,7 @@ class MyReports extends Page {
     await (await tableTab).waitForDisplayed()
     await (await tableTab).click()
     await super.waitUntilLoaded()
+    await browser.pause(1000) // wait for table to load/render
   }
 
   async getReportsTableRow(reportRow) {

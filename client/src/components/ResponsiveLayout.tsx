@@ -1,9 +1,13 @@
+import AppContext from "components/AppContext"
 import Navigation from "components/Nav"
+import PollingContext from "components/PollingContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import TopBar from "components/TopBar"
-import React, { useEffect, useState } from "react"
+import { usePollingRequest } from "pollingUtils"
+import React, { useContext, useEffect, useMemo, useState } from "react"
+import { connect } from "react-redux"
 import LoadingBar from "react-redux-loading-bar"
-import { useLocation } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router"
 import { Element } from "react-scroll"
 
 const anetContainer = {
@@ -55,68 +59,83 @@ interface ResponsiveLayoutProps {
     minimalHeader?: boolean
     useNavigation?: boolean
   }
-  sidebarData?: {
-    allOrganizations?: any[]
-  }
-  children?: React.ReactNode
 }
 
-const ResponsiveLayout = ({
-  pageProps,
-  sidebarData,
-  children
-}: ResponsiveLayoutProps) => {
+const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
   const location = useLocation()
+  const { adminSettings, ...connectionInfo } = usePollingRequest()
+  const { allOrganizations, currentUser } = useContext(AppContext)
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)
   const [securityBannerBottom, setSecurityBannerBottom] = useState(0)
   useEffect(() => {
     // We want to hide the floating menu on navigation events
-    showFloatingMenu(false)
+    setFloatingMenu(false)
   }, [location])
+  const layoutContext = useMemo(
+    () => ({
+      showFloatingMenu: setFloatingMenu,
+      topbarOffset: topbarHeight,
+      securityBannerOffset: securityBannerBottom
+    }),
+    [securityBannerBottom, topbarHeight]
+  )
+  const pollingContext = useMemo(
+    () => ({
+      appSettings: adminSettings,
+      connection: { ...connectionInfo }
+    }),
+    [adminSettings, connectionInfo]
+  )
 
   const sidebarClass = floatingMenu ? "nav-overlay" : "d-none d-sm-block"
 
+  // if this is a new user, redirect to onboarding
+  if (
+    currentUser.isPendingVerification() &&
+    !location.pathname.startsWith("/onboarding")
+  ) {
+    return (
+      <Navigate replace to="/onboarding/new" state={{ nextUrl: location }} />
+    )
+  }
+
   return (
-    <ResponsiveLayoutContext.Provider
-      value={{
-        showFloatingMenu,
-        topbarOffset: topbarHeight,
-        securityBannerOffset: securityBannerBottom
-      }}
-    >
-      <div style={anetContainer} className="anet">
-        <TopBar
-          handleTopbarHeight={handleTopbarHeight}
-          minimalHeader={pageProps.minimalHeader}
-          handleSecurityBannerBottom={handleSecurityBannerBottom}
-          toggleMenuAction={() => {
-            showFloatingMenu(!floatingMenu)
-          }}
-        />
-        <div style={contentContainer} className="content-container">
-          <LoadingBar showFastActions style={loadingBar} />
-          <div
-            style={floatingMenu ? glassPane : null}
-            onClick={() => {
-              showFloatingMenu(false)
+    <ResponsiveLayoutContext.Provider value={layoutContext}>
+      <PollingContext.Provider value={pollingContext}>
+        <div style={anetContainer} className="anet">
+          <TopBar
+            handleTopbarHeight={handleTopbarHeight}
+            minimalHeader={pageProps.minimalHeader}
+            handleSecurityBannerBottom={handleSecurityBannerBottom}
+            toggleMenuAction={() => {
+              setFloatingMenu(!floatingMenu)
             }}
           />
-          {(pageProps.useNavigation || floatingMenu) && (
+          <div style={contentContainer} className="content-container">
+            <LoadingBar showFastActions style={loadingBar} />
             <div
-              style={sidebarContainer}
-              className={`main-sidebar ${sidebarClass}`}
-            >
-              <div style={sidebar}>
-                <Navigation {...sidebarData} />
+              style={floatingMenu ? glassPane : null}
+              onClick={() => {
+                setFloatingMenu(false)
+              }}
+            />
+            {(pageProps.useNavigation || floatingMenu) && (
+              <div
+                style={sidebarContainer}
+                className={`main-sidebar ${sidebarClass}`}
+              >
+                <div style={sidebar}>
+                  <Navigation allOrganizations={allOrganizations} />
+                </div>
               </div>
-            </div>
-          )}
-          <Element name="mainViewport" id="main-viewport">
-            {children}
-          </Element>
+            )}
+            <Element name="mainViewport" id="main-viewport">
+              <Outlet />
+            </Element>
+          </div>
         </div>
-      </div>
+      </PollingContext.Provider>
     </ResponsiveLayoutContext.Provider>
   )
 
@@ -127,10 +146,10 @@ const ResponsiveLayout = ({
   function handleSecurityBannerBottom(securityBannerBottom) {
     setSecurityBannerBottom(securityBannerBottom)
   }
-
-  function showFloatingMenu(floatingMenu) {
-    setFloatingMenu(floatingMenu)
-  }
 }
 
-export default ResponsiveLayout
+const mapStateToProps = state => ({
+  pageProps: state.pageProps
+})
+
+export default connect(mapStateToProps)(ResponsiveLayout)

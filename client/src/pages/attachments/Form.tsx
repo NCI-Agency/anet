@@ -18,7 +18,7 @@ import _isEqual from "lodash/isEqual"
 import { Attachment } from "models"
 import React, { useContext, useState } from "react"
 import { Button, Col } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import Settings from "settings"
 import utils from "utils"
 

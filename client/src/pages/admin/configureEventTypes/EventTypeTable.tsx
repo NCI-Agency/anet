@@ -19,7 +19,7 @@ import moment from "moment"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import AddNewEventTypeModal from "./AddNewEventTypeModal"
 
 const GQL_GET_EVENT_TYPES = gql`

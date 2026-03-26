@@ -14,7 +14,7 @@ const SEARCH_TITLE_TEXTS = [
 
 describe("When checking the home page tiles", () => {
   afterEach("Should logout", async () => {
-    await Home.logout()
+    await Home.logout(true)
   })
 
   describe("As admin", async () => {

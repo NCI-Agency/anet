@@ -2,6 +2,7 @@ import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
+import PollingContext from "components/PollingContext"
 import { Person } from "models"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { ButtonGroup, Dropdown } from "react-bootstrap"
@@ -22,48 +23,22 @@ const css = {
 
 interface SecurityBannerProps {
   onLogout?: (...args: unknown[]) => unknown
-  handleSecurityBannerBottom?: (...args: unknown[]) => unknown
 }
 
-const SecurityBanner = ({
-  onLogout,
-  handleSecurityBannerBottom
-}: SecurityBannerProps) => {
-  const { currentUser, connection } = useContext(AppContext)
+const SecurityBanner = ({ onLogout }: SecurityBannerProps) => {
+  const { currentUser } = useContext(AppContext)
+  const { connection } = useContext(PollingContext)
   const securityTextRef = useRef(null)
   const [bannerSideHeight, setBannerSideHeight] = useState(0)
-  const securityTextHeight = securityTextRef.current?.clientHeight || 0
-  const securityBannerRef = useRef()
-  const [securityBannerOffset, setSecurityBannerOffset] = useState(0)
+  const securityTextHeight = securityTextRef.current?.clientHeight ?? 0
 
   useEffect(() => {
     setBannerSideHeight(securityTextHeight)
-  }, [setBannerSideHeight, securityTextHeight])
-
-  useEffect(() => {
-    function updateSecurityBannerBottom() {
-      const curOffset = securityBannerRef.current.getBoundingClientRect().bottom
-      if (curOffset !== undefined && curOffset !== securityBannerOffset) {
-        setSecurityBannerOffset(curOffset)
-      }
-    }
-    updateSecurityBannerBottom()
-    window.addEventListener("resize", updateSecurityBannerBottom)
-    // returned function will be called on component unmount
-    return () => {
-      window.removeEventListener("resize", updateSecurityBannerBottom)
-    }
-  }, [securityBannerOffset])
-
-  useEffect(() => {
-    if (handleSecurityBannerBottom !== undefined) {
-      handleSecurityBannerBottom(securityBannerOffset)
-    }
-  }, [securityBannerOffset, handleSecurityBannerBottom])
+  }, [securityTextHeight])
 
   return (
     <>
-      <SecurityBannerContainer className="bg-primary" ref={securityBannerRef}>
+      <SecurityBannerContainer className="bg-primary">
         <VersionBox id="bannerVersion">Version : {Version}</VersionBox>
         <SecurityTextContainer
           id="bannerSecurityText"

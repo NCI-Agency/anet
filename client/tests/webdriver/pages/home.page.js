@@ -56,6 +56,10 @@ class Home extends Page {
     return browser.$('//a[text()="My Work"]')
   }
 
+  async getMyReportsLink() {
+    return browser.$('//a//span[contains(text(), "My Reports")]')
+  }
+
   async getMyOrgLink() {
     return browser.$('//a//span[contains(text(), "My Organization")]')
   }

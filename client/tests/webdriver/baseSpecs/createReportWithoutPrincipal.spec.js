@@ -46,6 +46,7 @@ describe("When creating a report without an interlocutor", () => {
     expect(await ShowReport.getReportStatusText()).to.equal(
       ShowReport.REPORT_IS_PENDING_APPROVALS
     )
+    await ShowReport.logout()
   })
   it("Should show missing interlocutor warning to initial approver", async () => {
     await MyReports.open("erin")
@@ -76,7 +77,7 @@ describe("When creating a report without an interlocutor", () => {
     )
     await (await ShowReport.getConfirmApproveButton()).click()
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
-    await ShowReport.logout()
+    await ShowReport.logout(true)
   })
   it("Should show missing interlocutor warning to task owner", async () => {
     await Home.open("/", "henry")
