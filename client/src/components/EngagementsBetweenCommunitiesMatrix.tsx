@@ -110,6 +110,30 @@ const EngagementsBetweenCommunitiesMatrix = ({
     ...item,
     fade: hexToRgba(item.color, 0.25)
   }))
+  const [focusedAdvisorUuid, setFocusedAdvisorUuid] = useState<string | null>(
+    null
+  )
+  const [focusedInterlocutorUuid, setFocusedInterlocutorUuid] = useState<
+    string | null
+  >(null)
+
+  useEffect(() => {
+    if (authorizationGroupAdvisors && authorizationGroupInterlocutors) {
+      setAdvisorEntities(
+        authorizationGroupAdvisors.authorizationGroupRelatedObjects
+      )
+      setInterlocutorEntities(
+        authorizationGroupInterlocutors.authorizationGroupRelatedObjects
+      )
+      setFocusedAdvisorUuid(null)
+      setFocusedInterlocutorUuid(null)
+    } else {
+      setAdvisorEntities([])
+      setInterlocutorEntities([])
+      setFocusedAdvisorUuid(null)
+      setFocusedInterlocutorUuid(null)
+    }
+  }, [authorizationGroupAdvisors, authorizationGroupInterlocutors])
 
   useEffect(() => {
     async function fetchEngagementsBetweenCommunities(
@@ -125,12 +149,6 @@ const EngagementsBetweenCommunitiesMatrix = ({
       }
     }
     if (authorizationGroupAdvisors && authorizationGroupInterlocutors) {
-      setAdvisorEntities(
-        authorizationGroupAdvisors.authorizationGroupRelatedObjects
-      )
-      setInterlocutorEntities(
-        authorizationGroupInterlocutors.authorizationGroupRelatedObjects
-      )
       const engagementsBetweenCommunitiesQuery = {
         advisorAuthorizationGroupUuid: authorizationGroupAdvisors.uuid,
         interlocutorAuthorizationGroupUuid:
@@ -148,6 +166,19 @@ const EngagementsBetweenCommunitiesMatrix = ({
     authorizationGroupInterlocutors,
     plannedEngagements
   ])
+
+  const visibleAdvisorEntities = focusedAdvisorUuid
+    ? advisorEntities.filter(
+        advisor => advisor.relatedObjectUuid === focusedAdvisorUuid
+      )
+    : advisorEntities
+
+  const visibleInterlocutorEntities = focusedInterlocutorUuid
+    ? interlocutorEntities.filter(
+        interlocutor =>
+          interlocutor.relatedObjectUuid === focusedInterlocutorUuid
+      )
+    : interlocutorEntities
 
   function getEngagement(advisorEntityUuid, interlocutorEntityUuid) {
     const match = engagementsBetweenCommunities.find(
@@ -249,46 +280,103 @@ const EngagementsBetweenCommunitiesMatrix = ({
             className="event-matrix cadence-dashboard"
             hover
             id="events-matrix"
-            style={{ minWidth: `${advisorEntities.length * 220}px` }}
+            style={{ minWidth: `${visibleAdvisorEntities.length * 220}px` }}
           >
             <thead>
               <tr id="event-series-table-header" className="table-primary">
                 <th />
-                {advisorEntities.map(advisorEntity => (
+                {visibleAdvisorEntities.map(advisorEntity => (
                   <WrappedTh key={advisorEntity.relatedObjectUuid}>
-                    <LinkTo
-                      modelType={advisorEntity.relatedObjectType}
-                      model={{
-                        uuid: advisorEntity.relatedObjectUuid,
-                        ...advisorEntity.relatedObject
-                      }}
-                    />
+                    <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                      <LinkTo
+                        modelType={advisorEntity.relatedObjectType}
+                        model={{
+                          uuid: advisorEntity.relatedObjectUuid,
+                          ...advisorEntity.relatedObject
+                        }}
+                      />
+                      <Tooltip
+                        content={
+                          focusedAdvisorUuid === advisorEntity.relatedObjectUuid
+                            ? "Clear focus"
+                            : "Focus on this member"
+                        }
+                      >
+                        <Icon
+                          icon={
+                            focusedAdvisorUuid ===
+                            advisorEntity.relatedObjectUuid
+                              ? IconNames.CROSS
+                              : IconNames.SEARCH
+                          }
+                          style={{ cursor: "pointer" }}
+                          onClick={() => {
+                            const nextFocus =
+                              focusedAdvisorUuid ===
+                              advisorEntity.relatedObjectUuid
+                                ? null
+                                : advisorEntity.relatedObjectUuid
+                            setFocusedAdvisorUuid(nextFocus)
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
                   </WrappedTh>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {_isEmpty(interlocutorEntities) ? (
+              {_isEmpty(visibleInterlocutorEntities) ? (
                 <tr className="event-series-row">
-                  <td colSpan={8}>No interlocutor entities</td>
+                  <td colSpan={visibleAdvisorEntities.length + 1}>
+                    No interlocutor entities
+                  </td>
                 </tr>
               ) : (
-                interlocutorEntities.map(interlocutorEntity => {
+                visibleInterlocutorEntities.map(interlocutorEntity => {
                   return (
                     <tr
                       key={interlocutorEntity.relatedObjectUuid}
                       className="event-series-row"
                     >
                       <WrappedTh>
-                        <LinkTo
-                          modelType={interlocutorEntity.relatedObjectType}
-                          model={{
-                            uuid: interlocutorEntity.relatedObjectUuid,
-                            ...interlocutorEntity.relatedObject
-                          }}
-                        />
+                        <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                          <LinkTo
+                            modelType={interlocutorEntity.relatedObjectType}
+                            model={{
+                              uuid: interlocutorEntity.relatedObjectUuid,
+                              ...interlocutorEntity.relatedObject
+                            }}
+                          />
+                          <Tooltip
+                            content={
+                              focusedInterlocutorUuid ===
+                              interlocutorEntity.relatedObjectUuid
+                                ? "Clear focus"
+                                : "Focus on this member"
+                            }
+                          >
+                            <Icon
+                              icon={
+                                focusedInterlocutorUuid ===
+                                interlocutorEntity.relatedObjectUuid
+                                  ? IconNames.CROSS
+                                  : IconNames.SEARCH
+                              }
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                const nextFocus =
+                                  focusedInterlocutorUuid ===
+                                  interlocutorEntity.relatedObjectUuid
+                                    ? null
+                                    : interlocutorEntity.relatedObjectUuid
+                                setFocusedInterlocutorUuid(nextFocus)
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
                       </WrappedTh>
-                      {advisorEntities.map(advisorEntity => (
+                      {visibleAdvisorEntities.map(advisorEntity => (
                         <td
                           key={`${interlocutorEntity.relatedObjectUuid}-${advisorEntity.relatedObjectUuid}`}
                         >
