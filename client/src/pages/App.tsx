@@ -211,7 +211,7 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
     <AppContext.Provider value={appContext}>
       <ToastContainer theme="colored" />
       <D3Tooltip />
-      <RouterProvider router={router} />
+      <RouterProvider router={router} unstable_useTransitions={false} />
     </AppContext.Provider>
   )
 }
