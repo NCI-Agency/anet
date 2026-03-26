@@ -1,15 +1,19 @@
 import { gql } from "@apollo/client"
+import { Icon, Tooltip } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import API from "api"
+import classNames from "classnames"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { mapPageDispatchersToProps } from "components/Page"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import AuthorizationGroup from "models/AuthorizationGroup"
 import moment from "moment/moment"
-import React, { useEffect, useRef, useState } from "react"
-import { Table } from "react-bootstrap"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
 
@@ -32,22 +36,20 @@ const GET_ENGAGEMENTS_BETWEEN_COMMUNITIES = gql`
   }
 `
 
+const CADENCE_COLOR_RANGES = [
+  { label: "< 3 months", maxMonths: 3, color: "#28a745" },
+  { label: "3 - 6 months", maxMonths: 6, color: "#5C9BD5" },
+  { label: "6 - 12 months", maxMonths: 12, color: "#ffc107" },
+  { label: "12 - 24 months", maxMonths: 24, color: "#fd7e14" },
+  { label: "> 24 months", maxMonths: Infinity, color: "#dc3545" }
+]
+
 function getEngagementColor(engagementDate: string): string {
   const engagementMoment = moment(engagementDate)
   const now = moment()
   const monthsAgo = now.diff(engagementMoment, "months")
-
-  if (monthsAgo < 3) {
-    return "#28a745"
-  } else if (monthsAgo < 6) {
-    return "#6c757d"
-  } else if (monthsAgo < 12) {
-    return "#ffc107"
-  } else if (monthsAgo < 24) {
-    return "#fd7e14"
-  } else {
-    return "#dc3545"
-  }
+  const match = CADENCE_COLOR_RANGES.find(r => monthsAgo < r.maxMonths)
+  return match?.color ?? "#dc3545"
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -69,6 +71,14 @@ const GradientDiv = styled.div`
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   text-align: center;
+`
+
+const LegendSwatch = styled.span`
+  width: 32px;
+  height: 12px;
+  border-radius: 2px;
+  background-image: ${props =>
+    `linear-gradient(90deg, ${props.color} 0%, ${props.fade} 100%)`};
 `
 
 const WrappedTh = styled.th`
@@ -93,6 +103,13 @@ const EngagementsBetweenCommunitiesMatrix = ({
   const [engagementsBetweenCommunities, setEngagementsBetweenCommunities] =
     useState([])
   const [fetchError, setFetchError] = useState(null)
+  const [isFullScreen, setIsFullScreen] = useState(false)
+  const { securityBannerOffset } = useContext(ResponsiveLayoutContext)
+
+  const legendItems = CADENCE_COLOR_RANGES.map(item => ({
+    ...item,
+    fade: hexToRgba(item.color, 0.25)
+  }))
 
   useEffect(() => {
     async function fetchEngagementsBetweenCommunities(
@@ -162,44 +179,79 @@ const EngagementsBetweenCommunitiesMatrix = ({
   return (
     <>
       <Messages error={fetchError} />
-      <div className="d-flex mt-3">
+      <div
+        className={classNames("mt-4 cadence-dashboard-panel", {
+          fullscreen: isFullScreen
+        })}
+        style={{
+          ["--banner-height" as any]: `${securityBannerOffset}px`
+        }}
+      >
         <div className="text-start">
           <label htmlFor="dashboard-type" className="form-label">
             Dashboard Type
           </label>
-          <select
-            id="dashboard-type"
-            value={
-              plannedEngagements
-                ? EngagementType.PLANNED
-                : EngagementType.RECENT
-            }
-            onChange={e =>
-              setPlannedEngagements(e.target.value === EngagementType.PLANNED)
-            }
-            className="form-select"
-          >
-            <option value={EngagementType.RECENT}>
-              Most Recent Engagements
-            </option>
-            <option value={EngagementType.PLANNED}>Planned Engagements</option>
-          </select>
+          <div className="d-flex mb-2 flex-wrap justify-content-between">
+            <select
+              id="dashboard-type"
+              style={{ width: "unset" }}
+              value={
+                plannedEngagements
+                  ? EngagementType.PLANNED
+                  : EngagementType.RECENT
+              }
+              onChange={e =>
+                setPlannedEngagements(e.target.value === EngagementType.PLANNED)
+              }
+              className="form-select"
+            >
+              <option value={EngagementType.RECENT}>
+                Most Recent Engagements
+              </option>
+              <option value={EngagementType.PLANNED}>
+                Planned Engagements
+              </option>
+            </select>
+            <div className="d-flex align-items-center gap-3">
+              <span className="text-muted my-2">Legend:</span>
+              {legendItems.map(item => (
+                <div
+                  key={item.label}
+                  className="d-flex align-items-center gap-2"
+                >
+                  <LegendSwatch color={item.color} fade={item.fade} />
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+            <Tooltip
+              content={isFullScreen ? "Exit fullscreen" : "View in fullscreen"}
+            >
+              <Button
+                variant="outline-secondary"
+                onClick={() => setIsFullScreen(prev => !prev)}
+              >
+                <Icon
+                  icon={
+                    isFullScreen ? IconNames.MINIMIZE : IconNames.FULLSCREEN
+                  }
+                />
+              </Button>
+            </Tooltip>
+          </div>
         </div>
-      </div>
-      <div className="clearfix mt-3">
         <div
           ref={scrollContainerRef}
           className="w-100"
           style={{ overflowX: "auto", whiteSpace: "nowrap" }}
         >
           <Table
-            className="event-matrix"
-            responsive
+            className="event-matrix cadence-dashboard"
             hover
             id="events-matrix"
             style={{ minWidth: `${advisorEntities.length * 220}px` }}
           >
-            <tbody>
+            <thead>
               <tr id="event-series-table-header" className="table-primary">
                 <th />
                 {advisorEntities.map(advisorEntity => (
@@ -214,6 +266,8 @@ const EngagementsBetweenCommunitiesMatrix = ({
                   </WrappedTh>
                 ))}
               </tr>
+            </thead>
+            <tbody>
               {_isEmpty(interlocutorEntities) ? (
                 <tr className="event-series-row">
                   <td colSpan={8}>No interlocutor entities</td>

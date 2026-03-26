@@ -1444,6 +1444,46 @@ table.event-matrix-cell {
   border-spacing: 0 0.25rem;
 }
 
+table.cadence-dashboard > :not(caption) > * > * {
+  padding: 2px;
+  vertical-align: middle;
+}
+
+table.cadence-dashboard {
+  margin-bottom: 0;
+}
+
+table.cadence-dashboard thead th {
+  position: sticky;
+  top: 0;
+}
+
+table.cadence-dashboard thead tr.table-primary {
+  border-top: 0;
+}
+
+.cadence-dashboard-panel.fullscreen {
+  position: absolute;
+  top: var(--banner-height);
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: calc(100% - var(--banner-height));
+  max-height: calc(100% - var(--banner-height));
+  z-index: 10;
+  background: #f2f2f2;
+  margin: 0 !important;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cadence-dashboard-panel.fullscreen label,
+.cadence-dashboard-panel.fullscreen select {
+  display: none;
+}
+
 .event-series-task-row > td a {
   display: inline-block;
   width: var(--task-link-width);
