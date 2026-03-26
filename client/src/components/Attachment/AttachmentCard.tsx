@@ -68,6 +68,10 @@ const AttachmentCard = ({
   return (
     <div className="attachment-card" key={attachment.uuid}>
       <Card>
+        <div className="classification-line">
+          {attachment.classification &&
+            `[${utils.getConfidentialityLabelForChoice(attachment.classification)}]`}
+        </div>
         <div
           className="d-grid text-center"
           onClick={() => onClick?.(attachment)}

@@ -20,11 +20,26 @@ describe("My Attachments page", () => {
     it("Should see a table of arthur's attachments", async () => {
       await MyAttachments.openAsAdminUser()
       await (await MyAttachments.getMyAttachments()).waitForDisplayed()
-      const myAttachments = await (
-        await MyAttachments.getMyAttachments()
-      ).$$("table.attachments_table > tbody > tr")
-      // table has a header and 9 attachment rows
-      expect(myAttachments).to.have.length(10)
+      const attachmentRows = await MyAttachments.getAttachmentRows()
+      // table has 10 attachment rows
+      expect(attachmentRows).to.have.length(10)
+      // check the classifications
+      const attachmentClassifications = {}
+      for (const attachmentRow of attachmentRows) {
+        const attachmentCaptionCell =
+          await MyAttachments.getAttachmentCaptionCell(attachmentRow)
+        const classification = await (
+          await MyAttachments.getAttachmentClassification(attachmentCaptionCell)
+        ).getText()
+        attachmentClassifications[classification] =
+          (attachmentClassifications[classification] ?? 0) + 1
+      }
+      expect(Object.keys(attachmentClassifications)).to.have.length(3)
+      expect(attachmentClassifications["[Public]"]).to.equal(8)
+      expect(attachmentClassifications["[NATO UNCLASSIFIED]"]).to.equal(1)
+      expect(
+        attachmentClassifications["[NATO UNCLASSIFIED Releasable to EU]"]
+      ).to.equal(1)
       await MyAttachments.logout()
     })
   })

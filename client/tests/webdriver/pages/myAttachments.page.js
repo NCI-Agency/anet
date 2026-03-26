@@ -10,6 +10,20 @@ class MyAttachments extends Page {
   async getMyAttachments() {
     return browser.$("#my-attachments")
   }
+
+  async getAttachmentRows() {
+    return (await this.getMyAttachments()).$$(
+      "table.attachments_table > tbody > tr"
+    )
+  }
+
+  async getAttachmentCaptionCell(attachment) {
+    return attachment.$("td:nth-child(2)")
+  }
+
+  async getAttachmentClassification(attachmentCaptionCell) {
+    return attachmentCaptionCell.$(".attachment-classification")
+  }
 }
 
 export default new MyAttachments()

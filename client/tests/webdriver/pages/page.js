@@ -48,7 +48,11 @@ class Page {
     return browser.$(".card")
   }
 
-  async getCaption() {
+  async getClassificationLine() {
+    return (await browser.$(".classification-line")).getText()
+  }
+
+  async getCaptionLine() {
     return (await browser.$(".info-line")).getText()
   }
 

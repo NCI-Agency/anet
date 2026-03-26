@@ -41,13 +41,13 @@ export const gqlMinimalAttachmentFields = `
   fileName
   mimeType
   contentLength
+  classification
 `
 
 export const gqlBasicAttachmentFields = `
   ${gqlMinimalAttachmentFields}
   createdAt
   updatedAt
-  classification
   description
 `
 

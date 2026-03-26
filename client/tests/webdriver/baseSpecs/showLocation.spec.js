@@ -17,7 +17,10 @@ describe("Show location page", () => {
     it("We should see a card of Attachment", async () => {
       await (await ShowLocation.getCard()).waitForExist()
       await (await ShowLocation.getCard()).waitForDisplayed()
-      expect(await ShowLocation.getCaption()).to.be.equal("Antarctica")
+      expect(await ShowLocation.getClassificationLine()).to.be.equal(
+        "[NATO UNCLASSIFIED Releasable to EU]"
+      )
+      expect(await ShowLocation.getCaptionLine()).to.be.equal("Antarctica")
     })
     it("We should be able to edit the attachments", async () => {
       const editAttachmentsButton =

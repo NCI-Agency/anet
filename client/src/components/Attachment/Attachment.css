@@ -50,9 +50,18 @@
   border-radius: 6px;
 }
 
+.classification-line {
+  font-size: 12px;
+  color: #445566;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
 .info-line {
   font-size: 15px;
-  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,6 +97,8 @@
   flex: 0 0 calc(20%);
   margin: 0 0 10px;
   box-sizing: border-box;
+  position: relative;
+  text-align: center;
 }
 
 /******** ATTACHMENT SHOW PAGE ********/

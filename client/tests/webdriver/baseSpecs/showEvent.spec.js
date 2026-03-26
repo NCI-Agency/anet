@@ -88,7 +88,8 @@ describe("When on the show page of an event with attachment(s)", () => {
   it("We should see a card of Attachment", async () => {
     await (await ShowEvent.getCard()).waitForExist()
     await (await ShowEvent.getCard()).waitForDisplayed()
-    expect(await ShowEvent.getCaption()).to.be.equal("456")
+    expect(await ShowEvent.getClassificationLine()).to.be.equal("[Public]")
+    expect(await ShowEvent.getCaptionLine()).to.be.equal("456")
   })
   it("We should be able to edit the attachments", async () => {
     const editAttachmentsButton = await ShowEvent.getEditAttachmentsButton()

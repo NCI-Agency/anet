@@ -32,7 +32,8 @@ describe("Show person page", () => {
     it("We should see a card of Attachment", async () => {
       await (await ShowPerson.getCard()).waitForExist()
       await (await ShowPerson.getCard()).waitForDisplayed()
-      expect(await ShowPerson.getCaption()).to.be.equal("Erin")
+      expect(await ShowPerson.getClassificationLine()).to.be.equal("[Public]")
+      expect(await ShowPerson.getCaptionLine()).to.be.equal("Erin")
     })
     it("We should be able to edit the attachments", async () => {
       const editAttachmentsButton = await ShowPerson.getEditAttachmentsButton()

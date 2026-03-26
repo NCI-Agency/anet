@@ -289,7 +289,10 @@ describe("Show organization page", () => {
     it("We should see a card of Attachment", async () => {
       await (await ShowOrganization.getCard()).waitForExist()
       await (await ShowOrganization.getCard()).waitForDisplayed()
-      expect(await ShowOrganization.getCaption()).to.be.equal("EF 2.2")
+      expect(await ShowOrganization.getClassificationLine()).to.be.equal(
+        "[Public]"
+      )
+      expect(await ShowOrganization.getCaptionLine()).to.be.equal("EF 2.2")
     })
     it("We should be able to edit the attachments", async () => {
       const editAttachmentsButton =

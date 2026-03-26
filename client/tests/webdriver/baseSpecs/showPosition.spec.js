@@ -53,7 +53,10 @@ describe("Show position page", () => {
     it("We should see a card of Attachment", async () => {
       await (await ShowPosition.getCard()).waitForExist()
       await (await ShowPosition.getCard()).waitForDisplayed()
-      expect(await ShowPosition.getCaption()).to.be.equal("EF 1.1 Advisor G")
+      expect(await ShowPosition.getClassificationLine()).to.be.equal("[Public]")
+      expect(await ShowPosition.getCaptionLine()).to.be.equal(
+        "EF 1.1 Advisor G"
+      )
     })
     it("We should be able to edit the attachments", async () => {
       const editAttachmentsButton =

@@ -111,7 +111,12 @@ describe("Show report page", () => {
       // Attachment card list
       await (await ShowReport.getCard()).waitForExist()
       await (await ShowReport.getCard()).waitForDisplayed()
-      expect(await ShowReport.getCaption()).to.be.equal("Arthur's test report")
+      expect(await ShowReport.getClassificationLine()).to.be.equal(
+        "[NATO UNCLASSIFIED]"
+      )
+      expect(await ShowReport.getCaptionLine()).to.be.equal(
+        "Arthur's test report"
+      )
     })
     it("We should be able to edit the attachments", async () => {
       const editAttachmentsButton = await ShowReport.getEditAttachmentsButton()
