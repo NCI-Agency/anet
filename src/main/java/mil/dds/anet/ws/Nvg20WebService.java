@@ -423,8 +423,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       ConfidentialityRecord defaultConfidentiality, Instant reportingTime,
       Map<String, String> tasks, Report report) {
     final PointType nvgPoint = NVG_OF.createPointType();
-    nvgPoint.setLabel(Utils.ellipsizeOnWords(report.getIntent(),
-        Utils.orIfNull((Integer) dict.getDictionaryEntry("fields.report.intent.maxLength"), 40)));
+    nvgPoint.setLabel(Utils.getReportLabel(dict, report));
     nvgPoint.setUri(String.format("urn:anet:reports:%1$s", report.getUuid()));
     nvgPoint.setTimeStamp(getTimeStamp(report.getUpdatedAt()));
     setLocation(report, nvgPoint);

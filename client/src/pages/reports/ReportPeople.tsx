@@ -14,6 +14,7 @@ import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
 import "./ReportPeople.css"
+import classNames from "classnames"
 
 interface ReportPeopleProps {
   report?: any
@@ -37,12 +38,18 @@ const ReportPeople = ({
       <Table responsive>
         <tbody>
           <tr>
-            <th style={{ border: "none" }}>
-              {pluralize(Settings.fields.advisor.person.name)}
-            </th>
+            <th />
+            <td style={{ padding: "0" }}>
+              <TableContainer className="attendeesTableHeader">
+                <TableHeader />
+              </TableContainer>
+            </td>
+          </tr>
+          <tr>
+            <th>{pluralize(Settings.fields.advisor.person.name)}</th>
             <td style={{ padding: "0" }}>
               <TableContainer className="advisorAttendeesTable">
-                <TableHeader showDelete={showDelete} />
+                <TableHeader hide showDelete={showDelete} />
                 <TableBody
                   reportPeople={report.reportPeople}
                   filterCb={person => !person.interlocutor && person.attendee}
@@ -311,26 +318,26 @@ interface TableHeaderProps {
 const TableHeader = ({ showDelete, hide }: TableHeaderProps) => (
   <thead>
     <tr>
-      <th className={"col-1" + (hide ? " empty-cell-header" : "")}>
+      <th className={classNames("col-1", { "empty-cell-header": hide })}>
         <div style={{ minWidth: "100px" }}>{!hide && "Roles"}</div>
       </th>
-      <th className={"col-1" + (hide ? " empty-cell-header" : "")}>
+      <th className={classNames("col-1", { "empty-cell-header": hide })}>
         <div style={{ width: showDelete ? "35px" : "100px" }} />
       </th>
-      <th className={"col-3" + (hide ? " empty-cell-header" : "")}>
+      <th className={classNames("col-3", { "empty-cell-header": hide })}>
         <div style={{ minWidth: "120px" }}>{!hide && "Name"}</div>
       </th>
-      <th className={"col-3" + (hide ? " empty-cell-header" : "")}>
+      <th className={classNames("col-3", { "empty-cell-header": hide })}>
         <div style={{ minWidth: "90px" }}>{!hide && "Position"}</div>
       </th>
-      <th className={"col-2" + (hide ? " empty-cell-header" : "")}>
+      <th className={classNames("col-2", { "empty-cell-header": hide })}>
         <div style={{ minWidth: "90px" }}>{!hide && "Location"}</div>
       </th>
-      <th className={"col-2" + (hide ? " empty-cell-header" : "")}>
+      <th className={classNames("col-2", { "empty-cell-header": hide })}>
         <div style={{ minWidth: "90px" }}>{!hide && "Organization"}</div>
       </th>
       {showDelete && (
-        <th className={"col-1" + (hide ? " empty-cell-header" : "")} />
+        <th className={classNames("col-1", { "empty-cell-header": hide })} />
       )}
     </tr>
   </thead>
@@ -440,7 +447,7 @@ const ReportAttendeeCheckbox = ({
   disabled ? (
     !!person.attendee && (
       <OverlayTrigger
-        overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
+        overlay={<Tooltip id="attendee-tooltip">Advisor</Tooltip>}
       >
         <Icon size={IconSize.LARGE} icon={IconNames.PEOPLE} />
       </OverlayTrigger>
@@ -450,7 +457,7 @@ const ReportAttendeeCheckbox = ({
       type="checkbox"
       label={
         <OverlayTrigger
-          overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
+          overlay={<Tooltip id="attendee-tooltip">Advisor</Tooltip>}
         >
           <Icon size={IconSize.LARGE} icon={IconNames.PEOPLE} />
         </OverlayTrigger>

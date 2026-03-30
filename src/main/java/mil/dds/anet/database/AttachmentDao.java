@@ -205,7 +205,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
         + " FROM \"attachmentRelatedObjects\" "
         + "INNER JOIN attachments ON \"attachmentRelatedObjects\".\"attachmentUuid\" = attachments.uuid "
         + "WHERE \"attachmentRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
-        + "ORDER BY attachments.\"fileName\" DESC";
+        + "ORDER BY attachments.\"caption\", attachments.\"fileName\", attachments.\"uuid\"";
 
     public AttachmentBatcher() {
       super(AttachmentDao.this.databaseHandler, SQL, "foreignKeys", new AttachmentMapper(),

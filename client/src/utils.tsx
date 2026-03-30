@@ -409,6 +409,22 @@ export default {
     }
   },
 
+  isPdf(attachment) {
+    return attachment?.mimeType === "application/pdf"
+  },
+
+  isText(attachment) {
+    return attachment?.mimeType?.startsWith("text/")
+  },
+
+  isVideo(attachment) {
+    return attachment?.mimeType?.startsWith("video/")
+  },
+
+  isImage(attachment) {
+    return attachment?.mimeType?.startsWith("image/")
+  },
+
   getAttachmentIconDetails: function (attachment, small) {
     const iconSize = small ? "50px" : "200px"
     let iconImage = binaryIcon
@@ -417,22 +433,20 @@ export default {
       isNullOrUndefined(attachment.contentLength)
     if (contentMissing) {
       iconImage = absentIcon
-    } else if (attachment.mimeType === "application/pdf") {
+    } else if (this.isPdf(attachment)) {
       iconImage = pdfIcon
-    } else if (attachment.mimeType.startsWith("text/")) {
+    } else if (this.isText(attachment)) {
       iconImage = textIcon
-    } else if (attachment.mimeType.startsWith("video/")) {
+    } else if (this.isVideo(attachment)) {
       iconImage = videoIcon
-    } else if (attachment.mimeType.startsWith("image/")) {
+    } else if (this.isImage(attachment)) {
       iconImage = `/api/attachment/view/${attachment.uuid}`
     }
     return { iconSize, iconImage, contentMissing }
   },
 
   getImageAttachments: function (attachments = []) {
-    return attachments.filter(attachment =>
-      attachment?.mimeType?.startsWith("image/")
-    )
+    return attachments.filter(attachment => this.isImage(attachment))
   },
 
   stripExtension: function (fileName) {

@@ -2,7 +2,6 @@ package mil.dds.anet.emails;
 
 import java.util.Map;
 import mil.dds.anet.beans.Report;
-import org.apache.commons.lang3.StringUtils;
 
 public class FutureEngagementUpdated implements AnetEmailAction {
 
@@ -26,7 +25,7 @@ public class FutureEngagementUpdated implements AnetEmailAction {
     }
 
     context.put("report", r);
-    context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
+    context.put("reportIntent", getReportLabel(r));
 
     return context;
   }

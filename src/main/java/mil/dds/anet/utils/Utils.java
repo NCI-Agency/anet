@@ -33,6 +33,7 @@ import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.config.AnetDictionary;
@@ -75,6 +76,8 @@ public class Utils {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
+
+  private static final int MAX_REPORT_INTENT_LENGTH = 40;
 
   private static final String DICT_KEY_TYPE = "type";
   private static final String DICT_VALUE_TYPE_SPECIAL_FIELD = "special_field";
@@ -754,10 +757,16 @@ public class Utils {
   }
 
   public static DateTimeFormatter getEngagementDateFormatter(AnetDictionary dict,
-      boolean includeTime, String dateKey, String dateTimeKey) {
+      boolean includeTime, String dateTimeKey, String dateKey) {
     final String pattern = (String) dict.getDictionaryEntry(includeTime ? dateTimeKey : dateKey);
     return DateTimeFormatter.ofPattern(pattern).withLocale(getLocaleForDateFormatters(dict))
         .withZone(DaoUtils.getServerLocalZoneId());
+  }
+
+  public static String getReportLabel(AnetDictionary dict, Report r) {
+    return Utils.ellipsizeOnWords(r.getIntent(),
+        Utils.orIfNull((Integer) dict.getDictionaryEntry("fields.report.intent.maxLength"),
+            MAX_REPORT_INTENT_LENGTH));
   }
 
   public static String ellipsizeOnWords(String value, int maxLength) {

@@ -3,7 +3,6 @@ package mil.dds.anet.emails;
 import java.util.Map;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Report;
-import org.apache.commons.lang3.StringUtils;
 
 public class NewReportCommentEmail implements AnetEmailAction {
   private Report report;
@@ -28,7 +27,7 @@ public class NewReportCommentEmail implements AnetEmailAction {
     comment = engine().getCommentDao().getByUuid(comment.getUuid());
 
     context.put("report", r);
-    context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
+    context.put("reportIntent", getReportLabel(r));
     context.put("comment", comment);
 
     return context;

@@ -1,13 +1,14 @@
 package mil.dds.anet.emails;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
-import org.apache.commons.lang3.StringUtils;
 
 public class ReportEmail implements AnetEmailAction {
   private Report report;
@@ -22,7 +23,7 @@ public class ReportEmail implements AnetEmailAction {
   @Override
   public String getSubject(Map<String, Object> context) {
     final Report r = (Report) context.get("report");
-    return String.format("ANET report: %s", r == null ? "None" : r.getObjectLabel());
+    return String.format("ANET report: %s", getReportLabel(r));
   }
 
   @Override
@@ -34,7 +35,9 @@ public class ReportEmail implements AnetEmailAction {
     sender = engine().getPersonDao().getByUuid(sender.getUuid());
 
     context.put("report", r);
-    context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
+    context.put("reportIntent", getReportLabel(r));
+    context.put("reportAuthors", getReportAuthors(r));
+    context.put("reportPeople", getReportPeople(r));
     context.put("sender", sender);
     context.put("comment", comment);
     // Override the classification
@@ -73,6 +76,18 @@ public class ReportEmail implements AnetEmailAction {
 
   public void setComment(String comment) {
     this.comment = comment;
+  }
+
+  private List<ReportPerson> getReportAuthors(Report r) {
+    final List<ReportPerson> reportAuthors = r.loadAuthors(engine().getContext()).join();
+    reportAuthors.sort(Person.COMPARATOR);
+    return reportAuthors;
+  }
+
+  private List<ReportPerson> getReportPeople(Report r) {
+    final List<ReportPerson> reportPeople = r.loadReportPeople(engine().getContext()).join();
+    reportPeople.sort(ReportPerson.COMPARATOR);
+    return reportPeople;
   }
 
 }
