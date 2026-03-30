@@ -390,7 +390,11 @@ const deserialize = (el, markAttributes = {}) => {
 }
 
 function isImageAttachment(entity: any) {
-  return entity instanceof Models.Attachment && utils.isImage(entity)
+  return (
+    entity instanceof Models.Attachment &&
+    utils.isImage(entity) &&
+    utils.hasContent(entity)
+  )
 }
 
 function showIconCallback(entity: any) {

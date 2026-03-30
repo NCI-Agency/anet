@@ -425,11 +425,13 @@ export default {
     return attachment?.mimeType?.startsWith("image/")
   },
 
+  hasContent(attachment) {
+    return attachment?.contentLength >= 0
+  },
+
   getAttachmentIconDetails: function (attachment) {
     let iconImage = binaryIcon
-    const contentMissing =
-      attachment.contentLength < 0 ||
-      isNullOrUndefined(attachment.contentLength)
+    const contentMissing = !this.hasContent(attachment)
     if (contentMissing) {
       iconImage = absentIcon
     } else if (this.isPdf(attachment)) {

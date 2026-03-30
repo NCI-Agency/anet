@@ -92,6 +92,15 @@
       background-color: #d9534f;
       border-color: #d43f3a;
     }
+    .d-inline-flex {
+      display: inline-flex !important;
+    }
+    .flex-column {
+      flex-direction: column !important;
+    }
+    .align-middle {
+      vertical-align: middle !important;
+    }
   </style>
 
   <style>
@@ -161,6 +170,11 @@
     }
     .form-control-plaintext {
       margin-bottom: -11px;
+    }
+    .attachment-classification {
+      display: block;
+      font-size: 12px;
+      color: #445566;
     }
   </style>
 
@@ -286,6 +300,11 @@
     td {
       padding-left: 15px;
       padding-right: 15px;
+    }
+
+    .attachment-icon {
+      font-size: 2rem;
+      vertical-align: middle;
     }
   </style>
 </head>

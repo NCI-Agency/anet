@@ -940,8 +940,8 @@ public class Utils {
     final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(tableName);
     final TypeUuidTuple tut = getTypeUuidTuple(anetLink.html().split(":", 2));
     anetLink.empty();
-    anetLink.appendChild(
-        getInnerNode(daoEntityNameTuple.dao(), dict, anetServerUrl, tut.type(), tut.uuid()));
+    anetLink.appendChildren(
+        getInnerNodes(daoEntityNameTuple.dao(), dict, anetServerUrl, tut.type(), tut.uuid()));
   }
 
   private record DaoEntityNameTuple(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
@@ -970,34 +970,94 @@ public class Utils {
     };
   }
 
-  private static Node getInnerNode(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
-      AnetDictionary dict, String anetServerUrl, String objectType, String objectUuid) {
+  private static Collection<? extends Node> getInnerNodes(
+      AnetBaseDao<? extends AbstractAnetBean, ?> dao, AnetDictionary dict, String anetServerUrl,
+      String objectType, String objectUuid) {
     if (dao != null) {
       final AbstractAnetBean obj = dao.getByUuid(objectUuid);
       if (obj == null) {
-        return new TextNode(String.format("[deleted %s::%s]", objectType, objectUuid));
+        return List.of(new TextNode(String.format("[deleted %s::%s]", objectType, objectUuid)));
       }
       if (obj instanceof SubscribableObject subscribableObject) {
-        return new TextNode(subscribableObject.getObjectLabel());
+        return List.of(new TextNode(subscribableObject.getObjectLabel()));
       }
       if (obj instanceof Attachment attachment) {
-        final var attachmentClassification = ConfidentialityRecord
-            .getConfidentialityLabelForChoice(dict, attachment.getClassification());
-        final var classification = attachmentClassification == null ? ""
-            : String.format("[%s]", ConfidentialityRecord.create(attachmentClassification));
+        final var classification = getAttachmentConfidentialityLabel(dict, attachment);
         final String label = attachment.getObjectLabel();
-        final Element innerNode =
-            new Element(SPAN_TAG).classNames(Set.of("rich-text-image-wrapper"));
-        innerNode.appendChild(new Element(SPAN_TAG)
-            .classNames(Set.of("rich-text-image-classification")).text(classification));
-        innerNode.appendChild(new Element("img").classNames(Set.of("rich-text-image"))
-            .attr("src", String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
-            .attr("alt", label));
-        innerNode.appendChild(
-            new Element(SPAN_TAG).classNames(Set.of("rich-text-image-caption")).text(label));
-        return innerNode;
+        if (isImage(attachment) && hasContent(attachment)) {
+          final Element innerNode =
+              new Element(SPAN_TAG).classNames(Set.of("rich-text-image-wrapper"));
+          innerNode.appendChild(new Element(SPAN_TAG)
+              .classNames(Set.of("rich-text-image-classification")).text(classification));
+          innerNode.appendChild(new Element("img").classNames(Set.of("rich-text-image"))
+              .attr("src",
+                  String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
+              .attr("alt", label));
+          innerNode.appendChild(
+              new Element(SPAN_TAG).classNames(Set.of("rich-text-image-caption")).text(label));
+          return List.of(innerNode);
+        } else {
+          final Element innerNode1 = new Element(SPAN_TAG).classNames(Set.of("attachment-icon"))
+              .text(getAttachmentIcon(attachment));
+          final Element innerNode2 = new Element(SPAN_TAG)
+              .classNames(Set.of("d-inline-flex", "flex-column", "align-middle"));
+          innerNode2.appendChild(new Element(SPAN_TAG)
+              .classNames(Set.of("attachment-classification")).text(classification));
+          innerNode2.appendChild(
+              new Element(SPAN_TAG).classNames(Set.of("attachment-caption")).text(label));
+          return List.of(innerNode1, innerNode2);
+        }
       }
     }
-    return new TextNode(String.format("entity %s::%s", objectType, objectUuid));
+    return List.of(new TextNode(String.format("entity %s::%s", objectType, objectUuid)));
   }
+
+  public static String getAttachmentConfidentialityLabel(AnetDictionary dict,
+      Attachment attachment) {
+    final var attachmentClassification = ConfidentialityRecord
+        .getConfidentialityLabelForChoice(dict, attachment.getClassification());
+    return attachmentClassification == null ? ""
+        : String.format("[%s]", ConfidentialityRecord.create(attachmentClassification));
+  }
+
+  private static boolean hasMimeType(Attachment attachment) {
+    return attachment != null && attachment.getMimeType() != null;
+  }
+
+  public static boolean isPdf(Attachment attachment) {
+    return hasMimeType(attachment) && attachment.getMimeType().equals("application/pdf");
+  }
+
+  public static boolean isText(Attachment attachment) {
+    return hasMimeType(attachment) && attachment.getMimeType().startsWith("text/");
+  }
+
+  public static boolean isVideo(Attachment attachment) {
+    return hasMimeType(attachment) && attachment.getMimeType().startsWith("video/");
+  }
+
+  public static boolean isImage(Attachment attachment) {
+    return hasMimeType(attachment) && attachment.getMimeType().startsWith("image/");
+  }
+
+  public static boolean hasContent(Attachment attachment) {
+    return attachment.getContentLength() != null && attachment.getContentLength() >= 0;
+  }
+
+  public static String getAttachmentIcon(Attachment attachment) {
+    final String icon;
+    if (!hasContent(attachment)) {
+      icon = "\uD83D\uDEAB"; // 🚫
+    } else if (isPdf(attachment)) {
+      icon = "\uD83D\uDCD1"; // 🖺 📑
+    } else if (isText(attachment)) {
+      icon = "\uD83D\uDCC4"; // 🖹 📄
+    } else if (isVideo(attachment)) {
+      icon = "\uD83C\uDFA5"; // 🎥
+    } else {
+      icon = "\uD83D\uDD22"; // 🯄 🔢
+    }
+    return icon;
+  }
+
 }
