@@ -175,7 +175,7 @@ dependencies {
 	// Dependencies for MART importer
 	implementation 'com.microsoft.ews-java-api:ews-java-api:2.0'
 	constraints {
-		implementation("org.apache.httpcomponents:httpclient:4.5.13") {
+		implementation("org.apache.httpcomponents:httpclient:4.5.14") {
 			because("Upgrade transitive dependency to address vulnerability")
 		}
 	}
