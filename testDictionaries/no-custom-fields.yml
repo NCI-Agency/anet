@@ -7,6 +7,7 @@ engagementsIncludeTimeAndDuration: true
 eventsIncludeStartAndEndTime: true
 eventTypeVisitBanUuid: 54d88b80-6af5-4327-ab42-d1bc292745e9
 featureMartGuiEnabled: true
+martNewPositionDaysInThePast: 30
 maxShownAccessTokenActivities: 10
 
 calendarOptions:

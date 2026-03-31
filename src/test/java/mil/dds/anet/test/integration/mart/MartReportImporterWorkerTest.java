@@ -34,6 +34,8 @@ import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
+import mil.dds.anet.test.client.Report;
+import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.PersonResourceTest;
@@ -93,7 +95,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         createReportMockEmail(TestData.createGoodMartReport(sequence), true);
     // Good report with another user, comes with country name
     final EmailMessage reportMessage2 =
-        createReportMockEmail(TestData.createGoodMartReportWithDifferentUser(++sequence), true);
+        createReportMockEmail(TestData.createGoodOldMartReportWithDifferentUser(++sequence), true);
     // Good report with another user that has wrong country
     final EmailMessage reportMessage3 = createReportMockEmail(
         TestData.createGoodMartReportWithDifferentUserAndWrongCountry(++sequence), true);
@@ -153,9 +155,10 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
   void testWorker() {
     martReportImporterWorker.run();
     ReportDto goodReport = TestData.createGoodMartReport(1);
-    ReportDto goodReport2 = TestData.createGoodMartReportWithDifferentUser(1);
+    ReportDto goodOldReportWithDifferentUser = TestData.createGoodOldMartReportWithDifferentUser(2);
     ReportDto reportWithWarnings =
-        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(2);
+        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(3);
+
     // Validate persons created
     final PersonSearchQueryInput queryPerson =
         PersonSearchQueryInput.builder().withOrgUuid(List.of(goodReport.getOrganizationUuid()))
@@ -191,28 +194,65 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     Person person4 = searchResults.getList().getFirst();
     assertThat(person4.getPosition().getName()).isEqualTo(goodReport.getPositionName());
 
-    // We imported one report when everything was fine
-    mil.dds.anet.test.client.Report createdReport = withCredentials("arthur",
+    // We imported goodReport and everything was fine
+    final mil.dds.anet.test.client.Report createdGoodReport = withCredentials("arthur",
         t -> queryExecutor.report(ReportResourceTest.FIELDS, goodReport.getUuid()));
-    assertThat(createdReport).isNotNull();
-    assertThat(createdReport.getUuid()).isEqualTo(goodReport.getUuid());
-    assertThat(createdReport.getIntent()).isEqualTo(goodReport.getIntent());
-    assertThat(createdReport.getAtmosphere()).isEqualTo(Atmosphere.POSITIVE);
-    assertThat(createdReport.getLocation().getUuid()).isEqualTo(goodReport.getLocationUuid());
-    assertThat(createdReport.getAdvisorOrg().getUuid()).isEqualTo(goodReport.getOrganizationUuid());
-    assertThat(createdReport.getAuthors()).hasSize(1);
-    assertThat(createdReport.getAuthors().getFirst().getName()).isEqualTo(person1.getName());
-    assertThat(createdReport.getTasks()).hasSize(1);
-    assertThat(createdReport.getAttachments()).hasSize(1);
-    assertThat(createdReport.getAttachments().getFirst().getFileName()).isEqualTo(ATTACHMENT_NAME);
-    assertThat(createdReport.getTasks().getFirst().getLongName()).isEqualTo("Intelligence");
-    assertThat(createdReport.getClassification()).isEqualTo("NU");
+    assertThat(createdGoodReport).isNotNull();
+    assertThat(createdGoodReport.getUuid()).isEqualTo(goodReport.getUuid());
+    assertThat(createdGoodReport.getIntent()).isEqualTo(goodReport.getIntent());
+    assertThat(createdGoodReport.getAtmosphere()).isEqualTo(Atmosphere.POSITIVE);
+    assertThat(createdGoodReport.getLocation().getUuid()).isEqualTo(goodReport.getLocationUuid());
+    assertThat(createdGoodReport.getAdvisorOrg().getUuid())
+        .isEqualTo(goodReport.getOrganizationUuid());
+    assertThat(createdGoodReport.getAuthors()).hasSize(1);
+    assertThat(createdGoodReport.getAuthors().getFirst().getName()).isEqualTo(person1.getName());
+    assertThat(createdGoodReport.getTasks()).hasSize(1);
+    assertThat(createdGoodReport.getAttachments()).hasSize(1);
+    assertThat(createdGoodReport.getAttachments().getFirst().getFileName())
+        .isEqualTo(ATTACHMENT_NAME);
+    assertThat(createdGoodReport.getTasks().getFirst().getLongName()).isEqualTo("Intelligence");
+    assertThat(createdGoodReport.getClassification()).isEqualTo("NU");
+    assertThat(createdGoodReport.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    // Now we will edit and approve goodReport, we should not lose the advisorOrg of the report
+    // Edit the report
+    createdGoodReport.setAtmosphereDetails("Everybody was super nice! Again!");
+    final Report editedGoodReportEdited = withCredentials("arthur", t -> mutationExecutor
+        .updateReport(ReportResourceTest.FIELDS, false, getReportInput(createdGoodReport), true));
+    assertThat(editedGoodReportEdited.getAtmosphereDetails())
+        .isEqualTo(createdGoodReport.getAtmosphereDetails());
+    // AdvisorOrg should not have changed!
+    assertThat(editedGoodReportEdited.getAdvisorOrg().getUuid())
+        .isEqualTo(goodReport.getOrganizationUuid());
+    // Approve the report
+    int numRows = withCredentials("arthur",
+        t -> mutationExecutor.approveReport("", null, createdGoodReport.getUuid()));
+    assertThat(numRows).isOne();
+    // Get the report again
+    final mil.dds.anet.test.client.Report approvedReport = withCredentials("arthur",
+        t -> queryExecutor.report(ReportResourceTest.FIELDS, editedGoodReportEdited.getUuid()));
+    assertThat(approvedReport.getState()).isEqualTo(ReportState.APPROVED);
+    assertThat(approvedReport.getAdvisorOrg().getUuid())
+        .isEqualTo(goodReport.getOrganizationUuid());
+
+    // Now edit goodOldReportWithDifferentUser, we should not lose the advisorOrg neither
+    final mil.dds.anet.test.client.Report createdGoodOldReportWithDifferentUser =
+        withCredentials("arthur", t -> queryExecutor.report(ReportResourceTest.FIELDS,
+            goodOldReportWithDifferentUser.getUuid()));
+    createdGoodOldReportWithDifferentUser.setAtmosphereDetails("Everybody was super nice! Again!");
+    final Report editedGoodOldReportWithDifferentUser =
+        withCredentials("arthur", t -> mutationExecutor.updateReport(ReportResourceTest.FIELDS,
+            false, getReportInput(createdGoodOldReportWithDifferentUser), true));
+    // AdvisorOrg should not have changed!
+    assertThat(editedGoodOldReportWithDifferentUser.getAdvisorOrg().getUuid())
+        .isEqualTo(goodOldReportWithDifferentUser.getOrganizationUuid());
+
     // Validate comments in report submitted with warnings
-    createdReport = withCredentials("arthur",
+    final mil.dds.anet.test.client.Report createdReportWithWarnings = withCredentials("arthur",
         t -> queryExecutor.report(ReportResourceTest.FIELDS, reportWithWarnings.getUuid()));
-    assertThat(createdReport.getComments().size()).isOne();
-    assertThat(createdReport.getComments().getFirst().getText()).isEqualTo(
+    assertThat(createdReportWithWarnings.getComments().size()).isOne();
+    assertThat(createdReportWithWarnings.getComments().getFirst().getText()).isEqualTo(
         "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:<ul><li>Security marking is missing</li><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>");
+
     // New records in MartImportedReports, verify them
     AnetBeanList<MartImportedReport> martImportedReportsList =
         martImportedReportDao.search(new MartImportedReportSearchQuery());
@@ -224,8 +264,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertReportSubmittedOK(martImportedReports, ++sequence, goodReport.getUuid(),
         person1.getUuid());
 
-    assertReportSubmittedOK(martImportedReports, ++sequence, goodReport2.getUuid(),
-        person2.getUuid());
+    assertReportSubmittedOK(martImportedReports, ++sequence,
+        goodOldReportWithDifferentUser.getUuid(), person2.getUuid());
 
     assertReportSubmittedWithWarnings(martImportedReports, ++sequence,
         "While importing report f35ea806-acac-467c-96a7-75d809cd6705:"

@@ -4,6 +4,7 @@ import static mil.dds.anet.beans.Position.PositionType.ADMINISTRATOR;
 import static mil.dds.anet.commands.Utils.ANET_COMMAND_GROUP;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
@@ -123,7 +124,8 @@ public class InitializationCommand {
     admin.setName(adminFullName);
     admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
-    engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid(), true, null);
+    engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid(), true, null,
+        Instant.now());
 
     // Create admin user
     User user = new User();

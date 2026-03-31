@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailAddressDao;
@@ -77,7 +79,9 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final EmailAddressDao emailAddressDao;
   private final CommentDao commentDao;
 
-  public MartReportImporterService(ReportDao reportDao, PersonDao personDao,
+  private final int martNewPositionDaysInThePast;
+
+  public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
       PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
       LocationDao locationDao, MartImportedReportDao martImportedReportDao,
       AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao) {
@@ -91,6 +95,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
     this.commentDao = commentDao;
+
+    this.martNewPositionDaysInThePast =
+        (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
   }
 
   @Override
@@ -375,7 +382,8 @@ public class MartReportImporterService implements IMartReportImporterService {
     if (isNewPerson) {
       // This is a new person -> CREATE from MART report information
       personForReport = createNewPerson(martReport, errors);
-      createPositionForPerson(organizationForReport, martReport.getPositionName(), personForReport);
+      createPositionForPerson(organizationForReport, martReport.getPositionName(), personForReport,
+          martReport);
     } else {
       if (matchingPersons.size() > 1) {
         errors.add(String.format("More than one ANET person has this email address: '%s'",
@@ -395,7 +403,7 @@ public class MartReportImporterService implements IMartReportImporterService {
             organizationDao.getByUuid(personForReport.getPosition().getOrganizationUuid());
       } else {
         createPositionForPerson(organizationForReport, martReport.getPositionName(),
-            personForReport);
+            personForReport, martReport);
         errors.add(String.format("Existing ANET user was assigned to MART position: '%s'",
             martReport.getPositionName()));
       }
@@ -422,7 +430,7 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   private void createPositionForPerson(Organization organization, String positionName,
-      Person person) {
+      Person person, ReportDto martReport) {
     if (organization != null) {
       // Create person position if organization from MART exists
       Position position = new Position();
@@ -432,7 +440,16 @@ public class MartReportImporterService implements IMartReportImporterService {
       position.setRole(Position.PositionRole.MEMBER);
       position.setOrganization(organization);
       position = positionDao.insert(position);
-      positionDao.setPersonInPosition(person.getUuid(), position.getUuid(), true, null);
+
+      final Instant now = Instant.now();
+      final Instant dayBeforeEngagementDate =
+          Objects.requireNonNullElse(martReport.getEngagementDate(), now).minus(1, ChronoUnit.DAYS);
+      final Instant cutoffDate = now.minus(martNewPositionDaysInThePast, ChronoUnit.DAYS);
+      final Instant earliestDate =
+          dayBeforeEngagementDate.isBefore(cutoffDate) ? dayBeforeEngagementDate : cutoffDate;
+
+      positionDao.setPersonInPosition(person.getUuid(), position.getUuid(), true, null,
+          earliestDate);
     }
   }
 
