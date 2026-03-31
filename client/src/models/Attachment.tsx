@@ -38,7 +38,7 @@ export default class Attachment extends Model {
   }
 
   iconUrl() {
-    const { iconImage } = utils.getAttachmentIconDetails(this, true)
+    const { iconImage } = utils.getAttachmentIconDetails(this)
     return iconImage
   }
 

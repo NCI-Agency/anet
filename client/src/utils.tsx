@@ -425,8 +425,7 @@ export default {
     return attachment?.mimeType?.startsWith("image/")
   },
 
-  getAttachmentIconDetails: function (attachment, small) {
-    const iconSize = small ? "50px" : "200px"
+  getAttachmentIconDetails: function (attachment) {
     let iconImage = binaryIcon
     const contentMissing =
       attachment.contentLength < 0 ||
@@ -442,7 +441,7 @@ export default {
     } else if (this.isImage(attachment)) {
       iconImage = `/api/attachment/view/${attachment.uuid}`
     }
-    return { iconSize, iconImage, contentMissing }
+    return { iconImage, contentMissing }
   },
 
   getImageAttachments: function (attachments = []) {

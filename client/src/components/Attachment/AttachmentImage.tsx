@@ -3,7 +3,6 @@ import React from "react"
 interface AttachmentImageProps {
   uuid: string
   caption?: string
-  iconSize: string
   iconImage: string
   contentMissing: boolean
 }
@@ -11,7 +10,6 @@ interface AttachmentImageProps {
 const AttachmentImage = ({
   uuid,
   caption,
-  iconSize,
   iconImage,
   contentMissing
 }: AttachmentImageProps) => {
@@ -20,9 +18,6 @@ const AttachmentImage = ({
       className="image-preview info-show card-image attachment-image"
       src={iconImage}
       alt={caption}
-      width={iconSize}
-      height={iconSize}
-      style={{ objectFit: "contain" }}
     />
   )
   return (
