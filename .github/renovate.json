@@ -15,6 +15,12 @@
   ],
   "packageRules": [
     {
+      "matchManagers": [
+        "*"
+      ],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "labels": [
         "devDependencies"
       ],
