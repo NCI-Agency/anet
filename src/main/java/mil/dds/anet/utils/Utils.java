@@ -740,7 +740,7 @@ public class Utils {
     final var useISO8601 = Boolean.TRUE.equals(dict.getDictionaryEntry("useISO8601"));
     // Pretty ugly, as it always assumes English, but at least we can control the first day of the
     // week (and the first week of the year) this way…
-    return new Locale("en", useISO8601 ? "GB" : "US");
+    return Locale.of("en", useISO8601 ? "GB" : "US");
   }
 
   public static DateTimeFormatter getDateFormatter(AnetDictionary dict, String key) {
