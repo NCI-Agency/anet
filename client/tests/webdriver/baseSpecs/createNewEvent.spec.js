@@ -8,7 +8,7 @@ const POSITION_COMPLETE = "ANET Administrator"
 const ORGANIZATION = "moi"
 const ORGANIZATION_COMPLETE = "MoI | Ministry of Interior"
 const PERSON = "jacob"
-const PERSON_COMPLETE = "CIV JACOBSON, Jacob"
+const PERSON_COMPLETE = "CIV Jacob Jacobson"
 
 const SHORT_WAIT_MS = 200
 
