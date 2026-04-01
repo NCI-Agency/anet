@@ -649,20 +649,20 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     </>
                   )}
 
-                  <DictionaryField
-                    wrappedComponent={FieldHelper.ReadonlyField}
-                    dictProps={Settings.fields.report.reportCommunities}
-                    field={{ name: "reportCommunities" }}
-                    humanValue={
-                      report.reportCommunities?.length > 0 && (
+                  {report.reportCommunities?.length > 0 && (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.reportCommunities}
+                      field={{ name: "reportCommunities" }}
+                      humanValue={
                         <AuthorizationGroupTable
                           authorizationGroups={report.reportCommunities}
                           noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
                         />
-                      )
-                    }
-                    hideIfEmpty
-                  />
+                      }
+                      hideIfEmpty
+                    />
+                  )}
 
                   {attachmentsEnabled && (
                     <FieldHelper.ReadonlyField
