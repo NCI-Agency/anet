@@ -1,5 +1,7 @@
 package mil.dds.anet.threads;
 
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import graphql.GraphQLContext;
 import jakarta.mail.Authenticator;
@@ -152,6 +154,7 @@ public class AnetEmailWorker extends AbstractWorker {
     @SuppressWarnings("unchecked")
     final Map<String, Object> fields = (Map<String, Object>) dict.getDictionaryEntry("fields");
     emailContext.put("fields", fields);
+    emailContext.put("dict", dict);
 
     return email.getAction().buildContext(emailContext);
   }
@@ -179,8 +182,10 @@ public class AnetEmailWorker extends AbstractWorker {
     }
 
     final StringWriter writer = new StringWriter();
-    final Template temp =
-        Utils.getFreemarkerConfig(this.getClass()).getTemplate(email.getAction().getTemplateName());
+    final Configuration freemarkerConfig = Utils.getFreemarkerConfig(this.getClass());
+    final Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
+    emailContext.put("statics",
+        ((DefaultObjectWrapper) freemarkerConfig.getObjectWrapper()).getStaticModels());
     // scan:ignore — false positive, we know which template we are processing
     temp.process(emailContext, writer);
 

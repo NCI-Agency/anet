@@ -101,6 +101,35 @@
     .align-middle {
       vertical-align: middle !important;
     }
+    .d-grid {
+      display: grid !important;
+    }
+    .d-block {
+      display: block !important;
+    }
+    .p-1 {
+      padding: 0.25rem !important;
+    }
+    .text-center {
+      text-align: center !important;
+    }
+    .h5 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      word-wrap: break-word;
+    }
+    .card-body {
+      flex: 1 1 auto;
+    }
   </style>
 
   <style>
@@ -296,6 +325,60 @@
   </style>
 
   <style>
+    /* minimal copies from Attachment CSS: */
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+    }
+
+    .classification-line {
+      font-size: 12px;
+      color: #445566;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .info-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 120px;
+      object-fit: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0.10rem 0.10rem 0 0;
+    }
+
+    .card-icon {
+      width: 100%;
+      height: 120px;
+      font-size: 5rem;
+    }
+
+    .attachment-card-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .attachment-card {
+      flex: 0 0 calc(20%);
+      margin: 0 0 10px;
+      box-sizing: border-box;
+      position: relative;
+      text-align: center;
+    }
+  </style>
+
+  <style>
     /* some local overrides: */
     td {
       padding-left: 15px;
@@ -305,6 +388,10 @@
     .attachment-icon {
       font-size: 2rem;
       vertical-align: middle;
+    }
+
+    .info-line {
+      max-width: 176px;
     }
   </style>
 </head>
@@ -521,6 +608,51 @@
           </div>
         </#if>
       </#if>
+
+      <#macro renderAttachment attachment>
+        <#assign Utils = statics["mil.dds.anet.utils.Utils"]>
+        <#assign confidentialityLabel = Utils.getAttachmentConfidentialityLabel(dict, attachment)>
+        <div class="attachment-card">
+          <div class="card">
+            <div class="classification-line">${confidentialityLabel!}</div>
+            <div class="d-grid text-center">
+              <a href="${serverUrl}/attachments/${attachment.uuid}">
+                <#if Utils.isImage(attachment) && Utils.hasContent(attachment)>
+                  <img class="card-image" src="${serverUrl}/api/attachment/view/${attachment.uuid}" alt="${attachment.objectLabel}" style="object-fit: contain;" />
+                <#else>
+                  <#assign icon = Utils.getAttachmentIcon(attachment)>
+                  <span class="card-icon">${icon}</span>
+                </#if>
+              </a>
+            </div>
+            <div class="p-1 d-block card-body">
+              <div class="info-line card-title h5" title="${attachment.objectLabel}">${attachment.objectLabel}</div>
+            </div>
+          </div>
+        </div>
+      </#macro>
+
+      <#macro renderAttachments attachments>
+        <#if (attachments?size > 0)>
+          <div class="form-group">
+            <label for="attachments" class="col-sm-3 form-label">Attachments</label>
+            <div class="col-sm-9">
+              <div id="attachments" class="form-control-plaintext">
+                <div class="attachment-card-list">
+                  <#list attachments as attachment>
+                    <@renderAttachment attachment=attachment />
+                  </#list>
+                </div>
+              </div>
+            </div>
+          </div>
+        </#if>
+      </#macro>
+
+      <#if !(fields.attachment.featureDisabled!)>
+        <#assign attachments = (report.loadAttachments(context).get())!>
+        <@renderAttachments attachments=attachments />
+      </#if>
     </fieldset>
   </div>
 
@@ -656,7 +788,7 @@
       <fieldset>
         <div>
           <p>
-            ${report.reportTextWithLinks?no_esc}
+            ${Utils.replaceAnetLinks(report.reportText)?no_esc}
           </p>
         </div>
       </fieldset>

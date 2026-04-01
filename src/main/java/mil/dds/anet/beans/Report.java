@@ -428,11 +428,6 @@ public class Report extends AbstractCustomizableAnetBean
     this.reportText = Utils.trimStringReturnNull(reportText);
   }
 
-  @JsonIgnore
-  public String getReportTextWithLinks() {
-    return Utils.replaceAnetLinks(reportText);
-  }
-
   public String getNextSteps() {
     return nextSteps;
   }
