@@ -2,29 +2,26 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
-import MultiTypeAdvancedSelectComponent, {
-  ENTITY_TYPES
-} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
 import DictionaryField from "components/DictionaryField"
-import DraggableRow from "components/DraggableRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import { MessagesWithConflict } from "components/Messages"
-import Model, { MODEL_TO_OBJECT_TYPE } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import RemoveButton from "components/RemoveButton"
-import { FastField, Field, Form, Formik, useFormikContext } from "formik"
+import {
+  reindexSortableRelatedObjects,
+  SortableRelatedObjectsTableInput
+} from "components/RelatedObjectsTable"
+import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
-import React, { useContext, useEffect, useMemo, useState } from "react"
-import { Alert, Button, FormCheck, Table } from "react-bootstrap"
-import { DndProvider } from "react-dnd"
-import { HTML5Backend } from "react-dnd-html5-backend"
+import React, { useContext, useMemo, useState } from "react"
+import { Alert, Button, FormCheck } from "react-bootstrap"
 import { useNavigate } from "react-router"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -44,160 +41,6 @@ const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
     )
   }
 `
-
-const buildMemberKey = member =>
-  `${member.relatedObjectType}:${member.relatedObjectUuid}`
-
-const reindexMembers = members => {
-  if (!Array.isArray(members) || members.length === 0) {
-    return []
-  }
-  return members.map((member, index) => ({ ...member, priority: index }))
-}
-
-const MembersWidget = () => {
-  const { values, setFieldTouched, setFieldValue } =
-    useFormikContext<AuthorizationGroup>()
-  const membersLabel =
-    Settings.fields.authorizationGroup.authorizationGroupRelatedObjects
-      ?.label || "Members"
-  const memberLabel = pluralize.singular(membersLabel)
-  const membersFromValues = Array.isArray(
-    values.authorizationGroupRelatedObjects
-  )
-    ? values.authorizationGroupRelatedObjects
-    : []
-  const [members, setMembers] = useState(membersFromValues)
-
-  useEffect(() => {
-    setMembers(membersFromValues)
-  }, [membersFromValues])
-
-  const memberFieldValue = members.map(member => ({
-    uuid: member.relatedObjectUuid
-  }))
-
-  const setMembersAndForm = updatedMembers => {
-    setMembers(updatedMembers)
-    setFieldValue(
-      "authorizationGroupRelatedObjects",
-      reindexMembers(updatedMembers)
-    )
-  }
-
-  const handleMembersSelectConfirm = (value, objectType) => {
-    setFieldTouched("authorizationGroupRelatedObjects", true, false)
-    if (value.length > memberFieldValue.length) {
-      const addedEntity = value[value.length - 1]
-      const newRelatedObject = {
-        relatedObjectType: MODEL_TO_OBJECT_TYPE[objectType],
-        relatedObjectUuid: addedEntity.uuid,
-        relatedObject: addedEntity
-      }
-      setMembersAndForm([...members, newRelatedObject])
-    } else {
-      const valueUuids = value.map(v => v.uuid)
-      const newRelatedObjects = members.filter(ro =>
-        valueUuids.includes(ro.relatedObjectUuid)
-      )
-      setMembersAndForm(newRelatedObjects)
-    }
-  }
-
-  const moveMemberRow = (from, to) => {
-    if (from === to || members.length === 0) {
-      return
-    }
-    setMembers(prevMembers => {
-      const updated = [...prevMembers]
-      const [removed] = updated.splice(from, 1)
-      updated.splice(to, 0, removed)
-      setFieldValue("authorizationGroupRelatedObjects", reindexMembers(updated))
-      return updated
-    })
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
-  const onDropMemberRow = (uuid, toIndex) => {
-    setFieldTouched("authorizationGroupRelatedObjects", true, false)
-  }
-
-  return (
-    <div className="related_objects">
-      <MultiTypeAdvancedSelectComponent
-        fieldName="authorizationGroupRelatedObjects"
-        value={memberFieldValue}
-        objectType={ENTITY_TYPES.POSITIONS}
-        entityTypes={[
-          ENTITY_TYPES.POSITIONS,
-          ENTITY_TYPES.ORGANIZATIONS,
-          ENTITY_TYPES.PEOPLE
-        ]}
-        isMultiSelect
-        onConfirm={handleMembersSelectConfirm}
-      />
-      {members.length > 0 ? (
-        <DndProvider backend={HTML5Backend}>
-          <Table striped hover responsive className="related_objects_table">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }} />
-                <th>{memberLabel}</th>
-                <th style={{ width: "5%" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member, i) => (
-                <DraggableRow
-                  key={buildMemberKey(member)}
-                  itemType="AUTHORIZATION_GROUP_MEMBER_ROW"
-                  row={{
-                    ...member,
-                    uuid: buildMemberKey(member)
-                  }}
-                  index={i}
-                  moveRow={moveMemberRow}
-                  onDropRow={onDropMemberRow}
-                  dragHandleProps={{}}
-                  asTableRow
-                >
-                  <td className="text-start">
-                    <LinkTo
-                      modelType={member.relatedObjectType}
-                      model={{
-                        uuid: member.relatedObjectUuid,
-                        ...member.relatedObject
-                      }}
-                    />
-                  </td>
-                  <td>
-                    <RemoveButton
-                      title="Remove object"
-                      onClick={() => {
-                        const newRelatedObjects = members.filter(
-                          item =>
-                            item.relatedObjectUuid !== member.relatedObjectUuid
-                        )
-                        setFieldTouched(
-                          "authorizationGroupRelatedObjects",
-                          true,
-                          false
-                        )
-                        setMembersAndForm(newRelatedObjects)
-                      }}
-                    />
-                  </td>
-                </DraggableRow>
-              ))}
-            </tbody>
-          </Table>
-        </DndProvider>
-      ) : (
-        <em>No {membersLabel}</em>
-      )}
-    </div>
-  )
-}
 
 interface AuthorizationGroupFormProps {
   initialValues: AuthorizationGroup
@@ -239,9 +82,10 @@ const AuthorizationGroupForm = ({
   ]
   const normalizedInitialValues = useMemo(() => {
     const authorizationGroup = new AuthorizationGroup(initialValues)
-    authorizationGroup.authorizationGroupRelatedObjects = reindexMembers(
-      authorizationGroup.authorizationGroupRelatedObjects
-    )
+    authorizationGroup.authorizationGroupRelatedObjects =
+      reindexSortableRelatedObjects(
+        authorizationGroup.authorizationGroupRelatedObjects
+      )
     return authorizationGroup
   }, [initialValues])
 
@@ -432,7 +276,25 @@ const AuthorizationGroupForm = ({
                   }
                   name="authorizationGroupRelatedObjects"
                   component={FieldHelper.SpecialField}
-                  widget={<MembersWidget />}
+                  widget={
+                    <SortableRelatedObjectsTableInput
+                      title={pluralize.singular(
+                        Settings.fields.authorizationGroup
+                          .authorizationGroupRelatedObjects?.label
+                      )}
+                      relatedObjects={values.authorizationGroupRelatedObjects}
+                      objectType={ENTITY_TYPES.POSITIONS}
+                      entityTypes={[
+                        ENTITY_TYPES.POSITIONS,
+                        ENTITY_TYPES.ORGANIZATIONS,
+                        ENTITY_TYPES.PEOPLE
+                      ]}
+                      setRelatedObjects={value =>
+                        setFieldValue("authorizationGroupRelatedObjects", value)
+                      }
+                      showDelete
+                    />
+                  }
                 />
               </Fieldset>
 
