@@ -4,6 +4,7 @@ import static mil.dds.anet.utils.ResourceUtils.getAllowedClassifications;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import com.google.common.base.Joiner;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.function.Function;
@@ -108,7 +109,7 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
   protected Person admin;
 
   private static final String PERSON_FIELDS =
-      "{ uuid name user users { uuid domainUsername } rank status phoneNumber biography"
+      "{ uuid familyName givenName user users { uuid domainUsername } rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type superuserType status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } "
           + " emailAddresses { network address } }";
@@ -148,12 +149,14 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
           return user;
         }
       } else {
-        final PersonSearchQueryInput query =
-            PersonSearchQueryInput.builder().withText(stub.getName()).build();
+        final PersonSearchQueryInput query = PersonSearchQueryInput.builder()
+            .withText(Joiner.on(" ").skipNulls().join(stub.getGivenName(), stub.getFamilyName()))
+            .build();
         final AnetBeanList_Person searchObjects = withCredentials(jackUser,
             t -> queryExecutor.personList(getListFields(PERSON_FIELDS), query));
         for (final Person p : searchObjects.getList()) {
-          if (p.getName().equals(stub.getName())) {
+          if (p.getGivenName().equals(stub.getGivenName())
+              && p.getFamilyName().equals(stub.getFamilyName())) {
             return p;
           }
         }
@@ -232,28 +235,34 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
   }
 
   public Person getBenRogers() {
-    return findOrPutPersonInDb(Person.builder().withName("Rogers, Ben").build());
+    return findOrPutPersonInDb(
+        Person.builder().withFamilyName("Rogers").withGivenName("Ben").build());
   }
 
   // Interlocutors in the test database
   public Person getChristopfTopferness() {
-    return findOrPutPersonInDb(Person.builder().withName("Topferness, Christopf").build());
+    return findOrPutPersonInDb(
+        Person.builder().withFamilyName("Topferness").withGivenName("Christopf").build());
   }
 
   public Person getHunterHuntman() {
-    return findOrPutPersonInDb(Person.builder().withName("Huntman, Hunter").build());
+    return findOrPutPersonInDb(
+        Person.builder().withFamilyName("Huntman").withGivenName("Hunter").build());
   }
 
   public Person getRogerRogwell() {
-    return findOrPutPersonInDb(Person.builder().withName("Rogwell, Roger").build());
+    return findOrPutPersonInDb(
+        Person.builder().withFamilyName("Rogwell").withGivenName("Roger").build());
   }
 
   public Person getShardulSharton() {
-    return findOrPutPersonInDb(Person.builder().withName("Sharton, Shardul").build());
+    return findOrPutPersonInDb(
+        Person.builder().withFamilyName("Sharton").withGivenName("Shardul").build());
   }
 
   public Person getSteveSteveson() {
-    return findOrPutPersonInDb(Person.builder().withName("Steveson, Steve").build());
+    return findOrPutPersonInDb(
+        Person.builder().withFamilyName("Steveson").withGivenName("Steve").build());
   }
 
   // Getting the above as a normal bean

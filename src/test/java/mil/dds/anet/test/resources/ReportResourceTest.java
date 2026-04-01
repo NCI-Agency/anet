@@ -100,7 +100,7 @@ public class ReportResourceTest extends AbstractResourceTest {
       String.format("{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } %2$s }",
           _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name }"
+      "uuid familyName givenName status user phoneNumber rank biography obsoleteCountry country { uuid name }"
           + " gender endOfTourDate users { uuid domainUsername } pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS =
       String.format("{ %1$s %2$s }", _PERSON_FIELDS, _EMAIL_ADDRESSES_FIELDS);
@@ -156,7 +156,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withAddress("testApprover1@example.com").build();
     final User user1 = User.builder().withDomainUsername("testapprover1").build();
     final Person approver1tpl = Person.builder().withUser(true).withUsers(List.of(user1))
-        .withEmailAddresses(List.of(emailAddress1)).withName("Test Approver 1")
+        .withEmailAddresses(List.of(emailAddress1)).withFamilyName("Test Approver 1")
         .withStatus(Status.ACTIVE).build();
     final Person approver1 = findOrPutPersonInDb(getDomainUsername(approver1tpl), approver1tpl);
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
@@ -168,7 +168,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withAddress("testApprover2@example.com").build();
     final User user2 = User.builder().withDomainUsername("testapprover2").build();
     final Person approver2tpl = Person.builder().withUser(true).withUsers(List.of(user2))
-        .withEmailAddresses(List.of(emailAddress2)).withName("Test Approver 2")
+        .withEmailAddresses(List.of(emailAddress2)).withFamilyName("Test Approver 2")
         .withStatus(Status.ACTIVE).build();
     final Person approver2 = findOrPutPersonInDb(getDomainUsername(approver2tpl), approver2tpl);
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
@@ -571,7 +571,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withAddress("testApprover1@example.com").build();
     final User user1 = User.builder().withDomainUsername("testapprover1").build();
     final Person approver1tpl = Person.builder().withUser(true).withUsers(List.of(user1))
-        .withEmailAddresses(List.of(emailAddress1)).withName("Test Approver 1")
+        .withEmailAddresses(List.of(emailAddress1)).withFamilyName("Test Approver 1")
         .withStatus(Status.ACTIVE).build();
     final Person approver1 = findOrPutPersonInDb(getDomainUsername(approver1tpl), approver1tpl);
     final EmailAddress emailAddress2 =
@@ -579,7 +579,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withAddress("testApprover2@example.com").build();
     final User user2 = User.builder().withDomainUsername("testapprover2").build();
     final Person approver2tpl = Person.builder().withUser(true).withUsers(List.of(user2))
-        .withEmailAddresses(List.of(emailAddress2)).withName("Test Approver 2")
+        .withEmailAddresses(List.of(emailAddress2)).withFamilyName("Test Approver 2")
         .withStatus(Status.ACTIVE).build();
     final Person approver2 = findOrPutPersonInDb(getDomainUsername(approver2tpl), approver2tpl);
 
@@ -966,7 +966,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withAddress("newguy@example.com").build();
     final UserInput userInput = UserInput.builder().withDomainUsername("newguy").build();
     final PersonInput authorInput =
-        PersonInput.builder().withName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
+        PersonInput.builder().withFamilyName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
             .withUsers(List.of(userInput)).withEmailAddresses(List.of(emailAddressInput)).build();
     final Person author =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, authorInput));

@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
@@ -42,12 +44,15 @@ public class Person extends AbstractEmailableAnetBean
     return SYSTEM_USER.equals(user);
   }
 
-  private static final Comparator<Person> COMPARATOR =
-      Comparator.comparing(Person::getName).thenComparing(Person::getUuid);
+  private static final Comparator<Person> COMPARATOR = Comparator.comparing(Person::getFamilyName)
+      .thenComparing(Person::getGivenName).thenComparing(Person::getUuid);
 
   @GraphQLQuery
   @GraphQLInputField
-  private String name;
+  private String familyName;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String givenName;
   @GraphQLQuery
   @GraphQLInputField
   private Status status = Status.ACTIVE;
@@ -114,11 +119,29 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   @AllowUnverifiedUsers
   public String getName() {
-    return name;
+    // Principal name, combine givenName and familyName (optionally in all caps)
+    final boolean allCaps = (boolean) ApplicationContextProvider.getDictionary()
+        .getDictionaryEntry("fields.person.familyName.allCaps");
+    return Joiner.on(" ").skipNulls().join(givenName,
+        (familyName != null && allCaps) ? familyName.toUpperCase() : familyName);
   }
 
-  public void setName(String name) {
-    this.name = Utils.trimStringReturnNull(name);
+  @AllowUnverifiedUsers
+  public String getFamilyName() {
+    return familyName;
+  }
+
+  public void setFamilyName(String familyName) {
+    this.familyName = Utils.trimStringReturnNull(familyName);
+  }
+
+  @AllowUnverifiedUsers
+  public String getGivenName() {
+    return givenName;
+  }
+
+  public void setGivenName(String givenName) {
+    this.givenName = Utils.trimStringReturnNull(givenName);
   }
 
   @Override
@@ -474,8 +497,9 @@ public class Person extends AbstractEmailableAnetBean
     }
     final Person other = (Person) o;
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
-        && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
-        && Objects.equals(other.getUser(), user)
+        && Objects.equals(other.getFamilyName(), familyName)
+        && Objects.equals(other.getGivenName(), givenName)
+        && Objects.equals(other.getStatus(), status) && Objects.equals(other.getUser(), user)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
@@ -488,8 +512,8 @@ public class Person extends AbstractEmailableAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
-        pendingVerification, code, createdAt, updatedAt);
+    return Objects.hash(super.hashCode(), uuid, familyName, givenName, status, user, phoneNumber,
+        rank, biography, pendingVerification, code, createdAt, updatedAt);
   }
 
   @Override

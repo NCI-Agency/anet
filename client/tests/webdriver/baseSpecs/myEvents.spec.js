@@ -86,7 +86,7 @@ describe("My events page", () => {
       ).to.equal("Organizations attending:\nEF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(nmiEventIdx, 12, 1)).getText()
-      ).to.equal("People attending:\nCIV ERINSON, Erin")
+      ).to.equal("People attending:\nCIV Erin Erinson")
     })
     it("Should see a calendar of events", async () => {
       await MyEvents.selectEventsCalendar()

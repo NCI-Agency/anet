@@ -26,10 +26,11 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
       + " distributionList forSensitiveInformation"
       + " administrativePositions { uuid name code type role status location { uuid name }"
       + " organization { uuid shortName longName identificationCode }"
-      + " person { uuid name rank } }"
+      + " person { uuid familyName givenName rank } }"
       + " authorizationGroupRelatedObjects { relatedObjectType relatedObjectUuid"
       + " relatedObject { " + "... on Organization { uuid shortName longName identificationCode }"
-      + " ... on Person { uuid name rank }" + " ... on Position { uuid type name } } } }";
+      + " ... on Person { uuid familyName givenName rank }"
+      + " ... on Position { uuid type name } } } }";
 
   @Test
   void searchTest() {

@@ -1,7 +1,8 @@
 personList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
-    name
+    familyName
+    givenName
     rank
     entityAvatar {
       attachmentUuid

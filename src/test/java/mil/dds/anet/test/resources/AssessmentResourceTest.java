@@ -40,9 +40,9 @@ class AssessmentResourceTest extends AbstractResourceTest {
   private static final String _ASSESSMENTS_FIELDS =
       String.format("assessments %1$s", ASSESSMENT_FIELDS);
   private static final String PERSON_FIELDS =
-      String.format("{ uuid name %1$s }", _ASSESSMENTS_FIELDS);
+      String.format("{ uuid familyName givenName %1$s }", _ASSESSMENTS_FIELDS);
   private static final String REPORT_FIELDS = String.format(
-      "{ uuid updatedAt intent state reportPeople { uuid name author attendee primary interlocutor }"
+      "{ uuid updatedAt intent state reportPeople { uuid familyName givenName author attendee primary interlocutor }"
           + " tasks { uuid shortName } %1$s }",
       _ASSESSMENTS_FIELDS);
   private static final String TASK_FIELDS =

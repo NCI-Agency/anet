@@ -85,7 +85,8 @@ run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIV
 
 String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
 String adminPosName = run.environment["ANET_ADMIN_POS_NAME"] ?: "ANET Administrator"
-String adminFullName = run.environment["ANET_ADMIN_FULL_NAME"] ?: "DMIN, Arthur"
+String adminFamilyName = run.environment["ANET_ADMIN_FAMILY_NAME"] ?: "Dmin"
+String adminGivenName = run.environment["ANET_ADMIN_GIVEN_NAME"] ?: "Arthur"
 String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "arthur"
 
 String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
@@ -374,7 +375,8 @@ tasks.register('dbInit', JavaExec) {
 		cmdline.addAll([
 			"--adminOrgName", adminOrgName,
 			"--adminPosName", adminPosName,
-			"--adminFullName", adminFullName,
+			"--adminFamilyName", adminFamilyName,
+			"--adminGivenName", adminGivenName,
 			"--adminDomainUsername", adminDomainUsername
 		])
 	}

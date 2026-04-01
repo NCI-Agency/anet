@@ -124,7 +124,7 @@ const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   overlayRenderRow: PersonDetailedOverlayRow,
   objectType: Person,
-  valueKey: "name",
+  valueFunc: Person.fullName,
   queryParams: {
     pendingVerification: false
   },

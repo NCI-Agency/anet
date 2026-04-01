@@ -17,8 +17,8 @@ describe("When creating a Report with conflicts", () => {
       .seconds(0)
       .milliseconds(0),
     duration: "60",
-    advisors: ["CIV REPORTGUY, Ima"],
-    interlocutors: ["CIV KYLESON, Kyle"]
+    advisors: ["CIV Ima Reportguy"],
+    interlocutors: ["CIV Kyle Kyleson"]
   }
   const report02 = {
     intent: "2222222222",
@@ -29,8 +29,8 @@ describe("When creating a Report with conflicts", () => {
       .seconds(0)
       .milliseconds(0),
     duration: "10",
-    advisors: ["CIV REPORTGUY, Ima", "CIV REPORTGIRL, Ima"],
-    interlocutors: ["CIV KYLESON, Kyle", "OF-3 CHRISVILLE, Chris"]
+    advisors: ["CIV Ima Reportguy", "CIV Ima Reportgirl"],
+    interlocutors: ["CIV Kyle Kyleson", "OF-3 Chris Chrisville"]
   }
   const report03 = {
     intent: "333333333333",
@@ -51,8 +51,8 @@ describe("When creating a Report with conflicts", () => {
     expect(await (await CreateReport.getDuration()).getValue()).to.equal(
       report01.duration
     )
-    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await CreateReport.getPersonByName("CIV Erin Erinson")
+    expect(advisor01.name).to.equal("CIV Erin Erinson")
     expect(await advisor01.conflictButton.isExisting()).to.equal(false)
 
     const advisor02 = await CreateReport.getPersonByName(report01.advisors[0])
@@ -91,8 +91,8 @@ describe("When creating a Report with conflicts", () => {
     expect(await (await CreateReport.getDuration()).getValue()).to.equal(
       report02.duration
     )
-    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await CreateReport.getPersonByName("CIV Erin Erinson")
+    expect(advisor01.name).to.equal("CIV Erin Erinson")
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
 
     const advisor02 = await CreateReport.getPersonByName(report02.advisors[0])
@@ -150,10 +150,10 @@ describe("When creating a Report with conflicts", () => {
 
     expect(await ShowReport.getDuration()).to.equal(report01.duration)
     expect(await ShowReport.getLocation()).to.equal("Unspecified")
-    expect(await ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
+    expect(await ShowReport.getAuthors()).to.match(/CIV Erin Erinson/)
 
-    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await ShowReport.getAttendeeByName("CIV Erin Erinson")
+    expect(advisor01.name).to.equal("CIV Erin Erinson")
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
     expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 
@@ -194,27 +194,27 @@ describe("When creating a Report with conflicts", () => {
 
     expect(await ShowReport.getDuration()).to.equal(report02.duration)
     expect(await ShowReport.getLocation()).to.equal("Unspecified")
-    expect(await ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
+    expect(await ShowReport.getAuthors()).to.match(/CIV Erin Erinson/)
 
-    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await ShowReport.getAttendeeByName("CIV Erin Erinson")
+    expect(advisor01.name).to.equal("CIV Erin Erinson")
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
     expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 
-    const advisor02 = await ShowReport.getAttendeeByName("CIV REPORTGIRL, Ima")
+    const advisor02 = await ShowReport.getAttendeeByName("CIV Ima Reportgirl")
     expect(await advisor02.conflictButton.isExisting()).to.equal(false)
 
-    const advisor03 = await ShowReport.getAttendeeByName("CIV REPORTGUY, Ima")
+    const advisor03 = await ShowReport.getAttendeeByName("CIV Ima Reportguy")
     expect(await advisor03.conflictButton.isExisting()).to.equal(true)
     expect(await advisor03.conflictButton.getText()).to.match(/conflict/)
 
     const interlocutor01 =
-      await ShowReport.getAttendeeByName("CIV KYLESON, Kyle")
+      await ShowReport.getAttendeeByName("CIV Kyle Kyleson")
     expect(await interlocutor01.conflictButton.isExisting()).to.equal(true)
     expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
 
     const interlocutor02 = await ShowReport.getAttendeeByName(
-      "OF-3 CHRISVILLE, Chris"
+      "OF-3 Chris Chrisville"
     )
     expect(await interlocutor02.conflictButton.isExisting()).to.equal(false)
   })
@@ -249,8 +249,8 @@ describe("When creating a Report with conflicts", () => {
     expect(await (await CreateReport.getEngagementDate()).getValue()).to.equal(
       report03.engagementDate.format("DD-MM-YYYY HH:mm")
     )
-    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await CreateReport.getPersonByName("CIV Erin Erinson")
+    expect(advisor01.name).to.equal("CIV Erin Erinson")
     expect(await advisor01.conflictButton.isExisting()).to.equal(false)
 
     await CreateReport.submitForm()
@@ -281,8 +281,8 @@ describe("When creating a Report with conflicts", () => {
       await (await ShowReport.getReportConflictIcon()).isExisting()
     ).to.equal(false)
 
-    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await ShowReport.getAttendeeByName("CIV Erin Erinson")
+    expect(advisor01.name).to.equal("CIV Erin Erinson")
     expect(await advisor01.conflictButton.isExisting()).to.equal(false)
   })
 

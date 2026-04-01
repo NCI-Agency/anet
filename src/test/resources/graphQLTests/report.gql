@@ -19,7 +19,8 @@ report(uuid:"${reportUuid}") {
   }
   authors {
     uuid
-    name
+    familyName
+    givenName
     rank
     entityAvatar {
       attachmentUuid
@@ -44,7 +45,8 @@ report(uuid:"${reportUuid}") {
             name
             person {
               uuid
-              name
+              familyName
+              givenName
               rank
               entityAvatar {
                 attachmentUuid
@@ -62,7 +64,8 @@ report(uuid:"${reportUuid}") {
   }
   attendees {
     uuid
-    name
+    familyName
+    givenName
     rank
     entityAvatar {
       attachmentUuid
@@ -117,7 +120,8 @@ report(uuid:"${reportUuid}") {
     updatedAt
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -152,7 +156,8 @@ report(uuid:"${reportUuid}") {
         name
         person {
           uuid
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid
@@ -167,7 +172,8 @@ report(uuid:"${reportUuid}") {
     }
     person {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -207,7 +213,8 @@ report(uuid:"${reportUuid}") {
       }
       ... on Person {
         uuid
-        name
+        familyName
+        givenName
         rank
       }
       ... on Position {
@@ -225,7 +232,8 @@ report(uuid:"${reportUuid}") {
     assessmentValues
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -247,7 +255,8 @@ report(uuid:"${reportUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid
@@ -275,7 +284,8 @@ report(uuid:"${reportUuid}") {
     text
     author {
       uuid
-      name
+      familyName
+      givenName
       rank
       entityAvatar {
         attachmentUuid
@@ -303,7 +313,8 @@ report(uuid:"${reportUuid}") {
           identificationCode
         }
         ... on Person {
-          name
+          familyName
+          givenName
           rank
           entityAvatar {
             attachmentUuid

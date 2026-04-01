@@ -49,7 +49,7 @@ const PRESET_WITHOUT_SENSITIVE_LABELS = [
 describe("Show person page", () => {
   beforeEach("Should have print button", async () => {
     await Home.openAsAdminUser()
-    await (await Home.getSearchBar()).setValue("Roger")
+    await (await Home.getSearchBar()).setValue("Roger Rogwell")
     await (await Home.getSubmitSearch()).click()
     await (await Search.getFoundPeopleTable()).waitForExist({ timeout: 20000 })
     await (await Search.getFoundPeopleTable()).waitForDisplayed()

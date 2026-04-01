@@ -2,8 +2,8 @@ import { expect } from "chai"
 import Admin from "../pages/admin.page"
 import Help from "../pages/help.page"
 
-const ERIN_SUPERUSERS = ["CTR BECCABON, Rebecca", "CIV JACOBSON, Jacob"]
-const ERIN_ADMINS = ["CIV DMIN, Arthur", "CIV SCOTT, Michael"]
+const ERIN_SUPERUSERS = ["CTR Rebecca Beccabon", "CIV Jacob Jacobson"]
+const ERIN_ADMINS = ["CIV Arthur Dmin", "CIV Michael Scott"]
 
 const HELP_TEXT = "This is a help text"
 

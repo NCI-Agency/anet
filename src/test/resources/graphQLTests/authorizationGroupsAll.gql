@@ -14,7 +14,8 @@ authorizationGroupList(query:{pageSize:0}) {
 	}
 	... on Person {
 	  uuid
-	  name
+          familyName
+          givenName
 	  rank
           entityAvatar {
             attachmentUuid

@@ -22,7 +22,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
-import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import ObjectHistory from "components/ObjectHistory"
 import OptionListModal from "components/OptionListModal"
@@ -111,10 +110,12 @@ const PersonForm = ({
   const [showSimilarPeople, setShowSimilarPeople] = useState(false)
   const [showSimilarPeopleMessage, setShowSimilarPeopleMessage] =
     useState(false)
-  const [personFirstName, setPersonFirstName] = useState(
-    initialValues?.firstName
+  const [personGivenName, setPersonGivenName] = useState(
+    initialValues?.givenName
   )
-  const [personLastName, setPersonLastName] = useState(initialValues?.lastName)
+  const [personFamilyName, setPersonFamilyName] = useState(
+    initialValues?.familyName
+  )
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
   const attachmentsEnabled =
@@ -165,8 +166,8 @@ const PersonForm = ({
     400
   )
   useEffect(() => {
-    checkPotentialDuplicatesDebounced(personFirstName, personLastName)
-  }, [checkPotentialDuplicatesDebounced, personFirstName, personLastName])
+    checkPotentialDuplicatesDebounced(personGivenName, personFamilyName)
+  }, [checkPotentialDuplicatesDebounced, personGivenName, personFamilyName])
 
   return (
     <Formik
@@ -221,7 +222,7 @@ const PersonForm = ({
         const imageAttachments = attachmentList?.filter(a =>
           avatarMimeTypes.includes(a.mimeType)
         )
-        const fullName = Person.fullName(Person.parseFullName(values.name))
+        const fullName = Person.fullName(values)
         const nameMessage = "This is not " + (isSelf ? "me" : fullName)
         const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
         const confirmLabel =
@@ -270,7 +271,7 @@ const PersonForm = ({
                           initialAvatar={initialValues.entityAvatar}
                           relatedObjectType="people"
                           relatedObjectUuid={initialValues.uuid}
-                          relatedObjectName={initialValues.name}
+                          relatedObjectName={Person.fullName(initialValues)}
                           editMode={attachmentEditEnabled}
                           imageAttachments={imageAttachments}
                         />
@@ -284,7 +285,7 @@ const PersonForm = ({
                     >
                       <FormGroup>
                         <Row style={{ marginBottom: "1rem" }}>
-                          <Col sm={2} as={FormLabel} htmlFor="lastName">
+                          <Col sm={2} as={FormLabel} htmlFor="familyName">
                             Name
                           </Col>
                           <Col sm={7}>
@@ -292,36 +293,34 @@ const PersonForm = ({
                               <Col>
                                 <DictionaryField
                                   wrappedComponent={Field}
-                                  dictProps={Settings.fields.person.lastName}
-                                  name="lastName"
+                                  dictProps={Settings.fields.person.givenName}
+                                  name="givenName"
                                   component={FieldHelper.InputFieldNoLabel}
                                   display="inline"
                                   disabled={!canEditName}
-                                  onKeyDown={handleLastNameOnKeyDown}
                                   onChange={event => {
                                     setFieldValue(
-                                      "lastName",
+                                      "givenName",
                                       event.target.value
                                     )
-                                    setPersonLastName(event.target.value)
+                                    setPersonGivenName(event.target.value)
                                   }}
                                 />
-                              </Col>
-                              ,
+                              </Col>{" "}
                               <Col>
                                 <DictionaryField
                                   wrappedComponent={Field}
-                                  dictProps={Settings.fields.person.firstName}
-                                  name="firstName"
+                                  dictProps={Settings.fields.person.familyName}
+                                  name="familyName"
                                   component={FieldHelper.InputFieldNoLabel}
                                   display="inline"
                                   disabled={!canEditName}
                                   onChange={event => {
                                     setFieldValue(
-                                      "firstName",
+                                      "familyName",
                                       event.target.value
                                     )
-                                    setPersonFirstName(event.target.value)
+                                    setPersonFamilyName(event.target.value)
                                   }}
                                 />
                               </Col>
@@ -808,7 +807,7 @@ const PersonForm = ({
                 {showSimilarPeople && (
                   <SimilarObjectsModal
                     objectType="Person"
-                    userInput={`${values.lastName} ${values.firstName}`}
+                    userInput={Person.fullName(values)}
                     onCancel={() => {
                       setShowSimilarPeople(false)
                     }}
@@ -839,14 +838,6 @@ const PersonForm = ({
       }}
     </Formik>
   )
-
-  function handleLastNameOnKeyDown(event) {
-    // adding a "," to the last name results in jumping to the end of the first name
-    if (event.key === ",") {
-      event.preventDefault()
-      document.getElementById("firstName").focus()
-    }
-  }
 
   function onCancel() {
     navigate(-1)
@@ -904,10 +895,6 @@ const PersonForm = ({
     if (values.pendingVerification && Settings.automaticallyAllowAllNewUsers) {
       person.pendingVerification = false
     }
-    person.name = Person.fullName(
-      { firstName: values.firstName, lastName: values.lastName },
-      true
-    )
     person.country = utils.getReference(person.country)
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
@@ -939,16 +926,16 @@ const PersonForm = ({
       }
     }
   }
-  async function checkPotentialDuplicates(firstName, lastName) {
+  async function checkPotentialDuplicates(givenName, familyName) {
     if (
       !forOnboarding &&
       !edit &&
-      (firstName.length >= MIN_CHARS_FOR_DUPLICATES ||
-        lastName.length >= MIN_CHARS_FOR_DUPLICATES)
+      (givenName.length >= MIN_CHARS_FOR_DUPLICATES ||
+        familyName.length >= MIN_CHARS_FOR_DUPLICATES)
     ) {
       const personQuery = {
         pageSize: 1,
-        text: `${firstName} ${lastName}`
+        text: Person.fullName({ givenName, familyName })
       }
       try {
         const response = await API.query(GQL_GET_PERSON_COUNT, {

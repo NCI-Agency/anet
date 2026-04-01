@@ -141,7 +141,8 @@ class AdminResourceTest extends AbstractResourceTest {
   }
 
   private void recentActivities(Person user) {
-    final String recentActivityFields = "user { uuid rank name } activity { time ip request }";
+    final String recentActivityFields =
+        "user { uuid rank familyName givenName } activity { time ip request }";
     final String fields =
         String.format("{ byActivity { %1$s } byUser { %1$s } }", recentActivityFields);
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;

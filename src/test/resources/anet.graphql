@@ -1081,9 +1081,10 @@ type Person {
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
+  familyName: String
   gender: String
+  givenName: String
   isSubscribed: Boolean
-  name: String
   notes: [Note]
   obsoleteCountry: String
   pendingVerification: Boolean
@@ -1111,8 +1112,9 @@ input PersonInput {
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   entityAvatar: EntityAvatarInput
+  familyName: String
   gender: String
-  name: String
+  givenName: String
   obsoleteCountry: String
   pendingVerification: Boolean
   phoneNumber: String
@@ -1538,10 +1540,11 @@ type ReportPerson {
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
+  familyName: String
   gender: String
+  givenName: String
   interlocutor: Boolean!
   isSubscribed: Boolean
-  name: String
   notes: [Note]
   obsoleteCountry: String
   pendingVerification: Boolean
@@ -1572,9 +1575,10 @@ input ReportPersonInput {
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   entityAvatar: EntityAvatarInput
+  familyName: String
   gender: String
+  givenName: String
   interlocutor: Boolean!
-  name: String
   obsoleteCountry: String
   pendingVerification: Boolean
   phoneNumber: String

@@ -105,10 +105,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
 
   return (
     <div className={`${className} preview-content-scroll`}>
-      <PreviewTitle
-        title={`${person.rank} ${Person.militaryName(person.name)}`}
-        status={person.status}
-      />
+      <PreviewTitle title={Person.toString(person)} status={person.status} />
       <div className="preview-section">
         <Row>
           <Col>
@@ -321,7 +318,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
       return (
         <div style={{ textAlign: "center" }}>
           <p className="not-assigned-to-position-message">
-            <em>{person.name} is not assigned to a position.</em>
+            <em>{Person.fullName(person)} is not assigned to a position.</em>
           </p>
         </div>
       )

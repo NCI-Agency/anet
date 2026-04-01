@@ -37,7 +37,7 @@ test.serial("checking superuser permissions", async t => {
 
   const $rebeccaLink = await findSuperuserLink(
     t,
-    "CTR BECCABON, Rebecca",
+    "CTR Rebecca Beccabon",
     "EF 2.2"
   )
 
@@ -55,7 +55,7 @@ test.serial("checking superuser permissions", async t => {
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
-  const $jacobLink = await findSuperuserLink(t, "CIV JACOBSON, Jacob", "EF 2.2")
+  const $jacobLink = await findSuperuserLink(t, "CIV Jacob Jacobson", "EF 2.2")
   await $jacobLink.click()
   await t.context.driver.wait(t.context.untilStalenessOf($jacobLink))
 
@@ -133,11 +133,11 @@ test.serial("checking superuser permissions", async t => {
   // Check that Andrew is (also) superuser of EF 1.1
   await findSuperuserLink(
     t,
-    "CIV ANDERSON, Andrew",
+    "CIV Andrew Anderson",
     "EF 1 | Planning Programming, Budgeting and Execution"
   )
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "OF-2 ELIZAWELL, Elizabeth"
+    "OF-2 Elizabeth Elizawell"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await validateUserCanEditUserForCurrentPage(t, true)
@@ -152,9 +152,9 @@ test.serial("checking superuser permissions", async t => {
   )
   await $modLink.click()
   // Check that Bob is (also) superuser of MoD
-  await findSuperuserLink(t, "CIV BOBTOWN, Bob", "MoD | Ministry of Defense")
+  await findSuperuserLink(t, "CIV Bob Bobtown", "MoD | Ministry of Defense")
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "CIV KYLESON, Kyle"
+    "CIV Kyle Kyleson"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await validateUserCanEditUserForCurrentPage(t, true)
@@ -182,7 +182,7 @@ validateUserCannotEditOtherUser(
   "superuser cannot edit administrator",
   "rebecca",
   "arthur",
-  "CIV DMIN, Arthur",
+  "CIV Arthur Dmin",
   "ANET Administrator"
 )
 
@@ -190,7 +190,7 @@ validateUserCannotEditOtherUser(
   "superuser cannot edit people from the organizations their position is not administrating",
   "jacob",
   "andrew",
-  "CIV ANDERSON, Andrew",
+  "CIV Andrew Anderson",
   "EF 1 Manager"
 )
 
@@ -203,7 +203,7 @@ test.serial("checking regular user permissions", async t => {
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "OF-9 JACKSON, Jack"
+    "OF-9 Jack Jackson"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
 
@@ -225,7 +225,7 @@ validateUserCannotEditOtherUser(
   "Regular user cannot edit superuser people or positions",
   "jack",
   "rebecca",
-  "CTR BECCABON, Rebecca",
+  "CTR Rebecca Beccabon",
   "EF 2.2 Final Reviewer"
 )
 
@@ -233,7 +233,7 @@ validateUserCannotEditOtherUser(
   "Regular user cannot edit admin people or positions",
   "jack",
   "arthur",
-  "CIV DMIN, Arthur",
+  "CIV Arthur Dmin",
   "ANET Administrator"
 )
 
@@ -271,7 +271,7 @@ test.serial("checking admin permissions", async t => {
   await t.context.pageHelpers.clickMyOrgLink()
 
   const element = await t.context.driver.findElement(
-    By.linkText("CIV DMIN, Arthur")
+    By.linkText("CIV Arthur Dmin")
   )
   await element.click()
 
@@ -308,7 +308,7 @@ test.serial("admins can edit superusers and their positions", async t => {
   const $rebeccaPersonLink = await getFromSearchResults(
     t,
     "rebecca",
-    "CTR BECCABON, Rebecca",
+    "CTR Rebecca Beccabon",
     "people"
   )
   await $rebeccaPersonLink.click()
@@ -431,13 +431,13 @@ async function validateUserCanEditUserForCurrentPage(t, canChangeName) {
     // The user can should be able to change the name
     await assertElementEnabled(
       t,
-      '[name="lastName"]',
-      "Last name of a person should be enabled"
+      '[name="familyName"]',
+      "Family name of a person should be enabled"
     )
     await assertElementEnabled(
       t,
-      '[name="firstName"]',
-      "First name of a person should be enabled"
+      '[name="givenName"]',
+      "Given name of a person should be enabled"
     )
   }
 

@@ -26,7 +26,7 @@ interface BarChartProps {
   data?: any[]
   xProp: string | string[]
   yProp: string | string[]
-  xLabel?: string | string[]
+  xLabel?: string | string[] | ((d: object) => string)
   xPadding?: number
   barClass?: string
   onBarClick?: (...args: unknown[]) => unknown
@@ -68,7 +68,7 @@ const BarChart = ({
       data.map(function (d) {
         xLabels[getPropValue(d, xProp)] = utils.ellipsize(
           // TODO: Make responsive
-          getPropValue(d, label),
+          typeof label === "function" ? label(d) : getPropValue(d, label),
           10
         )
         return getPropValue(d, xProp)

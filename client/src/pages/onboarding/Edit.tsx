@@ -61,9 +61,6 @@ const OnboardingEdit = ({ pageDispatchers }: OnboardingEditProps) => {
   if (person.endOfTourDate) {
     person.endOfTourDate = moment(person.endOfTourDate).format()
   }
-  const parsedFullName = Person.parseFullName(person.name)
-  person.firstName = parsedFullName.firstName
-  person.lastName = parsedFullName.lastName
 
   return (
     <div>

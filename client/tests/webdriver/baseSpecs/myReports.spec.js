@@ -17,7 +17,7 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsTableSpan(reportNoAttachments, 1)
         ).getText()
-      ).to.equal("CIV DMIN, Arthur")
+      ).to.equal("CIV Arthur Dmin")
       expect(
         await (
           await MyReports.getReportsTableSpan(reportNoAttachments, 2)
@@ -68,7 +68,7 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 1)
         ).getText()
-      ).to.equal("CIV DMIN, Arthur")
+      ).to.equal("CIV Arthur Dmin")
       expect(
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 2)
@@ -78,7 +78,7 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 4)
         ).getText()
-      ).to.equal("CIV SHARTON, Shardul")
+      ).to.equal("CIV Shardul Sharton")
       expect(
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 5)

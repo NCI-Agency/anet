@@ -48,15 +48,16 @@ public class InitializationCommand {
           required = true) String adminOrgName,
       @Option(longName = "adminPosName", description = "set administrative position name",
           required = true) String adminPosName,
-      @Option(longName = "adminFullName",
-          description = "set administrator's full name; use format: LASTNAME, Firstname",
-          required = true) String adminFullName,
+      @Option(longName = "adminFamilyName", description = "set administrator's family name",
+          required = true) String adminFamilyName,
+      @Option(longName = "adminGivenName", description = "set administrator's given name",
+          required = true) String adminGivenName,
       @Option(longName = "adminDomainUsername", description = "set administrator's domain username",
           required = true) String adminDomainUsername) {
     logger.info("Initializing ANET database");
     checkPreconditions();
-    final String defaultApprovalOrgUuid =
-        createInitialAdministrator(adminOrgName, adminPosName, adminFullName, adminDomainUsername);
+    final String defaultApprovalOrgUuid = createInitialAdministrator(adminOrgName, adminPosName,
+        adminFamilyName, adminGivenName, adminDomainUsername);
     saveAdminSettings(defaultApprovalOrgUuid);
   }
 
@@ -90,7 +91,7 @@ public class InitializationCommand {
           "\tYou should run all migrations first");
     }
     // Only person should be "ANET Importer"
-    if (currPeople.size() != 1 || !"ANET Importer".equals(currPeople.get(0).getName())) {
+    if (currPeople.size() != 1 || !"ANET Importer".equals(currPeople.get(0).getFamilyName())) {
       exitWithError("ERROR: Other people besides ANET Importer detected in database",
           DB_SHOULD_BE_EMPTY);
     }
@@ -103,7 +104,7 @@ public class InitializationCommand {
   }
 
   private String createInitialAdministrator(String adminOrgName, String adminPosName,
-      String adminFullName, String adminDomainUsername) {
+      String adminFamilyName, String adminGivenName, String adminDomainUsername) {
     // Create admin organization
     Organization adminOrg = new Organization();
     adminOrg.setShortName(adminOrgName);
@@ -121,7 +122,8 @@ public class InitializationCommand {
 
     // Create admin person
     Person admin = new Person();
-    admin.setName(adminFullName);
+    admin.setFamilyName(adminFamilyName);
+    admin.setGivenName(adminGivenName);
     admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid(), true, null,

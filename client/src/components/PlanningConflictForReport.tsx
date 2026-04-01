@@ -7,7 +7,7 @@ import { Icon, IconSize, Intent, Spinner, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import API from "api"
-import { Report } from "models"
+import { Person, Report } from "models"
 import moment from "moment"
 import React from "react"
 
@@ -106,7 +106,7 @@ const PlanningConflictForReport = ({
             </div>
             <ul>
               {conflictingAttendees.map(at => (
-                <li key={at.uuid}>{at.name}</li>
+                <li key={at.uuid}>{Person.fullName(at)}</li>
               ))}
             </ul>
           </ReportConflictTooltipContainer>

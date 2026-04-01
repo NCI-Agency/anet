@@ -238,7 +238,7 @@ const AssignPersonModal = ({
                     filterDefs={personFilters}
                     onChange={value => setPerson(value)}
                     objectType={Person}
-                    valueKey="name"
+                    valueFunc={Person.fullName}
                     fields={`${gqlEntityFieldsMap.Person} position { ${gqlEntityFieldsMap.Position} type organization { uuid } }`}
                     addon={PEOPLE_ICON}
                   />
@@ -257,7 +257,7 @@ const AssignPersonModal = ({
                 <tbody>
                   <tr>
                     <td>{person.rank}</td>
-                    <td>{person.name}</td>
+                    <td>{Person.fullName(person)}</td>
                     <td>
                       {person.position ? (
                         person.position.name

@@ -63,7 +63,7 @@ export const EmailModal = ({
     const email = user.emailAddresses?.find(
       ea => ea.network === EMAIL_NETWORK
     )?.address
-    return `${user.name}${email ? ` <${email}>` : ""}`
+    return `${Person.fullName(user)}${email ? ` <${email}>` : ""}`
   }
 
   const personFields = `${Person.autocompleteQuery} emailAddresses(network: "${EMAIL_NETWORK}") { network address }`
