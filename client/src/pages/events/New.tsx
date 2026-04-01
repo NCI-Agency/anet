@@ -102,7 +102,7 @@ const EventNewConditional = ({
   if (data) {
     event.eventSeries = new EventSeries(data.eventSeries)
     event.ownerOrg = data.eventSeries.ownerOrg
-    event.hostOrg = data.eventSeries.hostOrg
+    event.hostRelatedObjects = data.eventSeries.hostRelatedObjects
     event.adminOrg = data.eventSeries.adminOrg
   }
   // mutates the object

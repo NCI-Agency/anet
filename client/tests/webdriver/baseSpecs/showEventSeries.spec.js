@@ -16,10 +16,10 @@ describe("Show event series page", () => {
     expect(
       await (await ShowEventSeries.getOwnerOrganization()).getText()
     ).to.equal("EF 2.2")
-    await (await ShowEventSeries.getHostOrganization()).waitForExist()
-    await (await ShowEventSeries.getHostOrganization()).waitForDisplayed()
+    await (await ShowEventSeries.getHostRelatedObjects()).waitForExist()
+    await (await ShowEventSeries.getHostRelatedObjects()).waitForDisplayed()
     expect(
-      await (await ShowEventSeries.getHostOrganization()).getText()
+      await (await ShowEventSeries.getHostRelatedObjects()).getText()
     ).to.equal("EF 2.2")
     await (await ShowEventSeries.getAdminOrganization()).waitForExist()
     await (await ShowEventSeries.getAdminOrganization()).waitForDisplayed()

@@ -4,6 +4,7 @@ import AppContext from "components/AppContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
+import EventHostMembersTable from "components/EventHostMembersTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -181,16 +182,14 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
               )
             }
           />
-          <DictionaryField
-            wrappedComponent={FieldHelper.ReadonlyField}
-            dictProps={Settings.fields.event.hostOrg}
-            field={{ name: "hostOrg" }}
-            humanValue={
-              event.hostOrg && (
-                <LinkTo modelType="Organization" model={event.hostOrg} />
-              )
-            }
-          />
+          {event.hostRelatedObjects.length > 0 && (
+            <DictionaryField
+              wrappedComponent={FieldHelper.ReadonlyField}
+              dictProps={Settings.fields.event.hostRelatedObjects}
+              field={{ name: "hostRelatedObjects" }}
+              humanValue={<EventHostMembersTable entity={event} />}
+            />
+          )}
           <DictionaryField
             wrappedComponent={FieldHelper.ReadonlyField}
             dictProps={Settings.fields.event.adminOrg}

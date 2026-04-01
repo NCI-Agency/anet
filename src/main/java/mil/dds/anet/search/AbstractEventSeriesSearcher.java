@@ -80,13 +80,15 @@ public abstract class AbstractEventSeriesSearcher
   }
 
   protected void addHostOrgQuery(EventSeriesSearchQuery query) {
+    qb.addFromClause(
+        "INNER JOIN \"eventSeriesHostRelatedObjects\" hosts ON hosts.\"relatedObjectType\" = 'organizations' AND hosts.\"eventSeriesUuid\" = \"eventSeries\".uuid");
     if (query.getHostOrgUuid().size() == 1
         && Organization.DUMMY_ORG_UUID.equals(query.getHostOrgUuid().get(0))) {
-      qb.addWhereClause("\"eventSeries\".\"hostOrgUuid\" IS NULL");
+      qb.addWhereClause("hosts.\"relatedObjectUuid\" IS NULL");
     } else {
-      qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"hostOrgUuid\""},
-          "parent_host_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "hostOrgUuid",
-          query.getHostOrgUuid(), true, true, null);
+      qb.addRecursiveClause(null, "hosts", new String[] {"\"relatedObjectUuid\""},
+          "parent_host_orgs", "organizations", "\"parentOrgUuid\"", "uuid", "hostOrgUuid",
+          query.getHostOrgUuid(), false, true, null);
     }
   }
 
@@ -102,12 +104,18 @@ public abstract class AbstractEventSeriesSearcher
   }
 
   private void addAnyOrgQuery(EventSeriesSearchQuery query) {
+    qb.addFromClause("LEFT JOIN \"eventSeriesHostRelatedObjects\" es_hosts"
+        + " ON es_hosts.\"relatedObjectType\" = 'organizations'"
+        + " AND es_hosts.\"eventSeriesUuid\" = \"eventSeries\".uuid");
     qb.addFromClause("LEFT JOIN events ON \"eventSeries\".uuid = events.\"eventSeriesUuid\"");
+    qb.addFromClause("LEFT JOIN \"eventHostRelatedObjects\" e_hosts"
+        + " ON e_hosts.\"relatedObjectType\" = 'organizations'"
+        + " AND e_hosts.\"eventUuid\" = events.uuid");
     qb.addWhereClause("(\"eventSeries\".\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
-        + " OR \"eventSeries\".\"hostOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR es_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )"
         + " OR \"eventSeries\".\"adminOrgUuid\" IN ( <anyOrgUuid> )"
         + " OR events.\"ownerOrgUuid\" IN ( <anyOrgUuid> )"
-        + " OR events.\"hostOrgUuid\" IN ( <anyOrgUuid> )"
+        + " OR e_hosts.\"relatedObjectUuid\" IN ( <anyOrgUuid> )"
         + " OR events.\"adminOrgUuid\" IN ( <anyOrgUuid> ))");
     qb.addListArg("anyOrgUuid", query.getAnyOrgUuid());
   }

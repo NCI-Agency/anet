@@ -3,6 +3,7 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.EventSeries;
+import mil.dds.anet.beans.WithStatus;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -12,12 +13,10 @@ public class EventSeriesMapper implements RowMapper<EventSeries> {
   public EventSeries map(ResultSet r, StatementContext ctx) throws SQLException {
     EventSeries eventSeries = new EventSeries();
     MapperUtils.setCustomizableBeanFields(eventSeries, r, "eventSeries");
-    eventSeries
-        .setStatus(MapperUtils.getEnumIdx(r, "eventSeries_status", EventSeries.Status.class));
+    eventSeries.setStatus(MapperUtils.getEnumIdx(r, "eventSeries_status", WithStatus.Status.class));
     eventSeries.setName(r.getString("eventSeries_name"));
     eventSeries.setDescription(r.getString("eventSeries_description"));
     eventSeries.setOwnerOrgUuid(r.getString("eventSeries_ownerOrgUuid"));
-    eventSeries.setHostOrgUuid(r.getString("eventSeries_hostOrgUuid"));
     eventSeries.setAdminOrgUuid(r.getString("eventSeries_adminOrgUuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {

@@ -791,7 +791,7 @@ properties:
       eventSeries:
         type: object
         additionalProperties: false
-        required: [status, name, description, ownerOrg, hostOrg, adminOrg]
+        required: [status, name, description, ownerOrg, hostOrg, adminOrg, hostRelatedObjects]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -802,15 +802,17 @@ properties:
           ownerOrg:
             "$ref": "#/$defs/inputField"
           hostOrg:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/labeledField"
           adminOrg:
             "$ref": "#/$defs/inputField"
+          hostRelatedObjects:
+            "$ref": "#/$defs/labeledField"
 
       event:
         type: object
         additionalProperties: false
         required: [status, name, type, description, startDate, endDate, outcomes, ownerOrg, hostOrg,
-                   adminOrg, eventSeries, location, organizations, people, tasks]
+                   adminOrg, eventSeries, location, organizations, people, tasks, hostRelatedObjects]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -829,7 +831,7 @@ properties:
           ownerOrg:
             "$ref": "#/$defs/inputField"
           hostOrg:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/labeledField"
           adminOrg:
             "$ref": "#/$defs/inputField"
           eventSeries:
@@ -842,6 +844,8 @@ properties:
             "$ref": "#/$defs/inputField"
           tasks:
             "$ref": "#/$defs/inputField"
+          hostRelatedObjects:
+            "$ref": "#/$defs/labeledField"
 
       report:
         type: object

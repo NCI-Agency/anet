@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -14,10 +15,12 @@ import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
+import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
 import { EventSeries, Organization } from "models"
+import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Button, Col, FormGroup, Row } from "react-bootstrap"
 import { useNavigate } from "react-router"
@@ -208,28 +211,25 @@ const EventSeriesForm = ({
                   />
                   <DictionaryField
                     wrappedComponent={Field}
-                    dictProps={Settings.fields.eventSeries.hostOrg}
-                    name="hostOrg"
+                    dictProps={Settings.fields.eventSeries.hostRelatedObjects}
+                    name="hostRelatedObjects"
                     component={FieldHelper.SpecialField}
-                    onChange={value => {
-                      // validation will be done by setFieldValue
-                      setFieldTouched("hostOrg", true, false) // onBlur doesn't work when selecting an option
-                      setFieldValue("hostOrg", value)
-                    }}
                     widget={
-                      <AdvancedSingleSelect
-                        fieldName="hostOrg"
-                        placeholder={
-                          Settings.fields.eventSeries.hostOrg.placeholder
+                      <RelatedObjectsTableInput
+                        title={
+                          Settings.fields.eventSeries.hostRelatedObjects?.label
                         }
-                        value={values.hostOrg}
-                        overlayColumns={["Name"]}
-                        overlayRenderRow={OrganizationOverlayRow}
-                        filterDefs={organizationFilters}
-                        objectType={Organization}
-                        fields={Organization.autocompleteQuery}
-                        valueKey="shortName"
-                        addon={ORGANIZATIONS_ICON}
+                        relatedObjects={values.hostRelatedObjects}
+                        objectType={ENTITY_TYPES.ORGANIZATIONS}
+                        entityTypes={[
+                          ENTITY_TYPES.ORGANIZATIONS,
+                          ENTITY_TYPES.POSITIONS,
+                          ENTITY_TYPES.PEOPLE
+                        ]}
+                        setRelatedObjects={value =>
+                          setFieldValue("hostRelatedObjects", value)
+                        }
+                        showDelete
                       />
                     }
                   />
@@ -377,7 +377,9 @@ const EventSeriesForm = ({
     )
     // strip tasks fields not in data model
     eventSeries.ownerOrg = utils.getReference(eventSeries.ownerOrg)
-    eventSeries.hostOrg = utils.getReference(eventSeries.hostOrg)
+    eventSeries.hostRelatedObjects = eventSeries.hostRelatedObjects.map(ro =>
+      Object.without(ro, "relatedObject")
+    )
     eventSeries.adminOrg = utils.getReference(eventSeries.adminOrg)
     return API.mutation(
       edit ? GQL_UPDATE_EVENTSERIES : GQL_CREATE_EVENTSERIES,

@@ -19,9 +19,6 @@ const GQL_GET_EVENT_SERIES_LIST = gql`
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }

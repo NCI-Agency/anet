@@ -5,23 +5,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Event;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
 import mil.dds.anet.database.mappers.EventMapper;
+import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.pg.PostgresqlEventSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery> {
 
   private static final String[] fields = {"uuid", "status", "eventTypeUuid", "name", "description",
-      "ownerOrgUuid", "hostOrgUuid", "adminOrgUuid", "eventSeriesUuid", "locationUuid", "startDate",
-      "endDate", "outcomes", "createdAt", "updatedAt"};
+      "ownerOrgUuid", "adminOrgUuid", "eventSeriesUuid", "locationUuid", "startDate", "endDate",
+      "outcomes", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "events";
   public static final String EVENT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
@@ -87,6 +91,27 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
     }
   }
 
+  class EventHostRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
+    private static final String SQL =
+        "/* batch.getEventHostRelatedObjects */ SELECT * FROM \"eventHostRelatedObjects\" "
+            + "WHERE \"eventUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
+
+    public EventHostRelatedObjectsBatcher() {
+      super(EventDao.this.databaseHandler, SQL, "foreignKeys",
+          new GenericRelatedObjectMapper("eventUuid"), "eventUuid");
+    }
+  }
+
+  public List<List<GenericRelatedObject>> getEventHostRelatedObjects(List<String> foreignKeys) {
+    return new EventDao.EventHostRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
+      Event event) {
+    return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
+        FkDataLoaderKey.EVENT_EVENT_HOST_RELATED_OBJECTS, event.getUuid());
+  }
+
   public List<List<Task>> getTasks(List<String> foreignKeys) {
     return new TasksBatcher().getByForeignKeys(foreignKeys);
   }
@@ -122,10 +147,10 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
     try {
       handle.createUpdate(
           "/* insertEvents */ INSERT INTO events (uuid, status, \"eventTypeUuid\", name, description, "
-              + "\"startDate\", \"endDate\", outcomes, \"ownerOrgUuid\", \"hostOrgUuid\","
+              + "\"startDate\", \"endDate\", outcomes, \"ownerOrgUuid\","
               + " \"adminOrgUuid\", \"eventSeriesUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\") "
               + "VALUES (:uuid, :status, :eventTypeUuid, :name, :description, "
-              + ":startDate, :endDate, :outcomes, :ownerOrgUuid, :hostOrgUuid, "
+              + ":startDate, :endDate, :outcomes, :ownerOrgUuid, "
               + ":adminOrgUuid, :eventSeriesUuid, :locationUuid, :createdAt, :updatedAt)")
           .bindBean(event).bind("createdAt", DaoUtils.asLocalDateTime(event.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(event.getUpdatedAt()))
@@ -134,7 +159,6 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
           .bind("status", DaoUtils.getEnumId(event.getStatus()))
           .bind("eventTypeUuid", DaoUtils.getUuid(event.getEventType()))
           .bind("ownerOrgUuid", DaoUtils.getUuid(event.getOwnerOrg()))
-          .bind("hostOrgUuid", DaoUtils.getUuid(event.getHostOrg()))
           .bind("adminOrgUuid", DaoUtils.getUuid(event.getAdminOrg()))
           .bind("eventSeriesUuid", DaoUtils.getUuid(event.getEventSeries()))
           .bind("locationId", DaoUtils.getUuid(event.getLocation())).execute();
@@ -152,7 +176,9 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
       if (event.getPeople() != null) {
         rb.insertEventPeople(event.getUuid(), event.getPeople());
       }
-
+      if (event.getHostRelatedObjects() != null && !event.getHostRelatedObjects().isEmpty()) {
+        rb.insertEventHostRelatedObjects(event.getUuid(), event.getHostRelatedObjects());
+      }
       return event;
     } finally {
       closeDbHandle(handle);
@@ -169,16 +195,30 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
 
     @SqlBatch("INSERT INTO \"eventPeople\" (\"eventUuid\", \"personUuid\") VALUES (:eventUuid, :uuid)")
     void insertEventPeople(@Bind("eventUuid") String eventUuid, @BindBean List<Person> people);
+
+    @SqlBatch("INSERT INTO \"eventHostRelatedObjects\""
+        + " (\"eventUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
+        + " VALUES (:eventUuid, :relatedObjectType, :relatedObjectUuid)")
+    void insertEventHostRelatedObjects(@Bind("eventUuid") String eventUuid,
+        @BindBean List<GenericRelatedObject> eventHostRelatedObjects);
+
+    @SqlUpdate("DELETE FROM \"eventHostRelatedObjects\" WHERE \"eventUuid\" = :eventUuid")
+    void deleteEventHostRelatedObjects(@Bind("eventUuid") String eventUuid);
   }
 
   @Override
   public int updateInternal(Event event) {
     final Handle handle = getDbHandle();
     try {
+      final EventDao.EventBatch eb = handle.attach(EventDao.EventBatch.class);
+      eb.deleteEventHostRelatedObjects(DaoUtils.getUuid(event)); // seems the easiest thing to do
+      if (!Utils.isEmptyOrNull(event.getHostRelatedObjects())) {
+        eb.insertEventHostRelatedObjects(DaoUtils.getUuid(event), event.getHostRelatedObjects());
+      }
       return handle.createUpdate("/* updateEvent */ UPDATE events "
           + "SET status = :status, \"eventTypeUuid\" = :eventTypeUuid, name = :name, description = :description, "
           + "\"startDate\" = :startDate, \"endDate\" = :endDate, outcomes = :outcomes, "
-          + "\"ownerOrgUuid\" = :ownerOrgUuid, \"hostOrgUuid\" = :hostOrgUuid, "
+          + "\"ownerOrgUuid\" = :ownerOrgUuid, "
           + "\"adminOrgUuid\" = :adminOrgUuid, \"eventSeriesUuid\" = :eventSeriesUuid, "
           + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(event).bind("updatedAt", DaoUtils.asLocalDateTime(event.getUpdatedAt()))
@@ -187,9 +227,7 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
           .bind("status", DaoUtils.getEnumId(event.getStatus()))
           .bind("eventTypeUuid", DaoUtils.getUuid(event.getEventType()))
           .bind("ownerOrgUuid", DaoUtils.getUuid(event.getOwnerOrg()))
-          .bind("hostOrgUuid", DaoUtils.getUuid(event.getHostOrg()))
           .bind("adminOrgUuid", DaoUtils.getUuid(event.getAdminOrg()))
-          .bind("eventSeriesUuid", DaoUtils.getUuid(event.getEventSeries()))
           .bind("eventSeriesUuid", DaoUtils.getUuid(event.getEventSeries()))
           .bind("locationUuid", DaoUtils.getUuid(event.getLocation())).execute();
     } finally {

@@ -2,7 +2,8 @@ import {
   gqlAllAttachmentFields,
   gqlAllEventSeriesFields,
   gqlEntityAvatarFields,
-  gqlEntityFieldsMap
+  gqlEntityFieldsMap,
+  gqlHostMembers
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import Model from "components/Model"
@@ -29,7 +30,7 @@ export default class EventSeries extends Model {
     name: yup.string().required().default(""),
     description: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
-    hostOrg: yup.object().nullable().default(null),
+    hostRelatedObjects: yup.array().nullable().default([]),
     adminOrg: yup.object().nullable().default(null)
   })
 
@@ -38,9 +39,7 @@ export default class EventSeries extends Model {
     ownerOrg {
       ${gqlEntityFieldsMap.Organization}
     }
-    hostOrg {
-      ${gqlEntityFieldsMap.Organization}
-    }
+    ${gqlHostMembers}
     adminOrg {
       ${gqlEntityFieldsMap.Organization}
     }
@@ -54,9 +53,7 @@ export default class EventSeries extends Model {
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
+        ${gqlHostMembers}
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }

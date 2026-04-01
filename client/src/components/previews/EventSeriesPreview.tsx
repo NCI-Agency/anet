@@ -1,6 +1,7 @@
 import API from "api"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
+import EventHostMembersTable from "components/EventHostMembersTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { PreviewTitle } from "components/previews/PreviewTitle"
@@ -51,10 +52,8 @@ const EventSeriesPreview = ({ className, uuid }: EventSeriesPreviewProps) => {
         />
         <DictionaryField
           wrappedComponent={PreviewField}
-          dictProps={Settings.fields.eventSeries.hostOrg}
-          value={
-            <LinkTo modelType="Organization" model={eventSeries.hostOrg} />
-          }
+          dictProps={Settings.fields.eventSeries.hostRelatedObjects}
+          value={<EventHostMembersTable entity={eventSeries} />}
         />
         <DictionaryField
           wrappedComponent={PreviewField}

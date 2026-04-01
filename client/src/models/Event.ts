@@ -3,6 +3,7 @@ import {
   gqlAllEventFields,
   gqlEntityAvatarFields,
   gqlEntityFieldsMap,
+  gqlHostMembers,
   gqlMinimalEventTypeFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
@@ -51,7 +52,7 @@ export default class Event extends Model {
       .default(null),
     outcomes: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
-    hostOrg: yup.object().nullable().default(null),
+    hostRelatedObjects: yup.array().nullable().default([]),
     adminOrg: yup.object().nullable().default(null),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),
@@ -95,9 +96,7 @@ export default class Event extends Model {
         ownerOrg {
           ${gqlEntityFieldsMap.Organization}
         }
-        hostOrg {
-          ${gqlEntityFieldsMap.Organization}
-        }
+        ${gqlHostMembers}
         adminOrg {
           ${gqlEntityFieldsMap.Organization}
         }
