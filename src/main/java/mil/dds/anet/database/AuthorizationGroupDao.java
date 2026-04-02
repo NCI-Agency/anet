@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.beans.GenericRelatedObject;
+import mil.dds.anet.beans.AuthorizationGroupRelatedObject;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
-import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
+import mil.dds.anet.database.mappers.AuthorizationGroupRelatedObjectMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.pg.PostgresqlAuthorizationGroupSearcher;
 import mil.dds.anet.utils.DaoUtils;
@@ -113,7 +113,7 @@ public class AuthorizationGroupDao
         + " VALUES (:authorizationGroupUuid, :relatedObjectType, :relatedObjectUuid, :priority)")
     void insertAuthorizationGroupRelatedObjects(
         @Bind("authorizationGroupUuid") String authorizationGroupUuid,
-        @BindBean List<GenericRelatedObject> authorizationGroupRelatedObjects);
+        @BindBean List<AuthorizationGroupRelatedObject> authorizationGroupRelatedObjects);
 
     @SqlUpdate("DELETE FROM \"authorizationGroupRelatedObjects\""
         + " WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid")
@@ -184,25 +184,28 @@ public class AuthorizationGroupDao
     }
   }
 
-  class AuthorizationGroupRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
+  class AuthorizationGroupRelatedObjectsBatcher
+      extends ForeignKeyBatcher<AuthorizationGroupRelatedObject> {
     private static final String SQL =
         "/* batch.getAuthorizationGroupRelatedObjects */ SELECT * FROM \"authorizationGroupRelatedObjects\" "
-            + "WHERE \"authorizationGroupUuid\" IN ( <foreignKeys> ) ORDER BY priority NULLS LAST, \"relatedObjectType\", \"relatedObjectUuid\" ASC";
+            + "WHERE \"authorizationGroupUuid\" IN ( <foreignKeys> ) "
+            + "ORDER BY priority NULLS LAST, \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public AuthorizationGroupRelatedObjectsBatcher() {
       super(AuthorizationGroupDao.this.databaseHandler, SQL, "foreignKeys",
-          new GenericRelatedObjectMapper("authorizationGroupUuid"), "authorizationGroupUuid");
+          new AuthorizationGroupRelatedObjectMapper("authorizationGroupUuid"),
+          "authorizationGroupUuid");
     }
   }
 
-  public List<List<GenericRelatedObject>> getAuthorizationGroupRelatedObjects(
+  public List<List<AuthorizationGroupRelatedObject>> getAuthorizationGroupRelatedObjects(
       List<String> foreignKeys) {
     return new AuthorizationGroupRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
-      AuthorizationGroup authorizationGroup) {
-    return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
+  public CompletableFuture<List<AuthorizationGroupRelatedObject>> getRelatedObjects(
+      GraphQLContext context, AuthorizationGroup authorizationGroup) {
+    return new ForeignKeyFetcher<AuthorizationGroupRelatedObject>().load(context,
         FkDataLoaderKey.AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS,
         authorizationGroup.getUuid());
   }

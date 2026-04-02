@@ -13,6 +13,7 @@ import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.AuditTrail;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.AuthorizationGroupRelatedObject;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.EmailAddress;
@@ -155,7 +156,7 @@ public final class BatchingUtils {
     dataLoaderRegistry.register(
         FkDataLoaderKey.AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+            (BatchLoader<String, List<AuthorizationGroupRelatedObject>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getAuthorizationGroupDao()
                     .getAuthorizationGroupRelatedObjects(foreignKeys), dispatcherService),
             dataLoaderOptions));

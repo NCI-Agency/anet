@@ -20,7 +20,7 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
   @GraphQLInputField
   private String description;
   // annotated below
-  private List<GenericRelatedObject> authorizationGroupRelatedObjects;
+  private List<AuthorizationGroupRelatedObject> authorizationGroupRelatedObjects;
   // annotated below
   private List<Position> administrativePositions;
   @GraphQLQuery
@@ -50,7 +50,7 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
   }
 
   @GraphQLQuery(name = "authorizationGroupRelatedObjects")
-  public CompletableFuture<List<GenericRelatedObject>> loadAuthorizationGroupRelatedObjects(
+  public CompletableFuture<List<AuthorizationGroupRelatedObject>> loadAuthorizationGroupRelatedObjects(
       @GraphQLRootContext GraphQLContext context) {
     if (authorizationGroupRelatedObjects != null) {
       return CompletableFuture.completedFuture(authorizationGroupRelatedObjects);
@@ -62,11 +62,12 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
   }
 
   @GraphQLInputField(name = "authorizationGroupRelatedObjects")
-  public void setAuthorizationGroupRelatedObjects(List<GenericRelatedObject> relatedObjects) {
+  public void setAuthorizationGroupRelatedObjects(
+      List<AuthorizationGroupRelatedObject> relatedObjects) {
     this.authorizationGroupRelatedObjects = relatedObjects;
   }
 
-  public List<GenericRelatedObject> getAuthorizationGroupRelatedObjects() {
+  public List<AuthorizationGroupRelatedObject> getAuthorizationGroupRelatedObjects() {
     return authorizationGroupRelatedObjects;
   }
 

@@ -11,8 +11,8 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
+import mil.dds.anet.test.client.AuthorizationGroupRelatedObjectInput;
 import mil.dds.anet.test.client.AuthorizationGroupSearchQueryInput;
-import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
@@ -168,11 +168,14 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
         .withAdministrativePositions(
             getPositionsInput(List.of(admin.getPosition(), getSuperuser().getPosition())))
         .withAuthorizationGroupRelatedObjects(List.of(
-            GenericRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
+            AuthorizationGroupRelatedObjectInput.builder()
+                .withRelatedObjectType(PositionDao.TABLE_NAME)
                 .withRelatedObjectUuid(getRegularUser().getPosition().getUuid()).build(),
-            GenericRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
-                .withRelatedObjectUuid(noposPersonUuid).build(),
-            GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
+            AuthorizationGroupRelatedObjectInput.builder()
+                .withRelatedObjectType(PersonDao.TABLE_NAME).withRelatedObjectUuid(noposPersonUuid)
+                .build(),
+            AuthorizationGroupRelatedObjectInput.builder()
+                .withRelatedObjectType(OrganizationDao.TABLE_NAME)
                 .withRelatedObjectUuid(admin.getPosition().getOrganization().getUuid()).build()))
         .build();
   }
