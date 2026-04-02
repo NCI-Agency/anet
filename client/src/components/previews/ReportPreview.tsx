@@ -285,17 +285,20 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
           </>
         )}
 
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.report.reportCommunities}
-          extraColForValue
-          value={
-            <AuthorizationGroupTable
-              authorizationGroups={report.reportCommunities}
-              noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
-            />
-          }
-        />
+        {report.reportCommunities?.length > 0 && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.report.reportCommunities}
+            extraColForValue
+            value={
+              <AuthorizationGroupTable
+                authorizationGroups={report.reportCommunities}
+                noAuthorizationGroupsMessage={`No ${Settings.fields.report.reportCommunities?.label} selected`}
+              />
+            }
+            hideIfEmpty
+          />
+        )}
       </div>
       <h4>
         {report.isFuture()

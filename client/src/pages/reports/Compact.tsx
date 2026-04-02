@@ -312,18 +312,20 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 hideIfEmpty
               />
             )}
-            <DictionaryField
-              wrappedComponent={CompactRow}
-              dictProps={Settings.fields.report.reportCommunities}
-              content={
-                <AuthorizationGroupTable
-                  id="reportCommunities"
-                  authorizationGroups={report.reportCommunities}
-                />
-              }
-              className="reportField"
-              hideIfEmpty
-            />
+            {report.reportCommunities?.length > 0 && (
+              <DictionaryField
+                wrappedComponent={CompactRow}
+                dictProps={Settings.fields.report.reportCommunities}
+                content={
+                  <AuthorizationGroupTable
+                    id="reportCommunities"
+                    authorizationGroups={report.reportCommunities}
+                  />
+                }
+                className="reportField"
+                hideIfEmpty
+              />
+            )}
             {optionalFields.workflow.active &&
               report.showWorkflow() &&
               !!report.workflow.length && (
