@@ -463,41 +463,40 @@ const OrganizationForm = ({
                         dictProps={Settings.fields.organization.location}
                         name="location"
                         component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("location", value)
+                        }}
                         widget={
-                          <>
-                            <AdvancedSingleSelect
-                              fieldName="location"
-                              placeholder={
-                                Settings.fields.organization.location
-                                  .placeholder
-                              }
-                              value={values.location}
-                              overlayColumns={["Name"]}
-                              overlayTable={HierarchicalLocationOverlayTable}
-                              restrictSelectableItems
-                              filterDefs={locationFilters}
-                              objectType={Location}
-                              fields={locationFields}
-                              valueKey="name"
-                              onChange={value => {
-                                // validation will be done by setFieldValue
-                                setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                                setFieldValue("location", value)
+                          <AdvancedSingleSelect
+                            fieldName="location"
+                            placeholder={
+                              Settings.fields.organization.location.placeholder
+                            }
+                            value={values.location}
+                            overlayColumns={["Name"]}
+                            overlayTable={HierarchicalLocationOverlayTable}
+                            restrictSelectableItems
+                            filterDefs={locationFilters}
+                            objectType={Location}
+                            fields={locationFields}
+                            valueKey="name"
+                            addon={LOCATIONS_ICON}
+                            pageSize={0}
+                          />
+                        }
+                        extraWidgets={
+                          <div className="mt-3">
+                            <LeafletWithSelection
+                              mapId="organization-location"
+                              location={values.location}
+                              onSelectAnetLocation={(loc: any) => {
+                                setFieldTouched("location", true, false)
+                                setFieldValue("location", loc, true)
                               }}
-                              addon={LOCATIONS_ICON}
-                              pageSize={0}
                             />
-                            <div className="mt-3">
-                              <LeafletWithSelection
-                                mapId="organization-location"
-                                location={values.location}
-                                onSelectAnetLocation={(loc: any) => {
-                                  setFieldTouched("location", true, false)
-                                  setFieldValue("location", loc, true)
-                                }}
-                              />
-                            </div>
-                          </>
+                          </div>
                         }
                       />
                       <DictionaryField

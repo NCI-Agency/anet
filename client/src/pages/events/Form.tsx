@@ -407,52 +407,50 @@ const EventForm = ({
                     dictProps={Settings.fields.event.location}
                     name="location"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("location", value, true)
+                    }}
                     widget={
-                      <>
-                        <AdvancedSingleSelect
-                          fieldName="location"
-                          placeholder={
-                            Settings.fields.event.location.placeholder
-                          }
-                          value={values.location}
-                          overlayColumns={["Name"]}
-                          overlayTable={HierarchicalLocationOverlayTable}
-                          restrictSelectableItems
-                          filterDefs={locationFilters}
-                          objectType={Location}
-                          fields={locationFields}
-                          valueKey="name"
-                          onChange={value => {
-                            // validation will be done by setFieldValue
-                            setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                            setFieldValue("location", value, true)
+                      <AdvancedSingleSelect
+                        fieldName="location"
+                        placeholder={Settings.fields.event.location.placeholder}
+                        value={values.location}
+                        overlayColumns={["Name"]}
+                        overlayTable={HierarchicalLocationOverlayTable}
+                        restrictSelectableItems
+                        filterDefs={locationFilters}
+                        objectType={Location}
+                        fields={locationFields}
+                        valueKey="name"
+                        addon={LOCATIONS_ICON}
+                        pageSize={0}
+                        createEntityComponent={
+                          !canCreateLocation
+                            ? null
+                            : (searchTerms, setDoReset) => (
+                                <CreateNewLocation
+                                  name={searchTerms}
+                                  setFieldTouched={setFieldTouched}
+                                  setFieldValue={setFieldValue}
+                                  setDoReset={setDoReset}
+                                />
+                              )
+                        }
+                      />
+                    }
+                    extraWidgets={
+                      <div className="mt-3">
+                        <LeafletWithSelection
+                          mapId="event-location"
+                          location={values.location}
+                          onSelectAnetLocation={(loc: any) => {
+                            setFieldTouched("location", true, false)
+                            setFieldValue("location", loc, true)
                           }}
-                          addon={LOCATIONS_ICON}
-                          pageSize={0}
-                          createEntityComponent={
-                            !canCreateLocation
-                              ? null
-                              : (searchTerms, setDoReset) => (
-                                  <CreateNewLocation
-                                    name={searchTerms}
-                                    setFieldTouched={setFieldTouched}
-                                    setFieldValue={setFieldValue}
-                                    setDoReset={setDoReset}
-                                  />
-                                )
-                          }
                         />
-                        <div className="mt-3">
-                          <LeafletWithSelection
-                            mapId="event-location"
-                            location={values.location}
-                            onSelectAnetLocation={(loc: any) => {
-                              setFieldTouched("location", true, false)
-                              setFieldValue("location", loc, true)
-                            }}
-                          />
-                        </div>
-                      </>
+                      </div>
                     }
                   />
                   <DictionaryField
