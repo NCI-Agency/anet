@@ -32,7 +32,8 @@ const DictionaryField = ({
         dictProps,
         "exclude",
         "optional",
-        "authorizationGroupUuids"
+        "authorizationGroupUuids",
+        "allCaps"
       )}
       {...otherProps}
     />
