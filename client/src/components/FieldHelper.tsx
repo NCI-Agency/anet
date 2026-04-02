@@ -352,7 +352,8 @@ interface SpecialFieldProps {
   extraColElem?: any
   addon?: React.ReactNode
   vertical?: boolean
-  widget?: any
+  widget: React.ReactElement
+  extraWidgets?: React.ReactNode
   isCompact?: boolean
 }
 
@@ -365,6 +366,7 @@ export const SpecialField = ({
   addon,
   vertical,
   widget,
+  extraWidgets,
   isCompact,
   ...otherProps
 }: SpecialFieldProps) => {
@@ -382,7 +384,12 @@ export const SpecialField = ({
       field={field}
       form={form}
       label={label}
-      widgetElem={widgetElem}
+      widgetElem={
+        <>
+          {widgetElem}
+          {extraWidgets}
+        </>
+      }
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}

@@ -738,59 +738,59 @@ const ReportForm = ({
                     dictProps={Settings.fields.report.location}
                     name="location"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("location", value, true)
+                      setLocationUuid(value?.uuid)
+                    }}
                     widget={
-                      <>
-                        <AdvancedSingleSelect
-                          fieldName="location"
-                          placeholder={
-                            Settings.fields.report.location.placeholder
-                          }
-                          value={values.location}
-                          overlayColumns={["Name"]}
-                          overlayTable={HierarchicalLocationOverlayTable}
-                          restrictSelectableItems
-                          filterDefs={locationFilters}
-                          objectType={Location}
-                          fields={locationFields}
-                          valueKey="name"
-                          addon={LOCATIONS_ICON}
-                          pageSize={0}
-                          onChange={value => {
-                            // validation will be done by setFieldValue
-                            setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                            setFieldValue("location", value, true)
-                            setLocationUuid(value?.uuid)
+                      <AdvancedSingleSelect
+                        fieldName="location"
+                        placeholder={
+                          Settings.fields.report.location.placeholder
+                        }
+                        value={values.location}
+                        overlayColumns={["Name"]}
+                        overlayTable={HierarchicalLocationOverlayTable}
+                        restrictSelectableItems
+                        filterDefs={locationFilters}
+                        objectType={Location}
+                        fields={locationFields}
+                        valueKey="name"
+                        addon={LOCATIONS_ICON}
+                        pageSize={0}
+                        createEntityComponent={
+                          !canCreateLocation
+                            ? null
+                            : (searchTerms, setDoReset) => (
+                                <CreateNewLocation
+                                  name={searchTerms}
+                                  setFieldTouched={setFieldTouched}
+                                  setFieldValue={setFieldValue}
+                                  setDoReset={setDoReset}
+                                />
+                              )
+                        }
+                      />
+                    }
+                    extraWidgets={
+                      <div className="mt-3">
+                        <LeafletWithSelection
+                          mapId="report-location"
+                          location={values.location}
+                          onSelectAnetLocation={(loc: any) => {
+                            setFieldTouched("location", true, false)
+                            setFieldValue("location", loc, true)
+                            setLocationUuid(loc.uuid)
                           }}
-                          createEntityComponent={
-                            !canCreateLocation
-                              ? null
-                              : (searchTerms, setDoReset) => (
-                                  <CreateNewLocation
-                                    name={searchTerms}
-                                    setFieldTouched={setFieldTouched}
-                                    setFieldValue={setFieldValue}
-                                    setDoReset={setDoReset}
-                                  />
-                                )
-                          }
+                          allowCreateLocation={canCreateLocation}
+                          onCreateLocation={({ lat, lng }) => {
+                            setNewLocationCoords({ lat, lng })
+                            setShowCreateLocationModal(true)
+                          }}
                         />
-                        <div className="mt-3">
-                          <LeafletWithSelection
-                            mapId="report-location"
-                            location={values.location}
-                            onSelectAnetLocation={(loc: any) => {
-                              setFieldTouched("location", true, false)
-                              setFieldValue("location", loc, true)
-                              setLocationUuid(loc.uuid)
-                            }}
-                            allowCreateLocation={canCreateLocation}
-                            onCreateLocation={({ lat, lng }) => {
-                              setNewLocationCoords({ lat, lng })
-                              setShowCreateLocationModal(true)
-                            }}
-                          />
-                        </div>
-                      </>
+                      </div>
                     }
                     extraColElem={
                       <>
