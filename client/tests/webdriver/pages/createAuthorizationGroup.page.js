@@ -50,9 +50,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getRelatedObjectsInput() {
-    return browser.$(
-      '.related_objects input[name="authorizationGroupRelatedObjects"]'
-    )
+    return browser.$('.related_objects input[name="entitySelect"]')
   }
 
   async getRelatedObjectsTable() {
@@ -66,13 +64,11 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getRelatedObjectsAdvancedSelectFirstItem() {
-    return browser.$(
-      "#authorizationGroupRelatedObjects-popover tbody tr:first-child"
-    )
+    return browser.$("#entitySelect-popover tbody tr:first-child")
   }
 
   async getAdministrativePositionsInput() {
-    return browser.$("#administrativePositions")
+    return browser.$('input[name="administrativePositions"]')
   }
 
   async getAdministrativePositionsTable() {
@@ -86,9 +82,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getAdministrativePositionsAdvancedSelectFirstItem() {
-    return browser.$(
-      "#administrativePositions-popover tbody tr:first-child td:nth-child(2) span"
-    )
+    return browser.$("#administrativePositions-popover tbody tr:first-child")
   }
 
   async getSubmitButton() {
