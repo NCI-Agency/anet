@@ -5,6 +5,7 @@ type AccessToken {
   description: String
   expiresAt: Instant
   name: String
+  pointOfContact: String
   scope: TokenScope
   tokenHash: String
   updatedAt: Instant
@@ -24,6 +25,7 @@ input AccessTokenInput {
   description: String
   expiresAt: Instant
   name: String
+  pointOfContact: String
   scope: TokenScope
   tokenHash: String
   updatedAt: Instant
