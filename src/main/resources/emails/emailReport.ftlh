@@ -400,6 +400,7 @@
 <#import "common/listItems.ftlh" as li>
 <#import "common/formatDate.ftlh" as fd>
 <#import "common/breadcrumbTrail.ftlh" as bt>
+<#assign Utils = statics["mil.dds.anet.utils.Utils"]>
 
 <#if sender??>
   <p style="color: #555555;">
@@ -610,7 +611,6 @@
       </#if>
 
       <#macro renderAttachment attachment>
-        <#assign Utils = statics["mil.dds.anet.utils.Utils"]>
         <#assign confidentialityLabel = Utils.getAttachmentConfidentialityLabel(dict, attachment)>
         <div class="attachment-card">
           <div class="card">
