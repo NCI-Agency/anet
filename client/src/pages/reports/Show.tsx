@@ -517,7 +517,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                 <Fieldset className="show-report-overview">
                   <FieldHelper.SpecialField
                     label="Summary"
-                    field={{ name: "summary" }}
+                    field={{ name: "report-summary" }}
                     widget={
                       <div id="report-summary">
                         <DictionaryField

@@ -2,9 +2,18 @@ package mil.dds.anet.beans;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class ReportPerson extends Person {
+
+  public static final Comparator<ReportPerson> COMPARATOR =
+      Comparator.comparing(ReportPerson::isAttendee, Comparator.reverseOrder())
+          .thenComparing(ReportPerson::isInterlocutor)
+          .thenComparing(ReportPerson::isPrimary, Comparator.reverseOrder())
+          .thenComparing(ReportPerson::isAuthor, Comparator.reverseOrder())
+          .thenComparing(ReportPerson::getFamilyName).thenComparing(ReportPerson::getGivenName)
+          .thenComparing(ReportPerson::getUuid);
 
   @GraphQLQuery
   @GraphQLInputField
@@ -73,5 +82,4 @@ public class ReportPerson extends Person {
   public int hashCode() {
     return Objects.hash(super.hashCode(), primary, author, attendee, interlocutor);
   }
-
 }

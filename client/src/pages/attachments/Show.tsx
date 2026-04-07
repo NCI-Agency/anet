@@ -75,7 +75,7 @@ const AttachmentShow = ({ pageDispatchers }: AttachmentShowProps) => {
     currentUser.isAdmin() ||
     (!Settings.fields.attachment.restrictToAdmins &&
       currentUser.uuid === attachment.author.uuid)
-  const { iconSize, iconImage, contentMissing } =
+  const { iconImage, contentMissing } =
     utils.getAttachmentIconDetails(attachment)
   const searchText = [attachment.caption, attachment.fileName].join(" ")
   const action = (
@@ -114,7 +114,6 @@ const AttachmentShow = ({ pageDispatchers }: AttachmentShowProps) => {
                 uuid={attachment.uuid}
                 caption={attachment.caption}
                 contentMissing={contentMissing}
-                iconSize={iconSize}
                 iconImage={iconImage}
               />
             </Col>

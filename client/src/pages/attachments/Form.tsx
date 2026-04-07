@@ -75,7 +75,7 @@ const AttachmentForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const { iconSize, iconImage } = utils.getAttachmentIconDetails(values)
+        const { iconImage } = utils.getAttachmentIconDetails(values)
         const action = (
           <>
             <Button
@@ -110,9 +110,6 @@ const AttachmentForm = ({
                     <img
                       className="image-preview info-show card-image attachment-image"
                       src={iconImage}
-                      width={iconSize}
-                      height={iconSize}
-                      style={{ objectFit: "contain" }}
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={10}>

@@ -44,7 +44,7 @@ public class Person extends AbstractEmailableAnetBean
     return SYSTEM_USER.equals(user);
   }
 
-  private static final Comparator<Person> COMPARATOR = Comparator.comparing(Person::getFamilyName)
+  public static final Comparator<Person> COMPARATOR = Comparator.comparing(Person::getFamilyName)
       .thenComparing(Person::getGivenName).thenComparing(Person::getUuid);
 
   @GraphQLQuery

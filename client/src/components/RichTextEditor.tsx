@@ -392,7 +392,8 @@ const deserialize = (el, markAttributes = {}) => {
 function isImageAttachment(entity: any) {
   return (
     entity instanceof Models.Attachment &&
-    entity?.mimeType?.startsWith("image/")
+    utils.isImage(entity) &&
+    utils.hasContent(entity)
   )
 }
 

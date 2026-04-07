@@ -38,19 +38,13 @@ const AttachmentCard = ({
   const computedCaptionStyle = captionStyle ?? {
     maxWidth: edit ? "201px" : "176px"
   }
-  const { iconSize, iconImage } = utils.getAttachmentIconDetails(
-    attachment,
-    true
-  )
+  const { iconImage } = utils.getAttachmentIconDetails(attachment)
 
   const image = (
     <img
       className="image-preview info-show card-image"
       src={iconImage}
       alt={attachment.caption}
-      width={iconSize}
-      height={iconSize}
-      style={{ objectFit: "contain" }}
     />
   )
   const divContents = onClick ? (

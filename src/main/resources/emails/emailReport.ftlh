@@ -1,3 +1,4 @@
+<#ftl encoding="utf-8">
 <html lang="en">
 <head>
   <style>
@@ -15,6 +16,9 @@
     p {
       margin: 0 0 10px;
     }
+    .col-2 {
+      width: 16.666667%;
+    }
     .col-sm-3, .col-sm-9 {
       float: left;
       position: relative;
@@ -22,6 +26,8 @@
     }
     .col-sm-3 {
       padding-right: 15px;
+    }
+    .col-sm-3, .col-3 {
       width: 25%;
     }
     .col-sm-9 {
@@ -30,11 +36,12 @@
     .form-group {
       clear: both;
     }
-    .form-control-static {
-      min-height: 34px;
-      padding-top: 7px;
-      padding-bottom: 7px;
-      margin-bottom: 0px;
+    .form-control-plaintext {
+      display: block;
+      width: 100%;
+      padding: 0.375rem 0;
+      margin-bottom: 0;
+      line-height: 1.5;
     }
     table {
       border-spacing: 0;
@@ -84,6 +91,54 @@
       color: #fff;
       background-color: #d9534f;
       border-color: #d43f3a;
+    }
+    .d-inline-flex {
+      display: inline-flex !important;
+    }
+    .flex-column {
+      flex-direction: column !important;
+    }
+    .align-middle {
+      vertical-align: middle !important;
+    }
+    .d-grid {
+      display: grid !important;
+    }
+    .d-block {
+      display: block !important;
+    }
+    .p-1 {
+      padding: 0.25rem !important;
+    }
+    .text-center {
+      text-align: center !important;
+    }
+    .h5 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      word-wrap: break-word;
+    }
+    .card-body {
+      flex: 1 1 auto;
+    }
+  </style>
+
+  <style>
+    /* minimal copies from bootstrapOverrides CSS: */
+    blockquote {
+      padding: 10px 20px;
+      margin: 0 0 20px;
+      font-size: 17.5px;
+      border-left: 5px solid #eeeeee;
     }
   </style>
 
@@ -140,10 +195,15 @@
       border: none !important;
     }
     table hr.attendee-divider {
-      margin: 0px;
+      margin: 0;
     }
-    .form-control-static {
+    .form-control-plaintext {
       margin-bottom: -11px;
+    }
+    .attachment-classification {
+      display: block;
+      font-size: 12px;
+      color: #445566;
     }
   </style>
 
@@ -192,7 +252,7 @@
 
     .workflow-fieldset .workflow-action .btn {
       border-radius: 30px;
-      margin: 10px 0px;
+      margin: 10px 0;
       width: 100%;
       position: relative;
     }
@@ -265,16 +325,81 @@
   </style>
 
   <style>
+    /* minimal copies from Attachment CSS: */
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+    }
+
+    .classification-line {
+      font-size: 12px;
+      color: #445566;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .info-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 120px;
+      object-fit: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0.10rem 0.10rem 0 0;
+    }
+
+    .card-icon {
+      width: 100%;
+      height: 120px;
+      font-size: 5rem;
+    }
+
+    .attachment-card-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .attachment-card {
+      flex: 0 0 calc(20%);
+      margin: 0 0 10px;
+      box-sizing: border-box;
+      position: relative;
+      text-align: center;
+    }
+  </style>
+
+  <style>
     /* some local overrides: */
     td {
       padding-left: 15px;
       padding-right: 15px;
     }
+
+    .attachment-icon {
+      font-size: 2rem;
+      vertical-align: middle;
+    }
+
+    .info-line {
+      max-width: 176px;
+    }
   </style>
 </head>
 <body>
 <#include "common/securityBanner.ftlh">
+<#import "common/listItems.ftlh" as li>
 <#import "common/formatDate.ftlh" as fd>
+<#import "common/breadcrumbTrail.ftlh" as bt>
 
 <#if sender??>
   <p style="color: #555555;">
@@ -305,22 +430,31 @@
 
     <fieldset class="show-report-overview">
       <div class="form-group">
-        <label for="intent" class="col-sm-3 form-label">Summary</label>
-        <div class="col-sm-9">
-          <div id="intent" class="form-control-static">
-            <p>
-              <strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}
-            </p>
-            <#if report.keyOutcomes??>
-              <#if fields.report.keyOutcomes??>
-                <p>
-                  <span><strong>${fields.report.keyOutcomes.label!}:</strong> ${(report.keyOutcomes)!}</span>
-                </p>
-              </#if>
+        <label for="report-summary" class="col-sm-3 form-label">Summary</label>
+        <div id="report-summary" class="col-sm-9">
+          <div>
+            <div class="row">
+              <label for="intent" class="col-sm-3 form-label">${fields.report.intent.label!}:</label>
+              <div id="intent" class="col-sm-9 form-control-plaintext">
+                ${(report.intent)!}
+              </div>
+            </div>
+            <#if !(fields.report.keyOutcomes.exclude!)>
+              <div class="row">
+                <label for="keyOutcomes" class="col-sm-3 form-label">${fields.report.keyOutcomes.label!}:</label>
+                <div id="keyOutcomes" class="col-sm-9 form-control-plaintext">
+                  <@li.listItems value=report.keyOutcomes />
+                </div>
+              </div>
             </#if>
-            <p>
-              <strong>${fields.report.nextSteps.label!}:</strong> ${(report.nextSteps)!}
-            </p>
+            <#if !(fields.report.nextSteps.exclude!)>
+              <div class="row">
+                <label for="nextSteps" class="col-sm-3 form-label">${fields.report.nextSteps.label!}:</label>
+                <div id="nextSteps" class="col-sm-9 form-control-plaintext">
+                  <@li.listItems value=report.nextSteps />
+                </div>
+              </div>
+            </#if>
           </div>
         </div>
       </div>
@@ -328,7 +462,7 @@
       <div class="form-group">
         <label for="engagementDate" class="col-sm-3 form-label">${fields.report.engagementDate.label!}</label>
         <div class="col-sm-9">
-          <div id="engagementDate" class="form-control-static">
+          <div id="engagementDate" class="form-control-plaintext">
             <@fd.formatDate dateFormatter=engagementDateFormatter timestamp=report.engagementDate />
           </div>
         </div>
@@ -338,7 +472,7 @@
         <div class="form-group">
           <label for="duration" class="col-sm-3 form-label">${fields.report.duration.label!}</label>
           <div class="col-sm-9">
-            <div id="duration" class="form-control-static">
+            <div id="duration" class="form-control-plaintext">
               ${(report.duration)!}
             </div>
           </div>
@@ -346,88 +480,9 @@
       </#if>
 
       <div class="form-group">
-        <label for="event" class="col-sm-3 form-label">${fields.report.event.label!}</label>
+        <label for="author" class="col-sm-3 form-label">Authors</label>
         <div class="col-sm-9">
-          <div id="event" class="form-control-static">
-            <#assign event = (report.loadEvent(context).get())!>
-            <#if event.uuid??>
-              <a href="${serverUrl}/events/${event.uuid}">${(event.name)!}</a>
-            </#if>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="location" class="col-sm-3 form-label">${fields.report.location.label!}</label>
-        <div class="col-sm-9">
-          <div id="location" class="form-control-static">
-            <#assign location = (report.loadLocation(context).get())!>
-            <#if location.uuid??>
-              <a href="${serverUrl}/locations/${location.uuid}">${(location.name)!}</a>
-            </#if>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <#assign isCancelled = report.cancelledReason??>
-        <#if isCancelled>
-          <label for="cancelledReason" class="col-sm-3 form-label">Cancelled Reason</label>
-          <div class="col-sm-9">
-            <div id="cancelledReason" class="form-control-static">
-              ${report.cancelledReason?replace("_", " ")?lower_case?cap_first}
-            </div>
-          </div>
-        <#else>
-          <label for="atmosphere" class="col-sm-3 form-label">${fields.report.atmosphere.label!}</label>
-          <div class="col-sm-9">
-            <div id="atmosphere" class="form-control-static">
-              ${(report.atmosphere)!?capitalize} - ${(report.atmosphereDetails)!}
-            </div>
-          </div>
-        </#if>
-      </div>
-
-      <#assign reportCommunities = (report.loadReportCommunities(context).get())!>
-      <#if (reportCommunities?size > 0)>
-        <div class="form-group">
-          <label for="reportCommunities" class="col-sm-3 form-label">${fields.report.reportCommunities.label!}</label>
-          <div class="col-sm-9">
-            <div id="reportCommunities" class="form-control-static">
-              <table class="borderless table">
-                <thead>
-                  <tr>
-                    <th>
-                      Name
-                    </th>
-                    <th>
-                      Description
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <#list reportCommunities as reportCommunity>
-                  <tr>
-                    <td>
-                      <a href="${serverUrl}/communities/${reportCommunity.uuid}">${(reportCommunity.name)!}</a>
-                    </td>
-                    <td>
-                      ${(reportCommunity.description)!}
-                    </td>
-                  </tr>
-                  </#list>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </#if>
-
-      <div class="form-group">
-        <label for="author" class="col-sm-3 form-label">Report author</label>
-        <div class="col-sm-9">
-          <div id="author" class="form-control-static">
-            <#assign reportAuthors = (report.loadAuthors(context).get())!>
+          <div id="author" class="form-control-plaintext">
             <#list reportAuthors as reportAuthor>
               <a href="${serverUrl}/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
               <br>
@@ -439,10 +494,10 @@
       <div class="form-group">
         <label for="advisorOrg" class="col-sm-3 form-label">${fields.advisor.org.name!}</label>
         <div class="col-sm-9">
-          <div id="advisorOrg" class="form-control-static">
+          <div id="advisorOrg" class="form-control-plaintext">
             <#assign advisorOrg = (report.loadAdvisorOrg(context).get())!>
             <#if advisorOrg.uuid??>
-              <a href="${serverUrl}/organizations/${advisorOrg.uuid}">${(advisorOrg.shortName)!(advisorOrg.longName)!(advisorOrg.identificationCode)!}</a>
+              <a href="${serverUrl}/organizations/${advisorOrg.uuid}">${(advisorOrg.objectLabel)!}</a>
             </#if>
           </div>
         </div>
@@ -451,14 +506,153 @@
       <div class="form-group">
         <label for="interlocutorOrg" class="col-sm-3 form-label">${fields.interlocutor.org.name!}</label>
         <div class="col-sm-9">
-          <div id="interlocutorOrg" class="form-control-static">
+          <div id="interlocutorOrg" class="form-control-plaintext">
             <#assign interlocutorOrg = (report.loadInterlocutorOrg(context).get())!>
             <#if interlocutorOrg.uuid??>
-              <a href="${serverUrl}/organizations/${interlocutorOrg.uuid}">${(interlocutorOrg.shortName)!(interlocutorOrg.longName)!(interlocutorOrg.identificationCode)!}</a>
+              <a href="${serverUrl}/organizations/${interlocutorOrg.uuid}">${(interlocutorOrg.objectLabel)!}</a>
             </#if>
           </div>
         </div>
       </div>
+
+      <div class="form-group">
+        <label for="event" class="col-sm-3 form-label">${fields.report.event.label!}</label>
+        <div class="col-sm-9">
+          <div id="event" class="form-control-plaintext">
+            <#assign event = (report.loadEvent(context).get())!>
+            <#if event.uuid??>
+              <a href="${serverUrl}/events/${event.uuid}">${(event.objectLabel)!}</a>
+            </#if>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="location" class="col-sm-3 form-label">${fields.report.location.label!}</label>
+        <div class="col-sm-9">
+          <div id="location" class="form-control-plaintext">
+            <#assign location = (report.loadLocation(context).get())!>
+            <#if location.uuid??>
+              <a href="${serverUrl}/locations/${location.uuid}">${(location.objectLabel)!}</a>
+            </#if>
+          </div>
+        </div>
+      </div>
+
+      <#assign isCancelled = report.cancelledReason??>
+      <#if isCancelled>
+        <div class="form-group">
+          <label for="cancelledReason" class="col-sm-3 form-label">Cancelled Reason</label>
+          <div class="col-sm-9">
+            <div id="cancelledReason" class="form-control-plaintext">
+              ${report.cancelledReason?replace("_", " ")?lower_case?cap_first}
+            </div>
+          </div>
+        </div>
+      <#else>
+        <#if !(fields.report.atmosphere.exclude!)>
+          <div class="form-group">
+            <label for="atmosphere" class="col-sm-3 form-label">${fields.report.atmosphere.label!}</label>
+            <div class="col-sm-9">
+              <div id="atmosphere" class="form-control-plaintext">
+                ${(report.atmosphere)!?capitalize}
+              </div>
+            </div>
+          </div>
+        </#if>
+        <#if !(fields.report.atmosphereDetails.exclude!)>
+          <div class="form-group">
+            <label for="atmosphereDetails" class="col-sm-3 form-label">${fields.report.atmosphereDetails.label!}</label>
+            <div class="col-sm-9">
+              <div id="atmosphereDetails" class="form-control-plaintext">
+                ${(report.atmosphereDetails)!}
+              </div>
+            </div>
+          </div>
+        </#if>
+      </#if>
+
+      <#if !(fields.report.reportCommunities.exclude!)>
+        <#assign reportCommunities = (report.loadReportCommunities(context).get())!>
+        <#if (reportCommunities?size > 0)>
+          <div class="form-group">
+            <label for="reportCommunities" class="col-sm-3 form-label">${fields.report.reportCommunities.label!}</label>
+            <div class="col-sm-9">
+              <div id="reportCommunities" class="form-control-plaintext">
+                <table class="borderless table">
+                  <thead>
+                    <tr>
+                      <th>
+                        Name
+                      </th>
+                      <th>
+                        Description
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <#list reportCommunities as reportCommunity>
+                      <tr>
+                        <td>
+                          <a href="${serverUrl}/communities/${reportCommunity.uuid}">${(reportCommunity.objectLabel)!}</a>
+                        </td>
+                        <td>
+                          ${(reportCommunity.description)!}
+                        </td>
+                      </tr>
+                    </#list>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </#if>
+      </#if>
+
+      <#macro renderAttachment attachment>
+        <#assign Utils = statics["mil.dds.anet.utils.Utils"]>
+        <#assign confidentialityLabel = Utils.getAttachmentConfidentialityLabel(dict, attachment)>
+        <div class="attachment-card">
+          <div class="card">
+            <div class="classification-line">${confidentialityLabel!}</div>
+            <div class="d-grid text-center">
+              <a href="${serverUrl}/attachments/${attachment.uuid}">
+                <#if Utils.isImage(attachment) && Utils.hasContent(attachment)>
+                  <img class="card-image" src="${serverUrl}/api/attachment/view/${attachment.uuid}" alt="${attachment.objectLabel}" style="object-fit: contain;" />
+                <#else>
+                  <#assign icon = Utils.getAttachmentIcon(attachment)>
+                  <span class="card-icon">${icon}</span>
+                </#if>
+              </a>
+            </div>
+            <div class="p-1 d-block card-body">
+              <div class="info-line card-title h5" title="${attachment.objectLabel}">${attachment.objectLabel}</div>
+            </div>
+          </div>
+        </div>
+      </#macro>
+
+      <#macro renderAttachments attachments>
+        <#if (attachments?size > 0)>
+          <div class="form-group">
+            <label for="attachments" class="col-sm-3 form-label">Attachments</label>
+            <div class="col-sm-9">
+              <div id="attachments" class="form-control-plaintext">
+                <div class="attachment-card-list">
+                  <#list attachments as attachment>
+                    <@renderAttachment attachment=attachment />
+                  </#list>
+                </div>
+              </div>
+            </div>
+          </div>
+        </#if>
+      </#macro>
+
+      <#if !(fields.attachment.featureDisabled!)>
+        <#assign attachments = (report.loadAttachments(context).get())!>
+        <@renderAttachments attachments=attachments />
+      </#if>
     </fieldset>
   </div>
 
@@ -470,54 +664,88 @@
       <table class="borderless table">
         <thead>
           <tr>
-            <th style="text-align: center;">
-              Primary
-            </th>
             <th>
+            </th>
+            <th class="col-2">
+              Roles
+            </th>
+            <th class="col-3">
               Name
             </th>
-            <th>
+            <th class="col-3">
               Position
+            </th>
+            <th class="col-2">
+              Location
+            </th>
+            <th class="col-2">
+              Organization
             </th>
           </tr>
         </thead>
 
-        <#macro renderAttendee attendee>
+        <#macro renderReportPerson reportPerson showLabel label>
           <tr>
-            <td class="primary-attendee">
-              <div class="checkbox">
-                <label title=""><input readonly <#if attendee.primary>checked</#if> type="checkbox" onclick="return false;"></label>
-              </div>
+            <th style="border-top: none;">
+              <#if showLabel>${label!}</#if>
+            </th>
+            <td>
+              <#if reportPerson.attendee>
+                <#if reportPerson.primary><span class="badge bg-primary">Primary</span></#if>
+                <#if reportPerson.interlocutor>🌐<#else>👥</#if>
+              </#if>
+              <#if reportPerson.author>🖉</#if>
             </td>
             <td>
-              <a href="${serverUrl}/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
+              <a href="${serverUrl}/people/${reportPerson.uuid}">${(reportPerson.rank)!} ${(reportPerson.name)!}</a>
             </td>
+            <#assign position = (reportPerson.loadPositionByDate(context, report.engagementDate).get())!>
             <td>
-              <#assign position = (attendee.loadPositionByDate(context, report.engagementDate).get())!>
               <#if position.uuid??>
-                <a href="${serverUrl}/positions/${position.uuid}">${(position.name)!}</a>
+                <a href="${serverUrl}/positions/${position.uuid}">${(position.objectLabel)!}</a>
+              </#if>
+            </td>
+            <#assign location = (position.loadLocation(context).get())!>
+            <td>
+              <#if location.uuid??>
+                <a href="${serverUrl}/locations/${location.uuid}">${(location.objectLabel)!}</a>
+              </#if>
+            </td>
+            <#assign organization = (position.loadOrganization(context).get())!>
+            <td>
+              <#if organization.uuid??>
+                <a href="${serverUrl}/organizations/${organization.uuid}">${(organization.objectLabel)!}</a>
               </#if>
             </td>
           </tr>
         </#macro>
 
-        <tbody>
-          <#assign attendees = (report.loadAttendees(context).get())!>
-          <#list attendees as attendee>
-            <#if !attendee.interlocutor>
-              <@renderAttendee attendee />
-            </#if>
+        <#macro renderReportPeople reportPeople label>
+          <#list reportPeople as reportPerson>
+            <#assign showLabel = reportPerson?is_first>
+            <@renderReportPerson reportPerson showLabel label />
           </#list>
+        </#macro>
+
+        <tbody>
+          <#assign advisors = reportPeople?filter(a -> !a.interlocutor && a.attendee)>
+          <@renderReportPeople advisors "Advisors" />
           <tr>
-            <td colspan="3">
+            <td colspan="6">
               <hr class="attendee-divider">
             </td>
           </tr>
-          <#list attendees as attendee>
-            <#if attendee.interlocutor>
-              <@renderAttendee attendee />
-            </#if>
-          </#list>
+          <#assign interlocutors = reportPeople?filter(a -> a.interlocutor && a.attendee)>
+          <@renderReportPeople interlocutors "Interlocutors" />
+          <#assign nonAttending = reportPeople?filter(a -> !a.attendee)>
+          <#if (nonAttending?size > 0)>
+            <tr>
+              <td colspan="6">
+                <hr class="attendee-divider">
+              </td>
+            </tr>
+            <@renderReportPeople nonAttending "Non-attending" />
+        </#if>
         </tbody>
       </table>
     </fieldset>
@@ -540,11 +768,11 @@
           </thead>
           <tbody>
             <#list tasks as task>
-            <tr>
-              <td class="taskName">
-                <a href="${serverUrl}/tasks/${task.uuid}">${(task.shortName)!} - ${(task.longName)!}</a>
-              </td>
-            </tr>
+              <tr>
+                <td class="taskName">
+                  <@bt.breadcrumbTrail task />
+                </td>
+              </tr>
             </#list>
           </tbody>
         </table>
@@ -560,7 +788,7 @@
       <fieldset>
         <div>
           <p>
-            ${report.reportTextWithLinks?no_esc}
+            ${Utils.replaceAnetLinks(report.reportText)?no_esc}
           </p>
         </div>
       </fieldset>

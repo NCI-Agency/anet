@@ -5,6 +5,7 @@ import ModelTooltip from "components/ModelTooltip"
 import ModelPreview from "components/previews/ModelPreview"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
+import { Attachment } from "models"
 import React, { useContext } from "react"
 import { Link } from "react-router"
 
@@ -114,11 +115,12 @@ const LinkTo = ({
 
   // Icon
   const iconUrl = modelInstance.iconUrl()
+  const iconHeight = ModelClass === Attachment ? "2em" : "1em"
   const iconComponent = showIcon && !button && iconUrl && (
     <img
       src={iconUrl}
       alt=""
-      style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
+      style={{ marginLeft: 5, marginRight: 5, height: iconHeight }}
     />
   )
 
