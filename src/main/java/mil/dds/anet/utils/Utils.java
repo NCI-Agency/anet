@@ -907,7 +907,7 @@ public class Utils {
     return instant == null ? "-" : dateTimeFormatter.format(instant);
   }
 
-  public static String replaceAnetLinks(String htmlString) {
+  public static String replaceAnetLinks(String htmlString, boolean useCids) {
     final AnetDictionary dict = ApplicationContextProvider.getDictionary();
     final String anetServerUrl = ApplicationContextProvider.getConfig().getServerUrl();
     final Document reportDoc = Jsoup.parse(htmlString);
@@ -917,7 +917,7 @@ public class Utils {
           anchor.getElementsByAttributeValueStarting(HREF_ATTRIBUTE, ANET_LINK_PREFIX);
       anetLinks.forEach(anetLink -> {
         final TypeUuidTuple typeUuidTuple = replaceHref(anetLink, anetServerUrl);
-        replaceInnerHtml(anetLink, dict, anetServerUrl, typeUuidTuple.type());
+        replaceInnerHtml(anetLink, dict, anetServerUrl, useCids, typeUuidTuple.type());
       });
     });
     return reportDoc.body().html();
@@ -941,12 +941,12 @@ public class Utils {
   }
 
   private static void replaceInnerHtml(Element anetLink, AnetDictionary dict, String anetServerUrl,
-      String tableName) {
+      boolean useCids, String tableName) {
     final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(tableName);
     final TypeUuidTuple tut = getTypeUuidTuple(anetLink.html().split(":", 2));
     anetLink.empty();
-    anetLink.appendChildren(
-        getInnerNodes(daoEntityNameTuple.dao(), dict, anetServerUrl, tut.type(), tut.uuid()));
+    anetLink.appendChildren(getInnerNodes(daoEntityNameTuple.dao(), dict, anetServerUrl, useCids,
+        tut.type(), tut.uuid()));
   }
 
   private record DaoEntityNameTuple(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
@@ -977,7 +977,7 @@ public class Utils {
 
   private static Collection<? extends Node> getInnerNodes(
       AnetBaseDao<? extends AbstractAnetBean, ?> dao, AnetDictionary dict, String anetServerUrl,
-      String objectType, String objectUuid) {
+      boolean useCids, String objectType, String objectUuid) {
     if (dao != null) {
       final AbstractAnetBean obj = dao.getByUuid(objectUuid);
       if (obj == null) {
@@ -995,8 +995,7 @@ public class Utils {
           innerNode.appendChild(new Element(SPAN_TAG)
               .classNames(Set.of("rich-text-image-classification")).text(classification));
           innerNode.appendChild(new Element("img").classNames(Set.of("rich-text-image"))
-              .attr("src",
-                  String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid))
+              .attr("src", getAttachmentUrl(anetServerUrl, useCids, objectUuid))
               .attr("alt", label));
           innerNode.appendChild(
               new Element(SPAN_TAG).classNames(Set.of("rich-text-image-caption")).text(label));
@@ -1015,6 +1014,11 @@ public class Utils {
       }
     }
     return List.of(new TextNode(String.format("entity %s::%s", objectType, objectUuid)));
+  }
+
+  public static String getAttachmentUrl(String anetServerUrl, boolean useCids, String objectUuid) {
+    return useCids ? String.format("cid:%s", objectUuid)
+        : String.format("%1$s/api/attachment/view/%2$s", anetServerUrl, objectUuid);
   }
 
   public static String getAttachmentConfidentialityLabel(AnetDictionary dict,
