@@ -653,7 +653,7 @@
             <div class="d-grid text-center">
               <a href="${serverUrl}/attachments/${attachment.uuid}">
                 <#if Utils.isImage(attachment) && Utils.hasContent(attachment)>
-                  <img class="card-image" src="${serverUrl}/api/attachment/view/${attachment.uuid}" alt="${attachment.objectLabel}" style="object-fit: contain;" />
+                  <img class="card-image" src="${Utils.getAttachmentUrl(serverUrl, true, attachment.uuid)}" alt="${attachment.objectLabel}" style="object-fit: contain;" />
                 <#else>
                   <#assign icon = Utils.getAttachmentIcon(attachment)>
                   <span class="card-icon">${icon}</span>
@@ -823,7 +823,7 @@
       <fieldset>
         <div>
           <p>
-            ${Utils.replaceAnetLinks(report.reportText)?no_esc}
+            ${Utils.replaceAnetLinks(report.reportText, true)?no_esc}
           </p>
         </div>
       </fieldset>
