@@ -42,17 +42,10 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
   @Autowired
   private GraphQLWebService graphQLWebService;
 
-  @Autowired
-  private BearerTokenService bearerTokenService;
 
   @AfterEach
   void clearSecurity() {
     SecurityContextHolder.clearContext();
-  }
-
-  private void setAuthentication(String bearerToken) {
-    var accessTokenAuthentication = createAccessTokenAuthentication(bearerToken);
-    SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
   }
 
   @Test
@@ -102,12 +95,6 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
     assertThat(assessments).filteredOn(
         a -> "fields.regular.person.assessments.interlocutorMonthly".equals(a.get("assessmentKey")))
         .isEmpty();
-  }
-
-  private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {
-    var accessToken = bearerTokenService.getAccessPrincipalFromAuthHeader(bearerToken);
-    assertThat(accessToken.isEmpty()).isFalse();
-    return new AccessTokenAuthentication(accessToken.get());
   }
 
   @Test

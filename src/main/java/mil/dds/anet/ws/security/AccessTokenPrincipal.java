@@ -14,6 +14,7 @@ public record AccessTokenPrincipal(AccessToken accessToken,
     return switch (scope) {
       case GRAPHQL -> WebServiceGrantedAuthority.GRAPHQL;
       case NVG -> WebServiceGrantedAuthority.NVG;
+      case MART -> WebServiceGrantedAuthority.MART;
     };
   }
 

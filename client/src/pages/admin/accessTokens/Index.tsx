@@ -93,6 +93,11 @@ const tokenScopeButtons = [
     id: "graphql",
     value: "GRAPHQL",
     label: "GraphQL"
+  },
+  {
+    id: "mart",
+    value: "MART",
+    label: "MART"
   }
 ]
 

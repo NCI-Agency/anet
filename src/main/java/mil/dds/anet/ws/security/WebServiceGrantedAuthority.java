@@ -6,9 +6,11 @@ public class WebServiceGrantedAuthority {
 
   public static final String SCOPE_GRAPHQL = "SCOPE_GRAPHQL";
   public static final String SCOPE_NVG = "SCOPE_NVG";
+  public static final String SCOPE_MART = "SCOPE_MART";
 
   public static final SimpleGrantedAuthority GRAPHQL = new SimpleGrantedAuthority(SCOPE_GRAPHQL);
   public static final SimpleGrantedAuthority NVG = new SimpleGrantedAuthority(SCOPE_NVG);
+  public static final SimpleGrantedAuthority MART = new SimpleGrantedAuthority(SCOPE_MART);
 
   private WebServiceGrantedAuthority() {}
 }

@@ -7,6 +7,8 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import jakarta.annotation.Nullable;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -65,6 +67,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -1058,6 +1063,22 @@ public class Utils {
       icon = "\uD83D\uDD22"; // 🯄 🔢
     }
     return icon;
+  }
+
+  public static StreamingResponseBody toYamlStream(Map<String, Object> data) {
+    final DumperOptions options = new DumperOptions();
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    options.setIndent(2);
+    options.setIndicatorIndent(2);
+    options.setIndentWithIndicator(true);
+
+    final Yaml yaml = new Yaml(options);
+
+    return outputStream -> {
+      try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+        yaml.dump(data, writer);
+      }
+    };
   }
 
 }

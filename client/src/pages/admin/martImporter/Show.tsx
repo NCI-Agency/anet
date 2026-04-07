@@ -33,7 +33,7 @@ const MartImporterShow = () => {
   }
   async function handleExport() {
     try {
-      const response = await fetch("/api/admin/dictionary/mart", {
+      const response = await fetch("/api/admin/martDictionary", {
         method: "GET",
         headers: {
           Accept: "application/x-yaml"

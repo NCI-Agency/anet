@@ -1907,6 +1907,7 @@ enum TaskSearchSortBy {
 """"""
 enum TokenScope {
   GRAPHQL
+  MART
   NVG
 }
 
