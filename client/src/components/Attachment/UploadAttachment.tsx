@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Icon } from "@blueprintjs/core"
+import { Icon, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import axios from "axios"
@@ -143,6 +143,17 @@ const UploadAttachment = ({
   const mimeTypes = Settings.fields.attachment.fileTypes?.map(
     fileType => fileType.mimeType
   )
+  const selectedNames = linkSelection.map(
+    attachment => attachment.caption || attachment.fileName || attachment.uuid
+  )
+  const maxSelectedNames = 5
+  const selectedSummary =
+    selectedNames.length > maxSelectedNames
+      ? selectedNames.slice(0, maxSelectedNames).join(", ") +
+        " +" +
+        (selectedNames.length - maxSelectedNames) +
+        " more"
+      : selectedNames.join(", ")
 
   const handleFileEvent = async e => {
     // Must keep a copy of this state here, as it is not updated while this function runs
@@ -339,9 +350,11 @@ const UploadAttachment = ({
             {isLinking ? "Linking..." : "Link selected"}
           </Button>
           {linkSelection.length > 0 && (
-            <span className="attachment-link-count">
-              Will link: {linkSelection.length} attachment(s)
-            </span>
+            <Tooltip content={selectedSummary} position="top">
+              <span className="attachment-link-count">
+                Will link: {linkSelection.length} attachment(s)
+              </span>
+            </Tooltip>
           )}
         </div>
       </section>
