@@ -303,6 +303,56 @@ const UploadAttachment = ({
     }
   }
 
+  const unlinkAttachment = async attachmentToUnlink => {
+    const currentObjectUuid = objectUuid
+
+    try {
+      const data = await API.query(GQL_GET_ATTACHMENT_FOR_LINKING, {
+        uuid: attachmentToUnlink.uuid
+      })
+      const attachment = data?.attachment
+      if (!attachment) {
+        return
+      }
+      const relatedObjects = attachment.attachmentRelatedObjects || []
+      const nextRelatedObjects = relatedObjects
+        .filter(
+          object =>
+            !(
+              object.relatedObjectType === relatedObjectType &&
+              object.relatedObjectUuid === currentObjectUuid
+            )
+        )
+        .map(({ relatedObjectType, relatedObjectUuid }) => ({
+          relatedObjectType,
+          relatedObjectUuid
+        }))
+
+      if (nextRelatedObjects.length === relatedObjects.length) {
+        return
+      }
+
+      const attachmentInput = Attachment.filterClientSideFields(attachment)
+      attachmentInput.attachmentRelatedObjects = nextRelatedObjects
+
+      await API.mutation(GQL_UPDATE_ATTACHMENT, {
+        attachment: attachmentInput
+      })
+
+      updateAttachments(
+        attachments.filter(a => a.uuid !== attachmentToUnlink.uuid)
+      )
+
+      const attachmentLabel =
+        attachmentToUnlink.caption ||
+        attachmentToUnlink.fileName ||
+        attachmentToUnlink.uuid
+      toast.success(`Unlinked ${attachmentLabel}`)
+    } catch (unlinkError) {
+      setError(unlinkError)
+    }
+  }
+
   return (
     <div>
       <Messages error={error} />
@@ -369,6 +419,8 @@ const UploadAttachment = ({
             setError={setError}
             uploadedList={attachments}
             setUploadedList={updateAttachments}
+            onUnlink={unlinkAttachment}
+            unlinkTitle={`Unlink from this ${RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[relatedObjectType]}`}
           />
         ))}
       </div>
