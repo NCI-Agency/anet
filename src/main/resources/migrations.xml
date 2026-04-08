@@ -7194,7 +7194,7 @@
 			WHERE "preferenceUuid" = (SELECT uuid FROM preferences WHERE name = 'PEOPLE' AND category = 'export');
 		</sql>
 	</changeSet>
-		
+
 	<changeSet id="add-priority-to-authorizationGroupRelatedObjects" author="jlnat">
 		<addColumn tableName="authorizationGroupRelatedObjects">
 			<column name="priority" type="double" />
