@@ -387,6 +387,7 @@ const UploadAttachment = ({
           objectType={ENTITY_TYPES.ATTACHMENTS}
           isMultiSelect
           value={linkSelection}
+          disabledValue={attachments}
           onConfirm={value => setLinkSelection(value)}
           className="attachment-link-select"
         />
