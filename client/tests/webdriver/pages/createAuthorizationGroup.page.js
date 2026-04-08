@@ -50,7 +50,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getRelatedObjectsInput() {
-    return browser.$("#authorizationGroupRelatedObjects")
+    return browser.$('.related_objects input[name="entitySelect"]')
   }
 
   async getRelatedObjectsTable() {
@@ -63,8 +63,12 @@ class CreateAuthorizationGroup extends Page {
     )
   }
 
+  async getRelatedObjectsAdvancedSelectFirstItem() {
+    return browser.$("#entitySelect-popover tbody tr:first-child")
+  }
+
   async getAdministrativePositionsInput() {
-    return browser.$("#administrativePositions")
+    return browser.$('input[name="administrativePositions"]')
   }
 
   async getAdministrativePositionsTable() {
@@ -78,9 +82,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getAdministrativePositionsAdvancedSelectFirstItem() {
-    return browser.$(
-      "#administrativePositions-popover tbody tr:first-child td:nth-child(2) span"
-    )
+    return browser.$("#administrativePositions-popover tbody tr:first-child")
   }
 
   async getSubmitButton() {
@@ -104,6 +106,20 @@ class CreateAuthorizationGroup extends Page {
   async open() {
     // Only admin users can create communities
     await super.openAsAdminUser(PAGE_URL)
+  }
+
+  async waitForAdvancedSelectToChange(value, getFirstItemCallback) {
+    return browser.waitUntil(
+      async () => {
+        const el = await getFirstItemCallback()
+        return (await el.getText()).includes(value)
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected advanced select input to contain "' + value + '" after 5s'
+      }
+    )
   }
 
   async submitForm() {

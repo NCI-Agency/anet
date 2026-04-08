@@ -406,7 +406,7 @@ enum AuditTrailUpdateType {
 """"""
 type AuthorizationGroup {
   administrativePositions: [Position]
-  authorizationGroupRelatedObjects: [GenericRelatedObject]
+  authorizationGroupRelatedObjects: [AuthorizationGroupRelatedObject]
   createdAt: Instant
   description: String
   distributionList: Boolean
@@ -421,7 +421,7 @@ type AuthorizationGroup {
 """"""
 input AuthorizationGroupInput {
   administrativePositions: [PositionInput]
-  authorizationGroupRelatedObjects: [GenericRelatedObjectInput]
+  authorizationGroupRelatedObjects: [AuthorizationGroupRelatedObjectInput]
   createdAt: Instant
   description: String
   distributionList: Boolean
@@ -430,6 +430,23 @@ input AuthorizationGroupInput {
   status: Status
   updatedAt: Instant
   uuid: String
+}
+
+""""""
+type AuthorizationGroupRelatedObject {
+  objectUuid: String
+  priority: Float
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input AuthorizationGroupRelatedObjectInput {
+  objectUuid: String
+  priority: Float
+  relatedObjectType: String
+  relatedObjectUuid: String
 }
 
 """"""

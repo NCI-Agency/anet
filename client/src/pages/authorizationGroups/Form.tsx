@@ -13,11 +13,14 @@ import NavigationWarning from "components/NavigationWarning"
 import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
+import {
+  reindexSortableRelatedObjects,
+  SortableRelatedObjectsTableInput
+} from "components/RelatedObjectsTable"
 import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
-import React, { useContext, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Alert, Button, FormCheck } from "react-bootstrap"
 import { useNavigate } from "react-router"
 import POSITIONS_ICON from "resources/positions.png"
@@ -77,13 +80,21 @@ const AuthorizationGroupForm = ({
       label: "Inactive"
     }
   ]
+  const normalizedInitialValues = useMemo(() => {
+    const authorizationGroup = new AuthorizationGroup(initialValues)
+    authorizationGroup.authorizationGroupRelatedObjects =
+      reindexSortableRelatedObjects(
+        authorizationGroup.authorizationGroupRelatedObjects
+      )
+    return authorizationGroup
+  }, [initialValues])
 
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={AuthorizationGroup.yupSchema}
-      initialValues={initialValues}
+      initialValues={normalizedInitialValues}
     >
       {({
         isSubmitting,
@@ -266,7 +277,7 @@ const AuthorizationGroupForm = ({
                   name="authorizationGroupRelatedObjects"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <RelatedObjectsTableInput
+                    <SortableRelatedObjectsTableInput
                       title={pluralize.singular(
                         Settings.fields.authorizationGroup
                           .authorizationGroupRelatedObjects?.label

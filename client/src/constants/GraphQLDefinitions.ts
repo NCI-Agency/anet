@@ -533,6 +533,7 @@ export const gqlEmailAddressesForNetworkFields = `
 
 export const gqlAuthorizationGroupMembersFields = `
   authorizationGroupRelatedObjects {
+    priority
     relatedObjectType
     relatedObjectUuid
     relatedObject {
@@ -551,6 +552,7 @@ export const gqlAuthorizationGroupMembersFields = `
 
 export const gqlAuthorizationGroupMembersWithEmailFields = `
   authorizationGroupRelatedObjects {
+    priority
     relatedObjectType
     relatedObjectUuid
     relatedObject {
@@ -572,6 +574,7 @@ export const gqlAuthorizationGroupMembersWithEmailFields = `
 
 export const gqlAuthorizationGroupMembersWithEmailNetworkFields = `
   authorizationGroupRelatedObjects {
+    priority
     relatedObjectType
     relatedObjectUuid
     relatedObject {
