@@ -82,6 +82,9 @@ const AdvancedSelectOverlayTable = ({
               })
           return (
             <tr
+              className={
+                isDisabled ? "advanced-select-row-disabled" : undefined
+              }
               key={`${item.uuid}-${pageNum}-${i}`}
               onClick={handleClick}
               style={style}
