@@ -13,6 +13,8 @@ import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,8 +42,6 @@ public class FakeSmtpServer {
   private final String smtpPassword;
   private final String sslTrust;
   private final String startTls;
-  private final String httpIP;
-  private final String httpPort;
 
   private final int waitBeforeActionMs;
   private final int maxRetriesClear;
@@ -55,17 +55,17 @@ public class FakeSmtpServer {
     smtpPassword = smtpConfig.getPassword();
     sslTrust = smtpConfig.getSslTrust();
     startTls = Boolean.toString(smtpConfig.getStartTls());
-    httpIP = smtpConfig.getHostname();
+    final String httpIP = smtpConfig.getHostname();
 
     // Not in config
-    httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
+    final String httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
 
     // A system variable is required to run this test
     if (httpPort == null) {
       fail("'ANET_SMTP_HTTP_PORT' system environment variable not found.");
     }
 
-    serverQuery = String.format("http://%s:%s/api/emails", httpIP, httpPort);
+    serverQuery = String.format("http://%s:%s/api/v1/messages", httpIP, httpPort);
 
     // Read from test config
     waitBeforeActionMs = Integer
@@ -86,23 +86,20 @@ public class FakeSmtpServer {
   public List<EmailResponse> requestAllEmailsFromServer() throws IOException, InterruptedException {
     TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
 
-    return requestEmailsFromServer(new QueryFilter());
+    return requestEmailsFromServer();
   }
 
   /**
-   * Retrieves all emails from the server according to a filter.
+   * Retrieves all emails from the server.
    *
-   * @param queryFilter The filter to use
-   * @return All filtered emails from the server
+   * @return All emails from the server
    * @throws IOException If the request fails
    * @throws InterruptedException If the wait timer fails
    */
-  public List<EmailResponse> requestEmailsFromServer(final QueryFilter queryFilter)
-      throws IOException, InterruptedException {
+  public List<EmailResponse> requestEmailsFromServer() throws IOException, InterruptedException {
     TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
 
-    final String request = queryFilter.createFilteredServerQuery();
-    final String response = sendServerRequest(request, "GET");
+    final String response = sendServerRequest(serverQuery, "GET");
     return parseServeResponse(response);
   }
 
@@ -116,27 +113,32 @@ public class FakeSmtpServer {
 
     sendServerRequest(serverQuery, "DELETE");
 
-    for (int i = 0; i < maxRetriesClear; i++) {
+    for (int i = 0; i <= maxRetriesClear; i++) {
       if (i == maxRetriesClear) {
         throw new Exception("Email server not responding");
-      } else if (requestAllEmailsFromServer().size() == 0) {
+      } else if (requestAllEmailsFromServer().isEmpty()) {
         break;
       }
     }
   }
 
-  private static List<EmailResponse> parseServeResponse(final String serverResponse)
+  private List<EmailResponse> parseServeResponse(final String serverResponse)
       throws JacksonException {
     final ObjectMapper mapper = new ObjectMapper();
     final JsonNode response = mapper.readTree(serverResponse);
-    final List<EmailResponse> emails = new ArrayList<EmailResponse>();
-    response.forEach(node -> emails.add(new EmailResponse(node)));
+    final List<EmailResponse> emails = new ArrayList<>();
+    response.get("messages").forEach(node -> emails.add(new EmailResponse(node)));
     return emails;
   }
 
   private String sendServerRequest(final String request, final String requestType)
       throws IOException {
-    final URL url = new URL(request);
+    final URL url;
+    try {
+      url = new URI(request).toURL();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
     final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 
     if (!Utils.isEmptyOrNull(smtpUsername) || !Utils.isEmptyOrNull(smtpPassword)) {
@@ -147,16 +149,14 @@ public class FakeSmtpServer {
     }
 
     httpConnection.setDoOutput(true);
-    httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-    httpConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
     httpConnection.setRequestMethod(requestType);
     httpConnection.connect();
     final InputStream response = httpConnection.getInputStream();
-    return IOUtils.toString(response, StandardCharsets.UTF_8.name());
+    return IOUtils.toString(response, StandardCharsets.UTF_8);
   }
 
   /**
-   * Sends an email to the server Warning: The server does not support the BCC field.
+   * Sends an email to the server.
    *
    * @param to 'To' address
    * @param from 'From' address
@@ -203,40 +203,6 @@ public class FakeSmtpServer {
     message.setSentDate(date == null ? new Date() : date);
 
     Transport.send(message, message.getAllRecipients());
-  }
-
-  /**
-   * A filter for the queries to the email server.
-   */
-  public class QueryFilter {
-    public String from = "";
-    public String to = "";
-    public String since = "";
-    public String until = "";
-
-    public QueryFilter withFrom(final String value) {
-      this.from = "?from=" + value;
-      return this;
-    }
-
-    public QueryFilter withTo(final String value) {
-      this.to = "?to=" + value;
-      return this;
-    }
-
-    public QueryFilter withSince(final String value) {
-      this.since = "?since=" + value;
-      return this;
-    }
-
-    public QueryFilter withUntil(final String value) {
-      this.until = "?until=" + value;
-      return this;
-    }
-
-    public String createFilteredServerQuery() {
-      return String.format(serverQuery + "%s%s%s%s", this.from, this.to, this.since, this.until);
-    }
   }
 
 }
