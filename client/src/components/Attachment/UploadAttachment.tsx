@@ -3,9 +3,17 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import axios from "axios"
+import {
+  gqlAllAttachmentFields,
+  gqlAttachmentRelatedObjectsFields
+} from "constants/GraphQLDefinitions"
+import MultiTypeAdvancedSelectComponent, {
+  ENTITY_TYPES
+} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import React, { useState } from "react"
+import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -16,6 +24,21 @@ import AttachmentCard from "./AttachmentCard"
 const GQL_CREATE_ATTACHMENT = gql`
   mutation ($attachment: AttachmentInput!) {
     createAttachment(attachment: $attachment)
+  }
+`
+
+const GQL_GET_ATTACHMENT_FOR_LINKING = gql`
+  query ($uuid: String!) {
+    attachment(uuid: $uuid) {
+      ${gqlAllAttachmentFields}
+      ${gqlAttachmentRelatedObjectsFields}
+    }
+  }
+`
+
+const GQL_UPDATE_ATTACHMENT = gql`
+  mutation ($attachment: AttachmentInput!, $force: Boolean) {
+    updateAttachment(attachment: $attachment, force: $force)
   }
 `
 
@@ -115,6 +138,8 @@ const UploadAttachment = ({
 }: UploadAttachmentProps) => {
   const [error, setError] = useState(null)
   const [objectUuid, setObjectUuid] = useState(relatedObjectUuid)
+  const [linkSelection, setLinkSelection] = useState<any[]>([])
+  const [isLinking, setIsLinking] = useState(false)
   const mimeTypes = Settings.fields.attachment.fileTypes?.map(
     fileType => fileType.mimeType
   )
@@ -178,6 +203,95 @@ const UploadAttachment = ({
     }
   }
 
+  const handleLinkAttachments = async () => {
+    setIsLinking(true)
+    let currentObjectUuid = objectUuid
+    try {
+      if (!currentObjectUuid) {
+        const response = await saveRelatedObject()
+        currentObjectUuid = response.uuid
+        setObjectUuid(currentObjectUuid)
+      }
+
+      const existingAttachmentUuids = new Set(
+        attachments.map(attachment => attachment.uuid)
+      )
+      const toLink = linkSelection.filter(
+        attachment => !existingAttachmentUuids.has(attachment.uuid)
+      )
+
+
+      const results = await Promise.all(
+        toLink.map(async selected => {
+          try {
+            const data = await API.query(GQL_GET_ATTACHMENT_FOR_LINKING, {
+              uuid: selected.uuid
+            })
+            const attachment = data?.attachment
+            if (!attachment) {
+              return { error: true, attachment: selected }
+            }
+            const relatedObjects = attachment.attachmentRelatedObjects || []
+            const alreadyLinked = relatedObjects.some(
+              object =>
+                object.relatedObjectType === relatedObjectType &&
+                object.relatedObjectUuid === currentObjectUuid
+            )
+            if (alreadyLinked) {
+              return { skipped: true, attachment }
+            }
+
+            const nextRelatedObjects = [
+              ...relatedObjects.map(
+                ({ relatedObjectType, relatedObjectUuid }) => ({
+                  relatedObjectType,
+                  relatedObjectUuid
+                })
+              ),
+              {
+                relatedObjectType,
+                relatedObjectUuid: currentObjectUuid
+              }
+            ]
+
+            const attachmentInput = Attachment.filterClientSideFields(attachment)
+            attachmentInput.attachmentRelatedObjects = nextRelatedObjects
+
+            await API.mutation(GQL_UPDATE_ATTACHMENT, {
+              attachment: attachmentInput
+            })
+
+            return { linked: true, attachment }
+          } catch (linkError) {
+            return { error: true, attachment: selected, linkError }
+          }
+        })
+      )
+
+      const newlyLinked = results
+        .filter(r => r?.linked)
+        .map(r => r.attachment)
+
+      if (newlyLinked.length > 0) {
+        const merged = [...attachments]
+        newlyLinked.forEach(att => {
+          if (!merged.some(existing => existing.uuid === att.uuid)) {
+            merged.push(att)
+          }
+        })
+        updateAttachments(merged)
+        toast.success(`${newlyLinked.length} attachment(s) linked successfully`)
+      }
+
+
+      setLinkSelection([])
+    } catch (linkError) {
+      setError(linkError)
+    } finally {
+      setIsLinking(false)
+    }
+  }
+
   return (
     <div>
       <Messages error={error} />
@@ -199,6 +313,37 @@ const UploadAttachment = ({
           accept={mimeTypes}
           onChange={handleFileEvent}
         />
+      </section>
+
+      <section className="attachment-link-container">
+        <div className="attachment-link-header">
+          <Icon className="icon" size={20} icon={IconNames.LINK} />
+          <span>Link existing attachments</span>
+        </div>
+        <MultiTypeAdvancedSelectComponent
+          fieldName="linkExistingAttachments"
+          entityTypes={[ENTITY_TYPES.ATTACHMENTS]}
+          objectType={ENTITY_TYPES.ATTACHMENTS}
+          isMultiSelect
+          value={linkSelection}
+          onConfirm={value => setLinkSelection(value)}
+          className="attachment-link-select"
+        />
+        <div className="attachment-link-actions">
+          <Button
+            variant="outline-primary"
+            size="sm"
+            onClick={handleLinkAttachments}
+            disabled={isLinking || linkSelection.length === 0}
+          >
+            {isLinking ? "Linking..." : "Link selected"}
+          </Button>
+          {linkSelection.length > 0 && (
+            <span className="attachment-link-count">
+              Will link: {linkSelection.length} attachment(s)
+            </span>
+          )}
+        </div>
       </section>
 
       {/** **** Show uploaded files in here **** **/}
