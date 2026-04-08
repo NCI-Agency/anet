@@ -1,12 +1,12 @@
+import {
+  gqlAllAttachmentFields,
+  gqlAttachmentRelatedObjectsFields
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import axios from "axios"
-import {
-  gqlAllAttachmentFields,
-  gqlAttachmentRelatedObjectsFields
-} from "constants/GraphQLDefinitions"
 import MultiTypeAdvancedSelectComponent, {
   ENTITY_TYPES
 } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
@@ -215,6 +215,11 @@ const UploadAttachment = ({
   }
 
   const handleLinkAttachments = async () => {
+    if (linkSelection.length === 0) {
+      toast.info("Select one or more attachments to link")
+      return
+    }
+
     setIsLinking(true)
     let currentObjectUuid = objectUuid
     try {
@@ -231,6 +236,13 @@ const UploadAttachment = ({
         attachment => !existingAttachmentUuids.has(attachment.uuid)
       )
 
+      if (toLink.length === 0) {
+        toast.info(
+          `${linkSelection.length} attachment(s) were already linked to this object`
+        )
+        setLinkSelection([])
+        return
+      }
 
       const results = await Promise.all(
         toLink.map(async selected => {
@@ -265,7 +277,8 @@ const UploadAttachment = ({
               }
             ]
 
-            const attachmentInput = Attachment.filterClientSideFields(attachment)
+            const attachmentInput =
+              Attachment.filterClientSideFields(attachment)
             attachmentInput.attachmentRelatedObjects = nextRelatedObjects
 
             await API.mutation(GQL_UPDATE_ATTACHMENT, {
@@ -279,9 +292,7 @@ const UploadAttachment = ({
         })
       )
 
-      const newlyLinked = results
-        .filter(r => r?.linked)
-        .map(r => r.attachment)
+      const newlyLinked = results.filter(r => r?.linked).map(r => r.attachment)
 
       if (newlyLinked.length > 0) {
         const merged = [...attachments]
@@ -294,10 +305,26 @@ const UploadAttachment = ({
         toast.success(`${newlyLinked.length} attachment(s) linked successfully`)
       }
 
+      const skippedCount = results.filter(r => r?.skipped).length
+      if (skippedCount > 0) {
+        toast.info(
+          `${skippedCount} attachment(s) were already linked to this object`
+        )
+      }
+
+      const errorCount = results.filter(r => r?.error).length
+      if (errorCount > 0) {
+        toast.error(
+          `${errorCount} attachment(s) could not be linked due to an error`
+        )
+      }
 
       setLinkSelection([])
     } catch (linkError) {
       setError(linkError)
+      toast.error(
+        `Linking attachments failed: ${linkError?.message || "Unknown error"}`
+      )
     } finally {
       setIsLinking(false)
     }
@@ -312,6 +339,7 @@ const UploadAttachment = ({
       })
       const attachment = data?.attachment
       if (!attachment) {
+        toast.error("Unlinking attachment failed; could not load attachment")
         return
       }
       const relatedObjects = attachment.attachmentRelatedObjects || []
@@ -350,6 +378,9 @@ const UploadAttachment = ({
       toast.success(`Unlinked ${attachmentLabel}`)
     } catch (unlinkError) {
       setError(unlinkError)
+      toast.error(
+        `Unlinking attachment failed: ${unlinkError?.message || "Unknown error"}`
+      )
     }
   }
 
