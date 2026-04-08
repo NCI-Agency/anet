@@ -45,3 +45,11 @@
 .advanced-select-popover > .bp6-overlay > .bp6-transition-container {
   width: 100%;
 }
+
+.advanced-select-row-disabled {
+  opacity: 0.5;
+}
+
+.advanced-select-row-disabled td {
+  cursor: not-allowed;
+}
