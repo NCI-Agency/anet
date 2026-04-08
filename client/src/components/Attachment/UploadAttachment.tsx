@@ -421,6 +421,7 @@ const UploadAttachment = ({
           disabledValue={attachments}
           onConfirm={value => setLinkSelection(value)}
           className="attachment-link-select"
+          hideAttachedHereFilter
         />
         <div className="attachment-link-actions">
           <Button
