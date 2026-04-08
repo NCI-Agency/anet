@@ -7347,12 +7347,12 @@ __metadata:
     react-dnd-html5-backend: "npm:16.0.1"
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
-    react-joyride: "npm:3.0.0"
+    react-joyride: "npm:3.0.2"
     react-mosaic-component: "npm:6.1.1"
     react-redux: "npm:9.2.0"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
-    react-router: "npm:7.13.2"
+    react-router: "npm:7.14.0"
     react-scroll: "npm:1.9.3"
     react-test-renderer: "npm:18.3.1"
     react-toastify: "npm:11.0.5"
@@ -16956,9 +16956,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-joyride@npm:3.0.0":
-  version: 3.0.0
-  resolution: "react-joyride@npm:3.0.0"
+"react-joyride@npm:3.0.2":
+  version: 3.0.2
+  resolution: "react-joyride@npm:3.0.2"
   dependencies:
     "@fastify/deepmerge": "npm:^3.2.1"
     "@floating-ui/react-dom": "npm:^2.1.8"
@@ -16973,7 +16973,7 @@ __metadata:
   peerDependencies:
     react: 16.8 - 19
     react-dom: 16.8 - 19
-  checksum: 10c0/4e30af2aaaaf66f0543ea47c1260346083b18fef7747309a4c433a4ad86aebe0154f4d8b1cfd7cceec883c354f8e5771220fbec5a2757968bc0e559d4a81f572
+  checksum: 10c0/6440204fa4d820d9b79c48026227a9dd41f7c3537b2201cd9a5384dd744345d2931e442ae976bb9329532b3477e7f9eec4d6e9c01e0056171c852c6880c5ebdc
   languageName: node
   linkType: hard
 
@@ -17098,9 +17098,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.13.2":
-  version: 7.13.2
-  resolution: "react-router@npm:7.13.2"
+"react-router@npm:7.14.0":
+  version: 7.14.0
+  resolution: "react-router@npm:7.14.0"
   dependencies:
     cookie: "npm:^1.0.1"
     set-cookie-parser: "npm:^2.6.0"
@@ -17110,7 +17110,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10c0/c7620565df0b444507cfceb76733adbd26e28a72fc4d52d344190bcb2e6483427313a3b6076c53d362e2682ccdb1262731bcaa6c3577cbbeea130291a38715f1
+  checksum: 10c0/a496489973cd5e87dcc5c1c7312f4cc99463eb5e0a0f97b3f298467531b754a3227562a83e0c9019b9d2452fd0681d05882ee061af2e0cafb0818f857578b805
   languageName: node
   linkType: hard
 
