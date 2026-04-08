@@ -619,7 +619,7 @@ dockerRemoveKeycloak.mustRunAfter('dockerStopKeycloak')
 
 tasks.register('dockerPullFakeSmtpServer', DockerPullImage) {
 	group = "fake-smtp-server container"
-	image = "devoto13/fake-smtp-server:0.1.0" // No 'latest' available yet
+	image = "axllent/mailpit:latest"
 	description = "Pulls a docker image for the fake-smtp-server from ${image}."
 }
 
@@ -629,8 +629,8 @@ tasks.register('dockerCreateFakeSmtpServer', DockerCreateContainer) {
 	imageId = dockerPullFakeSmtpServer.getImage()
 	containerName = fakeSmtpContainerName
 	description = "Creates a fake-smtp-server container named ${fakeSmtpContainerName}."
-	exposePorts("tcp", [1025, 1080])
-	hostConfig.portBindings.set(["${run.environment["ANET_SMTP_PORT"]}:1025", "${run.environment["ANET_SMTP_HTTP_PORT"]}:1080"])
+	exposePorts("tcp", [1025, 8025])
+	hostConfig.portBindings.set(["${run.environment["ANET_SMTP_PORT"]}:1025", "${run.environment["ANET_SMTP_HTTP_PORT"]}:8025"])
 }
 
 tasks.register('dockerStartFakeSmtpServer', DockerStartContainer) {
