@@ -60,12 +60,12 @@ class EmailServerTest extends AnetApplicationTest {
     assertThat(emails).hasSize(1);
 
     // Test first email
-    final EmailResponse email1 = emails.get(0);
-    assertThat(email1.from.text).isEqualTo("from@example.com");
-    assertThat(email1.to.text).isEqualTo("to@example.com");
-    assertThat(email1.cc).isNull();
-    assertThat(email1.replyTo).isNull();
+    final EmailResponse email1 = emails.getFirst();
+    assertThat(email1.from.values.getFirst().address).isEqualTo("from@example.com");
+    assertThat(email1.to.values.getFirst().address).isEqualTo("to@example.com");
+    assertThat(email1.cc.values).isEmpty();
+    assertThat(email1.replyTo.values).isEmpty();
     assertThat(email1.subject).isEqualTo("Test subject");
-    assertThat(email1.text).isEqualTo("Hello there!\n"); // <--Automatically inserts a new line!
+    assertThat(email1.text).isEqualTo("Hello there!");
   }
 }

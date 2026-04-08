@@ -13,8 +13,17 @@
       line-height: 1.42857143;
       color: #333;
     }
+    h4 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
     p {
       margin: 0 0 10px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
     }
     .col-2 {
       width: 16.666667%;
@@ -31,10 +40,7 @@
       width: 25%;
     }
     .col-sm-9 {
-      width: 75%;
-    }
-    .form-group {
-      clear: both;
+      width: 66%;
     }
     .form-control-plaintext {
       display: block;
@@ -42,20 +48,25 @@
       padding: 0.375rem 0;
       margin-bottom: 0;
       line-height: 1.5;
+      border: solid transparent;
+      border-width: 1px 0;
     }
     table {
       border-spacing: 0;
       border-collapse: collapse;
     }
-    table > thead > tr > th {
+    .table {
+      width: 100%;
+    }
+    .table > thead > tr > th {
       vertical-align: bottom;
       border-bottom: 2px solid #ddd;
     }
-    .table > tbody > tr > td {
-      padding: 8px;
-      line-height: 1.42857143;
-      vertical-align: top;
-      border-top: 1px solid #ddd;
+    table > :not(caption) > * > * {
+      padding: 0.5rem 0.5rem;
+    }
+    th {
+      text-align: inherit;
     }
     hr {
       border: 0;
@@ -78,8 +89,7 @@
       border: 1px solid transparent;
     }
     .btn-sm {
-      padding: 5px 10px;
-      font-size: 12px;
+      padding: 0.25rem 0.5rem;
       line-height: 1.5;
     }
     .btn-success {
@@ -130,6 +140,18 @@
     .card-body {
       flex: 1 1 auto;
     }
+    .badge {
+      display: inline-block;
+      padding: 0.35em 0.65em;
+      font-size: 0.75em;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: 0.375rem;
+    }
   </style>
 
   <style>
@@ -139,6 +161,12 @@
       margin: 0 0 20px;
       font-size: 17.5px;
       border-left: 5px solid #eeeeee;
+    }
+    .btn {
+      font-size: 0.9rem;
+    }
+    .bg-primary {
+      background-color: rgb(0, 113, 188) !important;
     }
   </style>
 
@@ -155,7 +183,7 @@
       box-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
       padding: 1.75em;
       margin: 0 0 4rem;
-      width: 100%;
+      max-width: 100%;
     }
     .ellipsized-text {
       text-overflow: ellipsis;
@@ -181,6 +209,7 @@
     }
     .form-label {
       font-weight: bold;
+      margin-bottom: 0.5rem;
     }
     .form-horizontal .form-label {
       padding-top: 9px;
@@ -430,29 +459,35 @@
     </h4>
 
     <fieldset class="show-report-overview">
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="report-summary" class="col-sm-3 form-label">Summary</label>
         <div id="report-summary" class="col-sm-9">
           <div>
             <div class="row">
               <label for="intent" class="col-sm-3 form-label">${fields.report.intent.label!}:</label>
-              <div id="intent" class="col-sm-9 form-control-plaintext">
-                ${(report.intent)!}
+              <div class="col-sm-9">
+                <div id="intent" class="form-control-plaintext" style="margin-bottom: 0;">
+                  ${(report.intent)!}
+                </div>
               </div>
             </div>
             <#if !(fields.report.keyOutcomes.exclude!)>
               <div class="row">
                 <label for="keyOutcomes" class="col-sm-3 form-label">${fields.report.keyOutcomes.label!}:</label>
-                <div id="keyOutcomes" class="col-sm-9 form-control-plaintext">
-                  <@li.listItems value=report.keyOutcomes />
+                <div class="col-sm-9">
+                  <div id="keyOutcomes" class="form-control-plaintext" style="margin-bottom: 0;">
+                    <@li.listItems value=report.keyOutcomes />
+                  </div>
                 </div>
               </div>
             </#if>
             <#if !(fields.report.nextSteps.exclude!)>
               <div class="row">
                 <label for="nextSteps" class="col-sm-3 form-label">${fields.report.nextSteps.label!}:</label>
-                <div id="nextSteps" class="col-sm-9 form-control-plaintext">
-                  <@li.listItems value=report.nextSteps />
+                <div class="col-sm-9">
+                  <div id="nextSteps" class="form-control-plaintext" style="margin-bottom: 0;">
+                    <@li.listItems value=report.nextSteps />
+                  </div>
                 </div>
               </div>
             </#if>
@@ -460,7 +495,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="engagementDate" class="col-sm-3 form-label">${fields.report.engagementDate.label!}</label>
         <div class="col-sm-9">
           <div id="engagementDate" class="form-control-plaintext">
@@ -470,7 +505,7 @@
       </div>
 
       <#if engagementsIncludeTimeAndDuration>
-        <div class="form-group">
+        <div class="row" style="margin-bottom: 1rem;">
           <label for="duration" class="col-sm-3 form-label">${fields.report.duration.label!}</label>
           <div class="col-sm-9">
             <div id="duration" class="form-control-plaintext">
@@ -480,19 +515,19 @@
         </div>
       </#if>
 
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="author" class="col-sm-3 form-label">Authors</label>
         <div class="col-sm-9">
           <div id="author" class="form-control-plaintext">
             <#list reportAuthors as reportAuthor>
-              <a href="${serverUrl}/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
+              <a href="${serverUrl}/people/${reportAuthor.uuid}">${(reportAuthor.objectLabel)!}</a>
               <br>
             </#list>
           </div>
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="advisorOrg" class="col-sm-3 form-label">${fields.advisor.org.name!}</label>
         <div class="col-sm-9">
           <div id="advisorOrg" class="form-control-plaintext">
@@ -504,7 +539,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="interlocutorOrg" class="col-sm-3 form-label">${fields.interlocutor.org.name!}</label>
         <div class="col-sm-9">
           <div id="interlocutorOrg" class="form-control-plaintext">
@@ -516,7 +551,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="event" class="col-sm-3 form-label">${fields.report.event.label!}</label>
         <div class="col-sm-9">
           <div id="event" class="form-control-plaintext">
@@ -528,7 +563,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="row" style="margin-bottom: 1rem;">
         <label for="location" class="col-sm-3 form-label">${fields.report.location.label!}</label>
         <div class="col-sm-9">
           <div id="location" class="form-control-plaintext">
@@ -542,7 +577,7 @@
 
       <#assign isCancelled = report.cancelledReason??>
       <#if isCancelled>
-        <div class="form-group">
+        <div class="row" style="margin-bottom: 1rem;">
           <label for="cancelledReason" class="col-sm-3 form-label">Cancelled Reason</label>
           <div class="col-sm-9">
             <div id="cancelledReason" class="form-control-plaintext">
@@ -552,7 +587,7 @@
         </div>
       <#else>
         <#if !(fields.report.atmosphere.exclude!)>
-          <div class="form-group">
+          <div class="row" style="margin-bottom: 1rem;">
             <label for="atmosphere" class="col-sm-3 form-label">${fields.report.atmosphere.label!}</label>
             <div class="col-sm-9">
               <div id="atmosphere" class="form-control-plaintext">
@@ -562,7 +597,7 @@
           </div>
         </#if>
         <#if !(fields.report.atmosphereDetails.exclude!)>
-          <div class="form-group">
+          <div class="row" style="margin-bottom: 1rem;">
             <label for="atmosphereDetails" class="col-sm-3 form-label">${fields.report.atmosphereDetails.label!}</label>
             <div class="col-sm-9">
               <div id="atmosphereDetails" class="form-control-plaintext">
@@ -576,7 +611,7 @@
       <#if !(fields.report.reportCommunities.exclude!)>
         <#assign reportCommunities = (report.loadReportCommunities(context).get())!>
         <#if (reportCommunities?size > 0)>
-          <div class="form-group">
+          <div class="row" style="margin-bottom: 1rem;">
             <label for="reportCommunities" class="col-sm-3 form-label">${fields.report.reportCommunities.label!}</label>
             <div class="col-sm-9">
               <div id="reportCommunities" class="form-control-plaintext">
@@ -634,7 +669,7 @@
 
       <#macro renderAttachments attachments>
         <#if (attachments?size > 0)>
-          <div class="form-group">
+          <div class="row" style="margin-bottom: 1rem;">
             <label for="attachments" class="col-sm-3 form-label">Attachments</label>
             <div class="col-sm-9">
               <div id="attachments" class="form-control-plaintext">
@@ -697,12 +732,12 @@
               <#if reportPerson.author>🖉</#if>
             </td>
             <td>
-              <a href="${serverUrl}/people/${reportPerson.uuid}">${(reportPerson.rank)!} ${(reportPerson.name)!}</a>
+              <a href="${serverUrl}/people/${reportPerson.uuid}">${(reportPerson.objectLabel)!}</a>
             </td>
             <#assign position = (reportPerson.loadPositionByDate(context, report.engagementDate).get())!>
             <td>
               <#if position.uuid??>
-                <a href="${serverUrl}/positions/${position.uuid}">${(position.objectLabel)!}</a>
+                <a href="${serverUrl}/positions/${position.uuid}">${(position.objectLabel)!}<#if position.code??>, ${position.code}</#if></a>
               </#if>
             </td>
             <#assign location = (position.loadLocation(context).get())!>
@@ -840,14 +875,14 @@
               </button>
             <#else>
               <button type="button" class="${styleClass} btn-sm btn btn-outline-secondary">
-                <span>
+                <div class="workflow-step-name">
                   ${(person.name)!SYSTEM_USER}
-                </span>
+                </div>
               </button>
             </#if>
             <#if reportAction.createdAt??>
               <div>
-                <span>By ${(person.name)!SYSTEM_USER}</span><br>
+                <span>By <#if person.uuid??><a href="${serverUrl}/people/${person.uuid}">${(person.objectLabel)!}</a><#else>${SYSTEM_USER}</#if></span><br>
                 <small>On <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=reportAction.createdAt /></small>
               </div>
             </#if>

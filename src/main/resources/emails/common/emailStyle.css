@@ -6,6 +6,7 @@ body {
 
 a {
   color: #215db0;
+  text-decoration: none;
 }
 
 .security-banner {

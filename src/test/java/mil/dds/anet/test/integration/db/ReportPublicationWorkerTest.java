@@ -239,8 +239,10 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
 
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
     assertThat(emails).hasSameSizeAs(expectedIds);
-    emails.forEach(e -> assertThat(expectedIds).contains(e.to.text.split("@")[0]));
-    emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
+    emails.forEach(
+        e -> assertThat(expectedIds).contains(e.to.values.getFirst().address.split("@")[0]));
+    emails.forEach(e -> assertThat(unexpectedIds)
+        .doesNotContain(e.to.values.getFirst().address.split("@")[0]));
   }
 
   private Report createTestReport(final String toAddressId) {
