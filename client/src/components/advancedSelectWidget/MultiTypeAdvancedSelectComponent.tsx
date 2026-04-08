@@ -232,6 +232,7 @@ interface MultiTypeAdvancedSelectComponentProps {
   entityTypes: string[]
   value?: any | any[]
   valueKey?: string
+  disabledValue?: any | any[]
   isMultiSelect: boolean
   filters?: any[]
   className?: string
@@ -244,6 +245,7 @@ const MultiTypeAdvancedSelectComponent = ({
   entityTypes = COMMON_ENTITY_TYPES,
   value,
   valueKey,
+  disabledValue,
   isMultiSelect = false,
   filters = [],
   className
@@ -314,6 +316,7 @@ const MultiTypeAdvancedSelectComponent = ({
         placeholder={searchPlaceholder}
         value={value}
         valueKey={valueKey}
+        disabledValue={disabledValue}
         showEmbedded
         keepSearchText
         overlayColumns={advancedSelectProps.overlayColumns}
