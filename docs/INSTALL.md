@@ -118,6 +118,8 @@ ANET is configured primarily through the `application.yml` file. This is a Sprin
 
     - **email-from-addr**: This is the email address that emails from ANET will be sent from.
 
+    - **email-fixed-rate-in-seconds**: The frequency in seconds in which the AnetEmailWorker will work
+
     - **server-url**: The URL that should be used for links in emails, e.g. `"https://anet.example.com"`; should not include an ending slash!
 
     - **keycloak-configuration**:
