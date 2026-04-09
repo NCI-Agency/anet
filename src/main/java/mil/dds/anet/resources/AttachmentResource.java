@@ -181,19 +181,36 @@ public class AttachmentResource {
     assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
     final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
-    assertAttachmentPermission(user, existing,
-        "You don't have permission to update this attachment");
     DaoUtils.assertObjectIsFresh(attachment, existing, force);
 
-    assertAllowedMimeType(attachment.getMimeType());
-    ResourceUtils.assertAllowedClassification(attachment.getClassification());
+    final boolean isAdmin = AuthUtils.isAdmin(user);
+    final boolean isAuthor = Objects.equals(existing.getAuthorUuid(), DaoUtils.getUuid(user));
+    final boolean canEditMetadata = isAdmin || isAuthor;
+    final boolean hasRelatedObjectsUpdate = attachment.getAttachmentRelatedObjects() != null;
 
-    final int numRows = dao.update(attachment);
-    if (numRows == 0) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process attachment update");
+    if (!canEditMetadata) {
+      final var attachmentSettings = getAttachmentSettings();
+      final Boolean restrictToAdmins = (Boolean) attachmentSettings.get("restrictToAdmins");
+      if (Boolean.TRUE.equals(restrictToAdmins) && !isAdmin) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "You don't have permission to update this attachment");
+      }
+      if (!hasRelatedObjectsUpdate) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "You don't have permission to update this attachment");
+      }
+    } else {
+      assertAllowedMimeType(attachment.getMimeType());
+      ResourceUtils.assertAllowedClassification(attachment.getClassification());
+
+      final int numRows = dao.update(attachment);
+      if (numRows == 0) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "Could not process attachment update");
+      }
     }
 
-    if (attachment.getAttachmentRelatedObjects() != null) {
+    if (hasRelatedObjectsUpdate) {
       logger.debug("Editing related objects for {}", attachment);
       final List<GenericRelatedObject> existingRelatedObjects =
           existing.loadAttachmentRelatedObjects(engine.getContext()).join();
