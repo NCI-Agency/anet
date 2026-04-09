@@ -34,7 +34,8 @@ public class MartWebService {
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<StreamingResponseBody> getMartDictionary() {
     if (Boolean.FALSE.equals(dict.getDictionaryEntry("featureMartGuiEnabled"))) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MART Feature is not enabled");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "featureMartGuiEnabled is not enabled");
     }
 
     final HttpHeaders headers = new HttpHeaders();
