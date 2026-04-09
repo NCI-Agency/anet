@@ -124,6 +124,9 @@ const GQL_GET_REPORT = gql`
       attachments {
         ${gqlMinimalAttachmentFields}
       }
+      event {
+        ${gqlEntityFieldsMap.Event}
+      }
       ${gqlReportWorkflowFields}
       approvalStep {
         ${gqlApprovalStepFields}
@@ -303,6 +306,21 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
               className="reportField"
               hideIfEmpty
             />
+            {report.event && (
+              <DictionaryField
+                wrappedComponent={CompactRow}
+                dictProps={Settings.fields.report.event}
+                content={
+                  <LinkTo
+                    modelType="Event"
+                    showAvatar={false}
+                    model={report.event}
+                  />
+                }
+                className="reportField"
+                hideIfEmpty
+              />
+            )}
             {report.cancelled && (
               <DictionaryField
                 wrappedComponent={CompactRow}
