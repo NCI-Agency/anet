@@ -66,6 +66,8 @@ import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.ws.security.AccessTokenAuthentication;
+import mil.dds.anet.ws.security.BearerTokenService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.provider.Arguments;
@@ -73,6 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
@@ -96,6 +99,9 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
 
   @Autowired
   protected AdminDao adminDao;
+
+  @Autowired
+  private BearerTokenService bearerTokenService;
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -650,4 +656,16 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
       }
     }
   }
+
+  protected void setAuthentication(String bearerToken) {
+    var accessTokenAuthentication = createAccessTokenAuthentication(bearerToken);
+    SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
+  }
+
+  private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {
+    var accessToken = bearerTokenService.getAccessPrincipalFromAuthHeader(bearerToken);
+    assertThat(accessToken.isEmpty()).isFalse();
+    return new AccessTokenAuthentication(accessToken.get());
+  }
+
 }

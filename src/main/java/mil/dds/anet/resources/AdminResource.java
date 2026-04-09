@@ -57,7 +57,7 @@ public class AdminResource {
 
   public static final String ADMIN_RESOURCE_PATH = "/api/admin";
   public static final String DICTIONARY_PATH = "/dictionary";
-  public static final String DICTIONARY_MART_PATH = "/mart";
+  public static final String DICTIONARY_MART_PATH = "/martDictionary";
   public static final String ADMIN_DICTIONARY_RESOURCE_PATH = ADMIN_RESOURCE_PATH + DICTIONARY_PATH;
 
   private final AnetConfig config;
@@ -108,7 +108,7 @@ public class AdminResource {
     return dict.getDictionary();
   }
 
-  @GetMapping(path = DICTIONARY_PATH + DICTIONARY_MART_PATH)
+  @GetMapping(path = DICTIONARY_MART_PATH)
   public ResponseEntity<StreamingResponseBody> getMartDictionary(Principal principal) {
     if (Boolean.FALSE.equals(dict.getDictionaryEntry("featureMartGuiEnabled"))) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MART Feature is not enabled");
@@ -116,29 +116,12 @@ public class AdminResource {
     final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     AuthUtils.assertAdministrator(user);
 
-    // Create MART dictionary
-    final Map<String, Object> dictionaryForMart = martDictionaryService.createDictionaryForMart();
-
-    // Dump to Yaml and return
-    final DumperOptions options = new DumperOptions();
-    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-    options.setIndent(2);
-    options.setIndicatorIndent(2);
-    options.setIndentWithIndicator(true);
-
-    final Yaml yaml = new Yaml(options);
-    final StreamingResponseBody responseBody = outputStream -> {
-      try (final Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-        yaml.dump(dictionaryForMart, writer);
-      }
-    };
-
     final HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(
         ContentDisposition.attachment().filename("anet-dictionary.yml").build());
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_YAML).headers(headers)
-        .body(responseBody);
+        .body(Utils.toYamlStream(martDictionaryService.createDictionaryForMart()));
   }
 
   /**

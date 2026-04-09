@@ -20,7 +20,7 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 
   public enum TokenScope {
-    NVG, GRAPHQL
+    NVG, GRAPHQL, MART
   }
 
   @GraphQLQuery

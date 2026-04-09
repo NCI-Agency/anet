@@ -1592,6 +1592,8 @@ INSERT INTO "accessTokens" (uuid, name, "pointOfContact", description, "tokenHas
   ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token for NVG', 'Arthur Dmin <arthur@example.ns>', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 0),
   -- GRAPHQL token value is W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf
   ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'Rebecca Beccabon, +2-456-7324', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 1),
+  -- MART token value is BwiEPXAx2Oc+kvhAGBwyMvN8iOXxOEVo
+  ('9f117107-1483-4d8e-9ecc-de433be1f5f5', 'Sample Web Service Access Token for MART', 'Rebecca Beccabon, +2-456-7324', 'A sample web service access token for the MART Web Service', 'dL4nKQ4agoM9lkSR5vn6aoNclTlSAMAU059L4sQzrn8=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 2),
   -- GRAPHQL expired token value is 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn
   ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', NULL, 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
 

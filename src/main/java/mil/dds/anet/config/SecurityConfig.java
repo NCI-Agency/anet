@@ -17,6 +17,7 @@ import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.views.UserActivityFilter;
 import mil.dds.anet.ws.GraphQLWebService;
+import mil.dds.anet.ws.MartWebService;
 import mil.dds.anet.ws.security.BearerTokenAuthFilter;
 import mil.dds.anet.ws.security.BearerTokenService;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,6 +122,23 @@ public class SecurityConfig {
         .addFilterBefore(bearerTokenAuthFilter, BasicAuthenticationFilter.class)
         .authorizeHttpRequests(authorize ->
         // Allow all GraphQL web service requests; service itself checks access
+        authorize.anyRequest().permitAll());
+
+    setCommonWebServiceSecurity(http);
+
+    return http.build();
+  }
+
+  @Bean
+  @Order(30)
+  public SecurityFilterChain martWebServiceFilterChain(HttpSecurity http) throws Exception {
+    http
+        // Only applies to MART Web Service endpoint
+        .securityMatcher(MartWebService.MART_WEB_SERVICE)
+        // Insert bearer token authentication filter into the chain
+        .addFilterBefore(bearerTokenAuthFilter, BasicAuthenticationFilter.class)
+        .authorizeHttpRequests(authorize ->
+        // Allow all MART web service requests; service itself checks access
         authorize.anyRequest().permitAll());
 
     setCommonWebServiceSecurity(http);
