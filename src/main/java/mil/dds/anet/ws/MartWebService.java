@@ -31,7 +31,7 @@ public class MartWebService {
   }
 
   @PreAuthorize("hasAuthority('SCOPE_MART')")
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping
   public ResponseEntity<StreamingResponseBody> getMartDictionary() {
     if (Boolean.FALSE.equals(dict.getDictionaryEntry("featureMartGuiEnabled"))) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
