@@ -146,7 +146,7 @@ const AuditTrailTable = ({ pageDispatchers }: AuditTrailTableProps) => {
               filterDefs={peopleFilters}
               onChange={handleSelectedPersonChange}
               objectType={Person}
-              valueKey="name"
+              valueFunc={Person.fullName}
               fields={Person.autocompleteQuery}
               addon={PEOPLE_ICON}
             />
