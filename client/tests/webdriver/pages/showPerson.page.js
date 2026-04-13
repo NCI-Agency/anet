@@ -55,6 +55,106 @@ class ShowPerson extends Page {
     return await browser.$("#edit-attachments")
   }
 
+  async openAttachmentsEdit() {
+    const edit = await this.getEditAttachmentsButton()
+    await edit.waitForDisplayed()
+    await edit.click()
+    await (await this.getAttachments()).waitForExist()
+  }
+
+  async selectAttachmentToLink(caption) {
+    const input = await browser.$('input[name="linkExistingAttachments"]')
+    await input.waitForDisplayed()
+    await input.click()
+    const popover = await browser.$("#linkExistingAttachments-popover")
+    await popover.waitForExist()
+    const allAttachmentsFilter = await browser.$(
+      '//div[@id="linkExistingAttachments-popover"]//button[text()="All attachments"]'
+    )
+    if (await allAttachmentsFilter.isExisting()) {
+      await allAttachmentsFilter.click()
+    } else {
+      const filterSelect = await browser.$(
+        "#linkExistingAttachments-popover select"
+      )
+      if (await filterSelect.isExisting()) {
+        await filterSelect.selectByVisibleText("All attachments")
+      }
+    }
+    await input.setValue(caption)
+    const row = await browser.$(
+      `//div[@id="linkExistingAttachments-popover"]//tbody//tr[.//td[contains(normalize-space(.), "${caption}")]]`
+    )
+    await row.waitForExist()
+    await row.click()
+  }
+
+  async linkSelectedAttachments() {
+    const button = await browser.$('//button[text()="Link selected"]')
+    await button.waitForEnabled()
+    await button.click()
+  }
+
+  async waitForLinkToComplete() {
+    const button = await browser.$('//button[text()="Link selected"]')
+    await browser.waitUntil(
+      async () => {
+        const text = await button.getText()
+        const countExists = await browser
+          .$(".attachment-link-count")
+          .isExisting()
+        return text === "Link selected" && !countExists
+      },
+      { timeout: 15000, timeoutMsg: "Expected link action to complete" }
+    )
+  }
+
+  async getAttachmentCardByUuid(uuid) {
+    const selector = `//div[contains(@class,"attachment-card")]//a[contains(@href,"/attachments/${uuid}/edit")]/ancestor::div[contains(@class,"attachment-card")]`
+    const card = await browser.$(selector)
+    await card.waitForExist({ timeout: 10000 })
+    return card
+  }
+
+  async attachmentCardExistsByUuid(uuid) {
+    const selector = `//div[contains(@class,"attachment-card")]//a[contains(@href,"/attachments/${uuid}/edit")]/ancestor::div[contains(@class,"attachment-card")]`
+    return (await browser.$(selector)).isExisting()
+  }
+
+  async unlinkAttachmentByUuid(uuid) {
+    const card = await this.getAttachmentCardByUuid(uuid)
+    const unlinkButton = await card.$('button[title^="Unlink from this"]')
+    await unlinkButton.waitForClickable()
+    await unlinkButton.click()
+  }
+
+  async waitForAttachmentToDisappear(uuid) {
+    await browser.waitUntil(
+      async () => !(await this.attachmentCardExistsByUuid(uuid)),
+      {
+        timeout: 15000,
+        timeoutMsg: `Expected attachment ${uuid} to be unlinked`
+      }
+    )
+  }
+
+  async ensureAttachmentUnlinked(uuid) {
+    if (await this.attachmentCardExistsByUuid(uuid)) {
+      await this.unlinkAttachmentByUuid(uuid)
+      await this.waitForAttachmentToDisappear(uuid)
+    }
+  }
+
+  async attemptDeleteAttachmentByUuid(uuid) {
+    const card = await this.getAttachmentCardByUuid(uuid)
+    const deleteButton = await card.$("button.btn-outline-danger")
+    await deleteButton.waitForDisplayed()
+    await deleteButton.click()
+    const confirm = await this.getDeleteConfirmButton()
+    await confirm.waitForDisplayed()
+    await confirm.click()
+  }
+
   async getDefaultPreset() {
     return browser.$('//a[text()="Default"]')
   }
