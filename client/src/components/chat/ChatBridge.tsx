@@ -44,23 +44,8 @@ export const useChatBridge = () => {
 }
 
 const DEFAULT_CONTEXT: any = {}
-const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
-  {
-    label: "Summarize",
-    prompt: "Summarize what I'm viewing",
-    icon: "list-bullets"
-  },
-  {
-    label: "Explain",
-    prompt: "Explain what this ANET page is used for",
-    icon: "book"
-  },
-  {
-    label: "Search",
-    prompt: "Help me find reports, people, or tasks",
-    icon: "magnifying-glass"
-  }
-]
+const DEFAULT_SUGGESTIONS: ChatSuggestion[] =
+  Settings.chatAssistant?.defaultSuggestions ?? []
 
 const buildPayload = (ctx?: any, suggestions?: ChatSuggestion[]) => {
   const payload = {
