@@ -25,7 +25,11 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import { ChatSuggestion, useChatBridge } from "components/chat/ChatBridge"
+import {
+  ChatSuggestion,
+  useChatBridge,
+  useChatPageContext
+} from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -62,7 +66,7 @@ import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Alert, Button, Col } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useNavigate, useParams } from "react-router"
@@ -238,11 +242,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   )
   const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
-  const { isReady, open: openChat, send: sendToChat } = useChatBridge()
+  const { open: openChat } = useChatBridge()
 
-  function makeReportSuggestions(): ChatSuggestion[] {
-    return Settings.chatAssistant?.reportShowSuggestions ?? []
-  }
   function buildReportBusinessObject(report: Report) {
     const plainText = truncate(stripHtml(report.reportText || ""))
 
@@ -274,11 +275,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
         nextSteps: report.nextSteps
       }
     }
-  }
-
-  function sendReportContextToAI(report: Report) {
-    const businessObject = buildReportBusinessObject(report)
-    sendToChat(businessObject, makeReportSuggestions())
   }
 
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
@@ -337,12 +333,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     }
   }
 
-  useEffect(() => {
-    if (done || !isReady) {
-      return
-    }
-    sendReportContextToAI(report)
-  }, [done, isReady, report])
+  const chatSuggestions = useMemo<ChatSuggestion[]>(
+    () => Settings.chatAssistant?.reportShowSuggestions ?? [],
+    []
+  )
+  const chatContext = useMemo(
+    () => (data ? buildReportBusinessObject(report) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data]
+  )
+  useChatPageContext(chatContext, chatSuggestions)
 
   if (done) {
     return result
