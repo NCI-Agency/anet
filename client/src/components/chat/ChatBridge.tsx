@@ -119,7 +119,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   }, [])
 
   const onIframeLoad = useCallback(() => {
-    setIsReady(true)
+    lastSentRef.current = null
   }, [])
 
   const send = useCallback(
@@ -181,16 +181,14 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         return
       }
       if (type === "ready") {
-        if (!isReady) {
-          setIsReady(true)
-        }
+        setIsReady(true)
         announceActive()
         flushQueue()
       }
     }
     window.addEventListener("message", onMessage)
     return () => window.removeEventListener("message", onMessage)
-  }, [announceActive, flushQueue, isReady])
+  }, [announceActive, flushQueue])
 
   useEffect(() => {
     if (!isReady) {
@@ -212,27 +210,6 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
     flushQueue()
     return () => window.clearInterval(id)
   }, [announceActive, flushQueue, isReady])
-
-  useEffect(() => {
-    const el = iframeElRef.current
-    if (!el || !isReady) {
-      return
-    }
-    let attempts = 0
-    const max = 20
-    const id = window.setInterval(() => {
-      attempts += 1
-      el.contentWindow?.postMessage(
-        { type: "PING" },
-        chatAssistantOrigin.current
-      )
-      if (isReady || attempts >= max) {
-        window.clearInterval(id)
-      }
-    }, 500)
-    el.contentWindow?.postMessage({ type: "PING" }, chatAssistantOrigin.current)
-    return () => window.clearInterval(id)
-  }, [setIframeEl, isReady])
 
   useEffect(() => {
     announceActive()
