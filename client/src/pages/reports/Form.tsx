@@ -475,22 +475,7 @@ const ReportForm = ({
   }
 
   const chatSuggestions = useMemo<ChatSuggestion[]>(
-    () => [
-      {
-        label: "Suggest improvements",
-        prompt:
-          "Use the ANET field picker UI to choose which report field to improve, then provide the suggestion in the ANET suggestion tool UI.",
-        icon: "lightbulb",
-        iconColor: "yellow"
-      },
-      {
-        label: "Suggest next steps",
-        prompt:
-          "Suggest improvements for the Next Steps field using the ANET suggestion tool UI. Do not include the suggestion in chat.",
-        icon: "lightbulb",
-        iconColor: "yellow"
-      }
-    ],
+    () => Settings.chatAssistant?.reportFormSuggestions ?? [],
     []
   )
 
