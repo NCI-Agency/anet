@@ -241,38 +241,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const { isReady, open: openChat, send: sendToChat } = useChatBridge()
 
   function makeReportSuggestions(): ChatSuggestion[] {
-    return [
-      {
-        label: "Review",
-        prompt: "Review the report",
-        icon: "check-circle",
-        iconColor: "#19aa28ff"
-      },
-      {
-        label: "Summarize",
-        prompt: "Summarize this report",
-        icon: "list-bullets",
-        iconColor: "#000000ff"
-      },
-      {
-        label: "Translate",
-        prompt: "Translate this report",
-        icon: "translate",
-        iconColor: "#1e90ff"
-      },
-      {
-        label: "Spell check",
-        prompt: "Perform a spell check on this report",
-        icon: "pencil",
-        iconColor: "#ff8c00ff"
-      },
-      {
-        label: "Latest report",
-        prompt: "Get the latest report",
-        icon: "arrow-up",
-        iconColor: "#1e90ff"
-      }
-    ]
+    return Settings.chatAssistant?.reportShowSuggestions ?? []
   }
   function buildReportBusinessObject(report: Report) {
     const plainText = truncate(stripHtml(report.reportText || ""))

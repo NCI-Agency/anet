@@ -28,7 +28,10 @@ function splitLines(text?: string) {
 
 // Compute a line-by-line diff between `leftLines` (old) and `mergedLines` (new) using
 // an LCS (Longest Common Subsequence) DP table, returning equal/add/remove operations.
-function computeLineDiff(leftLines: string[], mergedLines: string[]): DiffLine[] {
+function computeLineDiff(
+  leftLines: string[],
+  mergedLines: string[]
+): DiffLine[] {
   const m = leftLines.length
   const n = mergedLines.length
 
@@ -87,11 +90,7 @@ export default function DiffModal({
   const maxLines = Math.max(leftLines.length, rightLines.length)
 
   const mergeLine = useCallback(
-    (
-      lineChoices: Array<DiffSide>,
-      leftLine: string,
-      rightLine: string
-    ) => {
+    (lineChoices: Array<DiffSide>, leftLine: string, rightLine: string) => {
       if (lineChoices.length === 0) {
         return ""
       }
@@ -161,19 +160,16 @@ export default function DiffModal({
     return computeLineDiff(leftLines, mergedLines)
   }, [show, leftLines, mergedText])
 
-  const toggleChoice = useCallback(
-    (idx: number, choice: DiffSide) => {
-      setChoices(prev => {
-        const next = [...prev]
-        const existing = next[idx] ?? []
-        next[idx] = existing.includes(choice)
-          ? existing.filter(item => item !== choice)
-          : [...existing, choice]
-        return next
-      })
-    },
-    []
-  )
+  const toggleChoice = useCallback((idx: number, choice: DiffSide) => {
+    setChoices(prev => {
+      const next = [...prev]
+      const existing = next[idx] ?? []
+      next[idx] = existing.includes(choice)
+        ? existing.filter(item => item !== choice)
+        : [...existing, choice]
+      return next
+    })
+  }, [])
 
   const resetPreview = useCallback(() => {
     const nextChoices: Array<Array<DiffSide>> = new Array(maxLines)
@@ -204,7 +200,11 @@ export default function DiffModal({
   }
   const previewLineStyle = (type: DiffLine["type"]): React.CSSProperties => ({
     background:
-      type === "add" ? "#dcfce7" : type === "remove" ? "#fee2e2" : "transparent",
+      type === "add"
+        ? "#dcfce7"
+        : type === "remove"
+          ? "#fee2e2"
+          : "transparent",
     textDecoration: type === "remove" ? "line-through" : "none",
     fontSize: 16,
     lineHeight: 1.6
@@ -213,9 +213,7 @@ export default function DiffModal({
   return (
     <Modal show={show} onHide={onClose} size="xl" centered>
       <Modal.Header closeButton>
-        <Modal.Title>
-          {title ?? "Diff"}
-        </Modal.Title>
+        <Modal.Title>{title ?? "Diff"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {maxLines === 0 ? (
@@ -335,10 +333,7 @@ export default function DiffModal({
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => onApply(mergedText)}
-          >
+          <Button variant="primary" onClick={() => onApply(mergedText)}>
             Apply to ANET
           </Button>
         </div>

@@ -42,6 +42,7 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import DiffModal from "components/DiffModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import { LeafletWithSelection } from "components/Leaflet"
@@ -104,7 +105,6 @@ import utils from "utils"
 import ReportPeople, {
   forceOnlyAttendingPersonPerRoleToPrimary
 } from "./ReportPeople"
-import DiffModal from "components/DiffModal"
 
 const reportPeopleAutocompleteQuery = `
   ${Person.autocompleteQuery}
@@ -372,11 +372,7 @@ const ReportApplySuggestionListener = ({
     }
 
     window.addEventListener("anet-apply-suggestion", handler)
-    return () =>
-      window.removeEventListener(
-        "anet-apply-suggestion",
-        handler
-      )
+    return () => window.removeEventListener("anet-apply-suggestion", handler)
   }, [
     enabled,
     values,
@@ -485,22 +481,7 @@ const ReportForm = ({
   }
 
   const chatSuggestions = useMemo<ChatSuggestion[]>(
-    () => [
-      {
-        label: "Suggest improvements",
-        prompt:
-          "Use the ANET field picker UI to choose which report field to improve, then provide the suggestion in the ANET suggestion tool UI.",
-        icon: "lightbulb",
-        iconColor: "yellow"
-      },
-      {
-        label: "Suggest next steps",
-        prompt:
-          "Suggest improvements for the Next Steps field using the ANET suggestion tool UI. Do not include the suggestion in chat.",
-        icon: "lightbulb",
-        iconColor: "yellow"
-      }
-    ],
+    () => Settings.chatAssistant?.reportFormSuggestions ?? [],
     []
   )
 
@@ -537,13 +518,10 @@ const ReportForm = ({
     []
   )
 
-  const openDiffModal = useCallback(
-    (detail: OpenSuggestionDiffDetail) => {
-      setDiffDetail(detail)
-      setDiffModalOpen(true)
-    },
-    []
-  )
+  const openDiffModal = useCallback((detail: OpenSuggestionDiffDetail) => {
+    setDiffDetail(detail)
+    setDiffModalOpen(true)
+  }, [])
 
   const applyDiffSelection = useCallback(
     (mergedValue: string) => {
@@ -589,10 +567,7 @@ const ReportForm = ({
 
     window.addEventListener("anet-select-suggestion-field", handler)
     return () =>
-      window.removeEventListener(
-        "anet-select-suggestion-field",
-        handler
-      )
+      window.removeEventListener("anet-select-suggestion-field", handler)
   }, [])
 
   useEffect(() => {
@@ -615,10 +590,7 @@ const ReportForm = ({
 
     window.addEventListener("anet-open-suggestion-diff", handler)
     return () =>
-      window.removeEventListener(
-        "anet-open-suggestion-diff",
-        handler
-      )
+      window.removeEventListener("anet-open-suggestion-diff", handler)
   }, [openDiffModal])
 
   const sendReportContextToAI = useCallback(
