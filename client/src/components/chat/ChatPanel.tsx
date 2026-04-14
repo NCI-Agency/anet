@@ -25,9 +25,9 @@ export default function ChatPanel() {
         ref={setIframeEl}
         onLoad={onIframeLoad}
         src={Settings.chatAssistant.url}
-        title="ChatGPT Panel"
+        title="AI Assistant"
         style={{ width: "100%", height: "100%", border: "none" }}
-        sandbox="allow-scripts allow-same-origin allow-forms"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
         loading="lazy"
       />
     </div>
