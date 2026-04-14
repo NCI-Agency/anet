@@ -1,6 +1,7 @@
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 import io.mateo.cxf.codegen.wsdl2java.Wsdl2Java
+import org.gradle.internal.os.OperatingSystem
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
@@ -13,6 +14,7 @@ plugins {
 	id "com.netflix.nebula.rpm" version "12.3.0"
 	id "org.springframework.boot" version "4.0.5" apply false
 	id 'io.mateo.cxf-codegen' version '2.5.0'
+	id 'org.cyclonedx.bom' version '3.2.4'
 }
 
 apply plugin: 'java'
@@ -50,6 +52,8 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 // Defaults for development variables
 String DEV_DB = "devAnet"
 String TEST_DB = "testAnet"
+// Allows you to use `env VDR_FORMAT=table ./gradlew generateVdr` to see a human-readable VDR table:
+run.environment("VDR_FORMAT", run.environment["VDR_FORMAT"] ?: "cyclonedx-json")
 run.environment("KEYCLOAK_VERSION", run.environment["KEYCLOAK_VERSION"] ?: "latest")
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "postgresql")
 run.environment("DB_VERSION", run.environment["DB_VERSION"] ?: "latest")
@@ -306,6 +310,56 @@ if (run.environment['DB_DRIVER'] == "sqlserver") {
 }
 
 test.environment = run.environment
+
+cyclonedxDirectBom {
+	projectType = org.cyclonedx.model.Component.Type.APPLICATION
+	includeConfigs = ["runtimeClasspath"]
+	xmlOutput.unsetConvention()
+	jsonOutput.set(file("build/reports/SBOM/server-side-bom.json"))
+}
+
+tasks.register('generateVdr') {
+	dependsOn 'checkGrype', 'generateServerSideVdr', 'generateClientSideVdr'
+}
+
+tasks.register('checkGrype', Exec) {
+	def cmd = 'grype'
+	commandLine cmd, '--version'
+	doFirst {
+		def exe = OperatingSystem.current().findInPath(cmd)
+		if (exe == null) {
+			throw new GradleException("${cmd} not found, install with e.g.:\ncurl -sSfL https://get.anchore.io/grype | sh -s -- -b ~/bin")
+		} else {
+			println "Found ${exe.absolutePath} with version:"
+		}
+	}
+}
+
+tasks.register('generateServerSideVdr', Exec) {
+	dependsOn 'cyclonedxDirectBom'
+	doNotTrackState("Needs to re-run every time")
+	def dir = './build/reports'
+	commandLine 'grype', "sbom:${dir}/SBOM/server-side-bom.json", '--output', "${run.environment['VDR_FORMAT']}"
+	outputs.dir "${dir}/VDR"
+	doFirst {
+		if (run.environment['VDR_FORMAT'] != "table") {
+			standardOutput new FileOutputStream("${dir}/VDR/server-side-vdr.json")
+		}
+	}
+}
+
+tasks.register('generateClientSideVdr', Exec) {
+	dependsOn 'yarn_run_generate-sbom'
+	doNotTrackState("Needs to re-run every time")
+	def dir = './client/build/reports'
+	commandLine 'grype', "sbom:${dir}/SBOM/client-side-bom.json", '--output', "${run.environment['VDR_FORMAT']}"
+	outputs.dir "${dir}/VDR"
+	doFirst {
+		if (run.environment['VDR_FORMAT'] != "table") {
+			standardOutput new FileOutputStream("${dir}/VDR/client-side-vdr.json")
+		}
+	}
+}
 
 cxfCodegen {
 	cxfVersion = "${cxfVersion}"
