@@ -2084,7 +2084,52 @@ automaticallyInactivateUsers:
 
 chatAssistant:
   enabled: true
-  url: https://localhost:7002/chat/index.html
+  url: http://localhost:7002/chat/index.html
+  # Each entry requires `label` and `prompt`; `icon` and `iconColor` are optional.
+  defaultSuggestions:
+    - label: Summarize
+      prompt: Summarize what I'm viewing
+      icon: list-bullets
+    - label: Explain
+      prompt: Explain what this ANET page is used for
+      icon: book
+    - label: Search
+      prompt: Help me find reports, people, or tasks
+      icon: magnifying-glass
+  reportFormSuggestions:
+    - label: Suggest improvements
+      prompt: >
+        Use the ANET field picker UI to choose which report field to improve,
+        then provide the suggestion in the ANET suggestion tool UI.
+      icon: lightbulb
+      iconColor: "yellow"
+    - label: Suggest next steps
+      prompt: >
+        Suggest improvements for the Next Steps field using the ANET suggestion
+        tool UI. Do not include the suggestion in chat.
+      icon: lightbulb
+      iconColor: "yellow"
+  reportShowSuggestions:
+    - label: Review
+      prompt: Review the report
+      icon: check-circle
+      iconColor: "#19aa28ff"
+    - label: Summarize
+      prompt: Summarize this report
+      icon: list-bullets
+      iconColor: "#000000ff"
+    - label: Translate
+      prompt: Translate this report
+      icon: translate
+      iconColor: "#1e90ff"
+    - label: Spell check
+      prompt: Perform a spell check on this report
+      icon: pencil
+      iconColor: "#ff8c00ff"
+    - label: Latest report
+      prompt: Get the latest report
+      icon: arrow-up
+      iconColor: "#1e90ff"
 
 dashboards:
   - label: dashboard0
