@@ -30,11 +30,7 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import {
-  ChatSuggestion,
-  useChatBridge,
-  useChatPageContext
-} from "components/chat/ChatBridge"
+import { ChatSuggestion, useChatPageContext } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -390,7 +386,7 @@ const ReportForm = ({
 }: ReportFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
-  const { isReady, send: sendToChat } = useChatBridge()
+
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -586,35 +582,6 @@ const ReportForm = ({
     return () =>
       window.removeEventListener("anet-open-suggestion-diff", handler)
   }, [openDiffModal])
-
-  const sendReportContextToAI = useCallback(
-    (report: any) => {
-      const businessObject = buildReportBusinessObject(report)
-      sendToChat(businessObject, chatSuggestions)
-    },
-    [
-      sendToChat,
-      chatSuggestions,
-      selectedSuggestionField?.fieldId,
-      selectedSuggestionField?.fieldLabel
-    ]
-  )
-
-  useEffect(() => {
-    if (!isReady) {
-      return
-    }
-    const currentValues = latestValuesRef.current
-    if (!currentValues) {
-      return
-    }
-    sendReportContextToAI(currentValues)
-  }, [
-    isReady,
-    selectedSuggestionField?.fieldId,
-    selectedSuggestionField?.fieldLabel,
-    sendReportContextToAI
-  ])
 
   const ReportChatContextSync = () => {
     const { values } = useFormikContext<any>()
