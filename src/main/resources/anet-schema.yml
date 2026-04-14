@@ -1474,6 +1474,24 @@ properties:
               type: object
               additionalProperties: true
 
+  chatSuggestionItem: &chatSuggestionItem
+    type: object
+    additionalProperties: false
+    required: [label, prompt]
+    properties:
+      label:
+        type: string
+        description: Button label shown in the chat UI (e.g. "Suggest next steps")
+      prompt:
+        type: string
+        description: Prompt text sent to the AI when the button is clicked
+      icon:
+        type: string
+        description: Blueprint icon name (e.g. "lightbulb", "list-bullets")
+      iconColor:
+        type: string
+        description: CSS colour for the icon (e.g. "yellow", "#1e90ff")
+
   chatAssistant:
     type: object
     additionalProperties: false
@@ -1483,6 +1501,27 @@ properties:
         type: boolean
       url:
         type: string
+      defaultSuggestions:
+        type: array
+        description: >
+          Optional suggestion buttons shown on all pages that do not define their own suggestions.
+          When defined, replaces the built-in global defaults.
+          Each entry must have `label` and `prompt`; `icon` and `iconColor` are optional.
+        items: *chatSuggestionItem
+      reportFormSuggestions:
+        type: array
+        description: >
+          Optional suggestion buttons for the report edit form.
+          When defined, replaces the built-in edit-mode defaults.
+          Each entry must have `label` and `prompt`; `icon` and `iconColor` are optional.
+        items: *chatSuggestionItem
+      reportShowSuggestions:
+        type: array
+        description: >
+          Optional suggestion buttons for the report detail (read-only) page.
+          When defined, replaces the built-in read-mode defaults.
+          Each entry must have `label` and `prompt`; `icon` and `iconColor` are optional.
+        items: *chatSuggestionItem
 
   dashboards:
     type: array
