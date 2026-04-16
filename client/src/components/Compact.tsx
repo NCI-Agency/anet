@@ -79,7 +79,7 @@ const CompactViewS = styled.div`
   width: ${props => props.pageSize.width};
   &:before {
     content: "${props => props.backgroundText}";
-    z-index: -1000;
+    z-index: 1000;
     position: absolute;
     font-weight: 100;
     top: 40%;
