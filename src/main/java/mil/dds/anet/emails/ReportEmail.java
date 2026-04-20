@@ -40,6 +40,7 @@ public class ReportEmail implements AnetEmailAction {
     context.put("reportPeople", getReportPeople(r));
     context.put("sender", sender);
     context.put("comment", comment);
+    context.put("attachments", r.loadAttachments(engine().getContext()).join());
     // Override the classification
     final AnetDictionary dict = ApplicationContextProvider.getDictionary();
     final var siteClassification = ConfidentialityRecord.getConfidentialityLabelForChoice(dict,
