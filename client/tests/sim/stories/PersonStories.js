@@ -93,7 +93,7 @@ async function randomPerson(isUser, status) {
   }
   let email
   if (isUser || fuzzy.withProbability(0.25)) {
-    email = faker.internet.displayName({
+    email = faker.internet.email({
       firstName: name.givenName,
       lastName: name.familyName
     })
@@ -129,7 +129,7 @@ function modifiedPerson() {
     user: identity,
     users: identity,
     emailAddresses: (value, instance) => {
-      const email = faker.internet.displayName({
+      const email = faker.internet.email({
         firstName: instance.givenName,
         lastName: instance.familyName
       })
