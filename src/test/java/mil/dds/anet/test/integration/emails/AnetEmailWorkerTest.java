@@ -11,6 +11,7 @@ import java.util.List;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.test.AnetApplicationTest;
@@ -35,6 +36,9 @@ class AnetEmailWorkerTest extends AnetApplicationTest {
   @Autowired
   private JobHistoryDao jobHistoryDao;
 
+  @Autowired
+  private AttachmentDao attachmentDao;
+
   private String allowedEmail;
   private EmailDao emailDao;
   private FakeSmtpServer emailServer;
@@ -49,7 +53,7 @@ class AnetEmailWorkerTest extends AnetApplicationTest {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, attachmentDao);
 
     allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
     config.setEmailFromAddr("test_from_address" + allowedEmail);

@@ -4,6 +4,7 @@ import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
 import graphql.GraphQLContext;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -148,6 +149,22 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
 
     @SqlQuery("SELECT content FROM attachments WHERE uuid = :uuid")
     InputStream readContent(@Bind("uuid") String uuid);
+  }
+
+  @Transactional
+  public ByteArrayDataSource getContentBlob(final String uuid, String mimeType) {
+    final Handle handle = getDbHandle();
+    try {
+      try (final InputStream inputStream =
+          handle.attach(AttachmentContent.class).readContent(uuid)) {
+        return new ByteArrayDataSource(inputStream, mimeType);
+      } catch (IOException e) {
+        logger.error("Could not transfer content of attachment {}: {}", uuid, e.getMessage());
+        return new ByteArrayDataSource(new byte[0], mimeType);
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Transactional

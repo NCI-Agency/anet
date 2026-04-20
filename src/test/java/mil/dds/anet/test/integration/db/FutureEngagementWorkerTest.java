@@ -22,6 +22,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
@@ -56,6 +57,9 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   private EmailDao emailDao;
 
   @Autowired
+  private AttachmentDao attachmentDao;
+
+  @Autowired
   private EmailAddressDao emailAddressDao;
 
   @Autowired
@@ -86,7 +90,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
     allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
 
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, attachmentDao);
     futureEngagementWorker = new FutureEngagementWorker(dict, jobHistoryDao, reportDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
 

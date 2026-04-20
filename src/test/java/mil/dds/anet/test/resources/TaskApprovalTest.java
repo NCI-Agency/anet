@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.test.client.AnetBeanList_Person;
@@ -105,6 +106,9 @@ class TaskApprovalTest extends AbstractResourceTest {
   @Autowired
   private EmailDao emailDao;
 
+  @Autowired
+  private AttachmentDao attachmentDao;
+
   @BeforeAll
   void setUpEmailServer() throws Exception {
     if (config.getSmtp().isDisabled()) {
@@ -115,7 +119,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final List<String> activeDomainNames = (List<String>) newDict.get("activeDomainNames");
     activeDomainNames.add("example.com");
     dict.setDictionary(newDict);
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, attachmentDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
   }
 
