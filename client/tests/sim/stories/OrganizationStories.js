@@ -141,7 +141,7 @@ async function createHierarchy(user, grow, args) {
     org.status = status
     org.profile = await createHtmlParagraphs()
     if (fuzzy.withProbability(0.5)) {
-      const orgSlug = org.shortName.replace(/[ .]/g, "")
+      const orgSlug = faker.helpers.slugify(org.shortName)
       org.emailAddresses = createEmailAddresses(
         fuzzy.withProbability(0.5),
         `info_${orgSlug}`
