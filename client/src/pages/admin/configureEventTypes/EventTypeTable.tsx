@@ -4,6 +4,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
@@ -207,11 +208,17 @@ const EventTypeTable = ({
                           ? "Deactivate"
                           : "Activate"}
                       </Button>
-                      <RemoveButton
-                        title="Delete event type"
-                        onClick={() => deleteEventType(eventType.uuid)}
-                        disabled={eventType.relatedEventsCount > 0}
-                      />
+                      <ConfirmDestructive
+                        onConfirm={() => deleteEventType(eventType.uuid)}
+                        objectType="event type"
+                        objectDisplay={eventType.name}
+                        variant="outline-danger"
+                        buttonSize="xs"
+                        buttonTitle="Delete event type"
+                        buttonDisabled={eventType.relatedEventsCount > 0}
+                      >
+                        <Icon icon={IconNames.TRASH} />
+                      </ConfirmDestructive>
                     </div>
                   </td>
                 </tr>
