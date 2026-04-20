@@ -569,7 +569,7 @@ const Navigation = ({
                   linkTo="/admin/preferences"
                   handleOnClick={resetPages}
                 >
-                  Default Application Preferences
+                  Default application preferences
                 </SidebarLink>
               </span>
             </Nav>
