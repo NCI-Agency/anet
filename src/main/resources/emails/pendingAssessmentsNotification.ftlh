@@ -30,11 +30,11 @@
     <ul>
       <#list positions as position>
         <li>
-          <a href="${serverUrl}/people/${position.person.uuid}">
-            ${(position.person.rank)!} ${(position.person.name)!}, ${(position.name)!}
+          <a href="${serverUrl}/people/${(position.person.uuid)!}">
+            ${(position.person.objectLabel)!}, ${(position.objectLabel)!}
             <#assign organization = (position.loadOrganization(context).get())!>
             <#if organization.uuid??>
-              @ ${(organization.shortName)!}
+              @ ${(organization.objectLabel)!}
             </#if>
           </a>
         </li>
