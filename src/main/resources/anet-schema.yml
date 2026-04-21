@@ -433,6 +433,7 @@ required:
   - activeDomainNames
   - emailNetworks
   - emailNetworkForNotifications
+  - emailArchive
   - imagery
   - automaticallyAllowAllNewUsers
 properties:
@@ -1401,6 +1402,19 @@ properties:
     type: string
     title: The email network to be used for email notifications sent by ANET
     description: Should be one of the networks listed under `emailNetworks` above.
+
+  emailArchive:
+    type: object
+    additionalProperties: false
+    required: [enabled, addresses]
+    properties:
+      enabled:
+        type: boolean
+      addresses:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
 
   imagery:
     type: object

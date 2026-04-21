@@ -161,9 +161,10 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
     ra.setCreatedAt(Instant.now());
     reportActionDao.insert(ra);
 
+    // email was sent to author and to archive
     expectedIds.add("testApprovalStepReport_1");
-
-    testReportPublicationWorker(1);
+    expectedIds.add(ARCHIVE_ADDRESS);
+    testReportPublicationWorker(2);
 
     // Report should be published now
     testReportPublished(report.getUuid(), false);
@@ -186,9 +187,10 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
     ra.setCreatedAt(Instant.now());
     reportActionDao.insert(ra);
 
+    // email was sent to author and to archive
     expectedIds.add("testPlanningApprovalStepReport_1");
-
-    testReportPublicationWorker(1);
+    expectedIds.add(ARCHIVE_ADDRESS);
+    testReportPublicationWorker(2);
 
     // Report should be published now
     testReportPublished(report.getUuid(), false);
@@ -208,9 +210,10 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
     ra.setCreatedAt(Instant.now());
     reportActionDao.insert(ra);
 
+    // email was sent to author and to archive
     expectedIds.add("testAutomaticallyApprovedReport_1");
-
-    testReportPublicationWorker(1);
+    expectedIds.add(ARCHIVE_ADDRESS);
+    testReportPublicationWorker(2);
 
     // Report should be published now
     testReportPublished(report.getUuid(), true);

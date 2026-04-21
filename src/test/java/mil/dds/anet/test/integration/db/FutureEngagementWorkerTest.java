@@ -410,9 +410,11 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
     // Publish this report
     final int emailSize = emailDao.getAll().size();
     reportDao.publish(report, null);
-    // Should have sent email for publication
-    assertThat(emailDao.getAll()).hasSize(emailSize + 1);
+
+    // email was sent to author and to archive
+    assertThat(emailDao.getAll()).hasSize(emailSize + 2);
     expectedIds.add(toAddressId);
+    expectedIds.add(ARCHIVE_ADDRESS);
 
     setPastDate(report);
     return report;

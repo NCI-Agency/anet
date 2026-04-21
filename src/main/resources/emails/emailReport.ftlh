@@ -438,18 +438,16 @@
       ${sender.name}
     </a>
   </p>
+  <br>
 </#if>
-
-<br>
 
 <#if comment?has_content>
   <div>
     <h3 style="color: #004ee1;">${sender.name} wrote:</h3>
     <p>${comment}</p>
   </div>
+  <br>
 </#if>
-
-<br>
 
 <div class="form-horizontal">
 
