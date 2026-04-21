@@ -8,4 +8,5 @@ import org.springframework.boot.test.context.SpringBootTest;
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AnetApplicationTest {
+  protected static final String ARCHIVE_ADDRESS = "archive";
 }
