@@ -105,7 +105,7 @@ const AttachmentCard = ({
                   onClick={() => onUnlink(attachment)}
                   disabled={unlinkDisabled}
                 >
-                  <Icon icon={IconNames.LINK} />
+                  <Icon icon={IconNames.UNLINK} />
                 </Button>
               )}
               <ConfirmDestructive
