@@ -582,9 +582,7 @@ const EventMatrix = ({
               </tr>
               {_isEmpty(includedEventSeries) ? (
                 <tr className="event-series-row">
-                  <td colSpan={periodDays.length + 1}>
-                    No matching Event Series
-                  </td>
+                  <td>No matching Event Series</td>
                 </tr>
               ) : (
                 includedEventSeries.map(es => {
@@ -622,9 +620,7 @@ const EventMatrix = ({
               </tr>
               {_isEmpty(includedTasks) ? (
                 <tr className="event-series-task-row">
-                  <td colSpan={periodDays.length + 1}>
-                    No matching {Settings.fields.task.shortLabel}
-                  </td>
+                  <td>No matching {Settings.fields.task.shortLabel}</td>
                 </tr>
               ) : (
                 includedTasks.map(task => {

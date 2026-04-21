@@ -1430,8 +1430,23 @@ table.event-matrix > :not(caption) > * > * {
   padding: 0;
 }
 
-table.event-matrix > :not(caption) > * > :is(th, td):first-child {
+table.event-matrix :is(th, td):first-child {
   width: 300px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: white;
+}
+
+table.event-matrix-cell :is(th, td):first-child {
+  position: static;
+  background-color: unset;
+  z-index: unset;
+  width: unset;
+}
+
+table.event-matrix tr.table-primary > :is(th, td):first-child {
+  background-color: var(--bs-table-bg);
 }
 
 table.event-matrix tr.table-primary {
