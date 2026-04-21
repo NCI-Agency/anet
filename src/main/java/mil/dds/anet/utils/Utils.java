@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
@@ -54,6 +55,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
@@ -907,6 +909,38 @@ public class Utils {
     return instant == null ? "-" : dateTimeFormatter.format(instant);
   }
 
+  public static List<Attachment> getAttachments(AbstractCustomizableAnetBean entity,
+      String richText) {
+    final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
+    final List<Attachment> directAttachments = entity.loadAttachments(engine.getContext()).join();
+    final Set<String> directAttachmentUuids =
+        directAttachments.stream().map(Attachment::getUuid).collect(Collectors.toSet());
+    final Set<String> richTextAttachmentUuids = Utils.getAttachmentUuids(richText);
+    richTextAttachmentUuids.removeAll(directAttachmentUuids);
+    final List<Attachment> richTextAttachments =
+        engine.getAttachmentDao().getByIds(new ArrayList<>(richTextAttachmentUuids));
+    return Stream.concat(directAttachments.stream(), richTextAttachments.stream()).toList();
+  }
+
+  private static Set<String> getAttachmentUuids(String htmlString) {
+    final Set<String> attachmentUuids = new HashSet<>();
+    if (!Utils.isEmptyOrNull(htmlString)) {
+      final Document reportDoc = Jsoup.parse(htmlString);
+      final Elements anchors = reportDoc.getElementsByTag(ANCHOR_TAG);
+      anchors.forEach(anchor -> {
+        final Elements anetLinks =
+            anchor.getElementsByAttributeValueStarting(HREF_ATTRIBUTE, ANET_LINK_PREFIX);
+        anetLinks.forEach(anetLink -> {
+          final TypeUuidTuple typeUuidTuple = getTypeUuidTuple(anetLink);
+          if (AttachmentDao.TABLE_NAME.equals(typeUuidTuple.type())) {
+            attachmentUuids.add(typeUuidTuple.uuid());
+          }
+        });
+      });
+    }
+    return attachmentUuids;
+  }
+
   public static String replaceAnetLinks(String htmlString, boolean useCids) {
     final AnetDictionary dict = ApplicationContextProvider.getDictionary();
     final String anetServerUrl = ApplicationContextProvider.getConfig().getServerUrl();
@@ -933,11 +967,15 @@ public class Utils {
   }
 
   private static TypeUuidTuple replaceHref(Element anetLink, String anetServerUrl) {
-    final Attribute href = anetLink.attribute(HREF_ATTRIBUTE);
-    final TypeUuidTuple tut = getTypeUuidTuple(
-        Objects.requireNonNull(href).getValue().replace(ANET_LINK_PREFIX, "").split(":", 2));
+    final TypeUuidTuple tut = getTypeUuidTuple(anetLink);
     anetLink.attr(HREF_ATTRIBUTE, String.format("%s/%s/%s", anetServerUrl, tut.type(), tut.uuid()));
     return tut;
+  }
+
+  private static TypeUuidTuple getTypeUuidTuple(Element anetLink) {
+    final Attribute href = anetLink.attribute(HREF_ATTRIBUTE);
+    return getTypeUuidTuple(
+        Objects.requireNonNull(href).getValue().replace(ANET_LINK_PREFIX, "").split(":", 2));
   }
 
   private static void replaceInnerHtml(Element anetLink, AnetDictionary dict, String anetServerUrl,
