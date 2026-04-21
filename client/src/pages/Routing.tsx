@@ -20,6 +20,7 @@ import AttachmentEdit from "pages/attachments/Edit"
 import MyAttachments from "pages/attachments/MyAttachments"
 import AttachmentShow from "pages/attachments/Show"
 import AuthorizationGroupEdit from "pages/authorizationGroups/Edit"
+import AuthorizationGroupList from "pages/authorizationGroups/List"
 import MyAuthorizationGroups from "pages/authorizationGroups/MyAuthorizationGroups"
 import AuthorizationGroupNew from "pages/authorizationGroups/New"
 import AuthorizationGroupShow from "pages/authorizationGroups/Show"
@@ -328,6 +329,10 @@ const routes = [
       },
       { path: PAGE_URLS.TOP_TASKS, element: <TopTasks /> },
       { path: PAGE_URLS.EVENTS, element: <EventsList /> },
+      {
+        path: PAGE_URLS.AUTHORIZATION_GROUPS,
+        element: <AuthorizationGroupList />
+      },
       {
         path: PAGE_URLS.INSIGHTS,
         children: [{ path: ":insight", element: <InsightsShow /> }]
