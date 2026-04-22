@@ -100,7 +100,10 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
       <Alert variant="warning">Your account is pending approval</Alert>
       <Messages error={stateError} success={stateSuccess} />
       <div className="form-horizontal">
-        <Fieldset title={`${person.rank} ${person.name}`} action={action} />
+        <Fieldset
+          title={`${person.rank} ${Person.fullName(person)}`}
+          action={action}
+        />
         <Fieldset>
           <Container fluid>
             <Row>
