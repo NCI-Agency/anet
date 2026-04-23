@@ -151,7 +151,7 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
     try {
       if (domainUsername != null) {
         final Person user = findPerson(domainUsername);
-        if (user != null) {
+        if (user != null && !Utils.isEmptyOrNull(user.getUuid())) {
           return user;
         }
       } else {

@@ -32,15 +32,17 @@ public class UserActivityFilter extends OncePerRequestFilter {
     // Record activity only if the user is fully authenticated
     if (request.getUserPrincipal() != null) {
       final Person person = SecurityUtils.getPersonFromPrincipal(request.getUserPrincipal());
-      // Store recent user activities in Person bean
-      final Activity activity = new Activity(ResponseUtils.getRemoteAddr(request),
-          ResponseUtils.getReferer(request), DaoUtils.getCurrentMinute());
-      personCache.logActivitiesByPersonUuid(DaoUtils.getUuid(person), activity);
-      // Store this request in the database (only once per minute)
-      final Position position = person.getPosition();
-      final UserActivity userActivity = new UserActivity(person.getUuid(),
-          position == null ? null : position.getOrganizationUuid(), DaoUtils.getCurrentMinute());
-      userActivityDao.insert(userActivity);
+      if (!DaoUtils.isNewUser(person)) {
+        // Store recent user activities in Person bean
+        final Activity activity = new Activity(ResponseUtils.getRemoteAddr(request),
+            ResponseUtils.getReferer(request), DaoUtils.getCurrentMinute());
+        personCache.logActivitiesByPersonUuid(DaoUtils.getUuid(person), activity);
+        // Store this request in the database (only once per minute)
+        final Position position = person.getPosition();
+        final UserActivity userActivity = new UserActivity(person.getUuid(),
+            position == null ? null : position.getOrganizationUuid(), DaoUtils.getCurrentMinute());
+        userActivityDao.insert(userActivity);
+      }
     }
     filterChain.doFilter(request, response);
   }

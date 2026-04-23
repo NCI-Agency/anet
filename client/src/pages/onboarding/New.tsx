@@ -9,7 +9,6 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
-import Settings from "settings"
 
 interface OnboardingNewProps {
   pageDispatchers?: PageDispatchersPropType
@@ -24,9 +23,6 @@ const OnboardingNew = ({ pageDispatchers }: OnboardingNewProps) => {
   })
   usePageTitle("Welcome to ANET")
   const navigate = useNavigate()
-  const approvalMsg = Settings.automaticallyAllowAllNewUsers
-    ? "Let's create a new account for you. We'll grab your basic information and help your superuser get you set up."
-    : "Your access to ANET has been requested. While your approval is pending, please take a moment to fill in your profile."
 
   return (
     <div className="onboarding-new">
@@ -35,10 +31,13 @@ const OnboardingNew = ({ pageDispatchers }: OnboardingNewProps) => {
         ANET is a training system for reporting TAA engagements, and learning
         about past engagements and people.
       </p>
-      <p>{approvalMsg}</p>
+      <p>
+        Before you can start using ANET you need to fill in your basic profile
+        and enroll in ANET.
+      </p>
       <div className="create-account-button-wrapper">
         <Button variant="primary" onClick={onCreateAccountClick}>
-          Fill in your profile
+          Fill in your profile and enroll in ANET
         </Button>
       </div>
     </div>
