@@ -98,6 +98,13 @@ const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
     return (
       <Navigate replace to="/onboarding/new" state={{ nextUrl: location }} />
     )
+  } else if (
+    !currentUser.isPendingVerification() &&
+    location.pathname.startsWith("/onboarding")
+  ) {
+    // Replace with home if user account exists already.
+    // Some users bookmark the onboarding - the very first page they hit.
+    return <Navigate replace to="/" />
   }
 
   return (
