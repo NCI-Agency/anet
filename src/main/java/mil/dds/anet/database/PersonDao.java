@@ -5,11 +5,15 @@ import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.AuditTrail;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
@@ -24,7 +28,9 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PersonPreferenceMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.emails.AnetEmailAction;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
+import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
@@ -551,5 +557,26 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       String personUuid) {
     return new ForeignKeyFetcher<PersonPreference>().load(context,
         FkDataLoaderKey.PERSON_PERSON_PREFERENCES, personUuid);
+  }
+
+  public void sendEmailToAdmins(AnetEmailAction action) {
+    final String emailNetworkForNotifications = Utils.getEmailNetworkForNotifications();
+    final PersonSearchQuery adminQuery = new PersonSearchQuery();
+    adminQuery.setPageSize(0);
+    adminQuery.setStatus(WithStatus.Status.ACTIVE);
+    adminQuery.setIsUser(true);
+    adminQuery.setPositionType(List.of(Position.PositionType.ADMINISTRATOR));
+    adminQuery.setEmailNetwork(emailNetworkForNotifications);
+    final AnetBeanList<Person> adminList = search(adminQuery);
+    final Set<String> emailAddresses = adminList.getList().stream()
+        .map(admin -> admin.loadEmailAddresses(engine().getContext(), emailNetworkForNotifications)
+            .join())
+        .flatMap(Collection::stream).map(EmailAddress::getAddress).collect(Collectors.toSet());
+    if (!emailAddresses.isEmpty()) {
+      final AnetEmail email = new AnetEmail();
+      email.setAction(action);
+      email.setToAddresses(emailAddresses.stream().toList());
+      AnetEmailWorker.sendEmailAsync(email);
+    }
   }
 }
