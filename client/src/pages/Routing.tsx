@@ -361,24 +361,6 @@ const routes = [
               { path: "edit", element: <OnboardingEdit /> },
               { path: "show", element: <OnboardingShow /> }
             ]
-          },
-          {
-            element: (
-              <ProtectedRoute
-                authorizationCallback={currentUser =>
-                  !currentUser?.isPendingVerification()
-                }
-              />
-            ),
-            children: [
-              // Replace with home if user account exists already.
-              // Some users bookmark the onboarding - the very first page they hit.
-              {
-                index: true,
-                path: "*",
-                element: <Navigate replace to={PAGE_URLS.HOME} />
-              }
-            ]
           }
         ]
       },
