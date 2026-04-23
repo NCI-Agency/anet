@@ -5,7 +5,7 @@ import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import LinkTo from "components/LinkTo"
 import React from "react"
-import { Card } from "react-bootstrap"
+import { Button, Card } from "react-bootstrap"
 import { toast } from "react-toastify"
 import utils from "utils"
 import "./Attachment.css"
@@ -24,6 +24,9 @@ interface AttachmentCardProps {
   setError?: (...args: unknown[]) => unknown
   uploadedList?: any[]
   setUploadedList?: (...args: unknown[]) => unknown
+  onUnlink?: (...args: unknown[]) => unknown
+  unlinkTitle?: string
+  unlinkDisabled?: boolean
 }
 
 const AttachmentCard = ({
@@ -33,7 +36,10 @@ const AttachmentCard = ({
   edit,
   setError,
   uploadedList,
-  setUploadedList
+  setUploadedList,
+  onUnlink,
+  unlinkTitle,
+  unlinkDisabled
 }: AttachmentCardProps) => {
   const computedCaptionStyle = captionStyle ?? {
     maxWidth: edit ? "201px" : "176px"
@@ -92,6 +98,16 @@ const AttachmentCard = ({
                   <Icon icon={IconNames.EDIT} className="icon edit" />
                 </LinkTo>
               </div>
+              {onUnlink && (
+                <Button
+                  variant="outline-secondary"
+                  title={unlinkTitle || "Unlink attachment"}
+                  onClick={() => onUnlink(attachment)}
+                  disabled={unlinkDisabled}
+                >
+                  <Icon icon={IconNames.UNLINK} />
+                </Button>
+              )}
               <ConfirmDestructive
                 onConfirm={() => deleteAttachment(attachment)}
                 objectType="attachment"
