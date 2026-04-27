@@ -33,10 +33,10 @@ java {
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.2.0"
-String jdbi3Version = "3.52.0"
+String jdbi3Version = "3.52.1"
 String poiVersion = "5.5.1"
 String simplejavamailVersion = "8.12.6"
-String springShellVersion = "4.0.1"
+String springShellVersion = "4.0.2"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -126,7 +126,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
-	implementation 'com.google.guava:guava:33.5.0-jre' // Pick the non-Android version
+	implementation 'com.google.guava:guava:33.6.0-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.12.0') {
@@ -145,7 +145,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:3.0.1'
+	implementation 'com.networknt:json-schema-validator:3.0.2'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
@@ -156,7 +156,7 @@ dependencies {
 	implementation 'io.github.borewit:svg-sanitizer:0.4.0'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.22.1'
+	implementation 'org.jsoup:jsoup:1.22.2'
 
 	// GraphQL dependencies
 	implementation 'io.leangen.graphql:spqr:0.12.4'
