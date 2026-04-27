@@ -9,6 +9,7 @@ import {
   createApplySuggestionUI,
   renderApplySuggestionFromArgs
 } from "./ui/applySuggestion"
+import { createChecklistUI } from "./ui/checklist"
 import {
   createFieldPickerUI,
   renderFieldPickerFromArgs,
@@ -93,6 +94,35 @@ const fieldPickerUI = createFieldPickerUI(rootEl, async (field: SuggestionField)
   }
 })
 
+const checklistUI = createChecklistUI(rootEl, async req => {
+  try {
+    const result = await app.callServerTool({
+      name: "anet_report_criterion_help",
+      arguments: {
+        fieldId: req.fieldId,
+        criterionId: req.criterionId,
+        criterionLabel: req.criterionLabel,
+        currentText: req.currentText,
+        businessObject: req.businessObject
+      }
+    })
+
+    if (result.isError) return null
+
+    const structured = (result.structuredContent ?? {}) as Record<string, unknown>
+    if (typeof structured.text === "string" && structured.text.length > 0) {
+      return structured.text
+    }
+    const textBlock = (result.content ?? []).find(block => block.type === "text")
+    if (textBlock && "text" in textBlock && typeof textBlock.text === "string") {
+      return textBlock.text
+    }
+    return null
+  } catch {
+    return null
+  }
+})
+
 const toolHandlers = new Map<string, (args: unknown) => void>()
 toolHandlers.set("anet_suggestion", args =>
   renderApplySuggestionFromArgs(applySuggestionUI, args, setStatus)
@@ -100,9 +130,21 @@ toolHandlers.set("anet_suggestion", args =>
 toolHandlers.set("anet_field_picker", args =>
   renderFieldPickerFromArgs(fieldPickerUI, args, setStatus)
 )
+toolHandlers.set("anet_report_checklist", args => checklistUI.render(args))
 
 function resolveToolName(args?: Record<string, unknown>): string {
-  if (typeof args?.toolName === "string") return args.toolName
+  const toolNameFromArgs = typeof args?.toolName === "string" ? args.toolName : null
+  if (toolNameFromArgs && toolHandlers.has(toolNameFromArgs)) return toolNameFromArgs
+
+  const toolNameFromHost =
+    typeof app.getHostContext()?.toolInfo?.tool?.name === "string"
+      ? app.getHostContext()?.toolInfo?.tool?.name
+      : null
+  if (toolNameFromHost && toolHandlers.has(toolNameFromHost)) return toolNameFromHost
+
+  if (args?.checklist && typeof args.checklist === "object") {
+    return "anet_report_checklist"
+  }
   if (Array.isArray(args?.fields)) return "anet_field_picker"
   if (typeof args?.fieldId === "string" || typeof args?.suggestion === "string") {
     return "anet_suggestion"
