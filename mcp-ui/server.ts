@@ -12,6 +12,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { registerAnetSuggestionTool } from "./tools/anetSuggestion.js"
 import { registerAgentSuggestionTool } from "./tools/agentSuggestion.js"
 import { registerFieldPickerTool } from "./tools/fieldPicker.js"
+import { registerReportChecklistTool } from "./tools/reportChecklist.js"
+import { registerReportCriterionHelpTool } from "./tools/reportCriterionHelp.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const RESOURCE_URI = "ui://anet-mcp-ui/app"
@@ -34,6 +36,8 @@ export function createServer() {
   registerAnetSuggestionTool(server)
   registerAgentSuggestionTool(server)
   registerFieldPickerTool(server)
+  registerReportChecklistTool(server)
+  registerReportCriterionHelpTool(server)
 
   registerAppResource(
     server,

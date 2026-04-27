@@ -460,6 +460,8 @@ const ReportForm = ({
       description: plainText,
       suggestionTargetField: selectedSuggestionField,
       suggestionFieldOptions,
+      guidanceCriteria:
+        Settings.chatAssistant?.reportGuidanceCriteria ?? null,
       relatedContext: {
         classification: report.classification,
         engagementDate: report.engagementDate,
