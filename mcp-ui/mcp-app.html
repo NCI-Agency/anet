@@ -72,6 +72,94 @@
         color: #64748b;
         padding-left: 6px;
       }
+      .checklist-section {
+        margin-top: 4px;
+      }
+      .checklist-section-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #0f172a;
+        margin: 12px 0 6px;
+      }
+      .checklist-items {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .checklist-item {
+        display: grid;
+        grid-template-columns: 20px 1fr auto;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+      }
+      .checklist-item--pass {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+      }
+      .checklist-item--fail {
+        background: #fef2f2;
+        border-color: #fecaca;
+      }
+      .checklist-item--needs_ai {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+      }
+      .checklist-icon {
+        font-weight: 700;
+        font-size: 15px;
+        text-align: center;
+      }
+      .checklist-item--pass .checklist-icon {
+        color: #16a34a;
+      }
+      .checklist-item--fail .checklist-icon {
+        color: #dc2626;
+      }
+      .checklist-item--needs_ai .checklist-icon {
+        color: #64748b;
+      }
+      .checklist-label {
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .checklist-help-btn {
+        font-size: 12px;
+        padding: 4px 10px;
+      }
+      .checklist-help {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .checklist-help:empty {
+        display: none;
+      }
+      .criterion-help {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .criterion-help-label {
+        font-weight: 600;
+        font-size: 11px;
+        color: #1d4ed8;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 4px;
+      }
+      .criterion-help-text {
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
     </style>
   </head>
   <body>

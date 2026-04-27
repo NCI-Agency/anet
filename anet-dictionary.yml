@@ -2098,8 +2098,7 @@ chatAssistant:
   reportFormSuggestions:
     - label: Suggest improvements
       prompt: >
-        Use the ANET field picker UI to choose which report field to improve,
-        then provide the suggestion in the ANET suggestion tool UI.
+        Use the ANET field picker UI to choose which report field to improve
       icon: lightbulb
       iconColor: "yellow"
     - label: Suggest next steps
@@ -2108,6 +2107,85 @@ chatAssistant:
         tool UI. Do not include the suggestion in chat.
       icon: lightbulb
       iconColor: "yellow"
+    - label: Review report against guidance
+      prompt: >
+        Call the anet_report_checklist tool with the current report businessObject
+        so the user can see which writing-guidance criteria are met.
+      icon: clipboard-check
+      iconColor: "blue"
+  reportGuidanceCriteria:
+    - fieldId: intent
+      id: purpose-nonempty
+      label: "Engagement Purpose is filled in"
+      heuristic: nonempty
+    - fieldId: intent
+      id: purpose-length-250
+      label: "Purpose is at most 250 characters"
+      heuristic: "maxlength:250"
+    - fieldId: intent
+      id: purpose-links-strategy
+      label: "Purpose links to a strategic or operational objective"
+      mode: needs_ai
+    - fieldId: reportText
+      id: details-nonempty
+      label: "Engagement Details are filled in"
+      heuristic: nonempty
+    - fieldId: reportText
+      id: details-defines-acronyms
+      label: "Acronyms are defined on first use"
+      heuristic: no-undefined-acronyms
+    - fieldId: reportText
+      id: details-links-entities
+      label: "Report is linked to people, tasks, or a location"
+      heuristic: has-entities
+    - fieldId: reportText
+      id: details-facts-vs-analysis
+      label: "Facts are clearly distinguished from analysis"
+      mode: needs_ai
+    - fieldId: reportText
+      id: details-implications
+      label: "Implications, risks, or opportunities are called out"
+      mode: needs_ai
+    - fieldId: keyOutcomes
+      id: outcomes-nonempty
+      label: "Key Outcomes are filled in"
+      heuristic: nonempty
+    - fieldId: keyOutcomes
+      id: outcomes-executive-summary-tone
+      label: "Outcomes read like an executive summary"
+      mode: needs_ai
+    - fieldId: keyOutcomes
+      id: outcomes-strategic-impact
+      label: "Strategic relevance or impact is called out"
+      mode: needs_ai
+    - fieldId: nextSteps
+      id: nextsteps-nonempty
+      label: "Next Steps are filled in"
+      heuristic: nonempty
+    - fieldId: nextSteps
+      id: nextsteps-assigns-responsibility
+      label: "Responsibility is assigned where possible"
+      mode: needs_ai
+    - fieldId: nextSteps
+      id: nextsteps-timeline
+      label: "Timelines or urgency are indicated"
+      heuristic: has-timeline
+    - fieldId: nextSteps
+      id: nextsteps-actionable
+      label: "Items are concrete, actionable follow-ups"
+      mode: needs_ai
+    - fieldId: general
+      id: style-neutral-tone
+      label: "Tone is neutral and professional"
+      mode: needs_ai
+    - fieldId: general
+      id: style-consistent-titles
+      label: "Ranks and titles are used consistently"
+      mode: needs_ai
+    - fieldId: general
+      id: style-flag-inconsistencies
+      label: "No inconsistencies or ambiguities remain"
+      mode: needs_ai
   reportShowSuggestions:
     - label: Review
       prompt: Review the report
