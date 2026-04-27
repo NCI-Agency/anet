@@ -1522,6 +1522,38 @@ properties:
           When defined, replaces the built-in read-mode defaults.
           Each entry must have `label` and `prompt`; `icon` and `iconColor` are optional.
         items: *chatSuggestionItem
+      reportGuidanceCriteria:
+        type: array
+        description: >
+          Per-instance writing-guidance criteria for the report checklist tool.
+          Each entry defines a criterion for a specific report field.
+          When omitted, the MCP tool falls back to built-in hardcoded defaults.
+        items:
+          type: object
+          additionalProperties: false
+          required: [fieldId, id, label]
+          properties:
+            fieldId:
+              type: string
+              description: >
+                Target field: intent, reportText, keyOutcomes, nextSteps, or general.
+            id:
+              type: string
+              description: Unique stable identifier for this criterion.
+            label:
+              type: string
+              description: Human-readable criterion label shown in the checklist UI.
+            heuristic:
+              type: string
+              description: >
+                Named evaluator: nonempty, maxlength:N, no-undefined-acronyms,
+                has-entities, has-responsibility, or has-timeline.
+                If omitted, criterion is treated as needs_ai.
+            mode:
+              type: string
+              enum: [needs_ai]
+              description: >
+                Explicit override to needs_ai (neutral badge, evaluated on-demand by AI).
 
   dashboards:
     type: array
