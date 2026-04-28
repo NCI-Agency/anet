@@ -96,7 +96,11 @@ const ResponsiveLayout = ({ pageProps }: ResponsiveLayoutProps) => {
     !location.pathname.startsWith("/onboarding")
   ) {
     return (
-      <Navigate replace to="/onboarding/new" state={{ nextUrl: location }} />
+      <Navigate
+        replace
+        to={`/onboarding/${!currentUser.uuid ? "new" : "show"}`}
+        state={{ nextUrl: location }}
+      />
     )
   } else if (
     !currentUser.isPendingVerification() &&

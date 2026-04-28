@@ -97,7 +97,10 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
 
   return (
     <div>
-      <Alert variant="warning">Your account is pending approval</Alert>
+      <Alert variant="warning">
+        Your access to ANET has been requested. Your account is pending approval
+        by an administrator.
+      </Alert>
       <Messages error={stateError} success={stateSuccess} />
       <div className="form-horizontal">
         <Fieldset
