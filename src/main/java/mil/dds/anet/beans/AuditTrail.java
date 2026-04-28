@@ -173,7 +173,7 @@ public class AuditTrail extends GenericRelatedObject {
 
   @JsonIgnore
   public String getUpdateDetailsWithLinks() {
-    return Utils.replaceAnetLinks(updateDetails);
+    return Utils.replaceAnetLinks(updateDetails, false);
   }
 
   @Override

@@ -24,6 +24,7 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
@@ -65,6 +66,9 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
 
   @Autowired
   private EmailDao emailDao;
+
+  @Autowired
+  private AttachmentDao attachmentDao;
 
   @Autowired
   private EmailAddressDao emailAddressDao;
@@ -110,7 +114,7 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
 
     allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
 
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, attachmentDao);
     reportPublicationWorker =
         new ReportPublicationWorker(dict, jobHistoryDao, auditTrailDao, reportDao);
     emailServer = new FakeSmtpServer(config.getSmtp());

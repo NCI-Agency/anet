@@ -8,6 +8,7 @@ import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
@@ -21,17 +22,20 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetConfig.SmtpConfiguration;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.simplejavamail.api.email.Email;
+import org.simplejavamail.api.email.EmailPopulatingBuilder;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailValidationException;
 import org.simplejavamail.mailer.MailerBuilder;
@@ -53,13 +57,15 @@ public class AnetEmailWorker extends AbstractWorker {
 
   private final AnetConfig config;
   private final EmailDao dao;
+  private final AttachmentDao attachmentDao;
   private final ObjectMapper mapper;
 
   public AnetEmailWorker(AnetConfig config, AnetDictionary dict, JobHistoryDao jobHistoryDao,
-      EmailDao dao) {
+      EmailDao dao, AttachmentDao attachmentDao) {
     super(dict, jobHistoryDao, "AnetEmailWorker waking up to send emails!");
     this.config = config;
     this.dao = dao;
+    this.attachmentDao = attachmentDao;
     this.mapper = MapperUtils.getDefaultMapper();
 
     setInstance(this);
@@ -190,10 +196,11 @@ public class AnetEmailWorker extends AbstractWorker {
     temp.process(emailContext, writer);
 
     final Session session = Session.getInstance(smtpProps, smtpAuth);
-    final Email mail =
-        EmailBuilder.startingBlank().from(new InternetAddress(config.getEmailFromAddr()))
-            .toMultiple(email.getToAddresses()).withSubject(getEmailSubject(email, emailContext))
-            .withHTMLText(writer.toString()).buildEmail();
+    final EmailPopulatingBuilder builder = EmailBuilder.startingBlank()
+        .from(new InternetAddress(config.getEmailFromAddr())).toMultiple(email.getToAddresses())
+        .withSubject(getEmailSubject(email, emailContext)).withHTMLText(writer.toString());
+    addAttachments(emailContext, builder);
+    final Email mail = builder.buildEmail();
 
     try {
       logger.info("Sending email #{} re: \"{}\" to {}", email.getId(),
@@ -204,6 +211,27 @@ public class AnetEmailWorker extends AbstractWorker {
       logger.error("Sending email #{} failed:", email.getId(), e);
     }
     // Other errors are intentionally thrown, as we want ANET to try again.
+  }
+
+  private void addAttachments(Map<String, Object> emailContext, EmailPopulatingBuilder builder) {
+    @SuppressWarnings("unchecked")
+    final List<Attachment> attachments = (List<Attachment>) emailContext.get("attachments");
+    if (attachments != null) {
+      attachments.forEach(attachment -> {
+        if (!Utils.hasContent(attachment)) {
+          builder.withAttachment(attachment.getUuid(),
+              new ByteArrayDataSource(new byte[0], attachment.getMimeType()),
+              attachment.getCaption());
+        } else if (Utils.isImage(attachment)) {
+          builder.withEmbeddedImage(attachment.getUuid(),
+              attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()));
+        } else {
+          builder.withAttachment(attachment.getUuid(),
+              attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()),
+              attachment.getCaption());
+        }
+      });
+    }
   }
 
   private static final Logger noWorkerLogger =
