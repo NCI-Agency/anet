@@ -317,8 +317,12 @@ function createEmailAddresses(onNs, email, orgEmailAddresses) {
     domainName = orgEmailAddress?.address?.split("@")?.[1]
   }
   if (email && domainName) {
+    const localPart = email.split("@")?.[0]
     return [
-      { network: onNs ? "NS" : "Internet", address: `${email}@${domainName}` }
+      {
+        network: onNs ? "NS" : "Internet",
+        address: `${localPart}@${domainName}`
+      }
     ]
   }
   return null
