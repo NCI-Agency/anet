@@ -44,6 +44,7 @@ import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.emails.AnetEmailAction;
 import mil.dds.anet.emails.ApprovalNeededEmail;
+import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.search.pg.PostgresqlReportSearcher;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -893,6 +894,22 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public void sendEmailToReportPeople(AnetEmailAction action, List<String> peopleUuids) {
     final List<String> emailAddresses = getEmailAddressesBasedOnPreference(peopleUuids,
         PreferenceDao.PREFERENCE_REPORTS, PreferenceDao.CATEGORY_EMAILING);
+    sendEmailToAddresses(action, emailAddresses);
+  }
+
+  public void sendReportToArchive(Report r) {
+    final Boolean emailArchiveEnables = (Boolean) dict().getDictionaryEntry("emailArchive.enabled");
+    if (Boolean.TRUE.equals(emailArchiveEnables)) {
+      @SuppressWarnings("unchecked")
+      final List<String> emailArchiveAddresses =
+          (List<String>) dict().getDictionaryEntry("emailArchive.addresses");
+      final ReportEmail action = new ReportEmail();
+      action.setReport(r);
+      sendEmailToAddresses(action, emailArchiveAddresses);
+    }
+  }
+
+  private static void sendEmailToAddresses(AnetEmailAction action, List<String> emailAddresses) {
     if (!emailAddresses.isEmpty()) {
       AnetEmail email = new AnetEmail();
       email.setAction(action);
@@ -1042,6 +1059,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final int numRows = update(r, firstAuthor.orElse(null));
     if (numRows != 0) {
       sendReportPublishedEmail(r);
+      // Also send the report to the archive
+      sendReportToArchive(r);
     }
     return numRows;
   }
