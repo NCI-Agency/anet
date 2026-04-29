@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.1.6":
-  version: 4.1.6
-  resolution: "@apollo/client@npm:4.1.6"
+"@apollo/client@npm:4.1.9":
+  version: 4.1.9
+  resolution: "@apollo/client@npm:4.1.9"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/ff152317932cb0ba46423161d388d1a2bc0bbc6c8ec6e2e85e915bb2ec22f461effa6fd2bbc8b754babd75ac8b52843f1e3ddf8e501cbe1d9b857e4df2f2f2df
+  checksum: 10c0/b7c71295462b00c5f88a7cb5a0d70ae2671be0ff8997424f2aca9d0b2af9b509c6ae291f6c5f875a997e9da44437258907b0ebbc980fe8e2e4ce5f4f037cd750
   languageName: node
   linkType: hard
 
@@ -7228,7 +7228,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.1.6"
+    "@apollo/client": "npm:4.1.9"
     "@babel/core": "npm:7.29.0"
     "@babel/eslint-parser": "npm:7.28.6"
     "@babel/plugin-proposal-decorators": "npm:7.29.0"
@@ -7288,7 +7288,7 @@ __metadata:
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.4.27"
     ava: "npm:7.0.0"
-    axios: "npm:1.15.0"
+    axios: "npm:1.15.2"
     babel-jest: "npm:30.3.0"
     babel-loader: "npm:10.1.1"
     bootstrap: "npm:5.3.8"
@@ -7324,7 +7324,7 @@ __metadata:
     express-session: "npm:1.19.0"
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.9"
-    geographiclib-mgrs: "npm:1.0.4"
+    geographiclib-mgrs: "npm:1.0.5"
     git-describe: "npm:4.1.1"
     graphiql: "npm:5.2.2"
     graphql: "npm:16.13.2"
@@ -7340,7 +7340,7 @@ __metadata:
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.4.0"
     keycloak-connect: "npm:26.1.1"
-    keycloak-js: "npm:26.2.3"
+    keycloak-js: "npm:26.2.4"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.4.0"
@@ -7350,7 +7350,7 @@ __metadata:
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.18.1"
     milsymbol: "npm:3.0.4"
-    ml-matrix: "npm:6.12.1"
+    ml-matrix: "npm:6.12.2"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.6.1"
     pluralize: "npm:8.0.0"
@@ -7365,14 +7365,14 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
     react-joyride: "npm:3.0.2"
-    react-mosaic-component: "npm:6.1.1"
+    react-mosaic-component: "npm:6.2.0"
     react-redux: "npm:9.2.0"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
-    react-router: "npm:7.14.0"
+    react-router: "npm:7.14.2"
     react-scroll: "npm:1.9.3"
     react-test-renderer: "npm:18.3.1"
-    react-toastify: "npm:11.0.5"
+    react-toastify: "npm:11.1.0"
     react-ultimate-pagination: "npm:1.3.2"
     reactflow: "npm:11.11.4"
     reduce-css-calc: "npm:2.1.8"
@@ -7883,14 +7883,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.15.0":
-  version: 1.15.0
-  resolution: "axios@npm:1.15.0"
+"axios@npm:1.15.2":
+  version: 1.15.2
+  resolution: "axios@npm:1.15.2"
   dependencies:
     follow-redirects: "npm:^1.15.11"
     form-data: "npm:^4.0.5"
     proxy-from-env: "npm:^2.1.0"
-  checksum: 10c0/47e0f860e98d4d7aa145e89ce0cae00e1fb0f1d2485f065c21fce955ddb1dba4103a46bd0e47acd18a27208a7f62c96249e620db575521b92a968619ab133409
+  checksum: 10c0/4eeae0feeaa7fdc1ef24f81f8b378fdadedf4aebdd6bf224484675160f8744cf17b9b0d1c215279979940f7e8ce463beffa2f713099612e428eac238515c81d5
   languageName: node
   linkType: hard
 
@@ -11998,10 +11998,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"geographiclib-mgrs@npm:1.0.4":
-  version: 1.0.4
-  resolution: "geographiclib-mgrs@npm:1.0.4"
-  checksum: 10c0/74e064828bd55acc7fcc0a7f4264a83a45954ea79e6cfdcabb2107874a7e159a1fb29eb8529162c5e4d17ad1c373f4022e5ed0413569aeec7a96eb8446f0a9eb
+"geographiclib-mgrs@npm:1.0.5":
+  version: 1.0.5
+  resolution: "geographiclib-mgrs@npm:1.0.5"
+  checksum: 10c0/13de71d65f30ec905a7c4ccc9a6820633668f09f486dc009a0fb333ebff30a551336d21b9ed79e9a5616b6ec0b768444cdcca6851f2076f5f069a53c5828b074
   languageName: node
   linkType: hard
 
@@ -13070,10 +13070,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-any-array@npm:^2.0.0, is-any-array@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "is-any-array@npm:2.0.1"
-  checksum: 10c0/f9807458a51e63ca1ac27fd6f3a3ace8200f077094e00d9b05b24cfbc9d5594d586d6ecf3416271f26939d5cb93fc52ca869cb5744e77318c3f53ec70b08d61f
+"is-any-array@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "is-any-array@npm:3.0.0"
+  checksum: 10c0/dce09df1dd5688053282dd9929052aaba45529f5122a87afe6d66cfe3a96b69dece808f2abb7509614cc36e78db2b744cef0aea1bee6f84e6b7e4b04ccf8747e
   languageName: node
   linkType: hard
 
@@ -14450,10 +14450,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.2.3":
-  version: 26.2.3
-  resolution: "keycloak-js@npm:26.2.3"
-  checksum: 10c0/9c08a24c9667d31e0a599f19fc8f475499fe212fc399103a1d22c4a3aa87f5a9f43f62ed9a88929ae52ef9626ba695f02d97ab736d238668834e3f9a9de2096d
+"keycloak-js@npm:26.2.4":
+  version: 26.2.4
+  resolution: "keycloak-js@npm:26.2.4"
+  checksum: 10c0/ad1f3e7c07b6b84fd805129e21aefe94b32e48ecdde1c586294720712c0971ff4c49613c025476d30dbff22e5d61a4fc4d294050d5f11e1ecc0646bef2f02311
   languageName: node
   linkType: hard
 
@@ -14782,7 +14782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.18.1, lodash@npm:^4.0.0, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21":
+"lodash@npm:4.18.1, lodash@npm:^4.0.0, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
@@ -15330,42 +15330,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ml-array-max@npm:^1.2.4":
-  version: 1.2.4
-  resolution: "ml-array-max@npm:1.2.4"
+"ml-array-max@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ml-array-max@npm:2.0.0"
   dependencies:
-    is-any-array: "npm:^2.0.0"
-  checksum: 10c0/05eacc44ccc182f6d191bc7cd233c97b55ebd695e423f0f07e2358831af7d7a2f64e2698fee4e1edc9bbcd962b8df2141f52b5403219bc2432a77b2bab8e25df
+    is-any-array: "npm:^3.0.0"
+  checksum: 10c0/1d8ab7af4c2b0525e52786a99ecfd025e784170ec264c8482013911b986d8eb0e3cdf7d7a36174e3187189ebd761140133bccfa8033317b3579266282e18f9ca
   languageName: node
   linkType: hard
 
-"ml-array-min@npm:^1.2.3":
-  version: 1.2.3
-  resolution: "ml-array-min@npm:1.2.3"
+"ml-array-min@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ml-array-min@npm:2.0.0"
   dependencies:
-    is-any-array: "npm:^2.0.0"
-  checksum: 10c0/ba7aef2fd1bfe9f1937efa96242147c0ab30e5af4f22364b419a47f8c194b3c16b96b024fd6562eaddbf2d8648fcda3f54d3c2f394ec58beb756b9ed71c81593
+    is-any-array: "npm:^3.0.0"
+  checksum: 10c0/651d1a45a846e35daec080cc666ef71be1b9cf15cca5a3a995b4c2edcf4c77d9b473e704d2efe6a71f216fa9f1e44ab47f0aa12b1e7aeb3a0a6f0b4ae86956a0
   languageName: node
   linkType: hard
 
-"ml-array-rescale@npm:^1.3.7":
-  version: 1.3.7
-  resolution: "ml-array-rescale@npm:1.3.7"
+"ml-array-rescale@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ml-array-rescale@npm:2.0.0"
   dependencies:
-    is-any-array: "npm:^2.0.0"
-    ml-array-max: "npm:^1.2.4"
-    ml-array-min: "npm:^1.2.3"
-  checksum: 10c0/2b8fca33c38bee3c957e5e2f178d7f109d61acc2add924cc8a4a0eac30dfa2d0974642f25f2b4e46e82f9ac90de275268aca382bd644dac2960a83b349c7e706
+    is-any-array: "npm:^3.0.0"
+    ml-array-max: "npm:^2.0.0"
+    ml-array-min: "npm:^2.0.0"
+  checksum: 10c0/81b1f6befafcdcf2ff8db3b7b60055c1f0ae2e1b69ba216dd5cc184f5437ac89c03a8463dd3cdea4552b53a480a0c6cc40cf1681e9bd2d94e253184ca3539590
   languageName: node
   linkType: hard
 
-"ml-matrix@npm:6.12.1":
-  version: 6.12.1
-  resolution: "ml-matrix@npm:6.12.1"
+"ml-matrix@npm:6.12.2":
+  version: 6.12.2
+  resolution: "ml-matrix@npm:6.12.2"
   dependencies:
-    is-any-array: "npm:^2.0.1"
-    ml-array-rescale: "npm:^1.3.7"
-  checksum: 10c0/1e7a382a9abf099f6650a01056f09072f95bba15f566c1c9d78b208ebef5ba4cd4498d5aeef4a1014e71e059a5101a31fc2d5e3260f812b55b3d610bbd3d5484
+    is-any-array: "npm:^3.0.0"
+    ml-array-rescale: "npm:^2.0.0"
+  checksum: 10c0/5837a95cb6e8dc5e163e435614d757d97fd0e049f369081a5a8d5c472cb4e78a608368615fd3d87ee6b2ac05fdfd9fa41ffa1886a8f180a45a949fc62801b8c3
   languageName: node
   linkType: hard
 
@@ -17005,13 +17005,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-mosaic-component@npm:6.1.1":
-  version: 6.1.1
-  resolution: "react-mosaic-component@npm:6.1.1"
+"react-mosaic-component@npm:6.2.0":
+  version: 6.2.0
+  resolution: "react-mosaic-component@npm:6.2.0"
   dependencies:
     classnames: "npm:^2.3.2"
     immutability-helper: "npm:^3.1.1"
-    lodash: "npm:^4.17.21"
+    lodash: "npm:^4.18.1"
     prop-types: "npm:^15.8.1"
     rdndmb-html5-to-touch: "npm:^8.0.0"
     react-dnd: "npm:^16.0.1"
@@ -17021,7 +17021,7 @@ __metadata:
     uuid: "npm:^9.0.0"
   peerDependencies:
     react: ">=16"
-  checksum: 10c0/31a31b64f2b49f758127e64eb6e3a700d1d05bb5b5ef538b6394a4bd6f3c53f80d9d3cb67e87ea559ed99ab8ed3a423d60ad1ba19ca52a1c82013e1641272d99
+  checksum: 10c0/e54fa1b0695371216b981216c3f18ff77273771b9084927a5842a10194ddccbe1fe6807a12366c2db794cc094f05ac0ae914f63aba12b12605dfda7529f87548
   languageName: node
   linkType: hard
 
@@ -17119,9 +17119,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.14.0":
-  version: 7.14.0
-  resolution: "react-router@npm:7.14.0"
+"react-router@npm:7.14.2":
+  version: 7.14.2
+  resolution: "react-router@npm:7.14.2"
   dependencies:
     cookie: "npm:^1.0.1"
     set-cookie-parser: "npm:^2.6.0"
@@ -17131,7 +17131,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10c0/a496489973cd5e87dcc5c1c7312f4cc99463eb5e0a0f97b3f298467531b754a3227562a83e0c9019b9d2452fd0681d05882ee061af2e0cafb0818f857578b805
+  checksum: 10c0/83dc99158ff4c6513f2df358ca0e9920ba836672e491824ff9cf8d2218049db2859fafce147834f5c990cfe516cfdeefb5ffc3f49f917c0b30c2b22697ed96b7
   languageName: node
   linkType: hard
 
@@ -17189,15 +17189,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:11.0.5":
-  version: 11.0.5
-  resolution: "react-toastify@npm:11.0.5"
+"react-toastify@npm:11.1.0":
+  version: 11.1.0
+  resolution: "react-toastify@npm:11.1.0"
   dependencies:
     clsx: "npm:^2.1.1"
   peerDependencies:
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/50f5b81323ebb1957b2efd0963fac24aa1407155d16ab756ffd6d0f42f8af17e796b3958a9fce13e9d1b945d6c3a5a9ebf13529478474d8a2af4bf1dd0db67d2
+  checksum: 10c0/b621b8272bb9287ec19914b773d91c2f7741eedba253f2986150716d30c82ff069ba9780a7ab4cbb511175b3aeb6e35f003aef3f04742d77df79fb8f4c1c3c98
   languageName: node
   linkType: hard
 
