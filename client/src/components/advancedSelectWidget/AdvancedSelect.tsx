@@ -195,25 +195,26 @@ const AdvancedSelect = ({
 
   const fetchResults = useCallback(
     searchTerms => {
-      const resourceName = objectType.resourceName
-      const listName = selectedFilter?.listName || objectType.listName
-      const queryVars = { pageNum, pageSize }
-      if (latestQueryParams.current) {
-        Object.assign(queryVars, latestQueryParams.current)
-      }
-      if (selectedFilter?.queryVars) {
-        Object.assign(queryVars, selectedFilter?.queryVars)
-      }
-      if (searchTerms) {
-        Object.assign(queryVars, { text: searchTerms + "*" })
-      }
-      if (inclInactive) {
-        delete queryVars.status
-      } else {
-        queryVars.status = Model.STATUS.ACTIVE
-      }
-      const thisRequest = (latestRequest.current = API.query(
-        gql`
+      if (!selectedFilter?.list) {
+        const resourceName = objectType.resourceName
+        const listName = selectedFilter?.listName || objectType.listName
+        const queryVars = { pageNum, pageSize }
+        if (latestQueryParams.current) {
+          Object.assign(queryVars, latestQueryParams.current)
+        }
+        if (selectedFilter?.queryVars) {
+          Object.assign(queryVars, selectedFilter?.queryVars)
+        }
+        if (searchTerms) {
+          Object.assign(queryVars, { text: searchTerms + "*" })
+        }
+        if (inclInactive) {
+          delete queryVars.status
+        } else {
+          queryVars.status = Model.STATUS.ACTIVE
+        }
+        const thisRequest = (latestRequest.current = API.query(
+          gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
               ${gqlPaginationFields}
@@ -223,18 +224,19 @@ const AdvancedSelect = ({
             }
           }
         `,
-        { query: queryVars }
-      ).then(data => {
-        // If this is true there's a newer request happening, stop everything
-        if (thisRequest !== latestRequest.current) {
-          return
-        }
-        setIsLoading(data[listName].totalCount !== 0)
-        setResults(oldResults => ({
-          ...oldResults,
-          ...data[listName]
+          { query: queryVars }
+        ).then(data => {
+          // If this is true there's a newer request happening, stop everything
+          if (thisRequest !== latestRequest.current) {
+            return
+          }
+          setIsLoading(data[listName].totalCount !== 0)
+          setResults(oldResults => ({
+            ...oldResults,
+            ...data[listName]
+          }))
         }))
-      }))
+      }
     },
     [
       fields,
@@ -243,6 +245,7 @@ const AdvancedSelect = ({
       objectType.resourceName,
       pageNum,
       pageSize,
+      selectedFilter?.list,
       selectedFilter?.listName,
       selectedFilter?.queryVars
     ]
@@ -278,6 +281,20 @@ const AdvancedSelect = ({
       setFetchType(FETCH_TYPE.NONE)
     }
   }, [selectedValueAsString])
+
+  useEffect(() => {
+    // No need to fetch the data, it is already provided in the filter definition
+    if (selectedFilter?.list) {
+      setIsLoading(false)
+      setResults(oldResults => ({
+        ...oldResults,
+        list: selectedFilter.list,
+        pageNum,
+        pageSize,
+        totalCount: selectedFilter.list.length
+      }))
+    }
+  }, [pageNum, pageSize, selectedFilter?.list])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -417,15 +434,17 @@ const AdvancedSelect = ({
                                 </div>
                               }
                             />
-                            <UltimatePagination
-                              Component="footer"
-                              componentClassName="searchPagination"
-                              className="float-end"
-                              pageNum={pageNum}
-                              pageSize={pageSize}
-                              totalCount={totalCount}
-                              goToPage={goToPage}
-                            />
+                            {!selectedFilter?.list && (
+                              <UltimatePagination
+                                Component="footer"
+                                componentClassName="searchPagination"
+                                className="float-end"
+                                pageNum={pageNum}
+                                pageSize={pageSize}
+                                totalCount={totalCount}
+                                goToPage={goToPage}
+                              />
+                            )}
                           </Col>
                         </>
                       )}
@@ -552,12 +571,14 @@ const AdvancedSelect = ({
   }
 
   function changeSearchTerms(event) {
-    setSearchTerms(event.target.value)
-    // Reset the results state when the search terms change
-    setResults({})
-    setPageNum(0)
-    // Make sure we don't do a fetch for each character being typed
-    setFetchType(FETCH_TYPE.DEBOUNCED)
+    if (!selectedFilter?.list) {
+      setSearchTerms(event.target.value)
+      // Reset the results state when the search terms change
+      setResults({})
+      setPageNum(0)
+      // Make sure we don't do a fetch for each character being typed
+      setFetchType(FETCH_TYPE.DEBOUNCED)
+    }
   }
 
   function handleOnChangeSelect(event) {
