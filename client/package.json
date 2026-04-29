@@ -115,8 +115,8 @@
   },
   "dependencies": {
     "@apollo/client": "4.1.6",
-    "@blueprintjs/core": "6.11.3",
-    "@blueprintjs/datetime": "6.0.23",
+    "@blueprintjs/core": "6.12.1",
+    "@blueprintjs/datetime": "6.0.25",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@fullcalendar/core": "6.1.20",

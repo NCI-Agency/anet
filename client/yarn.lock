@@ -1586,12 +1586,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:6.11.3, @blueprintjs/core@npm:^6.11.3":
-  version: 6.11.3
-  resolution: "@blueprintjs/core@npm:6.11.3"
+"@blueprintjs/core@npm:6.12.1, @blueprintjs/core@npm:^6.12.1":
+  version: 6.12.1
+  resolution: "@blueprintjs/core@npm:6.12.1"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/icons": "npm:^6.8.0"
+    "@blueprintjs/icons": "npm:^6.9.1"
     "@floating-ui/react": "npm:^0.27.13"
     "@popperjs/core": "npm:^2.11.8"
     classnames: "npm:^2.3.1"
@@ -1599,7 +1599,6 @@ __metadata:
     react-popper: "npm:^2.3.0"
     react-transition-group: "npm:^4.4.5"
     tslib: "npm:~2.6.2"
-    use-sync-external-store: "npm:^1.2.0"
   peerDependencies:
     "@types/react": 18
     react: 18
@@ -1610,17 +1609,17 @@ __metadata:
   bin:
     upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
     upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10c0/85917340c657467b4e0da681900f2c445d43d6388a7f75bc982ceba84925933230ad23c39bc83d9f2ddaab52a4aecf90741f4a857cdc616d743e65d77e977ade
+  checksum: 10c0/1496303f8b5d2117785cee27f4a6d6425d50f45ac35839e4aeb8e3469162e97e3c218ceb5b020ff91a7e0012fb60b8e936f4cd0a43ad6ac7a7b50d2898ab94e3
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime@npm:6.0.23":
-  version: 6.0.23
-  resolution: "@blueprintjs/datetime@npm:6.0.23"
+"@blueprintjs/datetime@npm:6.0.25":
+  version: 6.0.25
+  resolution: "@blueprintjs/datetime@npm:6.0.25"
   dependencies:
-    "@blueprintjs/core": "npm:^6.11.3"
-    "@blueprintjs/icons": "npm:^6.8.0"
-    "@blueprintjs/select": "npm:^6.1.8"
+    "@blueprintjs/core": "npm:^6.12.1"
+    "@blueprintjs/icons": "npm:^6.9.1"
+    "@blueprintjs/select": "npm:^6.1.10"
     classnames: "npm:^2.3.1"
     date-fns: "npm:^2.28.0"
     date-fns-tz: "npm:^2.0.0"
@@ -1634,13 +1633,13 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/c360dfc4cb9d21dd4e63ec6575b620c917304836e9d223a195c1c2fe799e1f14ccdd48d7276e8943a74b5adbc61d417667e61a109591d5b2416954761c2d3d01
+  checksum: 10c0/c2b4b921b7d27c7b5e1fff7f96ff3d2fd767d29b6ff7b39c604e93196aaa22a220606e0fc48a0dd3de71381a8cc4605b983e0088dcfcb21abb4aef1d522ba6ce
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^6.8.0":
-  version: 6.8.0
-  resolution: "@blueprintjs/icons@npm:6.8.0"
+"@blueprintjs/icons@npm:^6.9.1":
+  version: 6.9.1
+  resolution: "@blueprintjs/icons@npm:6.9.1"
   dependencies:
     change-case: "npm:^4.1.2"
     classnames: "npm:^2.3.1"
@@ -1652,17 +1651,17 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/eaf8ed0e0d3f56da8c243bbc208d80bfd38c3e44e50e1fae85177c27726e36c5414ed2dde1601de42e37daf4cefc88af4bc89ba7a68d645d3df5483e59497d59
+  checksum: 10c0/5958a5168065adddf46590a8d5862f45a26715ee983af14cd9f82277e45131b75d9949f7c5c0876bc3836ddf9ed43fdc8d97530f6c9579498485ea9d8fde9030
   languageName: node
   linkType: hard
 
-"@blueprintjs/select@npm:^6.1.8":
-  version: 6.1.8
-  resolution: "@blueprintjs/select@npm:6.1.8"
+"@blueprintjs/select@npm:^6.1.10":
+  version: 6.1.10
+  resolution: "@blueprintjs/select@npm:6.1.10"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/core": "npm:^6.11.3"
-    "@blueprintjs/icons": "npm:^6.8.0"
+    "@blueprintjs/core": "npm:^6.12.1"
+    "@blueprintjs/icons": "npm:^6.9.1"
     classnames: "npm:^2.3.1"
     tslib: "npm:~2.6.2"
   peerDependencies:
@@ -1672,7 +1671,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/1634d13eaa85d374860251bc930e437f0efb144423ddc7e671ba040942e1a474cc32b3b0a5f823a0603a4522828256fc0d07ecad5247da82422f0879f6a63077
+  checksum: 10c0/60334bc08e7c62da94ad1b2906dc30c77f3576365465f16ec7aaa88a1f4c2210a306eead187e144cbb002bd24daca7da11191a1dcc4a69177b91360530671143
   languageName: node
   linkType: hard
 
@@ -7253,8 +7252,8 @@ __metadata:
     "@babel/preset-react": "npm:7.28.5"
     "@babel/register": "npm:7.28.6"
     "@babel/runtime": "npm:7.29.2"
-    "@blueprintjs/core": "npm:6.11.3"
-    "@blueprintjs/datetime": "npm:6.0.23"
+    "@blueprintjs/core": "npm:6.12.1"
+    "@blueprintjs/datetime": "npm:6.0.25"
     "@colors/colors": "npm:1.6.0"
     "@cyclonedx/yarn-plugin-cyclonedx": "npm:3.3.1"
     "@emotion/react": "npm:11.14.0"
@@ -19850,7 +19849,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.2.0, use-sync-external-store@npm:^1.2.2, use-sync-external-store@npm:^1.4.0, use-sync-external-store@npm:^1.5.0, use-sync-external-store@npm:^1.6.0":
+"use-sync-external-store@npm:^1.2.2, use-sync-external-store@npm:^1.4.0, use-sync-external-store@npm:^1.5.0, use-sync-external-store@npm:^1.6.0":
   version: 1.6.0
   resolution: "use-sync-external-store@npm:1.6.0"
   peerDependencies:
