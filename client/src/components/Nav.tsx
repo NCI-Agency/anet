@@ -461,6 +461,15 @@ const Navigation = ({
       </SidebarLink>
 
       <SidebarLink
+        id="communities-nav"
+        linkTo="/communities"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        Communities
+      </SidebarLink>
+
+      <SidebarLink
         id="daily-rollup-nav"
         linkTo="/rollup"
         handleOnClick={resetPages}
