@@ -12,6 +12,7 @@ type AccessToken {
   name: String
   pointOfContact: String
   scope: TokenScope
+  tenants: [Tenant]
   tokenHash: String
   updatedAt: Instant
   uuid: String
@@ -32,6 +33,7 @@ input AccessTokenInput {
   name: String
   pointOfContact: String
   scope: TokenScope
+  tenants: [TenantInput]
   tokenHash: String
   updatedAt: Instant
   uuid: String
@@ -992,6 +994,10 @@ type Mutation {
     """"""
     task: TaskInput
   ): Task
+  createTenant(
+    """"""
+    tenant: TenantInput
+  ): Tenant
   deleteAccessToken(
     """"""
     uuid: String
@@ -1278,6 +1284,13 @@ type Mutation {
     """"""
     task: TaskInput
   ): Int
+  updateTenant(
+    """"""
+    force: Boolean = false
+
+    """"""
+    tenant: TenantInput
+  ): Int
 }
 
 """"""
@@ -1454,6 +1467,7 @@ type Person {
   previousPositions: [PersonPositionHistory]
   rank: String
   status: Status
+  tenants: [Tenant]
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -1483,6 +1497,7 @@ input PersonInput {
   previousPositions: [PersonPositionHistoryInput]
   rank: String
   status: Status
+  tenants: [TenantInput]
   updatedAt: Instant
   user: Boolean
   users: [UserInput]
@@ -1864,6 +1879,11 @@ type Query {
     """"""
     uuids: [String]
   ): [Task]
+  tenant(
+    """"""
+    uuid: String
+  ): Tenant
+  tenantList: [Tenant]
   userActivityList(
     """"""
     query: UserActivitySearchQueryInput
@@ -1895,6 +1915,7 @@ union RelatableObject = AccessToken | Assessment | Attachment | AuthorizationGro
 """"""
 type Report {
   advisorOrg: Organization
+  allTenants: Boolean
   approvalStep: ApprovalStep
   assessments: [Assessment]
   atmosphere: Atmosphere
@@ -1931,6 +1952,7 @@ type Report {
   reportText: String
   state: ReportState
   tasks: [Task]
+  tenants: [Tenant]
   updatedAt: Instant
   uuid: String
   workflow: [ReportAction]
@@ -1963,6 +1985,7 @@ enum ReportCancelledReason {
 """"""
 input ReportInput {
   advisorOrg: OrganizationInput
+  allTenants: Boolean
   approvalStep: ApprovalStepInput
   atmosphere: Atmosphere
   atmosphereDetails: String
@@ -1990,6 +2013,7 @@ input ReportInput {
   reportText: String
   state: ReportState
   tasks: [TaskInput]
+  tenants: [TenantInput]
   updatedAt: Instant
   uuid: String
 }
@@ -2038,6 +2062,7 @@ type ReportPerson {
   rank: String
   reportPosition: Position
   status: Status
+  tenants: [Tenant]
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -2072,6 +2097,7 @@ input ReportPersonInput {
   rank: String
   reportPosition: PositionInput
   status: Status
+  tenants: [TenantInput]
   updatedAt: Instant
   user: Boolean
   users: [UserInput]
@@ -2396,6 +2422,26 @@ enum TaskSearchSortBy {
   CREATED_AT
   NAME
   RECENT
+}
+
+""""""
+type Tenant {
+  createdAt: Instant
+  members: [Person]
+  name: String
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input TenantInput {
+  createdAt: Instant
+  members: [PersonInput]
+  name: String
+  status: Status
+  updatedAt: Instant
+  uuid: String
 }
 
 """"""
