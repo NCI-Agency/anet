@@ -119,6 +119,7 @@ async function randomPerson(isUser, status) {
       lastName: name.familyName
     })
   }
+  const tenants = isUser ? [await getRandomObject("tenants")] : []
 
   return {
     familyName: () => name.familyName,
@@ -132,6 +133,7 @@ async function randomPerson(isUser, status) {
     biography: async () => await createHtmlParagraphs(),
     user: () => isUser,
     users: () => createUsers(domainUsername),
+    tenants,
     emailAddresses: () => createEmailAddresses(isUser, email)
   }
 }
@@ -172,6 +174,7 @@ const _createPerson = async function (user, isUser, status) {
   await personGenerator.user.always()
   await personGenerator.users.always()
   await personGenerator.phoneNumber.always()
+  await personGenerator.tenants.always()
   await personGenerator.country.always()
   await personGenerator.gender.always()
   await personGenerator.endOfTourDate.always()
