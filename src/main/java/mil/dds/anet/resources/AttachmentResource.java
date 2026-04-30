@@ -90,7 +90,7 @@ public class AttachmentResource {
   @GraphQLQuery(name = "attachmentList")
   public AnetBeanList<Attachment> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") AttachmentSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 
