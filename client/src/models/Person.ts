@@ -162,6 +162,7 @@ export default class Person extends Model {
         .string()
         .nullable()
         .default(() => Model.STATUS.ACTIVE),
+      tenants: yup.array().nullable().default([]),
       assessments: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields
