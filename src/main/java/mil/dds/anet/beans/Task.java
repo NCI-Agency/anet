@@ -169,7 +169,7 @@ public class Task extends AbstractCustomizableAnetBean
     }
     query.setBatchParams(new M2mBatchParams<>("reports", "uuid", "\"reportTasks\"",
         "\"reportUuid\"", "\"taskUuid\""));
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return engine().getReportDao().getReportsBySearch(context, uuid, query);
   }
 

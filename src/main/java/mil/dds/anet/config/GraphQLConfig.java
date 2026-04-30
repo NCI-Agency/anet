@@ -50,6 +50,7 @@ import mil.dds.anet.resources.SavedSearchResource;
 import mil.dds.anet.resources.SubscriptionResource;
 import mil.dds.anet.resources.SubscriptionUpdateResource;
 import mil.dds.anet.resources.TaskResource;
+import mil.dds.anet.resources.TenantResource;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +88,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
   private final SubscriptionResource subscriptionResource;
   private final SubscriptionUpdateResource subscriptionUpdateResource;
   private final TaskResource taskResource;
+  private final TenantResource tenantResource;
 
   public GraphQLConfig(AccessTokenResource accessTokenResource, AdminResource adminResource,
       AnetEmailResource anetEmailResource, ApprovalStepResource approvalStepResource,
@@ -99,7 +101,8 @@ public class GraphQLConfig implements WebMvcConfigurer {
       PersonResource personResource, PositionResource positionResource,
       PreferencesResource preferencesResource, ReportResource reportResource,
       SavedSearchResource savedSearchResource, SubscriptionResource subscriptionResource,
-      SubscriptionUpdateResource subscriptionUpdateResource, TaskResource taskResource) {
+      SubscriptionUpdateResource subscriptionUpdateResource, TaskResource taskResource,
+      TenantResource tenantResource) {
     this.accessTokenResource = accessTokenResource;
     this.adminResource = adminResource;
     this.anetEmailResource = anetEmailResource;
@@ -124,6 +127,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
     this.subscriptionResource = subscriptionResource;
     this.subscriptionUpdateResource = subscriptionUpdateResource;
     this.taskResource = taskResource;
+    this.tenantResource = tenantResource;
   }
 
   @Bean
@@ -196,7 +200,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
         entityAvatarResource, eventResource, eventSeriesResource, eventTypeResource,
         locationResource, martImportedReportsResource, noteResource, organizationResource,
         personResource, positionResource, preferencesResource, reportResource, savedSearchResource,
-        subscriptionResource, subscriptionUpdateResource, taskResource);
+        subscriptionResource, subscriptionUpdateResource, taskResource, tenantResource);
   }
 
   public static class AuthorizationInterceptor implements ResolverInterceptor {

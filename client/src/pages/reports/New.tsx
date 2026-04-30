@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import { initInvisibleFields } from "components/CustomFields"
 import GuidedTour from "components/GuidedTour"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -65,11 +66,7 @@ const ReportNewFetchEvent = ({
     uuid: eventUuid
   })
   return (
-    <ReportNewConditional
-      pageDispatchers={pageDispatchers}
-      {...queryResult}
-      eventUuid={eventUuid}
-    />
+    <ReportNewConditional pageDispatchers={pageDispatchers} {...queryResult} />
   )
 }
 
@@ -77,7 +74,6 @@ interface ReportNewConditionalProps {
   loading?: boolean
   error?: any
   data?: any
-  eventUuid?: string
   pageDispatchers?: PageDispatchersPropType
 }
 
@@ -85,15 +81,12 @@ const ReportNewConditional = ({
   loading,
   error,
   data,
-  eventUuid,
   pageDispatchers
 }: ReportNewConditionalProps) => {
   const { currentUser } = useContext(AppContext)
   const { done, result } = useBoilerplate({
     loading,
     error,
-    modelName: "EventSeries",
-    uuid: eventUuid,
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
@@ -112,7 +105,7 @@ const ReportNewConditional = ({
   // mutates the object
   initInvisibleFields(report, Settings.fields.report.customFields)
 
-  if (currentUser && currentUser.uuid) {
+  if (currentUser?.uuid) {
     const reportPerson = new Person(currentUser)
     reportPerson.primary = true
     reportPerson.author = true
@@ -120,6 +113,9 @@ const ReportNewConditional = ({
     reportPerson.interlocutor = false
     reportPerson.reportPosition = currentUser.position
     report.reportPeople.push(reportPerson)
+    report.tenants = currentUser.tenants?.filter(
+      t => t?.status === Model.STATUS.ACTIVE
+    )
   }
   const reportInitialValues = Object.assign(
     report,
