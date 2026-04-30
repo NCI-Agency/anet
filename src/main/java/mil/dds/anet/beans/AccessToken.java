@@ -42,6 +42,8 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   @GraphQLInputField
   private TokenScope scope;
   // annotated below
+  private List<Tenant> tenants;
+  // annotated below
   private List<AccessTokenActivity> accessTokenActivities;
 
   public String getName() {
@@ -90,6 +92,27 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
 
   public void setScope(TokenScope scope) {
     this.scope = scope;
+  }
+
+  @GraphQLQuery(name = "tenants")
+  public CompletableFuture<List<Tenant>> loadTenants(@GraphQLRootContext GraphQLContext context) {
+    if (tenants != null) {
+      return CompletableFuture.completedFuture(tenants);
+    } else {
+      return engine().getTenantDao().getTenantsForAccessToken(context, uuid).thenApply(o -> {
+        tenants = o;
+        return o;
+      });
+    }
+  }
+
+  public List<Tenant> getTenants() {
+    return tenants;
+  }
+
+  @GraphQLInputField(name = "tenants")
+  public void setTenants(List<Tenant> tenants) {
+    this.tenants = tenants;
   }
 
   @GraphQLQuery(name = "accessTokenActivities")

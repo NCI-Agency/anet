@@ -47,6 +47,7 @@ import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
+import TenantTable from "components/TenantTable"
 import UserTable from "components/UserTable"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -81,6 +82,9 @@ const GQL_GET_PERSON = gql`
         organization {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
       attachments {
         ${gqlAllAttachmentFields}
@@ -307,6 +311,17 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                 <Col md={6}>{rightColumn}</Col>
               </Row>
               <Row>
+                {person.user && (
+                  <Col md={12}>
+                    <FieldHelper.ReadonlyField
+                      field={{ name: "tenants" }}
+                      label={Settings.fields.person.tenants?.label}
+                      humanValue={
+                        <TenantTable tenants={person.tenants} showStatus />
+                      }
+                    />
+                  </Col>
+                )}
                 <Col md={12}>{fullWidthFields}</Col>
                 {attachmentsEnabled && (
                   <Col md={12}>

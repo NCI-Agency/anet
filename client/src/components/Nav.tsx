@@ -227,6 +227,7 @@ const Navigation = ({
   const inAdmin = path.startsWith("/admin")
   const inMerge = path.startsWith("/admin/merge")
   const inUserActivities = path.startsWith("/admin/userActivities")
+  const inTenants = path.startsWith("/admin/tenants")
 
   const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
     const inOrg = path.startsWith("/organizations")
@@ -556,6 +557,14 @@ const Navigation = ({
                   handleOnClick={resetPages}
                 >
                   Configure event types
+                </SidebarLink>
+                <SidebarLink
+                  id="tenants"
+                  linkTo="/admin/tenants"
+                  handleOnClick={resetPages}
+                  isActive={inTenants}
+                >
+                  Tenants
                 </SidebarLink>
                 {Settings.featureMartGuiEnabled && (
                   <SidebarLink

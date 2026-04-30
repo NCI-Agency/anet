@@ -2,7 +2,11 @@ import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { CountryOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  CountryOverlayRow,
+  TenantOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import AttachmentContext from "components/Attachment/AttachmentContext"
@@ -28,12 +32,13 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
+import TenantTable from "components/TenantTable"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import UserInputTable from "components/UserInputTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Location, Person } from "models"
+import { Location, Person, Tenant } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
@@ -98,7 +103,7 @@ const PersonForm = ({
   notesComponent
 }: PersonFormProps) => {
   const routerLocation = useLocation()
-  const { loadAppData, currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser, allTenants } = useContext(AppContext)
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -159,6 +164,12 @@ const PersonForm = ({
     allCountries: {
       label: "All countries",
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
+    }
+  }
+  const tenantsFilters = {
+    allTenants: {
+      label: "All Tenants",
+      list: allTenants
     }
   }
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
@@ -756,6 +767,49 @@ const PersonForm = ({
                     />
                   )}
 
+                  {!forOnboarding && values.user && (
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.person.tenants}
+                      name="tenants"
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("tenants", value, true)
+                      }}
+                      widget={
+                        <AdvancedMultiSelect
+                          fieldName="tenants"
+                          placeholder="Search for tenants…"
+                          value={values.tenants}
+                          renderSelected={
+                            <TenantTable
+                              tenants={values.tenants}
+                              showStatus
+                              showDelete={isAdmin}
+                              noTenantsMessage={
+                                isAdmin ? (
+                                  "No tenants selected; click in the box above to select any"
+                                ) : (
+                                  <div style={{ paddingTop: 9 }}>
+                                    No tenants found
+                                  </div>
+                                )
+                              }
+                            />
+                          }
+                          overlayColumns={["Name", "Status"]}
+                          overlayRenderRow={TenantOverlayRow}
+                          filterDefs={tenantsFilters}
+                          objectType={Tenant}
+                          fields={Tenant.autocompleteQuery}
+                          disabled={!isAdmin}
+                        />
+                      }
+                    />
+                  )}
+
                   {edit && attachmentEditEnabled && (
                     <Field
                       name="uploadAttachments"
@@ -896,6 +950,7 @@ const PersonForm = ({
       person.pendingVerification = false
     }
     person.country = utils.getReference(person.country)
+    person.tenants = person.tenants.map(t => Tenant.filterClientSideFields(t))
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON

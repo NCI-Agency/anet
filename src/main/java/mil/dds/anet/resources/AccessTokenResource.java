@@ -6,12 +6,16 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.AuditTrailDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,12 +23,17 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class AccessTokenResource {
 
+  private final AnetObjectEngine engine;
   private final AuditTrailDao auditTrailDao;
   private final AccessTokenDao accessTokenDao;
+  private final TenantDao tenantDao;
 
-  public AccessTokenResource(AuditTrailDao auditTrailDao, AccessTokenDao accessTokenDao) {
+  public AccessTokenResource(AnetObjectEngine engine, AuditTrailDao auditTrailDao,
+      AccessTokenDao accessTokenDao, TenantDao tenantDao) {
+    this.engine = engine;
     this.auditTrailDao = auditTrailDao;
     this.accessTokenDao = accessTokenDao;
+    this.tenantDao = tenantDao;
   }
 
   @GraphQLQuery(name = "accessToken")
@@ -53,6 +62,10 @@ public class AccessTokenResource {
     AuthUtils.assertAdministrator(user);
     final AccessToken created = accessTokenDao.insert(at);
 
+    if (at.getTenants() != null) {
+      accessTokenDao.insertAccessTokenTenants(at.getUuid(), at.getTenants());
+    }
+
     // Log the change
     auditTrailDao.logCreate(user, AccessTokenDao.TABLE_NAME, created);
     return created;
@@ -75,6 +88,16 @@ public class AccessTokenResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process access token update");
+    }
+
+    // Update Tenants:
+    if (at.getTenants() != null) {
+      final List<Tenant> existingTenants =
+          tenantDao.getTenantsForAccessToken(engine.getContext(), at.getUuid()).join();
+      final List<Tenant> newTenants = at.getTenants();
+      Utils.addRemoveElementsByUuid(existingTenants, newTenants,
+          newTenant -> accessTokenDao.addTenantToAccessToken(newTenant, at),
+          oldTenant -> accessTokenDao.removeTenantFromAccessToken(DaoUtils.getUuid(oldTenant), at));
     }
 
     // Log the change

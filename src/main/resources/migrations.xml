@@ -7309,6 +7309,154 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-multi-tenant-capability" author="gjvoosten">
+		<createTable tableName="tenants">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="status" type="int" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<!-- Create initial tenant -->
+		<sql>
+			INSERT INTO tenants (uuid, name, status, "createdAt", "updatedAt") VALUES
+				(${uuid_function}, 'Tenant #1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		</sql>
+
+		<createTable tableName="peopleTenants">
+			<column name="tenantUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_peopleTenants_tenant"
+			baseTableName="peopleTenants"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<addForeignKeyConstraint
+			constraintName="FK_peopleTenants_person"
+			baseTableName="peopleTenants"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<addUniqueConstraint
+			constraintName="UQ_PeopleTenants_Tenant_Person"
+			tableName="peopleTenants"
+			columnNames="tenantUuid, personUuid"
+		/>
+
+		<!-- Link users to initial tenant -->
+		<sql>
+			INSERT INTO "peopleTenants" ("tenantUuid", "personUuid")
+				SELECT tenants.uuid, people.uuid
+				FROM tenants, people
+				WHERE people.status = 0
+				AND people."user" IS TRUE;
+		</sql>
+
+		<addColumn tableName="reports">
+			<column name="allTenants" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+
+		<createTable tableName="reportTenants">
+			<column name="tenantUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="reportUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_reportTenants_tenant"
+			baseTableName="reportTenants"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<addForeignKeyConstraint
+			constraintName="FK_reportTenants_report"
+			baseTableName="reportTenants"
+			baseColumnNames="reportUuid"
+			referencedTableName="reports"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="CASCADE"
+		/>
+
+		<addUniqueConstraint
+			constraintName="UQ_ReportTenants_Tenant_Report"
+			tableName="reportTenants"
+			columnNames="tenantUuid, reportUuid"
+		/>
+
+		<!-- Link reports to initial tenant -->
+		<sql>
+			INSERT INTO "reportTenants" ("tenantUuid", "reportUuid")
+				SELECT tenants.uuid, reports.uuid
+				FROM tenants, reports;
+		</sql>
+
+		<createTable tableName="accessTokenTenants">
+			<column name="tenantUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="accessTokenUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_accessTokenTenants_tenant"
+			baseTableName="accessTokenTenants"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<addForeignKeyConstraint
+			constraintName="FK_accessTokenTenants_token"
+			baseTableName="accessTokenTenants"
+			baseColumnNames="accessTokenUuid"
+			referencedTableName="accessTokens"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="CASCADE"
+		/>
+
+		<addUniqueConstraint
+			constraintName="UQ_accessTokenTenants_Tenant_AccessToken"
+			tableName="accessTokenTenants"
+			columnNames="tenantUuid, accessTokenUuid"
+		/>
+
+		<!-- Link accessTokens to initial tenant -->
+		<sql>
+			INSERT INTO "accessTokenTenants" ("tenantUuid", "accessTokenUuid")
+			SELECT tenants.uuid, "accessTokens".uuid
+			FROM tenants, "accessTokens";
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

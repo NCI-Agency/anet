@@ -20,6 +20,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -38,6 +39,9 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -581,6 +585,57 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       email.setAction(action);
       email.setToAddresses(emailAddresses.stream().toList());
       AnetEmailWorker.sendEmailAsync(email);
+    }
+  }
+
+  public interface PersonBatch {
+    @SqlBatch("INSERT INTO \"peopleTenants\" (\"personUuid\", \"tenantUuid\") "
+        + "VALUES (:personUuid, :uuid)")
+    void insertPersonTenants(@Bind("personUuid") String personUuid, @BindBean List<Tenant> tenants);
+
+    @SqlUpdate("INSERT INTO \"peopleTenants\" (\"personUuid\", \"tenantUuid\") "
+        + "VALUES (:personUuid, :tenantUuid)")
+    void addTenantToPerson(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid);
+
+    @SqlUpdate("DELETE FROM \"peopleTenants\" "
+        + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
+    void removeTenantFromPerson(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid);
+  }
+
+  @Transactional
+  public void insertPersonTenants(String uuid, List<Tenant> personTenants) {
+    final Handle handle = getDbHandle();
+    try {
+      if (!Utils.isEmptyOrNull(personTenants)) {
+        final PersonBatch pb = handle.attach(PersonBatch.class);
+        pb.insertPersonTenants(uuid, personTenants);
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void addTenantToPerson(Tenant t, Person p) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.addTenantToPerson(p.getUuid(), t.getUuid());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void removeTenantFromPerson(Tenant t, Person p) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.removeTenantFromPerson(p.getUuid(), t.getUuid());
+    } finally {
+      closeDbHandle(handle);
     }
   }
 }

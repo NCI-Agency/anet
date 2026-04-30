@@ -1,6 +1,7 @@
 -- Do a cascading TRUNCATE of all tables created for ANET
 TRUNCATE TABLE "accessTokenActivities" CASCADE;
 TRUNCATE TABLE "accessTokens" CASCADE;
+TRUNCATE TABLE "accessTokenTenants" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
@@ -32,6 +33,7 @@ TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
 TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
+TRUNCATE TABLE "peopleTenants" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 -- Skip preferences, as these are inserted by the migrations
@@ -40,6 +42,7 @@ TRUNCATE TABLE "reportAuthorizedMembers" CASCADE;
 TRUNCATE TABLE "reportCommunities" CASCADE;
 TRUNCATE TABLE "reportPeople" CASCADE;
 TRUNCATE TABLE "reportTasks" CASCADE;
+TRUNCATE TABLE "reportTenants" CASCADE;
 TRUNCATE TABLE "reportsSensitiveInformation" CASCADE;
 TRUNCATE TABLE "reports" CASCADE;
 TRUNCATE TABLE "savedSearches" CASCADE;
@@ -56,6 +59,9 @@ DELETE FROM "locations" WHERE type != 'PAC';
 
 -- ANET Importer user is inserted by the migrations!
 DELETE FROM "people" WHERE "familyName" != 'ANET Importer';
+
+-- Initial Tenant is inserted by the migrations!
+DELETE FROM "tenants" WHERE name != 'Tenant #1';
 
 -- Make sure everything is in UTC
 SET time zone 'UTC';
@@ -137,6 +143,13 @@ INSERT INTO users (uuid, "domainUsername", "personUuid", "createdAt", "updatedAt
 -- Administrators
   (uuid_generate_v4(), 'arthur', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'michael', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Link users to tenant
+INSERT INTO "peopleTenants" ("tenantUuid", "personUuid")
+  SELECT tenants.uuid, people.uuid
+  FROM tenants, people
+  WHERE people.status = 0
+  AND people."user" IS TRUE;
 
 UPDATE people
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"Lorem ipsum dolor sit amet","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
@@ -1606,6 +1619,11 @@ INSERT INTO "accessTokens" (uuid, name, "pointOfContact", description, "tokenHas
   -- GRAPHQL expired token value is 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn
   ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', NULL, 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
 
+-- Link accessTokens to tenant
+INSERT INTO "accessTokenTenants" ("tenantUuid", "accessTokenUuid")
+  SELECT tenants.uuid, "accessTokens".uuid
+  FROM tenants, "accessTokens";
+
 -- Test data for assessments
 
 -- Reports for task assessments
@@ -1869,6 +1887,17 @@ INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "
 -- Add mart imported report
 INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "state", "submittedAt", "receivedAt", "errors") VALUES
   (1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+
+-- Link reports to tenant
+INSERT INTO "reportTenants" ("tenantUuid", "reportUuid")
+  SELECT tenants.uuid, reports.uuid
+  FROM tenants, reports;
+
+-- Add more tenants
+INSERT INTO tenants (uuid, name, status, "createdAt", "updatedAt") VALUES
+  ('f6211c13-20ba-47df-927e-025ae300cc46', 'Department Q', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ef636ea6-c3b0-454c-b9c7-ccce21044798', 'Test Facility', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5737e29c-f9bd-4e0d-ac99-3f4664a22762', 'Inactive Tenant', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add Saved Searches
 INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query", "displayInHomepage", "priority", "homepagePriority", "createdAt", "updatedAt") VALUES
