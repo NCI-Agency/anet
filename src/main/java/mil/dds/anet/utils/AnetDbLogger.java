@@ -15,6 +15,7 @@ import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 import org.jdbi.v3.core.statement.SqlLogger;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ public class AnetDbLogger implements SqlLogger {
               .replace(SubscriptionUpdateDao.SUBSCRIPTION_UPDATE_FIELDS,
                   " <SUBSCRIPTION_UPDATE_FIELDS> ")
               .replace(TaskDao.TASK_FIELDS, " <TASK_FIELDS> ")
+              .replace(TenantDao.TENANT_FIELDS, " <TENANT_FIELDS> ")
               .replaceFirst("LEFT JOIN (mv_fts_\\S+) ON \\S+\\s*=\\s*\\S+", "<$1>")
               .replaceFirst("\\(?(EXP|ISNULL|CASE|ts_rank).* AS (search_rank)", "<$2>");
       logger.debug("{}\t{}", context.getElapsedTime(ChronoUnit.MILLIS), msg);

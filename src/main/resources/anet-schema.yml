@@ -694,7 +694,7 @@ properties:
     type: object
     additionalProperties: false
     required: [task, attachment, authorizationGroup, eventSeries, event, report, person,
-               position, organization, advisor, interlocutor, regular, superuser, administrator]
+               position, organization, tenant, advisor, interlocutor, regular, superuser, administrator]
     properties:
 
       task:
@@ -874,7 +874,7 @@ properties:
         additionalProperties: false
         required: [intent, engagementDate, duration, atmosphere, atmosphereDetails, cancelled,
                    cancelledReason, nextSteps, keyOutcomes, reportText, location, reportPeople,
-                   event, reportCommunities]
+                   event, reportCommunities, allTenants, tenants]
         properties:
           canUnpublishReports:
             type: boolean
@@ -951,6 +951,10 @@ properties:
             "$ref": "#/$defs/inputField"
           reportCommunities:
             "$ref": "#/$defs/excludableInputField"
+          allTenants:
+            "$ref": "#/$defs/inputField"
+          tenants:
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:
@@ -961,7 +965,7 @@ properties:
         additionalProperties: false
         required: [status, givenName, familyName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
-                   biography, authorizationGroups]
+                   biography, authorizationGroups, tenants]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -1010,6 +1014,8 @@ properties:
             "$ref": "#/$defs/inputField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
+          tenants:
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:
@@ -1195,6 +1201,16 @@ properties:
             type: object
             additionalProperties:
               "$ref": "#/$defs/customField"
+
+      tenant:
+        type: object
+        additionalProperties: false
+        required: [status, name]
+        properties:
+          status:
+            "$ref": "#/$defs/labeledField"
+          name:
+            "$ref": "#/$defs/inputField"
 
       advisor:
         type: object

@@ -76,7 +76,7 @@ public class LocationResource {
       @GraphQLArgument(name = "query") LocationSearchQuery query) {
     final Principal principal = DaoUtils.getPrincipalFromContext(context);
     if (principal instanceof Person user) {
-      query.setUser(user);
+      query.setPrincipal(user);
       if (Boolean.TRUE.equals(user.getPendingVerification())) {
         // Unverified users can only search for countries
         query.setType(Location.LocationType.COUNTRY);

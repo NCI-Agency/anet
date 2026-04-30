@@ -255,6 +255,7 @@ export const gqlBasicReportFields = `
   cancelledReason
   releasedAt
   exsum
+  allTenants
 `
 
 export const gqlAllReportFields = `
@@ -298,6 +299,21 @@ export const gqlAllTaskFields = `
   customFields
 `
 
+// Tenant
+export const gqlMinimalTenantFields = `
+  ${gqlMinimalEntityFields}
+  name
+`
+
+export const gqlBasicTenantFields = `
+  ${gqlMinimalTenantFields}
+  ${gqlCommonEntityFields}
+`
+
+export const gqlAllTenantFields = `
+  ${gqlBasicTenantFields}
+`
+
 // Commonly used sub-entities
 
 export const gqlEntityAvatarFields = `
@@ -320,6 +336,7 @@ export const gqlEntityFieldsMap = {
   Position: `${gqlMinimalPositionFields} ${gqlEntityAvatarFields}`,
   Location: `${gqlMinimalLocationFields} ${gqlEntityAvatarFields}`,
   Task: gqlMinimalTaskFields,
+  Tenant: gqlMinimalTenantFields,
   AuthorizationGroup: gqlMinimalAuthorizationGroupFields,
   Attachment: gqlMinimalAttachmentFields,
   Event: `${gqlMinimalEventFields} ${gqlEntityAvatarFields}`,
