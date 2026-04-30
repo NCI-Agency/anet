@@ -9,6 +9,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.lang.invoke.MethodHandles;
+import java.security.Principal;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EngagementsBetweenCommunitiesSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -51,6 +53,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.emails.NewReportCommentEmail;
 import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
@@ -62,6 +65,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -82,10 +86,12 @@ public class ReportResource {
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
   private final ReportActionDao reportActionDao;
+  private final TenantDao tenantDao;
 
   public ReportResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
       AuditTrailDao auditTrailDao, CommentDao commentDao, AssessmentDao assessmentDao,
-      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao) {
+      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao,
+      TenantDao tenantDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.auditTrailDao = auditTrailDao;
@@ -94,6 +100,7 @@ public class ReportResource {
     this.organizationDao = organizationDao;
     this.reportDao = reportDao;
     this.reportActionDao = reportActionDao;
+    this.tenantDao = tenantDao;
   }
 
   public static boolean hasPermission(final Person user, final String reportUuid) {
@@ -127,8 +134,12 @@ public class ReportResource {
   @GraphQLQuery(name = "report")
   public Report getByUuid(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
-    final Person user = DaoUtils.getUserFromContext(context);
-    final Report r = reportDao.getByUuid(uuid, user);
+    final Principal principal = DaoUtils.getPrincipalFromContext(context);
+    final Report r = switch (principal) {
+      case AccessTokenPrincipal accessToken -> reportDao.getByUuid(uuid, accessToken);
+      case Person user -> reportDao.getByUuid(uuid, user);
+      case null, default -> null;
+    };
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -352,6 +363,17 @@ public class ReportResource {
           oldCommunity -> reportDao.removeCommunityFromReport(DaoUtils.getUuid(oldCommunity), r));
     }
 
+    // Update Tenants:
+    if (r.getTenants() != null) {
+      final List<Tenant> existingTenants =
+          tenantDao.getTenantsForReport(engine.getContext(), r.getUuid()).join();
+      final List<Tenant> newTenants =
+          Boolean.TRUE.equals(r.getAllTenants()) ? List.of() : r.getTenants();
+      Utils.addRemoveElementsByUuid(existingTenants, newTenants,
+          newTenant -> reportDao.addTenantToReport(newTenant, r),
+          oldTenant -> reportDao.removeTenantFromReport(DaoUtils.getUuid(oldTenant), r));
+    }
+
     // Update AuthorizedMembers:
     if (r.getAuthorizedMembers() != null) {
       logger.debug("Editing authorized members for {}", r);
@@ -379,7 +401,6 @@ public class ReportResource {
     return existing;
   }
 
-  @SuppressWarnings("checkstyle:MissingSwitchDefault")
   private void assertCanUpdateReport(Report report, Person editor, boolean isAuthor) {
     if (AuthUtils.isAdmin(editor)) {
       // Admins can do *anything*
@@ -434,6 +455,12 @@ public class ReportResource {
     if (r.getState() != ReportState.DRAFT && r.getState() != ReportState.REJECTED) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Cannot submit report unless it is either Draft or Rejected");
+    }
+
+    if (!Boolean.TRUE.equals(r.getAllTenants())
+        && Utils.isEmptyOrNull(r.loadTenants(engine.getContext()).join())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "You must share the report with at least one Tenant");
     }
 
     // Update advisor org
@@ -773,7 +800,7 @@ public class ReportResource {
   public CompletableFuture<AnetBeanList<Report>> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return reportDao.search(context, Utils.getSubFields(env), query);
   }
 

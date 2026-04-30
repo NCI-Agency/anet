@@ -93,7 +93,7 @@ public class SubscriptionResource {
   @GraphQLQuery(name = "mySubscriptions")
   public AnetBeanList<Subscription> getMySubscriptions(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") SubscriptionSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

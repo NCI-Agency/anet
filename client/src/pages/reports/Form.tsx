@@ -13,7 +13,8 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   AuthorizationGroupOverlayRow,
   EventOverlayRow,
-  PersonDetailedOverlayRow
+  PersonDetailedOverlayRow,
+  TenantOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import {
@@ -56,6 +57,7 @@ import {
 } from "components/Page"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
+import TenantTable from "components/TenantTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -69,7 +71,8 @@ import {
   Person,
   Position,
   Report,
-  Task
+  Task,
+  Tenant
 } from "models"
 import moment from "moment"
 import CreateNewLocation from "pages/locations/CreateNewLocation"
@@ -77,7 +80,7 @@ import LocationModal from "pages/locations/LocationModal"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Collapse, Form as FormBS } from "react-bootstrap"
+import { Button, Collapse, Form as FormBS, FormCheck } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 import { toast } from "react-toastify"
@@ -215,7 +218,7 @@ const ReportForm = ({
   showSensitiveInfo: ssi = false,
   notesComponent
 }: ReportFormProps) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, allTenants } = useContext(AppContext)
   const navigate = useNavigate()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
@@ -519,6 +522,17 @@ const ReportForm = ({
           allEntities: {
             label: "Communities of interest",
             queryVars: { distributionList: true }
+          }
+        }
+
+        const tenantsFilters = {
+          myTenants: {
+            label: "My Tenants",
+            list: currentUser.tenants
+          },
+          allTenants: {
+            label: "All Tenants",
+            list: allTenants
           }
         }
 
@@ -905,6 +919,57 @@ const ReportForm = ({
                       />
                     }
                   />
+
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.report.allTenants}
+                    name="allTenants"
+                    component={FieldHelper.SpecialField}
+                    onChange={value =>
+                      setFieldValue("allTenants", value?.target?.checked)
+                    }
+                    widget={
+                      <FormCheck
+                        type="checkbox"
+                        className="pt-2"
+                        checked={values.allTenants}
+                      />
+                    }
+                  />
+
+                  {!values.allTenants && (
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.report.tenants}
+                      name="tenants"
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("tenants", value, true)
+                      }}
+                      widget={
+                        <AdvancedMultiSelect
+                          fieldName="tenants"
+                          placeholder="Search for tenants…"
+                          value={values.tenants}
+                          renderSelected={
+                            <TenantTable
+                              tenants={values.tenants}
+                              showStatus
+                              showDelete
+                              noTenantsMessage="No tenants selected; click in the box above to select any"
+                            />
+                          }
+                          overlayColumns={["Name", "Status"]}
+                          overlayRenderRow={TenantOverlayRow}
+                          filterDefs={tenantsFilters}
+                          objectType={Tenant}
+                          fields={Tenant.autocompleteQuery}
+                        />
+                      }
+                    />
+                  )}
                 </Fieldset>
 
                 <Fieldset
@@ -1710,6 +1775,7 @@ const ReportForm = ({
     report.reportCommunities = values.reportCommunities.map(rc =>
       utils.getReference(rc)
     )
+    report.tenants = values.tenants.map(t => utils.getReference(t))
     report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
     const operation = edit ? "updateReport" : "createReport"

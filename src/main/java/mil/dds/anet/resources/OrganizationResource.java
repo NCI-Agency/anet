@@ -248,7 +248,7 @@ public class OrganizationResource {
   @GraphQLQuery(name = "organizationList")
   public AnetBeanList<Organization> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 
