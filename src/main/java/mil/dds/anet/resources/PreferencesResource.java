@@ -42,7 +42,7 @@ public class PreferencesResource {
   public AnetBeanList<Preference> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PreferenceSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(Utils.getSubFields(env), query);
   }
 
