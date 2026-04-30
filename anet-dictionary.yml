@@ -510,6 +510,10 @@ fields:
       label: Communities of interest
       placeholder: Search for Communities…
       exclude: false
+    allTenants:
+      label: Shared with all tenants
+    tenants:
+      label: Shared with these tenants
     customFields:
       gridLocation:
         type: geo_location
@@ -749,6 +753,8 @@ fields:
       placeholder: Fill in the biography of this person
     authorizationGroups:
       label: Communities
+    tenants:
+      label: Member of these tenants
     customFields:
       placeOfBirth:
         type: anet_object
@@ -1328,6 +1334,13 @@ fields:
             label: Object date
             helpText: Help text for object date field
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
+
+  tenant:
+    status:
+      label: Status
+    name:
+      label: Name
+      placeholder: Fill in the unique name of this tenant
 
   advisor:
     person:
