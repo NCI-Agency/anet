@@ -15,6 +15,7 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
+import TenantTable from "components/TenantTable"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
@@ -74,6 +75,9 @@ const GQL_GET_REPORT = gql`
         taskedOrganizations {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
       ${gqlReportCommunitiesFields}
       interlocutorOrg {
@@ -297,6 +301,28 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
               />
             }
             hideIfEmpty
+          />
+        )}
+
+        {report.allTenants ? (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.report.allTenants}
+            extraColForValue
+            value={utils.formatBoolean(report.allTenants)}
+          />
+        ) : (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.report.tenants}
+            extraColForValue
+            value={
+              <TenantTable
+                tenants={report.tenants}
+                noTenantsMessage="No tenants selected"
+                showStatus
+              />
+            }
           />
         )}
       </div>

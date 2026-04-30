@@ -126,6 +126,9 @@ const GQL_GET_APP_DATA = gql`
           }
         }
       }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
 
     topLevelOrgs: organizationList(
@@ -139,6 +142,10 @@ const GQL_GET_APP_DATA = gql`
         ${gqlEntityFieldsMap.Organization}
         app6standardIdentity
       }
+    }
+
+    allTenants: tenantList {
+      ${gqlEntityFieldsMap.Tenant}
     }
   }
 `
@@ -161,11 +168,13 @@ function processData(data) {
     return {}
   }
   const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
+  const allTenants = data.allTenants
   const currentUser = new Person(data.me)
   const notifications = getNotifications(currentUser.position)
   return {
     currentUser,
     allOrganizations,
+    allTenants,
     notifications
   }
 }
@@ -188,11 +197,13 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
     () => ({
       currentUser: appState.currentUser,
       allOrganizations: appState.allOrganizations,
+      allTenants: appState.allTenants,
       loadAppData: refetch,
       notifications: appState.notifications
     }),
     [
       appState.allOrganizations,
+      appState.allTenants,
       appState.currentUser,
       appState.notifications,
       refetch

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import jakarta.annotation.Nonnull;
+import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
+import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Person;
 
 public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQuery<T>, Cloneable {
@@ -35,7 +37,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private Boolean inMyReports;
   // internal search parameter:
   @JsonIgnore
-  private Person user;
+  private Principal principal;
 
   public AbstractSearchQuery(T defaultSortBy) {
     this.defaultSortBy = defaultSortBy;
@@ -163,7 +165,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   @Override
   public int hashCode() {
     return Objects.hash(status, text, pageNum, pageSize, sortOrder, sortBy, inMyReports,
-        batchParams, user);
+        batchParams, principal);
   }
 
   @Override
@@ -195,11 +197,24 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   }
 
   public Person getUser() {
-    return user;
+    if (principal instanceof Person user) {
+      return user;
+    }
+    return null;
   }
 
-  public void setUser(Person user) {
-    this.user = user;
+  public AccessToken getAccessToken() {
+    if (principal instanceof AccessToken accessToken) {
+      return accessToken;
+    }
+    return null;
   }
 
+  public Principal getPrincipal() {
+    return principal;
+  }
+
+  public void setPrincipal(Principal principal) {
+    this.principal = principal;
+  }
 }

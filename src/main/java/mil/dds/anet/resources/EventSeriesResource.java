@@ -57,7 +57,7 @@ public class EventSeriesResource {
   @GraphQLQuery(name = "eventSeriesList")
   public AnetBeanList<EventSeries> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") EventSeriesSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

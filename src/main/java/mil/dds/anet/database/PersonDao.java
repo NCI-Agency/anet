@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -32,6 +33,9 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -551,5 +555,48 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       String personUuid) {
     return new ForeignKeyFetcher<PersonPreference>().load(context,
         FkDataLoaderKey.PERSON_PERSON_PREFERENCES, personUuid);
+  }
+
+  public interface PersonBatch {
+    @SqlBatch("INSERT INTO \"peopleTenants\" (\"personUuid\", \"tenantUuid\") VALUES (:personUuid, :uuid)")
+    void insertPersonTenants(@Bind("personUuid") String personUuid, @BindBean List<Tenant> tenants);
+  }
+
+  public void insertPersonTenants(String uuid, List<Tenant> personTenants) {
+    final Handle handle = getDbHandle();
+    try {
+      if (!Utils.isEmptyOrNull(personTenants)) {
+        final PersonBatch pb = handle.attach(PersonBatch.class);
+        pb.insertPersonTenants(uuid, personTenants);
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int addTenantToPerson(Tenant t, Person p) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* addTenantToPerson */ INSERT INTO \"peopleTenants\" (\"tenantUuid\", \"personUuid\") "
+              + "VALUES (:tenantUuid, :personUuid)")
+          .bind("personUuid", p.getUuid()).bind("tenantUuid", t.getUuid()).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int removeTenantFromPerson(String tenantUuid, Person p) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* removeTenantFromPerson */ DELETE FROM \"peopleTenants\" "
+              + "WHERE \"personUuid\" = :personUuid AND \"tenantUuid\" = :tenantUuid")
+          .bind("personUuid", p.getUuid()).bind("tenantUuid", tenantUuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 }

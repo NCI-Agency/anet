@@ -193,9 +193,20 @@ const AdvancedSelect = ({
     : null
   const [items, totalCount] = [results?.list ?? [], results?.totalCount ?? 0]
 
+  const staticList = useMemo(
+    () =>
+      inclInactive
+        ? selectedFilter?.list
+        : selectedFilter?.list?.filter(
+            // reversed condition, so items without any status at all are also included
+            item => item?.status !== Model.STATUS.INACTIVE
+          ),
+    [selectedFilter?.list, inclInactive]
+  )
+
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilter?.list) {
+      if (staticList == null) {
         const resourceName = objectType.resourceName
         const listName = selectedFilter?.listName || objectType.listName
         const queryVars = { pageNum, pageSize }
@@ -245,7 +256,7 @@ const AdvancedSelect = ({
       objectType.resourceName,
       pageNum,
       pageSize,
-      selectedFilter?.list,
+      staticList,
       selectedFilter?.listName,
       selectedFilter?.queryVars
     ]
@@ -284,17 +295,17 @@ const AdvancedSelect = ({
 
   useEffect(() => {
     // No need to fetch the data, it is already provided in the filter definition
-    if (selectedFilter?.list) {
+    if (staticList != null) {
       setIsLoading(false)
       setResults(oldResults => ({
         ...oldResults,
-        list: selectedFilter.list,
+        list: staticList,
         pageNum,
         pageSize,
-        totalCount: selectedFilter.list.length
+        totalCount: staticList.length
       }))
     }
-  }, [pageNum, pageSize, selectedFilter?.list])
+  }, [pageNum, pageSize, staticList])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -313,12 +324,14 @@ const AdvancedSelect = ({
       if (!keepSearchText) {
         setSearchTerms(selectedValueAsString)
       }
-      setResults({})
+      if (staticList == null) {
+        setResults({})
+      }
       setPageNum(0)
       setFetchType(FETCH_TYPE.NONE)
       setDoReset(false)
     }
-  }, [doReset, firstFilter, selectedValueAsString, keepSearchText])
+  }, [doReset, firstFilter, selectedValueAsString, keepSearchText, staticList])
 
   const computedDisabledItems = useMemo(() => {
     if (!disableCheckboxIfNullPath) {
@@ -434,7 +447,7 @@ const AdvancedSelect = ({
                                 </div>
                               }
                             />
-                            {!selectedFilter?.list && (
+                            {staticList == null && (
                               <UltimatePagination
                                 Component="footer"
                                 componentClassName="searchPagination"
@@ -556,7 +569,9 @@ const AdvancedSelect = ({
           if (!keepSearchText) {
             setSearchTerms("")
           }
-          setIsLoading(true)
+          if (staticList == null) {
+            setIsLoading(true)
+          }
           setFetchType(FETCH_TYPE.NORMAL)
         } else {
           // overlay is being closed
@@ -571,7 +586,7 @@ const AdvancedSelect = ({
   }
 
   function changeSearchTerms(event) {
-    if (!selectedFilter?.list) {
+    if (staticList == null) {
       setSearchTerms(event.target.value)
       // Reset the results state when the search terms change
       setResults({})

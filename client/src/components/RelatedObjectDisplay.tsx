@@ -24,7 +24,7 @@ export const RelatedObjectDisplay = ({
         ...relatedObject
       }}
     >
-      {!relatedObject && `[deleted ${model}::${relatedObjectUuid}]`}
+      {!relatedObject && `[${model} with uuid ${relatedObjectUuid} not found]`}
     </LinkTo>
   ) : (
     (specialModels?.[relatedObjectType] ??
