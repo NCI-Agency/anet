@@ -346,6 +346,8 @@ function getListEndpoint(type) {
       return ["reportList", "ReportSearchQueryInput"]
     case "tasks":
       return ["taskList", "TaskSearchQueryInput"]
+    case "tenants":
+      return ["tenantList", null]
     default:
       return null
   }
@@ -363,7 +365,7 @@ function getCache(cacheObject, key) {
 
 export async function getRandomObject(
   type,
-  variables,
+  variables = {},
   fields = "uuid",
   ignoreCallback = randomObject => false
 ) {
@@ -382,9 +384,11 @@ export async function getRandomObject(
     const objectQuery = Object.assign({}, variables, {
       pageSize: 0
     })
-    cachedData.cache = (
-      await runGQL(specialUser, {
-        query: `
+
+    if (queryType) {
+      const values = (
+        await runGQL(specialUser, {
+          query: `
       query ($objectQuery: ${queryType}) {
         ${listEndpoint}(query: $objectQuery) {
           totalCount
@@ -394,11 +398,30 @@ export async function getRandomObject(
         }
       }
     `,
-        variables: {
-          objectQuery
+          variables: {
+            objectQuery
+          }
+        })
+      ).data[listEndpoint]
+      cachedData.cache = values
+    } else {
+      const list = (
+        await runGQL(specialUser, {
+          query: `
+      query {
+        ${listEndpoint} {
+          ${fields}
         }
-      })
-    ).data[listEndpoint]
+      }
+    `
+        })
+      ).data[listEndpoint]
+      cachedData.cache = {
+        list,
+        totalCount: list?.length
+      }
+    }
+
     cachedData.timestamp = now
   }
   const data = cachedData.cache
