@@ -245,3 +245,10 @@ export const ReportDetailedOverlayRow = (item: any) => (
     </td>
   </React.Fragment>
 )
+
+export const TenantOverlayRow = (item: any) => (
+  <React.Fragment key={item.uuid}>
+    <td>{item.name}</td>
+    <td>{utils.sentenceCase(item.status)}</td>
+  </React.Fragment>
+)
