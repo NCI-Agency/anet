@@ -235,7 +235,7 @@ public class Event extends AbstractCommonEvent implements RelatableObject, Subsc
       query = new ReportSearchQuery();
     }
     query.setBatchParams(new FkBatchParams<>("reports", "\"eventUuid\""));
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return engine().getReportDao().getReportsBySearch(context, uuid, query);
   }
 

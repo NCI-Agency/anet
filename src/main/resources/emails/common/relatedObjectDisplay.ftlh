@@ -15,7 +15,7 @@
     <#if object??>
       <#assign objectLabel = (object.objectLabel)!"Unspecified">
     <#else>
-      <#assign objectLabel = "[deleted ${subscribableObjectTypes[objectType]}::${objectUuid}]">
+      <#assign objectLabel = "[${subscribableObjectTypes[objectType]} with uuid ${objectUuid} not found]">
     </#if>
     <a href="${serverUrl}/${objectType}/${objectUuid}">${objectLabel}</a>
   <#elseif specialModels[objectType]??>
