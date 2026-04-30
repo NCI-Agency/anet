@@ -5,8 +5,10 @@ import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRIN
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +35,7 @@ import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -47,13 +50,16 @@ import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.search.pg.PostgresqlReportSearcher;
 import mil.dds.anet.threads.AnetEmailWorker;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.dataloader.BatchLoaderEnvironment;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -80,7 +86,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           "engagementDate", "releasedAt", "state", "classification"};
   public static final String[] additionalFields = {"duration", "intent", "exsum", "locationUuid",
       "interlocutorOrganizationUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text",
-      "keyOutcomes", "nextSteps", "customFields", "eventUuid"};
+      "keyOutcomes", "nextSteps", "customFields", "eventUuid", "allTenants"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
@@ -117,15 +123,15 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final Handle handle = getDbHandle();
     try {
       final String sql = "/* insertReport */ INSERT INTO reports "
-          + "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
-          + "text, \"keyOutcomes\", \"nextSteps\", "
-          + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
-          + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-          + "\"interlocutorOrganizationUuid\", \"customFields\", \"classification\", \"eventUuid\") VALUES "
-          + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
-          + ":exsum, :reportText, :keyOutcomes, :nextSteps, :engagementDate, :releasedAt, "
-          + ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
-          + ":interlocutorOrgUuid, :customFields, :classification, :eventUuid)";
+          + "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, text, "
+          + "\"keyOutcomes\", \"nextSteps\", \"engagementDate\", \"releasedAt\", duration, "
+          + "atmosphere, \"cancelledReason\", \"atmosphereDetails\", \"advisorOrganizationUuid\", "
+          + "\"interlocutorOrganizationUuid\", \"customFields\", \"classification\", "
+          + "\"eventUuid\", \"allTenants\") VALUES "
+          + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, :exsum, :reportText, "
+          + ":keyOutcomes, :nextSteps, :engagementDate, :releasedAt, :duration, "
+          + ":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
+          + ":interlocutorOrgUuid, :customFields, :classification, :eventUuid, :allTenants)";
 
       handle.createUpdate(sql).bindBean(r)
           .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -163,6 +169,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         rb.insertReportCommunities(r.getUuid(), r.getReportCommunities());
       }
 
+      if (!Boolean.TRUE.equals(r.getAllTenants()) && r.getTenants() != null) {
+        rb.insertTenants(r.getUuid(), r.getTenants());
+      }
+
       return r;
     } finally {
       closeDbHandle(handle);
@@ -194,34 +204,19 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     @SqlBatch("INSERT INTO \"reportCommunities\" (\"reportUuid\", \"authorizationGroupUuid\") VALUES (:reportUuid, :uuid)")
     void insertReportCommunities(@Bind("reportUuid") String reportUuid,
         @BindBean List<AuthorizationGroup> authorizationGroups);
+
+    @SqlBatch("INSERT INTO \"reportTenants\" (\"reportUuid\", \"tenantUuid\") VALUES (:reportUuid, :uuid)")
+    void insertTenants(@Bind("reportUuid") String reportUuid, @BindBean List<Tenant> tenants);
+  }
+
+  @Override
+  public Report getByUuid(String uuid) {
+    throw new UnsupportedOperationException();
   }
 
   @Transactional
-  @Override
-  public Report getByUuid(String uuid) {
-    final Handle handle = getDbHandle();
-    try {
-      /* Check whether uuid is purely numerical, and if so, query on legacyId */
-      final String queryDescriptor;
-      final String keyField;
-      final Object key;
-      final Integer legacyId = Utils.getInteger(uuid);
-      if (legacyId != null) {
-        queryDescriptor = "getReportByLegacyId";
-        keyField = "legacyId";
-        key = legacyId;
-      } else {
-        queryDescriptor = "getReportByUuid";
-        keyField = "uuid";
-        key = uuid;
-      }
-      return handle
-          .createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + "FROM reports "
-              + "WHERE reports.\"" + keyField + "\" = :key")
-          .bind("key", key).map(new ReportMapper()).findFirst().orElse(null);
-    } finally {
-      closeDbHandle(handle);
-    }
+  public Report getByUuid(String uuid, Principal principal) {
+    return getByIds(Arrays.asList(uuid), principal).getFirst();
   }
 
   @Transactional
@@ -263,8 +258,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           + "\"cancelledReason\" = :cancelledReason, "
           + "\"interlocutorOrganizationUuid\" = :interlocutorOrgUuid, "
           + "\"advisorOrganizationUuid\" = :advisorOrgUuid, " + "\"customFields\" = :customFields, "
-          + "\"classification\" = :classification, \"eventUuid\" = :eventUuid "
-          + "WHERE uuid = :uuid";
+          + "\"classification\" = :classification, \"eventUuid\" = :eventUuid, "
+          + "\"allTenants\" = :allTenants WHERE uuid = :uuid";
 
       return handle.createUpdate(sql).bindBean(r)
           .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
@@ -745,17 +740,42 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   class SelfIdBatcher extends IdBatcher<Report> {
-    private static final String SQL = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
-        + "FROM reports WHERE reports.uuid IN ( <uuids> )";
-
-    public SelfIdBatcher() {
-      super(ReportDao.this.databaseHandler, SQL, "uuids", new ReportMapper());
+    public SelfIdBatcher(String sql, Map<String, Object> paramsMap) {
+      super(ReportDao.this.databaseHandler, sql, "uuids", paramsMap, new ReportMapper());
     }
   }
 
   @Override
   public List<Report> getByIds(List<String> uuids) {
-    return new SelfIdBatcher().getByIds(uuids);
+    throw new UnsupportedOperationException();
+  }
+
+  public List<Report> getByIds(List<String> uuids, BatchLoaderEnvironment context) {
+    final Map<Object, Object> keyContexts = context.getKeyContexts();
+    // GraphQLContext is the same for all keys
+    final GraphQLContext gqlContext = (GraphQLContext) keyContexts.get(uuids.getFirst());
+    return getByIds(uuids, DaoUtils.getPrincipalFromContext(gqlContext));
+  }
+
+  private List<Report> getByIds(List<String> uuids, Principal principal) {
+    return new SelfIdBatcher(getSql(principal), DaoUtils.getReportsParamsMap(principal))
+        .getByIds(uuids);
+  }
+
+  private String getSql(final Principal principal) {
+    final String selectClause = "/* getReportByUuid */ SELECT " + REPORT_FIELDS;
+    final StringBuilder fromClause = new StringBuilder("FROM reports");
+    final StringBuilder whereClause = new StringBuilder("WHERE reports.uuid IN ( <uuids> )");
+    // Apply a filter to restrict access to reports if necessary.
+    if (principal instanceof AccessTokenPrincipal accessToken) {
+      whereClause.append(" AND ");
+      whereClause.append(DaoUtils.getReportsWhereClause(accessToken));
+    } else if (principal instanceof Person user && !Person.isSystemUser(user)
+        && !AuthUtils.isAdmin(user)) {
+      whereClause.append(" AND ");
+      whereClause.append(DaoUtils.getReportsWhereClause(user));
+    }
+    return "%s %s %s".formatted(selectClause, fromClause, whereClause);
   }
 
   class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
@@ -839,6 +859,32 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           + "WHERE \"reportUuid\" = :reportUuid AND \"authorizationGroupUuid\" = :authorizationGroupUuid")
           .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", authorizationGroupUuid)
           .execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int addTenantToReport(Tenant t, Report r) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* addTenantToReport */ INSERT INTO \"reportTenants\" (\"tenantUuid\", \"reportUuid\") "
+              + "VALUES (:tenantUuid, :reportUuid)")
+          .bind("reportUuid", r.getUuid()).bind("tenantUuid", t.getUuid()).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int removeTenantFromReport(String tenantUuid, Report r) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* removeTenantFromReport */ DELETE FROM \"reportTenants\" "
+              + "WHERE \"reportUuid\" = :reportUuid AND \"tenantUuid\" = :tenantUuid")
+          .bind("reportUuid", r.getUuid()).bind("tenantUuid", tenantUuid).execute();
     } finally {
       closeDbHandle(handle);
     }

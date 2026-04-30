@@ -21,12 +21,14 @@ import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Report;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -115,6 +117,21 @@ public class DaoUtils {
       return null;
     }
     return context.get("principal");
+  }
+
+  public static boolean isAccessToken(Principal principal) {
+    return principal instanceof AccessTokenPrincipal;
+  }
+
+  public static AccessTokenPrincipal getAccessTokenFromContext(GraphQLContext context) {
+    if (!(getPrincipalFromContext(context) instanceof AccessTokenPrincipal accessToken)) {
+      return null;
+    }
+    return accessToken;
+  }
+
+  public static boolean isUser(Principal principal) {
+    return principal instanceof Person;
   }
 
   public static Person getUserFromContext(GraphQLContext context) {
@@ -295,6 +312,47 @@ public class DaoUtils {
 
     return "(reports.uuid IN (" + authorQuery + ") OR reports.uuid IN ("
         + getAuthorizationOuterQuery("") + memberQuery + " UNION ALL " + communityQuery + "))";
+  }
+
+  public static String getReportsWhereClause(Principal principal) {
+    // Apply a filter to restrict access to reports.
+    if (DaoUtils.isAccessToken(principal)) {
+      // Access tokens only ever see non-draft/non-rejected reports within their tenants.
+      return "((reports.state NOT IN (:draftState, :rejectedState))"
+          + " AND (reports.\"allTenants\" IS TRUE OR reports.uuid IN ("
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" IN ("
+          + " SELECT \"tenantUuid\" FROM \"accessTokenTenants\" WHERE \"accessTokenUuid\" = :accessTokenUuid"
+          + "))))";
+    } else {
+      // When the search is performed by the system (for instance by a worker, systemSearch = true)
+      // or an admin, do not apply this filter.
+      // Users can see their own reports, other users only ever see non-draft/non-rejected reports
+      // within their tenants, and approvers also see reports pending their approval.
+      return "((reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid))"
+          + " OR ((reports.state NOT IN (:draftState, :rejectedState))"
+          + " AND (reports.\"allTenants\" IS TRUE OR reports.uuid IN ("
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" IN ("
+          + " SELECT \"tenantUuid\" FROM \"peopleTenants\" where \"personUuid\" = :userUuid))))"
+          + " OR (reports.\"approvalStepUuid\" IN ("
+          + " SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN ("
+          + " SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :userUuid))))";
+    }
+  }
+
+  public static Map<String, Object> getReportsParamsMap(Principal principal) {
+    return switch (principal) {
+      case AccessTokenPrincipal accessToken -> Map.of( // -
+          "accessTokenUuid", accessToken.getUuid(), // -
+          "draftState", getEnumId(Report.ReportState.DRAFT), // -
+          "rejectedState", getEnumId(Report.ReportState.REJECTED));
+      case Person user -> Map.of( // -
+          "isAuthor", true, // -
+          "userUuid", getUuid(user), // -
+          "draftState", getEnumId(Report.ReportState.DRAFT), // -
+          "rejectedState", getEnumId(Report.ReportState.REJECTED));
+      case null, default -> null;
+    };
   }
 
   private static boolean isForPerson(String relatedObjectType) {

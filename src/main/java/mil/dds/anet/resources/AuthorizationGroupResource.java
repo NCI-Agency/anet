@@ -45,7 +45,7 @@ public class AuthorizationGroupResource {
   @GraphQLQuery(name = "authorizationGroupList")
   public AnetBeanList<AuthorizationGroup> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") AuthorizationGroupSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

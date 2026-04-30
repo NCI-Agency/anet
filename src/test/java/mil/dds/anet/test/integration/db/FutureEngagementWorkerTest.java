@@ -329,7 +329,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   private Report testReportState(final String uuid, final ReportState state) {
-    final Report updatedReport = reportDao.getByUuid(uuid);
+    final Report updatedReport = reportDao.getByUuid(uuid, Person.SYSTEM_USER);
     assertThat(updatedReport.getState()).isEqualTo(state);
     return updatedReport;
   }

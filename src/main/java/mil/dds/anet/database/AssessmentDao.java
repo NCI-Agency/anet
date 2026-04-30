@@ -378,7 +378,7 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
       throw new IllegalArgumentException(
           "Instant assessment must link to report and person or task");
     }
-    final Report report = engine.getReportDao().getByUuid(groReport.getRelatedObjectUuid());
+    final Report report = engine.getReportDao().getByUuid(groReport.getRelatedObjectUuid(), user);
     if (report == null) {
       throw new IllegalArgumentException("Report not found");
     }

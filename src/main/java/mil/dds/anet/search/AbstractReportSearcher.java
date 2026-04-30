@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -33,6 +34,7 @@ import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -314,19 +316,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       }
     }
 
-    if (!query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
-      // Apply a filter to restrict access to other's draft or rejected reports.
-      // When the search is performed by the system (for instance by a worker, systemSearch = true),
-      // do not apply this filter.
-      // Admins see all drafts/rejected, other users only ever see their own drafts/rejected (and
-      // all other reports).
-      qb.addWhereClause("((reports.state != :draftState AND reports.state != :rejectedState) OR ("
-          + "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
-          + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)))");
-      qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-      qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-      qb.addSqlArg("isAuthor", true);
-      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+    // Apply a filter to restrict access to reports if necessary.
+    if (query.getPrincipal() instanceof AccessTokenPrincipal accessToken) {
+      qb.addWhereClause(DaoUtils.getReportsWhereClause(accessToken));
+      qb.addSqlArgs(DaoUtils.getReportsParamsMap(accessToken));
+    } else if (!query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
+      final Person user = query.getUser();
+      qb.addWhereClause(DaoUtils.getReportsWhereClause(user));
+      qb.addSqlArgs(DaoUtils.getReportsParamsMap(user));
     }
 
     if (query.getEmailNetwork() != null) {

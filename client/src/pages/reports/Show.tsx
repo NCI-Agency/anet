@@ -53,6 +53,7 @@ import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
+import TenantTable from "components/TenantTable"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
@@ -136,6 +137,9 @@ const GQL_GET_REPORT = gql`
         taskedOrganizations {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
       ${gqlReportCommunitiesFields}
       ${gqlReportCommentsFields}
@@ -661,6 +665,28 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                         />
                       }
                       hideIfEmpty
+                    />
+                  )}
+
+                  {report.allTenants ? (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.allTenants}
+                      field={{ name: "allTenants" }}
+                      humanValue={utils.formatBoolean(report.allTenants)}
+                    />
+                  ) : (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.tenants}
+                      field={{ name: "tenants" }}
+                      humanValue={
+                        <TenantTable
+                          tenants={report.tenants}
+                          noTenantsMessage="No tenants selected"
+                          showStatus
+                        />
+                      }
                     />
                   )}
 

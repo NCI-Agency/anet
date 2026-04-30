@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -122,6 +123,11 @@ public class Report extends AbstractCustomizableAnetBean
   private ForeignObjectHolder<Event> event = new ForeignObjectHolder<>();
   // annotated below
   private List<AuthorizationGroup> reportCommunities;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean allTenants = false;
+  // annotated below
+  private List<Tenant> tenants;
 
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
@@ -859,6 +865,36 @@ public class Report extends AbstractCustomizableAnetBean
     this.reportCommunities = reportCommunities;
   }
 
+  public Boolean getAllTenants() {
+    return allTenants;
+  }
+
+  public void setAllTenants(Boolean allTenants) {
+    this.allTenants = allTenants;
+  }
+
+  @GraphQLQuery(name = "tenants")
+  @AllowUnverifiedUsers
+  public CompletableFuture<List<Tenant>> loadTenants(@GraphQLRootContext GraphQLContext context) {
+    if (tenants != null) {
+      return CompletableFuture.completedFuture(tenants);
+    } else {
+      return engine().getTenantDao().getTenantsForReport(context, uuid).thenApply(o -> {
+        tenants = o;
+        return o;
+      });
+    }
+  }
+
+  public List<Tenant> getTenants() {
+    return tenants;
+  }
+
+  @GraphQLInputField(name = "tenants")
+  public void setTenants(List<Tenant> tenants) {
+    this.tenants = tenants;
+  }
+
   @Override
   public String customFieldsKey() {
     return "fields.report.customFields";
@@ -892,7 +928,8 @@ public class Report extends AbstractCustomizableAnetBean
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
         && Objects.equals(r.getAuthorizedMembers(), authorizedMembers)
         && Objects.equals(r.getEvent(), getEvent())
-        && Objects.equals(r.getReportCommunities(), reportCommunities);
+        && Objects.equals(r.getReportCommunities(), reportCommunities)
+        && Objects.equals(r.getAllTenants(), allTenants) && Objects.equals(r.getTenants(), tenants);
   }
 
   @Override

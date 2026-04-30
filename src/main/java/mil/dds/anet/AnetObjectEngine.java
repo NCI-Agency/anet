@@ -50,6 +50,7 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.database.UserDao;
 import mil.dds.anet.utils.AuthUtils;
@@ -195,6 +196,10 @@ public class AnetObjectEngine {
 
   public AccessTokenActivityDao getAccessTokenActivityDao() {
     return ApplicationContextProvider.getBean(AccessTokenActivityDao.class);
+  }
+
+  public TenantDao getTenantDao() {
+    return ApplicationContextProvider.getBean(TenantDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,

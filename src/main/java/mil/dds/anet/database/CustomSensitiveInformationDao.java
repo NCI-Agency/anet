@@ -255,7 +255,7 @@ public class CustomSensitiveInformationDao
     // If this is for a report, check whether the user is an author
     if (ReportDao.TABLE_NAME.equals(csi.getRelatedObjectType())) {
       final AnetObjectEngine engine = engine();
-      final Report report = engine.getReportDao().getByUuid(csi.getRelatedObjectUuid());
+      final Report report = engine.getReportDao().getByUuid(csi.getRelatedObjectUuid(), user);
       if (report != null) {
         final List<ReportPerson> authors = report.loadAuthors(engine.getContext()).join();
         if (authors.stream().anyMatch(author -> author.getUuid().equals(DaoUtils.getUuid(user)))) {

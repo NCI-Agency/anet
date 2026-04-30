@@ -984,7 +984,8 @@ public class Utils {
     if (dao != null) {
       final AbstractAnetBean obj = dao.getByUuid(objectUuid);
       if (obj == null) {
-        return List.of(new TextNode(String.format("[deleted %s::%s]", objectType, objectUuid)));
+        return List
+            .of(new TextNode(String.format("[%s with uuid %s not found]", objectType, objectUuid)));
       }
       if (obj instanceof SubscribableObject subscribableObject) {
         return List.of(new TextNode(subscribableObject.getObjectLabel()));

@@ -24,7 +24,7 @@ public class SubscriptionUpdateResource {
   public AnetBeanList<SubscriptionUpdate> getMySubscriptionUpdates(
       @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") SubscriptionUpdateSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

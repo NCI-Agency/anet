@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.EmailAddress;
@@ -27,6 +28,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
@@ -69,6 +71,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
 
+  private final AnetObjectEngine engine;
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
   private final TaskDao taskDao;
@@ -82,10 +85,12 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private final int martNewPositionDaysInThePast;
 
-  public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
-      PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
-      LocationDao locationDao, MartImportedReportDao martImportedReportDao,
-      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao) {
+  public MartReportImporterService(AnetObjectEngine engine, AnetDictionary dict,
+      ReportDao reportDao, PersonDao personDao, PositionDao positionDao, TaskDao taskDao,
+      OrganizationDao organizationDao, LocationDao locationDao,
+      MartImportedReportDao martImportedReportDao, AttachmentDao attachmentDao,
+      EmailAddressDao emailAddressDao, CommentDao commentDao) {
+    this.engine = engine;
     this.reportDao = reportDao;
     this.personDao = personDao;
     this.positionDao = positionDao;
@@ -414,6 +419,11 @@ public class MartReportImporterService implements IMartReportImporterService {
     anetReport.setReportPeople(List.of(createReportPerson(personForReport)));
     // Set advisor organization
     anetReport.setAdvisorOrg(organizationForReport);
+    // Assign tenants
+    final List<Tenant> tenants = personForReport.loadTenants(engine.getContext()).join();
+    final List<Tenant> activeTenants = tenants == null ? null
+        : tenants.stream().filter(t -> t.getStatus() == WithStatus.Status.ACTIVE).toList();
+    anetReport.setTenants(activeTenants);
   }
 
   private Person createNewPerson(ReportDto martReport, List<String> errors) {

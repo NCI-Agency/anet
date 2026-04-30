@@ -37,6 +37,7 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.SavedSearch;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -45,6 +46,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
+import org.dataloader.BatchLoaderWithContext;
 import org.dataloader.DataLoaderFactory;
 import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
@@ -357,11 +359,10 @@ public final class BatchingUtils {
                 () -> engine.getApprovalStepDao().getPlanningApprovalSteps(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.REPORTS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, Report>) keys -> CompletableFuture
-                .supplyAsync(() -> engine.getReportDao().getByIds(keys), dispatcherService),
-            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.REPORTS.toString(), DataLoaderFactory.newDataLoader(
+        (BatchLoaderWithContext<String, Report>) (keys, context) -> CompletableFuture
+            .supplyAsync(() -> engine.getReportDao().getByIds(keys, context), dispatcherService),
+        dataLoaderOptions));
     dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>) foreignKeys -> CompletableFuture
@@ -431,6 +432,27 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.TENANT_ACCESS_TOKEN.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Tenant>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getTenantDao().getTenantsForAccessToken(foreignKeys),
+                dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.TENANT_MEMBERS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Person>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getTenantDao().getMembers(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.TENANT_PERSON.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Tenant>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getTenantDao().getTenantsForPerson(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.TENANT_REPORT.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Tenant>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getTenantDao().getTenantsForReport(foreignKeys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.USER_PERSON.toString(),
         DataLoaderFactory.newDataLoader(
