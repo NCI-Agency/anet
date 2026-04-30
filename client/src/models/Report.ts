@@ -206,6 +206,27 @@ export default class Report extends Model {
         )
         .default([]),
       reportCommunities: yup.array().nullable().default([]),
+      allTenants: yup.boolean().default(false),
+      tenants: yup
+        .array()
+        .nullable()
+        .when("allTenants", ([allTenants], schema) =>
+          allTenants
+            ? schema
+            : schema.test(
+                "no-tenants",
+                "no tenants error",
+                (tenants, testContext) => {
+                  return _isEmpty(tenants)
+                    ? testContext.createError({
+                        message:
+                          "You must share the report with at least one Tenant"
+                      })
+                    : true
+                }
+              )
+        )
+        .default([]),
       comments: yup.array().nullable().default([]),
       reportText: yup
         .string()

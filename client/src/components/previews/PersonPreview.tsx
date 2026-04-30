@@ -20,6 +20,7 @@ import PositionsTable from "components/PositionsTable"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
+import TenantTable from "components/TenantTable"
 import UserTable from "components/UserTable"
 import { Person, Position } from "models"
 import moment from "moment"
@@ -64,6 +65,9 @@ const GQL_GET_PERSON = gql`
         position {
           ${gqlEntityFieldsMap.Position}
         }
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
     }
   }
@@ -208,6 +212,14 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
             />
           </Col>
         </Row>
+
+        {person.user && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.person.tenants}
+            value={<TenantTable tenants={person.tenants} showStatus />}
+          />
+        )}
 
         <div className="preview-field-label">
           {Settings.fields.person.biography?.label}
