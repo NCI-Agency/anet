@@ -151,6 +151,8 @@ async function populateReport(report, args) {
           "CANCELLED_DUE_TO_ROUTES",
           "CANCELLED_DUE_TO_THREAT"
         ])
+  const allTenants = faker.datatype.boolean()
+  const tenants = allTenants ? [] : [await getRandomObject("tenants")]
 
   const template = {
     intent: () => faker.lorem.paragraph(),
@@ -171,6 +173,8 @@ async function populateReport(report, args) {
     }),
     authorizedMembers: async () => await getAuthorizedMembers(),
     state,
+    allTenants,
+    tenants,
     releasedAt: () => {
       // Set the releasedAt value on a random date between 1 and 7 days after the engagement
       const result = new Date(engagementDate)
@@ -199,6 +203,8 @@ async function populateReport(report, args) {
     .and()
     .authorizedMembers.rarely()
   await reportGenerator.state.always()
+  await reportGenerator.allTenants.always()
+  await reportGenerator.tenants.always()
   await reportGenerator.releasedAt.always()
 
   return report
