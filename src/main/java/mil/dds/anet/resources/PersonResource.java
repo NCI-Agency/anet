@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -26,6 +27,7 @@ import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.UserDao;
 import mil.dds.anet.emails.NewUserEmail;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
@@ -47,11 +49,12 @@ public class PersonResource {
   private final EmailAddressDao emailAddressDao;
   private final PersonPreferenceDao personPreferenceDao;
   private final PositionDao positionDao;
+  private final TenantDao tenantDao;
   private final UserDao userDao;
 
   public PersonResource(AnetDictionary dict, AnetObjectEngine engine, AuditTrailDao auditTrailDao,
       PersonDao dao, EmailAddressDao emailAddressDao, PersonPreferenceDao personPreferenceDao,
-      PositionDao positionDao, UserDao userDao) {
+      PositionDao positionDao, TenantDao tenantDao, UserDao userDao) {
     this.dict = dict;
     this.engine = engine;
     this.auditTrailDao = auditTrailDao;
@@ -59,6 +62,7 @@ public class PersonResource {
     this.emailAddressDao = emailAddressDao;
     this.personPreferenceDao = personPreferenceDao;
     this.positionDao = positionDao;
+    this.tenantDao = tenantDao;
     this.userDao = userDao;
   }
 
@@ -109,6 +113,9 @@ public class PersonResource {
 
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
+      if (Boolean.TRUE.equals(p.getUser()) && p.getTenants() != null) {
+        dao.insertPersonTenants(p.getUuid(), p.getTenants());
+      }
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
@@ -226,6 +233,17 @@ public class PersonResource {
 
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
+
+      // Update Tenants:
+      if (p.getTenants() != null) {
+        final List<Tenant> existingTenants =
+            tenantDao.getTenantsForPerson(engine.getContext(), p.getUuid()).join();
+        final List<Tenant> newTenants =
+            Boolean.TRUE.equals(p.getUser()) ? p.getTenants() : List.of();
+        Utils.addRemoveElementsByUuid(existingTenants, newTenants,
+            newTenant -> dao.addTenantToPerson(newTenant, p),
+            oldTenant -> dao.removeTenantFromPerson(oldTenant, p));
+      }
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
@@ -300,7 +318,7 @@ public class PersonResource {
   public AnetBeanList<Person> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(Utils.getSubFields(env), query);
   }
 
