@@ -231,12 +231,11 @@ class SubscriptionResourceTest extends AnetApplicationTest {
 
   private void testDeleteSubscribedReport(final ReportState reportState) {
     // Create report
-    final ReportInput reportInput =
-        ReportInput.builder().withState(reportState)
-            .withIntent("Test report for deleting subscribed object")
-            .withReportPeople(
-                getReportPeopleInput(Lists.newArrayList(personToPrimaryReportAuthor(admin))))
-            .build();
+    final ReportInput reportInput = ReportInput.builder().withState(reportState)
+        .withIntent("Test report for deleting subscribed object")
+        .withReportPeople(
+            getReportPeopleInput(Lists.newArrayList(personToPrimaryReportAuthor(admin))))
+        .withAllTenants(true).build();
     final Report report =
         withCredentials(adminUser, t -> mutationExecutor.createReport("{ uuid }", reportInput));
 

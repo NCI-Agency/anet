@@ -71,6 +71,8 @@ import mil.dds.anet.test.client.SubscriptionUpdateSearchQueryInput;
 import mil.dds.anet.test.client.SubscriptionUpdateSearchSortBy;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
+import mil.dds.anet.test.client.Tenant;
+import mil.dds.anet.test.client.TenantInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
@@ -136,7 +138,7 @@ public abstract class AnetApplicationTest {
       "{ uuid familyName givenName user users { uuid domainUsername } rank status phoneNumber { type details } biography"
           + " pendingVerification createdAt updatedAt position { uuid name type superuserType status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } "
-          + " emailAddresses { network address } }";
+          + " emailAddresses { network address } tenants { uuid name } }";
   public static final String SUBSCRIPTION_FIELDS = "uuid createdAt updatedAt subscriber { uuid }"
       + " subscribedObjectType subscribedObjectUuid subscribedObject {"
       + " ... on AuthorizationGroup { uuid } ... on Event { uuid }"
@@ -491,6 +493,14 @@ public abstract class AnetApplicationTest {
         .withPreference(PreferenceInput.builder().withUuid(preferenceUuid).build()).build();
   }
 
+  protected static TenantInput getTenantInput(final Tenant tenant) {
+    return getInput(tenant, TenantInput.class);
+  }
+
+  protected static List<TenantInput> getTenantsInput(final List<Tenant> tenants) {
+    return tenants.stream().map(AnetApplicationTest::getTenantInput).toList();
+  }
+
   // Conversions from Person to ReportPerson
   public static ReportPerson personToPrimaryReportPerson(Person p, boolean interlocutor) {
     final ReportPerson rp = personToReportPerson(p, interlocutor);
@@ -778,9 +788,10 @@ public abstract class AnetApplicationTest {
     }
   }
 
-  protected void setAuthentication(String bearerToken) {
+  protected AccessTokenAuthentication setAuthentication(String bearerToken) {
     var accessTokenAuthentication = createAccessTokenAuthentication(bearerToken);
     SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
+    return accessTokenAuthentication;
   }
 
   private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {

@@ -265,6 +265,7 @@ class SubscriptionUpdateResourceTest extends AnetApplicationTest {
                 getPerson(SubscriptionResourceTest.getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
                 false),
             personToReportPerson(getChristopfTopferness(), true))))
+        .withAllTenants(true)
         .withReportCommunities(List.of(getAuthorizationGroupInput(getAuthorizationGroup(
             SubscriptionResourceTest.getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
         .withTasks(List.of(getTaskInput(
