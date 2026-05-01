@@ -288,7 +288,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     final ReportInput input = ReportInput.builder().withIntent("testReport")
         .withEngagementDate(Instant.now()).withAtmosphere(Atmosphere.NEUTRAL)
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(author))))
-        .withReportText(getRichText(ReportDao.TABLE_NAME, testOldUuid))
+        .withAllTenants(true).withReportText(getRichText(ReportDao.TABLE_NAME, testOldUuid))
         .withCustomFields(getJsonString(ReportDao.TABLE_NAME, testOldUuid))
         .withReportSensitiveInformation(rsiInput).build();
     final Report created = withCredentials(getDomainUsername(author),

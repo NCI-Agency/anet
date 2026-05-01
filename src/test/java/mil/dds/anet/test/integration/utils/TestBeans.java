@@ -67,6 +67,7 @@ public class TestBeans {
     r.setNextSteps(s);
     r.setEngagementDate(engagementDate == null ? Instant.now() : engagementDate);
     r.setDuration(60);
+    r.setAllTenants(true);
     return r;
   }
 }
