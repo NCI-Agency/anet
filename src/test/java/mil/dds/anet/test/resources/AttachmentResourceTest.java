@@ -572,7 +572,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final ReportInput testReportInput = ReportInput.builder().withState(ReportState.DRAFT)
         .withIntent("a test report created by testReportAttachment")
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(getJackJackson()))))
-        .build();
+        .withAllTenants(true).build();
     final Report testReport = withCredentials(jackUser,
         t -> mutationExecutor.createReport(OBJECT_FIELDS, testReportInput));
     assertThat(testReport).isNotNull();
