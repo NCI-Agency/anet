@@ -12,8 +12,6 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.graphql.GraphQLRequest;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.ws.GraphQLWebService;
-import mil.dds.anet.ws.security.AccessTokenAuthentication;
-import mil.dds.anet.ws.security.BearerTokenService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,6 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
   @Autowired
   private GraphQLWebService graphQLWebService;
 
-
   @AfterEach
   void clearSecurity() {
     SecurityContextHolder.clearContext();
@@ -50,7 +47,6 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
 
   @Test
   void testWithValidToken() {
-    setAuthentication(VALID_GRAPHQL_TOKEN);
     final Map<String, Object> report =
         sendGraphQLRequest(REPORT_QUERY, REPORT_QUERY_VARIABLES, "report");
     assertThat(report).isNotNull().containsEntry("uuid", REPORT_UUID)
@@ -100,10 +96,8 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
   @Test
   void testIntrospectionWithWrongScope() {
     try {
-      setAuthentication(VALID_NVG_TOKEN);
-      graphQLWebService
-
-          .graphqlPostJson(new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
+      graphQLWebService.graphqlPostJson(setAuthentication(VALID_NVG_TOKEN),
+          new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
     } catch (Exception expectedException) {
       assertThat(expectedException).hasMessage("Access Denied");
     }
@@ -111,9 +105,9 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
 
   @Test
   void testIntrospectionWithValidToken() {
-    setAuthentication(VALID_GRAPHQL_TOKEN);
-    final ResponseEntity<Map<String, Object>> result = graphQLWebService
-        .graphqlPostJson(new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
+    final ResponseEntity<Map<String, Object>> result =
+        graphQLWebService.graphqlPostJson(setAuthentication(VALID_GRAPHQL_TOKEN),
+            new GraphQLRequest(null, IntrospectionQueryBuilder.build(), null, null));
     assertThat(result).isNotNull();
   }
 
@@ -138,12 +132,10 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
 
   private Map<String, Object> sendGraphQLRequest(String query, Map<String, Object> variables,
       String value) {
-    setAuthentication(VALID_GRAPHQL_TOKEN);
-
     final GraphQLRequest graphQLRequest = new GraphQLRequest(null, query, null, variables);
 
     final ResponseEntity<Map<String, Object>> result =
-        graphQLWebService.graphqlPostJson(graphQLRequest);
+        graphQLWebService.graphqlPostJson(setAuthentication(VALID_GRAPHQL_TOKEN), graphQLRequest);
 
     assertThat(result).isNotNull();
 
