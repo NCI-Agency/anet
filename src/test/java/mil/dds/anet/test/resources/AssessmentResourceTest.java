@@ -44,7 +44,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
       String.format("{ uuid familyName givenName %1$s }", _ASSESSMENTS_FIELDS);
   private static final String REPORT_FIELDS = String.format(
       "{ uuid updatedAt intent state reportPeople { uuid familyName givenName author attendee primary interlocutor }"
-          + " tasks { uuid shortName } %1$s }",
+          + " tasks { uuid shortName } allTenants tenants { uuid name } %1$s }",
       _ASSESSMENTS_FIELDS);
   private static final String TASK_FIELDS =
       String.format("{ uuid shortName %1$s }", _ASSESSMENTS_FIELDS);
@@ -68,12 +68,11 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testDeleteDanglingReportTaskAssessment() {
     // Create test report
-    final ReportInput testReportInput =
-        ReportInput.builder()
-            .withIntent("a test report created by testDeleteDanglingReportTaskAssessment")
-            .withReportPeople(
-                getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
-            .build();
+    final ReportInput testReportInput = ReportInput.builder()
+        .withIntent("a test report created by testDeleteDanglingReportTaskAssessment")
+        .withReportPeople(
+            getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
+        .withAllTenants(true).build();
     final Report testReport = withCredentials(adminUser,
         t -> mutationExecutor.createReport(REPORT_FIELDS, testReportInput));
     assertThat(testReport).isNotNull();
@@ -126,12 +125,11 @@ class AssessmentResourceTest extends AbstractResourceTest {
   @Test
   void testDeleteDanglingReportAttendeeAssessment() {
     // Create test report
-    final ReportInput testReportInput =
-        ReportInput.builder()
-            .withIntent("a test report created by testDeleteDanglingReportAttendeeAssessment")
-            .withReportPeople(
-                getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
-            .build();
+    final ReportInput testReportInput = ReportInput.builder()
+        .withIntent("a test report created by testDeleteDanglingReportAttendeeAssessment")
+        .withReportPeople(
+            getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
+        .withAllTenants(true).build();
     final Report testReport = withCredentials(adminUser,
         t -> mutationExecutor.createReport(REPORT_FIELDS, testReportInput));
     assertThat(testReport).isNotNull();
@@ -951,7 +949,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
-            .withTasks(Lists.newArrayList(taskInput)).build();
+            .withAllTenants(true).withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
@@ -1137,7 +1135,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
-            .withTasks(Lists.newArrayList(taskInput)).build();
+            .withAllTenants(true).withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
 
@@ -1202,7 +1200,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
-            .withTasks(Lists.newArrayList(taskInput)).build();
+            .withAllTenants(true).withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
 
@@ -1260,7 +1258,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
-            .withTasks(Lists.newArrayList(taskInput)).build();
+            .withAllTenants(true).withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
@@ -1491,7 +1489,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
-            .withTasks(Lists.newArrayList(taskInput)).build();
+            .withAllTenants(true).withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();
@@ -1563,7 +1561,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
                 Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
-            .withTasks(Lists.newArrayList(taskInput)).build();
+            .withAllTenants(true).withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport = withCredentials(getDomainUsername(reportAuthor),
         t -> mutationExecutor.createReport(REPORT_FIELDS, reportInput));
     final String reportUuid = createdReport.getUuid();

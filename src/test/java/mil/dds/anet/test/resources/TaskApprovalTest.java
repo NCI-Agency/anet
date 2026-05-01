@@ -66,8 +66,8 @@ class TaskApprovalTest extends AbstractResourceTest {
           + " { uuid name person { uuid familyName givenName rank } } }";
   private static final String REPORT_FIELDS =
       "{ uuid updatedAt state workflow { type createdAt person { uuid } step "
-          + APPROVAL_STEP_FIELDS
-          + " } reportPeople { uuid primary author attendee interlocutor } }";
+          + APPROVAL_STEP_FIELDS + " } reportPeople { uuid primary author attendee interlocutor }"
+          + " allTenants tenants { uuid name } }";
   private static final String TASK_FIELDS =
       "{ uuid updatedAt shortName longName status plannedCompletion projectedCompletion"
           + " taskedOrganizations { uuid shortName longName identificationCode }"
@@ -669,7 +669,7 @@ class TaskApprovalTest extends AbstractResourceTest {
         .withDuration(120)
         .withReportPeople(getReportPeopleInput(
             Lists.newArrayList(advisor, interlocutor, personToReportAuthor(author))))
-        .withTasks(Lists.newArrayList(taskInput))
+        .withAllTenants(true).withTasks(Lists.newArrayList(taskInput))
         .withLocation(LocationInput.builder().withUuid(TEST_LOCATION_UUID).build())
         .withAtmosphere(Atmosphere.POSITIVE).withIntent(testText).withReportText(testText)
         .withNextSteps(testText).withKeyOutcomes(testText).build();
