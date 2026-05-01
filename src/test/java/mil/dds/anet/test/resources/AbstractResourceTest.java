@@ -61,6 +61,8 @@ import mil.dds.anet.test.client.SubscriptionUpdateSearchQueryInput;
 import mil.dds.anet.test.client.SubscriptionUpdateSearchSortBy;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
+import mil.dds.anet.test.client.Tenant;
+import mil.dds.anet.test.client.TenantInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
@@ -118,7 +120,7 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
       "{ uuid familyName givenName user users { uuid domainUsername } rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type superuserType status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } "
-          + " emailAddresses { network address } }";
+          + " emailAddresses { network address } tenants { uuid name } }";
 
   @BeforeAll
   void setUp() {
@@ -473,6 +475,14 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
         .withPreference(PreferenceInput.builder().withUuid(preferenceUuid).build()).build();
   }
 
+  protected static TenantInput getTenantInput(final Tenant tenant) {
+    return getInput(tenant, TenantInput.class);
+  }
+
+  protected static List<TenantInput> getTenantsInput(final List<Tenant> tenants) {
+    return tenants.stream().map(AbstractResourceTest::getTenantInput).toList();
+  }
+
   // Conversions from Person to ReportPerson
   public static ReportPerson personToPrimaryReportPerson(Person p, boolean interlocutor) {
     final ReportPerson rp = personToReportPerson(p, interlocutor);
@@ -657,14 +667,15 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
     }
   }
 
-  protected void setAuthentication(String bearerToken) {
+  protected AccessTokenAuthentication setAuthentication(String bearerToken) {
     var accessTokenAuthentication = createAccessTokenAuthentication(bearerToken);
     SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
+    return accessTokenAuthentication;
   }
 
   private AccessTokenAuthentication createAccessTokenAuthentication(String bearerToken) {
     var accessToken = bearerTokenService.getAccessPrincipalFromAuthHeader(bearerToken);
-    assertThat(accessToken.isEmpty()).isFalse();
+    assertThat(accessToken).isPresent();
     return new AccessTokenAuthentication(accessToken.get());
   }
 
