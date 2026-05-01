@@ -22,12 +22,9 @@ describe("Submit report", () => {
   })
 
   describe("As superuser", async () => {
-    it("Should not be able to submit Draft report", async () => {
+    it("Should not be able to open Draft report", async () => {
       await ShowReport.openAsSuperuser(DRAFT_REPORT_UUID)
-      await ShowReport.waitForShowReportToLoad()
-      // eslint-disable-next-line no-unused-expressions
-      expect(await (await ShowReport.getSubmitButton()).isExisting()).to.be
-        .false
+      await ShowReport.waitForShowReportToFail()
     })
   })
 
