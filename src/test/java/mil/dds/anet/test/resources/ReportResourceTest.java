@@ -74,6 +74,7 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.client.TaskSearchSortBy;
+import mil.dds.anet.test.client.Tenant;
 import mil.dds.anet.test.client.User;
 import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.utils.UtilsTest;
@@ -161,7 +162,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person approver1 = findOrPutPersonInDb(getDomainUsername(approver1tpl), approver1tpl);
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
       // Approve newly created user
-      withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver1.getUuid()));
+      final List<Tenant> tenants =
+          withCredentials(adminUser, t -> queryExecutor.tenantList("{ uuid }"));
+      withCredentials(adminUser,
+          t -> mutationExecutor.approvePerson("", getTenantsInput(tenants), approver1.getUuid()));
     }
     final EmailAddress emailAddress2 =
         EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
@@ -173,7 +177,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person approver2 = findOrPutPersonInDb(getDomainUsername(approver2tpl), approver2tpl);
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
       // Approve newly created user
-      withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver2.getUuid()));
+      final List<Tenant> tenants =
+          withCredentials(adminUser, t -> queryExecutor.tenantList("{ uuid }"));
+      withCredentials(adminUser,
+          t -> mutationExecutor.approvePerson("", getTenantsInput(tenants), approver2.getUuid()));
     }
 
     final PositionInput approver1PosInput = PositionInput.builder()
