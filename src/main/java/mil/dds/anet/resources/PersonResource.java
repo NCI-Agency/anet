@@ -324,18 +324,19 @@ public class PersonResource {
 
   @GraphQLMutation(name = "approvePerson")
   public Integer approvePerson(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "uuid") String personUuid) {
-    return approveOrDeletePerson(context, personUuid, true);
+      @GraphQLArgument(name = "uuid") String personUuid,
+      @GraphQLArgument(name = "tenants") List<Tenant> tenants) {
+    return approveOrDeletePerson(context, personUuid, tenants, true);
   }
 
   @GraphQLMutation(name = "deletePerson")
   public Integer deletePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String personUuid) {
-    return approveOrDeletePerson(context, personUuid, false);
+    return approveOrDeletePerson(context, personUuid, null, false);
   }
 
   public Integer approveOrDeletePerson(GraphQLContext context, String personUuid,
-      boolean isApproved) {
+      List<Tenant> tenants, boolean isApproved) {
     Person user = DaoUtils.getUserFromContext(context);
     final Person person = dao.getByUuid(personUuid);
     if (person == null) {
@@ -351,6 +352,10 @@ public class PersonResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
+    }
+
+    if (isApproved && tenants != null) {
+      dao.insertPersonTenants(personUuid, tenants);
     }
 
     // Log the change
