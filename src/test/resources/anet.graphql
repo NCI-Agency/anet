@@ -896,7 +896,7 @@ enum MartImportedReportSearchSortBy {
 """Mutation root"""
 type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
-  approvePerson(uuid: String): Int
+  approvePerson(tenants: [TenantInput], uuid: String): Int
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
   createAccessToken(accessToken: AccessTokenInput): AccessToken
