@@ -916,6 +916,9 @@ type Mutation {
   ): Comment
   approvePerson(
     """"""
+    tenants: [TenantInput]
+
+    """"""
     uuid: String
   ): Int
   approveReport(
