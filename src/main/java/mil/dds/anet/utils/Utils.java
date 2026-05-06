@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -430,10 +431,12 @@ public class Utils {
       JsonNode jsonNode) {
     if (jsonNode.isObject()) {
       final ObjectNode objectNode = (ObjectNode) jsonNode;
-      for (final Map.Entry<String, JsonNode> entry : objectNode.properties()) {
+      final Iterator<Map.Entry<String, JsonNode>> iterator = objectNode.properties().iterator();
+      while (iterator.hasNext()) {
+        final Map.Entry<String, JsonNode> entry = iterator.next();
         final String sanitizedKey = sanitizeHtml(entry.getKey());
         if (!entry.getKey().equals(sanitizedKey)) {
-          objectNode.remove(entry.getKey());
+          iterator.remove();
         }
         final String k = formatKey(parentKey, sanitizedKey);
         final String typeDef = typeDefs.get(k);
