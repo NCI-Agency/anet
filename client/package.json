@@ -92,7 +92,7 @@
     "json-loader": "0.5.7",
     "keycloak-connect": "26.1.1",
     "moment-timezone": "0.6.1",
-    "postcss": "8.5.8",
+    "postcss": "8.5.10",
     "postcss-loader": "8.2.1",
     "prettier": "3.8.1",
     "react-is": "18.3.1",
