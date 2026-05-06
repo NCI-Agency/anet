@@ -2,6 +2,7 @@ package mil.dds.anet.services;
 
 import static mil.dds.anet.resources.AttachmentResource.IMAGE_SVG_XML;
 
+import com.google.json.JsonSanitizer;
 import io.github.borewit.sanitize.SVGSanitizer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -245,7 +246,8 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private ReportDto getReportInfo(String reportJson) throws JacksonException {
     try {
-      final ReportDto report = ignoringMapper.readValue(reportJson, ReportDto.class);
+      final ReportDto report =
+          ignoringMapper.readValue(JsonSanitizer.sanitize(reportJson), ReportDto.class);
       if (report.getSubmittedAt() == null) {
         logger.warn("Submitted time not provided in report");
       } else {

@@ -1,5 +1,6 @@
 package mil.dds.anet.services;
 
+import com.google.json.JsonSanitizer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -39,7 +40,8 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
       // Get the transmission log JSON from the attachment
       martTransmissionLogAttachment.load();
       final List<LogDto> transmissionLog = ignoringMapper.readValue(
-          new String(martTransmissionLogAttachment.getContent(), StandardCharsets.UTF_8),
+          JsonSanitizer.sanitize(
+              new String(martTransmissionLogAttachment.getContent(), StandardCharsets.UTF_8)),
           new TypeReference<>() {});
       final MartImportedReportSearchQuery query = new MartImportedReportSearchQuery();
       query.setSequences(transmissionLog.stream().map(LogDto::getSequence).toList());
