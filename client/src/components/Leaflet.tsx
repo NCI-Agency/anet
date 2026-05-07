@@ -797,10 +797,7 @@ const Leaflet = ({
 function renderSelectedLocationMarkerPopupContents(location) {
   return (
     <div className="d-flex flex-column justify-content-center">
-      <LinkTo
-        modelType="Location"
-        model={{ uuid: location?.uuid, name: location?.name }}
-      />
+      <LinkTo modelType="Location" model={location} />
     </div>
   )
 }

@@ -1,5 +1,4 @@
-import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import React from "react"
 import { Table } from "react-bootstrap"
 
@@ -20,12 +19,10 @@ const AttachmentRelatedObjectsTable = ({
             {relatedObjects.map(attachRelObj => (
               <tr key={attachRelObj.relatedObjectUuid}>
                 <td>
-                  <LinkTo
-                    modelType={attachRelObj.relatedObjectType}
-                    model={{
-                      uuid: attachRelObj.relatedObjectUuid,
-                      ...attachRelObj.relatedObject
-                    }}
+                  <RelatedObjectDisplay
+                    relatedObjectType={attachRelObj.relatedObjectType}
+                    relatedObjectUuid={attachRelObj.relatedObjectUuid}
+                    relatedObject={attachRelObj.relatedObject}
                   />
                 </td>
               </tr>
