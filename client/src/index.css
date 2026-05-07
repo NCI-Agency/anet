@@ -1445,12 +1445,16 @@ table.event-matrix-cell :is(th, td):first-child {
   width: unset;
 }
 
-table.event-matrix tr.table-primary > :is(th, td):first-child {
+table.event-matrix tr.table-primary > :is(th, td) {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   background-color: var(--bs-table-bg);
 }
 
-table.event-matrix tr.table-primary {
-  border-top: 1.25rem solid white;
+table.event-matrix tr.table-primary > :is(th, td):first-child {
+  left: 0;
+  z-index: 4;
 }
 
 table.event-matrix-cell {

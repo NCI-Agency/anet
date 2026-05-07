@@ -485,7 +485,7 @@ const EventMatrix = ({
   return (
     <>
       <Messages error={fetchError} />
-      <div className="float-start">
+      <div className="float-start w-100 pb-3">
         <div className="rollup-date-range-container d-flex align-items-end gap-2">
           <div className="form-group" style={{ width: "170px" }}>
             <label className="form-label text-start mb-0">
@@ -560,11 +560,15 @@ const EventMatrix = ({
       <div style={{ clear: "both", marginTop: "1rem" }}>
         <div
           ref={scrollContainerRef}
-          style={{ overflowX: "auto", whiteSpace: "nowrap", width: "100%" }}
+          style={{
+            overflow: "auto",
+            whiteSpace: "nowrap",
+            width: "100%",
+            maxHeight: "calc(100vh - 250px)"
+          }}
         >
           <Table
             className="event-matrix"
-            responsive
             hover
             id="events-matrix"
             style={{ minWidth: `${periodDays.length * 250}px` }}
@@ -607,7 +611,8 @@ const EventMatrix = ({
                   )
                 })
               )}
-
+            </tbody>
+            <tbody>
               <tr id="tasks-table-header" className="table-primary">
                 <th>{Settings.fields.task.shortLabel}</th>
                 {periodDays.map(weekDay => (
