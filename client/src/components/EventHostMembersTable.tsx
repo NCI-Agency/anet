@@ -1,4 +1,4 @@
-import LinkTo from "components/LinkTo"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import React from "react"
 import { Table } from "react-bootstrap"
 
@@ -15,12 +15,10 @@ const EventHostMembersTable = ({ entity }: EventHostMembersTableProps) => {
             {entity.hostRelatedObjects.map(host => (
               <tr key={host.relatedObjectUuid}>
                 <td>
-                  <LinkTo
-                    modelType={host.relatedObjectType}
-                    model={{
-                      uuid: host.relatedObjectUuid,
-                      ...host.relatedObject
-                    }}
+                  <RelatedObjectDisplay
+                    relatedObjectType={host.relatedObjectType}
+                    relatedObjectUuid={host.relatedObjectUuid}
+                    relatedObject={host.relatedObject}
                   />
                 </td>
               </tr>

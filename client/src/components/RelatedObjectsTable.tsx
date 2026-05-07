@@ -1,7 +1,7 @@
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import DraggableRow from "components/DraggableRow"
-import LinkTo from "components/LinkTo"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import RemoveButton from "components/RemoveButton"
 import pluralize from "pluralize"
 import React from "react"
@@ -38,12 +38,10 @@ export const RelatedObjectsTable = ({
             {relatedObjects.map(nro => (
               <tr key={nro.relatedObjectUuid}>
                 <td>
-                  <LinkTo
-                    modelType={nro.relatedObjectType}
-                    model={{
-                      uuid: nro.relatedObjectUuid,
-                      ...nro.relatedObject
-                    }}
+                  <RelatedObjectDisplay
+                    relatedObjectType={nro.relatedObjectType}
+                    relatedObjectUuid={nro.relatedObjectUuid}
+                    relatedObject={nro.relatedObject}
                   />
                 </td>
                 {showDelete &&
@@ -219,12 +217,10 @@ export const SortableRelatedObjectsTableInput = ({
                   asTableRow
                 >
                   <td className="text-start">
-                    <LinkTo
-                      modelType={nro.relatedObjectType}
-                      model={{
-                        uuid: nro.relatedObjectUuid,
-                        ...nro.relatedObject
-                      }}
+                    <RelatedObjectDisplay
+                      relatedObjectType={nro.relatedObjectType}
+                      relatedObjectUuid={nro.relatedObjectUuid}
+                      relatedObject={nro.relatedObject}
                     />
                   </td>
                   {showDelete &&

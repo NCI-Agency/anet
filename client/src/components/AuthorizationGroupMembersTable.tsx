@@ -1,5 +1,5 @@
 import EmailAddressList from "components/EmailAddressList"
-import LinkTo from "components/LinkTo"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import pluralize from "pluralize"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -28,12 +28,10 @@ export const AuthorizationGroupMembersTable = ({
             {authorizationGroup.authorizationGroupRelatedObjects.map(agro => (
               <tr key={agro.relatedObjectUuid}>
                 <td>
-                  <LinkTo
-                    modelType={agro.relatedObjectType}
-                    model={{
-                      uuid: agro.relatedObjectUuid,
-                      ...agro.relatedObject
-                    }}
+                  <RelatedObjectDisplay
+                    relatedObjectType={agro.relatedObjectType}
+                    relatedObjectUuid={agro.relatedObjectUuid}
+                    relatedObject={agro.relatedObject}
                   />
                 </td>
                 <td>
