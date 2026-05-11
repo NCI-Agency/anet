@@ -42,17 +42,15 @@ const AuthorizationGroupList = ({
   }
 
   return (
-    <>
-      <Fieldset title="Communities" id="communities">
-        <AuthorizationGroupSearchResults
-          queryParams={queryParams}
-          pageDispatchers={pageDispatchers}
-          paginationKey="authorizationGroups"
-          pagination={pagination}
-          setPagination={setPagination}
-        />
-      </Fieldset>
-    </>
+    <Fieldset title="Communities" id="communities">
+      <AuthorizationGroupSearchResults
+        queryParams={queryParams}
+        pageDispatchers={pageDispatchers}
+        paginationKey="authorizationGroups"
+        pagination={pagination}
+        setPagination={setPagination}
+      />
+    </Fieldset>
   )
 }
 

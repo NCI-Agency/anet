@@ -230,8 +230,9 @@ const routes = [
         ]
       },
       {
-        path: "communities",
+        path: PAGE_URLS.COMMUNITIES,
         children: [
+          { index: true, element: <AuthorizationGroupList /> },
           {
             element: (
               <ProtectedRoute
@@ -329,10 +330,6 @@ const routes = [
       },
       { path: PAGE_URLS.TOP_TASKS, element: <TopTasks /> },
       { path: PAGE_URLS.EVENTS, element: <EventsList /> },
-      {
-        path: PAGE_URLS.AUTHORIZATION_GROUPS,
-        element: <AuthorizationGroupList />
-      },
       {
         path: PAGE_URLS.INSIGHTS,
         children: [{ path: ":insight", element: <InsightsShow /> }]
