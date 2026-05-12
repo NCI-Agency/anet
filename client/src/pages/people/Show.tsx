@@ -33,6 +33,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
@@ -271,6 +272,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             onEnd={() => (localStorage.hasSeenPersonTour = "true")}
           />
         </div>
+        {isAdmin && <NoTenantWarning person={person} />}
         <Messages error={stateError} success={stateSuccess} />
         <div className="form-horizontal">
           <Fieldset
