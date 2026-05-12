@@ -123,6 +123,7 @@ const PersonForm = ({
   )
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
+  const isAdmin = currentUser?.isAdmin()
   const attachmentsEnabled =
     !Settings.fields.attachment.featureDisabled && !forOnboarding
   const attachmentEditEnabled =
@@ -184,7 +185,7 @@ const PersonForm = ({
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Person.yupSchema}
+      validationSchema={isAdmin ? Person.yupAdminSchema : Person.yupSchema}
       initialValues={initialValues}
     >
       {({
@@ -199,7 +200,6 @@ const PersonForm = ({
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
-        const isAdmin = currentUser && currentUser.isAdmin()
         const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast =
           values.endOfTourDate && values.endOfTourDate <= Date.now()
@@ -230,6 +230,11 @@ const PersonForm = ({
           (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) ||
           isPendingVerification ||
           isSelf
+        const showNoTenantWarning =
+          isAdmin &&
+          values.status === Model.STATUS.ACTIVE &&
+          values.user &&
+          _isEmpty(values.tenants)
         const imageAttachments = attachmentList?.filter(a =>
           avatarMimeTypes.includes(a.mimeType)
         )
@@ -260,6 +265,14 @@ const PersonForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div>
+              {showNoTenantWarning && (
+                <div
+                  id="no-tenant-warning"
+                  className="p-1 text-bg-danger text-center"
+                >
+                  This active user has not yet been assigned to a Tenant
+                </div>
+              )}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <Form className="form-horizontal" method="post">
                 <MessagesWithConflict

@@ -49,7 +49,7 @@ export default class Person extends Model {
   static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
   static regularShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
 
-  static yupSchema = yup
+  static yupBaseSchema = yup
     .object()
     .shape({
       uuid: yup.string().nullable().default(null),
@@ -162,13 +162,45 @@ export default class Person extends Model {
         .string()
         .nullable()
         .default(() => Model.STATUS.ACTIVE),
-      tenants: yup.array().nullable().default([]),
       assessments: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)
     .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
+
+  static yupSchema = yup
+    .object()
+    .shape({
+      tenants: yup.array().nullable().default([])
+    })
+    .concat(Person.yupBaseSchema)
+
+  static yupAdminSchema = yup
+    .object()
+    .shape({
+      tenants: yup
+        .array()
+        .nullable()
+        .when(["status", "user"], ([status, user], schema) =>
+          status !== Model.STATUS.ACTIVE || !user
+            ? schema
+            : schema.test(
+                "no-tenants",
+                "no tenants error",
+                (tenants, testContext) => {
+                  return _isEmpty(tenants)
+                    ? testContext.createError({
+                        message:
+                          "An active user must be a member of at least one Tenant"
+                      })
+                    : true
+                }
+              )
+        )
+        .default([])
+    })
+    .concat(Person.yupBaseSchema)
 
   static autocompleteQuery = `
     ${gqlEntityFieldsMap.Person}
