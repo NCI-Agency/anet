@@ -1445,17 +1445,6 @@ table.event-matrix-cell :is(th, td):first-child {
   width: unset;
 }
 
-table.event-matrix tr.table-primary > :is(th, td) {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: var(--bs-table-bg);
-}
-
-table.event-matrix tr.table-primary > :is(th, td):first-child {
-  left: 0;
-  z-index: 4;
-}
 
 table.event-matrix-cell {
   table-layout: fixed;
@@ -1501,6 +1490,52 @@ table.cadence-dashboard thead tr.table-primary {
 .cadence-dashboard-panel.fullscreen label,
 .cadence-dashboard-panel.fullscreen select {
   display: none;
+}
+
+.event-matrix-panel.fullscreen {
+  position: absolute;
+  top: var(--banner-height);
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: calc(100% - var(--banner-height));
+  max-height: calc(100% - var(--banner-height));
+  z-index: 10;
+  background: #f2f2f2;
+  margin: 0 !important;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.event-matrix-panel.fullscreen > .float-start + div {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-matrix-panel.fullscreen > .float-start + div > div {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.event-matrix-panel.fullscreen table.event-matrix tr.table-primary > :is(th, td) {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: var(--bs-table-bg);
+}
+
+.event-matrix-panel.fullscreen table.event-matrix tr.table-primary > :is(th, td):first-child {
+  left: 0;
+  z-index: 4;
+}
+
+.event-matrix-panel table.event-matrix tr.table-primary > :is(th, td) {
+  background-color: var(--bs-table-bg);
 }
 
 .event-series-task-row > td a {

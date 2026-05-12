@@ -4,7 +4,10 @@ import {
   gqlPreferenceFields
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
+import { Icon, Tooltip } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import classNames from "classnames"
 import { buildTree } from "components/advancedSelectWidget/utils"
 import AppContext from "components/AppContext"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
@@ -21,6 +24,7 @@ import {
   CATEGORY_SYNC_MATRIX,
   NAME_SYNC_MATRIX_PERIOD
 } from "components/preferences/PreferencesFieldSet"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment/moment"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
@@ -145,12 +149,14 @@ const EventMatrix = ({
 }: EventMatrixProps) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const { currentUser } = useContext(AppContext)
+  const { securityBannerOffset } = useContext(ResponsiveLayoutContext)
   const [periodLengthInDays, setPeriodLengthInDays] = useState<number>(0)
   const [startDay, setStartDay] = useState(moment())
   const [periodDays, setPeriodDays] = useState([])
   const [events, setEvents] = useState([])
   const [reports, setReports] = useState([])
   const [fetchError, setFetchError] = useState(null)
+  const [isFullScreen, setIsFullScreen] = useState(false)
   const includeTask = !!taskUuid
 
   useEffect(() => {
@@ -485,191 +491,214 @@ const EventMatrix = ({
   return (
     <>
       <Messages error={fetchError} />
-      <div className="float-start w-100 pb-3">
-        <div className="rollup-date-range-container d-flex align-items-end gap-2">
-          <div className="form-group" style={{ width: "170px" }}>
-            <label className="form-label text-start mb-0">
-              <div>Period in days</div>
-              <input
-                type="number"
-                min={1}
-                value={periodLengthInDays}
-                onChange={e => setPeriodLengthInDays(Number(e.target.value))}
-                className="form-control"
-              />
-            </label>
-          </div>
+      <div
+        className={classNames("event-matrix-panel", {
+          fullscreen: isFullScreen
+        })}
+        style={{
+          ["--banner-height" as any]: `${securityBannerOffset}px`
+        }}
+      >
+        <div className="float-start w-100 pb-3">
+          <div className="rollup-date-range-container d-flex align-items-end gap-2">
+            <div className="form-group" style={{ width: "170px" }}>
+              <label className="form-label text-start mb-0">
+                <div>Period in days</div>
+                <input
+                  type="number"
+                  min={1}
+                  value={periodLengthInDays}
+                  onChange={e => setPeriodLengthInDays(Number(e.target.value))}
+                  className="form-control"
+                />
+              </label>
+            </div>
 
-          <div className="form-group" style={{ width: "170px" }}>
-            <label className="form-label text-start mb-0">
-              <div>Start day</div>
-              <CustomDateInput
-                showIcon={false}
-                placement="right"
-                value={startDay?.toDate()}
-                onChange={v => setStartDay(moment(v))}
-              />
-            </label>
-          </div>
-          <Button
-            id="previous-period"
-            variant="outline-secondary"
-            onClick={() => shiftPeriod(-periodLengthInDays)}
-          >
-            -1 period
-          </Button>
-          <Button
-            id="previous-week"
-            variant="outline-secondary"
-            onClick={() => shiftPeriod(-7)}
-          >
-            -1 week
-          </Button>
-          <Button
-            id="previous-day"
-            variant="outline-secondary"
-            onClick={() => shiftPeriod(-1)}
-          >
-            -1 day
-          </Button>
-          <Button
-            id="next-day"
-            variant="outline-secondary"
-            onClick={() => shiftPeriod(1)}
-          >
-            +1 day
-          </Button>
-          <Button
-            id="next-week"
-            variant="outline-secondary"
-            onClick={() => shiftPeriod(7)}
-          >
-            +1 week
-          </Button>
-          <Button
-            id="next-period"
-            variant="outline-secondary"
-            onClick={() => shiftPeriod(periodLengthInDays)}
-          >
-            +1 period
-          </Button>
+            <div className="form-group" style={{ width: "170px" }}>
+              <label className="form-label text-start mb-0">
+                <div>Start day</div>
+                <CustomDateInput
+                  showIcon={false}
+                  placement="right"
+                  value={startDay?.toDate()}
+                  onChange={v => setStartDay(moment(v))}
+                />
+              </label>
+            </div>
+            <Button
+              id="previous-period"
+              variant="outline-secondary"
+              onClick={() => shiftPeriod(-periodLengthInDays)}
+            >
+              -1 period
+            </Button>
+            <Button
+              id="previous-week"
+              variant="outline-secondary"
+              onClick={() => shiftPeriod(-7)}
+            >
+              -1 week
+            </Button>
+            <Button
+              id="previous-day"
+              variant="outline-secondary"
+              onClick={() => shiftPeriod(-1)}
+            >
+              -1 day
+            </Button>
+            <Button
+              id="next-day"
+              variant="outline-secondary"
+              onClick={() => shiftPeriod(1)}
+            >
+              +1 day
+            </Button>
+            <Button
+              id="next-week"
+              variant="outline-secondary"
+              onClick={() => shiftPeriod(7)}
+            >
+              +1 week
+            </Button>
+            <Button
+              id="next-period"
+              variant="outline-secondary"
+              onClick={() => shiftPeriod(periodLengthInDays)}
+            >
+              +1 period
+            </Button>
 
-          {emptyMsgComponent}
+            {emptyMsgComponent}
+            <div className="ms-auto">
+              <Tooltip
+                content={
+                  isFullScreen ? "Exit fullscreen" : "View in fullscreen"
+                }
+              >
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setIsFullScreen(prev => !prev)}
+                >
+                  <Icon
+                    icon={
+                      isFullScreen ? IconNames.MINIMIZE : IconNames.FULLSCREEN
+                    }
+                  />
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
         </div>
-      </div>
-      <div style={{ clear: "both", marginTop: "1rem" }}>
-        <div
-          ref={scrollContainerRef}
-          style={{
-            overflow: "auto",
-            whiteSpace: "nowrap",
-            width: "100%",
-            maxHeight: "calc(100vh - 250px)"
-          }}
-        >
-          <Table
-            className="event-matrix"
-            hover
-            id="events-matrix"
-            style={{ minWidth: `${periodDays.length * 250}px` }}
+        <div style={{ clear: "both", marginTop: "1rem" }}>
+          <div
+            ref={scrollContainerRef}
+            style={{ overflowX: "auto", whiteSpace: "nowrap", width: "100%" }}
           >
-            <tbody>
-              <tr id="event-series-table-header" className="table-primary">
-                <th>Event Series</th>
-                {periodDays.map(weekDay => (
-                  <th key={weekDay} style={{ minWidth: "120px" }}>
-                    {weekDay.format("YYYY-MM-DD")}
-                    <br />
-                    {weekDay.format("dddd")}
-                  </th>
-                ))}
-              </tr>
-              {_isEmpty(includedEventSeries) ? (
-                <tr className="event-series-row">
-                  <td>No matching Event Series</td>
-                  <td colSpan={periodDays.length} />
+            <Table
+              className="event-matrix"
+              hover
+              id="events-matrix"
+              style={{ minWidth: `${periodDays.length * 250}px` }}
+            >
+              <tbody>
+                <tr id="event-series-table-header" className="table-primary">
+                  <th>Event Series</th>
+                  {periodDays.map(weekDay => (
+                    <th key={weekDay} style={{ minWidth: "120px" }}>
+                      {weekDay.format("YYYY-MM-DD")}
+                      <br />
+                      {weekDay.format("dddd")}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                includedEventSeries.map(es => {
-                  const eventSeriesEvents = events.filter(
-                    e => e.eventSeries?.uuid === es.uuid
-                  )
-                  return (
-                    <tr key={es.uuid} className="event-series-row">
-                      <td
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis"
-                        }}
-                      >
-                        <LinkTo modelType="EventSeries" model={es} />
-                      </td>
-                      {periodDays.map((p, idx) => (
-                        <td key={p}>{getEvent(eventSeriesEvents, idx)}</td>
-                      ))}
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-            <tbody>
-              <tr id="tasks-table-header" className="table-primary">
-                <th>{Settings.fields.task.shortLabel}</th>
-                {periodDays.map(weekDay => (
-                  <th key={weekDay} style={{ width: "12%" }}>
-                    {weekDay.format("YYYY-MM-DD")}
-                    <br />
-                    {weekDay.format("dddd")}
-                  </th>
-                ))}
-              </tr>
-              {_isEmpty(includedTasks) ? (
-                <tr className="event-series-task-row">
-                  <td>No matching {Settings.fields.task.shortLabel}</td>
-                  <td colSpan={periodDays.length} />
+                {_isEmpty(includedEventSeries) ? (
+                  <tr className="event-series-row">
+                    <td>No matching Event Series</td>
+                    <td colSpan={periodDays.length} />
+                  </tr>
+                ) : (
+                  includedEventSeries.map(es => {
+                    const eventSeriesEvents = events.filter(
+                      e => e.eventSeries?.uuid === es.uuid
+                    )
+                    return (
+                      <tr key={es.uuid} className="event-series-row">
+                        <td
+                          style={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis"
+                          }}
+                        >
+                          <LinkTo modelType="EventSeries" model={es} />
+                        </td>
+                        {periodDays.map((p, idx) => (
+                          <td key={p}>{getEvent(eventSeriesEvents, idx)}</td>
+                        ))}
+                      </tr>
+                    )
+                  })
+                )}
+
+                <tr id="tasks-table-header" className="table-primary">
+                  <th>{Settings.fields.task.shortLabel}</th>
+                  {periodDays.map(weekDay => (
+                    <th key={weekDay} style={{ width: "12%" }}>
+                      {weekDay.format("YYYY-MM-DD")}
+                      <br />
+                      {weekDay.format("dddd")}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                includedTasks.map(task => {
-                  const taskEvents = events.filter(e => hasTask(e.tasks, task))
-                  const hideParents = includeTask
-                    ? task.uuid !== taskUuid
-                    : !!task.parentTask?.uuid
-                  const ascendantTasks = task.ascendantTasks || [task]
-                  const ascendantTaskUuids = new Set(
-                    hideParents ? ascendantTasks.map(t => t.uuid) : [taskUuid]
-                  )
-                  const paddingLeft = Math.min(task.level * 20, 200)
-                  const linkWidth =
-                    300 - paddingLeft - (task.level === 0 ? 0 : 30)
+                {_isEmpty(includedTasks) ? (
+                  <tr className="event-series-task-row">
+                    <td>No matching {Settings.fields.task.shortLabel}</td>
+                    <td colSpan={periodDays.length} />
+                  </tr>
+                ) : (
+                  includedTasks.map(task => {
+                    const taskEvents = events.filter(e =>
+                      hasTask(e.tasks, task)
+                    )
+                    const hideParents = includeTask
+                      ? task.uuid !== taskUuid
+                      : !!task.parentTask?.uuid
+                    const ascendantTasks = task.ascendantTasks || [task]
+                    const ascendantTaskUuids = new Set(
+                      hideParents ? ascendantTasks.map(t => t.uuid) : [taskUuid]
+                    )
+                    const paddingLeft = Math.min(task.level * 20, 200)
+                    const linkWidth =
+                      300 - paddingLeft - (task.level === 0 ? 0 : 30)
 
-                  return (
-                    <tr key={task.uuid} className="event-series-task-row">
-                      <td
-                        style={{
-                          paddingLeft: `${paddingLeft}px`,
-                          ["--task-link-width" as any]: `${linkWidth}px`
-                        }}
-                      >
-                        <BreadcrumbTrail
-                          modelType="Task"
-                          leaf={task}
-                          ascendantObjects={ascendantTasks}
-                          parentField="parentTask"
-                          hideParents={hideParents}
-                          ascendantTaskUuids={ascendantTaskUuids}
-                        />
-                      </td>
+                    return (
+                      <tr key={task.uuid} className="event-series-task-row">
+                        <td
+                          style={{
+                            paddingLeft: `${paddingLeft}px`,
+                            ["--task-link-width" as any]: `${linkWidth}px`
+                          }}
+                        >
+                          <BreadcrumbTrail
+                            modelType="Task"
+                            leaf={task}
+                            ascendantObjects={ascendantTasks}
+                            parentField="parentTask"
+                            hideParents={hideParents}
+                            ascendantTaskUuids={ascendantTaskUuids}
+                          />
+                        </td>
 
-                      {periodDays.map((p, idx) => (
-                        <td key={p}>{getEvent(taskEvents, idx, task)}</td>
-                      ))}
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </Table>
+                        {periodDays.map((p, idx) => (
+                          <td key={p}>{getEvent(taskEvents, idx, task)}</td>
+                        ))}
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </Table>
+          </div>
         </div>
       </div>
     </>
