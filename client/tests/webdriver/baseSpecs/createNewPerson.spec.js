@@ -212,15 +212,15 @@ describe("Create new Person form page", () => {
       await (await CreatePerson.getForm()).waitForDisplayed()
       await (await CreatePerson.getUserTrueButton()).waitForExist()
       await (await CreatePerson.getUserTrueButton()).click()
-      const warningMessage = await browser.$(".alert.alert-warning")
-      await warningMessage.waitForExist()
-      await warningMessage.waitForDisplayed()
-      expect(await warningMessage.getText()).to.equal(
+      await (await CreatePerson.getAlertWarning()).waitForExist()
+      await (await CreatePerson.getAlertWarning()).waitForDisplayed()
+      expect(await (await CreatePerson.getAlertWarning()).getText()).to.equal(
         "Creating a user in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts you should take action."
       )
       // Don't logout, next test continues…
     })
-    it("Should save even if endOfTourDate is not filled in", async () => {
+
+    it("Should not save a user without a tenant", async () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (
         await CreatePerson.getFamilyName()
@@ -230,6 +230,9 @@ describe("Create new Person form page", () => {
       ).setValue(VALID_PERSON_ADVISOR.givenName)
       await (await CreatePerson.getUserTrueButton()).waitForExist()
       await (await CreatePerson.getUserTrueButton()).click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await CreatePerson.getNoTenantWarning()).isExisting()).to.be
+        .true
       for (const [
         index,
         address
@@ -265,6 +268,35 @@ describe("Create new Person form page", () => {
         await CreatePerson.getCountryHelpBlock()
       ).waitForExist({ reverse: true })
 
+      await CreatePerson.submitForm()
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await CreatePerson.getAlertSuccess()).isExisting()).to.be
+        .false
+      await (await CreatePerson.getTenantsError()).waitForExist()
+      await (await CreatePerson.getTenantsError()).waitForDisplayed()
+      expect(await (await CreatePerson.getTenantsError()).getText()).to.equal(
+        "An active user must be a member of at least one active Tenant"
+      )
+      await (await CreatePerson.getTenantsInput()).scrollIntoView()
+      await (await CreatePerson.getTenantsInput()).click()
+      await (
+        await CreatePerson.getTenantsAdvancedSelectFirstItem()
+      ).waitForExist()
+      await (
+        await CreatePerson.getTenantsAdvancedSelectFirstItem()
+      ).waitForDisplayed()
+      await (await CreatePerson.getTenantsAdvancedSelectFirstItem()).click()
+      await (
+        await CreatePerson.getTenantsError()
+      ).waitForExist({ reverse: true })
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await CreatePerson.getNoTenantWarning()).isExisting()).to.be
+        .false
+      // Don't logout, next test continues…
+    })
+
+    it("Should save even if endOfTourDate is not filled in", async () => {
+      // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getFamilyName()).click()
       for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
