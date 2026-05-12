@@ -27,6 +27,7 @@ import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
@@ -123,6 +124,7 @@ const PersonForm = ({
   )
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
+  const isAdmin = currentUser?.isAdmin()
   const attachmentsEnabled =
     !Settings.fields.attachment.featureDisabled && !forOnboarding
   const attachmentEditEnabled =
@@ -184,7 +186,7 @@ const PersonForm = ({
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Person.yupSchema}
+      validationSchema={isAdmin ? Person.yupAdminSchema : Person.yupSchema}
       initialValues={initialValues}
     >
       {({
@@ -199,7 +201,6 @@ const PersonForm = ({
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
-        const isAdmin = currentUser && currentUser.isAdmin()
         const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast =
           values.endOfTourDate && values.endOfTourDate <= Date.now()
@@ -260,6 +261,7 @@ const PersonForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div>
+              {isAdmin && <NoTenantWarning person={values} />}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <Form className="form-horizontal" method="post">
                 <MessagesWithConflict
