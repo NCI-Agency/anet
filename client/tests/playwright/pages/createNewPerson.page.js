@@ -16,10 +16,6 @@ export class CreatePerson extends Page {
     return currentPage().locator("form.form-horizontal").first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getFamilyName() {
     return (await this.getForm()).locator("#familyName").first()
   }
@@ -119,6 +115,24 @@ export class CreatePerson extends Page {
     return currentPage()
       .locator(".bp6-datepicker-footer button.bp6-button:first-child")
       .first()
+  }
+
+  async getNoTenantWarning() {
+    return currentPage().locator("#no-tenant-warning").first()
+  }
+
+  async getTenantsInput() {
+    return currentPage().locator("#tenants").first()
+  }
+
+  async getTenantsAdvancedSelectFirstItem() {
+    return currentPage()
+      .locator("#tenants-popover tbody tr:first-child td:nth-child(2)")
+      .first()
+  }
+
+  async getTenantsError() {
+    return currentPage().locator("#fg-tenants div.invalid-feedback").first()
   }
 
   async getCustomFieldsContainer() {
