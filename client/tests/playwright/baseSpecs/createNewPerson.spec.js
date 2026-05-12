@@ -190,11 +190,9 @@ test.describe("Create new Person form page", () => {
       await CreatePerson.openAsAdmin()
       await waitFor(await CreatePerson.getForm(), "visible")
       await (await CreatePerson.getUserTrueButton()).click()
-      const warningMessage = await currentPage()
-        .locator(".alert.alert-warning")
-        .first()
-      await waitFor(warningMessage, "visible")
-      await expect(warningMessage).toHaveText(
+      await waitFor(await CreatePerson.getAlertWarning(), "attached")
+      await waitFor(await CreatePerson.getAlertWarning(), "visible")
+      await expect(await CreatePerson.getAlertWarning()).toHaveText(
         "Creating a user in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts you should take action.",
         {
           useInnerText: true
@@ -202,7 +200,7 @@ test.describe("Create new Person form page", () => {
       )
       // Don't logout, next test continues…
     })
-    test("Should save even if endOfTourDate is not filled in", async () => {
+    test("Should not save a user without a tenant", async () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (
         await CreatePerson.getFamilyName()
@@ -211,6 +209,7 @@ test.describe("Create new Person form page", () => {
         await CreatePerson.getGivenName()
       ).fill(String(VALID_PERSON_ADVISOR.givenName))
       await (await CreatePerson.getUserTrueButton()).click()
+      await expect(await CreatePerson.getNoTenantWarning()).not.toHaveCount(0)
       for (const [
         index,
         address
@@ -244,6 +243,36 @@ test.describe("Create new Person form page", () => {
       await waitFor(await CreatePerson.getCountryHelpBlock(), "attached", {
         reverse: true
       })
+      await CreatePerson.submitForm()
+      await expect(await CreatePerson.getAlertSuccess()).toHaveCount(0)
+      await waitFor(await CreatePerson.getTenantsError(), "attached")
+      await waitFor(await CreatePerson.getTenantsError(), "visible")
+      await expect(await CreatePerson.getTenantsError()).toHaveText(
+        "An active user must be a member of at least one active Tenant",
+        {
+          useInnerText: true
+        }
+      )
+      await (await CreatePerson.getTenantsInput()).scrollIntoViewIfNeeded()
+      await (await CreatePerson.getTenantsInput()).click()
+      await waitFor(
+        await CreatePerson.getTenantsAdvancedSelectFirstItem(),
+        "attached"
+      )
+      await waitFor(
+        await CreatePerson.getTenantsAdvancedSelectFirstItem(),
+        "visible"
+      )
+      await (await CreatePerson.getTenantsAdvancedSelectFirstItem()).click()
+      await waitFor(await CreatePerson.getTenantsError(), "attached", {
+        timeout: 1000,
+        reverse: true
+      })
+      await expect(await CreatePerson.getNoTenantWarning()).toHaveCount(0)
+      // Don't logout, next test continues…
+    })
+    test("Should save even if endOfTourDate is not filled in", async () => {
+      // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (await CreatePerson.getEndOfTourDate()).fill("")
       await (await CreatePerson.getFamilyName()).click()
       for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {

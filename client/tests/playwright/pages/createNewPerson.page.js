@@ -117,6 +117,24 @@ export class CreatePerson extends Page {
       .first()
   }
 
+  async getNoTenantWarning() {
+    return currentPage().locator("#no-tenant-warning").first()
+  }
+
+  async getTenantsInput() {
+    return currentPage().locator("#tenants").first()
+  }
+
+  async getTenantsAdvancedSelectFirstItem() {
+    return currentPage()
+      .locator("#tenants-popover tbody tr:first-child td:nth-child(2)")
+      .first()
+  }
+
+  async getTenantsError() {
+    return currentPage().locator("#fg-tenants div.invalid-feedback").first()
+  }
+
   async getCustomFieldsContainer() {
     return currentPage().locator("#custom-fields").first()
   }
