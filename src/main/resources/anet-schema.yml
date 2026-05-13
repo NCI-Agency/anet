@@ -419,6 +419,7 @@ required:
   - eventTypeVisitBanUuid
   - featureMartGuiEnabled
   - martNewPositionDaysInThePast
+  - martTenantName
   - maxShownAccessTokenActivities
   - dateFormats
   - calendarOptions
@@ -492,6 +493,11 @@ properties:
     minimum: 1
     title: Offset in days in the past for new position
     description: Used for MART; determines the offset of days in the past for a new position created for MART
+
+  martTenantName:
+    type: string
+    title: The Tenant to which MART users and MART reports will be linked
+    description: Used for MART; determines the the Tenant to be used for MART related users and reports
 
   maxShownAccessTokenActivities:
     type: integer
