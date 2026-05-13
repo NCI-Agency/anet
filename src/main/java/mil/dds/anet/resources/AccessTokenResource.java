@@ -28,7 +28,10 @@ public class AccessTokenResource {
   }
 
   @GraphQLQuery(name = "accessToken")
-  public AccessToken getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
+  public AccessToken getByUuid(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "uuid") String uuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
     final AccessToken accessToken = accessTokenDao.getByUuid(uuid);
     if (accessToken == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
