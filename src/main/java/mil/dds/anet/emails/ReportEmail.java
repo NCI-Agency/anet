@@ -9,6 +9,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.utils.Utils;
 
 public class ReportEmail implements AnetEmailAction {
   private Report report;
@@ -40,6 +41,8 @@ public class ReportEmail implements AnetEmailAction {
     context.put("reportPeople", getReportPeople(r));
     context.put("sender", sender);
     context.put("comment", comment);
+    // Gather all attachments, either directly linked, or referenced in rich-text
+    context.put("attachments", Utils.getAttachments(r, r.getReportText()));
     // Override the classification
     final AnetDictionary dict = ApplicationContextProvider.getDictionary();
     final var siteClassification = ConfidentialityRecord.getConfidentialityLabelForChoice(dict,

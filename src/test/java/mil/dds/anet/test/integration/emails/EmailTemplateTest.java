@@ -9,6 +9,7 @@ import java.util.List;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
@@ -42,6 +43,9 @@ class EmailTemplateTest extends AbstractResourceTest {
   private EmailDao emailDao;
 
   @Autowired
+  private AttachmentDao attachmentDao;
+
+  @Autowired
   private CommentDao commentDao;
 
   @Autowired
@@ -56,7 +60,7 @@ class EmailTemplateTest extends AbstractResourceTest {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, attachmentDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
 
     // Flush all emails from previous tests

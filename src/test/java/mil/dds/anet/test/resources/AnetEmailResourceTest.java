@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.emails.ReportEmail;
@@ -22,11 +23,14 @@ class AnetEmailResourceTest extends AbstractResourceTest {
   @Autowired
   private EmailDao emailDao;
 
+  @Autowired
+  private AttachmentDao attachmentDao;
+
   private AnetEmailWorker emailWorker;
 
   @BeforeAll
   void setUpClass() {
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, attachmentDao);
     emailWorker.run();
   }
 
