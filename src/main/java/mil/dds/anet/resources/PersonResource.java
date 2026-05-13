@@ -122,6 +122,12 @@ public class PersonResource {
   }
 
   private static boolean canCreateOrUpdatePerson(Person editor, Person subject, boolean create) {
+    if (editor == null || subject == null) {
+      return false;
+    }
+    if (DaoUtils.isNewUser(editor)) {
+      return DaoUtils.usersHaveMatchingDomainUsername(editor, subject);
+    }
     if (editor.getUuid().equals(subject.getUuid())) {
       return true;
     }
@@ -346,7 +352,11 @@ public class PersonResource {
   @GraphQLQuery(name = "me")
   @AllowUnverifiedUsers
   public Person getCurrentUser(@GraphQLRootContext GraphQLContext context) {
-    return dao.getByUuid(DaoUtils.getUuid(DaoUtils.getUserFromContext(context)));
+    final Person user = DaoUtils.getUserFromContext(context);
+    if (DaoUtils.isNewUser(user)) {
+      return user; // New user tries to onboard!
+    }
+    return dao.getByUuid(DaoUtils.getUuid(user));
   }
 
   @GraphQLMutation(name = "updateMe")
@@ -361,8 +371,13 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update yourself");
     }
 
-    final Person existing = dao.getByUuid(p.getUuid());
-    DaoUtils.assertObjectIsFresh(p, existing, force);
+    final Person existing;
+    if (DaoUtils.isNewUser(user)) {
+      existing = user; // New user tries to onboard!
+    } else {
+      existing = dao.getByUuid(p.getUuid());
+      DaoUtils.assertObjectIsFresh(p, existing, force);
+    }
 
     // Only admins can update user/domainUsername
     if (!AuthUtils.isAdmin(user)) {
@@ -383,17 +398,31 @@ public class PersonResource {
 
     p.setBiography(
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
-    final int numRows = dao.update(p);
-    if (numRows == 0) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
+
+    final int numRows;
+    if (DaoUtils.isNewUser(user)) {
+      dao.insert(p);
+      numRows = 1;
+    } else {
+      numRows = dao.update(p);
+      if (numRows == 0) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
+      }
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
-    // Log the change
-    final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
-    // Update any subscriptions
-    dao.updateSubscriptions(p, auditTrailUuid, false);
+    if (DaoUtils.isNewUser(user)) {
+      userDao.updateUsers(p, p.getUsers());
+
+      // Log the change
+      auditTrailDao.logCreate(user, PersonDao.TABLE_NAME, p);
+    } else {
+      // Log the change
+      final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
+      // Update any subscriptions
+      dao.updateSubscriptions(p, auditTrailUuid, false);
+    }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

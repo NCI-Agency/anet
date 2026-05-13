@@ -69,7 +69,7 @@ const OnboardingEdit = ({ pageDispatchers }: OnboardingEditProps) => {
         edit
         forOnboarding
         title="Fill in your profile"
-        saveText="Save"
+        saveText={!person.uuid ? "Enroll in ANET" : "Save"}
       />
     </div>
   )
