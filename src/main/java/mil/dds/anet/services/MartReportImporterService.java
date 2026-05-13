@@ -46,6 +46,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.utils.ResourceUtils;
@@ -82,14 +83,16 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final AttachmentDao attachmentDao;
   private final EmailAddressDao emailAddressDao;
   private final CommentDao commentDao;
+  private final TenantDao tenantDao;
 
   private final int martNewPositionDaysInThePast;
+  private final String martTenantName;
 
   public MartReportImporterService(AnetObjectEngine engine, AnetDictionary dict,
       ReportDao reportDao, PersonDao personDao, PositionDao positionDao, TaskDao taskDao,
       OrganizationDao organizationDao, LocationDao locationDao,
       MartImportedReportDao martImportedReportDao, AttachmentDao attachmentDao,
-      EmailAddressDao emailAddressDao, CommentDao commentDao) {
+      EmailAddressDao emailAddressDao, CommentDao commentDao, TenantDao tenantDao) {
     this.engine = engine;
     this.reportDao = reportDao;
     this.personDao = personDao;
@@ -101,9 +104,11 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
     this.commentDao = commentDao;
+    this.tenantDao = tenantDao;
 
     this.martNewPositionDaysInThePast =
         (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
+    this.martTenantName = (String) dict.getDictionaryEntry("martTenantName");
   }
 
   @Override
@@ -420,10 +425,8 @@ public class MartReportImporterService implements IMartReportImporterService {
     // Set advisor organization
     anetReport.setAdvisorOrg(organizationForReport);
     // Assign tenants
-    final List<Tenant> tenants = personForReport.loadTenants(engine.getContext()).join();
-    final List<Tenant> activeTenants = tenants == null ? null
-        : tenants.stream().filter(t -> t.getStatus() == WithStatus.Status.ACTIVE).toList();
-    anetReport.setTenants(activeTenants);
+    final List<Tenant> tenants = tenantDao.getByName(martTenantName);
+    anetReport.setTenants(tenants);
   }
 
   private Person createNewPerson(ReportDto martReport, List<String> errors) {
@@ -435,10 +438,16 @@ public class MartReportImporterService implements IMartReportImporterService {
     getPersonCountry(person, martReport, errors);
 
     person = personDao.insert(person);
+
     // Update email address
     final EmailAddress emailAddress = new EmailAddress("Internet", martReport.getEmail());
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
         List.of(emailAddress));
+
+    // Update tenants
+    final List<Tenant> tenants = tenantDao.getByName(martTenantName);
+    personDao.insertPersonTenants(person.getUuid(), tenants);
+
     return person;
   }
 
