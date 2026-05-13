@@ -61,6 +61,18 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     }
   }
 
+  @Transactional
+  public List<Tenant> getByName(String name) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery("/* getTenantsByName */ SELECT * FROM " + TABLE_NAME + " WHERE name = :name")
+          .bind("name", name).map(new TenantMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
   public interface TenantBatch {
     @SqlBatch("INSERT INTO \"peopleTenants\" (\"tenantUuid\", \"personUuid\") "
         + "VALUES (:tenantUuid, :uuid)")
