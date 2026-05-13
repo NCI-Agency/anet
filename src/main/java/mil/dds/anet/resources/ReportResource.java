@@ -185,6 +185,11 @@ public class ReportResource {
 
     // Log the change
     auditTrailDao.logCreate(author, ReportDao.TABLE_NAME, created);
+
+    if (created.getState() == ReportState.PUBLISHED) {
+      // Also send the report to the archive
+      reportDao.sendReportToArchive(created);
+    }
     return created;
   }
 
@@ -208,6 +213,11 @@ public class ReportResource {
         action.setEditor(editor);
         reportDao.sendEmailToReportAuthors(action, existing);
       }
+    }
+
+    if (existing.getState() == ReportState.PUBLISHED) {
+      // Also send the report to the archive
+      reportDao.sendReportToArchive(existing);
     }
 
     // Return the report in the response; used in autoSave by the client form

@@ -1561,6 +1561,12 @@ emailNetworks:
   - Internet
   - NS
 emailNetworkForNotifications: NS
+emailArchive:
+  enabled: true
+  addresses:
+    - archive@example.ns
+    - archive@example.com
+
 imagery:
   mapOptions:
     crs: EPSG3857
