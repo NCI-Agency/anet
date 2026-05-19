@@ -181,19 +181,41 @@ public class AttachmentResource {
     assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
     final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
-    assertAttachmentPermission(user, existing,
-        "You don't have permission to update this attachment");
     DaoUtils.assertObjectIsFresh(attachment, existing, force);
 
-    assertAllowedMimeType(attachment.getMimeType());
-    ResourceUtils.assertAllowedClassification(attachment.getClassification());
+    final boolean isAdmin = AuthUtils.isAdmin(user);
+    final boolean isAuthor = Objects.equals(existing.getAuthorUuid(), DaoUtils.getUuid(user));
+    final boolean canEditMetadata = isAdmin || isAuthor;
+    final boolean hasRelatedObjectsUpdate = attachment.getAttachmentRelatedObjects() != null;
+    final boolean hasMetadataChanges = hasAttachmentMetadataChanges(attachment, existing);
 
-    final int numRows = dao.update(attachment);
-    if (numRows == 0) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process attachment update");
+    if (!canEditMetadata) {
+      final var attachmentSettings = getAttachmentSettings();
+      final Boolean restrictToAdmins = (Boolean) attachmentSettings.get("restrictToAdmins");
+      if (Boolean.TRUE.equals(restrictToAdmins) && !isAdmin) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "You don't have permission to update this attachment");
+      }
+      if (hasMetadataChanges) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "You don't have permission to update this attachment");
+      }
+      if (!hasRelatedObjectsUpdate) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "You don't have permission to update this attachment");
+      }
+    } else {
+      assertAllowedMimeType(attachment.getMimeType());
+      ResourceUtils.assertAllowedClassification(attachment.getClassification());
+
+      final int numRows = dao.update(attachment);
+      if (numRows == 0) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "Could not process attachment update");
+      }
     }
 
-    if (attachment.getAttachmentRelatedObjects() != null) {
+    if (hasRelatedObjectsUpdate) {
       logger.debug("Editing related objects for {}", attachment);
       final List<GenericRelatedObject> existingRelatedObjects =
           existing.loadAttachmentRelatedObjects(engine.getContext()).join();
@@ -275,6 +297,15 @@ public class AttachmentResource {
       Attachment attachment) {
     return ContentDisposition.builder(disposition)
         .filename(attachment.getFileName(), StandardCharsets.UTF_8).build();
+  }
+
+  private boolean hasAttachmentMetadataChanges(final Attachment attachment,
+      final Attachment existing) {
+    return !Objects.equals(attachment.getFileName(), existing.getFileName())
+        || !Objects.equals(attachment.getMimeType(), existing.getMimeType())
+        || !Objects.equals(attachment.getDescription(), existing.getDescription())
+        || !Objects.equals(attachment.getClassification(), existing.getClassification())
+        || !Objects.equals(attachment.getCaption(), existing.getCaption());
   }
 
   private void assertAllowedRelatedObjects(final Person user,
