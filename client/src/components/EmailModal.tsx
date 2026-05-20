@@ -170,6 +170,7 @@ const ToAnetUsersOverlayRow = (item: any) => (
       <EmailAddressList
         label={Settings.fields.person.emailAddresses.label}
         emailAddresses={item.emailAddresses}
+        noMailLinks
       />
     </td>
     <td>
