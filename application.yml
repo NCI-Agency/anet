@@ -60,6 +60,8 @@ anet:
   # The email address that all automated emails should come from.
   # ex: "ANET <anet@example.com>"
   email-from-addr: "Anet Testing <anet+testing@example.com>"
+  # How frequently the AnetEmailWorker will kick in
+  email-fixed-rate-in-seconds: 300
 
   # The URL that should be used for links in emails
   # ex:  "http://anet.yourdomain"

@@ -69,7 +69,8 @@ public class AnetEmailWorker extends AbstractWorker {
     AnetEmailWorker.instance = instance;
   }
 
-  @Scheduled(initialDelay = 10, fixedRate = 300, timeUnit = TimeUnit.SECONDS)
+  @Scheduled(initialDelay = 10, fixedRateString = "${anet.email-fixed-rate-in-seconds:300}",
+      timeUnit = TimeUnit.SECONDS)
   @Override
   public void run() {
     super.run();
