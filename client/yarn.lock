@@ -7396,7 +7396,6 @@ __metadata:
     ts-node: "npm:10.9.2"
     typescript: "npm:5.9.3"
     use-debounce: "npm:10.1.1"
-    uuid: "npm:14.0.0"
     webdriverio: "npm:9.27.0"
     webpack: "npm:5.105.4"
     webpack-cli: "npm:7.0.2"
@@ -19884,15 +19883,6 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: 10c0/02ba649de1b7ca8854bfe20a82f1dfbdda3fb57a22ab4a8972a63a34553cf7aa51bc9081cf7e001b035b88186d23689d69e71b510e610a09a4c66f68aa95b672
-  languageName: node
-  linkType: hard
-
-"uuid@npm:14.0.0":
-  version: 14.0.0
-  resolution: "uuid@npm:14.0.0"
-  bin:
-    uuid: dist-node/bin/uuid
-  checksum: 10c0/a57ae7794c45005c1a9208989196c5baf79a7679c30f43c1bee9033a2c4d113a2cea216fa6fcc9663b08b0d55635df1a7c6eb7e7f3d21c3e50688c698fa39a50
   languageName: node
   linkType: hard
 
