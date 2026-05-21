@@ -19,7 +19,7 @@ import {
 import PendingApprovalReports from "components/PendingApprovalReports"
 import PendingAssessmentsByPosition from "components/PendingAssessmentsByPosition"
 import PollingContext from "components/PollingContext"
-import PublishedReportsOverTime from "components/PublishedReportsOverTime"
+import ReportsAggregatedOverTime from "components/ReportsAggregatedOverTime"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
 import {
@@ -43,7 +43,7 @@ export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
 export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 export const ADVISOR_REPORTS = "advisor-reports"
 export const CADENCE_DASHBOARD = "cadence-dashboard"
-export const PUBLISHED_REPORTS_OVER_TIME = "published-reports-over-time"
+export const AGGREGATED_REPORTS_OVER_TIME = "aggregated-reports-over-time"
 
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS,
@@ -51,7 +51,7 @@ export const INSIGHTS = [
   REPORTS_BY_TASK,
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
-  PUBLISHED_REPORTS_OVER_TIME,
+  AGGREGATED_REPORTS_OVER_TIME,
   PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS,
   CADENCE_DASHBOARD
@@ -116,11 +116,11 @@ export const INSIGHT_DETAILS = {
     navTitle: "Cadence Dashboard",
     title: "Cadence Dashboard"
   },
-  [PUBLISHED_REPORTS_OVER_TIME]: {
+  [AGGREGATED_REPORTS_OVER_TIME]: {
     searchProps: REPORT_SEARCH_PROPS,
-    component: PublishedReportsOverTime,
-    navTitle: "Reports Published Over Time",
-    title: "Reports Published Over Time"
+    component: ReportsAggregatedOverTime,
+    navTitle: "Aggregated Reports Over Time",
+    title: "Aggregated Reports Over Time"
   }
 }
 
@@ -216,10 +216,10 @@ const InsightsShow = ({
     },
     [ADVISOR_REPORTS]: {},
     [CADENCE_DASHBOARD]: {},
-    [PUBLISHED_REPORTS_OVER_TIME]: {
+    [AGGREGATED_REPORTS_OVER_TIME]: {
       state: [Report.STATE.PUBLISHED],
       releasedAtStart: getCurrentDateTime().startOf("year").toISOString(),
-      releasedAtEnd: getCurrentDateTime().endOf("year").toISOString()
+      releasedAtEnd: getCurrentDateTime().endOf("day").toISOString()
     }
   }
   let queryParams
