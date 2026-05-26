@@ -45,10 +45,34 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
         receivedAt
         errors
         reportUuid
+        historyCount
       }
     }
   }
 `
+
+interface HistoryIconProps {
+  historyCount?: number
+  onClick: () => void
+}
+
+const HistoryIcon = ({ historyCount = 0, onClick }: HistoryIconProps) => {
+  if (historyCount <= 1) {
+    return null
+  }
+  return (
+    <OverlayTrigger
+      placement="top"
+      overlay={<Tooltip>Show the import history for this report</Tooltip>}
+    >
+      <Icon
+        icon={IconNames.HISTORY}
+        style={{ cursor: "pointer" }}
+        onClick={onClick}
+      />
+    </OverlayTrigger>
+  )
+}
 
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
@@ -124,8 +148,6 @@ const MartImportedReportTable = ({
   const { totalCount = 0, list: martImportedReports = [] } =
     data.martImportedReportList || {}
 
-  // Summary counts reflect exactly what's on screen: the rows on the current page
-  // after every filter (author, state) and pagination has been applied.
   const stateCounts = martImportedReports.reduce(
     (acc: Record<string, number>, { state }: { state: string }) => {
       acc[state] = (acc[state] || 0) + 1
@@ -398,22 +420,12 @@ const MartImportedReportTable = ({
                                 model={martImportedReport.report}
                                 displayCallback={displayCallback}
                               />
-                              <OverlayTrigger
-                                placement="top"
-                                overlay={
-                                  <Tooltip>
-                                    Show the import history for this report
-                                  </Tooltip>
+                              <HistoryIcon
+                                historyCount={martImportedReport.historyCount}
+                                onClick={() =>
+                                  onSelectReport?.(martImportedReport)
                                 }
-                              >
-                                <Icon
-                                  icon={IconNames.HISTORY}
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    onSelectReport?.(martImportedReport)
-                                  }
-                                />
-                              </OverlayTrigger>
+                              />
                             </div>
                           </td>
                         </>

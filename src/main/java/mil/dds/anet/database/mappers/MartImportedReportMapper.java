@@ -21,6 +21,7 @@ public class MartImportedReportMapper implements RowMapper<MartImportedReport> {
     martImportedReport.setState(
         MapperUtils.getEnumIdx(rs, "martImportedReports_state", MartImportedReport.State.class));
     martImportedReport.setErrors(rs.getString("martImportedReports_errors"));
+    martImportedReport.setHistoryCount(rs.getInt("martImportedReports_historyCount"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

@@ -16,7 +16,10 @@ public class MartImportedReportDao extends AbstractDao {
       {"sequence", "personUuid", "reportUuid", "state", "submittedAt", "receivedAt", "errors"};
   public static final String TABLE_NAME = "martImportedReports";
   public static final String MART_IMPORTED_REPORTS_FIELDS =
-      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true)
+          + ", (SELECT COUNT(*) FROM \"martImportedReports\" mir2"
+          + " WHERE mir2.\"reportUuid\" = \"martImportedReports\".\"reportUuid\")"
+          + " AS \"martImportedReports_historyCount\" ";
 
   public MartImportedReportDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
