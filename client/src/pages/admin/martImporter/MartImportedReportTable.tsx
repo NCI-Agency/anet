@@ -49,6 +49,17 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
   }
 `
 
+const GQL_GET_MART_REPORTS_SUMMARY = gql`
+  query ($martImportedReportQuery: MartImportedReportSearchQueryInput) {
+    martImportedReportList(query: $martImportedReportQuery) {
+      totalCount
+      list {
+        state
+      }
+    }
+  }
+`
+
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
 const FILTER_OPTIONS = [
@@ -101,12 +112,24 @@ const MartImportedReportTable = ({
     sortOrder
   }
 
+  const martImportedReportSummaryQuery = {
+    pageNum: 0,
+    pageSize: 0,
+    personUuid: selectedAuthor?.uuid
+  }
+
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
     {
       martImportedReportQuery
     }
   )
+
+  const { data: summaryData } = API.useApiQuery(
+    GQL_GET_MART_REPORTS_SUMMARY,
+    { martImportedReportQuery: martImportedReportSummaryQuery },
+    { skip: !!selectedReportUuid }
+  ) as { data?: { martImportedReportList?: { list?: { state: string }[] } } }
 
   const { done, result } = useBoilerplate({
     loading,
@@ -122,6 +145,23 @@ const MartImportedReportTable = ({
 
   const { totalCount = 0, list: martImportedReports = [] } =
     data.martImportedReportList || {}
+
+  const summaryRows: { state: string }[] =
+    summaryData?.martImportedReportList?.list ?? []
+  const stateCounts = summaryRows.reduce(
+    (acc: Record<string, number>, { state }) => {
+      acc[state] = (acc[state] || 0) + 1
+      return acc
+    },
+    {}
+  )
+  const okCount = stateCounts.SUBMITTED_OK || 0
+  const warningsCount = stateCounts.SUBMITTED_WARNINGS || 0
+  const notSubmittedCount = stateCounts.NOT_SUBMITTED || 0
+  const notReceivedCount = stateCounts.NOT_RECEIVED || 0
+  const deliveredCount = okCount + warningsCount
+  const lostFailedCount = notSubmittedCount + notReceivedCount
+  const summaryTotal = deliveredCount + lostFailedCount
 
   const handlePageSizeChange = newPageSize => {
     const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
@@ -237,154 +277,186 @@ const MartImportedReportTable = ({
         </div>
       }
     >
-      {_isEmpty(martImportedReports) ? (
-        <em>No mart reports imported found</em>
-      ) : (
-        <UltimatePaginationTopDown
-          componentClassName="searchPagination"
-          className="float-end"
-          pageNum={pageNum}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          goToPage={setPageNum}
-        >
-          <Table striped hover responsive>
-            <thead>
-              <tr>
-                <th>Sequence</th>
-                <th>Sent by MART</th>
-                <th>Received by ANET</th>
-                <th>Received</th>
-                <th>Submitted</th>
-                {!selectedReportUuid && <th>Author</th>}
-                {!selectedReportUuid && <th>Report</th>}
-                <th>Errors</th>
-              </tr>
-            </thead>
-            <tbody>
-              {martImportedReports.map((martImportedReport, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{martImportedReport.sequence}</td>
-                    <td>
-                      {moment(martImportedReport.submittedAt).format(
-                        Settings.dateFormats.forms.displayLong.withTime
-                      )}
-                    </td>
-                    <td>
-                      {moment(martImportedReport.receivedAt).format(
-                        Settings.dateFormats.forms.displayLong.withTime
-                      )}
-                    </td>
-                    <td>
-                      <Icon
-                        icon={
-                          martImportedReport.state !== "NOT_RECEIVED"
-                            ? IconNames.TICK
-                            : IconNames.CROSS
-                        }
-                        className={
-                          martImportedReport.state !== "NOT_RECEIVED"
-                            ? "text-success"
-                            : "text-danger"
-                        }
-                      />
-                    </td>
-                    <td>
-                      {martImportedReport.state !== "NOT_RECEIVED" && (
+      <>
+        {!selectedReportUuid && summaryTotal > 0 && (
+          <div className="d-flex flex-wrap align-items-center gap-4 mb-3 p-2 border rounded bg-light">
+            <span className="d-inline-flex align-items-center gap-2">
+              <Icon
+                icon={IconNames.TICK_CIRCLE}
+                className="text-success"
+                size={20}
+              />
+              <span>
+                <strong>{deliveredCount}</strong> delivered
+                <small className="text-muted ms-1">
+                  ({okCount} ok, {warningsCount} with warnings)
+                </small>
+              </span>
+            </span>
+            <span className="d-inline-flex align-items-center gap-2">
+              <Icon icon={IconNames.ERROR} className="text-danger" size={20} />
+              <span>
+                <strong>{lostFailedCount}</strong> lost or failed
+                <small className="text-muted ms-1">
+                  ({notSubmittedCount} not submitted, {notReceivedCount} not
+                  received)
+                </small>
+              </span>
+            </span>
+            <span className="text-muted ms-auto">
+              {summaryTotal} {utils.pluralizeWord(summaryTotal, "report")}
+            </span>
+          </div>
+        )}
+        {_isEmpty(martImportedReports) ? (
+          <em>No mart reports imported found</em>
+        ) : (
+          <UltimatePaginationTopDown
+            componentClassName="searchPagination"
+            className="float-end"
+            pageNum={pageNum}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            goToPage={setPageNum}
+          >
+            <Table striped hover responsive>
+              <thead>
+                <tr>
+                  <th>Sequence</th>
+                  <th>Sent by MART</th>
+                  <th>Received by ANET</th>
+                  <th>Received</th>
+                  <th>Submitted</th>
+                  {!selectedReportUuid && <th>Author</th>}
+                  {!selectedReportUuid && <th>Report</th>}
+                  <th>Errors</th>
+                </tr>
+              </thead>
+              <tbody>
+                {martImportedReports.map((martImportedReport, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{martImportedReport.sequence}</td>
+                      <td>
+                        {moment(martImportedReport.submittedAt).format(
+                          Settings.dateFormats.forms.displayLong.withTime
+                        )}
+                      </td>
+                      <td>
+                        {moment(martImportedReport.receivedAt).format(
+                          Settings.dateFormats.forms.displayLong.withTime
+                        )}
+                      </td>
+                      <td>
                         <Icon
                           icon={
-                            martImportedReport.state === "SUBMITTED_OK"
+                            martImportedReport.state !== "NOT_RECEIVED"
                               ? IconNames.TICK
-                              : martImportedReport.state ===
-                                  "SUBMITTED_WARNINGS"
-                                ? IconNames.WARNING_SIGN
-                                : IconNames.CROSS
+                              : IconNames.CROSS
                           }
                           className={
-                            martImportedReport.state === "SUBMITTED_OK"
+                            martImportedReport.state !== "NOT_RECEIVED"
                               ? "text-success"
-                              : martImportedReport.state ===
-                                  "SUBMITTED_WARNINGS"
-                                ? "text-warning"
-                                : "text-danger"
+                              : "text-danger"
                           }
                         />
+                      </td>
+                      <td>
+                        {martImportedReport.state !== "NOT_RECEIVED" && (
+                          <Icon
+                            icon={
+                              martImportedReport.state === "SUBMITTED_OK"
+                                ? IconNames.TICK
+                                : martImportedReport.state ===
+                                    "SUBMITTED_WARNINGS"
+                                  ? IconNames.WARNING_SIGN
+                                  : IconNames.CROSS
+                            }
+                            className={
+                              martImportedReport.state === "SUBMITTED_OK"
+                                ? "text-success"
+                                : martImportedReport.state ===
+                                    "SUBMITTED_WARNINGS"
+                                  ? "text-warning"
+                                  : "text-danger"
+                            }
+                          />
+                        )}
+                      </td>
+                      {!selectedReportUuid && (
+                        <>
+                          <td>
+                            <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                              <LinkTo
+                                modelType="Person"
+                                model={martImportedReport.person}
+                              />
+                              {!selectedAuthor && martImportedReport.person && (
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip>
+                                      Filter all entries by this author
+                                    </Tooltip>
+                                  }
+                                >
+                                  <Icon
+                                    icon={IconNames.SEARCH}
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      handleAuthorChange(
+                                        martImportedReport.person
+                                      )
+                                    }
+                                  />
+                                </OverlayTrigger>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                              <LinkTo
+                                modelType="Report"
+                                model={martImportedReport.report}
+                                displayCallback={displayCallback}
+                              />
+                              {martImportedReport.report && (
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip>
+                                      Show the import history for this report
+                                    </Tooltip>
+                                  }
+                                >
+                                  <Icon
+                                    icon={IconNames.HISTORY}
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      onSelectReport?.(martImportedReport)
+                                    }
+                                  />
+                                </OverlayTrigger>
+                              )}
+                            </div>
+                          </td>
+                        </>
                       )}
-                    </td>
-                    {!selectedReportUuid && (
-                      <>
-                        <td>
-                          <div className="d-flex align-items-center gap-2 justify-content-between px-2">
-                            <LinkTo
-                              modelType="Person"
-                              model={martImportedReport.person}
-                            />
-                            {!selectedAuthor && martImportedReport.person && (
-                              <OverlayTrigger
-                                placement="top"
-                                overlay={
-                                  <Tooltip>
-                                    Filter all entries by this author
-                                  </Tooltip>
-                                }
-                              >
-                                <Icon
-                                  icon={IconNames.SEARCH}
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    handleAuthorChange(
-                                      martImportedReport.person
-                                    )
-                                  }
-                                />
-                              </OverlayTrigger>
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex align-items-center gap-2 justify-content-between px-2">
-                            <LinkTo
-                              modelType="Report"
-                              model={martImportedReport.report}
-                              displayCallback={displayCallback}
-                            />
-                            {martImportedReport.report && (
-                              <OverlayTrigger
-                                placement="top"
-                                overlay={
-                                  <Tooltip>
-                                    Show the import history for this report
-                                  </Tooltip>
-                                }
-                              >
-                                <Icon
-                                  icon={IconNames.HISTORY}
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    onSelectReport?.(martImportedReport)
-                                  }
-                                />
-                              </OverlayTrigger>
-                            )}
-                          </div>
-                        </td>
-                      </>
-                    )}
-                    <td>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: martImportedReport.errors
-                        }}
-                      />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </Table>
-        </UltimatePaginationTopDown>
-      )}
+                      <td>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: martImportedReport.errors
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+          </UltimatePaginationTopDown>
+        )}
+      </>
     </Fieldset>
   )
 }
