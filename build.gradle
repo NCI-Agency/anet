@@ -32,7 +32,7 @@ java {
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String cxfVersion = "4.2.0"
+String cxfVersion = "4.2.1"
 String jdbi3Version = "3.52.0"
 String poiVersion = "5.5.1"
 String simplejavamailVersion = "8.12.6"
