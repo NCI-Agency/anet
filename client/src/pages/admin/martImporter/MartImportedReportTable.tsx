@@ -44,17 +44,7 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
         submittedAt
         receivedAt
         errors
-      }
-    }
-  }
-`
-
-const GQL_GET_MART_REPORTS_SUMMARY = gql`
-  query ($martImportedReportQuery: MartImportedReportSearchQueryInput) {
-    martImportedReportList(query: $martImportedReportQuery) {
-      totalCount
-      list {
-        state
+        reportUuid
       }
     }
   }
@@ -112,24 +102,12 @@ const MartImportedReportTable = ({
     sortOrder
   }
 
-  const martImportedReportSummaryQuery = {
-    pageNum: 0,
-    pageSize: 0,
-    personUuid: selectedAuthor?.uuid
-  }
-
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
     {
       martImportedReportQuery
     }
   )
-
-  const { data: summaryData } = API.useApiQuery(
-    GQL_GET_MART_REPORTS_SUMMARY,
-    { martImportedReportQuery: martImportedReportSummaryQuery },
-    { skip: !!selectedReportUuid }
-  ) as { data?: { martImportedReportList?: { list?: { state: string }[] } } }
 
   const { done, result } = useBoilerplate({
     loading,
@@ -146,10 +124,10 @@ const MartImportedReportTable = ({
   const { totalCount = 0, list: martImportedReports = [] } =
     data.martImportedReportList || {}
 
-  const summaryRows: { state: string }[] =
-    summaryData?.martImportedReportList?.list ?? []
-  const stateCounts = summaryRows.reduce(
-    (acc: Record<string, number>, { state }) => {
+  // Summary counts reflect exactly what's on screen: the rows on the current page
+  // after every filter (author, state) and pagination has been applied.
+  const stateCounts = martImportedReports.reduce(
+    (acc: Record<string, number>, { state }: { state: string }) => {
       acc[state] = (acc[state] || 0) + 1
       return acc
     },
@@ -420,24 +398,22 @@ const MartImportedReportTable = ({
                                 model={martImportedReport.report}
                                 displayCallback={displayCallback}
                               />
-                              {martImportedReport.report && (
-                                <OverlayTrigger
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip>
-                                      Show the import history for this report
-                                    </Tooltip>
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={
+                                  <Tooltip>
+                                    Show the import history for this report
+                                  </Tooltip>
+                                }
+                              >
+                                <Icon
+                                  icon={IconNames.HISTORY}
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() =>
+                                    onSelectReport?.(martImportedReport)
                                   }
-                                >
-                                  <Icon
-                                    icon={IconNames.HISTORY}
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() =>
-                                      onSelectReport?.(martImportedReport)
-                                    }
-                                  />
-                                </OverlayTrigger>
-                              )}
+                                />
+                              </OverlayTrigger>
                             </div>
                           </td>
                         </>

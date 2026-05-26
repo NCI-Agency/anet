@@ -21,11 +21,13 @@ const ReportHistoryModal = ({
   return (
     <Modal backdrop="static" centered show onHide={onCancel} size="xl">
       <Modal.Header closeButton>
-        <Modal.Title>{martImportedReport.report.intent}</Modal.Title>
+        <Modal.Title>
+          {martImportedReport.report?.intent ?? "Import history"}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <MartImportedReportTable
-          selectedReportUuid={martImportedReport.report.uuid}
+          selectedReportUuid={martImportedReport.reportUuid}
           pageDispatchers={pageDispatchers}
         />
       </Modal.Body>

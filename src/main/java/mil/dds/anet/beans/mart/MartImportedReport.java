@@ -131,6 +131,7 @@ public class MartImportedReport {
   }
 
   @JsonIgnore
+  @GraphQLQuery
   public String getReportUuid() {
     return report.getForeignUuid();
   }
