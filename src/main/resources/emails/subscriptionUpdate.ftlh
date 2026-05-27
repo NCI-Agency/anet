@@ -8,6 +8,7 @@
 <#include "common/securityBanner.ftlh">
 <#import "common/formatDate.ftlh" as fd>
 <#import "common/relatedObjectDisplay.ftlh" as rod>
+<#assign Utils = statics["mil.dds.anet.utils.Utils"]>
 <#assign SPECIAL_MODELS = {
   "assessments": "an Assessment",
   "notes": "a Note"
@@ -34,7 +35,7 @@
     <#assign person = (auditTrail.loadPerson(context).get())!>
     by <@rod.relatedObjectDisplay objectType="people" objectUuid=auditTrail.objectUuid object=person />
   </#if>
-  on <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=createdAt /><#if auditTrail.updateDescription??>: ${auditTrail.updateDescription}</#if><#if auditTrail.updateDetails??>, with details:<br/>${auditTrail.updateDetailsWithLinks?no_esc}</#if>
+  on <@fd.formatDate dateFormatter=dateTimeFormatter timestamp=createdAt /><#if auditTrail.updateDescription??>: ${auditTrail.updateDescription}</#if><#if auditTrail.updateDetails??>, with details:<br/>${Utils.replaceAnetLinks(auditTrail.updateDetails, false)?no_esc}</#if>
 <#else>
   <#if isNote??>
     of a <b>note/assessment</b> on it
