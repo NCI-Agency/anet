@@ -7,6 +7,7 @@ import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,6 +49,7 @@ import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.search.pg.PostgresqlReportSearcher;
 import mil.dds.anet.threads.AnetEmailWorker;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
@@ -55,6 +57,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.dataloader.BatchLoaderEnvironment;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -197,32 +200,15 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         @BindBean List<AuthorizationGroup> authorizationGroups);
   }
 
-  @Transactional
+
   @Override
   public Report getByUuid(String uuid) {
-    final Handle handle = getDbHandle();
-    try {
-      /* Check whether uuid is purely numerical, and if so, query on legacyId */
-      final String queryDescriptor;
-      final String keyField;
-      final Object key;
-      final Integer legacyId = Utils.getInteger(uuid);
-      if (legacyId != null) {
-        queryDescriptor = "getReportByLegacyId";
-        keyField = "legacyId";
-        key = legacyId;
-      } else {
-        queryDescriptor = "getReportByUuid";
-        keyField = "uuid";
-        key = uuid;
-      }
-      return handle
-          .createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + "FROM reports "
-              + "WHERE reports.\"" + keyField + "\" = :key")
-          .bind("key", key).map(new ReportMapper()).findFirst().orElse(null);
-    } finally {
-      closeDbHandle(handle);
-    }
+    throw new UnsupportedOperationException();
+  }
+
+  @Transactional
+  public Report getByUuid(String uuid, Person user) {
+    return getByIds(Arrays.asList(uuid), user).getFirst();
   }
 
   @Transactional
@@ -746,17 +732,37 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   class SelfIdBatcher extends IdBatcher<Report> {
-    private static final String SQL = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
-        + "FROM reports WHERE reports.uuid IN ( <uuids> )";
-
-    public SelfIdBatcher() {
-      super(ReportDao.this.databaseHandler, SQL, "uuids", new ReportMapper());
+    public SelfIdBatcher(String sql, Map<String, Object> paramsMap) {
+      super(ReportDao.this.databaseHandler, sql, "uuids", paramsMap, new ReportMapper());
     }
   }
 
   @Override
   public List<Report> getByIds(List<String> uuids) {
-    return new SelfIdBatcher().getByIds(uuids);
+    throw new UnsupportedOperationException();
+  }
+
+  public List<Report> getByIds(List<String> uuids, BatchLoaderEnvironment context) {
+    final Map<Object, Object> keyContexts = context.getKeyContexts();
+    // GraphQLContext is the same for all keys
+    final GraphQLContext gqlContext = (GraphQLContext) keyContexts.get(uuids.getFirst());
+    return getByIds(uuids, DaoUtils.getUserFromContext(gqlContext));
+  }
+
+  private List<Report> getByIds(List<String> uuids, Person user) {
+    return new SelfIdBatcher(getSql(user), DaoUtils.getReportsParamsMap(user)).getByIds(uuids);
+  }
+
+  private String getSql(final Person user) {
+    final String selectClause = "/* getReportByUuid */ SELECT " + REPORT_FIELDS;
+    final StringBuilder fromClause = new StringBuilder("FROM reports");
+    final StringBuilder whereClause = new StringBuilder("WHERE reports.uuid IN ( <uuids> )");
+    // Apply a filter to restrict access to reports if necessary.
+    if (!Person.isSystemUser(user) && !AuthUtils.isAdmin(user)) {
+      whereClause.append(" AND ");
+      whereClause.append(DaoUtils.getReportsWhereClause());
+    }
+    return "%s %s %s".formatted(selectClause, fromClause, whereClause);
   }
 
   class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {

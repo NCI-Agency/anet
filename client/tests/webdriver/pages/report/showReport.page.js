@@ -231,12 +231,22 @@ class ShowReport extends Page {
     await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
   }
 
-  async waitForShowReportToLoad() {
+  async waitForReportUrl() {
     await browser.waitUntil(async () =>
       /^.*\/reports\/[a-z0-9-]{36}/.test(await browser.getUrl())
     )
+  }
+
+  async waitForShowReportToLoad() {
+    await this.waitForReportUrl()
     await (await this.getReportStatus()).waitForExist()
     await (await this.getReportStatus()).waitForDisplayed()
+  }
+
+  async waitForShowReportToFail() {
+    await this.waitForReportUrl()
+    await (await this.getNotFound()).waitForExist()
+    await (await this.getNotFound()).waitForDisplayed()
   }
 
   async getCompactViewElements(type, withAssessments) {

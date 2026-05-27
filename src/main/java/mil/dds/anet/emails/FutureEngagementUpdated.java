@@ -1,6 +1,7 @@
 package mil.dds.anet.emails;
 
 import java.util.Map;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 
 public class FutureEngagementUpdated implements AnetEmailAction {
@@ -19,7 +20,7 @@ public class FutureEngagementUpdated implements AnetEmailAction {
 
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
-    Report r = engine().getReportDao().getByUuid(report.getUuid());
+    Report r = engine().getReportDao().getByUuid(report.getUuid(), Person.SYSTEM_USER);
     if (r == null) {
       return null;
     }

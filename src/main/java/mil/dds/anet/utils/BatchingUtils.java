@@ -45,6 +45,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
+import org.dataloader.BatchLoaderWithContext;
 import org.dataloader.DataLoaderFactory;
 import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
@@ -357,11 +358,10 @@ public final class BatchingUtils {
                 () -> engine.getApprovalStepDao().getPlanningApprovalSteps(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.REPORTS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, Report>) keys -> CompletableFuture
-                .supplyAsync(() -> engine.getReportDao().getByIds(keys), dispatcherService),
-            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.REPORTS.toString(), DataLoaderFactory.newDataLoader(
+        (BatchLoaderWithContext<String, Report>) (keys, context) -> CompletableFuture
+            .supplyAsync(() -> engine.getReportDao().getByIds(keys, context), dispatcherService),
+        dataLoaderOptions));
     dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>) foreignKeys -> CompletableFuture

@@ -1020,9 +1020,12 @@ public class Utils {
       AnetBaseDao<? extends AbstractAnetBean, ?> dao, AnetDictionary dict, String anetServerUrl,
       boolean useCids, String objectType, String objectUuid) {
     if (dao != null) {
-      final AbstractAnetBean obj = dao.getByUuid(objectUuid);
+      final AbstractAnetBean obj =
+          dao instanceof ReportDao reportDao ? reportDao.getByUuid(objectUuid, null)
+              : dao.getByUuid(objectUuid);
       if (obj == null) {
-        return List.of(new TextNode(String.format("[deleted %s::%s]", objectType, objectUuid)));
+        return List
+            .of(new TextNode(String.format("[%s with uuid %s not found]", objectType, objectUuid)));
       }
       if (obj instanceof SubscribableObject subscribableObject) {
         return List.of(new TextNode(subscribableObject.getObjectLabel()));
