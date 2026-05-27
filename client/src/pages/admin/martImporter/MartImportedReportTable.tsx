@@ -44,7 +44,6 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
         submittedAt
         receivedAt
         errors
-        reportUuid
         historyCount
       }
     }

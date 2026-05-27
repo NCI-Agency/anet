@@ -27,7 +27,7 @@ const ReportHistoryModal = ({
       </Modal.Header>
       <Modal.Body>
         <MartImportedReportTable
-          selectedReportUuid={martImportedReport.reportUuid}
+          selectedReportUuid={martImportedReport.report.uuid}
           pageDispatchers={pageDispatchers}
         />
       </Modal.Body>
