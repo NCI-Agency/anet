@@ -156,7 +156,7 @@ const MartImportedReportTable = ({
   }
 
   const handleStateFilterChange = state => {
-    setSelectedState(state || null)
+    setSelectedState(state || undefined)
     setPageNum(0)
   }
 
