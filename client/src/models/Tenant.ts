@@ -12,6 +12,11 @@ export default class Tenant extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
+    emailAddresses: yup
+      .array()
+      .of(yup.string().email("Address must be a valid email").nullable())
+      .nullable()
+      .default([]),
     members: yup.array().nullable().default([])
   })
 
