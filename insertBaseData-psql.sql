@@ -1885,10 +1885,10 @@ INSERT INTO "reportTenants" ("tenantUuid", "reportUuid")
   FROM tenants, reports;
 
 -- Add more tenants
-INSERT INTO tenants (uuid, name, status, "createdAt", "updatedAt") VALUES
-  ('f6211c13-20ba-47df-927e-025ae300cc46', 'Department Q', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ef636ea6-c3b0-454c-b9c7-ccce21044798', 'Test Facility', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('5737e29c-f9bd-4e0d-ac99-3f4664a22762', 'Inactive Tenant', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tenants (uuid, name, status, "emailAddresses", "createdAt", "updatedAt") VALUES
+  ('f6211c13-20ba-47df-927e-025ae300cc46', 'Department Q', 0, 'department.q@example.ns,department.q@archive.example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ef636ea6-c3b0-454c-b9c7-ccce21044798', 'Test Facility', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5737e29c-f9bd-4e0d-ac99-3f4664a22762', 'Inactive Tenant', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add Saved Searches
 INSERT INTO "savedSearches" ("uuid", "name", "objectType", "ownerUuid", "query", "displayInHomepage", "priority", "homepagePriority", "createdAt", "updatedAt") VALUES

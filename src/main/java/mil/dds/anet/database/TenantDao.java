@@ -12,6 +12,7 @@ import mil.dds.anet.database.mappers.TenantMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.ResponseUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
@@ -84,9 +85,10 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     try {
       handle
           .createUpdate("/* insertTenant */ INSERT INTO " + TABLE_NAME
-              + " (uuid, name, status, \"createdAt\", \"updatedAt\")"
-              + " VALUES (:uuid, :name, :status, :createdAt, :updatedAt)")
+              + " (uuid, name, status, \"emailAddresses\", \"createdAt\", \"updatedAt\")"
+              + " VALUES (:uuid, :name, :status, :emailAddresses, :createdAt, :updatedAt)")
           .bindBean(t).bind("status", DaoUtils.getEnumId(t.getStatus()))
+          .bind("emailAddresses", Utils.joinEmailAddresses(t.getEmailAddresses()))
           .bind("createdAt", DaoUtils.asLocalDateTime(t.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
       final TenantBatch tb = handle.attach(TenantBatch.class);
@@ -107,8 +109,10 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     try {
       return handle
           .createUpdate("/* updateTenant */ UPDATE " + TABLE_NAME + " SET name = :name,"
-              + " status = :status, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+              + " status = :status, \"emailAddresses\" = :emailAddresses,"
+              + " \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(t).bind("status", DaoUtils.getEnumId(t.getStatus()))
+          .bind("emailAddresses", Utils.joinEmailAddresses(t.getEmailAddresses()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
     } catch (UnableToExecuteStatementException e) {
       throw ResponseUtils.handleSqlException(e, DUPLICATE_TENANT_NAME);

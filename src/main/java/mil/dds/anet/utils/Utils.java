@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,6 +87,7 @@ public class Utils {
   private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
   private static final int MAX_REPORT_INTENT_LENGTH = 40;
+  private static final String EMAIL_ADDRESS_SEPARATOR = ",";
 
   private static final String DICT_KEY_TYPE = "type";
   private static final String DICT_VALUE_TYPE_SPECIAL_FIELD = "special_field";
@@ -958,6 +960,20 @@ public class Utils {
       });
     });
     return reportDoc.body().html();
+  }
+
+  public static List<String> splitEmailAddresses(String emailAddresses) {
+    final List<String> l = isEmptyOrNull(emailAddresses) ? null
+        : Arrays.stream(emailAddresses.split(EMAIL_ADDRESS_SEPARATOR))
+            .filter(ea -> !isEmptyOrNull(ea)).toList();
+    return isEmptyOrNull(l) ? null : l;
+  }
+
+  public static String joinEmailAddresses(List<String> emailAddresses) {
+    final String s = isEmptyOrNull(emailAddresses) ? null
+        : emailAddresses.stream().filter(ea -> !isEmptyOrNull(ea))
+            .collect(Collectors.joining(EMAIL_ADDRESS_SEPARATOR));
+    return isEmptyOrNull(s) ? null : s;
   }
 
   private record TypeUuidTuple(String type, String uuid) {

@@ -1939,6 +1939,7 @@ enum TaskSearchSortBy {
 """"""
 type Tenant {
   createdAt: Instant
+  emailAddresses: [String]
   members: [Person]
   name: String
   status: Status
@@ -1949,6 +1950,7 @@ type Tenant {
 """"""
 input TenantInput {
   createdAt: Instant
+  emailAddresses: [String]
   members: [PersonInput]
   name: String
   status: Status
