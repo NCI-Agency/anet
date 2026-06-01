@@ -1342,6 +1342,8 @@ fields:
     name:
       label: Name
       placeholder: Fill in the unique name of this tenant
+    emailAddresses:
+      label: Archive email addresses
 
   advisor:
     person:
