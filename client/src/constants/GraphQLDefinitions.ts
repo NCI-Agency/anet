@@ -303,6 +303,7 @@ export const gqlAllTaskFields = `
 export const gqlMinimalTenantFields = `
   ${gqlMinimalEntityFields}
   name
+  emailAddresses
 `
 
 export const gqlBasicTenantFields = `
