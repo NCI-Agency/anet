@@ -24,6 +24,8 @@ import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.EngagementInformation;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
@@ -157,18 +159,9 @@ public class ReportResource {
     ResourceUtils.assertAllowedClassification(r.getClassification());
 
     // Set advisor org
-    Person primaryAdvisor = findPrimaryAttendee(r, false);
-    logger.debug("Setting advisor org for new report {} based on {} at date {}", r, primaryAdvisor,
-        r.getEngagementDate());
-    r.setAdvisorOrg(organizationDao.getOrganizationForPerson(engine.getContext(),
-        DaoUtils.getUuid(primaryAdvisor), r.getEngagementDate()).join());
-
+    setReportPrimaryAdvisorOrg(r, false);
     // Set interlocutor org
-    Person primaryInterlocutor = findPrimaryAttendee(r, true);
-    logger.debug("Setting interlocutor org for new report {} based on {} at date {}", r,
-        primaryInterlocutor, r.getEngagementDate());
-    r.setInterlocutorOrg(organizationDao.getOrganizationForPerson(engine.getContext(),
-        DaoUtils.getUuid(primaryInterlocutor), r.getEngagementDate()).join());
+    setReportPrimaryInterlocutorOrg(r, false);
 
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
@@ -217,15 +210,6 @@ public class ReportResource {
 
     // Return the report in the response; used in autoSave by the client form
     return r;
-  }
-
-  private Person findPrimaryAttendee(Report r, boolean isInterlocutor) {
-    if (r.getReportPeople() == null) {
-      return null;
-    }
-    return r.getReportPeople().stream()
-        .filter(p -> p.isAttendee() && p.isPrimary() && p.isInterlocutor() == isInterlocutor)
-        .findFirst().orElse(null);
   }
 
   /**
@@ -278,18 +262,9 @@ public class ReportResource {
     }
 
     // Update the advisor org
-    final Person primaryAdvisor = findPrimaryAttendee(r, false);
-    logger.debug("Updating advisor org for report {} based on {} at date {}", r, primaryAdvisor,
-        r.getEngagementDate());
-    r.setAdvisorOrg(organizationDao.getOrganizationForPerson(engine.getContext(),
-        DaoUtils.getUuid(primaryAdvisor), r.getEngagementDate()).join());
-
+    setReportPrimaryAdvisorOrg(r, false);
     // Update the interlocutor org
-    final Person primaryInterlocutor = findPrimaryAttendee(r, true);
-    logger.debug("Updating interlocutor org for report {} based on {} at date {}", r,
-        primaryInterlocutor, r.getEngagementDate());
-    r.setInterlocutorOrg(organizationDao.getOrganizationForPerson(engine.getContext(),
-        DaoUtils.getUuid(primaryInterlocutor), r.getEngagementDate()).join());
+    setReportPrimaryInterlocutorOrg(r, false);
 
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
@@ -307,16 +282,19 @@ public class ReportResource {
           reportDao.getPeopleForReport(engine.getContext(), r.getUuid()).join();
       // Find any differences and fix them.
       for (ReportPerson rp : r.getReportPeople()) {
-        Optional<ReportPerson> existingPerson =
+        Optional<ReportPerson> existingPersonOpt =
             existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
-        if (existingPerson.isPresent()) {
-          if (existingPerson.get().isPrimary() != rp.isPrimary()
-              || existingPerson.get().isAttendee() != rp.isAttendee()
-              || existingPerson.get().isAuthor() != rp.isAuthor()
-              || existingPerson.get().isInterlocutor() != rp.isInterlocutor()) {
+        if (existingPersonOpt.isPresent()) {
+          ReportPerson reportPerson = existingPersonOpt.get();
+          reportPerson.loadReportPosition(engine.getContext());
+          if (reportPerson.isPrimary() != rp.isPrimary()
+              || reportPerson.isAttendee() != rp.isAttendee()
+              || reportPerson.isAuthor() != rp.isAuthor()
+              || reportPerson.isInterlocutor() != rp.isInterlocutor() || !Objects
+                  .equals(reportPerson.getReportPositionUuid(), rp.getReportPositionUuid())) {
             reportDao.updatePersonOnReport(rp, r);
           }
-          existingPeople.remove(existingPerson.get());
+          existingPeople.remove(reportPerson);
         } else {
           reportDao.addPersonToReport(rp, r);
         }
@@ -430,29 +408,9 @@ public class ReportResource {
     }
 
     // Update advisor org
-    final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
-    final Boolean optionalPrimaryAdvisor =
-        (Boolean) dict.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
-    if (advisor == null && !Boolean.TRUE.equals(optionalPrimaryAdvisor)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Report missing primary advisor");
-    }
-    logger.debug("Updating advisor org for report {} based on {} at date {}", r, advisor,
-        r.getEngagementDate());
-    r.setAdvisorOrg(organizationDao.getOrganizationForPerson(engine.getContext(),
-        DaoUtils.getUuid(advisor), r.getEngagementDate()).join());
-
+    setReportPrimaryAdvisorOrg(r, true);
     // Update interlocutor org
-    final ReportPerson interlocutor = r.loadPrimaryInterlocutor(engine.getContext()).join();
-    final Boolean optionalPrimaryInterlocutor =
-        (Boolean) dict.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
-    if (interlocutor == null && !Boolean.TRUE.equals(optionalPrimaryInterlocutor)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Report missing primary interlocutor");
-    }
-    logger.debug("Updating interlocutor org for report {} based on {} at date {}", r, interlocutor,
-        r.getEngagementDate());
-    r.setInterlocutorOrg(organizationDao.getOrganizationForPerson(engine.getContext(),
-        DaoUtils.getUuid(interlocutor), r.getEngagementDate()).join());
+    setReportPrimaryInterlocutorOrg(r, true);
 
     if (r.getEngagementDate() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing engagement date");
@@ -890,6 +848,98 @@ public class ReportResource {
         updateType)) {
       // Don't provide too much information, just say it is "denied"
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
+    }
+  }
+
+  private void setReportPrimaryAdvisorOrg(Report r, boolean isSubmit) {
+    if (isSubmit) {
+      final ReportPerson primaryAdvisor = r.loadPrimaryAdvisor(engine.getContext()).join();
+      // When submitting we enforce the dictionary option
+      final Boolean optionalPrimaryAdvisor =
+          (Boolean) dict.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
+      if (primaryAdvisor == null && !Boolean.TRUE.equals(optionalPrimaryAdvisor)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Report missing primary interlocutor");
+      }
+      if (primaryAdvisor != null && primaryAdvisor.getReportPositionUuid() != null) {
+        // And we validate position with history and assign organization
+        r.setAdvisorOrg(validateReportPositionAndGetOrganization(primaryAdvisor, r));
+      }
+    } else {
+      // Just update the advisor org, no validation
+      final ReportPerson primaryAdvisor = findPrimaryAttendee(r, false);
+      if (primaryAdvisor != null && primaryAdvisor.getReportPosition() != null) {
+        primaryAdvisor.loadReportPosition(engine.getContext()).join();
+        logger.debug("Updating advisor org for report {} based on {} at date {}", r, primaryAdvisor,
+            r.getEngagementDate());
+        r.setAdvisorOrg(primaryAdvisor.getReportPosition().getOrganization());
+      }
+    }
+  }
+
+  private void setReportPrimaryInterlocutorOrg(Report r, boolean isSubmit) {
+    if (isSubmit) {
+      final ReportPerson primaryInterlocutor =
+          r.loadPrimaryInterlocutor(engine.getContext()).join();
+      // When submitting we enforce the dictionary option
+      final Boolean optionalPrimaryInterlocutor =
+          (Boolean) dict.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
+      if (primaryInterlocutor == null && !Boolean.TRUE.equals(optionalPrimaryInterlocutor)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Report missing primary interlocutor");
+      }
+      if (primaryInterlocutor != null && primaryInterlocutor.getReportPositionUuid() != null) {
+        // Validate position with history and assign organization
+        r.setInterlocutorOrg(validateReportPositionAndGetOrganization(primaryInterlocutor, r));
+      }
+    } else {
+      // Update the interlocutor org
+      final ReportPerson primaryInterlocutor = findPrimaryAttendee(r, true);
+      if (primaryInterlocutor != null && primaryInterlocutor.getReportPosition() != null) {
+        primaryInterlocutor.loadReportPosition(engine.getContext()).join();
+        logger.debug("Updating interlocutor org for report {} based on {} at date {}", r,
+            primaryInterlocutor, r.getEngagementDate());
+        r.setInterlocutorOrg(primaryInterlocutor.getReportPosition().getOrganization());
+      }
+    }
+  }
+
+  private ReportPerson findPrimaryAttendee(Report r, boolean isInterlocutor) {
+    if (r.getReportPeople() == null) {
+      return null;
+    }
+    return r.getReportPeople().stream()
+        .filter(p -> p.isAttendee() && p.isPrimary() && p.isInterlocutor() == isInterlocutor)
+        .findFirst().orElse(null);
+  }
+
+  private Organization validateReportPositionAndGetOrganization(ReportPerson reportPerson,
+      Report r) {
+    // No engagement date, stick to current primary position organization
+    if (r.getEngagementDate() == null) {
+      return organizationDao
+          .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(reportPerson)).join();
+    } else {
+      // Engagement date, need to check history
+      Optional<PersonPositionHistory> reportPosition = reportPerson
+          .loadPreviousPositions(
+              engine.getContext())
+          .join().stream()
+          .filter(historyEntry -> historyEntry.getPositionUuid()
+              .equals(reportPerson.getReportPositionUuid())
+              && !historyEntry.getStartTime().isAfter(r.getEngagementDate())
+              && (historyEntry.getEndTime() == null
+                  || !historyEntry.getEndTime().isBefore(r.getEngagementDate())))
+          .findFirst();
+      if (reportPosition.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Report position is not consistent with person history");
+      }
+      PersonPositionHistory positionEntry = reportPosition.get();
+      positionEntry.loadPosition(engine.getContext()).join();
+      Position position = positionEntry.getPosition();
+      position.loadOrganization(engine.getContext()).join();
+      return position.getOrganization();
     }
   }
 }

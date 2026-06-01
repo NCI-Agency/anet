@@ -132,20 +132,17 @@ public class OrganizationDao
   }
 
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(GraphQLContext context,
-      String personUuid, Instant when) {
-    return when == null
-        ? new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
-            personUuid)
-        : new ForeignKeyByDateFetcher<Organization>().load(context,
-            FkDataLoaderKey.PERSON_ORGANIZATIONS_WHEN, new ImmutablePair<>(personUuid, when));
+      String personUuid) {
+    return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
+        personUuid);
   }
 
   public CompletableFuture<Organization> getOrganizationForPerson(GraphQLContext context,
-      String personUuid, Instant when) {
+      String personUuid) {
     if (personUuid == null) {
       return CompletableFuture.completedFuture(null);
     }
-    return getOrganizationsForPerson(context, personUuid, when)
+    return getOrganizationsForPerson(context, personUuid)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 

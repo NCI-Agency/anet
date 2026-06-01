@@ -10,7 +10,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { Event, Person, Report } from "models"
+import { Event, Person, Position, Report } from "models"
 import { reportTour } from "pages/GuidedTour"
 import React, { useContext } from "react"
 import { legacy_connect as connect } from "react-redux"
@@ -113,12 +113,27 @@ const ReportNewConditional = ({
   initInvisibleFields(report, Settings.fields.report.customFields)
 
   if (currentUser && currentUser.uuid) {
-    const person = new Person(currentUser)
-    person.primary = true
-    person.author = true
-    person.attendee = true
-    person.interlocutor = false
-    report.reportPeople.push(person)
+    const reportPerson = new Person(currentUser)
+    reportPerson.primary = true
+    reportPerson.author = true
+    reportPerson.attendee = true
+    reportPerson.interlocutor = false
+    reportPerson.reportPosition = Position.filterClientSideFields(
+      currentUser.position,
+      "descendantOrgs",
+      "responsibleTasks",
+      "authorizationGroupsAdministrated",
+      "isApprover",
+      "associatedPositions",
+      "notes",
+      "emailAddresses",
+      "organization.descendantOrgs"
+    )
+    // TODO better way to do this?
+    if (reportPerson.reportPosition.organization) {
+      delete reportPerson.reportPosition.organization.descendantOrgs
+    }
+    report.reportPeople.push(reportPerson)
   }
   const reportInitialValues = Object.assign(
     report,

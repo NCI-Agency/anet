@@ -506,6 +506,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     rp.setAttendee(true);
     rp.setPrimary(true);
     rp.setInterlocutor(false);
+    rp.setReportPosition(person.getPosition());
     BeanUtils.copyProperties(person, rp);
     return rp;
   }

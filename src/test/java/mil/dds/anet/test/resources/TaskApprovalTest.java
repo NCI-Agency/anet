@@ -67,7 +67,7 @@ class TaskApprovalTest extends AbstractResourceTest {
   private static final String REPORT_FIELDS =
       "{ uuid updatedAt state workflow { type createdAt person { uuid } step "
           + APPROVAL_STEP_FIELDS
-          + " } reportPeople { uuid primary author attendee interlocutor } }";
+          + " } reportPeople { uuid primary author attendee interlocutor reportPosition { uuid organization { uuid } }} }";
   private static final String TASK_FIELDS =
       "{ uuid updatedAt shortName longName status plannedCompletion projectedCompletion"
           + " taskedOrganizations { uuid shortName longName identificationCode }"
