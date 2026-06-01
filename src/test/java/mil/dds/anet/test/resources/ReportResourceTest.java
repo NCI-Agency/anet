@@ -103,8 +103,9 @@ public class ReportResourceTest extends AbstractResourceTest {
           + " gender endOfTourDate users { uuid domainUsername } pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS =
       String.format("{ %1$s %2$s }", _PERSON_FIELDS, _EMAIL_ADDRESSES_FIELDS);
-  private static final String REPORT_PEOPLE_FIELDS =
-      String.format("{ %1$s primary author attendee interlocutor }", _PERSON_FIELDS);
+  private static final String REPORT_PEOPLE_FIELDS = String.format(
+      "{ %1$s primary author attendee interlocutor reportPosition { uuid organization { uuid } }}",
+      _PERSON_FIELDS);
   private static final String POSITION_FIELDS =
       String.format("{ uuid isApprover person { uuid } organization { %1$s } %2$s }",
           _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
@@ -217,7 +218,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.position(POSITION_FIELDS, authorBillet.getUuid()));
     assertThat(checkit.getPerson()).isNotNull();
     assertThat(checkit.getPerson().getUuid()).isEqualTo(author.getUuid());
-
+    // Update author with his new position so we can build ReportPeople properly
+    author.setPosition(checkit);
     // Create Approval workflow for Advising Organization
     final List<ApprovalStepInput> approvalStepsInput = new ArrayList<>();
     final ApprovalStepInput approvalStepInput =
@@ -636,7 +638,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.position(POSITION_FIELDS, authorBillet.getUuid()));
     assertThat(checkit.getPerson()).isNotNull();
     assertThat(checkit.getPerson().getUuid()).isEqualTo(author.getUuid());
-
+    // Update author with his new position so we can build ReportPeople properly
+    author.setPosition(checkit);
     // Create Approval workflow for Advising Organization
     final List<ApprovalStepInput> approvalStepsInput = new ArrayList<>();
     final ApprovalStepInput approvalStepInput =

@@ -1885,6 +1885,21 @@ INSERT INTO "peoplePositions" ("personUuid", "positionUuid", "createdAt", "prima
   ('31cba227-f6c6-49e9-9483-fce441bea624', '5e2414d2-b440-4e43-85b3-d1c10222cb5d', CURRENT_TIMESTAMP, FALSE),
   ('31cba227-f6c6-49e9-9483-fce441bea624', '44ba17f5-fcf7-4743-a6b9-baf922b172c2', CURRENT_TIMESTAMP, FALSE);
 
+-- Fill in value of reportPosition
+UPDATE "reportPeople"
+SET "reportPositionUuid" = pp."positionUuid"
+FROM reports r, "peoplePositions" pp
+WHERE r.uuid = "reportPeople"."reportUuid"
+  AND pp."personUuid" = "reportPeople"."personUuid"
+  AND pp."primary" IS TRUE
+  AND CASE WHEN r."engagementDate" IS NULL THEN (
+    pp."createdAt" <= CURRENT_TIMESTAMP
+        AND (pp."endedAt" IS NULL OR pp."endedAt" >= CURRENT_TIMESTAMP)
+    ) ELSE (
+    pp."createdAt" <= r."engagementDate"
+        AND (pp."endedAt" IS NULL OR pp."endedAt" >= r."engagementDate")
+    ) END;
+
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
 -- authorizationGroups currently have no links

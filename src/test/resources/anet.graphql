@@ -1563,6 +1563,7 @@ type ReportPerson {
   previousPositions: [PersonPositionHistory]
   primary: Boolean!
   rank: String
+  reportPosition: Position
   status: Status
   updatedAt: Instant
   user: Boolean
@@ -1596,6 +1597,7 @@ input ReportPersonInput {
   previousPositions: [PersonPositionHistoryInput]
   primary: Boolean!
   rank: String
+  reportPosition: PositionInput
   status: Status
   updatedAt: Instant
   user: Boolean

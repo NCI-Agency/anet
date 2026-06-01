@@ -172,8 +172,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   public interface ReportBatch {
     @SqlBatch("INSERT INTO \"reportPeople\""
-        + " (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\", \"isInterlocutor\")"
-        + " VALUES (:reportUuid, :uuid, :primary, :author, :attendee, :interlocutor)")
+        + " (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\", \"isInterlocutor\", \"reportPositionUuid\")"
+        + " VALUES (:reportUuid, :uuid, :primary, :author, :attendee, :interlocutor, :reportPositionUuid)")
     void insertReportPeople(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
@@ -280,8 +280,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final Handle handle = getDbHandle();
     try {
       return handle.createUpdate("/* addReportPerson */ INSERT INTO \"reportPeople\" "
-          + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\", \"isInterlocutor\")"
-          + " VALUES (:personUuid, :reportUuid, :primary, :author, :attendee, :interlocutor)")
+          + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\", \"isInterlocutor\", \"reportPositionUuid\")"
+          + " VALUES (:personUuid, :reportUuid, :primary, :author, :attendee, :interlocutor, :reportPositionUuid)")
           .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid()).bindBean(rp).execute();
     } finally {
       closeDbHandle(handle);
@@ -306,7 +306,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final Handle handle = getDbHandle();
     try {
       return handle.createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
-          + "SET \"isPrimary\" = :primary, \"isAuthor\" = :author, \"isAttendee\" = :attendee, \"isInterlocutor\" = :interlocutor"
+          + "SET \"isPrimary\" = :primary, \"isAuthor\" = :author, \"isAttendee\" = :attendee, \"isInterlocutor\" = :interlocutor, \"reportPositionUuid\" = :reportPositionUuid"
           + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
           .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid()).bindBean(rp).execute();
     } finally {
@@ -533,10 +533,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
       sql.append(
           "LEFT JOIN \"reportPeople\" rpa ON rpa.\"reportUuid\" = r.uuid AND rpa.\"isInterlocutor\" IS NOT TRUE ");
-      sql.append("LEFT JOIN \"peoplePositions\" ppa ON ppa.\"personUuid\" = rpa.\"personUuid\" ");
-      sql.append(" AND ppa.primary IS TRUE ");
-      sql.append(" AND ppa.\"createdAt\" < r.\"engagementDate\" ");
-      sql.append(" AND (ppa.\"endedAt\" IS NULL OR ppa.\"endedAt\" > r.\"engagementDate\") ");
       sql.append(
           "INNER JOIN \"authorizationGroupRelatedObjects\" agroa ON agroa.\"authorizationGroupUuid\" = :advisorAuthorizationGroupUuid AND ( ");
       sql.append(
@@ -544,15 +540,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       sql.append(
           " OR (agroa.\"relatedObjectType\" = 'people' AND agroa.\"relatedObjectUuid\" = rpa.\"personUuid\") ");
       sql.append(
-          " OR (agroa.\"relatedObjectType\" = 'positions' AND agroa.\"relatedObjectUuid\" = ppa.\"positionUuid\") ");
+          " OR (agroa.\"relatedObjectType\" = 'positions' AND agroa.\"relatedObjectUuid\" = rpa.\"reportPositionUuid\") ");
       sql.append(") ");
 
       sql.append(
           "LEFT JOIN \"reportPeople\" rpi ON rpi.\"reportUuid\" = r.uuid AND rpi.\"isInterlocutor\" IS TRUE ");
-      sql.append("LEFT JOIN \"peoplePositions\" ppi ON ppi.\"personUuid\" = rpi.\"personUuid\" ");
-      sql.append(" AND ppi.primary IS TRUE ");
-      sql.append(" AND ppi.\"createdAt\" < r.\"engagementDate\" ");
-      sql.append(" AND (ppi.\"endedAt\" IS NULL OR ppi.\"endedAt\" > r.\"engagementDate\") ");
       sql.append(
           "INNER JOIN \"authorizationGroupRelatedObjects\" agroi ON agroi.\"authorizationGroupUuid\" = :interlocutorAuthorizationGroupUuid AND ( ");
       sql.append(
@@ -560,7 +552,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       sql.append(
           " OR (agroi.\"relatedObjectType\" = 'people' AND agroi.\"relatedObjectUuid\" = rpi.\"personUuid\") ");
       sql.append(
-          " OR (agroi.\"relatedObjectType\" = 'positions' AND agroi.\"relatedObjectUuid\" = ppi.\"positionUuid\") ");
+          " OR (agroi.\"relatedObjectType\" = 'positions' AND agroi.\"relatedObjectUuid\" = rpi.\"reportPositionUuid\") ");
       sql.append(") ");
 
       sql.append("WHERE r.state in (:approvedState, :publishedState) ");
@@ -622,14 +614,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
-    private static final String SQL =
-        "/* batch.getPeopleForReport */ SELECT " + PersonDao.PERSON_FIELDS
-            + ", \"reportPeople\".\"reportUuid\", \"reportPeople\".\"isPrimary\""
-            + ", \"reportPeople\".\"isAuthor\", \"reportPeople\".\"isAttendee\""
-            + ", \"reportPeople\".\"isInterlocutor\" FROM \"reportPeople\" "
-            + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
-            + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
-            + "ORDER BY people.\"familyName\", people.\"givenName\", people.uuid";
+    private static final String SQL = "/* batch.getPeopleForReport */ SELECT "
+        + PersonDao.PERSON_FIELDS
+        + ", \"reportPeople\".\"reportUuid\", \"reportPeople\".\"isPrimary\""
+        + ", \"reportPeople\".\"isAuthor\", \"reportPeople\".\"isAttendee\""
+        + ", \"reportPeople\".\"isInterlocutor\", \"reportPeople\".\"reportPositionUuid\" FROM \"reportPeople\" "
+        + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
+        + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
+        + "ORDER BY people.\"familyName\", people.\"givenName\", people.uuid";
 
     public ReportPeopleBatcher() {
       super(ReportDao.this.databaseHandler, SQL, "foreignKeys", new ReportPersonMapper(),

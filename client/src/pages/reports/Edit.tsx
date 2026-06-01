@@ -5,6 +5,8 @@ import {
   gqlAssessmentsFields,
   gqlAuthorizedMembersFields,
   gqlEntityFieldsMap,
+  gqlMinimalLocationFields,
+  gqlMinimalOrganizationFields,
   gqlNotesFields,
   gqlPreviousPositionsFields,
   gqlReportCommunitiesFields,
@@ -54,6 +56,12 @@ const GQL_GET_REPORT = gql`
             ${gqlEntityFieldsMap.Location}
           }
         }
+        additionalPositions {
+          ${gqlEntityFieldsMap.Position}
+          organization {
+            ${gqlEntityFieldsMap.Organization}
+          }
+        }
         previousPositions {
           ${gqlPreviousPositionsFields}
           position {
@@ -64,6 +72,15 @@ const GQL_GET_REPORT = gql`
             location {
               ${gqlEntityFieldsMap.Location}
             }
+          }
+        }
+        reportPosition {
+          ${gqlEntityFieldsMap.Position}
+          organization {
+            ${gqlMinimalOrganizationFields}
+          }
+          location {
+            ${gqlMinimalLocationFields}
           }
         }
       }
