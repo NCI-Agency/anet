@@ -7357,6 +7357,7 @@
 				<constraints nullable="false" unique="true" />
 			</column>
 			<column name="status" type="int" />
+			<column name="emailAddresses" type="${long_text_type}" />
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />
 		</createTable>
