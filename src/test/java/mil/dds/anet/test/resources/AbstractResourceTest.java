@@ -496,6 +496,8 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
     final ReportPerson rp = ReportPerson.builder().withPrimary(false).withAuthor(false)
         .withAttendee(true).withInterlocutor(interlocutor).build();
     BeanUtils.copyProperties(p, rp);
+    // Pick up the primary position for the Report Person
+    rp.setReportPosition(p.getPosition());
     return rp;
   }
 
@@ -527,6 +529,8 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
     rp.setAuthor(false);
     rp.setAttendee(true);
     rp.setInterlocutor(interlocutor);
+    // Pick up the primary position for the Report Person
+    rp.setReportPosition(p.getPosition());
     BeanUtils.copyProperties(p, rp);
     return rp;
   }

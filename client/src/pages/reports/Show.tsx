@@ -115,6 +115,15 @@ const GQL_GET_REPORT = gql`
             }
           }
         }
+        reportPosition {
+          ${gqlEntityFieldsMap.Position}
+          organization {
+            ${gqlEntityFieldsMap.Organization}
+          }
+          location {
+            ${gqlEntityFieldsMap.Location}
+          }
+        }
       }
       primaryAdvisor {
         ${gqlEntityFieldsMap.Person}

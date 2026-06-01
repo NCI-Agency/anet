@@ -38,12 +38,12 @@ public class PositionResource {
   private final PersonDao personDao;
 
   public PositionResource(AnetObjectEngine anetObjectEngine, AuditTrailDao auditTrailDao,
-      PositionDao dao, EmailAddressDao emailAddressDao, PersonDao personDao, PersonDao personDao1) {
+      PositionDao dao, EmailAddressDao emailAddressDao, PersonDao personDao) {
     this.auditTrailDao = auditTrailDao;
     this.dao = dao;
     this.engine = anetObjectEngine;
     this.emailAddressDao = emailAddressDao;
-    this.personDao = personDao1;
+    this.personDao = personDao;
   }
 
   public static boolean hasPermission(final Person user, final String positionUuid) {
