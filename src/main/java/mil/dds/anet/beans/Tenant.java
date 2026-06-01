@@ -15,6 +15,9 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
   @GraphQLQuery
   @GraphQLInputField
   private String name;
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> emailAddresses;
   // annotated below
   private List<Person> members;
 
@@ -34,6 +37,14 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public List<String> getEmailAddresses() {
+    return emailAddresses;
+  }
+
+  public void setEmailAddresses(List<String> emailAddresses) {
+    this.emailAddresses = emailAddresses;
   }
 
   @GraphQLQuery(name = "members")

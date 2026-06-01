@@ -1,10 +1,16 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
+import {
+  getFormGroupValidationState,
+  getHelpBlock
+} from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
@@ -12,7 +18,8 @@ import NavigationWarning from "components/NavigationWarning"
 import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
-import { FastField, Field, Form, Formik } from "formik"
+import RemoveButton from "components/RemoveButton"
+import { FastField, Field, FieldArray, Form, Formik } from "formik"
 import { Person, Tenant } from "models"
 import React, { useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
@@ -32,6 +39,48 @@ const GQL_UPDATE_TENANT = gql`
     updateTenant(tenant: $tenant, force: $force)
   }
 `
+
+interface EmailAddressInputTableProps {
+  emailAddresses: any[]
+}
+
+const EmailAddressInputTable = ({
+  emailAddresses
+}: EmailAddressInputTableProps) => (
+  <FieldArray name="emailAddresses">
+    {({ form, push, remove }) => (
+      <>
+        {emailAddresses?.map((ea, i) => {
+          const fieldName = `emailAddresses.${i}`
+          const { className } = getFormGroupValidationState(
+            fieldName,
+            form,
+            "form-control"
+          )
+          return (
+            <div key={i} className="input-group">
+              <Field className={className} name={fieldName} value={ea} />
+              <RemoveButton
+                id={`remove-${fieldName}`}
+                title="Remove email address"
+                onClick={() => remove(i)}
+              />
+              {getHelpBlock(fieldName, form)}
+            </div>
+          )
+        })}
+        <Button
+          id="add-emailAddresses"
+          title="Add email address"
+          variant="secondary"
+          onClick={() => push("")}
+        >
+          <Icon icon={IconNames.ADD} />
+        </Button>
+      </>
+    )}
+  </FieldArray>
+)
 
 interface TenantFormProps {
   initialValues: Tenant
@@ -133,6 +182,19 @@ const TenantForm = ({
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
+                />
+
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  as="div"
+                  dictProps={Settings.fields.tenant.emailAddresses}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => setFieldValue("emailAddresses", value)}
+                  widget={
+                    <EmailAddressInputTable
+                      emailAddresses={values.emailAddresses}
+                    />
+                  }
                 />
 
                 <Field

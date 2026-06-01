@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
+import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -14,6 +15,8 @@ public class TenantMapper implements RowMapper<Tenant> {
     MapperUtils.setCommonBeanFields(t, rs, null);
     t.setName(rs.getString("name"));
     t.setStatus(MapperUtils.getEnumIdx(rs, "status", WithStatus.Status.class));
+    t.setEmailAddresses(Utils.splitEmailAddresses(rs.getString("emailAddresses")));
     return t;
   }
+
 }

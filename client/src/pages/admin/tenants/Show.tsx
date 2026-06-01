@@ -98,6 +98,18 @@ const TenantShow = ({ pageDispatchers }: TenantShowProps) => {
             field={{ name: "status" }}
             humanValue={Tenant.humanNameOfStatus(tenant.status)}
           />
+          <DictionaryField
+            wrappedComponent={FieldHelper.ReadonlyField}
+            dictProps={Settings.fields.tenant.emailAddresses}
+            field={{ name: "emailAddresses" }}
+            humanValue={
+              <ul style={{ listStyle: "none" }} className="ps-0">
+                {tenant.emailAddresses?.map((ea, i) => (
+                  <li key={i}>{ea}</li>
+                ))}
+              </ul>
+            }
+          />
         </Fieldset>
         <Fieldset title="Members">
           <NoPaginationPeopleTable people={tenant.members} />

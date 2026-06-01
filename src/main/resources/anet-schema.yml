@@ -1190,12 +1190,14 @@ properties:
       tenant:
         type: object
         additionalProperties: false
-        required: [status, name]
+        required: [status, name, emailAddresses]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
           name:
             "$ref": "#/$defs/inputField"
+          emailAddresses:
+            "$ref": "#/$defs/labeledField"
 
       advisor:
         type: object
