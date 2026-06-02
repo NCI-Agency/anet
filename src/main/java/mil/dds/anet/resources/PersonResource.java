@@ -433,6 +433,21 @@ public class PersonResource {
       }
     }
 
+    if (Boolean.TRUE.equals(automaticallyAllowAllNewUsers)
+        && Boolean.TRUE.equals(existing.getPendingVerification())
+        && Boolean.FALSE.equals(p.getPendingVerification())) {
+      // Load existing tenants
+      final List<Tenant> existingTenants = existing.loadTenants(engine.getContext()).join();
+      if (Utils.isEmptyOrNull(existingTenants)) {
+        // Assign default tenant if there is only one active
+        final List<Tenant> activeTenants = tenantDao.getAll().stream()
+            .filter(t -> t.getStatus() == WithStatus.Status.ACTIVE).toList();
+        if (activeTenants.size() == 1) {
+          dao.insertPersonTenants(p.getUuid(), activeTenants);
+        }
+      }
+    }
+
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
     if (DaoUtils.isNewUser(user)) {
