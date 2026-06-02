@@ -107,6 +107,10 @@ const UsersPendingVerification = ({
       list: allTenants
     }
   }
+  const activeTenants = allTenants?.filter(
+    t => t?.status === Model.STATUS.ACTIVE
+  )
+  const defaultTenants = activeTenants?.length === 1 ? activeTenants : null
 
   return (
     <Fieldset title="Users Pending Verification">
@@ -131,76 +135,81 @@ const UsersPendingVerification = ({
               </tr>
             </thead>
             <tbody>
-              {list.map(person => (
-                <Formik
-                  key={person.uuid}
-                  enableReinitialize
-                  initialValues={person}
-                  validationSchema={yupSchema}
-                  validateOnMount
-                >
-                  {({ values, isValid, setFieldValue, setFieldTouched }) => (
-                    <tr>
-                      <td>
-                        <LinkTo
-                          modelType="Person"
-                          model={values}
-                          showAvatar={false}
-                        />
-                      </td>
-                      <td>
-                        <FastField
-                          name="tenants"
-                          label={null}
-                          component={FieldHelper.SpecialField}
-                          extraColElem={null}
-                          onChange={value => {
-                            // validation will be done by setFieldValue
-                            setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
-                            setFieldValue("tenants", value, true)
-                          }}
-                          widget={
-                            <AdvancedMultiSelect
-                              fieldName="tenants"
-                              placeholder="Search for tenants…"
-                              value={values.tenants}
-                              renderSelected={
-                                <TenantTable
-                                  tenants={values.tenants}
-                                  showStatus
-                                  showDelete
-                                  noTenantsMessage="No tenants selected; click in the box above to select any"
-                                />
-                              }
-                              overlayColumns={["Name", "Status"]}
-                              overlayRenderRow={TenantOverlayRow}
-                              filterDefs={tenantsFilters}
-                              objectType={Tenant}
-                              fields={Tenant.autocompleteQuery}
-                            />
-                          }
-                        />
-                      </td>
-                      <td>
-                        <Button
-                          variant="primary"
-                          disabled={!isValid}
-                          onClick={() => updateAccess(values, true)}
-                        >
-                          Allow Access
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          className="ms-2"
-                          onClick={() => updateAccess(values, false)}
-                        >
-                          Deny Access
-                        </Button>
-                      </td>
-                    </tr>
-                  )}
-                </Formik>
-              ))}
+              {list.map(person => {
+                if (_isEmpty(person?.tenants)) {
+                  person.tenants = defaultTenants
+                }
+                return (
+                  <Formik
+                    key={person.uuid}
+                    enableReinitialize
+                    initialValues={person}
+                    validationSchema={yupSchema}
+                    validateOnMount
+                  >
+                    {({ values, isValid, setFieldValue, setFieldTouched }) => (
+                      <tr>
+                        <td>
+                          <LinkTo
+                            modelType="Person"
+                            model={values}
+                            showAvatar={false}
+                          />
+                        </td>
+                        <td>
+                          <FastField
+                            name="tenants"
+                            label={null}
+                            component={FieldHelper.SpecialField}
+                            extraColElem={null}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenants", value, true)
+                            }}
+                            widget={
+                              <AdvancedMultiSelect
+                                fieldName="tenants"
+                                placeholder="Search for tenants…"
+                                value={values.tenants}
+                                renderSelected={
+                                  <TenantTable
+                                    tenants={values.tenants}
+                                    showStatus
+                                    showDelete
+                                    noTenantsMessage="No tenants selected; click in the box above to select any"
+                                  />
+                                }
+                                overlayColumns={["Name", "Status"]}
+                                overlayRenderRow={TenantOverlayRow}
+                                filterDefs={tenantsFilters}
+                                objectType={Tenant}
+                                fields={Tenant.autocompleteQuery}
+                              />
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Button
+                            variant="primary"
+                            disabled={!isValid}
+                            onClick={() => updateAccess(values, true)}
+                          >
+                            Allow Access
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            className="ms-2"
+                            onClick={() => updateAccess(values, false)}
+                          >
+                            Deny Access
+                          </Button>
+                        </td>
+                      </tr>
+                    )}
+                  </Formik>
+                )
+              })}
             </tbody>
           </Table>
         </UltimatePaginationTopDown>
