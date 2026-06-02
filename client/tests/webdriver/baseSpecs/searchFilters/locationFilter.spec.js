@@ -8,15 +8,15 @@ describe("When using the location filter on the reports search", () => {
 
     // depending on the test run sequence, one more locations may have been created
     expect(await LocationFilter.getLocationCount()).to.be.within(
-      261,
-      265,
+      256,
+      260,
       "Number of locations, searching for any location"
     )
 
     await LocationFilter.openAllCollapsedLocations()
     expect(await LocationFilter.getLocationCount()).to.be.within(
-      293,
-      296,
+      288,
+      291,
       "Number of uncollapsed locations, searching for any location"
     )
   })

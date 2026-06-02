@@ -7301,6 +7301,14 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="inactivate-kosovo-ethnic-groups" author="gjvoosten">
+		<sql>
+			UPDATE locations
+			SET status = 1
+			WHERE locations.trigram IN ('KOA', 'KOB', 'KOG', 'KOS', 'KOT');
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
