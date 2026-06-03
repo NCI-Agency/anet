@@ -24,6 +24,7 @@ const DEFAULT_FIELDS: SuggestionField[] = [
 function buildUI(root: HTMLElement): FieldPickerElements {
   const card = document.createElement("div")
   card.className = "card"
+  card.id = "mcp-ui-field-picker"
 
   const title = document.createElement("div")
   title.className = "label"

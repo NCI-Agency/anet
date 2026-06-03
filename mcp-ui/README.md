@@ -45,6 +45,14 @@ Currently registered tools include:
 - `ANET_AGENT_API_KEY` (or `OPENAI_API_KEY`)
 - `ANET_AGENT_MODEL` (or `OPENAI_MODEL`)
 
+### Report search configuration
+
+`anet_report_search_results` calls ANET's GraphQL API directly:
+- `ANET_GRAPHQL_TOKEN` (required) — bearer token for `/graphqlWebService`. Reuse the same value as `apollo-mcp-config.yaml`'s `Authorization` header.
+- `ANET_GRAPHQL_URL` (optional, default `http://localhost:8080/graphqlWebService`) — endpoint to query.
+
+The tool also uses an LLM agent (via `@openai/agents`) to extract a search keyword from natural-language queries before hitting GraphQL, so it shares the same env vars as `anet_agent_suggestion` (`ANET_AGENT_BASE_URL`, `ANET_AGENT_API_KEY`, `ANET_AGENT_MODEL`). If those aren't set, the tool falls back to using the raw user query as the GraphQL `text` filter.
+
 ## Tool input contract
 
 The tool expects:

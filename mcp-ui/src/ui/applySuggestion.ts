@@ -43,6 +43,7 @@ type ApplySuggestionElements = {
 function buildUI(root: HTMLElement): ApplySuggestionElements {
   const card = document.createElement("div")
   card.className = "card"
+  card.id = "mcp-ui-apply-suggestion"
 
   const fieldWrap = document.createElement("div")
   const fieldLabel = document.createElement("div")
