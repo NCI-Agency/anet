@@ -14,6 +14,8 @@ import { registerAgentSuggestionTool } from "./tools/agentSuggestion.js"
 import { registerFieldPickerTool } from "./tools/fieldPicker.js"
 import { registerReportChecklistTool } from "./tools/reportChecklist.js"
 import { registerReportCriterionHelpTool } from "./tools/reportCriterionHelp.js"
+import { registerReportSearchInputTool } from "./tools/reportSearchInput.js"
+import { registerReportSearchResultsTool } from "./tools/reportSearchResults.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const RESOURCE_URI = "ui://anet-mcp-ui/app"
@@ -38,6 +40,8 @@ export function createServer() {
   registerFieldPickerTool(server)
   registerReportChecklistTool(server)
   registerReportCriterionHelpTool(server)
+  registerReportSearchInputTool(server)
+  registerReportSearchResultsTool(server)
 
   registerAppResource(
     server,
