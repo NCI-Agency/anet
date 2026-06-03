@@ -2083,7 +2083,7 @@ automaticallyInactivateUsers:
 
 chatAssistant:
   enabled: true
-  url: http://localhost:7002/chat/index.html
+  url: https://127.0.0.1:7002/chat/index.html
   # Each entry requires `label` and `prompt`; `icon` and `iconColor` are optional.
   defaultSuggestions:
     - label: Summarize
@@ -2092,9 +2092,13 @@ chatAssistant:
     - label: Explain
       prompt: Explain what this ANET page is used for
       icon: book
-    - label: Search
-      prompt: Help me find reports, people, or tasks
+    - label: Find reports
+      prompt: >
+        Open the report search UI by calling the anet_report_search_input MCP
+        tool exactly once with the current businessObject. The user will type
+        their query into the UI; do not search in chat.
       icon: magnifying-glass
+      iconColor: "#1d4ed8"
   reportFormSuggestions:
     - label: Suggest improvements
       prompt: >
