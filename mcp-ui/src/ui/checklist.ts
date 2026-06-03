@@ -72,6 +72,7 @@ function postApply(fieldId: string, value: string) {
 function buildUI(root: HTMLElement, onRefresh: RefreshFn): ChecklistElements {
   const card = document.createElement("div")
   card.className = "card"
+  card.id = "mcp-ui-report-checklist"
 
   const header = document.createElement("div")
   header.style.display = "flex"

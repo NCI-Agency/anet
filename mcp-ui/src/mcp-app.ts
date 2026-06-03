@@ -15,6 +15,8 @@ import {
   renderFieldPickerFromArgs,
   SuggestionField
 } from "./ui/fieldPicker"
+import { createReportSearchInputUI } from "./ui/reportSearchInput"
+import { createReportSearchResultsUI } from "./ui/reportSearchResults"
 
 const app = new App({
   name: "ANET MCP UI",
@@ -123,6 +125,49 @@ const checklistUI = createChecklistUI(rootEl, async req => {
   }
 })
 
+let reportSearchInputUI: ReturnType<typeof createReportSearchInputUI>
+
+const reportSearchResultsUI = createReportSearchResultsUI(
+  rootEl,
+  previousQuery => {
+    reportSearchInputUI.render({ defaultQuery: previousQuery })
+  },
+  async (query, nextLimit) => {
+    const result = await app.callServerTool({
+      name: "anet_report_search_results",
+      arguments: { query, limit: nextLimit }
+    })
+    if (result.isError) {
+      return
+    }
+    const structured = (result.structuredContent ?? {}) as Record<string, unknown>
+    reportSearchResultsUI.render(structured)
+  }
+)
+
+reportSearchInputUI = createReportSearchInputUI(
+  rootEl,
+  async (query, businessObject) => {
+    void businessObject
+    const result = await app.callServerTool({
+      name: "anet_report_search_results",
+      arguments: { query }
+    })
+
+    if (result.isError) {
+      const errBlock = (result.content ?? []).find(b => b.type === "text")
+      const errText =
+        errBlock && "text" in errBlock && typeof errBlock.text === "string"
+          ? errBlock.text
+          : "Search failed."
+      throw new Error(errText)
+    }
+
+    const structured = (result.structuredContent ?? {}) as Record<string, unknown>
+    reportSearchResultsUI.render(structured)
+  }
+)
+
 const toolHandlers = new Map<string, (args: unknown) => void>()
 toolHandlers.set("anet_suggestion", args =>
   renderApplySuggestionFromArgs(applySuggestionUI, args, setStatus)
@@ -131,6 +176,12 @@ toolHandlers.set("anet_field_picker", args =>
   renderFieldPickerFromArgs(fieldPickerUI, args, setStatus)
 )
 toolHandlers.set("anet_report_checklist", args => checklistUI.render(args))
+toolHandlers.set("anet_report_search_input", args =>
+  reportSearchInputUI.render(args)
+)
+toolHandlers.set("anet_report_search_results", args =>
+  reportSearchResultsUI.render(args)
+)
 
 function resolveToolName(args?: Record<string, unknown>): string {
   const toolNameFromArgs = typeof args?.toolName === "string" ? args.toolName : null
@@ -143,6 +194,17 @@ function resolveToolName(args?: Record<string, unknown>): string {
   if (toolNameFromHost && toolHandlers.has(toolNameFromHost)) return toolNameFromHost
 
   if (args?.checklist && typeof args.checklist === "object") {
+    return "anet_report_checklist"
+  }
+  // Some hosts send checklist tool-input with only businessObject on first render.
+  // Keep this guarded fallback to avoid blank UI when toolInfo isn't available yet.
+  if (
+    args?.businessObject &&
+    typeof args.businessObject === "object" &&
+    !Array.isArray(args?.fields) &&
+    typeof args?.fieldId !== "string" &&
+    typeof args?.suggestion !== "string"
+  ) {
     return "anet_report_checklist"
   }
   if (Array.isArray(args?.fields)) return "anet_field_picker"
