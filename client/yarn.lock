@@ -7369,7 +7369,7 @@ __metadata:
     react-redux: "npm:9.2.0"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
-    react-router: "npm:7.14.0"
+    react-router: "npm:7.15.0"
     react-scroll: "npm:1.9.3"
     react-test-renderer: "npm:18.3.1"
     react-toastify: "npm:11.0.5"
@@ -17119,9 +17119,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.14.0":
-  version: 7.14.0
-  resolution: "react-router@npm:7.14.0"
+"react-router@npm:7.15.0":
+  version: 7.15.0
+  resolution: "react-router@npm:7.15.0"
   dependencies:
     cookie: "npm:^1.0.1"
     set-cookie-parser: "npm:^2.6.0"
@@ -17131,7 +17131,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10c0/a496489973cd5e87dcc5c1c7312f4cc99463eb5e0a0f97b3f298467531b754a3227562a83e0c9019b9d2452fd0681d05882ee061af2e0cafb0818f857578b805
+  checksum: 10c0/ce27ff25a0a53afec7f24385be89b779efd9f04d84c5b90c6a8f3fbbac28fc2f8c5f1bb26aff0588d41a225482365997082808f9e098c565435fad09426de114
   languageName: node
   linkType: hard
 
