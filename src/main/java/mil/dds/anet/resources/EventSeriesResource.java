@@ -12,7 +12,6 @@ import mil.dds.anet.beans.search.EventSeriesSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventSeriesDao;
-import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -56,7 +55,6 @@ public class EventSeriesResource {
   }
 
   @GraphQLQuery(name = "eventSeriesList")
-  @AllowUnverifiedUsers
   public AnetBeanList<EventSeries> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") EventSeriesSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
