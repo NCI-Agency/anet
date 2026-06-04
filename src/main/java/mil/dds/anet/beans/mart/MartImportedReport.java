@@ -29,6 +29,8 @@ public class MartImportedReport {
   private State state;
   @GraphQLQuery
   private String errors;
+  @GraphQLQuery
+  private Integer historyCount;
 
   // annotated below
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
@@ -81,6 +83,14 @@ public class MartImportedReport {
 
   public void setErrors(final String errors) {
     this.errors = errors;
+  }
+
+  public Integer getHistoryCount() {
+    return historyCount;
+  }
+
+  public void setHistoryCount(Integer historyCount) {
+    this.historyCount = historyCount;
   }
 
   @GraphQLQuery(name = "person")

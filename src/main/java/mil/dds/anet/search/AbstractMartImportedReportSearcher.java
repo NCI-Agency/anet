@@ -38,6 +38,13 @@ public abstract class AbstractMartImportedReportSearcher
             : "") + MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
     qb.addFromClause("\"martImportedReports\"");
 
+    // Add the count for each imported report
+    qb.addWithClause("mir2 AS "
+        + "(SELECT COUNT(*), \"reportUuid\" FROM \"martImportedReports\" GROUP BY \"reportUuid\")");
+    qb.addSelectClause("mir2.count AS \"martImportedReports_historyCount\"");
+    qb.addFromClause(", mir2");
+    qb.addWhereClause("mir2.\"reportUuid\" = \"martImportedReports\".\"reportUuid\"");
+
     if (!Utils.isEmptyOrNull(query.getPersonUuid())) {
       qb.addStringEqualsClause("personUuid", "\"martImportedReports\".\"personUuid\"",
           query.getPersonUuid());

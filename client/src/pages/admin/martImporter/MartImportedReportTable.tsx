@@ -44,6 +44,7 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
         submittedAt
         receivedAt
         errors
+        historyCount
       }
     }
   }
@@ -123,6 +124,21 @@ const MartImportedReportTable = ({
   const { totalCount = 0, list: martImportedReports = [] } =
     data.martImportedReportList || {}
 
+  const stateCounts = martImportedReports.reduce(
+    (acc: Record<string, number>, { state }: { state: string }) => {
+      acc[state] = (acc[state] || 0) + 1
+      return acc
+    },
+    {}
+  )
+  const okCount = stateCounts.SUBMITTED_OK || 0
+  const warningsCount = stateCounts.SUBMITTED_WARNINGS || 0
+  const notSubmittedCount = stateCounts.NOT_SUBMITTED || 0
+  const notReceivedCount = stateCounts.NOT_RECEIVED || 0
+  const deliveredCount = okCount + warningsCount
+  const lostFailedCount = notSubmittedCount + notReceivedCount
+  const summaryTotal = deliveredCount + lostFailedCount
+
   const handlePageSizeChange = newPageSize => {
     const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
     setPageNum(newPageNum)
@@ -140,7 +156,7 @@ const MartImportedReportTable = ({
   }
 
   const handleStateFilterChange = state => {
-    setSelectedState(state || null)
+    setSelectedState(state || undefined)
     setPageNum(0)
   }
 
@@ -237,6 +253,36 @@ const MartImportedReportTable = ({
         </div>
       }
     >
+      {!selectedReportUuid && summaryTotal > 0 && (
+        <div className="d-flex flex-wrap align-items-center gap-4 mb-3 p-2 border rounded bg-light">
+          <span className="d-inline-flex align-items-center gap-2">
+            <Icon
+              icon={IconNames.TICK_CIRCLE}
+              className="text-success"
+              size={20}
+            />
+            <span>
+              <strong>{deliveredCount}</strong> delivered
+              <small className="text-muted ms-1">
+                ({okCount} ok, {warningsCount} with warnings)
+              </small>
+            </span>
+          </span>
+          <span className="d-inline-flex align-items-center gap-2">
+            <Icon icon={IconNames.ERROR} className="text-danger" size={20} />
+            <span>
+              <strong>{lostFailedCount}</strong> lost or failed
+              <small className="text-muted ms-1">
+                ({notSubmittedCount} not submitted, {notReceivedCount} not
+                received)
+              </small>
+            </span>
+          </span>
+          <span className="text-muted ms-auto">
+            {summaryTotal} {utils.pluralizeWord(summaryTotal, "report")}
+          </span>
+        </div>
+      )}
       {_isEmpty(martImportedReports) ? (
         <em>No mart reports imported found</em>
       ) : (
@@ -349,7 +395,7 @@ const MartImportedReportTable = ({
                               model={martImportedReport.report}
                               displayCallback={displayCallback}
                             />
-                            {martImportedReport.report && (
+                            {martImportedReport.historyCount > 1 && (
                               <OverlayTrigger
                                 placement="top"
                                 overlay={
