@@ -12,6 +12,7 @@ export const PAGE_URLS = {
   PEOPLE: "/people",
   PREFERENCES: "/preferences",
   ATTACHMENTS: "/attachments",
+  COMMUNITIES: "/communities",
   ORGANIZATIONS: "/organizations",
   LOCATIONS: "/locations",
   POSITIONS: "/positions",

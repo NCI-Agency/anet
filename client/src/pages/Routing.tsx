@@ -20,6 +20,7 @@ import AttachmentEdit from "pages/attachments/Edit"
 import MyAttachments from "pages/attachments/MyAttachments"
 import AttachmentShow from "pages/attachments/Show"
 import AuthorizationGroupEdit from "pages/authorizationGroups/Edit"
+import AuthorizationGroupList from "pages/authorizationGroups/List"
 import MyAuthorizationGroups from "pages/authorizationGroups/MyAuthorizationGroups"
 import AuthorizationGroupNew from "pages/authorizationGroups/New"
 import AuthorizationGroupShow from "pages/authorizationGroups/Show"
@@ -229,8 +230,9 @@ const routes = [
         ]
       },
       {
-        path: "communities",
+        path: PAGE_URLS.COMMUNITIES,
         children: [
+          { index: true, element: <AuthorizationGroupList /> },
           {
             element: (
               <ProtectedRoute
