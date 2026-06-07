@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState
 } from "react"
-import { useLocation } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import Settings from "settings"
 
 export type ChatSuggestion = {
@@ -62,6 +62,7 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
 
   const iframeElRef = useRef<HTMLIFrameElement | null>(null)
   const chatAssistantOrigin = useRef(new URL(Settings.chatAssistant.url).origin)
@@ -157,7 +158,9 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
       const isMcpAppEvent =
         source === "mcp-app" &&
         (type === "anet.applySuggestion" ||
-          type === "anet.selectSuggestionField")
+          type === "anet.selectSuggestionField" ||
+          type === "anet.openSuggestionDiff" ||
+          type === "anet.openReport")
 
       if (!isMcpAppEvent && ev.origin !== chatAssistantOrigin.current) {
         return
@@ -180,6 +183,13 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
         )
         return
       }
+      if (type === "anet.openReport") {
+        const uuid = typeof ev.data?.uuid === "string" ? ev.data.uuid : ""
+        if (uuid) {
+          navigate(`/reports/${uuid}`)
+        }
+        return
+      }
       if (type === "ready") {
         setIsReady(true)
         announceActive()
@@ -188,27 +198,15 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
     }
     window.addEventListener("message", onMessage)
     return () => window.removeEventListener("message", onMessage)
-  }, [announceActive, flushQueue])
+  }, [announceActive, flushQueue, navigate])
 
   useEffect(() => {
     if (!isReady) {
       return
     }
-    let attempts = 0
-    const max = 5
-    const id = window.setInterval(() => {
-      attempts += 1
-      lastSentRef.current = null
-      announceActive()
-      flushQueue()
-      if (attempts >= max) {
-        window.clearInterval(id)
-      }
-    }, 300)
     lastSentRef.current = null
     announceActive()
     flushQueue()
-    return () => window.clearInterval(id)
   }, [announceActive, flushQueue, isReady])
 
   useEffect(() => {

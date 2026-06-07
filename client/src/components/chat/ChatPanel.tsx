@@ -8,13 +8,13 @@ const base = {
   overflow: "hidden",
   transition: "width 0.3s ease",
   width: 0,
-  maxWidth: 500,
+  maxWidth: 600,
   borderLeft: "1px solid #ddd",
   backgroundColor: "#f9f9f9",
   zIndex: 10,
   height: "100%"
 }
-const openStyle = { ...base, width: "25%" }
+const openStyle = { ...base, width: "30%" }
 
 export default function ChatPanel() {
   const { isOpen, onIframeLoad, setIframeEl } = useChatBridge()

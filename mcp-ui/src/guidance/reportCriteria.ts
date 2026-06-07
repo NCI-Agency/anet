@@ -50,11 +50,15 @@ export type FieldId = (typeof FIELD_DEFS)[number]["id"]
 
 const ACRONYM_PATTERN = /\b[A-Z]{2,}\b/g
 
+// Well-known acronyms that do not need to be defined on first use.
+const ACRONYM_ALLOWLIST = new Set(["NATO", "EU"])
+
 function hasUndefinedAcronyms(text: string): boolean {
   const seen = new Set<string>()
   ACRONYM_PATTERN.lastIndex = 0
   let m: RegExpExecArray | null
   while ((m = ACRONYM_PATTERN.exec(text)) !== null) {
+    if (ACRONYM_ALLOWLIST.has(m[0])) continue
     seen.add(m[0])
   }
   if (seen.size === 0) return false
