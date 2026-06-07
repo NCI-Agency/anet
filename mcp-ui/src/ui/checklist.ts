@@ -80,7 +80,7 @@ function buildUI(root: HTMLElement, onRefresh: RefreshFn): ChecklistElements {
   header.style.alignItems = "center"
 
   const title = document.createElement("div")
-  title.className = "label"
+  title.className = "checklist-title"
   title.textContent = "Report Guidance Checklist"
 
   const refreshBtn = document.createElement("button")
@@ -139,15 +139,20 @@ function renderChecklistInto(
       label.className = "checklist-label"
       label.textContent = item.label
 
-      const helpBtn = document.createElement("button")
-      helpBtn.type = "button"
-      helpBtn.className = "checklist-help-btn"
-      helpBtn.textContent = "Help me"
-      helpBtn.addEventListener("click", () =>
-        onHelp(group.id, item.id, item.label)
-      )
+      li.append(icon, label)
 
-      li.append(icon, label, helpBtn)
+      if (item.status !== "pass") {
+        const helpBtn = document.createElement("button")
+        helpBtn.type = "button"
+        helpBtn.className = "checklist-help-btn"
+        helpBtn.textContent =
+          item.status === "needs_ai" ? "Get insights" : "Help me"
+        helpBtn.addEventListener("click", () =>
+          onHelp(group.id, item.id, item.label)
+        )
+        li.append(helpBtn)
+      }
+
       list.append(li)
     }
 
