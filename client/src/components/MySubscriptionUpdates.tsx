@@ -111,7 +111,10 @@ const MySubscriptionUpdates = ({
   const subscriptionUpdates = paginatedSubscriptionUpdates
     ? paginatedSubscriptionUpdates.list
     : []
-  const { pageSize, totalCount } = paginatedSubscriptionUpdates
+  const { pageSize, totalCount } = paginatedSubscriptionUpdates ?? {
+    pageSize: 0,
+    totalCount: 0
+  }
   const subscriptionUpdatesExist = totalCount > 0
 
   return (
