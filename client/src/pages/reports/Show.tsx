@@ -25,11 +25,7 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentContext from "components/Attachment/AttachmentContext"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import {
-  ChatSuggestion,
-  useChatBridge,
-  useChatPageContext
-} from "components/chat/ChatBridge"
+import { ChatSuggestion, useChatPageContext } from "components/chat/ChatBridge"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -242,7 +238,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   )
   const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
-  const { open: openChat } = useChatBridge()
 
   function buildReportBusinessObject(report: Report) {
     const plainText = truncate(stripHtml(report.reportText || ""))
@@ -407,15 +402,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
             {canEmail && (
               <Button onClick={toggleEmailModal} variant="outline-secondary">
                 Email report
-              </Button>
-            )}
-            {Settings.chatAssistant.enabled && (
-              <Button
-                variant="outline-primary"
-                onClick={openChat}
-                title="Open AI chat panel"
-              >
-                Ask AI
               </Button>
             )}
             <Button

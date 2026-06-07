@@ -449,11 +449,22 @@ const ReportForm = ({
       ? report.nextSteps.join("\n")
       : (report.nextSteps ?? "")
 
+    const fieldCurrentText: Record<string, string> = {
+      intent: report.intent ?? "",
+      keyOutcomes,
+      nextSteps,
+      reportText: plainText
+    }
+    const suggestionFieldOptionsWithText = suggestionFieldOptions.map(opt => ({
+      ...opt,
+      currentText: fieldCurrentText[opt.id] ?? ""
+    }))
+
     return {
       title: report.intent || "",
       description: plainText,
       suggestionTargetField: selectedSuggestionField,
-      suggestionFieldOptions,
+      suggestionFieldOptions: suggestionFieldOptionsWithText,
       guidanceCriteria: Settings.chatAssistant?.reportGuidanceCriteria ?? null,
       relatedContext: {
         classification: report.classification,
@@ -948,6 +959,22 @@ const ReportForm = ({
                   setFieldTouched={setFieldTouched}
                   setFieldValue={setFieldValue}
                   validateField={validateFieldHandler}
+                />
+              )}
+              {Settings.chatAssistant.enabled && (
+                <DiffModal
+                  show={diffModalOpen}
+                  title={
+                    diffDetail?.fieldLabel
+                      ? `Edit ${diffDetail.fieldLabel}`
+                      : "Review suggestion"
+                  }
+                  leftText={diffDetail?.currentText ?? ""}
+                  rightText={diffDetail?.suggestion ?? ""}
+                  leftLabel="Current"
+                  rightLabel="Suggested"
+                  onClose={() => setDiffModalOpen(false)}
+                  onApply={applyDiffSelection}
                 />
               )}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
