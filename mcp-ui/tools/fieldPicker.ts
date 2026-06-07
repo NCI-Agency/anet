@@ -38,13 +38,28 @@ export function registerFieldPickerTool(server: McpServer) {
         }
       }
     },
-    async () => ({
-      content: [
-        {
-          type: "text",
-          text: "Choose a field."
-        }
-      ]
-    })
+    async (args?: Record<string, unknown>) => {
+      const fields = Array.isArray(args?.fields) ? args.fields : []
+      return {
+        structuredContent: {
+          toolName: "anet_field_picker",
+          status: "rendered",
+          rendered: true,
+          awaitingUserInput: true,
+          message:
+            "The field picker UI is now displayed. The user will choose a field and the UI will trigger the next step without involving you.",
+          fields
+        },
+        content: [
+          {
+            type: "text",
+            text:
+              "DONE. The field picker UI is rendered and visible. The user must pick a field inside the UI; that pick triggers the next step directly without involving you. " +
+              "STOP calling tools. Calling anet_field_picker again will not change anything — the UI is already shown. " +
+              "Wait silently for the next user message."
+          }
+        ]
+      }
+    }
   )
 }
