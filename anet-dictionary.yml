@@ -2087,36 +2087,21 @@ chatAssistant:
   url: https://127.0.0.1:7002/chat/index.html
   # Each entry requires `label` and `prompt`; `icon` and `iconColor` are optional.
   defaultSuggestions:
-    - label: Summarize
-      prompt: Summarize what I'm viewing
-      icon: list-bullets
-    - label: Explain
-      prompt: Explain what this ANET page is used for
+    - label: Explain page
+      prompt: Explain this page
       icon: book
     - label: Find reports
-      prompt: >
-        Open the report search UI by calling the anet_report_search_input MCP
-        tool exactly once with the current businessObject. The user will type
-        their query into the UI; do not search in chat.
+      prompt: Find reports
       icon: magnifying-glass
       iconColor: "#1d4ed8"
   reportFormSuggestions:
     - label: Suggest improvements
-      prompt: >
-        Use the ANET field picker UI to choose which report field to improve
+      prompt: Suggest field improvements
       icon: lightbulb
       iconColor: "yellow"
-    - label: Suggest next steps
-      prompt: >
-        Suggest improvements for the Next Steps field using the ANET suggestion
-        tool UI. Do not include the suggestion in chat.
-      icon: lightbulb
-      iconColor: "yellow"
-    - label: Review report against guidance
-      prompt: >
-        Call the anet_report_checklist tool with the current report businessObject
-        so the user can see which writing-guidance criteria are met.
-      icon: clipboard-check
+    - label: Writing guidance review
+      prompt: Writing guidance review
+      icon: graduation-cap
       iconColor: "blue"
   reportGuidanceCriteria:
     - fieldId: intent
@@ -2197,21 +2182,17 @@ chatAssistant:
       icon: check-circle
       iconColor: "#19aa28ff"
     - label: Summarize
-      prompt: Summarize this report
+      prompt: Summarize the report
       icon: list-bullets
       iconColor: "#000000ff"
     - label: Translate
-      prompt: Translate this report
+      prompt: Translate the report
       icon: translate
       iconColor: "#1e90ff"
     - label: Spell check
-      prompt: Perform a spell check on this report
+      prompt: Spell check the report
       icon: pencil
       iconColor: "#ff8c00ff"
-    - label: Latest report
-      prompt: Get the latest report
-      icon: arrow-up
-      iconColor: "#1e90ff"
 
 dashboards:
   - label: dashboard0
