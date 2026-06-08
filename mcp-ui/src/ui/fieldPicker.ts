@@ -1,3 +1,5 @@
+import { sendAction } from "../messaging"
+
 export type SuggestionField = {
   id: string
   label: string
@@ -57,23 +59,10 @@ export function createFieldPickerUI(
 
   function postSelection(field: SuggestionField) {
     const el = ensureElements()
-    const payload = {
-      type: "anet.selectSuggestionField",
+    sendAction("select_suggestion_field", {
       fieldId: field.id,
-      fieldLabel: field.label,
-      source: "mcp-app"
-    }
-
-    try {
-      if (!window.top || window.top === window) {
-        throw new Error("Missing top window")
-      }
-      window.top.postMessage(payload, "*")
-    } catch {
-      el.statusEl.textContent = "Failed to select field"
-      return
-    }
-
+      fieldLabel: field.label
+    })
     el.statusEl.textContent = `${field.label} selected`
     onSelect?.(field)
   }
