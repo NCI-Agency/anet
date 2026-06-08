@@ -240,29 +240,23 @@ function getEventMinDate(eventStartDate?: Date) {
 }
 
 type ApplySuggestionDetail = {
-  type?: string
   fieldId?: string
   fieldLabel?: string
   value?: string
   requestId?: string
-  source?: string
 }
 
 type SelectSuggestionFieldDetail = {
-  type?: string
   fieldId?: string
   fieldLabel?: string
-  source?: string
 }
 
 type OpenSuggestionDiffDetail = {
-  type?: string
   fieldId?: string
   fieldLabel?: string
   currentText?: string
   suggestion?: string
   requestId?: string
-  source?: string
 }
 
 function normalizeFieldKey(value?: string) {
@@ -343,10 +337,7 @@ const ReportApplySuggestionListener = ({
         return
       }
       const detail = (event as CustomEvent<ApplySuggestionDetail>).detail
-      if (!detail || detail.type !== "anet.applySuggestion") {
-        return
-      }
-      if (typeof detail.value !== "string") {
+      if (!detail || typeof detail.value !== "string") {
         return
       }
 
@@ -541,12 +532,10 @@ const ReportForm = ({
       }
 
       const payload: ApplySuggestionDetail = {
-        type: "anet.applySuggestion",
         fieldId: diffDetail.fieldId,
         fieldLabel: diffDetail.fieldLabel,
         value: mergedValue,
-        requestId: diffDetail.requestId,
-        source: "mcp-app"
+        requestId: diffDetail.requestId
       }
 
       window.dispatchEvent(
@@ -563,10 +552,7 @@ const ReportForm = ({
         return
       }
       const detail = (event as CustomEvent<SelectSuggestionFieldDetail>).detail
-      if (!detail || detail.type !== "anet.selectSuggestionField") {
-        return
-      }
-      if (typeof detail.fieldId !== "string") {
+      if (!detail || typeof detail.fieldId !== "string") {
         return
       }
       const label =
@@ -587,13 +573,11 @@ const ReportForm = ({
         return
       }
       const detail = (event as CustomEvent<OpenSuggestionDiffDetail>).detail
-      if (!detail || detail.type !== "anet.openSuggestionDiff") {
-        return
-      }
-      if (typeof detail.fieldId !== "string") {
-        return
-      }
-      if (typeof detail.suggestion !== "string") {
+      if (
+        !detail ||
+        typeof detail.fieldId !== "string" ||
+        typeof detail.suggestion !== "string"
+      ) {
         return
       }
       openDiffModal(detail)
