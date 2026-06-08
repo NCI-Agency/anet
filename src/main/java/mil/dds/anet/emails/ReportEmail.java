@@ -33,7 +33,9 @@ public class ReportEmail implements AnetEmailAction {
     if (r == null) {
       return null;
     }
-    sender = engine().getPersonDao().getByUuid(sender.getUuid());
+    if (sender != null) {
+      sender = engine().getPersonDao().getByUuid(sender.getUuid());
+    }
 
     context.put("report", r);
     context.put("reportIntent", getReportLabel(r));
@@ -70,7 +72,9 @@ public class ReportEmail implements AnetEmailAction {
   }
 
   public void setSender(Person sender) {
-    this.sender = Person.createWithUuid(sender.getUuid());
+    if (sender != null) {
+      this.sender = Person.createWithUuid(sender.getUuid());
+    }
   }
 
   public String getComment() {
