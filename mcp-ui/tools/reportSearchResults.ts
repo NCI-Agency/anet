@@ -21,7 +21,14 @@ const inputSchema: ZodTypeAny = z
       .int()
       .positive()
       .optional()
-      .describe(`Max number of reports to return (default ${DEFAULT_LIMIT}, max ${MAX_LIMIT}).`)
+      .describe(`Max number of reports to return (default ${DEFAULT_LIMIT}, max ${MAX_LIMIT}).`),
+    userToken: z
+      .string()
+      .optional()
+      .describe(
+        "Caller's ANET Keycloak bearer token. Injected by the mcp-ui iframe; " +
+          "the LLM should not populate or forward this field."
+      )
   })
   .passthrough()
 
@@ -1020,8 +1027,11 @@ export function registerReportSearchResultsTool(server: McpServer) {
       const limit = Math.min(Math.floor(requestedLimit), MAX_LIMIT)
 
       const endpoint =
-        process.env.ANET_GRAPHQL_URL ?? "http://localhost:8080/graphqlWebService"
-      const token = process.env.ANET_GRAPHQL_TOKEN
+        process.env.ANET_GRAPHQL_URL ?? "http://localhost:8080/graphql"
+      const token =
+        typeof safe.userToken === "string" && safe.userToken.length > 0
+          ? safe.userToken
+          : undefined
       console.log(
         `[anet_report_search_results] endpoint=${endpoint} tokenPresent=${Boolean(token)} query=${JSON.stringify(query)} limit=${limit}`
       )
@@ -1032,7 +1042,7 @@ export function registerReportSearchResultsTool(server: McpServer) {
             {
               type: "text",
               text:
-                "Missing ANET_GRAPHQL_TOKEN env var; cannot authenticate with ANET GraphQL."
+                "Missing userToken; mcp-ui must include the caller's bearer token in tool arguments."
             }
           ]
         }
