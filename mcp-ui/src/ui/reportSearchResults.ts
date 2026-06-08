@@ -1,3 +1,5 @@
+import { sendAction } from "../messaging"
+
 type ReportItem = {
   uuid: string
   intent?: string
@@ -134,17 +136,7 @@ function formatMeta(report: ReportItem): string {
 }
 
 function postOpenReport(uuid: string) {
-  const payload = {
-    type: "anet.openReport",
-    uuid,
-    source: "mcp-app" as const
-  }
-  try {
-    if (!window.top || window.top === window) return
-    window.top.postMessage(payload, "*")
-  } catch {
-    // ignore
-  }
+  sendAction("open_report", { uuid })
 }
 
 function normalizeStringArray(v: unknown): string[] | undefined {
