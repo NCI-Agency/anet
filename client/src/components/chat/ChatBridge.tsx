@@ -152,44 +152,40 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
   )
 
   useEffect(() => {
-    const onMessage = (ev: MessageEvent) => {
-      const type = typeof ev.data === "string" ? ev.data : ev.data?.type
-      const source = typeof ev.data === "string" ? undefined : ev.data?.source
-      const isMcpAppEvent =
-        source === "mcp-app" &&
-        (type === "anet.applySuggestion" ||
-          type === "anet.selectSuggestionField" ||
-          type === "anet.openSuggestionDiff" ||
-          type === "anet.openReport")
+    const ACTION_TO_EVENT: Record<string, string> = {
+      apply_suggestion: "anet-apply-suggestion",
+      select_suggestion_field: "anet-select-suggestion-field",
+      open_suggestion_diff: "anet-open-suggestion-diff"
+    }
 
-      if (!isMcpAppEvent && ev.origin !== chatAssistantOrigin.current) {
+    const onMessage = (ev: MessageEvent) => {
+      const data = ev.data
+      const action = typeof data === "object" && data ? data.action : undefined
+
+      if (!action && ev.origin !== chatAssistantOrigin.current) {
         return
       }
-      if (type === "anet.applySuggestion") {
-        window.dispatchEvent(
-          new CustomEvent("anet-apply-suggestion", { detail: ev.data })
-        )
-        return
-      }
-      if (type === "anet.selectSuggestionField") {
-        window.dispatchEvent(
-          new CustomEvent("anet-select-suggestion-field", { detail: ev.data })
-        )
-        return
-      }
-      if (type === "anet.openSuggestionDiff") {
-        window.dispatchEvent(
-          new CustomEvent("anet-open-suggestion-diff", { detail: ev.data })
-        )
-        return
-      }
-      if (type === "anet.openReport") {
-        const uuid = typeof ev.data?.uuid === "string" ? ev.data.uuid : ""
-        if (uuid) {
-          navigate(`/reports/${uuid}`)
+
+      if (typeof action === "string") {
+        const payload =
+          typeof data.payload === "object" && data.payload ? data.payload : {}
+
+        if (action === "open_report") {
+          const uuid = typeof payload.uuid === "string" ? payload.uuid : ""
+          if (uuid) {
+            navigate(`/reports/${uuid}`)
+          }
+          return
+        }
+
+        const eventName = ACTION_TO_EVENT[action]
+        if (eventName) {
+          window.dispatchEvent(new CustomEvent(eventName, { detail: payload }))
         }
         return
       }
+
+      const type = typeof data === "string" ? data : data?.type
       if (type === "ready") {
         setIsReady(true)
         announceActive()
