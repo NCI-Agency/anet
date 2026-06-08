@@ -1,3 +1,4 @@
+import { keycloak } from "keycloak"
 import React, {
   createContext,
   FC,
@@ -169,6 +170,17 @@ export const ChatBridgeProvider: FC<{ children }> = ({ children }) => {
       if (typeof action === "string") {
         const payload =
           typeof data.payload === "object" && data.payload ? data.payload : {}
+
+        if (action === "request_user_token") {
+          const source = ev.source as Window | null
+          if (source && typeof source.postMessage === "function") {
+            source.postMessage(
+              { type: "anet.userToken", token: keycloak.token ?? null },
+              "*"
+            )
+          }
+          return
+        }
 
         if (action === "open_report") {
           const uuid = typeof payload.uuid === "string" ? payload.uuid : ""
