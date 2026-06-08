@@ -17,6 +17,7 @@ import {
 } from "./ui/fieldPicker"
 import { createReportSearchInputUI } from "./ui/reportSearchInput"
 import { createReportSearchResultsUI } from "./ui/reportSearchResults"
+import { getUserToken } from "./userToken"
 
 const app = new App({
   name: "ANET MCP UI",
@@ -133,9 +134,10 @@ const reportSearchResultsUI = createReportSearchResultsUI(
     reportSearchInputUI.render({ defaultQuery: previousQuery })
   },
   async (query, nextLimit) => {
+    const userToken = await getUserToken()
     const result = await app.callServerTool({
       name: "anet_report_search_results",
-      arguments: { query, limit: nextLimit }
+      arguments: { query, limit: nextLimit, userToken }
     })
     if (result.isError) {
       return
@@ -149,9 +151,10 @@ reportSearchInputUI = createReportSearchInputUI(
   rootEl,
   async (query, businessObject) => {
     void businessObject
+    const userToken = await getUserToken()
     const result = await app.callServerTool({
       name: "anet_report_search_results",
-      arguments: { query }
+      arguments: { query, userToken }
     })
 
     if (result.isError) {
