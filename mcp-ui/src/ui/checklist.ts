@@ -10,6 +10,7 @@ import {
   FIELD_DEFS,
   normalizeBusinessCtx
 } from "../guidance/reportCriteria"
+import { sendAction } from "../messaging"
 
 type CallHelpRequest = {
   fieldId: string
@@ -34,14 +35,6 @@ type ChecklistElements = {
   statusEl: HTMLElement
 }
 
-type ApplyMessage = {
-  type: "anet.applySuggestion"
-  fieldId: string
-  value: string
-  fieldLabel?: string
-  source: "mcp-app"
-}
-
 const STATUS_ICON: Record<CriterionStatus, string> = {
   pass: "\u2713",
   fail: "\u2717",
@@ -54,19 +47,11 @@ for (const def of FIELD_DEFS) {
 }
 
 function postApply(fieldId: string, value: string) {
-  const payload: ApplyMessage = {
-    type: "anet.applySuggestion",
+  sendAction("apply_suggestion", {
     fieldId,
     value,
-    fieldLabel: FIELD_LABEL_MAP[fieldId],
-    source: "mcp-app"
-  }
-  try {
-    if (!window.top || window.top === window) return
-    window.top.postMessage(payload, "*")
-  } catch {
-    // ignore
-  }
+    fieldLabel: FIELD_LABEL_MAP[fieldId]
+  })
 }
 
 function buildUI(root: HTMLElement, onRefresh: RefreshFn): ChecklistElements {
