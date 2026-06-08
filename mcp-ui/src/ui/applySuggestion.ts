@@ -1,28 +1,11 @@
+import { sendAction } from "../messaging"
+
 export type SuggestionArgs = {
   fieldId: string
   fieldLabel?: string
   currentText?: string
   suggestion: string
   requestId?: string
-}
-
-type ApplyMessage = {
-  type: "anet.applySuggestion"
-  fieldId: string
-  value: string
-  fieldLabel?: string
-  requestId?: string
-  source: "mcp-app"
-}
-
-type OpenDiffMessage = {
-  type: "anet.openSuggestionDiff"
-  fieldId: string
-  fieldLabel?: string
-  currentText?: string
-  suggestion: string
-  requestId?: string
-  source: "mcp-app"
 }
 
 type ApplySuggestionUI = {
@@ -124,51 +107,25 @@ export function createApplySuggestionUI(root: HTMLElement): ApplySuggestionUI {
     const el = ensureElements()
     if (!currentArgs) return
 
-    const payload: ApplyMessage = {
-      type: "anet.applySuggestion",
+    sendAction("apply_suggestion", {
       fieldId: currentArgs.fieldId,
       value: currentArgs.suggestion,
       fieldLabel: currentArgs.fieldLabel,
-      requestId: currentArgs.requestId,
-      source: "mcp-app"
-    }
-
-    try {
-      if (!window.top || window.top === window) {
-        throw new Error("Missing top window")
-      }
-      window.top.postMessage(payload, "*")
-    } catch {
-      el.statusEl.textContent = "Failed to apply"
-      return
-    }
-
+      requestId: currentArgs.requestId
+    })
     el.statusEl.textContent = "Applied to ANET"
   }
 
   function postOpenDiffMessage() {
-    const el = ensureElements()
     if (!currentArgs) return
 
-    const payload: OpenDiffMessage = {
-      type: "anet.openSuggestionDiff",
+    sendAction("open_suggestion_diff", {
       fieldId: currentArgs.fieldId,
       suggestion: currentArgs.suggestion,
       fieldLabel: currentArgs.fieldLabel,
       currentText: currentArgs.currentText,
-      requestId: currentArgs.requestId,
-      source: "mcp-app"
-    }
-
-    try {
-      if (!window.top || window.top === window) {
-        throw new Error("Missing top window")
-      }
-      window.top.postMessage(payload, "*")
-    } catch {
-      el.statusEl.textContent = "Failed to open picker"
-      return
-    }
+      requestId: currentArgs.requestId
+    })
   }
 
   return {
