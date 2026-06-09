@@ -200,7 +200,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         @BindBean List<AuthorizationGroup> authorizationGroups);
   }
 
-
   @Override
   public Report getByUuid(String uuid) {
     throw new UnsupportedOperationException();
