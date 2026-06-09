@@ -73,11 +73,7 @@ function getDateField(
 ): moment.Moment {
   const selectedDate =
     obj?.[`${usePublicationDate ? "releasedAt" : "engagementDate"}${mark}`]
-  if (selectedDate) {
-    return moment(selectedDate)
-  } else {
-    return null
-  }
+  return selectedDate ? moment(selectedDate) : null
 }
 
 function getStartDate(queryParams, usePublicationDate: boolean): moment.Moment {
@@ -154,18 +150,15 @@ const ReportsAggregatedOverTime = ({
   }, [data, queryParams, usePublicationDate, granularity])
   const startDate = getStartDate(queryParams, usePublicationDate)
   const endDate = getEndDate(queryParams, usePublicationDate)
+  const hasRange = startDate && endDate
 
-  const getNoDateRangeMessage = () => {
-    return `Select a ${usePublicationDate ? "Release" : "Engagement"} Date range in search filters to view results.`
-  }
+  const noDateRangeMessage = `Select ${usePublicationDate ? "a Release" : "an Engagement"} Date range in search filters to view results.`
 
   const displayedRangeLabel = (() => {
     if (!startDate || !endDate) {
-      return getNoDateRangeMessage()
+      return noDateRangeMessage
     }
-    const start = getStartDate(queryParams, usePublicationDate)
-    const end = getEndDate(queryParams, usePublicationDate)
-    return `${start.format(Settings.dateFormats.forms.displayShort.date)} — ${end.format(Settings.dateFormats.forms.displayShort.date)}`
+    return `${startDate.format(Settings.dateFormats.forms.displayShort.date)} — ${endDate.format(Settings.dateFormats.forms.displayShort.date)}`
   })()
 
   const totalReports = graphData.reduce(
@@ -176,13 +169,8 @@ const ReportsAggregatedOverTime = ({
   const barPadding = 0.1
   const hasData = graphData.length > 0
 
-  const rangeStart = getStartDate(queryParams, usePublicationDate)
-  const rangeEnd = getEndDate(queryParams, usePublicationDate)
-  const hasRange = rangeStart && rangeEnd
-
   const canGoNext =
-    hasRange &&
-    (!usePublicationDate || rangeEnd.isBefore(moment().endOf("day")))
+    hasRange && (!usePublicationDate || endDate.isBefore(moment().endOf("day")))
   const canGoPrevious = hasRange
 
   const updateQueryParams = (
@@ -190,7 +178,7 @@ const ReportsAggregatedOverTime = ({
     direction: number = 0
   ) => {
     const newRangeStart = getRangeStart(
-      getStartDate(queryParams, usePublicationDate).add(direction, "year"),
+      startDate.add(direction, "year"),
       newUsePublicationDate
     )
     const newRangeEnd = getRangeEnd(newRangeStart, newUsePublicationDate)
@@ -287,7 +275,7 @@ const ReportsAggregatedOverTime = ({
         </div>
 
         {!hasRange ? (
-          <em>{getNoDateRangeMessage()}</em>
+          <em>{noDateRangeMessage}</em>
         ) : !hasData ? (
           <em>No reports found for the selected range.</em>
         ) : (
