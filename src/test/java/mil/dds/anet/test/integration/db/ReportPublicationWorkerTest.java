@@ -15,6 +15,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
@@ -221,7 +222,7 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
 
   private void testReportPublished(final String uuid, final boolean expectedPlanned) {
     final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
-    final Report updatedReport = reportDao.getByUuid(uuid);
+    final Report updatedReport = reportDao.getByUuid(uuid, Person.SYSTEM_USER);
     assertThat(updatedReport.getState()).isEqualTo(ReportState.PUBLISHED);
     final List<ReportAction> workflow = updatedReport.loadWorkflow(engine.getContext()).join();
     assertThat(workflow).isNotEmpty();

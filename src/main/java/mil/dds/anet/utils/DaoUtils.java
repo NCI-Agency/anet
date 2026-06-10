@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.User;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuthorizationGroupDao;
@@ -307,6 +309,26 @@ public class DaoUtils {
 
     return "(reports.uuid IN (" + authorQuery + ") OR reports.uuid IN ("
         + getAuthorizationOuterQuery("") + memberQuery + " UNION ALL " + communityQuery + "))";
+  }
+
+  public static String getReportsWhereClause() {
+    // Users can see their own reports, other users only ever see non-draft/non-rejected reports,
+    // and approvers also see reports pending their approval.
+    return "((reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+        + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid))"
+        + " OR (reports.state NOT IN (:draftState, :rejectedState))"
+        + " OR (reports.\"approvalStepUuid\" IN ("
+        + " SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN ("
+        + " SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :userUuid))))";
+  }
+
+  public static Map<String, Object> getReportsParamsMap(Person user) {
+    final Map<String, Object> params = new HashMap<>();
+    params.put("isAuthor", true);
+    params.put("userUuid", getUuid(user));
+    params.put("draftState", getEnumId(Report.ReportState.DRAFT));
+    params.put("rejectedState", getEnumId(Report.ReportState.REJECTED));
+    return params;
   }
 
   private static boolean isForPerson(String relatedObjectType) {

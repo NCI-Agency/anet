@@ -11,6 +11,6 @@ public class UuidFetcher<T extends AbstractAnetBean> {
       String uuid) {
     final DataLoaderRegistry dlr = context.get("dataLoaderRegistry");
     final DataLoader<String, T> dl = dlr.getDataLoader(dataLoaderKey.toString());
-    return (uuid == null) ? CompletableFuture.completedFuture(null) : dl.load(uuid);
+    return (uuid == null) ? CompletableFuture.completedFuture(null) : dl.load(uuid, context);
   }
 }

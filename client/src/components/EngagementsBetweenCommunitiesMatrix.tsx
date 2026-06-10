@@ -7,6 +7,7 @@ import classNames from "classnames"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { mapPageDispatchersToProps } from "components/Page"
+import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
@@ -288,12 +289,10 @@ const EngagementsBetweenCommunitiesMatrix = ({
                 {visibleAdvisorEntities.map(advisorEntity => (
                   <WrappedTh key={advisorEntity.relatedObjectUuid}>
                     <div className="d-flex align-items-center gap-2 justify-content-between px-2">
-                      <LinkTo
-                        modelType={advisorEntity.relatedObjectType}
-                        model={{
-                          uuid: advisorEntity.relatedObjectUuid,
-                          ...advisorEntity.relatedObject
-                        }}
+                      <RelatedObjectDisplay
+                        relatedObjectType={advisorEntity.relatedObjectType}
+                        relatedObjectUuid={advisorEntity.relatedObjectUuid}
+                        relatedObject={advisorEntity.relatedObject}
                       />
                       <Tooltip
                         content={
@@ -341,12 +340,14 @@ const EngagementsBetweenCommunitiesMatrix = ({
                     >
                       <WrappedTh>
                         <div className="d-flex align-items-center gap-2 justify-content-between px-2">
-                          <LinkTo
-                            modelType={interlocutorEntity.relatedObjectType}
-                            model={{
-                              uuid: interlocutorEntity.relatedObjectUuid,
-                              ...interlocutorEntity.relatedObject
-                            }}
+                          <RelatedObjectDisplay
+                            relatedObjectType={
+                              interlocutorEntity.relatedObjectType
+                            }
+                            relatedObjectUuid={
+                              interlocutorEntity.relatedObjectUuid
+                            }
+                            relatedObject={interlocutorEntity.relatedObject}
                           />
                           <Tooltip
                             content={

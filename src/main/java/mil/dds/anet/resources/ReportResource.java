@@ -99,7 +99,7 @@ public class ReportResource {
   public static boolean hasPermission(final Person user, final String reportUuid) {
     final AnetObjectEngine anetObjectEngine = ApplicationContextProvider.getEngine();
     final ReportDao reportDao = anetObjectEngine.getReportDao();
-    final Report report = reportDao.getByUuid(reportUuid);
+    final Report report = reportDao.getByUuid(reportUuid, user);
     if (report == null) {
       return false;
     }
@@ -125,8 +125,10 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "report")
-  public Report getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
-    final Report r = reportDao.getByUuid(uuid);
+  public Report getByUuid(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "uuid") String uuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Report r = reportDao.getByUuid(uuid, user);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -245,7 +247,7 @@ public class ReportResource {
   private Report executeReportUpdates(Person editor, Report r, boolean force) {
     // Verify this person has access to edit this report
     // Either they are an author, or an approver for the current step.
-    final Report existing = reportDao.getByUuid(r.getUuid());
+    final Report existing = reportDao.getByUuid(r.getUuid(), editor);
     if (existing == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -416,7 +418,7 @@ public class ReportResource {
   public int submitReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = reportDao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid, user);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -490,7 +492,7 @@ public class ReportResource {
       @GraphQLArgument(name = "comment") Comment comment) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, comment);
-    final Report r = reportDao.getByUuid(reportComment.uuid);
+    final Report r = reportDao.getByUuid(reportComment.uuid, approver);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -540,7 +542,7 @@ public class ReportResource {
       @GraphQLArgument(name = "comment") Comment reason) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, reason);
-    final Report r = reportDao.getByUuid(reportComment.uuid);
+    final Report r = reportDao.getByUuid(reportComment.uuid, approver);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -614,7 +616,7 @@ public class ReportResource {
   public int publishReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = reportDao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid, user);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -649,7 +651,7 @@ public class ReportResource {
     // TODO: Do we need a reason here (like with rejectReport)?
     final Person unpublisher = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(unpublisher);
-    final Report r = reportDao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid, unpublisher);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -693,7 +695,7 @@ public class ReportResource {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't process adding new comment");
     }
-    final Report r = reportDao.getByUuid(reportUuid);
+    final Report r = reportDao.getByUuid(reportUuid, author);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -714,7 +716,7 @@ public class ReportResource {
       @GraphQLArgument(name = "uuid") String reportUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = reportDao.getByUuid(reportUuid);
+    final Report r = reportDao.getByUuid(reportUuid, user);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -733,7 +735,7 @@ public class ReportResource {
   public Integer deleteReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String reportUuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report report = reportDao.getByUuid(reportUuid);
+    final Report report = reportDao.getByUuid(reportUuid, user);
     if (report == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -842,8 +844,9 @@ public class ReportResource {
   public int updateReportAssessments(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "reportUuid") String reportUuid,
       @GraphQLArgument(name = "assessments") List<Assessment> assessments) {
+    final Person user = DaoUtils.getUserFromContext(context);
     // Do some sanity checks
-    final Report r = reportDao.getByUuid(reportUuid);
+    final Report r = reportDao.getByUuid(reportUuid, user);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -875,7 +878,6 @@ public class ReportResource {
     final List<Assessment> existingAssessments = r.loadAssessments(engine.getContext()).join();
 
     // Process the assessments
-    final Person user = DaoUtils.getUserFromContext(context);
     final String authorUuid = DaoUtils.getUuid(user);
     final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
     Utils.updateElementsByUuid(existingAssessments, assessments,

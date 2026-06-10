@@ -137,6 +137,10 @@ class Page {
     await this._open(pathName, uniqueName)
   }
 
+  async getNotFound() {
+    return browser.$(".not-found-text")
+  }
+
   async getAlertSuccess() {
     return browser.$(".alert-success")
   }

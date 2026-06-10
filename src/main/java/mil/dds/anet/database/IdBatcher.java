@@ -17,13 +17,20 @@ public class IdBatcher<T extends AbstractAnetBean> extends AbstractDao {
 
   private final String sql;
   private final String paramName;
+  private final Map<String, Object> paramsMap;
   private final RowMapper<T> mapper;
 
   public IdBatcher(DatabaseHandler databaseHandler, String sql, String paramName,
       RowMapper<T> mapper) {
+    this(databaseHandler, sql, paramName, null, mapper);
+  }
+
+  public IdBatcher(DatabaseHandler databaseHandler, String sql, String paramName,
+      Map<String, Object> paramsMap, RowMapper<T> mapper) {
     super(databaseHandler);
     this.sql = sql;
     this.paramName = paramName;
+    this.paramsMap = paramsMap;
     this.mapper = mapper;
   }
 
@@ -32,8 +39,8 @@ public class IdBatcher<T extends AbstractAnetBean> extends AbstractDao {
     final Handle handle = getDbHandle();
     try {
       final List<String> args = uuids.isEmpty() ? defaultIfEmpty : uuids;
-      return handle.createQuery(sql).bindList(NULL_KEYWORD, paramName, args).map(mapper)
-          .withStream(result -> {
+      return handle.createQuery(sql).bindList(NULL_KEYWORD, paramName, args).bindMap(paramsMap)
+          .map(mapper).withStream(result -> {
             final Map<String, T> map = result.collect(Collectors.toMap(AbstractAnetBean::getUuid, // key
                 obj -> obj)); // value
             return uuids.stream().map(map::get).toList();

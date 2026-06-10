@@ -20,7 +20,7 @@ public class ReportEditedEmail implements AnetEmailAction {
 
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
-    Report r = engine().getReportDao().getByUuid(report.getUuid());
+    Report r = engine().getReportDao().getByUuid(report.getUuid(), Person.SYSTEM_USER);
     if (r == null) {
       return null;
     }
