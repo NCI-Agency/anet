@@ -2,27 +2,28 @@ import { expect } from "chai"
 import moment from "moment"
 import Settings from "../../../platform/node/settings"
 import AdvancedSearch from "../pages/advancedSearch.page"
-import Insights, { PUBLISHED_REPORTS_OVER_TIME } from "../pages/insights.page"
+import Insights, { AGGREGATED_REPORTS_OVER_TIME } from "../pages/insights.page"
 
 const RELEASE_DATE_LABEL = "Release Date"
 const NO_RANGE_MESSAGE =
   "Select a Release Date range in search filters to view results."
-const RANGE_LABEL_SELECTOR = `#${PUBLISHED_REPORTS_OVER_TIME} .d-flex.align-items-center.gap-2 .fw-semibold`
-const GRANULARITY_SELECTOR = `#${PUBLISHED_REPORTS_OVER_TIME} .btn-group`
-const TOTAL_REPORTS_SELECTOR = `//div[@id="${PUBLISHED_REPORTS_OVER_TIME}"]//div[contains(text(),"Total reports:")]`
+const RANGE_LABEL_SELECTOR = '[data-testid="range-label"]'
+const GRANULARITY_SELECTOR = `#${AGGREGATED_REPORTS_OVER_TIME} .btn-group`
+const TOTAL_REPORTS_SELECTOR = `//div[@id="${AGGREGATED_REPORTS_OVER_TIME}"]//div[contains(text(),"Total reports:")]`
 const CHART_ID = "reports_published_over_time"
 const BAR_SELECTOR = `#${CHART_ID} g.bars-group`
 const EXPECTED_PUBLISHED_RANGE = { min: 27, max: 29 }
 const WEEK_PERIOD_KEY = Settings.useISO8601 ? "isoWeek" : "week"
 
-describe("Published reports over time insight", () => {
+describe("Aggregated reports over time insight", () => {
   it("Should show the default release date range in the search summary", async () => {
     await openPublishedReportsInsight()
 
     const rangeLabel = await browser.$(RANGE_LABEL_SELECTOR)
-    expect(await rangeLabel.getText()).to.equal(
-      `Year ${new Date().getFullYear()}`
-    )
+    const expectedRangeLabelText = `${moment()
+      .startOf("year")
+      .format("D MMMM YYYY")} — ${moment().format("D MMMM YYYY")}`
+    expect(await rangeLabel.getText()).to.equal(expectedRangeLabelText)
 
     const totalReportsLabel = await browser.$(TOTAL_REPORTS_SELECTOR)
     await totalReportsLabel.waitForExist()
@@ -121,9 +122,11 @@ describe("Published reports over time insight", () => {
     expect(await searchSummary.getText()).to.not.include(RELEASE_DATE_LABEL)
 
     const rangeLabel = await browser.$(RANGE_LABEL_SELECTOR)
-    expect(await rangeLabel.getText()).to.equal("Release Date range")
+    expect(await rangeLabel.getText()).to.equal(NO_RANGE_MESSAGE)
 
-    const noRangeMessage = await browser.$(`#${PUBLISHED_REPORTS_OVER_TIME} em`)
+    const noRangeMessage = await browser.$(
+      `#${AGGREGATED_REPORTS_OVER_TIME} em`
+    )
     expect(await noRangeMessage.getText()).to.equal(NO_RANGE_MESSAGE)
 
     await Insights.logout()
@@ -131,9 +134,9 @@ describe("Published reports over time insight", () => {
 })
 
 async function openPublishedReportsInsight() {
-  await Insights.open(`/insights/${PUBLISHED_REPORTS_OVER_TIME}`)
+  await Insights.open(`/insights/${AGGREGATED_REPORTS_OVER_TIME}`)
   await (
-    await Insights.getInsightDiv(PUBLISHED_REPORTS_OVER_TIME)
+    await Insights.getInsightDiv(AGGREGATED_REPORTS_OVER_TIME)
   ).waitForExist()
   await (await AdvancedSearch.getAdvancedSearchForm()).waitForExist()
 }
@@ -162,7 +165,7 @@ async function expectBarCountToEqual(expectedCount) {
 
 async function expectLastTableCountWithinRange(range) {
   const rows = await browser.$$(
-    `#${PUBLISHED_REPORTS_OVER_TIME} table tbody tr`
+    `#${AGGREGATED_REPORTS_OVER_TIME} table tbody tr`
   )
   if (!rows.length) {
     throw new Error("Expected report table to have rows")

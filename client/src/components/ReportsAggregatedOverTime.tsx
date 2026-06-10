@@ -12,9 +12,10 @@ import {
 import _escape from "lodash/escape"
 import moment from "moment"
 import { WEEK_PERIOD_FORMAT, WEEK_PERIOD_KEY } from "periodUtils"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { useResizeDetector } from "react-resize-detector"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -24,6 +25,7 @@ const GQL_GET_REPORT_LIST = gql`
         uuid
         state
         releasedAt
+        engagementDate
       }
     }
   }
@@ -35,15 +37,51 @@ const GRANULARITY = {
   WEEK: "week"
 }
 
-// Helper to resolve various date value types to a moment object
-function resolveDateValue(value) {
-  if (value === null || value === undefined) {
-    return null
+enum ReportDate {
+  ENGAGEMENT = "Engagement Date",
+  PUBLICATION = "Publication Date"
+}
+
+function getRangeStart(
+  rangeStart: moment.Moment,
+  usePublicationDate: boolean
+): moment.Moment {
+  const newRangeStart = rangeStart.startOf("year")
+  const startOfYear = moment().startOf("year")
+  if (usePublicationDate && newRangeStart.isAfter(startOfYear)) {
+    return startOfYear
   }
-  if (typeof value === "number") {
-    return moment().add(value, "milliseconds")
+  return newRangeStart
+}
+
+function getRangeEnd(
+  rangeStart: moment.Moment,
+  usePublicationDate: boolean
+): moment.Moment {
+  const rangeEnd = moment(rangeStart).add(1, "year").add(-1, "day").endOf("day")
+  const endOfDay = moment().endOf("day")
+  if (usePublicationDate && rangeEnd.isAfter(endOfDay)) {
+    return endOfDay
   }
-  return moment(value)
+  return rangeEnd
+}
+
+function getDateField(
+  obj,
+  usePublicationDate: boolean,
+  mark: string = ""
+): moment.Moment {
+  const selectedDate =
+    obj?.[`${usePublicationDate ? "releasedAt" : "engagementDate"}${mark}`]
+  return selectedDate ? moment(selectedDate) : null
+}
+
+function getStartDate(queryParams, usePublicationDate: boolean): moment.Moment {
+  return getDateField(queryParams, usePublicationDate, "Start")
+}
+
+function getEndDate(queryParams, usePublicationDate: boolean) {
+  return getDateField(queryParams, usePublicationDate, "End")
 }
 
 interface PublishedReportsOverTimeProps {
@@ -52,29 +90,16 @@ interface PublishedReportsOverTimeProps {
   setQueryParams?: (...args: unknown[]) => unknown
 }
 
-const PublishedReportsOverTime = ({
+const ReportsAggregatedOverTime = ({
   pageDispatchers,
   queryParams,
   setQueryParams
 }: PublishedReportsOverTimeProps) => {
   const [granularity, setGranularity] = useState(GRANULARITY.MONTH)
-  usePageTitle("Reports Published Over Time")
+  const [usePublicationDate, setUsePublicationDate] = useState(true)
+  usePageTitle("Aggregated Reports Over Time")
 
   const { width, ref } = useResizeDetector()
-  const rangeStart = useMemo(
-    () => resolveDateValue(queryParams?.releasedAtStart),
-    [queryParams?.releasedAtStart]
-  )
-  const rangeEnd = useMemo(
-    () => resolveDateValue(queryParams?.releasedAtEnd),
-    [queryParams?.releasedAtEnd]
-  )
-  const todayEnd = moment().endOf("day")
-  const displayRangeEnd =
-    rangeEnd && rangeEnd.isAfter(todayEnd) ? todayEnd : rangeEnd
-  const hasRange = Boolean(
-    rangeStart && displayRangeEnd && rangeStart.isSameOrBefore(displayRangeEnd)
-  )
   const reportQuery = useMemo(
     () => ({
       ...queryParams,
@@ -92,26 +117,29 @@ const PublishedReportsOverTime = ({
     pageDispatchers
   })
   const graphData = useMemo(() => {
-    if (!data || !hasRange) {
+    if (!data) {
       return []
     }
     const reportsList = data.reportList.list || []
     if (!reportsList.length) {
       return []
     }
+    const startDate = getStartDate(queryParams, usePublicationDate)
+    const endDate = getEndDate(queryParams, usePublicationDate)
     const periods =
       granularity === GRANULARITY.MONTH
-        ? buildMonthlyPeriods(rangeStart, displayRangeEnd)
-        : buildWeeklyPeriods(rangeStart, displayRangeEnd)
+        ? buildMonthlyPeriods(startDate, endDate)
+        : buildWeeklyPeriods(startDate, endDate)
     const counts = reportsList.reduce((acc, report) => {
-      if (!report.releasedAt) {
+      const dateField = getDateField(report, usePublicationDate)
+      if (!dateField) {
         return acc
       }
-      const releasedAt = moment(report.releasedAt)
+      const dateValue = moment(dateField)
       const key =
         granularity === GRANULARITY.MONTH
-          ? releasedAt.format("YYYY-MM")
-          : getWeekKey(releasedAt)
+          ? getMonthKey(dateValue)
+          : getWeekKey(dateValue)
       acc[key] = (acc[key] || 0) + 1
       return acc
     }, {})
@@ -119,14 +147,20 @@ const PublishedReportsOverTime = ({
       ...period,
       reportsCount: counts[period.periodKey] || 0
     }))
-  }, [data, displayRangeEnd, granularity, hasRange, rangeStart])
+  }, [data, queryParams, usePublicationDate, granularity])
+  const startDate = getStartDate(queryParams, usePublicationDate)
+  const endDate = getEndDate(queryParams, usePublicationDate)
+  const hasRange = startDate && endDate
 
-  const displayedRangeLabel =
-    hasRange && rangeStart.year() === displayRangeEnd.year()
-      ? `Year ${rangeStart.year()}`
-      : hasRange
-        ? `${rangeStart.format("YYYY")}–${displayRangeEnd.format("YYYY")}`
-        : "Release Date range"
+  const noDateRangeMessage = `Select ${usePublicationDate ? "a Release" : "an Engagement"} Date range in search filters to view results.`
+
+  const displayedRangeLabel = (() => {
+    if (!startDate || !endDate) {
+      return noDateRangeMessage
+    }
+    return `${startDate.format(Settings.dateFormats.forms.displayShort.date)} — ${endDate.format(Settings.dateFormats.forms.displayShort.date)}`
+  })()
+
   const totalReports = graphData.reduce(
     (total, period) => total + period.reportsCount,
     0
@@ -134,62 +168,46 @@ const PublishedReportsOverTime = ({
   const chartWidth = width || 0
   const barPadding = 0.1
   const hasData = graphData.length > 0
-  const rangeStartOfYear = moment(rangeStart).startOf("year")
-  const isCurrentYearClampedRange =
-    hasRange &&
-    rangeStart.isSame(rangeStartOfYear, "day") &&
-    displayRangeEnd.isSame(todayEnd, "day") &&
-    rangeStart.isSame(todayEnd, "year")
-  const isFullYearRange =
-    hasRange &&
-    rangeStart.isSame(rangeStartOfYear, "day") &&
-    displayRangeEnd.isSame(moment(displayRangeEnd).endOf("year"), "day")
-  const getShiftedRange = direction => {
-    if (!hasRange) {
-      return null
+
+  const canGoNext =
+    hasRange && (!usePublicationDate || endDate.isBefore(moment().endOf("day")))
+  const canGoPrevious = hasRange
+
+  const updateQueryParams = (
+    newUsePublicationDate: boolean,
+    direction: number = 0
+  ) => {
+    const newRangeStart = getRangeStart(
+      startDate.add(direction, "year"),
+      newUsePublicationDate
+    )
+    const newRangeEnd = getRangeEnd(newRangeStart, newUsePublicationDate)
+    if (newUsePublicationDate) {
+      setQueryParams({
+        ...Object.without(
+          queryParams,
+          "engagementDateStart",
+          "engagementDateEnd"
+        ),
+        releasedAtStart: newRangeStart.toISOString(),
+        releasedAtEnd: newRangeEnd.toISOString()
+      })
+    } else {
+      setQueryParams({
+        ...Object.without(queryParams, "releasedAtStart", "releasedAtEnd"),
+        engagementDateStart: newRangeStart.toISOString(),
+        engagementDateEnd: newRangeEnd.toISOString()
+      })
     }
-    let nextStart = moment(rangeStart).add(direction, "year")
-    let nextEnd = moment(displayRangeEnd).add(direction, "year")
-    if (direction < 0 && isCurrentYearClampedRange) {
-      nextStart = nextStart.startOf("year")
-      nextEnd = moment(nextStart).endOf("year")
-    } else if (direction > 0 && isFullYearRange) {
-      nextStart = nextStart.startOf("year")
-      if (nextStart.isSame(todayEnd, "year")) {
-        nextEnd = moment(todayEnd)
-      } else {
-        nextEnd = moment(nextStart).endOf("year")
-      }
-    } else if (direction > 0 && nextEnd.isAfter(todayEnd)) {
-      nextEnd = moment(todayEnd)
-    }
-    if (direction > 0 && nextStart.isAfter(todayEnd, "day")) {
-      return null
-    }
-    return { start: nextStart, end: nextEnd }
+    setUsePublicationDate(newUsePublicationDate)
   }
 
-  const canGoNext = Boolean(getShiftedRange(1))
-  const canGoPrevious = Boolean(getShiftedRange(-1))
-  useEffect(() => {
-    if (!rangeEnd || !rangeEnd.isAfter(todayEnd)) {
-      return
-    }
-    setQueryParams({
-      ...queryParams,
-      releasedAtEnd: todayEnd.toISOString()
-    })
-  }, [queryParams, rangeEnd, setQueryParams, todayEnd])
-  const shiftRange = direction => {
-    const shifted = getShiftedRange(direction)
-    if (!shifted) {
-      return
-    }
-    setQueryParams({
-      ...queryParams,
-      releasedAtStart: shifted.start.toISOString(),
-      releasedAtEnd: shifted.end.toISOString()
-    })
+  const shiftRange = (direction: number) => {
+    updateQueryParams(usePublicationDate, direction)
+  }
+
+  const updateUsePublicationDate = (newUsePublicationDate: boolean) => {
+    updateQueryParams(newUsePublicationDate)
   }
 
   if (done) {
@@ -201,6 +219,26 @@ const PublishedReportsOverTime = ({
       <div className="p-3">
         <div className="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
           <div className="d-flex align-items-center gap-2">
+            <div className="fw-semibold">Date to use in the report</div>
+            <select
+              id="report-date-type"
+              style={{ width: "unset" }}
+              disabled={!hasRange}
+              value={
+                usePublicationDate
+                  ? ReportDate.PUBLICATION
+                  : ReportDate.ENGAGEMENT
+              }
+              onChange={e =>
+                updateUsePublicationDate(
+                  e.target.value === ReportDate.PUBLICATION
+                )
+              }
+              className="form-select"
+            >
+              <option value={ReportDate.PUBLICATION}>Publication Date</option>
+              <option value={ReportDate.ENGAGEMENT}>Engagement Date</option>
+            </select>
             <Button
               variant="outline-secondary"
               disabled={!canGoPrevious}
@@ -208,7 +246,9 @@ const PublishedReportsOverTime = ({
             >
               <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} /> previous year
             </Button>
-            <div className="fw-semibold">{displayedRangeLabel}</div>
+            <div className="fw-semibold" data-testid="range-label">
+              {displayedRangeLabel}
+            </div>
             <Button
               variant="outline-secondary"
               disabled={!canGoNext}
@@ -235,9 +275,7 @@ const PublishedReportsOverTime = ({
         </div>
 
         {!hasRange ? (
-          <em>
-            Select a Release Date range in search filters to view results.
-          </em>
+          <em>{noDateRangeMessage}</em>
         ) : !hasData ? (
           <em>No reports found for the selected range.</em>
         ) : (
@@ -285,7 +323,10 @@ const PublishedReportsOverTime = ({
   )
 }
 
-const buildMonthlyPeriods = (rangeStart, rangeEnd) => {
+const buildMonthlyPeriods = (
+  rangeStart: moment.Moment,
+  rangeEnd: moment.Moment
+) => {
   const startOfFirstMonth = moment(rangeStart).startOf("month")
   const startOfLastMonth = moment(rangeEnd).startOf("month")
   const totalMonths = startOfLastMonth.diff(startOfFirstMonth, "months") + 1
@@ -296,9 +337,10 @@ const buildMonthlyPeriods = (rangeStart, rangeEnd) => {
     const isLast = index === totalMonths - 1
     const periodStart = isFirst ? moment(rangeStart) : start
     const periodEnd = isLast ? moment(rangeEnd) : monthEnd
+    const monthLabel = getMonthKey(periodStart)
     return {
-      periodKey: start.format("YYYY-MM"),
-      label: start.format("MMM"),
+      periodKey: monthLabel,
+      label: monthLabel,
       periodRange: `${periodStart.format("MMM D")} - ${periodEnd.format(
         "MMM D"
       )}`
@@ -306,7 +348,10 @@ const buildMonthlyPeriods = (rangeStart, rangeEnd) => {
   })
 }
 
-const buildWeeklyPeriods = (rangeStart, rangeEnd) => {
+const buildWeeklyPeriods = (
+  rangeStart: moment.Moment,
+  rangeEnd: moment.Moment
+) => {
   const startOfRange = moment(rangeStart).startOf(WEEK_PERIOD_KEY)
   const endOfRange = moment(rangeEnd).startOf(WEEK_PERIOD_KEY)
   const totalWeeks = endOfRange.diff(startOfRange, "weeks") + 1
@@ -330,6 +375,7 @@ const buildWeeklyPeriods = (rangeStart, rangeEnd) => {
   })
 }
 
-const getWeekKey = date => date.format(WEEK_PERIOD_FORMAT)
+const getMonthKey = (date: moment.Moment) => date.format("MMM YYYY")
+const getWeekKey = (date: moment.Moment) => date.format(WEEK_PERIOD_FORMAT)
 
-export default PublishedReportsOverTime
+export default ReportsAggregatedOverTime
