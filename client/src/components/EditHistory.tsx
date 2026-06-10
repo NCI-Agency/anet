@@ -182,7 +182,7 @@ const EditHistory = ({
         </Modal.Header>
         <Modal.Body>
           <Formik enableReinitialize initialValues={{ history: finalHistory }}>
-            {({ values, setFieldValue, setValues }) => {
+            {({ values, setValues }) => {
               function removeItemFromHistory(idx) {
                 setValues({
                   history: values.history.filter((_, i) => i !== idx)

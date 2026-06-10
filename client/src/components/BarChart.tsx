@@ -197,6 +197,7 @@ const BarChart = ({
     xProp,
     yProp,
     xLabel,
+    xPadding,
     barClass,
     onBarClick,
     tooltip,

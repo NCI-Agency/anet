@@ -73,7 +73,6 @@ import TaskShow from "pages/tasks/Show"
 import TopTasks from "pages/tasks/Top"
 import { PAGE_URLS } from "pages/util"
 import React from "react"
-import { Navigate } from "react-router"
 import Settings from "settings"
 
 const routes = [

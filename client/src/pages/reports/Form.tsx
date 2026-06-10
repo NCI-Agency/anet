@@ -207,12 +207,6 @@ function getEventMinDate(eventStartDate?: Date) {
     : moment(eventStartDate).startOf("day").toDate()
 }
 
-function getEventMaxDate(eventEndDate?: Date) {
-  return !eventEndDate || Settings?.eventsIncludeStartAndEndTime
-    ? eventEndDate
-    : moment(eventEndDate).endOf("day").toDate()
-}
-
 const ReportForm = ({
   pageDispatchers,
   edit = false,
