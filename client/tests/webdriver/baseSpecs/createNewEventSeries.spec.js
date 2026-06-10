@@ -136,6 +136,8 @@ describe("Create event series page", () => {
         ).isExisting()
       ).to.be.true
 
+      // Click outside the overlay
+      await (await CreateEventSeries.getNameInput()).click()
       await (
         await CreateEventSeries.getAdminOrganizationInput()
       ).waitForDisplayed()

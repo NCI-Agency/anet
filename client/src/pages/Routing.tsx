@@ -328,7 +328,6 @@ const routes = [
         ]
       },
       { path: PAGE_URLS.TOP_TASKS, element: <TopTasks /> },
-      { path: PAGE_URLS.EVENTS, element: <EventsList /> },
       {
         path: PAGE_URLS.INSIGHTS,
         children: [{ path: ":insight", element: <InsightsShow /> }]
@@ -385,6 +384,7 @@ const routes = [
       {
         path: PAGE_URLS.EVENTS,
         children: [
+          { index: true, element: <EventsList /> },
           { path: "mine", element: <MyEvents /> },
           { path: "new", element: <EventNew /> },
           {

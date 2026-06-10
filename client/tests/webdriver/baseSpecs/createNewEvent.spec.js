@@ -141,6 +141,8 @@ describe("Create event page", () => {
       ).to.include(ORG_COMPLETE)
       await (await CreateEvent.getAdminOrgAdvancedSelectFirstItem()).click()
 
+      // Click outside the overlay
+      await (await CreateEvent.getNameInput()).click()
       await CreateEvent.submitForm()
       await CreateEvent.waitForAlertSuccessToLoad()
 
