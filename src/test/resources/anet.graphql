@@ -860,6 +860,7 @@ scalar Map_String_ObjectScalar
 """"""
 type MartImportedReport {
   errors: String
+  historyCount: Int
   person: Person
   receivedAt: Instant
   report: Report
