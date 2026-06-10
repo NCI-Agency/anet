@@ -954,10 +954,6 @@ const PersonForm = ({
     }
   }
 
-  function getNumberOfPositionsText(values) {
-    return pluralize("position", getNumberOfPositions(values))
-  }
-
   function getNumberOfPositions(values) {
     return (values.position?.uuid ? 1 : 0) + values.additionalPositions?.length
   }

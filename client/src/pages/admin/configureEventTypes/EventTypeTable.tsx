@@ -13,7 +13,6 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import RemoveButton from "components/RemoveButton"
 import { deserializeQueryParams } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
