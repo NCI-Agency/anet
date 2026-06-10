@@ -10,9 +10,7 @@ import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuditTrailDao;
-import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.UserDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -49,7 +47,7 @@ public class SecurityUtils {
     Person person = findUser(dao, (String) claims.get(StandardClaimNames.PREFERRED_USERNAME), true);
     if (person == null) {
       // Call synchronized method
-      person = findOrCreateUser(dao, claims);
+      person = findOrPrepareUser(dao, claims);
     }
     return person;
   }
@@ -59,7 +57,7 @@ public class SecurityUtils {
       final boolean activeUser) {
     final List<Person> p = dao.findByDomainUsername(domainUsername, activeUser);
     if (!p.isEmpty()) {
-      final Person existingPerson = p.get(0);
+      final Person existingPerson = p.getFirst();
       logger.trace("found existing user={} by domainUsername={}", existingPerson, domainUsername);
       return existingPerson;
     }
@@ -67,9 +65,9 @@ public class SecurityUtils {
     return null;
   }
 
-  // Synchronized method, so we create/update at most one user in the face of multiple
+  // Synchronized method, so we prepare/update at most one user in the face of multiple
   // simultaneous authentication requests
-  private static synchronized Person findOrCreateUser(final PersonDao dao,
+  private static synchronized Person findOrPrepareUser(final PersonDao dao,
       final Map<String, Object> claims) {
     final String username = (String) claims.get(StandardClaimNames.PREFERRED_USERNAME);
     final Person person = findUser(dao, username, false);
@@ -78,7 +76,7 @@ public class SecurityUtils {
     }
 
     // Not found, first time this user has ever logged in
-    return createPerson(dao, username, (String) claims.get(StandardClaimNames.EMAIL),
+    return preparePerson(username, (String) claims.get(StandardClaimNames.EMAIL),
         Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.FAMILY_NAME)),
         Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.GIVEN_NAME)));
   }
@@ -99,10 +97,10 @@ public class SecurityUtils {
     return person;
   }
 
-  private static Person createPerson(final PersonDao dao, final String username, final String email,
+  private static Person preparePerson(final String username, final String email,
       final String familyName, String givenName) {
     final Person newPerson = new Person();
-    logger.trace("creating new user with domainUsername={} and email={}", username, email);
+    logger.trace("preparing new user with domainUsername={} and email={}", username, email);
     newPerson.setUser(true);
     newPerson.setPendingVerification(true);
     // Copy some data from the authentication token
@@ -113,27 +111,18 @@ public class SecurityUtils {
      * token.getPhoneNumber(), but that requires scope="openid phone" on the authentication request,
      * which is hard to accomplish with current Keycloak code.
      */
-    final Person person = dao.insert(newPerson);
 
+    // Copy some more data from the authentication token
     final User newUser = new User();
-    // Copy some data from the authentication token
     newUser.setDomainUsername(username);
-    newUser.setPersonUuid(person.getUuid());
-    final UserDao userDao = ApplicationContextProvider.getEngine().getUserDao();
-    final User user = userDao.insert(newUser);
-    person.setUsers(List.of(user));
+    newPerson.setUsers(List.of(newUser));
 
     if (!Utils.isEmptyOrNull(email)) {
-      final EmailAddressDao emailAddressDao =
-          ApplicationContextProvider.getEngine().getEmailAddressDao();
       final EmailAddress emailAddress =
           new EmailAddress(Utils.getEmailNetworkForNotifications(), email);
-      emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
-          List.of(emailAddress));
+      newPerson.setEmailAddresses(List.of(emailAddress));
     }
-    final AuditTrailDao auditTrailDao = ApplicationContextProvider.getEngine().getAuditTrailDao();
-    auditTrailDao.logCreate(person, PersonDao.TABLE_NAME, person,
-        "person signed in for the first time");
-    return person;
+
+    return newPerson;
   }
 }

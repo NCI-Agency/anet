@@ -21,6 +21,7 @@ import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -122,6 +123,17 @@ public class DaoUtils {
       return null;
     }
     return user;
+  }
+
+  public static boolean isNewUser(Person user) {
+    return user == null || Utils.isEmptyOrNull(user.getUuid());
+  }
+
+  public static boolean usersHaveMatchingDomainUsername(Person editor, Person subject) {
+    final Set<User> editorUsers = new HashSet<>(editor.getUsers());
+    final Set<User> subjectUsers = new HashSet<>(subject.getUsers());
+    editorUsers.retainAll(subjectUsers);
+    return !editorUsers.isEmpty();
   }
 
   public static Position getPosition(final Person user) {
