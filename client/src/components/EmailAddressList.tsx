@@ -5,9 +5,14 @@ import utils from "utils"
 interface EmailAddressListProps {
   label: string
   emailAddresses?: any[]
+  isLink?: boolean
 }
 
-const EmailAddressList = ({ label, emailAddresses }: EmailAddressListProps) => {
+const EmailAddressList = ({
+  label,
+  emailAddresses,
+  isLink = true
+}: EmailAddressListProps) => {
   if (_get(emailAddresses, "length", 0) === 0) {
     return <em>No {label.toLowerCase()} available</em>
   }
@@ -15,7 +20,9 @@ const EmailAddressList = ({ label, emailAddresses }: EmailAddressListProps) => {
   return (
     <>
       {emailAddresses?.map(ea => (
-        <div key={ea.network}>{utils.createMailtoLink(ea.address)}</div>
+        <div key={ea.network}>
+          {isLink ? utils.createMailtoLink(ea.address) : ea.address}
+        </div>
       ))}
     </>
   )

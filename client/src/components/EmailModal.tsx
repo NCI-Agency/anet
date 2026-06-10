@@ -170,13 +170,14 @@ const ToAnetUsersOverlayRow = (item: any) => (
       <EmailAddressList
         label={Settings.fields.person.emailAddresses.label}
         emailAddresses={item.emailAddresses}
+        isLink={false}
       />
     </td>
     <td>
       <LinkTo modelType="Person" model={item} isLink={false} />
     </td>
     <td>
-      <LinkTo modelType="Position" model={item.position}>
+      <LinkTo modelType="Position" model={item.position} isLink={false}>
         {Position.toString(item.position)}
         {item.position?.code ? `, ${item.position.code}` : ""}
       </LinkTo>
@@ -186,6 +187,7 @@ const ToAnetUsersOverlayRow = (item: any) => (
         modelType="Location"
         model={item.position?.location}
         whenUnspecified=""
+        isLink={false}
       />
     </td>
     <td>
