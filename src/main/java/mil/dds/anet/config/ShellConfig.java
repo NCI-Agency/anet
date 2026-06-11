@@ -11,19 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShellConfig {
 
-  private final CommandParser commandParser;
-  private final CommandRegistry commandRegistry;
-  private final ApplicationContext applicationContext;
-
-  public ShellConfig(CommandParser commandParser, CommandRegistry commandRegistry,
-      ApplicationContext applicationContext) {
-    this.commandParser = commandParser;
-    this.commandRegistry = commandRegistry;
-    this.applicationContext = applicationContext;
-  }
-
   @Bean
-  public ShellRunner shellRunner() {
+  public ShellRunner shellRunner(CommandParser commandParser, CommandRegistry commandRegistry,
+      ApplicationContext applicationContext) {
     return new CustomNonInteractiveShellRunner(commandParser, commandRegistry, applicationContext);
   }
 
