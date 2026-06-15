@@ -1,0 +1,12 @@
+﻿{
+  "mcpServers": {
+    "anet-mcp": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp"
+    },
+    "anet-mcp-ui": {
+      "type": "http",
+      "url": "http://localhost:8001/mcp"
+    }
+  }
+}
