@@ -2084,7 +2084,7 @@ automaticallyInactivateUsers:
 
 chatAssistant:
   enabled: true
-  url: https://127.0.0.1:7002/chat/index.html
+  url: https://localhost:7002/chat/index.html
   # Each entry requires `label` and `prompt`; `icon` and `iconColor` are optional.
   defaultSuggestions:
     - label: Explain page

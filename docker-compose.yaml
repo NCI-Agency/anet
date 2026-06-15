@@ -1,0 +1,57 @@
+services:
+
+  apollo-mcp-config:
+    image: alpine:3.19
+    container_name: anet-apollo-mcp-config
+    restart: "no"
+    environment:
+      ANET_GRAPHQL_TOKEN: ${ANET_GRAPHQL_TOKEN:?must be set in .env}
+      ANET_GRAPHQL_ENDPOINT: ${ANET_GRAPHQL_ENDPOINT:-http://host.docker.internal:8080/graphqlWebService}
+    volumes:
+      - ./apollo-mcp-config.yaml:/in/apollo-mcp-config.yaml:ro
+      - apollo-mcp-rendered:/out
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache gettext >/dev/null
+        envsubst < /in/apollo-mcp-config.yaml > /out/config.yaml
+
+  apollo-mcp:
+    image: ghcr.io/apollographql/apollo-mcp-server:${APOLLO_MCP_TAG:-latest}
+    container_name: anet-apollo-mcp
+    restart: unless-stopped
+    depends_on:
+      apollo-mcp-config:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - apollo-mcp-rendered:/etc/apollo-mcp:ro
+      - ./src/test/resources:/data:ro
+    command:
+      - /etc/apollo-mcp/config.yaml
+
+  mcp-ui:
+    build:
+      context: ./mcp-ui
+      dockerfile: Dockerfile
+    image: anet-mcp-ui:local
+    container_name: anet-mcp-ui
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8001:8001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ANET_GRAPHQL_URL: ${MCP_UI_GRAPHQL_URL:-http://host.docker.internal:8080/graphql}
+      ANET_AGENT_BASE_URL: ${ANET_AGENT_BASE_URL:?must be set in .env}
+      ANET_AGENT_API_KEY: ${ANET_AGENT_API_KEY:?must be set in .env}
+      ANET_AGENT_MODEL: ${ANET_AGENT_MODEL:?must be set in .env}
+      NODE_ENV: production
+      PORT: "8001"
+
+volumes:
+  apollo-mcp-rendered:
