@@ -27,6 +27,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.UserDao;
+import mil.dds.anet.emails.NewUserEmail;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -414,6 +415,10 @@ public class PersonResource {
 
     if (DaoUtils.isNewUser(user)) {
       userDao.updateUsers(p, p.getUsers());
+      if (Boolean.FALSE.equals(automaticallyAllowAllNewUsers)) {
+        // Email admins that a new user has enrolled
+        sendNewUserEmail(p);
+      }
 
       // Log the change
       auditTrailDao.logCreate(user, PersonDao.TABLE_NAME, p);
@@ -502,5 +507,11 @@ public class PersonResource {
     final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
         : String.format("%s at %s", messageBody, supportEmailAddr);
     return errorMessage;
+  }
+
+  private void sendNewUserEmail(Person p) {
+    final NewUserEmail action = new NewUserEmail();
+    action.setPersonUuid(DaoUtils.getUuid(p));
+    dao.sendEmailToAdmins(action);
   }
 }
