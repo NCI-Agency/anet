@@ -36,7 +36,7 @@ String cxfVersion = "4.2.2"
 String jdbi3Version = "3.53.0"
 String poiVersion = "5.5.1"
 String simplejavamailVersion = "8.12.6"
-String springShellVersion = "4.0.2"
+String springShellVersion = "4.0.3"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -145,7 +145,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:3.0.3'
+	implementation 'com.networknt:json-schema-validator:3.0.4'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
