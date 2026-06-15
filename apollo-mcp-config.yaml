@@ -1,6 +1,6 @@
-endpoint: "http://host.docker.internal:8080/graphqlWebService"
+endpoint: "${ANET_GRAPHQL_ENDPOINT}"
 headers:
-  Authorization: "Bearer W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf"
+  Authorization: "Bearer ${ANET_GRAPHQL_TOKEN}"
 logging:
   level: debug
 transport:
