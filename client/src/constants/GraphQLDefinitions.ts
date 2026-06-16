@@ -703,7 +703,8 @@ export const gqlHostMembersForExport = `
         shortName
       }
       ... on Person {
-        name
+        familyName
+        givenName
       }
       ... on Position {
         name
