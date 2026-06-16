@@ -46,7 +46,7 @@ import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrat
 import PreviousPeople from "pages/positions/PreviousPeople"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"

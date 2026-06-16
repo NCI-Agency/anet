@@ -20,7 +20,7 @@ import {
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Position } from "models"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useParams } from "react-router"
 import Settings from "settings"
 import utils from "utils"

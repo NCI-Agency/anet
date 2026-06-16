@@ -7,7 +7,7 @@ import {
 } from "components/Page"
 import React from "react"
 import { Button } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
 
 interface OnboardingNewProps {

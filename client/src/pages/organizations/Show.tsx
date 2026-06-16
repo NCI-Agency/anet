@@ -64,7 +64,7 @@ import {
   Nav,
   Row
 } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"

@@ -5,7 +5,7 @@ import {
 import MartImportedReportTable from "pages/admin/martImporter/MartImportedReportTable"
 import React from "react"
 import { Button, Modal } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 interface ReportHistoryModalProps {
   pageDispatchers?: PageDispatchersPropType

@@ -55,7 +55,7 @@ import useMergeObjects, {
 import { Location, Organization } from "models"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"

@@ -15,7 +15,7 @@ import {
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { Link, useLocation, useMatch } from "react-router"
 import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"

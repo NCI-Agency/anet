@@ -62,7 +62,7 @@ import {
   Row,
   Tooltip
 } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 import { toast } from "react-toastify"
 import COMMUNITIES_ICON from "resources/communities.png"

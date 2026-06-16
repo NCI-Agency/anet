@@ -14,7 +14,7 @@ import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import React, { useState } from "react"
 import { FormSelect, Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import utils from "utils"
 

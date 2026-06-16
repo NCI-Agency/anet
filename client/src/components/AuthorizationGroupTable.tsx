@@ -9,7 +9,7 @@ import { AuthorizationGroup } from "models"
 import pluralize from "pluralize"
 import React from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import utils from "utils"
 

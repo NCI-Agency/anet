@@ -24,7 +24,7 @@ import React, {
   useState
 } from "react"
 import { Button } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import ReactFlow, {
   EdgeProps,
   Handle,

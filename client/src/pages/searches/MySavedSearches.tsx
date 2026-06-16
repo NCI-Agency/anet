@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 import utils from "utils"
 

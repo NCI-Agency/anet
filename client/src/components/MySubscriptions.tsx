@@ -20,7 +20,7 @@ import _get from "lodash/get"
 import moment from "moment"
 import React, { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_MY_SUBSCRIPTIONS = gql`
   query ($subscriptionsQuery: SubscriptionSearchQueryInput) {

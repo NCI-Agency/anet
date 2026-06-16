@@ -10,7 +10,7 @@ import {
 } from "components/Page"
 import { Event, EventSeries } from "models"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useLocation } from "react-router"
 import Settings from "settings"
 import utils from "utils"

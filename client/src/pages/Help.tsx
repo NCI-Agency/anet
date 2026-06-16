@@ -16,7 +16,7 @@ import PollingContext from "components/PollingContext"
 import RichTextEditor from "components/RichTextEditor"
 import { Position } from "models"
 import React, { useContext } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
 
 const GQL_GET_SUPERUSERS_AND_ADMINS = gql`

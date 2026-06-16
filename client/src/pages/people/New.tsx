@@ -8,7 +8,7 @@ import {
 } from "components/Page"
 import { Person } from "models"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import PersonForm from "./Form"
 

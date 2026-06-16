@@ -19,7 +19,7 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_USERS_PENDING_VERIFICATION = gql`
   query ($personQuery: PersonSearchQueryInput) {

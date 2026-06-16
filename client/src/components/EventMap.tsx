@@ -11,7 +11,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import React, { useEffect } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {

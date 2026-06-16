@@ -17,7 +17,7 @@ import _isEqual from "lodash/isEqual"
 import { Location } from "models"
 import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_LOCATION_LIST = gql`
   query ($locationQuery: LocationSearchQueryInput) {

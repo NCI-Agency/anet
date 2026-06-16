@@ -29,7 +29,7 @@ import moment from "moment/moment"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useState } from "react"
 import { Col, FormGroup, Row } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useLocation, useParams } from "react-router"
 import Settings from "settings"
 

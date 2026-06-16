@@ -25,7 +25,7 @@ import { Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
 import { Alert, Col, Container, Row } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { Link, useLocation } from "react-router"
 import Settings from "settings"
 

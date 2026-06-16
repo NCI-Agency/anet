@@ -14,7 +14,7 @@ import {
   usePageTitle
 } from "components/Page"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
   query {

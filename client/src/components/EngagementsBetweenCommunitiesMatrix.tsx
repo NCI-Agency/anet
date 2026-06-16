@@ -15,7 +15,7 @@ import AuthorizationGroup from "models/AuthorizationGroup"
 import moment from "moment/moment"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 
 const GET_ENGAGEMENTS_BETWEEN_COMMUNITIES = gql`

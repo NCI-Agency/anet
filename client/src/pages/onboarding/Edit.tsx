@@ -18,7 +18,7 @@ import { Person } from "models"
 import moment from "moment"
 import PersonForm from "pages/people/Form"
 import React, { useContext } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_SELF = gql`
   query {

@@ -10,7 +10,7 @@ import _isEqual from "lodash/isEqual"
 import { Event } from "models"
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 import SEARCH_ICON from "resources/search-alt.png"
 
