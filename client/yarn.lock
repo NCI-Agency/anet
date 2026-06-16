@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.1.6":
-  version: 4.1.6
-  resolution: "@apollo/client@npm:4.1.6"
+"@apollo/client@npm:4.2.3":
+  version: 4.2.3
+  resolution: "@apollo/client@npm:4.2.3"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -24,7 +24,7 @@ __metadata:
     optimism: "npm:^0.18.0"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    graphql: ^16.0.0
+    graphql: ^16.0.0 || ^17.0.0
     graphql-ws: ^5.5.5 || ^6.0.3
     react: ^17.0.0 || ^18.0.0 || >=19.0.0-rc
     react-dom: ^17.0.0 || ^18.0.0 || >=19.0.0-rc
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/ff152317932cb0ba46423161d388d1a2bc0bbc6c8ec6e2e85e915bb2ec22f461effa6fd2bbc8b754babd75ac8b52843f1e3ddf8e501cbe1d9b857e4df2f2f2df
+  checksum: 10c0/5aa020c6f859e4d97c417f0d61fc71f1c998e88667c7aacb85693b37bbcf56553d7fa122715c4f6604cb614eac513b3d2da3cbabd29e6428622f0862f13f5c7f
   languageName: node
   linkType: hard
 
@@ -2437,42 +2437,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/plugin-doc-explorer@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "@graphiql/plugin-doc-explorer@npm:0.4.1"
+"@graphiql/plugin-doc-explorer@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@graphiql/plugin-doc-explorer@npm:0.4.2"
   dependencies:
     "@headlessui/react": "npm:^2.2"
+    react-compiler-runtime: "npm:19.1.0-rc.1"
     zustand: "npm:^5"
   peerDependencies:
     "@graphiql/react": ^0.37.0
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^18 || ^19
-    react-compiler-runtime: 19.1.0-rc.1
     react-dom: ^18 || ^19
-  checksum: 10c0/7dc4b027025c78d06603d4d6de72c60acedec48813bddc77eaf1dd749e201f5b4ad2fbbadf5f899bb2e656a372027848743d31b57a8148ab49a46a8b23642ada
+  checksum: 10c0/eecd198b37bf575c55e7bab3cadaa488cc4abf35324a1a3ea78385a36f21e2be8e1164ef3736ee9ecf48c62004e9c573d2988b1bf6ef18b24f09f81ec36489ce
   languageName: node
   linkType: hard
 
-"@graphiql/plugin-history@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "@graphiql/plugin-history@npm:0.4.1"
+"@graphiql/plugin-history@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@graphiql/plugin-history@npm:0.4.2"
   dependencies:
-    "@graphiql/toolkit": "npm:^0.11.3"
+    "@graphiql/toolkit": "npm:^0.12.0"
+    react-compiler-runtime: "npm:19.1.0-rc.1"
     zustand: "npm:^5"
   peerDependencies:
     "@graphiql/react": ^0.37.0
     react: ^18 || ^19
-    react-compiler-runtime: 19.1.0-rc.1
     react-dom: ^18 || ^19
-  checksum: 10c0/8c72936be6bd8ea7db69cf338634b741061bfb4eb0f20ae09261864049e50bac0889e92ad53b31ae4a4c88402614ecb6c9ec6f401d43a1989519f8e959c7571e
+  checksum: 10c0/9a5d915be7f6f7b790581b10ce07d6c31df1ceb8b208930b95cd8a2f514da5bc6092a37b37f7dfd2675baadc8cc64d0202c63abfd7e99b55f66bfffcb13220bf
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.37.3":
-  version: 0.37.3
-  resolution: "@graphiql/react@npm:0.37.3"
+"@graphiql/react@npm:^0.37.7":
+  version: 0.37.7
+  resolution: "@graphiql/react@npm:0.37.7"
   dependencies:
-    "@graphiql/toolkit": "npm:^0.11.3"
+    "@graphiql/toolkit": "npm:^0.12.1"
     "@radix-ui/react-dialog": "npm:^1.1"
     "@radix-ui/react-dropdown-menu": "npm:^2.1"
     "@radix-ui/react-tooltip": "npm:^1.2"
@@ -2480,26 +2480,26 @@ __metadata:
     clsx: "npm:^1.2.1"
     framer-motion: "npm:^12.12"
     get-value: "npm:^3.0.1"
-    graphql-language-service: "npm:^5.5.0"
+    graphql-language-service: "npm:^5.5.2"
     jsonc-parser: "npm:^3.3.1"
     markdown-it: "npm:^14.1.0"
     monaco-editor: "npm:0.52.2"
-    monaco-graphql: "npm:^1.7.3"
+    monaco-graphql: "npm:^1.8.0"
     prettier: "npm:^3.5.3"
+    react-compiler-runtime: "npm:19.1.0-rc.1"
     set-value: "npm:^4.1.0"
     zustand: "npm:^5"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^18 || ^19
-    react-compiler-runtime: 19.1.0-rc.1
     react-dom: ^18 || ^19
-  checksum: 10c0/48b48d977805e23238bcd49370e57890b80ffd6b6889f28c7031303b35a5da66019e7330b6e46c666088e3d13eaee44f477ebfd0f407ac9c11af953c47cb1bec
+  checksum: 10c0/6b5e542967362e6ac42a2a05f5db2352659096027a608b101ea60ab397a593030a74f42ec7873a4bdc74ad11ba30c03328faf084c7831fd6f2f765647039ce5e
   languageName: node
   linkType: hard
 
-"@graphiql/toolkit@npm:^0.11.3":
-  version: 0.11.3
-  resolution: "@graphiql/toolkit@npm:0.11.3"
+"@graphiql/toolkit@npm:^0.12.0, @graphiql/toolkit@npm:^0.12.1":
+  version: 0.12.1
+  resolution: "@graphiql/toolkit@npm:0.12.1"
   dependencies:
     "@n1ru4l/push-pull-async-iterable-iterator": "npm:^3.1.0"
     meros: "npm:^1.1.4"
@@ -2509,7 +2509,7 @@ __metadata:
   peerDependenciesMeta:
     graphql-ws:
       optional: true
-  checksum: 10c0/dda0801680076586d41344bea5d4d42f0a0fe68913ed1c0916331004552e9aa7090986d73d29e358b814441425895c48fe20a448c775102e883c2ed5a5b904e2
+  checksum: 10c0/2368eef64bf59bd7150b89c0626209d143ad821c11b2e599d1b9fa6065151a3d2f29f09b6e0c494899091e24c002c3753e5849b2ad2235fbdc2e91ccfc65ba5f
   languageName: node
   linkType: hard
 
@@ -7155,6 +7155,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"agent-base@npm:6":
+  version: 6.0.2
+  resolution: "agent-base@npm:6.0.2"
+  dependencies:
+    debug: "npm:4"
+  checksum: 10c0/dc4f757e40b5f3e3d674bc9beb4f1048f4ee83af189bae39be99f57bf1f48dde166a8b0a5342a84b5944ee8e6ed1e5a9d801858f4ad44764e84957122fe46261
+  languageName: node
+  linkType: hard
+
 "agent-base@npm:^7.1.0, agent-base@npm:^7.1.2":
   version: 7.1.4
   resolution: "agent-base@npm:7.1.4"
@@ -7231,7 +7240,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.1.6"
+    "@apollo/client": "npm:4.2.3"
     "@babel/core": "npm:7.29.7"
     "@babel/eslint-parser": "npm:7.29.7"
     "@babel/plugin-proposal-decorators": "npm:7.29.7"
@@ -7291,7 +7300,7 @@ __metadata:
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.5.0"
     ava: "npm:7.0.0"
-    axios: "npm:1.16.0"
+    axios: "npm:1.17.0"
     babel-jest: "npm:30.4.1"
     babel-loader: "npm:10.1.1"
     bootstrap: "npm:5.3.8"
@@ -7327,10 +7336,10 @@ __metadata:
     express-session: "npm:1.19.0"
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.9"
-    geographiclib-mgrs: "npm:1.0.4"
+    geographiclib-mgrs: "npm:1.0.5"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:5.2.2"
-    graphql: "npm:16.13.2"
+    graphiql: "npm:5.2.4"
+    graphql: "npm:16.14.2"
     handlebars: "npm:4.7.9"
     handlebars-loader: "npm:1.7.3"
     html-to-image: "npm:1.11.11"
@@ -7343,7 +7352,7 @@ __metadata:
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.4.0"
     keycloak-connect: "npm:26.1.1"
-    keycloak-js: "npm:26.2.3"
+    keycloak-js: "npm:26.2.4"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.4.0"
@@ -7353,7 +7362,7 @@ __metadata:
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.18.1"
     milsymbol: "npm:3.0.4"
-    ml-matrix: "npm:6.12.1"
+    ml-matrix: "npm:6.12.2"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.6.2"
     pluralize: "npm:8.0.0"
@@ -7367,15 +7376,15 @@ __metadata:
     react-dnd-html5-backend: "npm:16.0.1"
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
-    react-joyride: "npm:3.0.2"
-    react-mosaic-component: "npm:6.1.1"
+    react-joyride: "npm:3.1.0"
+    react-mosaic-component: "npm:6.2.0"
     react-redux: "npm:9.2.0"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
     react-router: "npm:7.17.0"
     react-scroll: "npm:1.9.3"
     react-test-renderer: "npm:18.3.1"
-    react-toastify: "npm:11.0.5"
+    react-toastify: "npm:11.1.0"
     react-ultimate-pagination: "npm:1.3.2"
     reactflow: "npm:11.11.4"
     reduce-css-calc: "npm:2.1.8"
@@ -7886,14 +7895,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.16.0":
-  version: 1.16.0
-  resolution: "axios@npm:1.16.0"
+"axios@npm:1.17.0":
+  version: 1.17.0
+  resolution: "axios@npm:1.17.0"
   dependencies:
     follow-redirects: "npm:^1.16.0"
     form-data: "npm:^4.0.5"
+    https-proxy-agent: "npm:^5.0.1"
     proxy-from-env: "npm:^2.1.0"
-  checksum: 10c0/1c91a5221b77b76072026b4cc95ecdf38f7c3e33e63423abec09a85e6e9a12279637dcc9ac2ba1fc333e0c447fb3b0f46d7965acb5d7cea02d188e9c6d425c0b
+  checksum: 10c0/c4fa19ff3a3a63bde48beec03ad816b133b9a6385cccffffe172577ab18c6a70e299280d57f12c80c867fe25df41f92cb91d3a8258708a6d2be3e9e085f92650
   languageName: node
   linkType: hard
 
@@ -11994,10 +12004,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"geographiclib-mgrs@npm:1.0.4":
-  version: 1.0.4
-  resolution: "geographiclib-mgrs@npm:1.0.4"
-  checksum: 10c0/74e064828bd55acc7fcc0a7f4264a83a45954ea79e6cfdcabb2107874a7e159a1fb29eb8529162c5e4d17ad1c373f4022e5ed0413569aeec7a96eb8446f0a9eb
+"geographiclib-mgrs@npm:1.0.5":
+  version: 1.0.5
+  resolution: "geographiclib-mgrs@npm:1.0.5"
+  checksum: 10c0/13de71d65f30ec905a7c4ccc9a6820633668f09f486dc009a0fb333ebff30a551336d21b9ed79e9a5616b6ec0b768444cdcca6851f2076f5f069a53c5828b074
   languageName: node
   linkType: hard
 
@@ -12315,19 +12325,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:5.2.2":
-  version: 5.2.2
-  resolution: "graphiql@npm:5.2.2"
+"graphiql@npm:5.2.4":
+  version: 5.2.4
+  resolution: "graphiql@npm:5.2.4"
   dependencies:
-    "@graphiql/plugin-doc-explorer": "npm:^0.4.1"
-    "@graphiql/plugin-history": "npm:^0.4.1"
-    "@graphiql/react": "npm:^0.37.3"
+    "@graphiql/plugin-doc-explorer": "npm:^0.4.2"
+    "@graphiql/plugin-history": "npm:^0.4.2"
+    "@graphiql/react": "npm:^0.37.7"
     react-compiler-runtime: "npm:19.1.0-rc.1"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/2f0cd35ef1b9e1fd6b7aa2929fac5be20da4b140915338af518f746771241edba07172e8be1960ee283b5be75abc8471dc7144cf47cb0835b5e70f9ac6620462
+  checksum: 10c0/b4e0b532c3ebc38f4df1dc1781209702d1b2d8cf5b6e7fdee2d91e17d83a0f6864644334067ce9998643eb6b7d9f85e33859ef319e57a5c7f5806f403568c54b
   languageName: node
   linkType: hard
 
@@ -12356,9 +12366,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-language-service@npm:^5.5.0":
-  version: 5.5.0
-  resolution: "graphql-language-service@npm:5.5.0"
+"graphql-language-service@npm:^5.5.1, graphql-language-service@npm:^5.5.2":
+  version: 5.5.2
+  resolution: "graphql-language-service@npm:5.5.2"
   dependencies:
     debounce-promise: "npm:^3.1.2"
     nullthrows: "npm:^1.0.0"
@@ -12367,7 +12377,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
   bin:
     graphql: dist/temp-bin.js
-  checksum: 10c0/edac04ef2ebc33cb6dcb07bbc6ae8c92ad952e3f830782e5dd89cb57f3ee93ed50f750c8c2c4636e1e9841eb6c4429892abbf22a85c34f900d0e6f0c74554047
+  checksum: 10c0/fe340823b90f418fa466c0dedfdf0070ab658530bfbad3386aefa58998d272c6971d93e95ecd0ea44a36df2edc3471273b2b467a1526c8f62da1df400cc172e1
   languageName: node
   linkType: hard
 
@@ -12401,10 +12411,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:16.13.2":
-  version: 16.13.2
-  resolution: "graphql@npm:16.13.2"
-  checksum: 10c0/64e822a0a0e4398781e4bc9765b88d370c08261498b517add4b878038ef7be2005b6b394a79a5102b9379d57052f60bc7f23fec8f39808d101984a74772ebd9d
+"graphql@npm:16.14.2":
+  version: 16.14.2
+  resolution: "graphql@npm:16.14.2"
+  checksum: 10c0/a95a96961eaff55cc9fe9d31fae6f33499ac988b972d07ea5085024cb1333f515b902f376e7393a5489aa82200a8aff3eb96580e4d1b69d702ed19b6eb1ce97a
   languageName: node
   linkType: hard
 
@@ -12777,6 +12787,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"https-proxy-agent@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "https-proxy-agent@npm:5.0.1"
+  dependencies:
+    agent-base: "npm:6"
+    debug: "npm:4"
+  checksum: 10c0/6dd639f03434003577c62b27cafdb864784ef19b2de430d8ae2a1d45e31c4fd60719e5637b44db1a88a046934307da7089e03d6089ec3ddacc1189d8de8897d1
+  languageName: node
+  linkType: hard
+
 "https-proxy-agent@npm:^7.0.1, https-proxy-agent@npm:^7.0.5, https-proxy-agent@npm:^7.0.6":
   version: 7.0.6
   resolution: "https-proxy-agent@npm:7.0.6"
@@ -13066,10 +13086,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-any-array@npm:^2.0.0, is-any-array@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "is-any-array@npm:2.0.1"
-  checksum: 10c0/f9807458a51e63ca1ac27fd6f3a3ace8200f077094e00d9b05b24cfbc9d5594d586d6ecf3416271f26939d5cb93fc52ca869cb5744e77318c3f53ec70b08d61f
+"is-any-array@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "is-any-array@npm:3.0.0"
+  checksum: 10c0/dce09df1dd5688053282dd9929052aaba45529f5122a87afe6d66cfe3a96b69dece808f2abb7509614cc36e78db2b744cef0aea1bee6f84e6b7e4b04ccf8747e
   languageName: node
   linkType: hard
 
@@ -14447,10 +14467,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.2.3":
-  version: 26.2.3
-  resolution: "keycloak-js@npm:26.2.3"
-  checksum: 10c0/9c08a24c9667d31e0a599f19fc8f475499fe212fc399103a1d22c4a3aa87f5a9f43f62ed9a88929ae52ef9626ba695f02d97ab736d238668834e3f9a9de2096d
+"keycloak-js@npm:26.2.4":
+  version: 26.2.4
+  resolution: "keycloak-js@npm:26.2.4"
+  checksum: 10c0/ad1f3e7c07b6b84fd805129e21aefe94b32e48ecdde1c586294720712c0971ff4c49613c025476d30dbff22e5d61a4fc4d294050d5f11e1ecc0646bef2f02311
   languageName: node
   linkType: hard
 
@@ -14779,7 +14799,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.18.1, lodash@npm:^4.0.0, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21":
+"lodash@npm:4.18.1, lodash@npm:^4.0.0, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
@@ -15327,42 +15347,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ml-array-max@npm:^1.2.4":
-  version: 1.2.4
-  resolution: "ml-array-max@npm:1.2.4"
+"ml-array-max@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ml-array-max@npm:2.0.0"
   dependencies:
-    is-any-array: "npm:^2.0.0"
-  checksum: 10c0/05eacc44ccc182f6d191bc7cd233c97b55ebd695e423f0f07e2358831af7d7a2f64e2698fee4e1edc9bbcd962b8df2141f52b5403219bc2432a77b2bab8e25df
+    is-any-array: "npm:^3.0.0"
+  checksum: 10c0/1d8ab7af4c2b0525e52786a99ecfd025e784170ec264c8482013911b986d8eb0e3cdf7d7a36174e3187189ebd761140133bccfa8033317b3579266282e18f9ca
   languageName: node
   linkType: hard
 
-"ml-array-min@npm:^1.2.3":
-  version: 1.2.3
-  resolution: "ml-array-min@npm:1.2.3"
+"ml-array-min@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ml-array-min@npm:2.0.0"
   dependencies:
-    is-any-array: "npm:^2.0.0"
-  checksum: 10c0/ba7aef2fd1bfe9f1937efa96242147c0ab30e5af4f22364b419a47f8c194b3c16b96b024fd6562eaddbf2d8648fcda3f54d3c2f394ec58beb756b9ed71c81593
+    is-any-array: "npm:^3.0.0"
+  checksum: 10c0/651d1a45a846e35daec080cc666ef71be1b9cf15cca5a3a995b4c2edcf4c77d9b473e704d2efe6a71f216fa9f1e44ab47f0aa12b1e7aeb3a0a6f0b4ae86956a0
   languageName: node
   linkType: hard
 
-"ml-array-rescale@npm:^1.3.7":
-  version: 1.3.7
-  resolution: "ml-array-rescale@npm:1.3.7"
+"ml-array-rescale@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ml-array-rescale@npm:2.0.0"
   dependencies:
-    is-any-array: "npm:^2.0.0"
-    ml-array-max: "npm:^1.2.4"
-    ml-array-min: "npm:^1.2.3"
-  checksum: 10c0/2b8fca33c38bee3c957e5e2f178d7f109d61acc2add924cc8a4a0eac30dfa2d0974642f25f2b4e46e82f9ac90de275268aca382bd644dac2960a83b349c7e706
+    is-any-array: "npm:^3.0.0"
+    ml-array-max: "npm:^2.0.0"
+    ml-array-min: "npm:^2.0.0"
+  checksum: 10c0/81b1f6befafcdcf2ff8db3b7b60055c1f0ae2e1b69ba216dd5cc184f5437ac89c03a8463dd3cdea4552b53a480a0c6cc40cf1681e9bd2d94e253184ca3539590
   languageName: node
   linkType: hard
 
-"ml-matrix@npm:6.12.1":
-  version: 6.12.1
-  resolution: "ml-matrix@npm:6.12.1"
+"ml-matrix@npm:6.12.2":
+  version: 6.12.2
+  resolution: "ml-matrix@npm:6.12.2"
   dependencies:
-    is-any-array: "npm:^2.0.1"
-    ml-array-rescale: "npm:^1.3.7"
-  checksum: 10c0/1e7a382a9abf099f6650a01056f09072f95bba15f566c1c9d78b208ebef5ba4cd4498d5aeef4a1014e71e059a5101a31fc2d5e3260f812b55b3d610bbd3d5484
+    is-any-array: "npm:^3.0.0"
+    ml-array-rescale: "npm:^2.0.0"
+  checksum: 10c0/5837a95cb6e8dc5e163e435614d757d97fd0e049f369081a5a8d5c472cb4e78a608368615fd3d87ee6b2ac05fdfd9fa41ffa1886a8f180a45a949fc62801b8c3
   languageName: node
   linkType: hard
 
@@ -15427,17 +15447,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-graphql@npm:^1.7.3":
-  version: 1.7.3
-  resolution: "monaco-graphql@npm:1.7.3"
+"monaco-graphql@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "monaco-graphql@npm:1.8.0"
   dependencies:
-    graphql-language-service: "npm:^5.5.0"
+    graphql-language-service: "npm:^5.5.1"
     picomatch-browser: "npm:^2.2.6"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     monaco-editor: ">= 0.20.0 < 0.53"
     prettier: ^2.8.0 || ^3.0.0
-  checksum: 10c0/8cf88abbebc989202d99707fc7592e7306cda9a43ecdb74ef486cbd57efb888578f52b134a2ca0fe3a81f9ca884c06f947ff6cbc5db8694b10874a85b3ea47cd
+  checksum: 10c0/a2bbeb48b7e9819a78c8546817d1f676690cacfa267646ff1fbfde7786c60148f4e3a7b7b6bc71a4ce6e3d9541dac5948dda76fa664aa60c49982fa1994a2ad0
   languageName: node
   linkType: hard
 
@@ -16982,9 +17002,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-joyride@npm:3.0.2":
-  version: 3.0.2
-  resolution: "react-joyride@npm:3.0.2"
+"react-joyride@npm:3.1.0":
+  version: 3.1.0
+  resolution: "react-joyride@npm:3.1.0"
   dependencies:
     "@fastify/deepmerge": "npm:^3.2.1"
     "@floating-ui/react-dom": "npm:^2.1.8"
@@ -16999,7 +17019,7 @@ __metadata:
   peerDependencies:
     react: 16.8 - 19
     react-dom: 16.8 - 19
-  checksum: 10c0/6440204fa4d820d9b79c48026227a9dd41f7c3537b2201cd9a5384dd744345d2931e442ae976bb9329532b3477e7f9eec4d6e9c01e0056171c852c6880c5ebdc
+  checksum: 10c0/de5bc0c76479e4f0ba7a7929c7362a0853fb87992e9bc107062839002c72bf866d3161f62bbf968f820c66842f34f7a747da62198c7583a937fff4419ea2e94e
   languageName: node
   linkType: hard
 
@@ -17010,13 +17030,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-mosaic-component@npm:6.1.1":
-  version: 6.1.1
-  resolution: "react-mosaic-component@npm:6.1.1"
+"react-mosaic-component@npm:6.2.0":
+  version: 6.2.0
+  resolution: "react-mosaic-component@npm:6.2.0"
   dependencies:
     classnames: "npm:^2.3.2"
     immutability-helper: "npm:^3.1.1"
-    lodash: "npm:^4.17.21"
+    lodash: "npm:^4.18.1"
     prop-types: "npm:^15.8.1"
     rdndmb-html5-to-touch: "npm:^8.0.0"
     react-dnd: "npm:^16.0.1"
@@ -17026,7 +17046,7 @@ __metadata:
     uuid: "npm:^9.0.0"
   peerDependencies:
     react: ">=16"
-  checksum: 10c0/31a31b64f2b49f758127e64eb6e3a700d1d05bb5b5ef538b6394a4bd6f3c53f80d9d3cb67e87ea559ed99ab8ed3a423d60ad1ba19ca52a1c82013e1641272d99
+  checksum: 10c0/e54fa1b0695371216b981216c3f18ff77273771b9084927a5842a10194ddccbe1fe6807a12366c2db794cc094f05ac0ae914f63aba12b12605dfda7529f87548
   languageName: node
   linkType: hard
 
@@ -17194,15 +17214,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:11.0.5":
-  version: 11.0.5
-  resolution: "react-toastify@npm:11.0.5"
+"react-toastify@npm:11.1.0":
+  version: 11.1.0
+  resolution: "react-toastify@npm:11.1.0"
   dependencies:
     clsx: "npm:^2.1.1"
   peerDependencies:
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/50f5b81323ebb1957b2efd0963fac24aa1407155d16ab756ffd6d0f42f8af17e796b3958a9fce13e9d1b945d6c3a5a9ebf13529478474d8a2af4bf1dd0db67d2
+  checksum: 10c0/b621b8272bb9287ec19914b773d91c2f7741eedba253f2986150716d30c82ff069ba9780a7ab4cbb511175b3aeb6e35f003aef3f04742d77df79fb8f4c1c3c98
   languageName: node
   linkType: hard
 
