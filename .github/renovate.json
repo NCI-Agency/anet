@@ -80,6 +80,7 @@
     {
       "matchPackageNames": [
         "html-to-image",
+        "react-redux",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
         "io.leangen.graphql:graphql-spqr-spring-boot-starter"
