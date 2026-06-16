@@ -1599,12 +1599,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:6.15.0, @blueprintjs/core@npm:^6.15.0":
-  version: 6.15.0
-  resolution: "@blueprintjs/core@npm:6.15.0"
+"@blueprintjs/core@npm:6.16.0, @blueprintjs/core@npm:^6.16.0":
+  version: 6.16.0
+  resolution: "@blueprintjs/core@npm:6.16.0"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/icons": "npm:^6.10.0"
+    "@blueprintjs/icons": "npm:^6.11.0"
     "@floating-ui/react": "npm:^0.27.13"
     "@popperjs/core": "npm:^2.11.8"
     classnames: "npm:^2.3.1"
@@ -1613,26 +1613,26 @@ __metadata:
     react-transition-group: "npm:^4.4.5"
     tslib: "npm:~2.6.2"
   peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
+    "@types/react": 18 || 19
+    react: 18 || 19
+    react-dom: 18 || 19
   peerDependenciesMeta:
     "@types/react":
       optional: true
   bin:
     upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
     upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10c0/f55c325d9eb5c4e8498bfaaeb1e0a2fd5c12c761e3d662a6698d32b94919b3c35fbdb5d38637cbaf692b54aef4b884474de5da733b33b0c965252da99ddec20f
+  checksum: 10c0/5a55fa5637d8def84bc7db04d00291898e6ef776b3941f7518a2a2fbc8dd7da46486addbd54ad108462d83ccc9a79983a0ba87730af7ca3e3fcd9763674b83da
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime@npm:6.1.1":
-  version: 6.1.1
-  resolution: "@blueprintjs/datetime@npm:6.1.1"
+"@blueprintjs/datetime@npm:6.2.0":
+  version: 6.2.0
+  resolution: "@blueprintjs/datetime@npm:6.2.0"
   dependencies:
-    "@blueprintjs/core": "npm:^6.15.0"
-    "@blueprintjs/icons": "npm:^6.10.0"
-    "@blueprintjs/select": "npm:^6.2.1"
+    "@blueprintjs/core": "npm:^6.16.0"
+    "@blueprintjs/icons": "npm:^6.11.0"
+    "@blueprintjs/select": "npm:^6.3.0"
     classnames: "npm:^2.3.1"
     date-fns: "npm:^2.28.0"
     date-fns-tz: "npm:^2.0.0"
@@ -1640,51 +1640,51 @@ __metadata:
     react-innertext: "npm:^1.1.5"
     tslib: "npm:~2.6.2"
   peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
+    "@types/react": 18 || 19
+    react: 18 || 19
+    react-dom: 18 || 19
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/b0f7429d6f24c6ed49437213c0dd64f88a1da9dd6ed2c0525c292a4dda250d330e88d53ee845f6bc3f74eac844588735ca53dd5d6405d381902875945499c6b5
+  checksum: 10c0/c4210ab02fc56a9d427d2929018dc96fa913e80784d8e9d343ef1e7909cf9514e11b6e693f20a5750e220f9c48c934b0eff207163a1626231926c6180f922f33
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^6.10.0":
-  version: 6.10.0
-  resolution: "@blueprintjs/icons@npm:6.10.0"
+"@blueprintjs/icons@npm:^6.11.0":
+  version: 6.11.0
+  resolution: "@blueprintjs/icons@npm:6.11.0"
   dependencies:
     change-case: "npm:^4.1.2"
     classnames: "npm:^2.3.1"
     tslib: "npm:~2.6.2"
   peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
+    "@types/react": 18 || 19
+    react: 18 || 19
+    react-dom: 18 || 19
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/1111739e69a1ca4273c988d75236e9f2e3cf5b297bda90a74568fcb8edf39eae71dad57ae5d892b303dff28f93e5bb17f575670c1a30245ccb8a458480c60484
+  checksum: 10c0/192f1f3b6465f3c76eed1ea8192255e98fd32a0da6645419934478c5966441f31a1760e14c707f0124cdd70f8076b04d9efb9ad46c9ab1682702e17ed42ee11b
   languageName: node
   linkType: hard
 
-"@blueprintjs/select@npm:^6.2.1":
-  version: 6.2.1
-  resolution: "@blueprintjs/select@npm:6.2.1"
+"@blueprintjs/select@npm:^6.3.0":
+  version: 6.3.0
+  resolution: "@blueprintjs/select@npm:6.3.0"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/core": "npm:^6.15.0"
-    "@blueprintjs/icons": "npm:^6.10.0"
+    "@blueprintjs/core": "npm:^6.16.0"
+    "@blueprintjs/icons": "npm:^6.11.0"
     classnames: "npm:^2.3.1"
     tslib: "npm:~2.6.2"
   peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
+    "@types/react": 18 || 19
+    react: 18 || 19
+    react-dom: 18 || 19
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/8d9bd1b70ea96bf4b3daabe2aae4a8f85e72c6e539a2c06df2a24f82e06d2b85359826bdd64f6fa8ce0b5af727dda9b1324526194a0fe87b3a1ce27bd3c96f31
+  checksum: 10c0/a5281ec67c439757c7596cc9eab5a87328c116fae0af5904eb7bfd04d43fc5d1da6d0bdaa4cd89bfbb80b8ffd0b8b89fd5a058d267909e847699ba9b88550cf5
   languageName: node
   linkType: hard
 
@@ -7256,8 +7256,8 @@ __metadata:
     "@babel/preset-react": "npm:7.29.7"
     "@babel/register": "npm:7.29.7"
     "@babel/runtime": "npm:7.29.7"
-    "@blueprintjs/core": "npm:6.15.0"
-    "@blueprintjs/datetime": "npm:6.1.1"
+    "@blueprintjs/core": "npm:6.16.0"
+    "@blueprintjs/datetime": "npm:6.2.0"
     "@colors/colors": "npm:1.6.0"
     "@cyclonedx/yarn-plugin-cyclonedx": "npm:3.3.1"
     "@emotion/react": "npm:11.14.0"
