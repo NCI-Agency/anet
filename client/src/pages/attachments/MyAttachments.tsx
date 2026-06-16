@@ -16,7 +16,7 @@ import {
   usePageTitle
 } from "components/Page"
 import React, { useContext, useState } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_ATTACHMENT_LIST = gql`
   query ($attachmentQuery: AttachmentSearchQueryInput) {

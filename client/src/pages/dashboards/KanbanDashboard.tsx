@@ -15,7 +15,7 @@ import {
 } from "components/Page"
 import { LAST_MONTH } from "dateUtils"
 import React, { useEffect, useState } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useParams } from "react-router"
 import Settings from "settings"
 

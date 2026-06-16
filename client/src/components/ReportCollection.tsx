@@ -16,7 +16,7 @@ import { RECURRENCE_TYPE, useResponsiveNumberOfPeriods } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 
 export const FORMAT_CALENDAR = "calendar"

@@ -8,7 +8,7 @@ import {
 } from "components/Page"
 import { EventSeries } from "models"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import EventSeriesForm from "./Form"
 

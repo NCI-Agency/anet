@@ -2,7 +2,7 @@ import { setSearchQuery } from "actions"
 import { deserializeQueryParams } from "components/SearchFilters"
 import React from "react"
 import { Button } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 
 interface FindObjectsButtonProps {

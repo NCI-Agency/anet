@@ -19,7 +19,7 @@ import { Task } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_TASK_LIST = gql`

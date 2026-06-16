@@ -11,7 +11,7 @@ import {
 import { GraphiQL } from "graphiql"
 import "graphiql/setup-workers/webpack"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 async function fetch(params) {
   const { variables, query } = params

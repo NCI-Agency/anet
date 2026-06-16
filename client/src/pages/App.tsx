@@ -23,7 +23,7 @@ import {
 } from "notificationsUtils"
 import routes from "pages/Routing"
 import React, { useMemo } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { createBrowserRouter, RouterProvider } from "react-router"
 import { ToastContainer } from "react-toastify"
 import { D3Tooltip } from "../components/D3Tooltip"

@@ -19,7 +19,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Position } from "models"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_PERSON_LIST = gql`

@@ -18,7 +18,7 @@ import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 import AddNewEventTypeModal from "./AddNewEventTypeModal"
 

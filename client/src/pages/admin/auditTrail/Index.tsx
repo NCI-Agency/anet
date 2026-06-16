@@ -26,7 +26,7 @@ import { Person } from "models"
 import moment from "moment"
 import React, { useState } from "react"
 import { FormSelect, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 

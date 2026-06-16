@@ -22,7 +22,7 @@ import { PositionRole } from "models/Position"
 import moment from "moment"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 
 const ROLES = Object.keys(PositionRole)

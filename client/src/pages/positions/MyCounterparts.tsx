@@ -9,7 +9,7 @@ import {
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import React, { useContext } from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 interface MyCounterpartsProps {
   pageDispatchers?: PageDispatchersPropType

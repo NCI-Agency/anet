@@ -9,7 +9,7 @@ import {
 } from "components/Page"
 import React from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`

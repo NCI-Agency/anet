@@ -11,7 +11,7 @@ import {
 } from "components/Page"
 import { Organization, Position } from "models"
 import React from "react"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import { useLocation } from "react-router"
 import Settings from "settings"
 import utils from "utils"

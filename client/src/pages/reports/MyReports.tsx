@@ -14,7 +14,7 @@ import SubNav from "components/SubNav"
 import { Report } from "models"
 import React, { useContext } from "react"
 import { Nav } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 
 interface MyReportsProps {
   pageDispatchers?: PageDispatchersPropType

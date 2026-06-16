@@ -30,7 +30,7 @@ import {
   Table,
   Tooltip
 } from "react-bootstrap"
-import { connect } from "react-redux"
+import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import * as yup from "yup"
 
