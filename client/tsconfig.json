@@ -14,17 +14,17 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "sourceMap": true,
     "jsx": "react-jsx",
     "noEmit": true,
-    "baseUrl": ".",
+    "rootDir": ".",
     "paths": {
       "*": [
-        "src/*",
-        "platform/node/*"
+        "./src/*",
+        "./platform/node/*"
       ]
     }
   },
