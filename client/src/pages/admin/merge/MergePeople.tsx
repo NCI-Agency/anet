@@ -171,6 +171,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                     MERGE_SIDES.LEFT
                   )
                 )
+                setSideUsedForHistory(MERGE_SIDES.LEFT)
               },
               MERGE_SIDES.LEFT,
               mergeState,
@@ -201,6 +202,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                     MERGE_SIDES.RIGHT
                   )
                 )
+                setSideUsedForHistory(MERGE_SIDES.RIGHT)
               },
               MERGE_SIDES.RIGHT,
               mergeState,
