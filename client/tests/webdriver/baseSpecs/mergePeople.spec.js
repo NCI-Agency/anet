@@ -83,6 +83,8 @@ const EXAMPLE_PEOPLE = {
     ],
     biography: "Andrew is the EF 1 Manager",
     notes: ["A really nice person to work with"],
+    perUuid: "1a557db0-5af5-4ea3-b926-28b5f2e88bf7",
+    posUuid: "38274eea-3438-40f7-8f1e-6529fd4f6191",
     colourOptions: "",
     numberField: "",
     birthday: "",
@@ -501,6 +503,9 @@ describe("Merge people who are both non-users", () => {
         await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
+    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
+      EXAMPLE_PEOPLE.validLeft.previousPositions
+    )
 
     await (await MergePeople.getSelectButton("left", "Email addresses")).click()
     await MergePeople.waitForColumnToChange(
@@ -523,18 +528,6 @@ describe("Merge people who are both non-users", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.phone)
-
-    await (await MergePeople.getSelectButton("left", "Email addresses")).click()
-    await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.email,
-      "mid",
-      "Email addresses"
-    )
-    expect(
-      await (
-        await MergePeople.getColumnContent("mid", "Email addresses")
-      ).getText()
-    ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
     await (await MergePeople.getSelectButton("left", "Rank")).click()
     await MergePeople.waitForColumnToChange(
@@ -565,13 +558,6 @@ describe("Merge people who are both non-users", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.biography)
-
-    await (
-      await MergePeople.getSelectButton("left", "Primary Position")
-    ).click()
-    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
-      EXAMPLE_PEOPLE.validLeft.previousPositions
-    )
 
     if (hasCustomFields) {
       await (await MergePeople.getSelectButton("left", "Number field")).click()
@@ -617,6 +603,33 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(true)
   })
 
+  it("Should have correctly set the primary position of the merged person from the left", async () => {
+    await (await MergePeople.getPrimaryPosition()).waitForExist()
+    await (await MergePeople.getPrimaryPosition()).waitForDisplayed()
+    expect(await (await MergePeople.getPrimaryPosition()).getText()).to.eq(
+      EXAMPLE_PEOPLE.validLeft.position
+    )
+  })
+
+  it("Should have correctly set the position history of the merged person from the left", async () => {
+    expect(await MergePeople.getPreviousPrimaryPositions()).to.eql(
+      EXAMPLE_PEOPLE.validLeft.previousPositions
+    )
+  })
+
+  it("Should have correctly set the current assigned person of the position of the merged person from the left", async () => {
+    await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validLeft.posUuid}`)
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergePeople.getUnoccupiedPositionPersonMessage()
+      ).isExisting()
+    ).to.be.false
+    expect(
+      await (await MergePeople.getPositionCurrentPersonName()).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.fullName)
+  })
+
   it("Should have deleted the loser person", async () => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
     await (await MergePeople.getErrorTitle()).waitForExist()
@@ -629,9 +642,13 @@ describe("Merge people who are both non-users", () => {
     await MergePeople.openPage(
       `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
     )
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (await MergePeople.getPositionCurrentPersonName()).isExisting()
+    ).to.be.false
     expect(
       await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
-    ).to.equal("Chief of Merge People Test 2 is currently empty.")
+    ).to.equal(`${EXAMPLE_PEOPLE.validRight.position} is currently empty.`)
   })
 })
 
@@ -957,11 +974,49 @@ describe("Merge user with non-user", () => {
     )
   })
 
+  it("Should have correctly set the primary position of the merged person from the right", async () => {
+    await (await MergePeople.getPrimaryPosition()).waitForExist()
+    await (await MergePeople.getPrimaryPosition()).waitForDisplayed()
+    expect(await (await MergePeople.getPrimaryPosition()).getText()).to.eq(
+      EXAMPLE_PEOPLE.userRight.position
+    )
+  })
+
+  it("Should have correctly set the position history of the merged person from the right", async () => {
+    expect(await MergePeople.getPreviousPrimaryPositions()).to.eql(
+      EXAMPLE_PEOPLE.userRight.previousPositions
+    )
+  })
+
+  it("Should have correctly set the current assigned person of the position of the merged person from the right", async () => {
+    await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.userRight.posUuid}`)
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergePeople.getUnoccupiedPositionPersonMessage()
+      ).isExisting()
+    ).to.be.false
+    expect(
+      await (await MergePeople.getPositionCurrentPersonName()).getText()
+    ).to.equal(EXAMPLE_PEOPLE.userRight.fullName)
+  })
+
   it("Should have deleted the loser person", async () => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
     await (await MergePeople.getErrorTitle()).waitForExist()
     expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validLeft.perUuid} not found.`
     )
+  })
+
+  it("Should have removed the loser from its position and position history", async () => {
+    await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validLeft.posUuid}`)
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (await MergePeople.getPositionCurrentPersonName()).isExisting()
+    ).to.be.false
+    expect(
+      await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
+    ).to.equal(`${EXAMPLE_PEOPLE.validLeft.position} is currently empty.`)
   })
 })

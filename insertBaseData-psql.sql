@@ -307,7 +307,7 @@ WHERE uuid='178dfbba-f15a-400b-9135-6ff800246be0';
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, "superuserType", role, status, "currentPersonUuid", "locationUuid", "createdAt", "updatedAt") VALUES
   (uuid_generate_v4(), 'ANET Administrator', 3, NULL, 0, 0, NULL, 'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1 Manager', 2, 0, 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('38274eea-3438-40f7-8f1e-6529fd4f6191', 'EF 1 Manager', 2, 0, 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor A', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor B', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor C', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
