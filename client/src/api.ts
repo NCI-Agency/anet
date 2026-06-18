@@ -69,7 +69,12 @@ const API = {
       { query: query.loc.source.body, variables },
       accept,
       output
-    ).then(response => response.blob())
+    ).then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`)
+      }
+      return response.blob()
+    })
   },
 
   /**
