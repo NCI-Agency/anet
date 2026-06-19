@@ -90,20 +90,24 @@ class ShowPerson extends Page {
   }
 
   async linkSelectedAttachments() {
-    const button = await browser.$('//button[text()="Link selected"]')
+    const button = await browser.$(
+      '//button[text()="Link selected attachments"]'
+    )
     await button.waitForEnabled()
     await button.click()
   }
 
   async waitForLinkToComplete() {
-    const button = await browser.$('//button[text()="Link selected"]')
+    const button = await browser.$(
+      '//button[text()="Link selected attachments"]'
+    )
     await browser.waitUntil(
       async () => {
         const text = await button.getText()
         const countExists = await browser
           .$(".attachment-link-count")
           .isExisting()
-        return text === "Link selected" && !countExists
+        return text === "Link selected attachments" && !countExists
       },
       { timeout: 15000, timeoutMsg: "Expected link action to complete" }
     )
