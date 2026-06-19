@@ -137,7 +137,7 @@
     "formik": "2.4.9",
     "geographiclib-mgrs": "1.0.5",
     "graphiql": "5.2.4",
-    "graphql": "16.14.2",
+    "graphql": "17.0.1",
     "html-to-image": "1.11.11",
     "jsonpath-plus": "10.4.0",
     "keycloak-js": "26.2.4",
