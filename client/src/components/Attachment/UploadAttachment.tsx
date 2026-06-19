@@ -430,7 +430,7 @@ const UploadAttachment = ({
             onClick={handleLinkAttachments}
             disabled={isLinking || linkSelection.length === 0}
           >
-            {isLinking ? "Linking..." : "Link selected"}
+            {isLinking ? "Linking..." : "Link selected attachments"}
           </Button>
           {linkSelection.length > 0 && (
             <Tooltip content={selectedSummary} position="top">
