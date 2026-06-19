@@ -40,14 +40,9 @@ vi .env   # set ANET_GRAPHQL_TOKEN and ANET_AGENT_API_KEY
 # 2. Build mcp-ui locally and start the stack:
 docker compose up -d --build
 
-# 3. Verify both containers are healthy:
+# 3. Verify both containers are running:
 docker compose ps
-curl -sS http://127.0.0.1:8000/health   # Apollo MCP
-curl -sS http://127.0.0.1:8001/         # mcp-ui  (returns 404 unless you hit /mcp)
 ```
-
-If Apollo MCP exits immediately, check `docker compose logs apollo-mcp-config` —
-the renderer sidecar logs every env-var substitution failure.
 
 ---
 
@@ -81,8 +76,8 @@ What it does:
   survive future drops.
 - `daemon-reload`, `enable`, `start`.
 
-Chat UI: `http://<host>:7002/chat/index.html`. Tail logs with
-`journalctl -u assistantservice -f`.
+Chat UI: `https://localhost:7002/chat/index.html`. Tail logs with
+`journalctl -u assistantservice -f -n 400`.
 
 Re-run the script any time — it's idempotent. New drop? Unpack to a fresh dir
 and re-run with that path; the overlay preserves your customizations.
@@ -106,6 +101,10 @@ docker compose logs -f apollo-mcp
 
 # Stop everything:
 docker compose down
+
+# Start and stop the Assistant Service
+sudo systemctl start assistantservice
+sudo systemctl stop assistantservice
 ```
 
 ---
