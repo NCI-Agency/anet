@@ -535,11 +535,12 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Given name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.givenName)
 
+    // Pick position data from the right!
     await (
-      await MergePeople.getSelectButton("left", "Primary Position")
+      await MergePeople.getSelectButton("right", "Primary Position")
     ).click()
     await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.position,
+      EXAMPLE_PEOPLE.validRight.position,
       "mid",
       "Primary Position"
     )
@@ -547,9 +548,9 @@ describe("Merge people who are both non-users", () => {
       await (
         await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
-    ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
+    ).to.equal(EXAMPLE_PEOPLE.validRight.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
-      EXAMPLE_PEOPLE.validLeft.previousPositions
+      EXAMPLE_PEOPLE.validRight.previousPositions
     )
 
     await (await MergePeople.getSelectButton("left", "Email addresses")).click()
@@ -648,31 +649,33 @@ describe("Merge people who are both non-users", () => {
     ).to.eq(true)
   })
 
-  it("Should have correctly set the primary position of the merged person from the left", async () => {
+  it("Should have correctly set the primary position of the merged person from the right", async () => {
     await (await MergePeople.getPrimaryPosition()).waitForExist()
     await (await MergePeople.getPrimaryPosition()).waitForDisplayed()
     expect(await (await MergePeople.getPrimaryPosition()).getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.position
+      EXAMPLE_PEOPLE.validRight.position
     )
   })
 
-  it("Should have correctly set the additional positions of the merged person from the left", async () => {
+  it("Should have correctly set the additional positions of the merged person from the right", async () => {
     expect(await MergePeople.getAdditionalPositions()).to.eql(
-      EXAMPLE_PEOPLE.validLeft.additionalPositions
+      EXAMPLE_PEOPLE.validRight.additionalPositions
     )
   })
 
-  it("Should have correctly set the position history of the merged person from the left", async () => {
+  it("Should have correctly set the position history of the merged person from the right", async () => {
     expect(await MergePeople.getPreviousPositionsElements(true)).to.eql(
-      EXAMPLE_PEOPLE.validLeft.previousPrimaryPositions
+      EXAMPLE_PEOPLE.validRight.previousPrimaryPositions
     )
     expect(await MergePeople.getPreviousPositionsElements(false)).to.eql(
-      EXAMPLE_PEOPLE.validLeft.previousAdditionalPositions
+      EXAMPLE_PEOPLE.validRight.previousAdditionalPositions
     )
   })
 
-  it("Should have correctly set the current assigned person of the primary position of the merged person from the left", async () => {
-    await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validLeft.posUuid}`)
+  it("Should have correctly set the current assigned person of the primary position of the merged person from the right", async () => {
+    await MergePeople.openPage(
+      `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
+    )
     // eslint-disable-next-line no-unused-expressions
     expect(
       await (
@@ -684,8 +687,8 @@ describe("Merge people who are both non-users", () => {
     ).to.equal(EXAMPLE_PEOPLE.validLeft.fullName)
   })
 
-  it("Should have correctly set the current assigned person of the additional positions of the merged person from the left", async () => {
-    for (const addPosUuid of EXAMPLE_PEOPLE.validLeft.addPosUuids) {
+  it("Should have correctly set the current assigned person of the additional positions of the merged person from the right", async () => {
+    for (const addPosUuid of EXAMPLE_PEOPLE.validRight.addPosUuids) {
       await MergePeople.openPage(`/positions/${addPosUuid}`)
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -708,22 +711,20 @@ describe("Merge people who are both non-users", () => {
   })
 
   it("Should have removed the loser from their primary position and history", async () => {
-    await MergePeople.openPage(
-      `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
-    )
+    await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validLeft.posUuid}`)
     // eslint-disable-next-line no-unused-expressions
     expect(
       await (await MergePeople.getPositionCurrentPersonName()).isExisting()
     ).to.be.false
     expect(
       await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
-    ).to.equal(`${EXAMPLE_PEOPLE.validRight.position} is currently empty.`)
+    ).to.equal(`${EXAMPLE_PEOPLE.validLeft.position} is currently empty.`)
   })
 
   it("Should have removed the loser from their additional positions and history", async () => {
-    for (let i = 0; i < EXAMPLE_PEOPLE.validRight.addPosUuids.length; i++) {
+    for (let i = 0; i < EXAMPLE_PEOPLE.validLeft.addPosUuids.length; i++) {
       await MergePeople.openPage(
-        `/positions/${EXAMPLE_PEOPLE.validRight.addPosUuids[i]}`
+        `/positions/${EXAMPLE_PEOPLE.validLeft.addPosUuids[i]}`
       )
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -732,7 +733,7 @@ describe("Merge people who are both non-users", () => {
       expect(
         await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
       ).to.equal(
-        `${EXAMPLE_PEOPLE.validRight.additionalPositions[i]} is currently empty.`
+        `${EXAMPLE_PEOPLE.validLeft.additionalPositions[i]} is currently empty.`
       )
     }
   })
@@ -892,9 +893,9 @@ describe("Merge user with non-user", () => {
       await (
         await MergePeople.getColumnContent("mid", "Primary Position")
       ).getText()
-    ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
+    ).to.eq(EXAMPLE_PEOPLE.validRight.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
-      EXAMPLE_PEOPLE.validLeft.previousPositions
+      EXAMPLE_PEOPLE.validRight.previousPositions
     )
     expect(
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
@@ -1120,20 +1121,22 @@ describe("Merge user with non-user", () => {
   })
 
   it("Should have removed the loser from their primary position and history", async () => {
-    await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validLeft.posUuid}`)
+    await MergePeople.openPage(
+      `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
+    )
     // eslint-disable-next-line no-unused-expressions
     expect(
       await (await MergePeople.getPositionCurrentPersonName()).isExisting()
     ).to.be.false
     expect(
       await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
-    ).to.equal(`${EXAMPLE_PEOPLE.validLeft.position} is currently empty.`)
+    ).to.equal(`${EXAMPLE_PEOPLE.validRight.position} is currently empty.`)
   })
 
   it("Should have removed the loser from their additional positions and history", async () => {
-    for (let i = 0; i < EXAMPLE_PEOPLE.validLeft.addPosUuids.length; i++) {
+    for (let i = 0; i < EXAMPLE_PEOPLE.validRight.addPosUuids.length; i++) {
       await MergePeople.openPage(
-        `/positions/${EXAMPLE_PEOPLE.validLeft.addPosUuids[i]}`
+        `/positions/${EXAMPLE_PEOPLE.validRight.addPosUuids[i]}`
       )
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -1142,7 +1145,7 @@ describe("Merge user with non-user", () => {
       expect(
         await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
       ).to.equal(
-        `${EXAMPLE_PEOPLE.validLeft.additionalPositions[i]} is currently empty.`
+        `${EXAMPLE_PEOPLE.validRight.additionalPositions[i]} is currently empty.`
       )
     }
   })
