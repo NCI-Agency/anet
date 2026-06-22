@@ -1,6 +1,7 @@
 type SearchInputArgs = {
   placeholder?: string
   defaultQuery?: string
+  autoSubmit?: boolean
   businessObject?: unknown
 }
 
@@ -75,6 +76,7 @@ function normalizeArgs(args: unknown): SearchInputArgs {
     placeholder: typeof r.placeholder === "string" ? r.placeholder : undefined,
     defaultQuery:
       typeof r.defaultQuery === "string" ? r.defaultQuery : undefined,
+    autoSubmit: typeof r.autoSubmit === "boolean" ? r.autoSubmit : undefined,
     businessObject: r.businessObject
   }
 }
@@ -127,13 +129,26 @@ export function createReportSearchInputUI(
     if (parsed.placeholder) {
       el.textarea.placeholder = parsed.placeholder
     }
-    if (parsed.defaultQuery && !el.textarea.value) {
+    const hadValue = el.textarea.value.length > 0
+    if (parsed.defaultQuery && !hadValue) {
       el.textarea.value = parsed.defaultQuery
     }
     el.statusEl.textContent = ""
     el.searchBtn.disabled = false
 
-    setTimeout(() => el.textarea.focus(), 0)
+    // Auto-submit when the LLM passed a clean defaultQuery — saves the user
+    // a click. Skip if the textarea already had content, or if the caller
+    // explicitly opted out.
+    const shouldAutoSubmit =
+      Boolean(parsed.defaultQuery) &&
+      !hadValue &&
+      parsed.autoSubmit !== false
+
+    if (shouldAutoSubmit) {
+      setTimeout(() => void handleSubmit(), 0)
+    } else {
+      setTimeout(() => el.textarea.focus(), 0)
+    }
   }
 
   return { render }
