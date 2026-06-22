@@ -17,7 +17,20 @@ const inputSchema: ZodTypeAny = z
     defaultQuery: z
       .string()
       .optional()
-      .describe("Pre-filled query, e.g. inferred from earlier chat."),
+      .describe(
+        "Search terms extracted from the user's chat message. Drop filler ('find me', " +
+          "'show me', 'search for', 'where they meet'); keep person names, organisations, " +
+          "topics, locations, and date ranges. Example: user types 'find reports where " +
+          "Zack and John meet' -> set defaultQuery to 'Zack John'. When provided, the " +
+          "search UI will auto-submit this query unless autoSubmit is explicitly false."
+      ),
+    autoSubmit: z
+      .boolean()
+      .optional()
+      .describe(
+        "If true (default when defaultQuery is set), the search UI auto-submits defaultQuery " +
+          "the moment it renders. Set to false to pre-fill but wait for the user to click Search."
+      ),
     businessObject: z
       .record(z.unknown())
       .optional()
@@ -61,6 +74,8 @@ export function registerReportSearchInputTool(server: McpServer) {
           typeof safe.placeholder === "string" ? safe.placeholder : null,
         defaultQuery:
           typeof safe.defaultQuery === "string" ? safe.defaultQuery : null,
+        autoSubmit:
+          typeof safe.autoSubmit === "boolean" ? safe.autoSubmit : undefined,
         businessObject: safe.businessObject ?? null
       }
 
