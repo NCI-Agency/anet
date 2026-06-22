@@ -53,6 +53,15 @@ class MergePeople extends Page {
     return browser.$("#position a.position-name")
   }
 
+  async getAdditionalPositions() {
+    const additionalPositions = await browser.$$(
+      "#additionalPositions a.position-name"
+    )
+    return additionalPositions.map(
+      async additionalPosition => await additionalPosition.getText()
+    )
+  }
+
   async getPositionCurrentPersonName() {
     return browser.$("h4.assigned-person-name")
   }
@@ -101,12 +110,12 @@ class MergePeople extends Page {
     }))
   }
 
-  async getPreviousPrimaryPositions() {
+  async getPreviousPositionsElements(primary) {
     const previousPrimaryPositionsElements = await browser.$$(
-      "table#previous-positions tbody tr"
+      `${primary ? "#fg-prevPositions" : "#fg-prevAdditionalPositions"} table#previous-positions tbody tr`
     )
     return await previousPrimaryPositionsElements.map(async elem => ({
-      name: `Primary\n${await (await elem.$$("td"))[0].getText()}`,
+      name: `${await (await elem.$$("td"))[0].getText()}`,
       date: await (await elem.$$("td"))[1].getText()
     }))
   }
