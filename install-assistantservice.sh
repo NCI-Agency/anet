@@ -6,7 +6,7 @@
 # Skips the optional Qdrant / MinIO services.
 #
 # Usage:
-#   sudo -E ./install-assistantservice.sh [SRC_DIR]
+#   sudo ./install-assistantservice.sh [SRC_DIR]
 #
 # SRC_DIR  Path to the unpacked AssistantService drop. Defaults to
 #          ./assistant-service relative to the script.
@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-[ "$(id -u)" -eq 0 ] || { echo "Run as root: sudo -E $0 [SRC_DIR]" >&2; exit 1; }
+[ "$(id -u)" -eq 0 ] || { echo "Run as root: sudo $0 [SRC_DIR]" >&2; exit 1; }
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 SRC_DIR="${1:-${REPO_ROOT}/assistant-service}"
