@@ -21,8 +21,9 @@ systemd unit and config stay the same.
 - Docker Engine 20.10+ (or Podman with `podman-docker`) and `docker compose` v2.
 - ANET running locally with both `/graphql` (user-bearer) and `/graphqlWebService`
   (service-account) endpoints reachable on port 8080.
-- A **Web Service Access Token** configured in ANET — Apollo MCP authenticates
-  with this token. See ANET's `anet.yml` for how to generate one.
+- A **Web Service Access Token** generated in ANET — Apollo MCP authenticates
+  with this token. Generate one as an admin via the ANET Admin UI under
+  "Web service access tokens".
 - Outbound network access to `ghcr.io` (for the Apollo MCP vendor image).
 
 ---
@@ -53,13 +54,19 @@ unattended via `install-assistantservice.sh` at the repo root — no prompts,
 all values pulled from `.env` and `assistant-service-config/`.
 
 ```sh
-# 1. Download and unpack the drop somewhere (Azure DevOps drop-linux artifact):
+# 1. Download the drop (Azure DevOps drop-linux artifact), then create the dir
+#    and unpack into it:
+mkdir -p /tmp/assistant-service-drop
 tar -xzf assistantservice-linux-x64-*.tar.gz -C /tmp/assistant-service-drop
 
 # 2. Ensure .env has ANET_AGENT_API_KEY (the DataScience-proxy key — already
-#    required by mcp-ui; AssistantService reuses it).
+#    required by mcp-ui; AssistantService reuses it). The installer sources
+#    .env from the repo root automatically, so plain `sudo` is fine — no -E.
 # 3. Run the installer; pass the unpacked dir as the first arg:
-sudo -E ./install-assistantservice.sh /tmp/assistant-service-drop
+sudo ./install-assistantservice.sh /tmp/assistant-service-drop
+
+# 4. Clean up the unpacked drop once the install finishes:
+rm -rf /tmp/assistant-service-drop
 ```
 
 What it does:
@@ -76,7 +83,7 @@ What it does:
   survive future drops.
 - `daemon-reload`, `enable`, `start`.
 
-Chat UI: `https://localhost:7002/chat/index.html`. Tail logs with
+Chat UI: <https://localhost:7002/chat/index.html>. Tail logs with
 `journalctl -u assistantservice -f -n 400`.
 
 Re-run the script any time — it's idempotent. New drop? Unpack to a fresh dir
