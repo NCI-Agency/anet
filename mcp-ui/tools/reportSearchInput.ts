@@ -56,10 +56,6 @@ export function registerReportSearchInputTool(server: McpServer) {
       }
     },
     async (args?: Record<string, unknown>) => {
-      console.log(
-        "[anet_report_search_input] CALLED args=" +
-          JSON.stringify(args).slice(0, 500)
-      )
       const safe = args ?? {}
       const payload = {
         toolName: "anet_report_search_input",

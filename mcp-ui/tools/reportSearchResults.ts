@@ -7,6 +7,11 @@ const RESOURCE_URI = "ui://anet-mcp-ui/app"
 const DEFAULT_LIMIT = 10
 const MAX_LIMIT = 200
 
+const LOG_VERBOSE = process.env.MCP_LOG_VERBOSE === "true"
+const logVerbose = (...args: unknown[]) => {
+  if (LOG_VERBOSE) console.log(...args)
+}
+
 const inputSchema: ZodTypeAny = z
   .object({
     toolName: z
@@ -296,7 +301,7 @@ async function gqlRequest<T>(
 
   if (!response.ok) {
     const body = await response.text().catch(() => "")
-    console.log(
+    console.error(
       `[anet_report_search_results] HTTP ${response.status} body=${body.slice(0, 500)}`
     )
     throw new Error(
@@ -309,7 +314,7 @@ async function gqlRequest<T>(
     errors?: Array<{ message?: string }>
   }
   if (json.errors && json.errors.length > 0) {
-    console.log("[anet_report_search_results] GraphQL errors:", json.errors)
+    console.error("[anet_report_search_results] GraphQL errors:", json.errors)
     const message = json.errors.map(e => e.message ?? "(no message)").join("; ")
     throw new Error(`ANET GraphQL error: ${message}`)
   }
@@ -489,18 +494,18 @@ async function parseQuery(query: string): Promise<ParsedQuery> {
     const parsed = sanitizeParsed(JSON.parse(json))
 
     if (Object.keys(parsed).length === 0) {
-      console.log(
+      logVerbose(
         `[anet_report_search_results] parser returned empty; falling back to text=${JSON.stringify(trimmed)}`
       )
       return { text: trimmed }
     }
 
-    console.log(
+    logVerbose(
       `[anet_report_search_results] parsed query "${trimmed}" -> ${JSON.stringify(parsed)}`
     )
     return parsed
   } catch (err) {
-    console.log(
+    console.error(
       `[anet_report_search_results] query parse failed for "${trimmed}":`,
       err instanceof Error ? err.message : err
     )
@@ -655,7 +660,7 @@ async function broadSearch(
   const orgSummary = orgs
     .map(o => `${o.shortName ?? o.longName ?? "?"} (${o.uuid?.slice(0, 8) ?? "?"})`)
     .join(", ")
-  console.log(
+  logVerbose(
     `[anet_report_search_results] broad OK textCount=${textMatches.length} textTotal=${textTotalCount} persons=[${personSummary}] locations=[${locationSummary}] locReports=${locationReports.length} orgs=[${orgSummary}] orgReports=${orgReports.length} merged=${merged.length}`
   )
   return { reports: merged, totalCount: merged.length }
@@ -950,7 +955,7 @@ async function compoundSearch(
       orgs.length > 0 ? `orgs(∪)=[${orgs.map(r => r.label).join(" ∪ ")}]` : ""
     ].filter(Boolean) as string[]
   ).join(" ∩ ")
-  console.log(
+  logVerbose(
     `[anet_report_search_results] compound text=${text ? `"${text}"` : "(none)"} ${partSummary} merged=${merged.length}`
   )
   return { reports: merged, totalCount: merged.length }
@@ -1009,10 +1014,6 @@ export function registerReportSearchResultsTool(server: McpServer) {
       }
     },
     async (args?: Record<string, unknown>) => {
-      console.log(
-        "[anet_report_search_results] CALLED args=" +
-          JSON.stringify(args).slice(0, 500)
-      )
       const safe = args ?? {}
       const query = typeof safe.query === "string" ? safe.query.trim() : ""
       if (!query) {
@@ -1032,7 +1033,7 @@ export function registerReportSearchResultsTool(server: McpServer) {
         typeof safe.userToken === "string" && safe.userToken.length > 0
           ? safe.userToken
           : undefined
-      console.log(
+      logVerbose(
         `[anet_report_search_results] endpoint=${endpoint} tokenPresent=${Boolean(token)} query=${JSON.stringify(query)} limit=${limit}`
       )
       if (!token) {
