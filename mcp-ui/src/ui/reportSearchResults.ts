@@ -22,6 +22,9 @@ type ResultsArgs = {
   query?: string
   searchKeyword?: string
   parsed?: ParsedQuery
+  matchedPersons?: string[]
+  matchedLocations?: string[]
+  matchedOrgs?: string[]
   reports: ReportItem[]
   totalCount?: number
 }
@@ -208,6 +211,9 @@ function normalizeArgs(args: unknown): ResultsArgs {
     searchKeyword:
       typeof r.searchKeyword === "string" ? r.searchKeyword : undefined,
     parsed: normalizeParsed(r.parsed),
+    matchedPersons: normalizeStringArray(r.matchedPersons),
+    matchedLocations: normalizeStringArray(r.matchedLocations),
+    matchedOrgs: normalizeStringArray(r.matchedOrgs),
     reports,
     totalCount: typeof r.totalCount === "number" ? r.totalCount : undefined
   }
@@ -233,19 +239,50 @@ function formatDateRange(
 
 function buildFilterChips(
   parsed: ParsedQuery | undefined,
-  fallback: string | undefined
+  fallback: string | undefined,
+  matched: {
+    persons?: string[]
+    locations?: string[]
+    orgs?: string[]
+  }
 ): FilterChip[] {
   if (parsed) {
     const chips: FilterChip[] = []
     if (parsed.text) chips.push({ kind: "text", label: `text: ${parsed.text}` })
-    for (const name of parsed.personNames ?? []) {
-      chips.push({ kind: "person", label: `person: ${name}` })
+
+    const onlyOnePerson =
+      !parsed.text &&
+      (parsed.personNames?.length ?? 0) === 1 &&
+      !parsed.locationNames?.length &&
+      !parsed.orgNames?.length &&
+      !parsed.engagementDateStart &&
+      !parsed.engagementDateEnd
+    const personLabels =
+      matched.persons && matched.persons.length > 0
+        ? matched.persons
+        : (parsed.personNames ?? []).map(name =>
+            onlyOnePerson && fallback && fallback.toLowerCase() !== name.toLowerCase()
+              ? fallback
+              : name
+          )
+    for (const label of personLabels) {
+      chips.push({ kind: "person", label: `person: ${label}` })
     }
-    for (const name of parsed.locationNames ?? []) {
-      chips.push({ kind: "location", label: `location: ${name}` })
+
+    const locationLabels =
+      matched.locations && matched.locations.length > 0
+        ? matched.locations
+        : parsed.locationNames ?? []
+    for (const label of locationLabels) {
+      chips.push({ kind: "location", label: `location: ${label}` })
     }
-    for (const name of parsed.orgNames ?? []) {
-      chips.push({ kind: "org", label: `org: ${name}` })
+
+    const orgLabels =
+      matched.orgs && matched.orgs.length > 0
+        ? matched.orgs
+        : parsed.orgNames ?? []
+    for (const label of orgLabels) {
+      chips.push({ kind: "org", label: `org: ${label}` })
     }
     const dateLabel = formatDateRange(
       parsed.engagementDateStart,
@@ -311,7 +348,15 @@ export function createReportSearchResultsUI(
     el.showMoreBtn.disabled = false
     el.showMoreBtn.textContent = "Show more"
 
-    const chips = buildFilterChips(parsed.parsed, parsed.searchKeyword)
+    const chips = buildFilterChips(
+      parsed.parsed,
+      parsed.query ?? parsed.searchKeyword,
+      {
+        persons: parsed.matchedPersons,
+        locations: parsed.matchedLocations,
+        orgs: parsed.matchedOrgs
+      }
+    )
     el.subheader.replaceChildren()
     if (chips.length > 0) {
       for (const chip of chips) {
