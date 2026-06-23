@@ -101,6 +101,14 @@ type ParsedQuery = {
   engagementDateEnd?: string
 }
 
+type SearchOutcome = {
+  reports: ReportListItem[]
+  totalCount: number
+  matchedPersons: string[]
+  matchedLocations: string[]
+  matchedOrgs: string[]
+}
+
 // Convert YYYY-MM-DD to ISO Instant strings for GraphQL.
 function toInstantStart(d: string): string {
   return `${d}T00:00:00Z`
@@ -400,6 +408,11 @@ function getParseAgent(): Agent {
       "Generic topics, concepts, equipment, or actions go in text. " +
       "When multiple entities of the same type appear, list them all in the array. " +
       "If a single bare proper noun could plausibly be a person OR a body-text term (ambiguous), prefer text. " +
+      "CASE-INSENSITIVE NAMES: users often type names in lowercase. If the ENTIRE query reads as one or more person names with NO topic word (no 'reports', 'logistics', 'cyber', 'supply', 'about', etc.) and the token(s) look surname-shaped (alphabetic only, not a common English noun), return personNames ONLY — do NOT also keep the full query in text. Treat the last token as the surname candidate in a two-token <firstname> <surname> pattern; treat each token as its own surname candidate when both are plausibly surnames. Returning text alongside personNames here would over-constrain the search (intersect text-match AND person-match) and drop valid hits — use text only when the query mixes a topic with a name. " +
+      'Pattern: lowercase "<firstname> <surname>" -> {"personNames":["<surname>"]}. ' +
+      'Pattern: two lowercase tokens that both look surname-shaped -> {"personNames":["<a>","<b>"]}. ' +
+      'Pattern with mixed topic+name: "<topic> by <surname>" -> {"text":"<topic>","personNames":["<surname>"]}. ' +
+      'Counter-pattern: a token that is a common noun (e.g. "chain", "threats", "report") is NOT a surname; keep as text only. ' +
       "Examples — the names and dates below are illustrative; apply the pattern: " +
       'For Today=2026-05-11: "reports last quarter" -> {"engagementDateStart":"2026-01-01","engagementDateEnd":"2026-03-31"} | ' +
       'For Today=2026-05-11: "phishing this month" -> {"text":"phishing","engagementDateStart":"2026-05-01","engagementDateEnd":"2026-05-11"} | ' +
@@ -520,7 +533,7 @@ async function broadSearch(
   token: string,
   startDate: string | null,
   endDate: string | null
-): Promise<{ reports: ReportListItem[]; totalCount: number }> {
+): Promise<SearchOutcome> {
   const step1 = await gqlRequest<{
     reportList?: { totalCount?: number; list?: ReportListItem[] }
     personList?: { list?: PersonHit[] }
@@ -663,7 +676,23 @@ async function broadSearch(
   logVerbose(
     `[anet_report_search_results] broad OK textCount=${textMatches.length} textTotal=${textTotalCount} persons=[${personSummary}] locations=[${locationSummary}] locReports=${locationReports.length} orgs=[${orgSummary}] orgReports=${orgReports.length} merged=${merged.length}`
   )
-  return { reports: merged, totalCount: merged.length }
+  return {
+    reports: merged,
+    totalCount: merged.length,
+    matchedPersons: dedupe(persons.map(p => p.name).filter(isNonEmpty)),
+    matchedLocations: dedupe(locations.map(l => l.name).filter(isNonEmpty)),
+    matchedOrgs: dedupe(
+      orgs.map(o => o.shortName ?? o.longName).filter(isNonEmpty)
+    )
+  }
+}
+
+function isNonEmpty(s: string | null | undefined): s is string {
+  return typeof s === "string" && s.trim().length > 0
+}
+
+function dedupe(list: string[]): string[] {
+  return Array.from(new Set(list))
 }
 
 async function personCompound(
@@ -861,7 +890,7 @@ async function compoundSearch(
   limit: number,
   endpoint: string,
   token: string
-): Promise<{ reports: ReportListItem[]; totalCount: number }> {
+): Promise<SearchOutcome> {
   const text = parsed.text
   const startDate = parsed.engagementDateStart
     ? toInstantStart(parsed.engagementDateStart)
@@ -958,7 +987,13 @@ async function compoundSearch(
   logVerbose(
     `[anet_report_search_results] compound text=${text ? `"${text}"` : "(none)"} ${partSummary} merged=${merged.length}`
   )
-  return { reports: merged, totalCount: merged.length }
+  return {
+    reports: merged,
+    totalCount: merged.length,
+    matchedPersons: dedupe(persons.map(r => r.label).filter(isNonEmpty)),
+    matchedLocations: dedupe(locations.map(r => r.label).filter(isNonEmpty)),
+    matchedOrgs: dedupe(orgs.map(r => r.label).filter(isNonEmpty))
+  }
 }
 
 async function searchReports(
@@ -966,7 +1001,7 @@ async function searchReports(
   limit: number,
   endpoint: string,
   token: string
-): Promise<{ reports: ReportListItem[]; totalCount: number }> {
+): Promise<SearchOutcome> {
   const totalEntities =
     (parsed.personNames?.length ?? 0) +
     (parsed.locationNames?.length ?? 0) +
@@ -1063,12 +1098,13 @@ export function registerReportSearchResultsTool(server: McpServer) {
           }
         }
 
-        const { reports, totalCount } = await searchReports(
-          parsed,
-          limit,
-          endpoint,
-          token
-        )
+        const {
+          reports,
+          totalCount,
+          matchedPersons,
+          matchedLocations,
+          matchedOrgs
+        } = await searchReports(parsed, limit, endpoint, token)
 
         // searchKeyword preserves the existing UI subheader contract (single string).
         const searchKeyword =
@@ -1084,7 +1120,10 @@ export function registerReportSearchResultsTool(server: McpServer) {
           parsed,
           searchKeyword,
           reports,
-          totalCount
+          totalCount,
+          matchedPersons,
+          matchedLocations,
+          matchedOrgs
         }
         return {
           structuredContent: payload,
