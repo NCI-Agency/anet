@@ -30,7 +30,14 @@ SERVICE_NAME="assistantservice"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 SECRETS_DIR="/etc/systemd/system/${SERVICE_NAME}.service.d"
 SECRETS_FILE="${SECRETS_DIR}/secrets.conf"
+USER_DROPIN="${SECRETS_DIR}/user.conf"
 CONFIG_FILE="${INSTALL_DIR}/appsettings.Production.json"
+
+# Run AssistantService as a dedicated unprivileged system user, matching the
+# ANET / MART Ansible-deployment convention. Override via env if your hosts
+# already provision the account differently.
+: "${SERVICE_USER:=assistantservice}"
+: "${SERVICE_GROUP:=assistantservice}"
 
 [ -d "$SRC_DIR" ] || { echo "Source dir not found: $SRC_DIR" >&2; exit 1; }
 [ -f "$SRC_DIR/AssistantService" ] || { echo "Missing $SRC_DIR/AssistantService binary" >&2; exit 1; }
@@ -85,24 +92,46 @@ csv_to_json_array() {
     printf '%s' "${result}]"
 }
 
-if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
-    echo "Stopping existing $SERVICE_NAME..."
-    systemctl stop "$SERVICE_NAME"
+# Stop unconditionally — `is-active --quiet` misses `failed`/`activating`/etc.,
+# and skipping the stop in those states would leave a stale process holding
+# the old config while we overlay the new one.
+echo "Stopping $SERVICE_NAME (if running)..."
+systemctl stop "$SERVICE_NAME" 2>/dev/null || true
+
+# Create the service group + user if missing.
+if ! getent group "$SERVICE_GROUP" >/dev/null; then
+    echo "Creating group: $SERVICE_GROUP"
+    groupadd --system "$SERVICE_GROUP"
+fi
+if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
+    echo "Creating user:  $SERVICE_USER"
+    useradd --system --gid "$SERVICE_GROUP" --home-dir "$INSTALL_DIR" \
+            --shell /usr/sbin/nologin --no-create-home "$SERVICE_USER"
 fi
 
 echo "Copying $SRC_DIR -> $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/logs"
-# -a preserves perms, --delete drops stale files from prior installs,
-# --force lets --delete remove non-empty dirs (e.g. leftover .git from tests).
 rsync -a --delete --force --exclude logs/ "$SRC_DIR"/ "$INSTALL_DIR"/
-chmod +x "$INSTALL_DIR/AssistantService"
-chown -R root:root "$INSTALL_DIR"
+chown -R "root:${SERVICE_GROUP}" "$INSTALL_DIR"
+chown -R "${SERVICE_USER}:${SERVICE_GROUP}" "$INSTALL_DIR/logs"
 chmod 750 "$INSTALL_DIR"
+chmod -R g+rX "$INSTALL_DIR"
+chmod +x "$INSTALL_DIR/AssistantService"
 chmod 640 "$INSTALL_DIR"/*.json 2>/dev/null || true
+chmod 750 "$INSTALL_DIR/logs"
 
 echo "Installing systemd unit: $SERVICE_FILE"
 cp "$INSTALL_DIR/assistantservice.service" "$SERVICE_FILE"
 chmod 644 "$SERVICE_FILE"
+
+mkdir -p "$SECRETS_DIR"
+cat > "$USER_DROPIN" <<EOF
+[Service]
+User=${SERVICE_USER}
+Group=${SERVICE_GROUP}
+EOF
+chmod 644 "$USER_DROPIN"
+chown root:root "$USER_DROPIN"
 
 if [ -f "${OVERLAY_DIR}/appsettings.Production.json" ]; then
     echo "Skipping generated $CONFIG_FILE — overlay copy will replace it."
@@ -130,7 +159,7 @@ else
 }
 EOF
     chmod 640 "$CONFIG_FILE"
-    chown root:root "$CONFIG_FILE"
+    chown "root:${SERVICE_GROUP}" "$CONFIG_FILE"
 fi
 
 echo "Writing $SECRETS_FILE (root-only)"
@@ -156,7 +185,7 @@ if [ -d "$OVERLAY_DIR" ]; then
             target="${INSTALL_DIR}/$(basename "$f")"
             cp "$f" "$target"
             chmod 640 "$target"
-            chown root:root "$target"
+            chown "root:${SERVICE_GROUP}" "$target"
             echo "  $(basename "$f")"
         done
     fi
@@ -168,6 +197,7 @@ systemctl start "$SERVICE_NAME"
 
 echo
 echo "AssistantService installed and started."
+echo "  Run-as : ${SERVICE_USER}:${SERVICE_GROUP} (set by ${USER_DROPIN})"
 echo "  Status : systemctl status $SERVICE_NAME"
 echo "  Logs   : journalctl -u $SERVICE_NAME -f"
-echo "  Web UI : http://localhost:${PORT}/chat/index.html"
+echo "  Web UI : https://localhost:${PORT}/chat/index.html"
