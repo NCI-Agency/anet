@@ -4,6 +4,10 @@ services:
     image: alpine:3.19
     container_name: anet-apollo-mcp-config
     restart: "no"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       ANET_GRAPHQL_TOKEN: ${ANET_GRAPHQL_TOKEN:?must be set in .env}
       ANET_GRAPHQL_ENDPOINT: ${ANET_GRAPHQL_ENDPOINT:-http://host.docker.internal:8080/graphqlWebService}
@@ -21,6 +25,10 @@ services:
     image: ghcr.io/apollographql/apollo-mcp-server:${APOLLO_MCP_TAG:-latest}
     container_name: anet-apollo-mcp
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       apollo-mcp-config:
         condition: service_completed_successfully
@@ -41,6 +49,10 @@ services:
     image: anet-mcp-ui:local
     container_name: anet-mcp-ui
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "127.0.0.1:8001:8001"
     extra_hosts:
