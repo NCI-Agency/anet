@@ -25,6 +25,9 @@ systemd unit and config stay the same.
   with this token. Generate one as an admin via the ANET Admin UI under
   "Web service access tokens".
 - Outbound network access to `ghcr.io` (for the Apollo MCP vendor image).
+- Network reachability to the LLM endpoint configured in `ANET_AGENT_BASE_URL`
+  (e.g. the DataScience proxy at `http://ai2.datascienceai.nsf/llm` — requires
+  VPN if running outside the corporate network).
 
 ---
 
@@ -71,13 +74,17 @@ rm -rf /tmp/assistant-service-drop
 
 What it does:
 
-- `rsync`s the binaries into `/opt/assistantservice/`.
-- Installs the systemd unit.
+- Creates the `assistantservice` system user + group if missing
+  (override via `SERVICE_USER` / `SERVICE_GROUP` env vars).
+- `rsync`s the binaries into `/opt/assistantservice/` owned `root:assistantservice`
+  (read-only for the service group); `logs/` is owned by the service user.
+- Installs the systemd unit and a `user.conf` drop-in that runs the service
+  under the unprivileged account.
 - Writes `appsettings.Production.json` from `.env` defaults — unless
   `assistant-service-config/appsettings.Production.json` exists, in which
   case that file wins.
 - Writes `/etc/systemd/system/assistantservice.service.d/secrets.conf`
-  (mode 600, root-only) from `.env`.
+  (mode 600, root-only — systemd reads it before dropping privileges).
 - Overlays every `*.json` in `assistant-service-config/` over the install
   dir, so MCP URLs, the prompt preamble, and any other pinned values
   survive future drops.
