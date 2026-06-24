@@ -37,7 +37,7 @@ function buildUI(root: HTMLElement, onSubmit: () => void): SearchInputElements {
   const description = document.createElement("div")
   description.className = "description"
   description.textContent =
-    "Describe what you're looking for in plain language — topics, people, " +
+    "Describe what you're looking for in plain language — key words, people, " +
     "organizations, time ranges, or anything else."
 
   const textarea = document.createElement("textarea")
