@@ -94,7 +94,7 @@ Chat UI: <https://localhost:7002/chat/index.html>. Tail logs with
 `journalctl -u assistantservice -f -n 400`.
 
 Re-run the script any time — it's idempotent. New drop? Unpack to a fresh dir
-and re-run with that path; the overlay preserves your customizations.
+and re-run with that path; the overlay preserves customizations.
 
 ---
 
@@ -120,6 +120,37 @@ docker compose down
 sudo systemctl start assistantservice
 sudo systemctl stop assistantservice
 ```
+
+---
+
+## Uninstall
+
+To wipe the entire AI stack from a host (containers, native AssistantService,
+config, service user). Run in this order; each block is independent.
+
+```sh
+# 1. Stop and remove the containers + their network, named volumes, and renderer.
+#    Run from the repo root so docker compose finds docker-compose.yaml.
+docker compose down --volumes --remove-orphans
+docker rm -f anet-apollo-mcp anet-mcp-ui anet-apollo-mcp-config 2>/dev/null
+
+# 2. Stop, disable, and remove the AssistantService systemd unit + drop-ins.
+sudo systemctl stop assistantservice.service
+sudo systemctl disable assistantservice.service
+sudo systemctl reset-failed assistantservice 2>/dev/null
+sudo rm -rf /etc/systemd/system/assistantservice.service*
+sudo systemctl daemon-reload
+
+# 3. Remove the installed binaries and configs.
+sudo rm -rf /opt/assistantservice
+
+# 4. Remove the dedicated service account the installer created.
+sudo userdel assistantservice 2>/dev/null
+sudo groupdel assistantservice 2>/dev/null
+```
+
+After uninstall, a fresh `docker compose up -d --build` + re-run of
+`install-assistantservice.sh` gives a clean reinstall.
 
 ---
 
