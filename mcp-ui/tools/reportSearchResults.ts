@@ -64,6 +64,15 @@ function withSource(r: ReportListItem, source: string): ReportListItem {
   return { ...r, matchedBy: [...existing, source] }
 }
 
+function personDisplay(p: PersonHit): string | undefined {
+  const family = p.familyName?.trim()
+  const given = p.givenName?.trim()
+  if (family && given) return `${given} ${family}`
+  if (family) return family
+  if (given) return given
+  return undefined
+}
+
 const REPORT_FIELDS = /* GraphQL */ `
   uuid
   intent
@@ -75,7 +84,8 @@ const REPORT_FIELDS = /* GraphQL */ `
 
 type PersonHit = {
   uuid?: string
-  name?: string
+  familyName?: string
+  givenName?: string
   attendedReports?: { list?: ReportListItem[] }
   authoredReports?: { list?: ReportListItem[] }
 }
@@ -145,7 +155,8 @@ const BROAD_SEARCH_QUERY = /* GraphQL */ `
     personList(query: { pageSize: 5, text: $text }) {
       list {
         uuid
-        name
+        familyName
+        givenName
         attendedReports(
           query: {
             pageSize: $pageSize
@@ -244,7 +255,8 @@ const PERSON_COMPOUND_QUERY = /* GraphQL */ `
     personList(query: { pageSize: 5, text: $personText }) {
       list {
         uuid
-        name
+        familyName
+        givenName
         attendedReports(
           query: {
             pageSize: $pageSize
@@ -408,9 +420,10 @@ function getParseAgent(): Agent {
       "Generic topics, concepts, equipment, or actions go in text. " +
       "When multiple entities of the same type appear, list them all in the array. " +
       "If a single bare proper noun could plausibly be a person OR a body-text term (ambiguous), prefer text. " +
-      "CASE-INSENSITIVE NAMES: users often type names in lowercase. If the ENTIRE query reads as one or more person names with NO topic word (no 'reports', 'logistics', 'cyber', 'supply', 'about', etc.) and the token(s) look surname-shaped (alphabetic only, not a common English noun), return personNames ONLY — do NOT also keep the full query in text. Treat the last token as the surname candidate in a two-token <firstname> <surname> pattern; treat each token as its own surname candidate when both are plausibly surnames. Returning text alongside personNames here would over-constrain the search (intersect text-match AND person-match) and drop valid hits — use text only when the query mixes a topic with a name. " +
+      "CASE-INSENSITIVE NAMES: users often type names in lowercase. If the ENTIRE query reads as one or more person names with NO topic word (no 'reports', 'logistics', 'cyber', 'supply', 'about', etc.) and the token(s) look name-shaped (alphabetic only, not a common English noun), return personNames ONLY — do NOT also keep the full query in text. Returning text alongside personNames here would over-constrain the search (intersect text-match AND person-match) and drop valid hits — use text only when the query mixes a topic with a name. " +
+      "DEFAULT FOR TWO TOKENS: treat them as <firstname> <surname> for ONE person and return ONLY the last token. People almost always search by a full name expecting one match; intersecting two separate person lookups inflates results with co-attendees. Only return BOTH tokens as personNames when the query explicitly signals two distinct people via a connector word like 'and', '&', '+', or 'with' between them. " +
       'Pattern: lowercase "<firstname> <surname>" -> {"personNames":["<surname>"]}. ' +
-      'Pattern: two lowercase tokens that both look surname-shaped -> {"personNames":["<a>","<b>"]}. ' +
+      'Pattern: explicit two-person query "<a> and <b>" or "<a> & <b>" or "<a> with <b>" -> {"personNames":["<a>","<b>"]} (the connector word is dropped). ' +
       'Pattern with mixed topic+name: "<topic> by <surname>" -> {"text":"<topic>","personNames":["<surname>"]}. ' +
       'Counter-pattern: a token that is a common noun (e.g. "chain", "threats", "report") is NOT a surname; keep as text only. ' +
       "Examples — the names and dates below are illustrative; apply the pattern: " +
@@ -562,8 +575,8 @@ async function broadSearch(
     return typeof name === "string" && name.toLowerCase().includes(keywordLower)
   }
 
-  const persons = (step1.personList?.list ?? []).filter(p =>
-    nameContains(p.name)
+  const persons = (step1.personList?.list ?? []).filter(
+    p => nameContains(p.familyName) || nameContains(p.givenName)
   )
   const locations = (step1.locationList?.list ?? []).filter(l =>
     nameContains(l.name)
@@ -622,7 +635,7 @@ async function broadSearch(
   const textSource = text.length > 0 ? `text: ${text}` : null
   for (const r of textMatches) addOrTag(r, textSource)
   for (const person of persons) {
-    const pname = person.name ?? "person"
+    const pname = personDisplay(person) ?? "person"
     for (const r of person.attendedReports?.list ?? [])
       addOrTag(r, `attendee: ${pname}`)
     for (const r of person.authoredReports?.list ?? [])
@@ -665,7 +678,7 @@ async function broadSearch(
 
   const merged = Array.from(seen.values()).slice(0, limit)
   const personSummary = persons
-    .map(p => `${p.name ?? "?"} (${p.uuid?.slice(0, 8) ?? "?"})`)
+    .map(p => `${personDisplay(p) ?? "?"} (${p.uuid?.slice(0, 8) ?? "?"})`)
     .join(", ")
   const locationSummary = locations
     .map(l => `${l.name ?? "?"} (${l.uuid?.slice(0, 8) ?? "?"})`)
@@ -679,7 +692,7 @@ async function broadSearch(
   return {
     reports: merged,
     totalCount: merged.length,
-    matchedPersons: dedupe(persons.map(p => p.name).filter(isNonEmpty)),
+    matchedPersons: dedupe(persons.map(personDisplay).filter(isNonEmpty)),
     matchedLocations: dedupe(locations.map(l => l.name).filter(isNonEmpty)),
     matchedOrgs: dedupe(
       orgs.map(o => o.shortName ?? o.longName).filter(isNonEmpty)
@@ -703,7 +716,7 @@ async function personCompound(
   token: string,
   startDate: string | null,
   endDate: string | null
-): Promise<{ reports: ReportListItem[]; label: string }> {
+): Promise<{ reports: ReportListItem[]; label: string; matchedNames: string[] }> {
   const data = await gqlRequest<{ personList?: { list?: PersonHit[] } }>(
     endpoint,
     token,
@@ -719,23 +732,25 @@ async function personCompound(
   const persons = data.personList?.list ?? []
   const reports: ReportListItem[] = []
   for (const p of persons) {
+    const resolved = personDisplay(p) ?? personName
     for (const r of p.attendedReports?.list ?? []) {
-      let tagged = withSource(r, `attendee: ${personName}`)
+      let tagged = withSource(r, `attendee: ${resolved}`)
       if (reportText) tagged = withSource(tagged, `text: ${reportText}`)
       reports.push(tagged)
     }
     for (const r of p.authoredReports?.list ?? []) {
-      let tagged = withSource(r, `author: ${personName}`)
+      let tagged = withSource(r, `author: ${resolved}`)
       if (reportText) tagged = withSource(tagged, `text: ${reportText}`)
       reports.push(tagged)
     }
   }
   const summary = persons
-    .map(p => `${p.name ?? "?"} (${p.uuid?.slice(0, 8) ?? "?"})`)
+    .map(p => `${personDisplay(p) ?? "?"} (${p.uuid?.slice(0, 8) ?? "?"})`)
     .join(", ")
   return {
     reports,
-    label: `person="${personName}" persons=[${summary}] reports=${reports.length}`
+    label: `person="${personName}" persons=[${summary}] reports=${reports.length}`,
+    matchedNames: persons.map(personDisplay).filter(isNonEmpty)
   }
 }
 
@@ -747,7 +762,7 @@ async function locationCompound(
   token: string,
   startDate: string | null,
   endDate: string | null
-): Promise<{ reports: ReportListItem[]; label: string }> {
+): Promise<{ reports: ReportListItem[]; label: string; matchedNames: string[] }> {
   const lookup = await gqlRequest<{ locationList?: { list?: LocationHit[] } }>(
     endpoint,
     token,
@@ -758,6 +773,11 @@ async function locationCompound(
   const uuids = locations
     .map(l => l.uuid)
     .filter((u): u is string => typeof u === "string" && u.length > 0)
+  // The bulk reportList by UUID set returns reports without telling us which
+  // location produced each one. If exactly one location resolved, we can use
+  // its name on the per-result chip; otherwise we fall back to the query token.
+  const sharedLabel =
+    locations.length === 1 && locations[0]?.name ? locations[0].name : locationName
   let reports: ReportListItem[] = []
   if (uuids.length > 0) {
     const data = await gqlRequest<{ reportList?: { list?: ReportListItem[] } }>(
@@ -773,7 +793,7 @@ async function locationCompound(
       }
     )
     reports = (data.reportList?.list ?? []).map(r => {
-      let tagged = withSource(r, `location: ${locationName}`)
+      let tagged = withSource(r, `location: ${sharedLabel}`)
       if (reportText) tagged = withSource(tagged, `text: ${reportText}`)
       return tagged
     })
@@ -783,7 +803,8 @@ async function locationCompound(
     .join(", ")
   return {
     reports,
-    label: `location="${locationName}" locs=[${summary}] reports=${reports.length}`
+    label: `location="${locationName}" locs=[${summary}] reports=${reports.length}`,
+    matchedNames: locations.map(l => l.name).filter(isNonEmpty)
   }
 }
 
@@ -795,7 +816,7 @@ async function orgCompound(
   token: string,
   startDate: string | null,
   endDate: string | null
-): Promise<{ reports: ReportListItem[]; label: string }> {
+): Promise<{ reports: ReportListItem[]; label: string; matchedNames: string[] }> {
   const lookup = await gqlRequest<{
     organizationList?: { list?: OrgHit[] }
   }>(endpoint, token, ORG_LOOKUP_QUERY, { text: orgName })
@@ -803,6 +824,9 @@ async function orgCompound(
   const uuids = orgs
     .map(o => o.uuid)
     .filter((u): u is string => typeof u === "string" && u.length > 0)
+  const orgDisplay = (o: OrgHit) => o.shortName ?? o.longName
+  const sharedLabel =
+    orgs.length === 1 && orgDisplay(orgs[0]) ? orgDisplay(orgs[0])! : orgName
   let reports: ReportListItem[] = []
   if (uuids.length > 0) {
     const data = await gqlRequest<{ reportList?: { list?: ReportListItem[] } }>(
@@ -818,7 +842,7 @@ async function orgCompound(
       }
     )
     reports = (data.reportList?.list ?? []).map(r => {
-      let tagged = withSource(r, `org: ${orgName}`)
+      let tagged = withSource(r, `org: ${sharedLabel}`)
       if (reportText) tagged = withSource(tagged, `text: ${reportText}`)
       return tagged
     })
@@ -828,7 +852,8 @@ async function orgCompound(
     .join(", ")
   return {
     reports,
-    label: `org="${orgName}" orgs=[${summary}] reports=${reports.length}`
+    label: `org="${orgName}" orgs=[${summary}] reports=${reports.length}`,
+    matchedNames: orgs.map(orgDisplay).filter(isNonEmpty)
   }
 }
 
@@ -841,6 +866,7 @@ type Tagged = {
   type: EntityType
   reports: ReportListItem[]
   label: string
+  matchedNames: string[]
 }
 
 function intersectMaps(
@@ -990,9 +1016,9 @@ async function compoundSearch(
   return {
     reports: merged,
     totalCount: merged.length,
-    matchedPersons: dedupe(persons.map(r => r.label).filter(isNonEmpty)),
-    matchedLocations: dedupe(locations.map(r => r.label).filter(isNonEmpty)),
-    matchedOrgs: dedupe(orgs.map(r => r.label).filter(isNonEmpty))
+    matchedPersons: dedupe(persons.flatMap(r => r.matchedNames)),
+    matchedLocations: dedupe(locations.flatMap(r => r.matchedNames)),
+    matchedOrgs: dedupe(orgs.flatMap(r => r.matchedNames))
   }
 }
 
