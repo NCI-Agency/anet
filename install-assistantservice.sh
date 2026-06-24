@@ -113,11 +113,10 @@ echo "Copying $SRC_DIR -> $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/logs"
 rsync -a --delete --force --exclude logs/ "$SRC_DIR"/ "$INSTALL_DIR"/
 chown -R "root:${SERVICE_GROUP}" "$INSTALL_DIR"
-chown -R "${SERVICE_USER}:${SERVICE_GROUP}" "$INSTALL_DIR/logs"
 chmod 750 "$INSTALL_DIR"
-chmod -R g+rX "$INSTALL_DIR"
-chmod +x "$INSTALL_DIR/AssistantService"
-chmod 640 "$INSTALL_DIR"/*.json 2>/dev/null || true
+chmod -R g+rX,g-w,o= "$INSTALL_DIR"
+chmod 0750 "$INSTALL_DIR/AssistantService"
+chown -R "${SERVICE_USER}:${SERVICE_GROUP}" "$INSTALL_DIR/logs"
 chmod 750 "$INSTALL_DIR/logs"
 
 echo "Installing systemd unit: $SERVICE_FILE"
