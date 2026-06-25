@@ -207,6 +207,7 @@ const REPORTS_BY_LOCATION_QUERY = /* GraphQL */ `
         sortBy: ENGAGEMENT_DATE
         sortOrder: DESC
         locationUuid: $locationUuid
+        locationRecurseStrategy: CHILDREN
         text: $text
         engagementDateStart: $startDate
         engagementDateEnd: $endDate
