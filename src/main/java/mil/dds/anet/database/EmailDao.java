@@ -1,7 +1,5 @@
 package mil.dds.anet.database;
 
-import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
-
 import java.time.Instant;
 import java.util.List;
 import mil.dds.anet.beans.AnetEmail;
@@ -52,10 +50,9 @@ public class EmailDao extends AbstractDao {
     final Handle handle = getDbHandle();
     try {
       if (!processedEmails.isEmpty()) {
-        handle
-            .createUpdate("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\""
-                + " WHERE id IN ( <emailIds> )")
-            .bindList(NULL_KEYWORD, "emailIds", processedEmails).execute();
+        final Integer[] emailIds = processedEmails.toArray(Integer[]::new);
+        handle.createUpdate("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\""
+            + " WHERE id = ANY( :emailIds )").bind("emailIds", emailIds).execute();
       }
     } finally {
       closeDbHandle(handle);
