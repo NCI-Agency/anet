@@ -7,8 +7,8 @@ import {
   Callout,
   Icon,
   Intent,
-  Popover,
   PopoverInteractionKind,
+  PopoverNext,
   Spinner,
   Tooltip
 } from "@blueprintjs/core"
@@ -91,11 +91,12 @@ const BasePlanningConflictForPerson = ({
   }
 
   return (
-    <Popover
+    <PopoverNext
       interactionKind={PopoverInteractionKind.CLICK}
       usePortal={false}
       autoFocus={false}
       enforceFocus={false}
+      shouldReturnFocusOnClose={false}
       content={
         <Callout
           title={`${person.toString()} has ${
@@ -125,7 +126,7 @@ const BasePlanningConflictForPerson = ({
           </>
         )}
       </Button>
-    </Popover>
+    </PopoverNext>
   )
 }
 

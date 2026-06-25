@@ -1,8 +1,8 @@
 import {
   Icon,
   Intent,
-  Popover,
   PopoverInteractionKind,
+  PopoverNext,
   Tooltip
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -448,12 +448,13 @@ const AllFormatsInfo = ({
     return null
   }
   return (
-    <Popover
+    <PopoverNext
       placement="right"
       interactionKind={PopoverInteractionKind.CLICK}
       usePortal={false}
       autoFocus={false}
       enforceFocus={false}
+      shouldReturnFocusOnClose={false}
       content={
         <div style={{ padding: "8px" }}>
           <Table style={{ margin: 0 }}>
@@ -523,6 +524,6 @@ const AllFormatsInfo = ({
           />
         </Button>
       </Tooltip>
-    </Popover>
+    </PopoverNext>
   )
 }

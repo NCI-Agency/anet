@@ -4,8 +4,9 @@ import {
   Button as BlueprintButton,
   Classes as BlueprintClasses,
   Icon,
-  Popover,
-  PopoverInteractionKind
+  PopoverInteractionKind,
+  PopoverNext,
+  popperModifiersToNextMiddleware
 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
@@ -354,7 +355,7 @@ const AdvancedSelect = ({
         <>
           <div className={classNames(className, "advanced-select-popover")}>
             <InputGroup>
-              <Popover
+              <PopoverNext
                 popoverClassName="advanced-select-popover bp6-popover-content-sizing"
                 content={
                   <div className="d-flex flex-column">
@@ -463,8 +464,9 @@ const AdvancedSelect = ({
                 usePortal
                 autoFocus={false}
                 enforceFocus={false}
+                shouldReturnFocusOnClose={false}
                 placement="bottom"
-                modifiers={{
+                middleware={popperModifiersToNextMiddleware({
                   preventOverflow: {
                     enabled: true
                   },
@@ -474,7 +476,7 @@ const AdvancedSelect = ({
                   flip: {
                     enabled: true
                   }
-                }}
+                })}
               >
                 <InputGroup>
                   <Form.Control
@@ -524,7 +526,7 @@ const AdvancedSelect = ({
                   )}
                   {extraAddon}
                 </InputGroup>
-              </Popover>
+              </PopoverNext>
             </InputGroup>
           </div>
           <AdvancedSelectTarget overlayRef={overlayContainer} />
