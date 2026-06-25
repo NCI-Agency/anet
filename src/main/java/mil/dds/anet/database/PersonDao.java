@@ -340,8 +340,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       updateForMerge("attachments", "authorUuid", winnerUuid, loserUuid);
 
       if (useWinnerPositionHistory) {
+        // Clear out loser's positions and history
         updatePosition(handle, null, loserUuid, loserUuid);
       } else {
+        // Clear out winner's positions and history
+        updatePosition(handle, null, winnerUuid, winnerUuid);
+        // Move loser's positions to the winner
         updatePosition(handle, winnerUuid, loserUuid, winnerUuid);
         // Move loser's position history to winner
         updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
