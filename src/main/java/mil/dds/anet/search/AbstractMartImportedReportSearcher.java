@@ -35,9 +35,12 @@ public abstract class AbstractMartImportedReportSearcher
   protected void buildQuery(final MartImportedReportSearchQuery query) {
     final String tableName = String.format("\"%s\"", MartImportedReportDao.TABLE_NAME);
     final boolean applyGrouping = applyGrouping(query);
-    qb.addSelectClause((applyGrouping ? "ON (" + tableName + ".\"reportUuid\") " : "")
-        + MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
-    qb.addFromClause(tableName);
+    qb.addSelectClause(MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
+    qb.addFromClause(
+        (applyGrouping
+            ? "(SELECT DISTINCT ON (\"reportUuid\") * FROM " + tableName
+                + " ORDER BY \"reportUuid\", sequence DESC) AS "
+            : "") + tableName);
 
     // Add the count for each imported report
     qb.addWithClause(
