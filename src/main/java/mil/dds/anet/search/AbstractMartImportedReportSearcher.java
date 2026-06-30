@@ -33,9 +33,9 @@ public abstract class AbstractMartImportedReportSearcher
 
   @Override
   protected void buildQuery(final MartImportedReportSearchQuery query) {
-    qb.addSelectClause(
-        (Utils.isEmptyOrNull(query.getReportUuid()) ? "ON (\"martImportedReports\".\"reportUuid\") "
-            : "") + MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
+    final boolean applyGrouping = applyGrouping(query);
+    qb.addSelectClause((applyGrouping ? "ON (\"martImportedReports\".\"reportUuid\") " : "")
+        + MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
     qb.addFromClause("\"martImportedReports\"");
 
     // Add the count for each imported report
@@ -59,8 +59,7 @@ public abstract class AbstractMartImportedReportSearcher
     if (!Utils.isEmptyOrNull(query.getSequences())) {
       qb.addInListClause("sequence", "\"martImportedReports\".sequence", query.getSequences());
     }
-
-    if (Utils.isEmptyOrNull(query.getReportUuid())) {
+    if (applyGrouping) {
       qb.addInnerOrderByClause(
           "\"martImportedReports\".\"reportUuid\", \"martImportedReports\".sequence DESC");
     }
@@ -88,5 +87,9 @@ public abstract class AbstractMartImportedReportSearcher
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "martImportedReports_sequence"));
+  }
+
+  private boolean applyGrouping(MartImportedReportSearchQuery query) {
+    return Utils.isEmptyOrNull(query.getReportUuid()) && Utils.isEmptyOrNull(query.getSequences());
   }
 }
