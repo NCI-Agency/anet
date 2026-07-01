@@ -22,7 +22,7 @@ public class MartImportedReportSearchQuery
   private List<Long> sequences;
 
   public MartImportedReportSearchQuery() {
-    super(MartImportedReportSearchSortBy.RECEIVED_AT);
+    super(MartImportedReportSearchSortBy.SEQUENCE);
     this.setSortOrder(SortOrder.DESC);
     this.setPageSize(0);
   }

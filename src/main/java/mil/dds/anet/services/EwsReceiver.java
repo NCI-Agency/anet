@@ -68,7 +68,7 @@ public class EwsReceiver implements IMailReceiver {
               mailClientConfiguration.getTrustedSender()));
 
       // Get oldest e-mails first, process in sequence
-      view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Ascending);
+      view.getOrderBy().add(ItemSchema.DateTimeSent, SortDirection.Ascending);
       final FindItemsResults<Item> findResults =
           exchangeService.findItems(WellKnownFolderName.Inbox, filterUnreadEmails, view);
 
