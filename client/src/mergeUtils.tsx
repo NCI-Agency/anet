@@ -188,7 +188,8 @@ const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.Person]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
-  [MODEL_TO_OBJECT_TYPE.Task]: validForGeneral
+  [MODEL_TO_OBJECT_TYPE.Task]: validForGeneral,
+  [MODEL_TO_OBJECT_TYPE.EventSeries]: validForGeneral
 }
 // validations for every type of objects
 function validForGeneral(otherMergeable, newMergeable, mergeableType) {

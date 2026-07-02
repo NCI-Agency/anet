@@ -1517,6 +1517,10 @@ INSERT INTO "eventSeries" (uuid, name, description, status, "createdAt", "update
   ('bacec3a6-f075-421e-90a0-be6e3396197c', 'Inactive event series', 'To test that inactive event series are not shown', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
   ('b7b70191-54e4-462f-8e40-679dd2e71ec4', 'NMI PDT', 'NMI pre-deployment training', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
+   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
+  ('19a98fee-4864-4b04-a983-b837aadbfe8c', 'Merged Duplicated Winner', 'Winner test event series that will be merged', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
+   'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
+  ('071ce130-78fa-4c81-951f-9175b677c7b1', 'Merged Duplicated Loser', 'Loser test event series that will be merged', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b');
 
 INSERT INTO "eventSeriesHostRelatedObjects"

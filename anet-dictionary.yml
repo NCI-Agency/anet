@@ -388,6 +388,7 @@ fields:
       label: Members
 
   eventSeries:
+    shortLabel: Event Series
     status:
       label: Status
     ownerOrg:

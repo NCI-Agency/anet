@@ -6,6 +6,7 @@ import AuditTrailTable from "pages/admin/auditTrail/Index"
 import ConfigureEventTypesShow from "pages/admin/configureEventTypes/Show"
 import AdminIndex from "pages/admin/Index"
 import MartImporterShow from "pages/admin/martImporter/Show"
+import MergeEventSeries from "pages/admin/merge/MergeEventSeries"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
@@ -294,7 +295,8 @@ const routes = [
                   { path: "positions", element: <MergePositions /> },
                   { path: "locations", element: <MergeLocations /> },
                   { path: "organizations", element: <MergeOrganizations /> },
-                  { path: "tasks", element: <MergeTasks /> }
+                  { path: "tasks", element: <MergeTasks /> },
+                  { path: "eventSeries", element: <MergeEventSeries /> }
                 ]
               },
               {
