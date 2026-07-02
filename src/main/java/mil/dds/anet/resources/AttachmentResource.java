@@ -238,9 +238,14 @@ public class AttachmentResource {
   }
 
   @GetMapping(path = "/download/{uuid}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<StreamingResponseBody> downloadAttachment(final Principal ignoredPrincipal,
+  public ResponseEntity<StreamingResponseBody> downloadAttachment(final Principal principal,
       @PathVariable(name = "uuid") String uuid) {
     assertAttachmentEnabled();
+    final Person user = SecurityUtils.getPersonFromPrincipal(principal);
+    if (DaoUtils.isNewUser(user) || Boolean.TRUE.equals(user.getPendingVerification())) {
+      // New or unverified users are denied access
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
+    }
     final Attachment attachment = getAttachment(uuid);
     final HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(getContentDisposition("attachment", attachment));
@@ -249,9 +254,14 @@ public class AttachmentResource {
   }
 
   @GetMapping(path = "/view/{uuid}")
-  public ResponseEntity<StreamingResponseBody> viewAttachment(final Principal ignoredPrincipal,
+  public ResponseEntity<StreamingResponseBody> viewAttachment(final Principal principal,
       @PathVariable(name = "uuid") String uuid) {
     assertAttachmentEnabled();
+    final Person user = SecurityUtils.getPersonFromPrincipal(principal);
+    if (DaoUtils.isNewUser(user) || Boolean.TRUE.equals(user.getPendingVerification())) {
+      // New or unverified users are denied access
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
+    }
     final Attachment attachment = getAttachment(uuid);
     final HttpHeaders headers = new HttpHeaders();
     headers.setContentDisposition(getContentDisposition("inline", attachment));
