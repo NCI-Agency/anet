@@ -25,7 +25,7 @@ import { Event, EventSeries } from "models"
 import React, { useContext, useEffect, useState } from "react"
 import { Col, FormGroup, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
-import { useLocation, useParams } from "react-router"
+import { Link, useLocation, useParams } from "react-router"
 import Settings from "settings"
 
 interface EventSeriesShowProps {
@@ -64,6 +64,8 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
 
   const eventSeries = new EventSeries(data ? data.eventSeries : {})
 
+  const isAdmin = currentUser?.isAdmin()
+
   const canAdministrateOrg =
     currentUser?.isAdmin() ||
     currentUser?.hasAdministrativePermissionsForOrganization(
@@ -81,6 +83,16 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
   const searchText = eventSeries.name
   const action = (
     <>
+      {isAdmin && (
+        <Link
+          id="mergeWithOther"
+          to="/admin/merge/eventSeries"
+          state={{ initialLeftUuid: eventSeries.uuid }}
+          className="btn btn-outline-secondary"
+        >
+          Merge with other event series
+        </Link>
+      )}
       {canAdministrateOrg && (
         <LinkTo
           modelType="EventSeries"

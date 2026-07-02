@@ -918,6 +918,7 @@ type Mutation {
   deleteSavedSearch(uuid: String): Int
   deleteSubscription(uuid: String): Int
   emailReport(email: AnetEmailInput, uuid: String): Int
+  mergeEventSeries(loserUuid: String, winnerEventSeries: EventSeriesInput): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
   mergePeople(loserUuid: String, useWinnerPositionHistory: Boolean = true, winnerPerson: PersonInput): Int
