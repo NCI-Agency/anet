@@ -326,6 +326,7 @@ public class PositionResource {
     // if this position is in an approval chain, we just delete it
     // if this position is in an organization, just remove it
     // if this position has any associated positions, just remove them
+    // if this position is administrating any tenants, just remove them
     final int numRows = dao.delete(positionUuid);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process position delete");
