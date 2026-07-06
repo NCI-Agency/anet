@@ -307,7 +307,7 @@ WHERE uuid='178dfbba-f15a-400b-9135-6ff800246be0';
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, "superuserType", role, status, "currentPersonUuid", "locationUuid", "createdAt", "updatedAt") VALUES
   (uuid_generate_v4(), 'ANET Administrator', 3, NULL, 0, 0, NULL, 'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1 Manager', 2, 0, 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('38274eea-3438-40f7-8f1e-6529fd4f6191', 'EF 1 Manager', 2, 0, 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor A', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor B', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor C', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -908,10 +908,19 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'Chief of Merge People Test 1'), '3cb2076c-5317-47fe-86ad-76f298993917', '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = '3cb2076c-5317-47fe-86ad-76f298993917' WHERE name = 'Chief of Merge People Test 1';
+-- and in an additional position
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt", "primary") VALUES
+  ((SELECT uuid from positions where name = 'Chief of Staff - MoD'), '3cb2076c-5317-47fe-86ad-76f298993917', '2020-01-01', FALSE);
+UPDATE positions SET "currentPersonUuid" = '3cb2076c-5317-47fe-86ad-76f298993917' WHERE name = 'Chief of Staff - MoD';
+
 -- Put Loser Duplicate in a Tashkil
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'Chief of Merge People Test 2'), 'c725aef3-cdd1-4baf-ac72-f28219b234e9', '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = 'c725aef3-cdd1-4baf-ac72-f28219b234e9' WHERE name = 'Chief of Merge People Test 2';
+-- and in an additional position
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt", "primary") VALUES
+  ((SELECT uuid from positions where name = 'Director of Budgeting - MoD'), 'c725aef3-cdd1-4baf-ac72-f28219b234e9', '2020-01-01', FALSE);
+UPDATE positions SET "currentPersonUuid" = 'c725aef3-cdd1-4baf-ac72-f28219b234e9' WHERE name = 'Director of Budgeting - MoD';
 
 UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
 UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = 'MoD Headquarters Kabul') WHERE name = 'Cost Adder - MoD';

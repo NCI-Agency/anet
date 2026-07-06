@@ -209,10 +209,10 @@ class PersonMergeTest extends AbstractResourceTest {
     deleteSubscription(subscribeToWinner, loserSubscriptionUuid);
     deleteSubscription(false, winnerSubscriptionUuid);
 
-    // Assert that the position is empty.
-    Position winnerPos =
+    // Assert that the loser's position is now empty.
+    Position loserPos =
         withCredentials(adminUser, t -> queryExecutor.position(POSITION_FIELDS, created.getUuid()));
-    assertThat(winnerPos.getPerson()).isNull();
+    assertThat(loserPos.getPerson()).isNull();
 
     // Assert that winner has correct country
     assertThat(mergedPerson.getCountry()).isNotNull();
@@ -243,10 +243,10 @@ class PersonMergeTest extends AbstractResourceTest {
       // OK
     }
 
-    // Assert that the winner is in the position.
-    winnerPos = withCredentials(adminUser,
-        t -> queryExecutor.position(POSITION_FIELDS, createdPos2.getUuid()));
-    assertThat(winnerPos.getPerson().getUuid()).isEqualTo(winner.getUuid());
+    // Assert that the winner is in the loser's position.
+    loserPos =
+        withCredentials(adminUser, t -> queryExecutor.position(POSITION_FIELDS, created.getUuid()));
+    assertThat(loserPos.getPerson().getUuid()).isEqualTo(winner.getUuid());
   }
 
   @Test
