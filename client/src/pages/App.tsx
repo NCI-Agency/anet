@@ -53,6 +53,9 @@ const GQL_GET_APP_DATA = gql`
         authorizationGroupsAdministrated {
           ${gqlEntityFieldsMap.AuthorizationGroup}
         }
+        tenantsAdministrated {
+          ${gqlEntityFieldsMap.Tenant}
+        }
         organization {
           ${gqlEntityFieldsMap.Organization}
           descendantOrgs {
@@ -112,6 +115,9 @@ const GQL_GET_APP_DATA = gql`
         }
         authorizationGroupsAdministrated {
           ${gqlEntityFieldsMap.AuthorizationGroup}
+        }
+        tenantsAdministrated {
+          ${gqlEntityFieldsMap.Tenant}
         }
       }
       previousPositions {

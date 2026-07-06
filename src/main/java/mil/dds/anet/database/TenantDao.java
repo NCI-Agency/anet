@@ -1,13 +1,17 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
+
 import graphql.GraphQLContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TenantMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
@@ -18,7 +22,9 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +94,16 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
         + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
     void removeMemberFromTenant(@Bind("personUuid") String personUuid,
         @Bind("tenantUuid") String tenantUuid);
+
+    @SqlBatch("INSERT INTO \"tenantAdministrativePositions\" (\"tenantUuid\", \"positionUuid\")"
+        + " VALUES (:tenantUuid, :uuid)")
+    void insertAdministrativePositions(@Bind("tenantUuid") String tenantUuid,
+        @BindBean List<Position> positions);
+
+    @SqlUpdate("DELETE FROM \"tenantAdministrativePositions\""
+        + " WHERE \"tenantUuid\" = :tenantUuid AND \"positionUuid\" IN ( <positionUuids> )")
+    void deleteAdministrativePositions(@Bind("tenantUuid") String tenantUuid,
+        @BindList(value = "positionUuids", onEmpty = NULL_STRING) List<String> positionUuids);
   }
 
   @Override
@@ -127,6 +143,32 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
           .bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
     } catch (UnableToExecuteStatementException e) {
       throw ResponseUtils.handleSqlException(e, DUPLICATE_TENANT_NAME);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void addAdministrativePositions(String tenantUuid, List<Position> positions) {
+    final Handle handle = getDbHandle();
+    try {
+      final TenantBatch ab = handle.attach(TenantBatch.class);
+      if (positions != null) {
+        ab.insertAdministrativePositions(tenantUuid, positions);
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void removeAdministrativePositions(String tenantUuid, List<String> positionUuids) {
+    final Handle handle = getDbHandle();
+    try {
+      final TenantBatch ab = handle.attach(TenantBatch.class);
+      if (positionUuids != null) {
+        ab.deleteAdministrativePositions(tenantUuid, positionUuids);
+      }
     } finally {
       closeDbHandle(handle);
     }
@@ -240,6 +282,44 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     try {
       final TenantBatch tb = handle.attach(TenantBatch.class);
       tb.removeMemberFromTenant(p.getUuid(), t.getUuid());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  class TenantAdministrativePositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String SQL = "/* batch.getTenantAdministrativePositions */"
+        + " SELECT \"tenantAdministrativePositions\".\"tenantUuid\"," + PositionDao.POSITION_FIELDS
+        + " FROM \"tenantAdministrativePositions\""
+        + " INNER JOIN positions on positions.uuid = \"tenantAdministrativePositions\".\"positionUuid\""
+        + " WHERE \"tenantAdministrativePositions\".\"tenantUuid\" IN ( <foreignKeys> )"
+        + " ORDER BY positions.name, positions.uuid";
+
+    public TenantAdministrativePositionsBatcher() {
+      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(), "tenantUuid");
+    }
+  }
+
+  public List<List<Position>> getAdministrativePositions(List<String> foreignKeys) {
+    return new TenantDao.TenantAdministrativePositionsBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Position>> getAdministrativePositionsForTenant(
+      GraphQLContext context, String tenantUuid) {
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.TENANT_ADMINISTRATIVE_POSITIONS, tenantUuid);
+  }
+
+  @Transactional
+  public List<Tenant> getTenantsAdministratedByPosition(String positionUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      final String sql = "/* getTenantsAdministratedByPosition */ SELECT * FROM " + TABLE_NAME
+          + " JOIN \"tenantAdministrativePositions\" tap"
+          + " ON tap.\"tenantUuid\" = tenants.uuid WHERE tap.\"positionUuid\" = :positionUuid"
+          + " ORDER BY tenants.name";
+      return handle.createQuery(sql).bind("positionUuid", positionUuid).map(new TenantMapper())
+          .list();
     } finally {
       closeDbHandle(handle);
     }

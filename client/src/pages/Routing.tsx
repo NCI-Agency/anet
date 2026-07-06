@@ -13,10 +13,8 @@ import MergePositions from "pages/admin/merge/MergePositions"
 import MergeTasks from "pages/admin/merge/MergeTasks"
 import PendingEmailsShow from "pages/admin/pendingEmails/Show"
 import Preferences from "pages/admin/preferences/Preferences"
-import TenantEdit from "pages/admin/tenants/Edit"
 import TenantsList from "pages/admin/tenants/Index"
 import TenantNew from "pages/admin/tenants/New"
-import TenantShow from "pages/admin/tenants/Show"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
@@ -75,6 +73,9 @@ import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import TopTasks from "pages/tasks/Top"
+import TenantEdit from "pages/tenants/Edit"
+import MyTenants from "pages/tenants/MyTenants"
+import TenantShow from "pages/tenants/Show"
 import { PAGE_URLS } from "pages/util"
 import React from "react"
 import Settings from "settings"
@@ -266,6 +267,36 @@ const routes = [
         ]
       },
       {
+        path: "tenants",
+        element: (
+          <ProtectedRoute
+            authorizationCallback={currentUser =>
+              currentUser?.isAdmin() ||
+              !_isEmpty(currentUser?.position?.tenantsAdministrated)
+            }
+          />
+        ),
+        children: [
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <TenantShow /> },
+              { path: "edit", element: <TenantEdit /> }
+            ]
+          },
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  !_isEmpty(currentUser?.position?.tenantsAdministrated)
+                }
+              />
+            ),
+            children: [{ path: "mine", element: <MyTenants /> }]
+          }
+        ]
+      },
+      {
         element: (
           <ProtectedRoute
             authorizationCallback={currentUser => currentUser?.isAdmin()}
@@ -319,14 +350,7 @@ const routes = [
                 path: "tenants",
                 children: [
                   { index: true, element: <TenantsList /> },
-                  { path: "new", element: <TenantNew /> },
-                  {
-                    path: ":uuid",
-                    children: [
-                      { index: true, element: <TenantShow /> },
-                      { path: "edit", element: <TenantEdit /> }
-                    ]
-                  }
+                  { path: "new", element: <TenantNew /> }
                 ]
               },
               {
