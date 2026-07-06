@@ -17,6 +17,7 @@ export default class Tenant extends Model {
       .of(yup.string().email("Address must be a valid email").nullable())
       .nullable()
       .default([]),
+    administrativePositions: yup.array().nullable().default([]),
     members: yup.array().nullable().default([])
   })
 
@@ -28,7 +29,7 @@ export default class Tenant extends Model {
 
   static pathFor(instance, query) {
     const uuid = instance.uuid
-    let url = ["", "admin", "tenants", uuid].join("/")
+    let url = ["", "tenants", uuid].join("/")
     url += utils.formatQueryString(query)
     return url
   }
