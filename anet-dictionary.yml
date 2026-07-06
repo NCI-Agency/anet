@@ -1344,6 +1344,8 @@ fields:
       placeholder: Fill in the unique name of this tenant
     emailAddresses:
       label: Archive email addresses
+    administrativePositions:
+      label: Tenant administrators
 
   advisor:
     person:

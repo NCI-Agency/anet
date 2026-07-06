@@ -19,6 +19,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionTable from "components/PositionTable"
 import { Tenant } from "models"
 import React, { useContext } from "react"
 import { legacy_connect as connect } from "react-redux"
@@ -29,6 +30,18 @@ const GQL_GET_TENANT = gql`
   query ($uuid: String) {
     tenant(uuid: $uuid) {
       ${gqlAllTenantFields}
+      administrativePositions {
+        ${gqlEntityFieldsMap.Position}
+        location {
+          ${gqlEntityFieldsMap.Location}
+        }
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        person {
+          ${gqlEntityFieldsMap.Person}
+        }
+      }
       members {
         ${gqlEntityFieldsMap.Person}
         position {
@@ -73,7 +86,10 @@ const TenantShow = ({ pageDispatchers }: TenantShowProps) => {
   }
 
   const tenant = new Tenant(data ? data.tenant : {})
-  const canEdit = currentUser.isAdmin()
+  const isAssignedSuperuser = currentUser.position?.tenantsAdministrated?.some(
+    t => t.uuid === tenant.uuid
+  )
+  const canEdit = currentUser.isAdmin() || isAssignedSuperuser
 
   const action = (
     <>
@@ -109,6 +125,12 @@ const TenantShow = ({ pageDispatchers }: TenantShowProps) => {
                 ))}
               </ul>
             }
+          />
+        </Fieldset>
+        <Fieldset title={Settings.fields.tenant.administrativePositions?.label}>
+          <PositionTable
+            positions={tenant.administrativePositions}
+            showLocation
           />
         </Fieldset>
         <Fieldset title="Members">
