@@ -1613,6 +1613,7 @@ type Position {
   role: PositionRole
   status: Status
   superuserType: SuperuserType
+  tenantsAdministrated: [Tenant]
   type: PositionType
   updatedAt: Instant
   uuid: String
@@ -2427,6 +2428,7 @@ enum TaskSearchSortBy {
 
 """"""
 type Tenant {
+  administrativePositions: [Position]
   createdAt: Instant
   emailAddresses: [String]
   members: [Person]
@@ -2438,6 +2440,7 @@ type Tenant {
 
 """"""
 input TenantInput {
+  administrativePositions: [PositionInput]
   createdAt: Instant
   emailAddresses: [String]
   members: [PersonInput]
