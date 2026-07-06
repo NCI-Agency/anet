@@ -6,8 +6,8 @@ import {
   usePageTitle
 } from "components/Page"
 import { Tenant } from "models"
+import TenantForm from "pages/tenants/Form"
 import { legacy_connect as connect } from "react-redux"
-import TenantForm from "./Form"
 
 interface TenantNewProps {
   pageDispatchers?: PageDispatchersPropType
