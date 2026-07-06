@@ -21,6 +21,18 @@ const GQL_GET_TENANT = gql`
   query ($uuid: String!) {
     tenant(uuid: $uuid) {
       ${gqlAllTenantFields}
+      administrativePositions {
+        ${gqlEntityFieldsMap.Position}
+        location {
+          ${gqlEntityFieldsMap.Location}
+        }
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        person {
+          ${gqlEntityFieldsMap.Person}
+        }
+      }
       members {
         ${gqlEntityFieldsMap.Person}
         position {

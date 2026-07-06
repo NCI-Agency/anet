@@ -6,8 +6,10 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
+import java.util.Objects;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.TenantDao;
@@ -51,6 +53,9 @@ public class TenantResource {
     AuthUtils.assertAdministrator(user);
     final Tenant created = tenantDao.insert(t);
 
+    // Add administrative positions
+    tenantDao.addAdministrativePositions(t.getUuid(), t.getAdministrativePositions());
+
     // Log the change
     auditTrailDao.logCreate(user, TenantDao.TABLE_NAME, created);
     return created;
@@ -66,12 +71,30 @@ public class TenantResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tenant not found");
     }
 
-    AuthUtils.assertAdministrator(user);
+    final List<Position> existingAdministrativePositions = tenantDao
+        .getAdministrativePositionsForTenant(engine.getContext(), DaoUtils.getUuid(t)).join();
+    // User has to be admin or must hold an administrative position for the tenant
+    if (!AuthUtils.isAdmin(user)) {
+      final Position userPosition = DaoUtils.getPosition(user);
+      final boolean canUpdate = existingAdministrativePositions.stream()
+          .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
+      if (!canUpdate) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+      }
+    }
     DaoUtils.assertObjectIsFresh(t, existing, force);
 
     final int numRows = tenantDao.update(t);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process tenant update");
+    }
+
+    // Update administrative positions
+    if (AuthUtils.isAdmin(user) && t.getAdministrativePositions() != null) {
+      Utils.addRemoveElementsByUuid(existingAdministrativePositions, t.getAdministrativePositions(),
+          newPosition -> tenantDao.addAdministrativePositions(t.getUuid(), List.of(newPosition)),
+          oldPosition -> tenantDao.removeAdministrativePositions(t.getUuid(),
+              List.of(DaoUtils.getUuid(oldPosition))));
     }
 
     // Update members:

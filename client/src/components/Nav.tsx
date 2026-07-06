@@ -243,6 +243,7 @@ const Navigation = ({
   const inMyCounterParts = path.startsWith("/positions/counterparts")
   const inMyTasks = path.startsWith("/tasks/mine")
   const inMyAuthorizationGroups = path.startsWith("/communities/mine")
+  const inMyTenants = path.startsWith("/tenants/mine")
   const inMyReports = path.startsWith("/reports/mine")
   const inMySubscriptions = path.startsWith("/subscriptions/mine")
   const inInsights = path.startsWith("/insights")
@@ -260,6 +261,7 @@ const Navigation = ({
       inMyReports ||
       inMyTasks ||
       inMyAuthorizationGroups ||
+      inMyTenants ||
       inMySubscriptions ||
       inMySavedSearches ||
       inMyEvents
@@ -272,6 +274,7 @@ const Navigation = ({
     inMyReports,
     inMyTasks,
     inMyAuthorizationGroups,
+    inMyTenants,
     inMySubscriptions,
     inMySavedSearches,
     inMyEvents
@@ -403,6 +406,15 @@ const Navigation = ({
               handleOnClick={resetPages}
             >
               My Communities
+            </SidebarLink>
+          )}
+          {!_isEmpty(currentUser?.position?.tenantsAdministrated) && (
+            <SidebarLink
+              id="my-tenants-nav"
+              linkTo="/tenants/mine"
+              handleOnClick={resetPages}
+            >
+              My Tenants
             </SidebarLink>
           )}
           {(currentUser.isAdmin() ||
