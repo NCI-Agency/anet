@@ -46,7 +46,7 @@ public abstract class AbstractAuditTrailSearcher
           query.getPersonUuid());
     }
 
-    if (query.getRelatedObjectUuid() != null) {
+    if (!Utils.isEmptyOrNull(Utils.trimStringReturnNull(query.getRelatedObjectUuid()))) {
       qb.addStringEqualsClause("relatedObjectUuid", quotedTableName + ".\"relatedObjectUuid\"",
           query.getRelatedObjectUuid());
     } else {
