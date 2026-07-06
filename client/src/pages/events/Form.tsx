@@ -264,7 +264,7 @@ const EventForm = ({
                           initialAvatar={initialValues.entityAvatar}
                           relatedObjectType="events"
                           relatedObjectUuid={initialValues.uuid}
-                          relatedObjectName={initialValues.shortName}
+                          relatedObjectName={initialValues.name}
                           editMode={attachmentEditEnabled}
                           imageAttachments={imageAttachments}
                         />

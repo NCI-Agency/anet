@@ -150,7 +150,7 @@ const EventSeriesForm = ({
                           initialAvatar={initialValues.entityAvatar}
                           relatedObjectType="eventSeries"
                           relatedObjectUuid={initialValues.uuid}
-                          relatedObjectName={initialValues.shortName}
+                          relatedObjectName={initialValues.name}
                           editMode={attachmentEditEnabled}
                           imageAttachments={imageAttachments}
                         />
