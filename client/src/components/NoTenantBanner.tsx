@@ -23,7 +23,7 @@ const NoTenantBanner = ({ person }: NoTenantBannerProps) => {
     showNoTenantBanner && (
       <div className="banner" style={css}>
         You have not been assigned to an active Tenant. Please contact your
-        administrator to be assigned to one.
+        Tenant's administrator to be assigned to one.
       </div>
     )
   )

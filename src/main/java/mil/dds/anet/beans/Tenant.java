@@ -19,6 +19,8 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
   @GraphQLInputField
   private List<String> emailAddresses;
   // annotated below
+  private List<Position> administrativePositions;
+  // annotated below
   private List<Person> members;
 
   @Override
@@ -45,6 +47,28 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
 
   public void setEmailAddresses(List<String> emailAddresses) {
     this.emailAddresses = emailAddresses;
+  }
+
+  @GraphQLQuery(name = "administrativePositions")
+  public CompletableFuture<List<Position>> loadAdministrativePositions(
+      @GraphQLRootContext GraphQLContext context) {
+    if (administrativePositions != null) {
+      return CompletableFuture.completedFuture(administrativePositions);
+    }
+    return engine().getTenantDao().getAdministrativePositionsForTenant(context, uuid)
+        .thenApply(o -> {
+          administrativePositions = o;
+          return o;
+        });
+  }
+
+  public List<Position> getAdministrativePositions() {
+    return administrativePositions;
+  }
+
+  @GraphQLInputField(name = "administrativePositions")
+  public void setAdministrativePositions(List<Position> positions) {
+    this.administrativePositions = positions;
   }
 
   @GraphQLQuery(name = "members")
