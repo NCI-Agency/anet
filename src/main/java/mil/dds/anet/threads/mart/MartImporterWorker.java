@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.JobHistory;
@@ -81,9 +82,21 @@ public class MartImporterWorker extends AbstractWorker {
       // If transmission log in email process
       attachments.stream()
           .filter(attachment -> attachment.getName().equalsIgnoreCase(TRANSMISSION_LOG_ATTACHMENT))
-          .findFirst().ifPresent(this.transmissionLogImporter::processTransmissionLog);
+          .findFirst().ifPresent(attachment -> transmissionLogImporter
+              .processTransmissionLog(attachment, getEmailReceivedTime(email)));
     } catch (Exception e) {
       logger.error("Could not load information from email", e);
+    }
+  }
+
+  private Instant getEmailReceivedTime(EmailMessage email) {
+    final Instant fallback = Instant.now();
+    try {
+      return email.getDateTimeReceived() != null ? email.getDateTimeReceived().toInstant()
+          : fallback;
+    } catch (ServiceLocalException e) {
+      logger.warn("Could not determine email received time. Using current time instead.", e);
+      return fallback;
     }
   }
 }

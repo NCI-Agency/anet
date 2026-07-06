@@ -87,7 +87,7 @@ const MartImportedReportTable = ({
   usePageTitle("MART reports imported")
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
-  const [sortBy, setSortBy] = useState("RECEIVED_AT")
+  const [sortBy, setSortBy] = useState("SEQUENCE")
   const [sortOrder, setSortOrder] = useState("DESC")
   const [selectedState, setSelectedState] = useState(undefined)
   const [selectedAuthor, setSelectedAuthor] = useState(null)

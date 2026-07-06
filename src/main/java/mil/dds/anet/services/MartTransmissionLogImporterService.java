@@ -35,7 +35,8 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
   }
 
   @Override
-  public void processTransmissionLog(FileAttachment martTransmissionLogAttachment) {
+  public void processTransmissionLog(FileAttachment martTransmissionLogAttachment,
+      Instant emailReceivedTime) {
     try {
       // Get the transmission log JSON from the attachment
       martTransmissionLogAttachment.load();
@@ -59,7 +60,7 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
           martImportedReport.setSequence(logDto.getSequence());
           martImportedReport.setState(MartImportedReport.State.NOT_RECEIVED);
           martImportedReport.setSubmittedAt(logDto.getSubmittedAt());
-          martImportedReport.setReceivedAt(Instant.now());
+          martImportedReport.setReceivedAt(emailReceivedTime);
           martImportedReport.setReportUuid(logDto.getReportUuid());
           if (logDto.getState() == LogDto.LogState.FAILED_TO_SEND_EMAIL.getCode()) {
             martImportedReport.setErrors(

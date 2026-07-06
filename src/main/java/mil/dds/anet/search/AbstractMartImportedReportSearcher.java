@@ -33,36 +33,36 @@ public abstract class AbstractMartImportedReportSearcher
 
   @Override
   protected void buildQuery(final MartImportedReportSearchQuery query) {
-    qb.addSelectClause(
-        (Utils.isEmptyOrNull(query.getReportUuid()) ? "ON (\"martImportedReports\".\"reportUuid\") "
-            : "") + MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
-    qb.addFromClause("\"martImportedReports\"");
+    final String tableName = String.format("\"%s\"", MartImportedReportDao.TABLE_NAME);
+    final boolean applyGrouping = applyGrouping(query);
+    qb.addSelectClause(MartImportedReportDao.MART_IMPORTED_REPORTS_FIELDS);
+    qb.addFromClause(
+        (applyGrouping
+            ? "(SELECT DISTINCT ON (\"reportUuid\") * FROM " + tableName
+                + " ORDER BY \"reportUuid\", sequence DESC) AS "
+            : "") + tableName);
 
     // Add the count for each imported report
-    qb.addWithClause("mir2 AS "
-        + "(SELECT COUNT(*), \"reportUuid\" FROM \"martImportedReports\" GROUP BY \"reportUuid\")");
+    qb.addWithClause(
+        "mir2 AS (SELECT COUNT(*), \"reportUuid\" FROM " + tableName + " GROUP BY \"reportUuid\")");
     qb.addSelectClause("mir2.count AS \"martImportedReports_historyCount\"");
     qb.addFromClause(", mir2");
-    qb.addWhereClause("mir2.\"reportUuid\" = \"martImportedReports\".\"reportUuid\"");
+    qb.addWhereClause("mir2.\"reportUuid\" = " + tableName + ".\"reportUuid\"");
 
     if (!Utils.isEmptyOrNull(query.getPersonUuid())) {
-      qb.addStringEqualsClause("personUuid", "\"martImportedReports\".\"personUuid\"",
-          query.getPersonUuid());
+      qb.addStringEqualsClause("personUuid", tableName + ".\"personUuid\"", query.getPersonUuid());
     }
     if (!Utils.isEmptyOrNull(query.getReportUuid())) {
-      qb.addStringEqualsClause("reportUuid", "\"martImportedReports\".\"reportUuid\"",
-          query.getReportUuid());
+      qb.addStringEqualsClause("reportUuid", tableName + ".\"reportUuid\"", query.getReportUuid());
     }
     if (query.getState() != null) {
-      qb.addEnumEqualsClause("state", "\"martImportedReports\".state", query.getState());
+      qb.addEnumEqualsClause("state", tableName + ".state", query.getState());
     }
     if (!Utils.isEmptyOrNull(query.getSequences())) {
-      qb.addInListClause("sequence", "\"martImportedReports\".sequence", query.getSequences());
+      qb.addInListClause("sequence", tableName + ".sequence", query.getSequences());
     }
-
-    if (Utils.isEmptyOrNull(query.getReportUuid())) {
-      qb.addInnerOrderByClause(
-          "\"martImportedReports\".\"reportUuid\", \"martImportedReports\".sequence DESC");
+    if (applyGrouping) {
+      qb.addInnerOrderByClause(tableName + ".\"reportUuid\", " + tableName + ".sequence DESC");
     }
     addOrderByClauses(qb, query);
   }
@@ -88,5 +88,9 @@ public abstract class AbstractMartImportedReportSearcher
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "martImportedReports_sequence"));
+  }
+
+  private boolean applyGrouping(MartImportedReportSearchQuery query) {
+    return Utils.isEmptyOrNull(query.getReportUuid()) && Utils.isEmptyOrNull(query.getSequences());
   }
 }
