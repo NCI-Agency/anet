@@ -100,6 +100,8 @@ public class Person extends AbstractEmailableAnetBean
   // annotated below
   private EntityAvatar entityAvatar;
   // annotated below
+  private List<Tenant> tenantAccessRequests;
+  // annotated below
   private List<Tenant> tenants;
 
   // non-GraphQL
@@ -474,6 +476,30 @@ public class Person extends AbstractEmailableAnetBean
   @GraphQLInputField(name = "preferences")
   public void setPreferences(List<PersonPreference> preferences) {
     this.preferences = preferences;
+  }
+
+  @GraphQLQuery(name = "tenantAccessRequests")
+  @AllowUnverifiedUsers
+  public CompletableFuture<List<Tenant>> loadTenantAccessRequests(
+      @GraphQLRootContext GraphQLContext context) {
+    if (tenantAccessRequests != null) {
+      return CompletableFuture.completedFuture(tenantAccessRequests);
+    } else {
+      return engine().getTenantDao().getTenantAccessRequestsForPerson(context, uuid)
+          .thenApply(o -> {
+            tenantAccessRequests = o;
+            return o;
+          });
+    }
+  }
+
+  public List<Tenant> getTenantAccessRequests() {
+    return tenantAccessRequests;
+  }
+
+  @GraphQLInputField(name = "tenantAccessRequests")
+  public void setTenantAccessRequests(List<Tenant> tenantAccessRequests) {
+    this.tenantAccessRequests = tenantAccessRequests;
   }
 
   @GraphQLQuery(name = "tenants")
