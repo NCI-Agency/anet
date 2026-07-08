@@ -28,6 +28,7 @@ import {
   SearchDescription
 } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
+import _isEmpty from "lodash/isEmpty"
 import { Event, Report } from "models"
 import { superuserTour, userTour } from "pages/GuidedTour"
 import SearchResults from "pages/searches/SearchResults"
@@ -349,6 +350,25 @@ const UsersPendingVerification = ({
   )
 }
 
+const PendingTenantAccessRequests = () => {
+  const { currentUser } = useContext(AppContext)
+  const nrTenantsWithAccessRequests =
+    currentUser?.position?.tenantsAdministrated?.filter(
+      t => !_isEmpty(t.accessRequests)
+    )?.length ?? 0
+  return (
+    <Fieldset title="My tenants with pending access requests">
+      {nrTenantsWithAccessRequests <= 0 ? (
+        <em>No tenants with pending access requests</em>
+      ) : (
+        <Link to="/tenants/mine">
+          {nrTenantsWithAccessRequests} tenant(s) with pending access requests
+        </Link>
+      )}
+    </Fieldset>
+  )
+}
+
 interface HiddenSearchResultsCountersProps {
   searches: any[]
   savedQueries: any
@@ -657,6 +677,10 @@ const Home = ({
           pageDispatchers={pageDispatchers}
           clearSearchQuery={clearSearchQuery}
         />
+      )}
+
+      {!_isEmpty(currentUser?.position?.tenantsAdministrated) && (
+        <PendingTenantAccessRequests />
       )}
 
       <MySubscriptionUpdates />
