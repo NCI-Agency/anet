@@ -495,6 +495,7 @@ const AdvancedSelect = ({
                 <InputGroup>
                   <Form.Control
                     name={fieldName}
+                    className={className}
                     autoComplete={autoComplete}
                     value={searchTerms || ""}
                     placeholder={placeholder}

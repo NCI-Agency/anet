@@ -21,6 +21,7 @@ test.describe(() => {
     rank: "CIV",
     gender: "FEMALE",
     country: "Albania",
+    tenant: "Department Q",
     endOfTourDate: moment().add(1, "days").format("DD-MM-YYYY")
   }
   test.describe("Onboard new user login", () => {
@@ -116,6 +117,27 @@ test.describe(() => {
       await (await OnboardPage.getCountryAdvancedSelectFirstItem()).click()
       await (
         await OnboardPage.getCountryHelpBlock()
+      ).waitFor({
+        state: "detached"
+      })
+      await (await OnboardPage.getTenantAccessRequestsInput()).click()
+      await (
+        await OnboardPage.getTenantAccessRequestsInput()
+      ).fill(String(personDetails.tenant))
+      await OnboardPage.waitForElementToChange(
+        () => OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem(),
+        personDetails.tenant
+      )
+      await expect(
+        await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+      ).toContainText(personDetails.tenant, {
+        useInnerText: true
+      })
+      await (
+        await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+      ).click()
+      await (
+        await OnboardPage.getTenantAccessRequestsHelpBlock()
       ).waitFor({
         state: "detached"
       })

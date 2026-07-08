@@ -19,6 +19,9 @@ const GQL_GET_MY_TENANTS = gql`
       position {
         tenantsAdministrated {
           ${gqlEntityFieldsMap.Tenant}
+          accessRequests {
+            uuid
+          }
           members {
             uuid
             status
@@ -55,6 +58,7 @@ const MyTenants = ({ pageDispatchers }: MyTenantsProps) => {
         tenants={tenantsAdministrated}
         showLink
         showStatus
+        showAccessRequestsCount
         showMembersCount
       />
     </Fieldset>
