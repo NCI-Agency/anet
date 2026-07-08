@@ -30,6 +30,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.UserDao;
 import mil.dds.anet.emails.NewUserEmail;
+import mil.dds.anet.emails.TenantAccessRequestEmail;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -239,8 +240,11 @@ public class PersonResource {
           Boolean.TRUE.equals(p.getUser()) ? p.getTenantAccessRequests() : List.of();
       final Instant now = Instant.now();
       Utils.addRemoveElementsByUuid(existingTenantAccessRequests, newTenantAccessRequests,
-          newTenant -> dao.addTenantAccessRequestToPerson(newTenant, p, now),
-          oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
+          newTenant -> {
+            dao.addTenantAccessRequestToPerson(newTenant, p, now);
+            // Send email to the tenant administrators that a user requests access
+            sendTenantAccessRequestEmail(newTenant, p);
+          }, oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
     }
 
     if (AuthUtils.isAdmin(user)) {
@@ -473,8 +477,11 @@ public class PersonResource {
           Boolean.TRUE.equals(p.getUser()) ? p.getTenantAccessRequests() : List.of();
       final Instant now = Instant.now();
       Utils.addRemoveElementsByUuid(existingTenantAccessRequests, newTenantAccessRequests,
-          newTenant -> dao.addTenantAccessRequestToPerson(newTenant, p, now),
-          oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
+          newTenant -> {
+            dao.addTenantAccessRequestToPerson(newTenant, p, now);
+            // Send email to the tenant administrators that a user requests access
+            sendTenantAccessRequestEmail(newTenant, p);
+          }, oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -561,5 +568,12 @@ public class PersonResource {
     final NewUserEmail action = new NewUserEmail();
     action.setPersonUuid(DaoUtils.getUuid(p));
     dao.sendEmailToAdmins(action);
+  }
+
+  private void sendTenantAccessRequestEmail(Tenant t, Person p) {
+    final TenantAccessRequestEmail action = new TenantAccessRequestEmail();
+    action.setTenantUuid(DaoUtils.getUuid(t));
+    action.setPersonUuid(DaoUtils.getUuid(p));
+    dao.sendEmailToTenantAdministrators(t, action);
   }
 }
