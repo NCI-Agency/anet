@@ -148,14 +148,18 @@ public class Utils {
           updateFunc.accept(newElement);
         }
       } else {
-        // Add this new element
-        addFunc.accept(newElement);
+        // Add this new element (optional)
+        if (addFunc != null) {
+          addFunc.accept(newElement);
+        }
       }
     }
 
-    // Finally remove all items remaining in existingUuids
-    for (final T oldElement : existingElementsByKey.values()) {
-      removeFunc.accept(oldElement);
+    // Finally remove all items remaining in existingUuids (optional)
+    if (removeFunc != null) {
+      for (final T oldElement : existingElementsByKey.values()) {
+        removeFunc.accept(oldElement);
+      }
     }
   }
 

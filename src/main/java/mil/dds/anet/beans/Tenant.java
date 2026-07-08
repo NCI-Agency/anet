@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Tenant extends AbstractAnetBean implements WithStatus {
@@ -21,9 +22,18 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
   // annotated below
   private List<Position> administrativePositions;
   // annotated below
+  private List<Person> accessRequests;
+  // annotated below
   private List<Person> members;
 
   @Override
+  @AllowUnverifiedUsers
+  public String getUuid() {
+    return super.getUuid();
+  }
+
+  @Override
+  @AllowUnverifiedUsers
   public Status getStatus() {
     return status;
   }
@@ -33,6 +43,7 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
     this.status = status;
   }
 
+  @AllowUnverifiedUsers
   public String getName() {
     return name;
   }
@@ -69,6 +80,27 @@ public class Tenant extends AbstractAnetBean implements WithStatus {
   @GraphQLInputField(name = "administrativePositions")
   public void setAdministrativePositions(List<Position> positions) {
     this.administrativePositions = positions;
+  }
+
+  @GraphQLQuery(name = "accessRequests")
+  public CompletableFuture<List<Person>> loadAccessRequests(
+      @GraphQLRootContext GraphQLContext context) {
+    if (accessRequests != null) {
+      return CompletableFuture.completedFuture(accessRequests);
+    }
+    return engine().getTenantDao().getAccessRequestsForTenant(context, uuid).thenApply(o -> {
+      accessRequests = o;
+      return o;
+    });
+  }
+
+  public List<Person> getAccessRequests() {
+    return accessRequests;
+  }
+
+  @GraphQLInputField(name = "accessRequests")
+  public void setAccessRequests(List<Person> accessRequests) {
+    this.accessRequests = accessRequests;
   }
 
   @GraphQLQuery(name = "members")
