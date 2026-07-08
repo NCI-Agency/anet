@@ -39,6 +39,9 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         ${gqlEntityFieldsMap.Person}
         pendingVerification
         ${gqlEmailAddressesFields}
+        tenantAccessRequests {
+          ${gqlEntityFieldsMap.Tenant}
+        }
         tenants {
           ${gqlEntityFieldsMap.Tenant}
         }
@@ -136,6 +139,7 @@ const UsersPendingVerification = ({
             </thead>
             <tbody>
               {list.map(person => {
+                person.tenants = person.tenantAccessRequests
                 if (_isEmpty(person?.tenants)) {
                   person.tenants = defaultTenants
                 }

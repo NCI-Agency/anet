@@ -99,6 +99,24 @@ export class CreatePerson extends Page {
     return currentPage().locator("#fg-country div.invalid-feedback").first()
   }
 
+  async getTenantAccessRequestsInput() {
+    return currentPage().locator("#tenantAccessRequests").first()
+  }
+
+  async getTenantAccessRequestsAdvancedSelectFirstItem() {
+    return currentPage()
+      .locator(
+        "#tenantAccessRequests-popover tbody tr:first-child td:nth-child(2)"
+      )
+      .first()
+  }
+
+  async getTenantAccessRequestsHelpBlock() {
+    return currentPage()
+      .locator("#fg-tenantAccessRequests div.invalid-feedback")
+      .first()
+  }
+
   async getEndOfTourDate() {
     return currentPage().locator("#endOfTourDate").first()
   }
