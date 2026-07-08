@@ -172,6 +172,19 @@ export default class Person extends Model {
   static yupSchema = yup
     .object()
     .shape({
+      tenantAccessRequests: yup.array().nullable().default([]),
+      tenants: yup.array().nullable().default([])
+    })
+    .concat(Person.yupBaseSchema)
+
+  static yupOnboardingSchema = yup
+    .object()
+    .shape({
+      tenantAccessRequests: yup
+        .array()
+        .min(1, "You must request access to at least one tenant")
+        .nullable()
+        .default([]),
       tenants: yup.array().nullable().default([])
     })
     .concat(Person.yupBaseSchema)
@@ -179,6 +192,7 @@ export default class Person extends Model {
   static yupAdminSchema = yup
     .object()
     .shape({
+      tenantAccessRequests: yup.array().nullable().default([]),
       tenants: yup
         .array()
         .nullable()
