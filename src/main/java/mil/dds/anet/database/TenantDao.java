@@ -3,6 +3,8 @@ package mil.dds.anet.database;
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
 import graphql.GraphQLContext;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -104,6 +106,16 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
         + " WHERE \"tenantUuid\" = :tenantUuid AND \"positionUuid\" IN ( <positionUuids> )")
     void deleteAdministrativePositions(@Bind("tenantUuid") String tenantUuid,
         @BindList(value = "positionUuids", onEmpty = NULL_STRING) List<String> positionUuids);
+
+    @SqlUpdate("INSERT INTO \"tenantAccessRequests\" (\"personUuid\", \"tenantUuid\", \"createdAt\") "
+        + "VALUES (:personUuid, :tenantUuid, :createdAt)")
+    void addAccessRequestToTenant(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid, @Bind("createdAt") LocalDateTime createdAt);
+
+    @SqlUpdate("DELETE FROM \"tenantAccessRequests\" "
+        + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
+    void removeAccessRequestFromTenant(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid);
   }
 
   @Override
@@ -174,6 +186,29 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     }
   }
 
+  public CompletableFuture<List<Tenant>> getTenantAccessRequestsForPerson(GraphQLContext context,
+      String personUuid) {
+    return new ForeignKeyFetcher<Tenant>().load(context,
+        FkDataLoaderKey.TENANT_ACCESS_REQUESTS_FOR_PERSON, personUuid);
+  }
+
+  class TenantAccessRequestsForPersonBatcher extends ForeignKeyBatcher<Tenant> {
+    private static final String SQL =
+        "/* batch.getTenantAccessRequestsForPerson */ SELECT \"tenantAccessRequests\".\"personUuid\", "
+            + TABLE_NAME + ".*  FROM \"tenantAccessRequests\" INNER JOIN " + TABLE_NAME
+            + " ON tenants.uuid = \"tenantAccessRequests\".\"tenantUuid\""
+            + " WHERE \"tenantAccessRequests\".\"personUuid\" IN ( <foreignKeys> )"
+            + " ORDER BY tenants.name";
+
+    public TenantAccessRequestsForPersonBatcher() {
+      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new TenantMapper(), "personUuid");
+    }
+  }
+
+  public List<List<Tenant>> getTenantAccessRequestsForPerson(List<String> foreignKeys) {
+    return new TenantAccessRequestsForPersonBatcher().getByForeignKeys(foreignKeys);
+  }
+
   public CompletableFuture<List<Tenant>> getTenantsForPerson(GraphQLContext context,
       String personUuid) {
     return new ForeignKeyFetcher<Tenant>().load(context, FkDataLoaderKey.TENANT_PERSON, personUuid);
@@ -240,6 +275,51 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
 
   public List<List<Tenant>> getTenantsForAccessToken(List<String> foreignKeys) {
     return new TenantsForAccessTokenBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  class AccessRequestsBatcher extends ForeignKeyBatcher<Person> {
+    private static final String SQL =
+        "/* batch.getAccessRequestsForTenant */ SELECT \"tenantAccessRequests\".\"tenantUuid\", "
+            + PersonDao.PERSON_FIELDS + " FROM \"tenantAccessRequests\" "
+            + "INNER JOIN people ON people.uuid = \"tenantAccessRequests\".\"personUuid\" "
+            + "WHERE \"tenantAccessRequests\".\"tenantUuid\" IN ( <foreignKeys> ) "
+            + "ORDER BY people.\"familyName\", people.\"givenName\", people.uuid";
+
+    public AccessRequestsBatcher() {
+      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new PersonMapper(), "tenantUuid");
+    }
+  }
+
+  public List<List<Person>> getAccessRequests(List<String> foreignKeys) {
+    return new AccessRequestsBatcher().getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Person>> getAccessRequestsForTenant(GraphQLContext context,
+      String tenantUuid) {
+    return new ForeignKeyFetcher<Person>().load(context,
+        FkDataLoaderKey.TENANT_ACCESS_REQUESTS_FOR_TENANT, tenantUuid);
+  }
+
+  @Transactional
+  public void addAccessRequestToTenant(Person p, Tenant t, Instant timestamp) {
+    final Handle handle = getDbHandle();
+    try {
+      final TenantBatch tb = handle.attach(TenantBatch.class);
+      tb.addAccessRequestToTenant(p.getUuid(), t.getUuid(), DaoUtils.asLocalDateTime(timestamp));
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void removeAccessRequestFromTenant(Person p, Tenant t) {
+    final Handle handle = getDbHandle();
+    try {
+      final TenantBatch tb = handle.attach(TenantBatch.class);
+      tb.removeAccessRequestFromTenant(p.getUuid(), t.getUuid());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   class MembersBatcher extends ForeignKeyBatcher<Person> {
