@@ -3,7 +3,7 @@ import Model from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import React from "react"
-import { Table } from "react-bootstrap"
+import { Badge, Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -12,6 +12,7 @@ interface TenantTableProps {
   tenants?: any[]
   showLink?: boolean
   showStatus?: boolean
+  showAccessRequestsCount?: boolean
   showMembersCount?: boolean
   showDelete?: boolean
   onDelete?: (...args: unknown[]) => unknown
@@ -23,6 +24,7 @@ const TenantTable = ({
   tenants,
   showLink = false,
   showStatus = false,
+  showAccessRequestsCount = false,
   showMembersCount = false,
   showDelete = false,
   onDelete,
@@ -38,6 +40,7 @@ const TenantTable = ({
             <tr>
               <th>{Settings.fields.tenant.name?.label}</th>
               {showStatus && <th>{Settings.fields.tenant.status?.label}</th>}
+              {showAccessRequestsCount && <th># Access requests</th>}
               {showMembersCount && <th># Members</th>}
               {showDelete && <th />}
             </tr>
@@ -48,6 +51,7 @@ const TenantTable = ({
               const nrActiveTenants =
                 tenant.members?.filter(m => m?.status === Model.STATUS.ACTIVE)
                   ?.length ?? 0
+              const nrAccessRequests = tenant.accessRequests?.length ?? 0
               return (
                 <tr key={tenant.uuid}>
                   <td>
@@ -62,6 +66,15 @@ const TenantTable = ({
                     )}
                   </td>
                   {showStatus && <td>{utils.sentenceCase(tenant.status)}</td>}
+                  {showAccessRequestsCount && (
+                    <td>
+                      {nrAccessRequests ? (
+                        <Badge>{nrAccessRequests}</Badge>
+                      ) : (
+                        nrAccessRequests
+                      )}
+                    </td>
+                  )}
                   {showMembersCount && (
                     <td>
                       {nrTenants}
