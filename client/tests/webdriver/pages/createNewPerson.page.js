@@ -104,6 +104,20 @@ export class CreatePerson extends Page {
     return browser.$("#fg-country div.invalid-feedback")
   }
 
+  async getTenantAccessRequestsInput() {
+    return browser.$("#tenantAccessRequests")
+  }
+
+  async getTenantAccessRequestsAdvancedSelectFirstItem() {
+    return browser.$(
+      "#tenantAccessRequests-popover tbody tr:first-child td:nth-child(2)"
+    )
+  }
+
+  async getTenantAccessRequestsHelpBlock() {
+    return browser.$("#fg-tenantAccessRequests div.invalid-feedback")
+  }
+
   async getEndOfTourDate() {
     return browser.$("#endOfTourDate")
   }
