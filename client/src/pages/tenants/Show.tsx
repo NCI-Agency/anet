@@ -42,6 +42,18 @@ const GQL_GET_TENANT = gql`
           ${gqlEntityFieldsMap.Person}
         }
       }
+      accessRequests {
+        ${gqlEntityFieldsMap.Person}
+        position {
+          ${gqlEntityFieldsMap.Position}
+          location {
+            ${gqlEntityFieldsMap.Location}
+          }
+          organization {
+            ${gqlEntityFieldsMap.Organization}
+          }
+        }
+      }
       members {
         ${gqlEntityFieldsMap.Person}
         position {
@@ -131,6 +143,12 @@ const TenantShow = ({ pageDispatchers }: TenantShowProps) => {
           <PositionTable
             positions={tenant.administrativePositions}
             showLocation
+          />
+        </Fieldset>
+        <Fieldset title="Access requests">
+          <NoPaginationPersonTable
+            people={tenant.accessRequests}
+            noPeopleMessage="No pending access requests"
           />
         </Fieldset>
         <Fieldset title="Members">
