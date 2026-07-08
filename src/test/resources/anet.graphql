@@ -1108,6 +1108,7 @@ type Person {
   previousPositions: [PersonPositionHistory]
   rank: String
   status: Status
+  tenantAccessRequests: [Tenant]
   tenants: [Tenant]
   updatedAt: Instant
   user: Boolean
@@ -1138,6 +1139,7 @@ input PersonInput {
   previousPositions: [PersonPositionHistoryInput]
   rank: String
   status: Status
+  tenantAccessRequests: [TenantInput]
   tenants: [TenantInput]
   updatedAt: Instant
   user: Boolean
@@ -1577,6 +1579,7 @@ type ReportPerson {
   primary: Boolean!
   rank: String
   status: Status
+  tenantAccessRequests: [Tenant]
   tenants: [Tenant]
   updatedAt: Instant
   user: Boolean
@@ -1611,6 +1614,7 @@ input ReportPersonInput {
   primary: Boolean!
   rank: String
   status: Status
+  tenantAccessRequests: [TenantInput]
   tenants: [TenantInput]
   updatedAt: Instant
   user: Boolean
@@ -1928,6 +1932,7 @@ enum TaskSearchSortBy {
 
 """"""
 type Tenant {
+  accessRequests: [Person]
   administrativePositions: [Position]
   createdAt: Instant
   emailAddresses: [String]
@@ -1940,6 +1945,7 @@ type Tenant {
 
 """"""
 input TenantInput {
+  accessRequests: [PersonInput]
   administrativePositions: [PositionInput]
   createdAt: Instant
   emailAddresses: [String]

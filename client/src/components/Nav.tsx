@@ -252,6 +252,10 @@ const Navigation = ({
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
   const allOrgsSorted = allOrganizations.toSorted(compareByApp6StandardIdentity)
+  const nrTenantsWithAccessRequests =
+    currentUser?.position?.tenantsAdministrated?.filter(
+      t => !_isEmpty(t.accessRequests)
+    )?.length ?? 0
 
   useEffect(() => {
     if (
@@ -414,6 +418,11 @@ const Navigation = ({
               handleOnClick={resetPages}
             >
               My Tenants
+              {!!nrTenantsWithAccessRequests && (
+                <NotificationBadge>
+                  {nrTenantsWithAccessRequests}
+                </NotificationBadge>
+              )}
             </SidebarLink>
           )}
           {(currentUser.isAdmin() ||

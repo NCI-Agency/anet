@@ -42,6 +42,7 @@ import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -602,6 +603,19 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
     void removeTenantFromPerson(@Bind("personUuid") String personUuid,
         @Bind("tenantUuid") String tenantUuid);
+
+    @SqlUpdate("INSERT INTO \"tenantAccessRequests\" (\"personUuid\", \"tenantUuid\", \"createdAt\") "
+        + "VALUES (:personUuid, :tenantUuid, :createdAt)")
+    void addTenantAccessRequestToPerson(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid, @Bind("createdAt") LocalDateTime createdAt);
+
+    @SqlUpdate("DELETE FROM \"tenantAccessRequests\" "
+        + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
+    void removeTenantAccessRequestFromPerson(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid);
+
+    @SqlUpdate("DELETE FROM \"tenantAccessRequests\" WHERE \"personUuid\" = :personUuid")
+    void deletePersonTenantAccessRequests(@Bind("personUuid") String personUuid);
   }
 
   @Transactional
@@ -612,6 +626,40 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         final PersonBatch pb = handle.attach(PersonBatch.class);
         pb.insertPersonTenants(uuid, personTenants);
       }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void addTenantAccessRequestToPerson(Tenant t, Person p, Instant timestamp) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.addTenantAccessRequestToPerson(p.getUuid(), t.getUuid(),
+          DaoUtils.asLocalDateTime(timestamp));
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void removeTenantAccessRequestFromPerson(Tenant t, Person p) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.removeTenantAccessRequestFromPerson(p.getUuid(), t.getUuid());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void deletePersonTenantAccessRequests(String personUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.deletePersonTenantAccessRequests(personUuid);
     } finally {
       closeDbHandle(handle);
     }

@@ -118,6 +118,9 @@ const GQL_GET_APP_DATA = gql`
         }
         tenantsAdministrated {
           ${gqlEntityFieldsMap.Tenant}
+          accessRequests {
+            uuid
+          }
         }
       }
       previousPositions {

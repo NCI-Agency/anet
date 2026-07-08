@@ -950,7 +950,7 @@ properties:
         additionalProperties: false
         required: [status, givenName, familyName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
-                   biography, authorizationGroups, tenants]
+                   biography, authorizationGroups, tenantAccessRequests, tenants]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -999,6 +999,8 @@ properties:
             "$ref": "#/$defs/inputField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
+          tenantAccessRequests:
+            "$ref": "#/$defs/inputField"
           tenants:
             "$ref": "#/$defs/inputField"
           customFields:

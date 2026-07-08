@@ -597,6 +597,8 @@ fields:
       placeholder: Fill in the biography of this person
     authorizationGroups:
       label: Communities
+    tenantAccessRequests:
+      label: Request access to these tenants
     tenants:
       label: Member of these tenants
     customSensitiveInformation:

@@ -21,6 +21,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import TenantTable from "components/TenantTable"
 import { Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
@@ -37,6 +38,12 @@ const GQL_GET_SELF = gql`
       ${gqlEntityAvatarFields}
       country {
         ${gqlEntityFieldsMap.Location}
+      }
+      tenantAccessRequests {
+        ${gqlEntityFieldsMap.Tenant}
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
     }
   }
@@ -99,7 +106,7 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
     <div>
       <Alert variant="warning">
         Your access to ANET has been requested. Your account is pending approval
-        by an administrator.
+        by a Tenant administrator.
       </Alert>
       <Messages error={stateError} success={stateSuccess} />
       <div className="form-horizontal">
@@ -117,6 +124,18 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
               <Col md={6}>{rightColumn}</Col>
             </Row>
             <Row>
+              <Col md={12}>
+                <FieldHelper.ReadonlyField
+                  field={{ name: "tenantAccessRequests" }}
+                  label={Settings.fields.person.tenantAccessRequests?.label}
+                  humanValue={
+                    <TenantTable
+                      tenants={person.tenantAccessRequests}
+                      showStatus
+                    />
+                  }
+                />
+              </Col>
               <Col md={12}>{fullWidthFields}</Col>
             </Row>
           </Container>
