@@ -174,6 +174,13 @@ const PersonForm = ({
       list: allTenants
     }
   }
+  const activeTenants = allTenants?.filter(
+    t => t?.status === Model.STATUS.ACTIVE
+  )
+  const defaultTenants = activeTenants?.length === 1 ? activeTenants : null
+  if (forOnboarding && _isEmpty(initialValues.tenantAccessRequests)) {
+    initialValues.tenantAccessRequests = defaultTenants ?? []
+  }
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
     checkPotentialDuplicates,
     400
@@ -186,7 +193,13 @@ const PersonForm = ({
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={isAdmin ? Person.yupAdminSchema : Person.yupSchema}
+      validationSchema={
+        isAdmin
+          ? Person.yupAdminSchema
+          : forOnboarding
+            ? Person.yupOnboardingSchema
+            : Person.yupSchema
+      }
       initialValues={initialValues}
     >
       {({
@@ -215,6 +228,15 @@ const PersonForm = ({
             values.position
           )
         const ranks = Settings.fields.person.ranks || []
+        const unselectedTenants = allTenants?.filter(
+          t => !values?.tenants?.some(pt => pt?.uuid === t.uuid)
+        )
+        const tenantAccessRequestsFilters = {
+          allTenants: {
+            label: "Unselected Tenants",
+            list: unselectedTenants
+          }
+        }
         // admins can edit all persons,
         // superusers for their organization hierarchy or position-less people,
         // and the user themselves when onboarding
@@ -769,47 +791,90 @@ const PersonForm = ({
                     />
                   )}
 
-                  {!forOnboarding && values.user && (
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.person.tenants}
-                      name="tenants"
-                      component={FieldHelper.SpecialField}
-                      onChange={value => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
-                        setFieldValue("tenants", value, true)
-                      }}
-                      widget={
-                        <AdvancedMultiSelect
-                          fieldName="tenants"
-                          placeholder="Search for tenants…"
-                          value={values.tenants}
-                          renderSelected={
-                            <TenantTable
-                              tenants={values.tenants}
-                              showStatus
-                              showDelete={isAdmin}
-                              noTenantsMessage={
-                                isAdmin ? (
-                                  "No tenants selected; click in the box above to select any"
-                                ) : (
-                                  <div style={{ paddingTop: 9 }}>
-                                    No tenants found
-                                  </div>
-                                )
-                              }
-                            />
-                          }
-                          overlayColumns={["Name", "Status"]}
-                          overlayRenderRow={TenantOverlayRow}
-                          filterDefs={tenantsFilters}
-                          objectType={Tenant}
-                          fields={Tenant.autocompleteQuery}
-                          disabled={!isAdmin}
-                        />
-                      }
-                    />
+                  {values.user && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.person.tenants}
+                        name="tenants"
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tenants", value, true)
+                        }}
+                        widget={
+                          <AdvancedMultiSelect
+                            fieldName="tenants"
+                            placeholder="Search for tenants…"
+                            value={values.tenants}
+                            renderSelected={
+                              <TenantTable
+                                tenants={values.tenants}
+                                showStatus
+                                showDelete={isAdmin}
+                                noTenantsMessage={
+                                  isAdmin ? (
+                                    "No tenants selected; click in the box above to select any"
+                                  ) : (
+                                    <div style={{ paddingTop: 9 }}>
+                                      No tenants found
+                                    </div>
+                                  )
+                                }
+                              />
+                            }
+                            overlayColumns={["Name", "Status"]}
+                            overlayRenderRow={TenantOverlayRow}
+                            filterDefs={tenantsFilters}
+                            objectType={Tenant}
+                            fields={Tenant.autocompleteQuery}
+                            disabled={!isAdmin}
+                          />
+                        }
+                      />
+
+                      {(forOnboarding || isSelf) &&
+                        !_isEmpty(unselectedTenants) && (
+                          <DictionaryField
+                            wrappedComponent={Field}
+                            dictProps={
+                              Settings.fields.person.tenantAccessRequests
+                            }
+                            name="tenantAccessRequests"
+                            component={FieldHelper.SpecialField}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched(
+                                "tenantAccessRequests",
+                                true,
+                                false
+                              ) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenantAccessRequests", value, true)
+                            }}
+                            widget={
+                              <AdvancedMultiSelect
+                                fieldName="tenantAccessRequests"
+                                placeholder="Search for tenants…"
+                                value={values.tenantAccessRequests}
+                                renderSelected={
+                                  <TenantTable
+                                    tenants={values.tenantAccessRequests}
+                                    showStatus
+                                    showDelete
+                                    noTenantsMessage="No access requests for tenants"
+                                  />
+                                }
+                                overlayColumns={["Name", "Status"]}
+                                overlayRenderRow={TenantOverlayRow}
+                                filterDefs={tenantAccessRequestsFilters}
+                                objectType={Tenant}
+                                fields={Tenant.autocompleteQuery}
+                              />
+                            }
+                          />
+                        )}
+                    </>
                   )}
 
                   {edit && attachmentEditEnabled && (
@@ -952,6 +1017,9 @@ const PersonForm = ({
       person.pendingVerification = false
     }
     person.country = utils.getReference(person.country)
+    person.tenantAccessRequests = person.tenantAccessRequests.map(t =>
+      Tenant.filterClientSideFields(t)
+    )
     person.tenants = person.tenants.map(t => Tenant.filterClientSideFields(t))
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
