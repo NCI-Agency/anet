@@ -252,6 +252,50 @@ const TenantForm = ({
                   }
                 />
 
+                {edit && (
+                  <Field
+                    name="accessRequests"
+                    label="Access requests"
+                    component={FieldHelper.SpecialField}
+                    onChange={() => {}}
+                    widget={
+                      <NoPaginationPersonTable
+                        id="tenants-accessRequests"
+                        people={values.accessRequests}
+                        noPeopleMessage={
+                          <div style={{ paddingTop: 9 }}>
+                            No pending access requests
+                          </div>
+                        }
+                        showAccessActions
+                        onAccessChanged={(person, allow) => {
+                          const updatedAccessRequests =
+                            values.accessRequests.filter(
+                              ar => ar.uuid !== person.uuid
+                            )
+                          if (
+                            allow &&
+                            !values.members?.some(m => m.uuid === person.uuid)
+                          ) {
+                            setFieldTouched("members", true, false)
+                            setFieldValue(
+                              "members",
+                              [person, ...values.members],
+                              true
+                            )
+                          }
+                          setFieldTouched("accessRequests", true, false)
+                          setFieldValue(
+                            "accessRequests",
+                            updatedAccessRequests,
+                            true
+                          )
+                        }}
+                      />
+                    }
+                  />
+                )}
+
                 <Field
                   name="members"
                   label="Members"

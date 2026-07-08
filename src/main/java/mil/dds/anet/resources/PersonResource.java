@@ -231,6 +231,18 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
+    // Update Tenant access requests:
+    if (p.getTenantAccessRequests() != null) {
+      final List<Tenant> existingTenantAccessRequests =
+          tenantDao.getTenantAccessRequestsForPerson(engine.getContext(), p.getUuid()).join();
+      final List<Tenant> newTenantAccessRequests =
+          Boolean.TRUE.equals(p.getUser()) ? p.getTenantAccessRequests() : List.of();
+      final Instant now = Instant.now();
+      Utils.addRemoveElementsByUuid(existingTenantAccessRequests, newTenantAccessRequests,
+          newTenant -> dao.addTenantAccessRequestToPerson(newTenant, p, now),
+          oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
+    }
+
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
 
@@ -356,6 +368,7 @@ public class PersonResource {
 
     if (isApproved && tenants != null) {
       dao.insertPersonTenants(personUuid, tenants);
+      dao.deletePersonTenantAccessRequests(personUuid);
     }
 
     // Log the change
@@ -434,21 +447,6 @@ public class PersonResource {
       }
     }
 
-    if (Boolean.TRUE.equals(automaticallyAllowAllNewUsers)
-        && Boolean.TRUE.equals(existing.getPendingVerification())
-        && Boolean.FALSE.equals(p.getPendingVerification())) {
-      // Load existing tenants
-      final List<Tenant> existingTenants = existing.loadTenants(engine.getContext()).join();
-      if (Utils.isEmptyOrNull(existingTenants)) {
-        // Assign default tenant if there is only one active
-        final List<Tenant> activeTenants = tenantDao.getAll().stream()
-            .filter(t -> t.getStatus() == WithStatus.Status.ACTIVE).toList();
-        if (activeTenants.size() == 1) {
-          dao.insertPersonTenants(p.getUuid(), activeTenants);
-        }
-      }
-    }
-
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
 
     if (DaoUtils.isNewUser(user)) {
@@ -465,6 +463,18 @@ public class PersonResource {
       final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
       // Update any subscriptions
       dao.updateSubscriptions(p, auditTrailUuid, false);
+    }
+
+    // Update Tenant access requests:
+    if (p.getTenantAccessRequests() != null) {
+      final List<Tenant> existingTenantAccessRequests =
+          tenantDao.getTenantAccessRequestsForPerson(engine.getContext(), p.getUuid()).join();
+      final List<Tenant> newTenantAccessRequests =
+          Boolean.TRUE.equals(p.getUser()) ? p.getTenantAccessRequests() : List.of();
+      final Instant now = Instant.now();
+      Utils.addRemoveElementsByUuid(existingTenantAccessRequests, newTenantAccessRequests,
+          newTenant -> dao.addTenantAccessRequestToPerson(newTenant, p, now),
+          oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows

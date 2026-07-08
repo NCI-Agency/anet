@@ -84,6 +84,9 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
+      tenantAccessRequests {
+        ${gqlEntityFieldsMap.Tenant}
+      }
       tenants {
         ${gqlEntityFieldsMap.Tenant}
       }
@@ -162,6 +165,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const position = person.position
 
   // User can always edit themselves
+  const isSelf = Person.isEqual(currentUser, person)
   // Admins can always edit anybody
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser?.isAdmin()
@@ -173,7 +177,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         position.organization
       )) ||
     (!hasPosition && currentUser.isSuperuser())
-  const canEdit = canEditPosition || Person.isEqual(currentUser, person)
+  const canEdit = canEditPosition || isSelf
   // When the person is not in a position, any superuser can assign them.
   const canAssignPosition = currentUser.isSuperuser()
   const canAddPeriodicAssessment =
@@ -314,15 +318,33 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
               </Row>
               <Row>
                 {person.user && (
-                  <Col md={12}>
-                    <FieldHelper.ReadonlyField
-                      field={{ name: "tenants" }}
-                      label={Settings.fields.person.tenants?.label}
-                      humanValue={
-                        <TenantTable tenants={person.tenants} showStatus />
-                      }
-                    />
-                  </Col>
+                  <>
+                    <Col md={12}>
+                      <FieldHelper.ReadonlyField
+                        field={{ name: "tenants" }}
+                        label={Settings.fields.person.tenants?.label}
+                        humanValue={
+                          <TenantTable tenants={person.tenants} showStatus />
+                        }
+                      />
+                    </Col>
+                    {isSelf && !_isEmpty(person.tenantAccessRequests) && (
+                      <Col md={12}>
+                        <FieldHelper.ReadonlyField
+                          field={{ name: "tenantAccessRequests" }}
+                          label={
+                            Settings.fields.person.tenantAccessRequests?.label
+                          }
+                          humanValue={
+                            <TenantTable
+                              tenants={person.tenantAccessRequests}
+                              showStatus
+                            />
+                          }
+                        />
+                      </Col>
+                    )}
+                  </>
                 )}
                 <Col md={12}>{fullWidthFields}</Col>
                 {attachmentsEnabled && (

@@ -33,6 +33,18 @@ const GQL_GET_TENANT = gql`
           ${gqlEntityFieldsMap.Person}
         }
       }
+      accessRequests {
+        ${gqlEntityFieldsMap.Person}
+        position {
+          ${gqlEntityFieldsMap.Position}
+          location {
+            ${gqlEntityFieldsMap.Location}
+          }
+          organization {
+            ${gqlEntityFieldsMap.Organization}
+          }
+        }
+      }
       members {
         ${gqlEntityFieldsMap.Person}
         position {
