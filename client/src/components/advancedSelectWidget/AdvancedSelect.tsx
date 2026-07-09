@@ -94,6 +94,32 @@ const FETCH_TYPE = {
   DEBOUNCED: "DEBOUNCED"
 }
 
+function matchSearchTerm(item: object, searchTerm: string) {
+  for (const prop in item) {
+    if (["__typename", "uuid", "status"].includes(prop)) {
+      continue
+    }
+    const value = item[prop]
+    if (typeof value !== "string") {
+      continue
+    }
+    if (value?.toLowerCase()?.includes(searchTerm?.toLowerCase())) {
+      return true
+    }
+  }
+  return false
+}
+
+function matchSearchTerms(item: object, searchTerms: string) {
+  const searchTermArray = searchTerms?.match(/\S+/g) ?? []
+  for (const searchTerm of searchTermArray) {
+    if (!matchSearchTerm(item, searchTerm)) {
+      return false
+    }
+  }
+  return true
+}
+
 export interface AdvancedSelectProps {
   fieldName: string
   className?: string // input field name
@@ -193,16 +219,15 @@ const AdvancedSelect = ({
     : null
   const [items, totalCount] = [results?.list ?? [], results?.totalCount ?? 0]
 
-  const staticList = useMemo(
-    () =>
-      inclInactive
-        ? selectedFilter?.list
-        : selectedFilter?.list?.filter(
-            // reversed condition, so items without any status at all are also included
-            item => item?.status !== Model.STATUS.INACTIVE
-          ),
-    [selectedFilter?.list, inclInactive]
-  )
+  const staticList = useMemo(() => {
+    const prefilteredList = inclInactive
+      ? selectedFilter?.list
+      : selectedFilter?.list?.filter(
+          // reversed condition, so items without any status at all are also included
+          item => item?.status !== Model.STATUS.INACTIVE
+        )
+    return prefilteredList?.filter(item => matchSearchTerms(item, searchTerms))
+  }, [selectedFilter?.list, inclInactive, searchTerms])
 
   const fetchResults = useCallback(
     searchTerms => {
@@ -587,14 +612,12 @@ const AdvancedSelect = ({
   }
 
   function changeSearchTerms(event) {
-    if (staticList == null) {
-      setSearchTerms(event.target.value)
-      // Reset the results state when the search terms change
-      setResults({})
-      setPageNum(0)
-      // Make sure we don't do a fetch for each character being typed
-      setFetchType(FETCH_TYPE.DEBOUNCED)
-    }
+    setSearchTerms(event.target.value)
+    // Reset the results state when the search terms change
+    setResults({})
+    setPageNum(0)
+    // Make sure we don't do a fetch for each character being typed
+    setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
   function handleOnChangeSelect(event) {
