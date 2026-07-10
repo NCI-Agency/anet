@@ -641,6 +641,8 @@ input EventSearchQueryInput {
   anyOrgUuid: [String]
   emailNetwork: String
   endDate: Instant
+  endDateEnd: Instant
+  endDateStart: Instant
   eventSeriesUuid: String
   eventTaskUuid: [String]
   eventTypeUuid: String
@@ -654,6 +656,8 @@ input EventSearchQueryInput {
   sortBy: EventSearchSortBy
   sortOrder: SortOrder
   startDate: Instant
+  startDateEnd: Instant
+  startDateStart: Instant
   status: Status
   subscribed: Boolean
   taskUuid: [String]

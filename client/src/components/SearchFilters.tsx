@@ -739,6 +739,20 @@ export const searchFilters = function (
           queryKey: "eventSeriesUuid"
         }
       },
+      "Start Date": {
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
+        props: {
+          queryKey: "startDate"
+        }
+      },
+      "End Date": {
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
+        props: {
+          queryKey: "endDate"
+        }
+      },
       [`Within ${Settings.fields.event.ownerOrg.label}`]: {
         component: OrganizationMultiFilter,
         deserializer: deserializeOrganizationMultiFilter,
