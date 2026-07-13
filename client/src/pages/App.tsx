@@ -114,6 +114,15 @@ const GQL_GET_APP_DATA = gql`
           ${gqlEntityFieldsMap.AuthorizationGroup}
         }
       }
+      additionalPositions {
+        ${gqlEntityFieldsMap.Position}
+        organization {
+          ${gqlEntityFieldsMap.Organization}
+        }
+        location {
+          ${gqlEntityFieldsMap.Location}
+        }
+      }
       previousPositions {
         ${gqlPreviousPositionsFields}
         position {

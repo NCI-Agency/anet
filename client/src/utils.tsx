@@ -521,7 +521,7 @@ export default {
       return [
         normalize(person.position),
         ...(person.additionalPositions ?? []).map(normalize)
-      ].filter(Boolean)
+      ].filter(p => !_isEmpty(p))
     }
 
     const when = moment(date).valueOf()
@@ -529,7 +529,7 @@ export default {
     return (person.previousPositions ?? [])
       .filter(p => p.startTime <= when && (!p.endTime || p.endTime > when))
       .map(p => normalize(p.position))
-      .filter(Boolean)
+      .filter(p => !_isEmpty(p))
   },
 
   getButtonsFromChoices: function (choices) {

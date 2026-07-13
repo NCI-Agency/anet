@@ -74,44 +74,6 @@ public class OrganizationDao
     return new SelfIdBatcher().getByIds(uuids);
   }
 
-  class OrganizationsBatcher extends ForeignKeyBatcher<Organization> {
-    private static final String SQL =
-        "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", "
-            + ORGANIZATION_FIELDS + "FROM organizations, positions WHERE "
-            + "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
-
-    public OrganizationsBatcher() {
-      super(OrganizationDao.this.databaseHandler, SQL, "foreignKeys", new OrganizationMapper(),
-          "personUuid");
-    }
-  }
-
-  public List<List<Organization>> getOrganizations(List<String> foreignKeys) {
-    return new OrganizationsBatcher().getByForeignKeys(foreignKeys);
-  }
-
-  class OrganizationsByDateBatcher extends ForeignKeyByDateBatcher<Organization> {
-    private static final String sql =
-        "/* batch.getOrganizationForPerson */ SELECT \"peoplePositions\".\"personUuid\" AS \"personUuid\", "
-            + ORGANIZATION_FIELDS + " FROM organizations, \"peoplePositions\", positions "
-            + "WHERE \"peoplePositions\".\"personUuid\" IN ( <foreignKeys> ) "
-            + "AND \"peoplePositions\".\"positionUuid\" = positions.uuid "
-            + "AND positions.\"organizationUuid\" = organizations.uuid "
-            + "AND \"peoplePositions\".\"createdAt\" <= :when "
-            + "AND \"peoplePositions\".\"primary\" IS TRUE "
-            + "AND (\"peoplePositions\".\"endedAt\" IS NULL"
-            + " OR \"peoplePositions\".\"endedAt\" > :when)";
-
-    public OrganizationsByDateBatcher() {
-      super(OrganizationDao.this.databaseHandler, sql, "foreignKeys", new OrganizationMapper(),
-          "personUuid");
-    }
-  }
-
-  public List<List<Organization>> getOrganizationsByDate(
-      List<ImmutablePair<String, Instant>> foreignKeys) {
-    return new OrganizationsByDateBatcher().getByForeignKeys(foreignKeys);
-  }
 
   class OrganizationSearchBatcher
       extends SearchQueryBatcher<Organization, OrganizationSearchQuery> {
@@ -129,21 +91,6 @@ public class OrganizationDao
       String uuid, OrganizationSearchQuery query) {
     return new SearchQueryFetcher<Organization, OrganizationSearchQuery>().load(context,
         SqDataLoaderKey.ORGANIZATIONS_SEARCH, new ImmutablePair<>(uuid, query));
-  }
-
-  public CompletableFuture<List<Organization>> getOrganizationsForPerson(GraphQLContext context,
-      String personUuid) {
-    return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
-        personUuid);
-  }
-
-  public CompletableFuture<Organization> getOrganizationForPerson(GraphQLContext context,
-      String personUuid) {
-    if (personUuid == null) {
-      return CompletableFuture.completedFuture(null);
-    }
-    return getOrganizationsForPerson(context, personUuid)
-        .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
   class AdministratingPositionsBatcher extends ForeignKeyBatcher<Position> {
