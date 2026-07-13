@@ -19,7 +19,7 @@ public class ReportPerson extends Person {
           .thenComparing(ReportPerson::isPrimary, Comparator.reverseOrder())
           .thenComparing(ReportPerson::isAuthor, Comparator.reverseOrder())
           .thenComparing(ReportPerson::getFamilyName).thenComparing(ReportPerson::getGivenName)
-          .thenComparing(ReportPerson::getUuid).thenComparing(ReportPerson::getReportPositionUuid);;
+          .thenComparing(ReportPerson::getUuid).thenComparing(ReportPerson::getReportPositionUuid);
 
   @GraphQLQuery
   @GraphQLInputField

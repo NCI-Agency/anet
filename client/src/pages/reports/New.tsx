@@ -10,7 +10,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { Event, Person, Position, Report } from "models"
+import { Event, Person, Report } from "models"
 import { reportTour } from "pages/GuidedTour"
 import React, { useContext } from "react"
 import { legacy_connect as connect } from "react-redux"
@@ -118,21 +118,7 @@ const ReportNewConditional = ({
     reportPerson.author = true
     reportPerson.attendee = true
     reportPerson.interlocutor = false
-    reportPerson.reportPosition = Position.filterClientSideFields(
-      currentUser.position,
-      "descendantOrgs",
-      "responsibleTasks",
-      "authorizationGroupsAdministrated",
-      "isApprover",
-      "associatedPositions",
-      "notes",
-      "emailAddresses",
-      "organization.descendantOrgs"
-    )
-    // TODO better way to do this?
-    if (reportPerson.reportPosition.organization) {
-      delete reportPerson.reportPosition.organization.descendantOrgs
-    }
+    reportPerson.reportPosition = currentUser.position
     report.reportPeople.push(reportPerson)
   }
   const reportInitialValues = Object.assign(

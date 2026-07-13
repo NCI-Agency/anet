@@ -758,7 +758,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       // Update subscriptionUpdates
       updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerUuid, loserUuid);
 
-      // If looser id happens to be in reportPeople set to null
+      // If loser id happens to be in reportPeople set to null
       updateForMerge("reportPeople", "reportPositionUuid", null, loserUuid);
 
       // Finally, delete loser

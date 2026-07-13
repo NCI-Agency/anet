@@ -96,11 +96,14 @@ import ReportPeople, {
 const reportPeopleAutocompleteQuery = `
   ${Person.autocompleteQuery}
   additionalPositions {
-        ${gqlEntityFieldsMap.Position}
-        organization {
-          ${gqlEntityFieldsMap.Organization}
-        }
-      }
+    ${gqlEntityFieldsMap.Position}
+    organization {
+      ${gqlEntityFieldsMap.Organization}
+    }
+    location {
+      ${gqlEntityFieldsMap.Location}
+    }
+  }
   previousPositions {
     ${gqlPreviousPositionsFields}
     position {
@@ -1458,20 +1461,7 @@ const ReportForm = ({
       // Make sure field is 'controlled' by defining a value
       rp.interlocutor = rp.interlocutor ?? !rp.user
       // Default to the primary position of the person
-      rp.reportPosition = Position.filterClientSideFields(
-        rp.position,
-        "descendantOrgs",
-        "responsibleTasks",
-        "authorizationGroupsAdministrated",
-        "isApprover",
-        "associatedPositions",
-        "notes",
-        "emailAddresses"
-      )
-      // TODO better way to do this?
-      if (rp.reportPosition.organization) {
-        delete rp.reportPosition.organization.descendantOrgs
-      }
+      rp.reportPosition = rp.position
     })
 
     // if no one else is primary, set that person primary if attending
@@ -1728,7 +1718,7 @@ const ReportForm = ({
       rp.author = !!reportPerson.author
       rp.attendee = !!reportPerson.attendee
       rp.interlocutor = !!reportPerson.interlocutor
-      rp.reportPosition = reportPerson.reportPosition
+      rp.reportPosition = utils.getReference(reportPerson.reportPosition)
       return rp
     })
     // strip tasks fields not in data model

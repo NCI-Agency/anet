@@ -43,6 +43,7 @@ import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
@@ -77,10 +78,12 @@ public class ReportResource {
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
   private final ReportActionDao reportActionDao;
+  private final PositionDao positionDao;
 
   public ReportResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine,
       AuditTrailDao auditTrailDao, CommentDao commentDao, AssessmentDao assessmentDao,
-      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao) {
+      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao,
+      PositionDao positionDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.auditTrailDao = auditTrailDao;
@@ -89,6 +92,7 @@ public class ReportResource {
     this.organizationDao = organizationDao;
     this.reportDao = reportDao;
     this.reportActionDao = reportActionDao;
+    this.positionDao = positionDao;
   }
 
   public static boolean hasPermission(final Person user, final String reportUuid) {
@@ -286,7 +290,6 @@ public class ReportResource {
             existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
         if (existingPersonOpt.isPresent()) {
           ReportPerson reportPerson = existingPersonOpt.get();
-          reportPerson.loadReportPosition(engine.getContext());
           if (reportPerson.isPrimary() != rp.isPrimary()
               || reportPerson.isAttendee() != rp.isAttendee()
               || reportPerson.isAuthor() != rp.isAuthor()
@@ -863,16 +866,17 @@ public class ReportResource {
       }
       if (primaryAdvisor != null && primaryAdvisor.getReportPositionUuid() != null) {
         // And we validate position with history and assign organization
-        r.setAdvisorOrg(validateReportPositionAndGetOrganization(primaryAdvisor, r));
+        r.setAdvisorOrgUuid(validateReportPositionAndGetOrganization(primaryAdvisor, r));
       }
     } else {
       // Just update the advisor org, no validation
       final ReportPerson primaryAdvisor = findPrimaryAttendee(r, false);
-      if (primaryAdvisor != null && primaryAdvisor.getReportPosition() != null) {
-        primaryAdvisor.loadReportPosition(engine.getContext()).join();
+      if (primaryAdvisor != null && primaryAdvisor.getReportPositionUuid() != null) {
+        final Position primaryAdvisorPosition =
+            positionDao.getByUuid(primaryAdvisor.getReportPositionUuid());
         logger.debug("Updating advisor org for report {} based on {} at date {}", r, primaryAdvisor,
             r.getEngagementDate());
-        r.setAdvisorOrg(primaryAdvisor.getReportPosition().getOrganization());
+        r.setAdvisorOrgUuid(primaryAdvisorPosition.getOrganizationUuid());
       }
     }
   }
@@ -890,16 +894,17 @@ public class ReportResource {
       }
       if (primaryInterlocutor != null && primaryInterlocutor.getReportPositionUuid() != null) {
         // Validate position with history and assign organization
-        r.setInterlocutorOrg(validateReportPositionAndGetOrganization(primaryInterlocutor, r));
+        r.setInterlocutorOrgUuid(validateReportPositionAndGetOrganization(primaryInterlocutor, r));
       }
     } else {
       // Update the interlocutor org
       final ReportPerson primaryInterlocutor = findPrimaryAttendee(r, true);
-      if (primaryInterlocutor != null && primaryInterlocutor.getReportPosition() != null) {
-        primaryInterlocutor.loadReportPosition(engine.getContext()).join();
+      if (primaryInterlocutor != null && primaryInterlocutor.getReportPositionUuid() != null) {
+        final Position primaryAdvisorPosition =
+            positionDao.getByUuid(primaryInterlocutor.getReportPositionUuid());
         logger.debug("Updating interlocutor org for report {} based on {} at date {}", r,
             primaryInterlocutor, r.getEngagementDate());
-        r.setInterlocutorOrg(primaryInterlocutor.getReportPosition().getOrganization());
+        r.setInterlocutorOrgUuid(primaryAdvisorPosition.getOrganizationUuid());
       }
     }
   }
@@ -913,33 +918,23 @@ public class ReportResource {
         .findFirst().orElse(null);
   }
 
-  private Organization validateReportPositionAndGetOrganization(ReportPerson reportPerson,
-      Report r) {
-    // No engagement date, stick to current primary position organization
-    if (r.getEngagementDate() == null) {
-      return organizationDao
-          .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(reportPerson)).join();
-    } else {
-      // Engagement date, need to check history
-      Optional<PersonPositionHistory> reportPosition = reportPerson
-          .loadPreviousPositions(
-              engine.getContext())
-          .join().stream()
-          .filter(historyEntry -> historyEntry.getPositionUuid()
-              .equals(reportPerson.getReportPositionUuid())
-              && !historyEntry.getStartTime().isAfter(r.getEngagementDate())
-              && (historyEntry.getEndTime() == null
-                  || !historyEntry.getEndTime().isBefore(r.getEngagementDate())))
-          .findFirst();
-      if (reportPosition.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            "Report position is not consistent with person history");
-      }
-      PersonPositionHistory positionEntry = reportPosition.get();
-      positionEntry.loadPosition(engine.getContext()).join();
-      Position position = positionEntry.getPosition();
-      position.loadOrganization(engine.getContext()).join();
-      return position.getOrganization();
+  private String validateReportPositionAndGetOrganization(ReportPerson reportPerson, Report r) {
+    // Check history is consistent with engagement date
+    final Optional<PersonPositionHistory> reportPosition =
+        reportPerson
+            .loadPreviousPositions(
+                engine.getContext())
+            .join().stream()
+            .filter(historyEntry -> historyEntry.getPositionUuid()
+                .equals(reportPerson.getReportPositionUuid())
+                && !historyEntry.getStartTime().isAfter(r.getEngagementDate())
+                && (historyEntry.getEndTime() == null
+                    || !historyEntry.getEndTime().isBefore(r.getEngagementDate())))
+            .findFirst();
+    if (reportPosition.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Report position is not consistent with person history");
     }
+    return reportPosition.get().loadPosition(engine.getContext()).join().getOrganizationUuid();
   }
 }
