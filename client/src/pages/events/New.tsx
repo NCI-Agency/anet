@@ -1,7 +1,6 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -12,7 +11,6 @@ import { Event, EventSeries } from "models"
 import React from "react"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation } from "react-router"
-import Settings from "settings"
 import utils from "utils"
 import EventForm from "./Form"
 
@@ -105,8 +103,6 @@ const EventNewConditional = ({
     event.hostRelatedObjects = data.eventSeries.hostRelatedObjects
     event.adminOrg = data.eventSeries.adminOrg
   }
-  // mutates the object
-  initInvisibleFields(event, Settings.fields.organization.customFields)
   return (
     <EventForm
       pageDispatchers={pageDispatchers}

@@ -1,5 +1,4 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
-import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -9,7 +8,6 @@ import {
 import { EventSeries } from "models"
 import React from "react"
 import { legacy_connect as connect } from "react-redux"
-import Settings from "settings"
 import EventSeriesForm from "./Form"
 
 interface EventSeriesNewProps {
@@ -25,8 +23,6 @@ const EventSeriesNew = ({ pageDispatchers }: EventSeriesNewProps) => {
   usePageTitle("New Event Series")
 
   const eventSeries = new EventSeries()
-  // mutates the object
-  initInvisibleFields(location, Settings.fields.location.customFields)
   return (
     <EventSeriesForm
       initialValues={eventSeries}
