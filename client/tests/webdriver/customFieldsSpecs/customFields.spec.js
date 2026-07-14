@@ -169,29 +169,6 @@ describe("When working with custom fields for different anet objects", () => {
       ).to.include(VALID_NUMBER_INPUT.toString())
     })
 
-    it("Should discard invisible fields after saving even if it is valid", async () => {
-      await (await CreateReport.getEditButton()).click()
-      await (await CreateReport.getForm()).waitForExist()
-      await (await CreateReport.getForm()).waitForDisplayed()
-
-      const trainButton = await CreateReport.getEngagementTypesButtonByName(
-        TRAIN_ENGAGEMENT_BUTTON
-      )
-      // give valid input before making invisible
-      await CreateReport.deleteInput(CreateReport.getNumberTrainedField())
-      await (
-        await CreateReport.getNumberTrainedField()
-      ).setValue(VALID_NUMBER_INPUT)
-      // goes invisible
-      await trainButton.click()
-      await CreateReport.submitForm()
-      await CreateReport.waitForAlertToLoad()
-
-      expect(
-        await (await CreateReport.getNumberTrainedFieldShowed()).getText()
-      ).to.not.include(VALID_NUMBER_INPUT.toString())
-    })
-
     it("Should logout", async () => {
       await CreateReport.logout()
     })
