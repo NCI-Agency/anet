@@ -69,7 +69,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
 
   public List<List<GenericRelatedObject>> getEventSeriesHostRelatedObjects(
       List<String> foreignKeys) {
-    return new EventSeriesDao.EventSeriesHostRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
+    return new EventSeriesHostRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
   }
 
   public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
@@ -98,8 +98,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
           .bind("ownerOrgUuid", DaoUtils.getUuid(eventSeries.getOwnerOrg()))
           .bind("adminOrgUuid", DaoUtils.getUuid(eventSeries.getAdminOrg())).execute();
 
-      final EventSeriesDao.EventSeriesBatch rb =
-          handle.attach(EventSeriesDao.EventSeriesBatch.class);
+      final EventSeriesBatch rb = handle.attach(EventSeriesBatch.class);
 
       if (!Utils.isEmptyOrNull(eventSeries.getHostRelatedObjects())) {
         rb.insertEventSeriesHostRelatedObjects(eventSeries.getUuid(),
@@ -128,8 +127,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   public int updateInternal(EventSeries eventSeries) {
     final Handle handle = getDbHandle();
     try {
-      final EventSeriesDao.EventSeriesBatch eb =
-          handle.attach(EventSeriesDao.EventSeriesBatch.class);
+      final EventSeriesBatch eb = handle.attach(EventSeriesBatch.class);
       eb.deleteEventSeriesHostRelatedObjects(DaoUtils.getUuid(eventSeries)); // seems the easiest
                                                                              // thing to do
       if (!Utils.isEmptyOrNull(eventSeries.getHostRelatedObjects())) {
@@ -170,23 +168,12 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
     try {
       final var loserEventSeriesUuid = loserEventSeries.getUuid();
       final var winnerEventSeriesUuid = winnerEventSeries.getUuid();
-      final EventSeries eventSeriesWinner = getByUuid(winnerEventSeriesUuid);
-      final GraphQLContext context = engine().getContext();
 
-      // Update the winner's fields
+      // Update the winner's fields (also updates winner's host related objects)
       update(winnerEventSeries);
 
-      // - delete event series host related objects for both winner and looser
+      // Delete host related objects for loser
       deleteForMerge("eventSeriesHostRelatedObjects", "eventSeriesUuid", loserEventSeriesUuid);
-      deleteForMerge("eventSeriesHostRelatedObjects", "eventSeriesUuid", winnerEventSeriesUuid);
-
-      // - update the host related objects for the winner from the input
-      List<GenericRelatedObject> eventSeriesHostRelatedObjects =
-          eventSeriesWinner.loadHostRelatedObjects(context).join();
-      for (GenericRelatedObject hostRelatedObjects : eventSeriesHostRelatedObjects) {
-        addEventSeriesRelatedObject(hostRelatedObjects.getRelatedObjectUuid(),
-            eventSeriesWinner.getUuid());
-      }
 
       // Move events to the winner
       updateForMerge("events", "eventSeriesUuid", winnerEventSeriesUuid, loserEventSeriesUuid);
@@ -221,22 +208,6 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
             new MergedEntity(loserEventSeriesUuid, winnerEventSeriesUuid, Instant.now()));
       }
       return nrDeleted;
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public int addEventSeriesRelatedObject(String organizationUuid, String eventSeriesUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      return handle
-          .createUpdate(
-              "/* addHostOrganizationRelationship */ INSERT INTO \"eventSeriesHostRelatedObjects\""
-                  + " (\"eventSeriesUuid\", \"relatedObjectType\", \"relatedObjectUuid\") "
-                  + "VALUES (:eventSeriesUuid, 'organizations', :organizationUuid)")
-          .bind("eventSeriesUuid", eventSeriesUuid).bind("organizationUuid", organizationUuid)
-          .execute();
     } finally {
       closeDbHandle(handle);
     }

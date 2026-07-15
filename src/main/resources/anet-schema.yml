@@ -792,12 +792,8 @@ properties:
       eventSeries:
         type: object
         additionalProperties: false
-        required: [shortLabel, status, name, description, ownerOrg, hostOrg, adminOrg, hostRelatedObjects]
+        required: [status, name, description, ownerOrg, hostOrg, adminOrg, hostRelatedObjects]
         properties:
-          shortLabel:
-            type: string
-            title: The short label for this field
-            description: Used in the UI where a short label for event series is shown.
           status:
             "$ref": "#/$defs/labeledField"
           name:
