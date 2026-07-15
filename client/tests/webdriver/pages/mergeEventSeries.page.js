@@ -46,7 +46,7 @@ class MergeEventSeries extends Page {
   }
 
   async getEventSeriesHeaderFromPopover() {
-    return browser.$('//table//th[contains(text(), "Event Series")]')
+    return browser.$('//table//th[contains(text(), "Name")]')
   }
 
   async getSelectButton(side, text) {
@@ -102,7 +102,7 @@ class MergeEventSeries extends Page {
       async () => {
         return (
           (await (await browser.$(".alert-success")).getText()) ===
-          "Event Series merged. Displaying merged Event Series below."
+          "Event series merged. Displaying merged event series below."
         )
       },
       {
@@ -110,6 +110,37 @@ class MergeEventSeries extends Page {
         timeoutMsg: "Couldn't see the success alert in time"
       }
     )
+  }
+
+  async getName() {
+    return browser.$("#fg-name #name")
+  }
+
+  async getDescription() {
+    return browser.$("#description .editable p")
+  }
+
+  async getOwnerOrganization() {
+    return browser.$("#ownerOrg")
+  }
+
+  async getAdminOrganization() {
+    return browser.$("#adminOrg")
+  }
+
+  async getHosts() {
+    return browser.$$("#hostRelatedObjects tbody tr")
+  }
+
+  async getHostNames() {
+    const hosts = await this.getHosts()
+    const hostNames = []
+
+    for (const host of hosts) {
+      hostNames.push(await host.getText())
+    }
+
+    return hostNames
   }
 }
 

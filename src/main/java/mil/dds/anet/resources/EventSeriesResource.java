@@ -137,7 +137,7 @@ public class EventSeriesResource {
 
     // Log the change
     final String auditTrailUuid = auditTrailDao.logUpdate(user, EventSeriesDao.TABLE_NAME,
-        winnerEventSeries, "a event series has been merged into it", Utils.getElementDetails(
+        winnerEventSeries, "an event series has been merged into it", Utils.getElementDetails(
             "merged event series: ", EventSeriesDao.TABLE_NAME, loserEventSeries.getUuid()));
     // Update any subscriptions
     dao.updateSubscriptions(winnerEventSeries, auditTrailUuid, false);

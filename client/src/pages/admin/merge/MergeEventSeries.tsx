@@ -41,7 +41,6 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Position } from "models"
 import EventSeries from "models/EventSeries"
-import pluralize from "pluralize"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
@@ -127,7 +126,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
       <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} />
-        <h4>{`Merge ${pluralize(eventSeriesLabel)} Tool`}</h4>
+        <h4>Merge Event Series Tool</h4>
       </Row>
       <Row>
         <Col md={4} id="left-merge-eventSeries-col">
@@ -135,7 +134,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.LEFT}
-            label={`${eventSeriesLabel} 1`}
+            label="Event Series 1"
             disabled={!!initialLeftUuid}
           />
         </Col>
@@ -153,7 +152,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
               !areAllSet(eventSeries1, eventSeries2),
               "Use All"
             )}
-            <h4 style={{ margin: "0" }}>Merged {eventSeriesLabel}</h4>
+            <h4 style={{ margin: "0" }}>Merged Event Series</h4>
             {getActionButton(
               () => {
                 dispatchMergeActions(
@@ -170,8 +169,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
           {!areAllSet(eventSeries1, eventSeries2) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="warning">
-                Please select <strong>both</strong>{" "}
-                {pluralize(eventSeriesLabel)} to proceed...
+                Please select <strong>both</strong> Event Series to proceed...
               </Callout>
             </div>
           )}
@@ -244,11 +242,12 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
 
-              <MergeField
-                label="Host organizations"
-                fieldName="hostRelatedObjects"
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.eventSeries.hostRelatedObjects}
                 value={<EventHostMembersTable entity={mergedEventSeries} />}
                 align={ALIGN_OPTIONS.CENTER}
+                fieldName="hostRelatedObjects"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -275,7 +274,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.RIGHT}
-            label={`${eventSeriesLabel} 2`}
+            label="Event Series 2"
           />
         </Col>
       </Row>
@@ -289,7 +288,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
           }}
           disabled={mergeState.notAllSet()}
         >
-          {`Merge ${pluralize(eventSeriesLabel)}`}
+          Merge Event Series
         </Button>
       </Row>
     </Container>
@@ -314,7 +313,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
         if (res) {
           navigate(EventSeries.pathFor({ uuid: mergedEventSeries.uuid }), {
             state: {
-              success: `${pluralize(eventSeriesLabel)} merged. Displaying merged ${eventSeriesLabel} below.`
+              success: `Event series merged. Displaying merged event series below.`
             }
           })
         }
@@ -347,8 +346,6 @@ const eventSeriesFilter = {
   }
 }
 
-const eventSeriesLabel = Settings.fields.eventSeries.shortLabel
-
 interface EventSeriesColumnProps {
   align: "left" | "right"
   label: string
@@ -376,10 +373,10 @@ const EventSeriesColumn = ({
       <ColTitle controlId={idForEventSeries}>
         <AdvancedSingleSelect
           fieldName="eventSeries"
-          placeholder={`Select an ${eventSeriesLabel.toLowerCase()} to merge`}
+          placeholder="Select an event series to merge"
           value={eventSeries}
           disabledValue={otherSide}
-          overlayColumns={[eventSeriesLabel]}
+          overlayColumns={["Name"]}
           overlayRenderRow={EventSeriesOverlayRow}
           filterDefs={eventSeriesFilter}
           onChange={value => {
@@ -496,8 +493,9 @@ const EventSeriesColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <MergeField
-            label="Host Organizations"
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.eventSeries.hostRelatedObjects}
             fieldName="hostRelatedObjects"
             value={<EventHostMembersTable entity={eventSeries} />}
             align={align}

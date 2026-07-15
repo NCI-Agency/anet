@@ -67,7 +67,7 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
   const isAdmin = currentUser?.isAdmin()
 
   const canAdministrateOrg =
-    currentUser?.isAdmin() ||
+    isAdmin ||
     currentUser?.hasAdministrativePermissionsForOrganization(
       eventSeries.adminOrg
     )
