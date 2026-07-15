@@ -1,6 +1,5 @@
 package mil.dds.anet.resources;
 
-import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -9,18 +8,13 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.lang.invoke.MethodHandles;
-import java.time.DayOfWeek;
 import java.time.Instant;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.AdvisorReportsEntry;
-import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Assessment;
@@ -29,7 +23,6 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.EngagementInformation;
 import mil.dds.anet.beans.GenericRelatedObject;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -775,69 +768,6 @@ public class ReportResource {
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return reportDao.search(context, Utils.getSubFields(env), query);
-  }
-
-  /**
-   * Gets aggregated data per organization for engagements attended and reports submitted for each
-   * advisor in a given organization.
-   *
-   * @param weeksAgo Weeks ago integer for the amount of weeks before the current week
-   */
-  @GraphQLQuery(name = "advisorReportInsights")
-  public List<AdvisorReportsEntry> getAdvisorReportInsights(
-      @GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "weeksAgo", defaultValue = "3") int weeksAgo,
-      @GraphQLArgument(name = "orgUuid",
-          defaultValue = Organization.DUMMY_ORG_UUID) String orgUuid) {
-    Instant now = Instant.now();
-    Instant weekStart = now.atZone(DaoUtils.getServerNativeZoneId()).with(DayOfWeek.MONDAY)
-        .withHour(0).withMinute(0).withSecond(0).withNano(0).plusWeeks(1).toInstant();
-    Instant startDate =
-        weekStart.atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(weeksAgo).toInstant();
-    final List<Map<String, Object>> list =
-        reportDao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
-
-    final String groupName = "stats";
-    final String groupCol;
-    final List<String> topLevelFields;
-    final boolean isForOrganizations = Organization.DUMMY_ORG_UUID.equals(orgUuid);
-    if (isForOrganizations) {
-      topLevelFields = List.of("organizationShortName");
-      groupCol = "organizationUuid";
-    } else {
-      topLevelFields = List.of("givenName", "familyName");
-      groupCol = "personUuid";
-    }
-    final List<Map<String, Object>> groupedResults =
-        Utils.resultGrouper(list, groupName, groupCol, topLevelFields);
-    final List<AdvisorReportsEntry> result = new LinkedList<>();
-    for (final Map<String, Object> group : groupedResults) {
-      final AdvisorReportsEntry entry = new AdvisorReportsEntry();
-      entry.setUuid((String) group.get(groupCol));
-      if (isForOrganizations) {
-        entry.setName(
-            Joiner.on(" ").skipNulls().join(topLevelFields.stream().map(group::get).toList()));
-      } else {
-        final Person p = new Person();
-        p.setFamilyName((String) group.get("familyName"));
-        p.setGivenName((String) group.get("givenName"));
-        entry.setName(p.getName());
-      }
-      final List<AdvisorReportsStats> stats = new LinkedList<>();
-      @SuppressWarnings("unchecked")
-      final List<Map<String, Object>> groupStats = (List<Map<String, Object>>) group.get(groupName);
-      for (final Map<String, Object> groupSt : groupStats) {
-        AdvisorReportsStats st = new AdvisorReportsStats();
-        st.setWeek(((Number) groupSt.get("week")).intValue());
-        st.setNrReportsSubmitted(((Number) groupSt.get("nrReportsSubmitted")).intValue());
-        st.setNrEngagementsAttended(((Number) groupSt.get("nrEngagementsAttended")).intValue());
-        stats.add(st);
-      }
-      entry.setStats(stats);
-      result.add(entry);
-    }
-    return result;
-
   }
 
   @GraphQLMutation(name = "updateReportAssessments")

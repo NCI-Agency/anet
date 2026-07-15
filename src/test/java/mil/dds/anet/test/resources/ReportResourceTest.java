@@ -24,7 +24,6 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AdminSettingInput;
-import mil.dds.anet.test.client.AdvisorReportsEntry;
 import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
@@ -2066,53 +2065,6 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final List<Report> reports = reportResults.getList();
     assertThat(reports).isEmpty();
-  }
-
-  @Test
-  void testAdvisorReportInsightsSuperuser() {
-    advisorReportInsights(getSuperuser());
-  }
-
-  @Test
-  void testAdvisorReportInsightsRegularUser() {
-    advisorReportInsights(getRegularUser());
-  }
-
-  private void advisorReportInsights(final Person user) {
-    try {
-      createTestReport();
-      final List<AdvisorReportsEntry> advisorReports =
-          withCredentials(getDomainUsername(user),
-              t -> queryExecutor.advisorReportInsights(
-                  "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1",
-                  3));
-      assertThat(advisorReports).isNotNull();
-      assertThat(advisorReports).isNotEmpty();
-    } catch (Exception e) {
-      fail("Unexpected Exception", e);
-    }
-  }
-
-  private void createTestReport() {
-    final Person author = getJackJackson();
-    final ReportPerson reportPerson = personToPrimaryReportAuthor(author);
-
-    final Instant engagementDate =
-        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
-    final ReportInput rInput = ReportInput.builder().withState(ReportState.PUBLISHED)
-        .withAtmosphere(Atmosphere.POSITIVE).withIntent("Testing the advisor reports insight")
-        .withNextSteps("Retrieve the advisor reports insight")
-        .withLocation(getLocationInput(getLocation(author, "General Hospital")))
-        .withEngagementDate(engagementDate)
-        .withReleasedAt(Instant.now().truncatedTo(ChronoUnit.MILLIS))
-        .withReportPeople(getReportPeopleInput(List.of(reportPerson))).build();
-    final Report created =
-        withCredentials(adminUser, t -> mutationExecutor.createReport(FIELDS, rInput));
-    assertThat(created).isNotNull();
-    assertThat(created.getUuid()).isNotNull();
-    // Check that report is published and release date is set
-    assertThat(created.getState()).isEqualTo(ReportState.PUBLISHED);
-    assertThat(created.getReleasedAt()).isEqualTo(rInput.getReleasedAt());
   }
 
   private Location getLocation(Person user, String name) {

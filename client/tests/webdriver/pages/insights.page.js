@@ -7,7 +7,6 @@ const REPORTS_BY_TASK = "reports-by-task"
 const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
 export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
-const ADVISOR_REPORTS = "advisor-reports"
 const CADENCE_DASHBOARD = "cadence-dashboard"
 export const AGGREGATED_REPORTS_OVER_TIME = "aggregated-reports-over-time"
 export const INSIGHTS = [
@@ -17,7 +16,6 @@ export const INSIGHTS = [
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
   PENDING_ASSESSMENTS_BY_POSITION,
-  ADVISOR_REPORTS,
   CADENCE_DASHBOARD,
   AGGREGATED_REPORTS_OVER_TIME
 ]

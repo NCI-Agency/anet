@@ -59,7 +59,6 @@ import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoaderEnvironment;
 import org.jdbi.v3.core.Handle;
-import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
@@ -90,8 +89,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public static final String TABLE_NAME = "reports";
   public static final String REPORT_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
-
-  private static final String weekFormat = "EXTRACT(WEEK FROM %s)";
 
   public ReportDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
@@ -585,146 +582,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
       return handle.createQuery(sql.toString()).bindMap(sqlArgs)
           .map(new EngagementInformationMapper()).list();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  /* Generates Advisor Report Insights for Organizations */
-  @Transactional
-  public List<Map<String, Object>> getAdvisorReportInsights(Instant start, Instant end,
-      String orgUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      final Map<String, Object> sqlArgs = new HashMap<>();
-      final StringBuilder sql = new StringBuilder();
-
-      sql.append("/* AdvisorReportInsightsQuery */ ");
-      sql.append("SELECT ");
-      sql.append(
-          "CASE WHEN a.\"organizationUuid\" IS NULL THEN b.\"organizationUuid\" ELSE a.\"organizationUuid\" END AS \"organizationUuid\",");
-      sql.append(
-          "CASE WHEN a.\"organizationShortName\" IS NULL THEN b.\"organizationShortName\" ELSE a.\"organizationShortName\" END AS \"organizationShortName\",");
-      sql.append("%1$s");
-      sql.append("%2$s");
-      sql.append("CASE WHEN a.week IS NULL THEN b.week ELSE a.week END AS week,");
-      sql.append(
-          "CASE WHEN a.\"nrReportsSubmitted\" IS NULL THEN 0 ELSE a.\"nrReportsSubmitted\" END AS \"nrReportsSubmitted\",");
-      sql.append(
-          "CASE WHEN b.\"nrEngagementsAttended\" IS NULL THEN 0 ELSE b.\"nrEngagementsAttended\" END AS \"nrEngagementsAttended\"");
-
-      sql.append(" FROM (");
-
-      sql.append("SELECT ");
-      sql.append("organizations.uuid AS \"organizationUuid\",");
-      sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
-      sql.append("%3$s");
-      sql.append("%4$s");
-      sql.append(" ").append(String.format(weekFormat, "reports.\"createdAt\""))
-          .append(" AS week,");
-      sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrReportsSubmitted\"");
-
-      sql.append(" FROM ");
-      sql.append("positions,");
-      sql.append("reports,");
-      sql.append("\"reportPeople\",");
-      sql.append("%5$s");
-      sql.append("organizations");
-
-      sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
-      sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
-      sql.append(" AND \"reportPeople\".\"isInterlocutor\" = :isInterlocutor");
-      sql.append(" %6$s");
-      sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-      sql.append(
-          " AND reports.state IN ( :reportPublished, :reportApproved, :reportPending, :reportDraft )");
-      sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
-      sql.append(" %11$s");
-
-      sql.append(" GROUP BY ");
-      sql.append("organizations.uuid,");
-      sql.append("organizations.\"shortName\",");
-      sql.append("%7$s");
-      sql.append("%8$s");
-      sql.append(" ").append(String.format(weekFormat, "reports.\"createdAt\""));
-      sql.append(") a");
-
-      sql.append(" FULL OUTER JOIN (");
-      sql.append("SELECT ");
-      sql.append("organizations.uuid AS \"organizationUuid\",");
-      sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
-      sql.append("%3$s");
-      sql.append("%4$s");
-      sql.append(" ").append(String.format(weekFormat, "reports.\"engagementDate\""))
-          .append(" AS week,");
-      sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrEngagementsAttended\"");
-
-      sql.append(" FROM ");
-      sql.append("positions,");
-      sql.append("%5$s");
-      sql.append("reports,");
-      sql.append("\"reportPeople\",");
-      sql.append("organizations");
-
-      sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
-      sql.append(" %6$s");
-      sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
-      sql.append(" AND \"reportPeople\".\"isInterlocutor\" = :isInterlocutor");
-      sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-      sql.append(
-          " AND reports.state IN ( :reportPublished, :reportApproved, :reportPending, :reportDraft )");
-      sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
-      sql.append(" %11$s");
-
-      sql.append(" GROUP BY ");
-      sql.append("organizations.uuid,");
-      sql.append("organizations.\"shortName\",");
-      sql.append("%7$s");
-      sql.append("%8$s");
-      sql.append(" ").append(String.format(weekFormat, "reports.\"engagementDate\""));
-      sql.append(") b");
-
-      sql.append(" ON ");
-      sql.append(" a.\"organizationUuid\" = b.\"organizationUuid\"");
-      sql.append(" %9$s");
-      sql.append(" AND a.week = b.week");
-
-      sql.append(" ORDER BY ");
-      sql.append("\"organizationShortName\",");
-      sql.append("%10$s");
-      sql.append("week;");
-
-      final Object[] fmtArgs;
-      if (!Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
-        fmtArgs = new String[] {
-            "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"personUuid\" ELSE a.\"personUuid\" END AS \"personUuid\",", // -
-            "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"familyName\" ELSE a.\"familyName\" END AS \"familyName\", "
-                + "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"givenName\" ELSE a.\"givenName\" END AS \"givenName\",", // -
-            "people.uuid AS \"personUuid\",", // -
-            "people.\"familyName\" AS \"familyName\", people.\"givenName\" AS \"givenName\",", // -
-            "people,", // -
-            "AND positions.\"currentPersonUuid\" = people.uuid", // -
-            "people.uuid,", // -
-            "people.\"familyName\", people.\"givenName\",", // -
-            "AND a.\"personUuid\" = b.\"personUuid\"", // -
-            "\"familyName\", \"givenName\",", // -
-            "AND organizations.uuid = :organizationUuid" // -
-        };
-        sqlArgs.put("organizationUuid", orgUuid);
-      } else {
-        fmtArgs = new String[] {"", "", "", "", "", "", "", "", "", "", ""};
-      }
-
-      DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
-      DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-      sqlArgs.put("reportDraft", DaoUtils.getEnumId(ReportState.DRAFT));
-      sqlArgs.put("reportPending", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
-      sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
-      sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
-      sqlArgs.put("isInterlocutor", false);
-
-      return handle.createQuery(String.format(sql.toString(), fmtArgs)).bindMap(sqlArgs)
-          .map(new MapMapper()).list();
     } finally {
       closeDbHandle(handle);
     }
