@@ -16,7 +16,7 @@ const getRandomPerson = async function () {
   return await getRandomObject(
     "people",
     { positionType: Object.values(Position.TYPE) },
-    "uuid familyName givenName"
+    "uuid familyName givenName position {uuid name}"
   )
 }
 
@@ -73,7 +73,8 @@ async function populateReport(report, args) {
           primary: false,
           attendee: true,
           interlocutor: false,
-          author: false
+          author: false,
+          reportPosition: advisor.position
         })
       }
     }
@@ -87,7 +88,8 @@ async function populateReport(report, args) {
           primary: false,
           attendee: true,
           interlocutor: true,
-          author: false
+          author: false,
+          reportPosition: interlocutor.position
         })
       }
     }

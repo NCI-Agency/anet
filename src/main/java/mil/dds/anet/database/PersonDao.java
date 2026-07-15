@@ -303,18 +303,21 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
           + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
           + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor,"
-          + "  rpw.\"isInterlocutor\" AS winterlocutor, rpl.\"isInterlocutor\" AS linterlocutor"
-          + "  FROM \"reportPeople\" rpw"
+          + "  rpw.\"isInterlocutor\" AS winterlocutor, rpl.\"isInterlocutor\" AS linterlocutor,"
+          + "  rpl.\"reportPositionUuid\" AS lreportpositionuuid" + "  FROM \"reportPeople\" rpw"
           + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
-          + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
-          + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
+          + "  WHERE rpw.\"personUuid\" = :winnerUuid" + "  AND rpl.\"personUuid\" = :loserUuid )"
+          + " UPDATE \"reportPeople\" SET" + " \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
           + " \"isAttendee\" = (dups.wattendee OR dups.lattendee),"
           + " \"isAuthor\" = (dups.wauthor OR dups.lauthor),"
-          + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor) FROM dups"
-          + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
+          + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor)"
+          + (useWinnerPositionHistory ? "" : ", \"reportPositionUuid\" = dups.lreportpositionuuid")
+          + " FROM dups" + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
           + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
+
       handle.createUpdate(sqlUpd).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
           .execute();
+
       // 2. delete the loser so we don't have duplicates
       final String sqlDel = "WITH dups AS ( SELECT"
           + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"

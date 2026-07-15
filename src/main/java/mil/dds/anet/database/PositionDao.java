@@ -599,16 +599,6 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
   }
 
-  public static String generatePositionFilterAtDate(String personJoinColumn,
-      String dateFilterColumn, String placeholderName) {
-    return String.format(
-        "JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = %1$s"
-            + " WHERE pp.primary IS TRUE AND pp.\"createdAt\" <= %2$s"
-            + " AND (pp.\"endedAt\" IS NULL OR pp.\"endedAt\" > %2$s)"
-            + " AND pp.\"positionUuid\" = :%3$s",
-        personJoinColumn, dateFilterColumn, placeholderName);
-  }
-
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj, String auditTrailUuid,
       boolean isDelete) {

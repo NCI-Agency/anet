@@ -663,7 +663,6 @@ const ReportForm = ({
                       setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
                       setFieldValue("engagementDate", value, true)
                       setEngagementDate(value)
-                      // We also need to update the value of all positions
                     }}
                     onBlur={() => setFieldTouched("engagementDate")}
                     widget={
