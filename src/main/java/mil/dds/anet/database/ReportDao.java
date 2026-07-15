@@ -991,8 +991,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
                 + " JOIN \"reportPeople\" rp ON rp.\"personUuid\" = pp.\"personUuid\""
                 + " JOIN reports r ON r.uuid = rp.\"reportUuid\"" // -
                 + " WHERE r.uuid = " + paramOrJoin("reports.uuid", isParam)
-                + " AND pp.primary IS TRUE AND pp.\"createdAt\" <= r.\"engagementDate\""
-                + " AND (pp.\"endedAt\" IS NULL OR pp.\"endedAt\" > r.\"engagementDate\")",
+                + " AND rp.\"reportPositionUuid\" = pp.\"positionUuid\"",
             // param is already added above
             Collections.emptyMap()));
     // update organizations
