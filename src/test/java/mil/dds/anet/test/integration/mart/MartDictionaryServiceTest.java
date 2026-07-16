@@ -4,12 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import mil.dds.anet.beans.Report;
+import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.services.IMartDictionaryService;
+import mil.dds.anet.services.MartReportImporterService;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 class MartDictionaryServiceTest extends AbstractResourceTest {
+
+  private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
   @Autowired
   private IMartDictionaryService martDictionaryService;
@@ -75,5 +87,53 @@ class MartDictionaryServiceTest extends AbstractResourceTest {
     assertThat(locations.get(0)).containsEntry("townAlbanian", "Baballoq");
     assertThat(locations.get(0)).containsEntry("townSerbian", "Babaloc");
     assertThat(locations.get(0)).containsEntry("mgrs", "34TDN46550404");
+  }
+
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {"", " ", "{}"})
+  void testDictionaryCustomFieldsWithoutReportType(String testCustomFields) {
+    checkReportType(testCustomFields, "lmt");
+  }
+
+  @Test
+  void testDictionaryCustomFieldsWithSameReportType() {
+    checkReportType("{ \"reportType\": \"lmt\" }", "lmt");
+  }
+
+  @Test
+  void testDictionaryCustomFieldsWithDifferentReportType() {
+    checkReportType("{ \"reportType\": \"engagement\" }", "engagement");
+  }
+
+  @Test
+  void testDictionaryCustomFieldsWithAdditionalField() {
+    final Report anetReport = checkReportType("{ \"someField\": \"someValue\" }", "lmt");
+    final ObjectNode jsonTree = mapper.readTree(anetReport.getCustomFields()).asObject();
+    final JsonNode someField = jsonTree.get("someField");
+    assertThat(someField).isInstanceOf(StringNode.class);
+    assertThat(someField.stringValue()).isEqualTo("someValue");
+  }
+
+  private Report checkReportType(String testCustomFields, String lmt) {
+    final Report anetReport = new Report();
+    anetReport.setCustomFields(testCustomFields);
+    addReportType(anetReport);
+    assertReportType(anetReport, lmt);
+    return anetReport;
+  }
+
+  private void addReportType(Report anetReport) {
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> dictionaryCustomFields =
+        (Map<String, Object>) dict.getDictionaryEntry("martReportImport.customFields");
+    MartReportImporterService.addDictionaryCustomFields(anetReport, dictionaryCustomFields);
+  }
+
+  private void assertReportType(Report anetReport, String expectedReportType) {
+    final ObjectNode jsonTree = mapper.readTree(anetReport.getCustomFields()).asObject();
+    final JsonNode reportType = jsonTree.get("reportType");
+    assertThat(reportType).isInstanceOf(StringNode.class);
+    assertThat(reportType.stringValue()).isEqualTo(expectedReportType);
   }
 }

@@ -58,6 +58,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.node.ObjectNode;
 
 @Component
 public class MartReportImporterService implements IMartReportImporterService {
@@ -68,6 +69,7 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
+  private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
@@ -81,7 +83,9 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final CommentDao commentDao;
 
   private final int martNewPositionDaysInThePast;
+  private final Map<String, Object> martImportCustomFields;
 
+  @SuppressWarnings("unchecked")
   public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
       PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
       LocationDao locationDao, MartImportedReportDao martImportedReportDao,
@@ -99,6 +103,8 @@ public class MartReportImporterService implements IMartReportImporterService {
 
     this.martNewPositionDaysInThePast =
         (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
+    this.martImportCustomFields =
+        (Map<String, Object>) dict.getDictionaryEntry("martReportImport.customFields");
   }
 
   @Override
@@ -307,6 +313,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
         : Utils.sanitizeHtml(anetReport.getReportText()));
 
+    // Add dictionary-defined customFields
+    addDictionaryCustomFields(anetReport, martImportCustomFields);
+
     // Insert report
     try {
       anetReport = reportDao.insertWithExistingUuid(anetReport);
@@ -349,6 +358,23 @@ public class MartReportImporterService implements IMartReportImporterService {
         martImportedReport.setState(MartImportedReport.State.NOT_SUBMITTED);
       }
     }
+  }
+
+  public static void addDictionaryCustomFields(Report anetReport,
+      Map<String, Object> dictionaryCustomFields) {
+    if (anetReport == null || dictionaryCustomFields == null) {
+      return;
+    }
+    final String customFields = anetReport.getCustomFields();
+    final String safeCustomFields =
+        Utils.isEmptyOrNull(Utils.trimStringReturnNull(customFields)) ? "{}" : customFields;
+    final ObjectNode customFieldsJson = mapper.readTree(safeCustomFields).asObject();
+    dictionaryCustomFields.forEach((k, v) -> {
+      if (!customFieldsJson.has(k)) {
+        customFieldsJson.putPOJO(k, v);
+      }
+    });
+    anetReport.setCustomFields(mapper.writeValueAsString(customFieldsJson));
   }
 
   private String getClassificationFromReport(ReportDto martReport, List<String> errors) {
