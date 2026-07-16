@@ -1111,19 +1111,24 @@ const ReportForm = ({
                           )
                           validateFieldDebounced("keyOutcomes")
                         }}
-                        maxLength={Settings.maxTextFieldLength}
+                        maxLength={utils.getMaxTextFieldLength(
+                          Settings.fields.report.keyOutcomes
+                        )}
                         onKeyUp={event =>
                           countCharsLeft(
                             "keyOutcomesCharsLeft",
-                            Settings.maxTextFieldLength,
+                            utils.getMaxTextFieldLength(
+                              Settings.fields.report.keyOutcomes
+                            ),
                             event
                           )
                         }
                         extraColElem={
                           <>
                             <span id="keyOutcomesCharsLeft">
-                              {Settings.maxTextFieldLength -
-                                initialValues.keyOutcomes.length}
+                              {utils.getMaxTextFieldLength(
+                                Settings.fields.report.keyOutcomes
+                              ) - initialValues.keyOutcomes.length}
                             </span>{" "}
                             characters remaining
                           </>
