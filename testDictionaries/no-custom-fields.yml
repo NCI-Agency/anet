@@ -1619,6 +1619,10 @@ dashboards:
     data: /data/dashboards/decisives.json
     type: decisives
 
+martReportImport:
+  customFields:
+    reportType: lmt
+
 martDictionaryExport:
   tasks:
     domainUuid: f07beca6-153e-49da-8aaa-3e29c2a1f4bc

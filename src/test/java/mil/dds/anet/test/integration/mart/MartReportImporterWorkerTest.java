@@ -49,14 +49,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
+  private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
   @Autowired
   protected AnetConfig config;
@@ -214,6 +218,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdGoodReport.getTasks().getFirst().getLongName()).isEqualTo("Intelligence");
     assertThat(createdGoodReport.getClassification()).isEqualTo("NU");
     assertThat(createdGoodReport.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    assertReportType(createdGoodReport);
     // Now we will edit and approve goodReport, we should not lose the advisorOrg of the report
     // Edit the report
     createdGoodReport.setAtmosphereDetails("Everybody was super nice! Again!");
@@ -240,6 +245,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         withCredentials("arthur", t -> queryExecutor.report(ReportResourceTest.FIELDS,
             goodOldReportWithDifferentUser.getUuid()));
     createdGoodOldReportWithDifferentUser.setAtmosphereDetails("Everybody was super nice! Again!");
+    assertReportType(createdGoodOldReportWithDifferentUser);
     final Report editedGoodOldReportWithDifferentUser =
         withCredentials("arthur", t -> mutationExecutor.updateReport(ReportResourceTest.FIELDS,
             false, getReportInput(createdGoodOldReportWithDifferentUser), true));
@@ -253,6 +259,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdReportWithWarnings.getComments().size()).isOne();
     assertThat(createdReportWithWarnings.getComments().getFirst().getText()).isEqualTo(
         "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:<ul><li>Security marking is missing</li><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>");
+    assertReportType(createdReportWithWarnings);
 
     // New records in MartImportedReports, verify them
     AnetBeanList<MartImportedReport> martImportedReportsList =
@@ -428,5 +435,12 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
     when(emailMessageMock.getAttachments()).thenReturn(attachmentCollection, attachmentCollection);
     return emailMessageMock;
+  }
+
+  private void assertReportType(Report anetReport) {
+    final ObjectNode jsonTree = mapper.readTree(anetReport.getCustomFields()).asObject();
+    final JsonNode reportType = jsonTree.get("reportType");
+    assertThat(reportType).isInstanceOf(StringNode.class);
+    assertThat(reportType.stringValue()).isEqualTo("lmt");
   }
 }

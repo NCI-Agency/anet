@@ -1527,6 +1527,17 @@ properties:
         description: Used in the application to set the initial delay after which the first deactivation (warning) checks will occur;
                      when not specified, it will use the checkIntervalInSecs setting.
 
+  martReportImport:
+    title: Definition of extra fields to be added when importing MART reports
+    type: object
+    additionalProperties: false
+    required:
+      - customFields
+    properties:
+      customFields:
+        title: Custom fields to be added when importing MART reports
+        type: object
+
   martDictionaryExport:
     title: Configuration of MART ANET dictionary export
     type: object
