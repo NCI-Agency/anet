@@ -304,15 +304,15 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
           + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor,"
           + "  rpw.\"isInterlocutor\" AS winterlocutor, rpl.\"isInterlocutor\" AS linterlocutor,"
-          + "  rpl.\"reportPositionUuid\" AS lreportpositionuuid" + "  FROM \"reportPeople\" rpw"
+          + "  rpl.\"reportPositionUuid\" AS lreportpositionuuid FROM \"reportPeople\" rpw"
           + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
-          + "  WHERE rpw.\"personUuid\" = :winnerUuid" + "  AND rpl.\"personUuid\" = :loserUuid )"
-          + " UPDATE \"reportPeople\" SET" + " \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
+          + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+          + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
           + " \"isAttendee\" = (dups.wattendee OR dups.lattendee),"
           + " \"isAuthor\" = (dups.wauthor OR dups.lauthor),"
           + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor)"
           + (useWinnerPositionHistory ? "" : ", \"reportPositionUuid\" = dups.lreportpositionuuid")
-          + " FROM dups" + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
+          + " FROM dups WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
           + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
 
       handle.createUpdate(sqlUpd).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
