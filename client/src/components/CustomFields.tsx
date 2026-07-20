@@ -1391,6 +1391,10 @@ export const ReadonlyCustomFields = ({
     values,
     parentFieldName
   )
+  const invisibleFields = useMemo(
+    () => getInvisibleFields(fieldsConfig, parentFieldName, values),
+    [fieldsConfig, parentFieldName, values]
+  )
 
   useEffect(() => {
     if (setShowCustomFields) {
@@ -1402,6 +1406,9 @@ export const ReadonlyCustomFields = ({
     <>
       {Object.entries(deprecatedFieldsFiltered).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
+        if (invisibleFields.includes(fieldName)) {
+          return null
+        }
         const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
         const { type } = fieldConfig
         let extraProps = {}

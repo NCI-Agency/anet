@@ -78,10 +78,14 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  const location = useMemo(
-    () => new Location(data?.location ?? {}),
-    [data?.location]
-  )
+  const location = useMemo(() => {
+    if (data?.location) {
+      data.location[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+        data.location.customFields
+      )
+    }
+    return new Location(data?.location ?? {})
+  }, [data?.location])
 
   const { shapes, markers } = useMemo(() => {
     const shapes = location?.geoJson
@@ -107,11 +111,6 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   }, [location])
   if (done) {
     return result
-  }
-  if (data) {
-    data.location[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-      data.location.customFields
-    )
   }
   const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
