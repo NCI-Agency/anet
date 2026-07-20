@@ -65,20 +65,6 @@ input AdminSettingInput {
 }
 
 """"""
-type AdvisorReportsEntry {
-  name: String
-  stats: [AdvisorReportsStats]
-  uuid: String
-}
-
-""""""
-type AdvisorReportsStats {
-  nrEngagementsAttended: Int!
-  nrReportsSubmitted: Int!
-  week: Int!
-}
-
-""""""
 enum AggregationPeriod {
   DAY
   MONTH
@@ -1375,7 +1361,6 @@ type Query {
   accessToken(uuid: String): AccessToken
   accessTokenList: [AccessToken]
   adminSettings: [AdminSetting]
-  advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!
   attachment(uuid: String): Attachment
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
