@@ -485,6 +485,7 @@ fields:
     keyOutcomes:
       label: Key outcomes
       placeholder: Fill in the key outcomes of this engagement
+      maxLength: 1000
       exclude: false
       optional: false
     reportText:
