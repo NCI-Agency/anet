@@ -78,6 +78,15 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
         query.getIncludeDate());
     qb.addDateRangeClause("startDate", "events.\"endDate\"", Comparison.AFTER, query.getStartDate(),
         "endDate", "events.\"startDate\"", Comparison.BEFORE, query.getEndDate());
+
+    qb.addDateRangeClause("startStartDate", "events.\"startDate\"", Comparison.AFTER,
+        query.getStartDateStart(), "endStartDate", "events.\"startDate\"", Comparison.BEFORE,
+        query.getStartDateEnd());
+
+    qb.addDateRangeClause("startEndDate", "events.\"endDate\"", Comparison.AFTER,
+        query.getEndDateStart(), "endEndDate", "events.\"endDate\"", Comparison.BEFORE,
+        query.getEndDateEnd());
+
     addOrderByClauses(qb, query);
   }
 

@@ -28,6 +28,18 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
   Instant endDate;
   @GraphQLQuery
   @GraphQLInputField
+  Instant startDateStart;
+  @GraphQLQuery
+  @GraphQLInputField
+  Instant startDateEnd;
+  @GraphQLQuery
+  @GraphQLInputField
+  Instant endDateStart;
+  @GraphQLQuery
+  @GraphQLInputField
+  Instant endDateEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   String eventTypeUuid;
 
   public EventSearchQuery() {
@@ -91,10 +103,42 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
     this.eventTypeUuid = eventTypeUuid;
   }
 
+  public Instant getStartDateStart() {
+    return startDateStart;
+  }
+
+  public void setStartDateStart(Instant startDateStart) {
+    this.startDateStart = startDateStart;
+  }
+
+  public Instant getStartDateEnd() {
+    return startDateEnd;
+  }
+
+  public void setStartDateEnd(Instant startDateEnd) {
+    this.startDateEnd = startDateEnd;
+  }
+
+  public Instant getEndDateStart() {
+    return endDateStart;
+  }
+
+  public void setEndDateStart(Instant endDateStart) {
+    this.endDateStart = endDateStart;
+  }
+
+  public Instant getEndDateEnd() {
+    return endDateEnd;
+  }
+
+  public void setEndDateEnd(Instant endDateEnd) {
+    this.endDateEnd = endDateEnd;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), eventSeriesUuid, locationUuid, taskUuid, includeDate,
-        startDate, endDate, eventTypeUuid);
+        startDate, endDate, startDateStart, startDateEnd, endDateStart, endDateEnd, eventTypeUuid);
   }
 
   @Override
@@ -108,6 +152,10 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
         && Objects.equals(getIncludeDate(), other.getIncludeDate())
         && Objects.equals(getStartDate(), other.getStartDate())
         && Objects.equals(getEndDate(), other.getEndDate())
+        && Objects.equals(getStartDateStart(), other.getStartDateStart())
+        && Objects.equals(getStartDateEnd(), other.getStartDateEnd())
+        && Objects.equals(getEndDateStart(), other.getEndDateStart())
+        && Objects.equals(getEndDateEnd(), other.getEndDateEnd())
         && Objects.equals(getEventTypeUuid(), other.getEventTypeUuid());
   }
 

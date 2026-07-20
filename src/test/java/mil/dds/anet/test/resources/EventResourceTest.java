@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +21,7 @@ import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.utils.UtilsTest;
+import mil.dds.anet.utils.DaoUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -75,13 +78,42 @@ public class EventResourceTest extends AbstractResourceTest {
     assertThat(updated.getPeople()).hasSize(1);
     assertThat(updated.getTasks()).hasSize(1);
 
-    // Search
+    // Search filtering by text
     final EventSearchQueryInput query =
         EventSearchQueryInput.builder().withText("NMI PDT 2024-01").build();
     final AnetBeanList_Event searchObjects =
         withCredentials(adminUser, t -> queryExecutor.eventList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
+    assertThat(searchObjects.getList()).hasSize(1);
+
+    // Search filtering by start date
+    final EventSearchQueryInput query2 = EventSearchQueryInput.builder()
+        .withStartDateStart(LocalDateTime.of(2024, Month.JANUARY, 7, 0, 0)
+            .atZone(DaoUtils.getServerNativeZoneId()).toInstant())
+        .withStartDateEnd(LocalDateTime.of(2024, Month.JANUARY, 10, 0, 0)
+            .atZone(DaoUtils.getServerNativeZoneId()).toInstant())
+        .build();
+
+    final AnetBeanList_Event searchObjects2 =
+        withCredentials(adminUser, t -> queryExecutor.eventList(getListFields(FIELDS), query2));
+    assertThat(searchObjects2).isNotNull();
+    assertThat(searchObjects2.getList()).isNotEmpty();
+    assertThat(searchObjects2.getList()).hasSize(1);
+
+    // Search filtering by end date
+    final EventSearchQueryInput query3 = EventSearchQueryInput.builder()
+        .withEndDateStart(LocalDateTime.of(2024, Month.JANUARY, 11, 0, 0)
+            .atZone(DaoUtils.getServerNativeZoneId()).toInstant())
+        .withEndDateEnd(LocalDateTime.of(2024, Month.JANUARY, 13, 0, 0)
+            .atZone(DaoUtils.getServerNativeZoneId()).toInstant())
+        .build();
+
+    final AnetBeanList_Event searchObjects3 =
+        withCredentials(adminUser, t -> queryExecutor.eventList(getListFields(FIELDS), query3));
+    assertThat(searchObjects3).isNotNull();
+    assertThat(searchObjects3.getList()).isNotEmpty();
+    assertThat(searchObjects3.getList()).hasSize(1);
   }
 
   @Test
