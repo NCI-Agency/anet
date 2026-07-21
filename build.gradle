@@ -33,7 +33,7 @@ java {
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.2.2"
-String jdbi3Version = "3.53.0"
+String jdbi3Version = "3.54.0"
 String poiVersion = "5.5.1"
 String simplejavamailVersion = "8.12.6"
 String springShellVersion = "4.0.3"
@@ -122,7 +122,7 @@ configurations {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.11'
+	implementation 'org.postgresql:postgresql:42.7.13'
 	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
@@ -145,13 +145,13 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:3.0.4'
+	implementation 'com.networknt:json-schema-validator:3.0.6'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
 	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:3.3.1'
+	implementation 'org.apache.tika:tika-core:3.3.2'
 	// For sanitizing SVG uploads
 	implementation 'io.github.borewit:svg-sanitizer:0.4.0'
 
@@ -822,7 +822,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '13.5.0'
+	toolVersion = '13.8.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleMain {
