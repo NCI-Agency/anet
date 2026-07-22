@@ -514,6 +514,24 @@ export default {
     )?.position
   },
 
+  findPositionsAtDate: function (person, date) {
+    const normalize = p => (Array.isArray(p) ? p[0] : p)
+
+    if (!date) {
+      return [
+        normalize(person.position),
+        ...(person.additionalPositions ?? []).map(normalize)
+      ].filter(p => !_isEmpty(p))
+    }
+
+    const when = moment(date).valueOf()
+
+    return (person.previousPositions ?? [])
+      .filter(p => p.startTime <= when && (!p.endTime || p.endTime > when))
+      .map(p => normalize(p.position))
+      .filter(p => !_isEmpty(p))
+  },
+
   getButtonsFromChoices: function (choices) {
     return Object.entries(choices).map(([value, label]) => ({
       value,

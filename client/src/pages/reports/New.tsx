@@ -113,12 +113,13 @@ const ReportNewConditional = ({
   initInvisibleFields(report, Settings.fields.report.customFields)
 
   if (currentUser && currentUser.uuid) {
-    const person = new Person(currentUser)
-    person.primary = true
-    person.author = true
-    person.attendee = true
-    person.interlocutor = false
-    report.reportPeople.push(person)
+    const reportPerson = new Person(currentUser)
+    reportPerson.primary = true
+    reportPerson.author = true
+    reportPerson.attendee = true
+    reportPerson.interlocutor = false
+    reportPerson.reportPosition = currentUser.position
+    report.reportPeople.push(reportPerson)
   }
   const reportInitialValues = Object.assign(
     report,

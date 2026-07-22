@@ -9,7 +9,14 @@ import RemoveButton from "components/RemoveButton"
 import { Person, Position } from "models"
 import pluralize from "pluralize"
 import React, { useContext } from "react"
-import { Badge, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
+import {
+  Badge,
+  Form,
+  FormSelect,
+  OverlayTrigger,
+  Table,
+  Tooltip
+} from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -98,10 +105,23 @@ const ReportPeople = ({
 
   function renderAttendeeRow(person) {
     const isCurrentEditor = Person.isEqual(person, currentUser)
-    const position = utils.findPrimaryPositionAtDate(
-      person,
-      report.engagementDate
-    )
+    let positions = []
+    if (!disabled) {
+      positions = utils.findPositionsAtDate(person, report.engagementDate) ?? []
+      if (positions.length === 0) {
+        if (person.reportPosition != null) {
+          setReportPosition(person, null)
+        }
+      } else {
+        // If current position not in the new positions list just assign first one available
+        const mustUpdatePosition = !positions.some(
+          p => p.uuid === person.reportPosition?.uuid
+        )
+        if (mustUpdatePosition) {
+          setReportPosition(person, positions[0])
+        }
+      }
+    }
     return (
       <tr key={person.uuid}>
         <td className="primary-attendee">
@@ -151,24 +171,48 @@ const ReportPeople = ({
           <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
-          {position?.uuid && (
-            <LinkTo modelType="Position" model={position}>
-              {Position.toString(position)}
-              {position?.code ? `, ${position.code}` : ""}
+          {(disabled || positions.length === 1) && (
+            <LinkTo
+              modelType="Position"
+              model={person.reportPosition}
+              whenUnspecified=""
+            >
+              {Position.toString(person.reportPosition)}
+              {person.reportPosition?.code
+                ? `, ${person.reportPosition.code}`
+                : ""}
             </LinkTo>
+          )}
+          {!disabled && positions.length > 1 && (
+            <FormSelect
+              value={person.reportPosition?.uuid || ""}
+              onChange={e => {
+                const position = positions.find(p => p.uuid === e.target.value)
+                if (position) {
+                  setReportPosition(person, position)
+                }
+              }}
+            >
+              {positions.map(p => (
+                <option key={p.uuid} value={p.uuid}>
+                  {Position.toString(p)}
+                  {p.code ? `, ${p.code}` : ""}
+                </option>
+              ))}
+            </FormSelect>
           )}
         </td>
         <td>
           <LinkTo
             modelType="Location"
-            model={position?.location}
+            model={person.reportPosition?.location}
             whenUnspecified=""
           />
         </td>
         <td>
           <LinkTo
             modelType="Organization"
-            model={position?.organization}
+            model={person.reportPosition?.organization}
             whenUnspecified=""
           />
         </td>
@@ -236,6 +280,18 @@ const ReportPeople = ({
       }
     })
     onChange(newPeopleList)
+  }
+
+  function setReportPosition(person: Person, position: Position) {
+    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+    newPeopleList.forEach(rp => {
+      if (Person.isEqual(rp, person)) {
+        rp.reportPosition = position
+      }
+    })
+    if (onChange) {
+      onChange(newPeopleList)
+    }
   }
 
   function passesAuthorValidationSteps(person) {
