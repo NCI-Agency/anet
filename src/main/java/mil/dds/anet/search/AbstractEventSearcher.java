@@ -87,6 +87,10 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
         query.getEndDateStart(), "endEndDate", "events.\"endDate\"", Comparison.BEFORE,
         query.getEndDateEnd());
 
+    if (!Utils.isEmptyOrNull(query.getAttendeeRanks())) {
+      addAttendeeRanksQuery(query);
+    }
+
     addOrderByClauses(qb, query);
   }
 
@@ -145,6 +149,12 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       qb.addRecursiveClause(null, "et", "\"taskUuid\"", "parent_tasks", "tasks",
           "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true, null);
     }
+  }
+
+  protected void addAttendeeRanksQuery(EventSearchQuery query) {
+    qb.addFromClause("INNER JOIN \"eventPeople\" ep ON ep.\"eventUuid\" = events.uuid");
+    qb.addFromClause("INNER JOIN \"people\" people ON ep.\"personUuid\" = people.uuid");
+    qb.addInListClause("attendeeRanks", "people.rank", query.getAttendeeRanks());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, EventSearchQuery query) {
