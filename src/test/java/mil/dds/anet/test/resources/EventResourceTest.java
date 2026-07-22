@@ -114,6 +114,16 @@ public class EventResourceTest extends AbstractResourceTest {
     assertThat(searchObjects3).isNotNull();
     assertThat(searchObjects3.getList()).isNotEmpty();
     assertThat(searchObjects3.getList()).hasSize(1);
+
+    // Search filtering by rank of attendees
+    final EventSearchQueryInput query4 =
+        EventSearchQueryInput.builder().withAttendeeRanks(List.of("CIV")).build();
+
+    final AnetBeanList_Event searchObjects4 =
+        withCredentials(adminUser, t -> queryExecutor.eventList(getListFields(FIELDS), query4));
+    assertThat(searchObjects4).isNotNull();
+    assertThat(searchObjects4.getList()).isNotEmpty();
+    assertThat(searchObjects4.getList()).hasSize(1);
   }
 
   @Test

@@ -13,6 +13,9 @@ import CheckboxFilter, {
 import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
+import EventAttendeeRanksFilter, {
+  deserialize as deserializeEventAttendeeRanksFilter
+} from "components/advancedSearch/EventAttendeeRanksFilter"
 import LocationFilter, {
   deserialize as deserializeLocationFilter
 } from "components/advancedSearch/LocationFilter"
@@ -751,6 +754,13 @@ export const searchFilters = function (
         deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "endDate"
+        }
+      },
+      "Attendee Ranks": {
+        component: EventAttendeeRanksFilter,
+        deserializer: deserializeEventAttendeeRanksFilter,
+        props: {
+          queryKey: "attendeeRanks"
         }
       },
       [`Within ${Settings.fields.event.ownerOrg.label}`]: {
