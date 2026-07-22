@@ -32,7 +32,8 @@ const MERGE_OPTIONS = [
   {
     key: "tasks",
     label: `Merge ${tasksShortLabel.toLowerCase()}`
-  }
+  },
+  { key: "eventSeries", label: "Merge event series" }
 ]
 
 const USER_ACTIVITY_OPTIONS = [

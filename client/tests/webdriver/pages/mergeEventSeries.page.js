@@ -1,0 +1,147 @@
+import Page from "./page"
+
+const PATH = "/admin/merge/eventSeries"
+
+class MergeEventSeries extends Page {
+  async openPage() {
+    await super.openAsAdminUser(PATH)
+  }
+
+  async getTitle() {
+    return browser.$('//h4[contains(text(),"Merge Event Series")]')
+  }
+
+  async getLeftEventSeriesField() {
+    return browser.$("#EventSeries1")
+  }
+
+  async getRightEventSeriesField() {
+    return browser.$("#EventSeries2")
+  }
+
+  async getItemFromAdvancedSelect(rowNumber = 1) {
+    return browser.$(
+      `.advanced-select-popover table > tbody > tr:nth-child(${rowNumber}) > td:nth-child(2) span`
+    )
+  }
+
+  async getItemRadioButtonFromAdvancedSelect(rowNumber = 1) {
+    return browser.$(
+      `table > tbody > tr:nth-child(${rowNumber}) > td:first-child > input.form-check-input`
+    )
+  }
+
+  async getAdvancedSelectPopover() {
+    return browser.$(".bp6-popover-content")
+  }
+
+  async getColumnContent(side, text) {
+    return browser.$(
+      `//div[@id="${side}-merge-eventSeries-col"]//div[text()="${text}"]/following-sibling::div`
+    )
+  }
+
+  async getMergeEventSeriesButton() {
+    return browser.$('//button[text()="Merge Event Series"]')
+  }
+
+  async getEventSeriesHeaderFromPopover() {
+    return browser.$('//table//th[contains(text(), "Name")]')
+  }
+
+  async getSelectButton(side, text) {
+    const buttonDiv = await browser.$(
+      `//div[@id="${side}-merge-eventSeries-col"]//div[text()="${text}"]`
+    )
+    const button = await buttonDiv.parentElement().parentElement()
+    return button.$("small > button")
+  }
+
+  async getUseAllButton(side) {
+    const button = side === "left" ? "small:first-child" : "small:last-child"
+    return browser.$(`#mid-merge-eventSeries-col ${button} > button`)
+  }
+
+  async waitForAdvancedSelectLoading(compareStr, rowNumber = 1) {
+    await (await this.getAdvancedSelectPopover()).waitForExist()
+    await (await this.getAdvancedSelectPopover()).waitForDisplayed()
+    await (await this.getEventSeriesHeaderFromPopover()).waitForExist()
+    await (await this.getEventSeriesHeaderFromPopover()).waitForDisplayed()
+
+    await browser.waitUntil(
+      async () => {
+        return (
+          (await (
+            await this.getItemFromAdvancedSelect(rowNumber)
+          ).getText()) === compareStr
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: "Couldn't find the searched event series in time"
+      }
+    )
+  }
+
+  async waitForColumnToChange(compareStr, side, text) {
+    const field = await this.getColumnContent(side, text)
+
+    await browser.waitUntil(
+      async () => {
+        return (await field.getText()) === compareStr
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: "Couldn't set the event series in time"
+      }
+    )
+  }
+
+  async waitForSuccessAlert() {
+    await browser.waitUntil(
+      async () => {
+        return (
+          (await (await browser.$(".alert-success")).getText()) ===
+          "Event series merged. Displaying merged event series below."
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: "Couldn't see the success alert in time"
+      }
+    )
+  }
+
+  async getName() {
+    return browser.$("#fg-name #name")
+  }
+
+  async getDescription() {
+    return browser.$("#description .editable p")
+  }
+
+  async getOwnerOrganization() {
+    return browser.$("#ownerOrg")
+  }
+
+  async getAdminOrganization() {
+    return browser.$("#adminOrg")
+  }
+
+  async getHosts() {
+    return browser.$$("#hostRelatedObjects tbody tr")
+  }
+
+  async getHostNames() {
+    const hosts = await this.getHosts()
+    const hostNames = []
+
+    for (const host of hosts) {
+      hostNames.push(await host.getText())
+    }
+
+    return hostNames
+  }
+}
+
+export default new MergeEventSeries()

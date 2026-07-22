@@ -1,11 +1,14 @@
 package mil.dds.anet.database;
 
 import graphql.GraphQLContext;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.GenericRelatedObject;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSeriesSearchQuery;
 import mil.dds.anet.database.mappers.EventSeriesMapper;
@@ -21,6 +24,7 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, EventSeriesSearchQuery> {
@@ -31,8 +35,11 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   public static final String EVENT_SERIES_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
-  public EventSeriesDao(DatabaseHandler databaseHandler) {
+  private final AdminDao adminDao;
+
+  public EventSeriesDao(DatabaseHandler databaseHandler, AdminDao adminDao) {
     super(databaseHandler);
+    this.adminDao = adminDao;
   }
 
   @Override
@@ -62,7 +69,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
 
   public List<List<GenericRelatedObject>> getEventSeriesHostRelatedObjects(
       List<String> foreignKeys) {
-    return new EventSeriesDao.EventSeriesHostRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
+    return new EventSeriesHostRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
   }
 
   public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
@@ -91,8 +98,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
           .bind("ownerOrgUuid", DaoUtils.getUuid(eventSeries.getOwnerOrg()))
           .bind("adminOrgUuid", DaoUtils.getUuid(eventSeries.getAdminOrg())).execute();
 
-      final EventSeriesDao.EventSeriesBatch rb =
-          handle.attach(EventSeriesDao.EventSeriesBatch.class);
+      final EventSeriesBatch rb = handle.attach(EventSeriesBatch.class);
 
       if (!Utils.isEmptyOrNull(eventSeries.getHostRelatedObjects())) {
         rb.insertEventSeriesHostRelatedObjects(eventSeries.getUuid(),
@@ -121,8 +127,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   public int updateInternal(EventSeries eventSeries) {
     final Handle handle = getDbHandle();
     try {
-      final EventSeriesDao.EventSeriesBatch eb =
-          handle.attach(EventSeriesDao.EventSeriesBatch.class);
+      final EventSeriesBatch eb = handle.attach(EventSeriesBatch.class);
       eb.deleteEventSeriesHostRelatedObjects(DaoUtils.getUuid(eventSeries)); // seems the easiest
                                                                              // thing to do
       if (!Utils.isEmptyOrNull(eventSeries.getHostRelatedObjects())) {
@@ -154,5 +159,57 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
       boolean isDelete) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, auditTrailUuid, "eventSeries.uuid",
         isDelete);
+  }
+
+  @Transactional
+  public int mergeEventSeries(final EventSeries loserEventSeries,
+      final EventSeries winnerEventSeries) {
+    final Handle handle = getDbHandle();
+    try {
+      final var loserEventSeriesUuid = loserEventSeries.getUuid();
+      final var winnerEventSeriesUuid = winnerEventSeries.getUuid();
+
+      // Update the winner's fields (also updates winner's host related objects)
+      update(winnerEventSeries);
+
+      // Delete host related objects for loser
+      deleteForMerge("eventSeriesHostRelatedObjects", "eventSeriesUuid", loserEventSeriesUuid);
+
+      // Move events to the winner
+      updateForMerge("events", "eventSeriesUuid", winnerEventSeriesUuid, loserEventSeriesUuid);
+
+      // Update subscriptions
+      updateM2mForMerge("subscriptions", "subscriberUuid", "subscribedObjectUuid",
+          winnerEventSeriesUuid, loserEventSeriesUuid);
+
+      // Update subscriptionUpdates
+      updateForMerge("subscriptionUpdates", "updatedObjectUuid", winnerEventSeriesUuid,
+          loserEventSeriesUuid);
+
+      // Update attachments
+      updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
+          winnerEventSeriesUuid, loserEventSeriesUuid);
+
+      // Update the avatar
+      final EntityAvatarDao entityAvatarDao = engine().getEntityAvatarDao();
+      entityAvatarDao.delete(PositionDao.TABLE_NAME, winnerEventSeriesUuid);
+      entityAvatarDao.delete(PositionDao.TABLE_NAME, loserEventSeriesUuid);
+      final EntityAvatar winnerEntityAvatar = winnerEventSeries.getEntityAvatar();
+      if (winnerEntityAvatar != null) {
+        winnerEntityAvatar.setRelatedObjectType(EventSeriesDao.TABLE_NAME);
+        winnerEntityAvatar.setRelatedObjectUuid(winnerEventSeriesUuid);
+        entityAvatarDao.upsert(winnerEntityAvatar);
+      }
+
+      // Finally, delete loser
+      final int nrDeleted = deleteForMerge(EventSeriesDao.TABLE_NAME, "uuid", loserEventSeriesUuid);
+      if (nrDeleted > 0) {
+        adminDao.insertMergedEntity(
+            new MergedEntity(loserEventSeriesUuid, winnerEventSeriesUuid, Instant.now()));
+      }
+      return nrDeleted;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 }

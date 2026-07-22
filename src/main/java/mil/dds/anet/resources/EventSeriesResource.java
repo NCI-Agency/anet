@@ -5,6 +5,7 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.Objects;
 import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -117,6 +118,39 @@ public class EventSeriesResource {
           "Event Series name must not be empty");
     }
     assertPermission(user, eventSeries.getAdminOrgUuid());
+  }
+
+  @GraphQLMutation(name = "mergeEventSeries")
+  public Integer mergeEventSeries(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerEventSeries") EventSeries winnerEventSeries) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+
+    final var loserEventSeries = dao.getByUuid(loserUuid);
+    checkWhetherEventSeriesAreMergeable(winnerEventSeries, loserEventSeries);
+    final var numberOfAffectedRows = dao.mergeEventSeries(loserEventSeries, winnerEventSeries);
+    if (numberOfAffectedRows == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process merge operation, error occurred while updating merged event series relation information.");
+    }
+
+    // Log the change
+    final String auditTrailUuid = auditTrailDao.logUpdate(user, EventSeriesDao.TABLE_NAME,
+        winnerEventSeries, "an event series has been merged into it", Utils.getElementDetails(
+            "merged event series: ", EventSeriesDao.TABLE_NAME, loserEventSeries.getUuid()));
+    // Update any subscriptions
+    dao.updateSubscriptions(winnerEventSeries, auditTrailUuid, false);
+
+    return numberOfAffectedRows;
+  }
+
+  private void checkWhetherEventSeriesAreMergeable(final EventSeries winnerEventSeries,
+      final EventSeries loserEventSeries) {
+    if (Objects.equals(DaoUtils.getUuid(loserEventSeries), DaoUtils.getUuid(winnerEventSeries))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot merge identical event series.");
+    }
   }
 
 }
