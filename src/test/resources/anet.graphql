@@ -633,6 +633,7 @@ input EventInput {
 input EventSearchQueryInput {
   adminOrgUuid: [String]
   anyOrgUuid: [String]
+  attendeeRanks: [String]
   emailNetwork: String
   endDate: Instant
   endDateEnd: Instant

@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import mil.dds.anet.beans.Report;
 
 public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearchSortBy> {
   @GraphQLQuery
@@ -41,6 +42,9 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
   @GraphQLQuery
   @GraphQLInputField
   String eventTypeUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  List<String> attendeeRanks;
 
   public EventSearchQuery() {
     super(EventSearchSortBy.START_DATE);
@@ -135,10 +139,19 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
     this.endDateEnd = endDateEnd;
   }
 
+  public List<String> getAttendeeRanks() {
+    return attendeeRanks;
+  }
+
+  public void setAttendeeRanks(List<String> attendeeRanks) {
+    this.attendeeRanks = attendeeRanks;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), eventSeriesUuid, locationUuid, taskUuid, includeDate,
-        startDate, endDate, startDateStart, startDateEnd, endDateStart, endDateEnd, eventTypeUuid);
+        startDate, endDate, startDateStart, startDateEnd, endDateStart, endDateEnd, eventTypeUuid,
+        attendeeRanks);
   }
 
   @Override
@@ -156,7 +169,8 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
         && Objects.equals(getStartDateEnd(), other.getStartDateEnd())
         && Objects.equals(getEndDateStart(), other.getEndDateStart())
         && Objects.equals(getEndDateEnd(), other.getEndDateEnd())
-        && Objects.equals(getEventTypeUuid(), other.getEventTypeUuid());
+        && Objects.equals(getEventTypeUuid(), other.getEventTypeUuid())
+        && Objects.equals(getAttendeeRanks(), other.getAttendeeRanks());
   }
 
   @Override
