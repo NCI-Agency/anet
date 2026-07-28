@@ -7309,6 +7309,38 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-position-to-report-people" author="fdelcastillo">
+		<addColumn tableName="reportPeople">
+			<column name="reportPositionUuid" type="${uuid_type}" />
+		</addColumn>
+		<addForeignKeyConstraint
+			constraintName="FK_reportPeople_reportPosition"
+			baseTableName="reportPeople"
+			baseColumnNames="reportPositionUuid"
+			referencedTableName="positions"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<!-- Add their primary position at the engagementDate to existing reportPeople -->
+		<sql>
+		<![CDATA[
+			UPDATE "reportPeople"
+			SET "reportPositionUuid" = pp."positionUuid"
+			FROM reports r, "peoplePositions" pp
+			WHERE r.uuid = "reportPeople"."reportUuid"
+			AND pp."personUuid" = "reportPeople"."personUuid"
+			AND pp."primary" IS TRUE
+			AND CASE WHEN r."engagementDate" IS NULL THEN (
+				pp."createdAt" <= CURRENT_TIMESTAMP
+				AND (pp."endedAt" IS NULL OR pp."endedAt" >= CURRENT_TIMESTAMP)
+			) ELSE (
+				pp."createdAt" <= r."engagementDate"
+				AND (pp."endedAt" IS NULL OR pp."endedAt" >= r."engagementDate")
+			) END;
+		]]>
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

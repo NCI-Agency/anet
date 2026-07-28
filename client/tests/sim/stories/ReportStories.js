@@ -16,7 +16,7 @@ const getRandomPerson = async function () {
   return await getRandomObject(
     "people",
     { positionType: Object.values(Position.TYPE) },
-    "uuid familyName givenName"
+    "uuid familyName givenName position {uuid name} additionalPositions {uuid name} previousPositions {startTime endTime primary position {uuid name}}"
   )
 }
 
@@ -62,7 +62,32 @@ async function populateReport(report, args) {
       ? Location.LOCATION_TYPES.POINT_LOCATION
       : Location.LOCATION_TYPES.VIRTUAL_LOCATION
   })
-  async function getAttendees() {
+
+  function getReportPosition(person, engagementDate) {
+    if (engagementDate) {
+      // If we have an engagement date we look in position history
+      const engagement = new Date(engagementDate)
+      const positionsAtEngagementDate = (person.previousPositions ?? []).filter(
+        p => {
+          const start = new Date(p.startTime)
+          const end = p.endTime ? new Date(p.endTime) : null
+          return engagement >= start && (!end || engagement <= end)
+        }
+      )
+
+      if (positionsAtEngagementDate.length > 0) {
+        return faker.helpers.arrayElement(positionsAtEngagementDate).position
+      }
+    }
+
+    // Fall back to current position and additional positions
+    return faker.helpers.arrayElement([
+      person.position,
+      ...(person.additionalPositions ?? [])
+    ])
+  }
+
+  async function getAttendees(engagementDate) {
     let reportPeople = []
     const nbOfAdvisors = faker.number.int({ min: 1, max: 5 })
     for (let i = 0; i < nbOfAdvisors; i++) {
@@ -73,7 +98,8 @@ async function populateReport(report, args) {
           primary: false,
           attendee: true,
           interlocutor: false,
-          author: false
+          author: false,
+          reportPosition: getReportPosition(advisor, engagementDate)
         })
       }
     }
@@ -87,7 +113,8 @@ async function populateReport(report, args) {
           primary: false,
           attendee: true,
           interlocutor: true,
-          author: false
+          author: false,
+          reportPosition: getReportPosition(interlocutor, engagementDate)
         })
       }
     }
@@ -120,7 +147,6 @@ async function populateReport(report, args) {
     }
     return reportPeople
   }
-  const reportPeople = await getAttendees()
   async function getTasks() {
     const reportTasks = []
     const nbOfTasks = faker.number.int({ min: 1, max: 3 })
@@ -137,6 +163,7 @@ async function populateReport(report, args) {
   const engagementDate = fuzzy.withProbability(0.9)
     ? faker.date.past()
     : faker.date.future()
+  const reportPeople = await getAttendees(engagementDate)
   const state = fuzzy.withProbability(0.05)
     ? Report.STATE.CANCELLED
     : (args && args.state) || Report.STATE.DRAFT

@@ -19,8 +19,6 @@ public enum FkDataLoaderKey {
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects
   NOTE_RELATED_OBJECT_NOTES, // noteRelatedObject.notes
   ORGANIZATION_ADMINISTRATIVE_POSITIONS, // organization.responsiblePositions
-  PERSON_ORGANIZATIONS, // person.organizations
-  PERSON_ORGANIZATIONS_WHEN, // person.organizations at a given date
   PERSON_PERSON_ADDITIONAL_POSITIONS, // person.personAdditionalPositions
   PERSON_PERSON_POSITION_HISTORY, // person.personPositionHistory
   PERSON_PERSON_PREFERENCES, // person.personPreferences
