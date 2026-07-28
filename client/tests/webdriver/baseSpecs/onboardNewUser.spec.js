@@ -65,7 +65,9 @@ describe("Onboard new user login", () => {
     await (await OnboardPage.getEndOfTourDate()).setValue(yesterday)
 
     await (await OnboardPage.getFamilyName()).click()
-    const errorMessage = await (await OnboardPage.getEndOfTourDate())
+    const errorMessage = await (
+      await OnboardPage.getEndOfTourDate()
+    )
       .parentElement()
       .parentElement()
       .parentElement()

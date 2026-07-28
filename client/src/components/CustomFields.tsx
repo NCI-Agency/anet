@@ -48,8 +48,7 @@ const SPECIAL_WIDGET_COMPONENTS = {
 interface SpecialFieldProps {
   name: string
   widget:
-    | SPECIAL_WIDGET_TYPES.LIKERT_SCALE
-    | SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+    SPECIAL_WIDGET_TYPES.LIKERT_SCALE | SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
   formikProps?: any
 }
 
@@ -84,8 +83,7 @@ const SpecialField = ({
 interface ReadonlySpecialFieldProps {
   name: string
   widget:
-    | SPECIAL_WIDGET_TYPES.LIKERT_SCALE
-    | SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+    SPECIAL_WIDGET_TYPES.LIKERT_SCALE | SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
   values?: any
   isCompact?: boolean
 }

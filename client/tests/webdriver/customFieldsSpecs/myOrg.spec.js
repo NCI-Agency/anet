@@ -35,7 +35,9 @@ describe("My Organization page", () => {
 
       await (await MyOrg.getEngagementStatus()).waitForDisplayed()
       // There are 4 engagement status options
-      const engagementStatusLegend = await (await MyOrg.getEngagementStatus())
+      const engagementStatusLegend = await (
+        await MyOrg.getEngagementStatus()
+      )
         .$(".pieLegend")
         .$$("span")
       expect(engagementStatusLegend).to.have.length(4)
@@ -55,7 +57,9 @@ describe("My Organization page", () => {
 
       await (await MyOrg.getTrainingEvent()).waitForDisplayed()
       // There are 3 training event options
-      const trainingEventLegend = await (await MyOrg.getTrainingEvent())
+      const trainingEventLegend = await (
+        await MyOrg.getTrainingEvent()
+      )
         .$(".pieLegend")
         .$$("span")
       expect(trainingEventLegend).to.have.length(3)

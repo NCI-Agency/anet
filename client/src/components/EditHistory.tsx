@@ -61,9 +61,7 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
 
 const INVALID_ENTRY_STYLE = { borderRadius: "4px", backgroundColor: "#F2DEDE" }
 type HistoryConflictType =
-  | "PRIMARY_OVERLAP"
-  | "SAME_POSITION_OVERLAP"
-  | "ALREADY_OCCUPIED"
+  "PRIMARY_OVERLAP" | "SAME_POSITION_OVERLAP" | "ALREADY_OCCUPIED"
 
 interface HistoryConflictWatcherProps {
   history: any[]
