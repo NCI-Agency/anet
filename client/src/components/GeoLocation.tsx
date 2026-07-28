@@ -74,8 +74,7 @@ interface BaseGeoLocationProps {
   setFieldTouched?: (...args: unknown[]) => unknown
   isSubmitting?: boolean
   displayType?:
-    | GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD
-    | GEO_LOCATION_DISPLAY_TYPE.GENERIC
+    GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD | GEO_LOCATION_DISPLAY_TYPE.GENERIC
   showAllFormatsInfo: boolean
 }
 

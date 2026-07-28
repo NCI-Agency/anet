@@ -287,12 +287,10 @@ const EventMatrix = ({
   }
 
   function isReportIncluded(report, startDate, endDate, task, event?) {
-    if (
-      !(
-        moment(report.engagementDate).startOf("day").isBefore(endDate) &&
-        moment(report.engagementDate).endOf("day").isSameOrAfter(startDate)
-      )
-    ) {
+    if (!(
+      moment(report.engagementDate).startOf("day").isBefore(endDate) &&
+      moment(report.engagementDate).endOf("day").isSameOrAfter(startDate)
+    )) {
       // Out of range
       return false
     }
