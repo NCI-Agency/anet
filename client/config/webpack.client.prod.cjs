@@ -1,6 +1,6 @@
 const path = require("path")
 const merge = require("webpack-merge")
-const TerserPlugin = require("terser-webpack-plugin")
+const TerserPlugin = require("minimizer-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const webpack = require("webpack")
 const paths = require("./paths")
