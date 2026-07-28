@@ -377,18 +377,21 @@ $defs:
             recurrence:
               enum: [ondemand]
             questions:
-              properties:
-                allOf:
+              allOf:
                 - "$ref": "#/$defs/questions"
-                - assessmentDate: "#/$defs/customField"
-                - expirationDate: "#/$defs/customField"
+                - properties:
+                    assessmentDate:
+                      "$ref": "#/$defs/customField"
+                    expirationDate:
+                      "$ref": "#/$defs/customField"
               required: [assessmentDate]
       onDemandAssessmentExpirationDays:
         oneOf:
         - properties:
             questions:
               properties:
-                expirationDate: "#/$defs/customField"
+                expirationDate:
+                  "$ref": "#/$defs/customField"
               required: [expirationDate]
 
 # definition for custom sensitive information
