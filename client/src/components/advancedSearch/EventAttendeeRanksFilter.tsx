@@ -38,10 +38,7 @@ const EventAttendeeRanksFilter = ({
     toQuery
   )
 
-  const filterDisplay =
-    value.attendeeRanks.length === 0
-      ? "All ranks"
-      : value.attendeeRanks.join(" or ")
+  const filterDisplay = value.attendeeRanks.join(" or ")
 
   return !asFormField ? (
     filterDisplay
@@ -79,11 +76,7 @@ export const deserialize = (props, query, key) => {
     return null
   }
 
-  const value = {
-    attendeeRanks: Array.isArray(query.ranks)
-      ? query.attendeeRanks
-      : [query.attendeeRanks]
-  }
+  const value = { attendeeRanks: query.attendeeRanks }
 
   return {
     key,

@@ -182,6 +182,9 @@ public class EventSearchQuery extends AbstractCommonEventSearchQuery<EventSearch
     if (taskUuid != null) {
       clone.setTaskUuid(new ArrayList<>(taskUuid));
     }
+    if (attendeeRanks != null) {
+      clone.setAttendeeRanks(new ArrayList<>(attendeeRanks));
+    }
     return clone;
   }
 }
