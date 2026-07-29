@@ -226,14 +226,15 @@ public class AnetEmailWorker extends AbstractWorker {
     if (attachments != null) {
       attachments.forEach(attachment -> {
         if (!Utils.hasContent(attachment)) {
-          builder.withAttachment(attachment.getUuid(),
+          builder.withAttachment(attachment.getFileName(),
               new ByteArrayDataSource(new byte[0], attachment.getMimeType()),
               attachment.getCaption());
         } else if (Utils.isImage(attachment)) {
-          builder.withEmbeddedImage(attachment.getUuid(),
-              attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()));
+          builder.withEmbeddedImage(attachment.getFileName(),
+              attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()),
+              attachment.getUuid());
         } else {
-          builder.withAttachment(attachment.getUuid(),
+          builder.withAttachment(attachment.getFileName(),
               attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()),
               attachment.getCaption());
         }
