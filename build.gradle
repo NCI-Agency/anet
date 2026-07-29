@@ -311,6 +311,16 @@ if (run.environment['DB_DRIVER'] == "sqlserver") {
 
 test.environment = run.environment
 
+interface InjectedExecOps {
+	@Inject
+	ExecOperations getExecOps()
+}
+
+def vdrFormats = [
+	json: 'json',
+	table: 'txt'
+]
+
 cyclonedxDirectBom {
 	projectType = org.cyclonedx.model.Component.Type.APPLICATION
 	includeConfigs = ["runtimeClasspath"]
@@ -335,28 +345,32 @@ tasks.register('checkGrype', Exec) {
 	}
 }
 
-tasks.register('generateServerSideVdr', Exec) {
+tasks.register('generateServerSideVdr') {
 	dependsOn 'cyclonedxDirectBom'
 	doNotTrackState("Needs to re-run every time")
 	def dir = './build/reports'
-	commandLine 'grype', "sbom:${dir}/SBOM/server-side-bom.json", '--output', "${run.environment['VDR_FORMAT']}"
 	outputs.dir "${dir}/VDR"
-	doFirst {
-		if (run.environment['VDR_FORMAT'] != "table") {
-			standardOutput new FileOutputStream("${dir}/VDR/server-side-vdr.json")
+	doLast {
+		def injected = project.objects.newInstance(InjectedExecOps)
+		vdrFormats.each{ vdrFormat, fileExtension ->
+			injected.execOps.exec {
+				    commandLine 'grype', "sbom:${dir}/SBOM/server-side-bom.json", '--output', "${vdrFormat}", '--file', "${dir}/VDR/server-side-vdr.${fileExtension}"
+			}
 		}
 	}
 }
 
-tasks.register('generateClientSideVdr', Exec) {
+tasks.register('generateClientSideVdr') {
 	dependsOn 'yarn_run_generate-sbom'
 	doNotTrackState("Needs to re-run every time")
 	def dir = './client/build/reports'
-	commandLine 'grype', "sbom:${dir}/SBOM/client-side-bom.json", '--output', "${run.environment['VDR_FORMAT']}"
 	outputs.dir "${dir}/VDR"
-	doFirst {
-		if (run.environment['VDR_FORMAT'] != "table") {
-			standardOutput new FileOutputStream("${dir}/VDR/client-side-vdr.json")
+	doLast {
+		def injected = project.objects.newInstance(InjectedExecOps)
+		vdrFormats.each{ vdrFormat, fileExtension ->
+			injected.execOps.exec {
+				commandLine 'grype', "sbom:${dir}/SBOM/client-side-bom.json", '--output', "${vdrFormat}", '--file', "${dir}/VDR/client-side-vdr.${fileExtension}"
+			}
 		}
 	}
 }
