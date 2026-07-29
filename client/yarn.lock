@@ -7551,7 +7551,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
     react-joyride: "npm:3.2.0"
-    react-mosaic-component: "npm:6.2.0"
+    react-mosaic-component: "npm:7.0.0"
     react-redux: "npm:9.3.0"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
@@ -8909,7 +8909,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:2.5.1, classnames@npm:^2.2.6, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
+"classnames@npm:2.5.1, classnames@npm:^2.2.6, classnames@npm:^2.3.1, classnames@npm:^2.3.2, classnames@npm:^2.5.1":
   version: 2.5.1
   resolution: "classnames@npm:2.5.1"
   checksum: 10c0/afff4f77e62cea2d79c39962980bf316bacb0d7c49e13a21adaadb9221e1c6b9d3cdb829d8bb1b23c406f4e740507f37e1dcf506f7e3b7113d17c5bab787aa69
@@ -10286,7 +10286,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dnd-core@npm:^16.0.1":
+"dnd-core@npm:16.0.1, dnd-core@npm:^16.0.1":
   version: 16.0.1
   resolution: "dnd-core@npm:16.0.1"
   dependencies:
@@ -10297,12 +10297,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dnd-multi-backend@npm:^8.1.2":
-  version: 8.1.2
-  resolution: "dnd-multi-backend@npm:8.1.2"
+"dnd-multi-backend@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "dnd-multi-backend@npm:9.0.0"
   peerDependencies:
     dnd-core: ^16.0.1
-  checksum: 10c0/f66c55d36ef601797e01c149c0f1b28c45c435374984df5d271ae5137f2b1b45475706ef7242907bf0f8aa364b158e4363f163a51e3a4c113e2202f9684e7e4f
+  checksum: 10c0/06bd814108aebe2f7d70e5324bc8c039f5d95772777c890d5610c7d2024a4f8d7935257a69c767cf7180e5c90606a3da66ee98fd38059e1bb98578fbf8054f94
   languageName: node
   linkType: hard
 
@@ -14809,7 +14809,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:^4.17.21":
+"lodash-es@npm:^4.17.21, lodash-es@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash-es@npm:4.18.1"
   checksum: 10c0/35d4dcf87ef07f8d090f409447575800108057e360b445f590d0d25d09e3d1e33a163d2fc100d4d072b0f901d5e2fc533cd7c4bfd8eeb38a06abec693823c8b8
@@ -14886,7 +14886,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.18.1, lodash@npm:^4.0.0, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.18.1":
+"lodash@npm:4.18.1, lodash@npm:^4.0.0, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
@@ -16917,14 +16917,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rdndmb-html5-to-touch@npm:^8.0.0":
-  version: 8.1.2
-  resolution: "rdndmb-html5-to-touch@npm:8.1.2"
+"rdndmb-html5-to-touch@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "rdndmb-html5-to-touch@npm:9.0.0"
   dependencies:
-    dnd-multi-backend: "npm:^8.1.2"
+    dnd-multi-backend: "npm:^9.0.0"
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dnd-touch-backend: "npm:^16.0.1"
-  checksum: 10c0/13319c5efee5c362e6d1a5251193d2aa68238e695f2437e330345c53de5b06915df53966ea3c8b89fa4bd26cf788f93a98d302b4edd33073d8cc7e5043fe5ea9
+  checksum: 10c0/04693a9e0cb47ac52289a228aed9b6515958a0431ab197334c086bb679dcce0b3140d4d65136c7c7f9cdf09181e5a13e59196463944253d398b1bf54bb96761d
   languageName: node
   linkType: hard
 
@@ -16997,28 +16997,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd-multi-backend@npm:^8.0.0":
-  version: 8.1.2
-  resolution: "react-dnd-multi-backend@npm:8.1.2"
+"react-dnd-multi-backend@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "react-dnd-multi-backend@npm:9.0.0"
   dependencies:
-    dnd-multi-backend: "npm:^8.1.2"
-    react-dnd-preview: "npm:^8.1.2"
+    dnd-multi-backend: "npm:^9.0.0"
+    react-dnd-preview: "npm:^9.0.0"
   peerDependencies:
     dnd-core: ^16.0.1
-    react: ^16.14.0 || ^17.0.2 || ^18.0.0
+    react: ^16.14.0 || ^17.0.2 || ^18.0.0 || ^19.0.0
     react-dnd: ^16.0.1
-    react-dom: ^16.14.0 || ^17.0.2 || ^18.0.0
-  checksum: 10c0/26e96ce327e47cb75d3f5a20996a6be7bd7b04abfbe52861b5514d6382b215df8365a287c037faeaf7351200eed168784ddb1ba3746186a445fc9b61ed2caaf5
+    react-dom: ^16.14.0 || ^17.0.2 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/f60bbe9eeed1549adfcd0539f59221b0fc8a7bbcc7b0ccb9f0fde78052a2e8fd5645373ab3e5b90640b99259c664d15a0e78c5817ab9312130f9db95a53bfc14
   languageName: node
   linkType: hard
 
-"react-dnd-preview@npm:^8.1.2":
-  version: 8.1.2
-  resolution: "react-dnd-preview@npm:8.1.2"
+"react-dnd-preview@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "react-dnd-preview@npm:9.0.0"
   peerDependencies:
-    react: ^16.14.0 || ^17.0.2 || ^18.0.0
+    react: ^16.14.0 || ^17.0.2 || ^18.0.0 || ^19.0.0
     react-dnd: ^16.0.1
-  checksum: 10c0/26b1b74caf53bb8ba66b7e4ac665cb1db8ffc4ac99793f3502ca1ab0e1520e63e4268b9696a0e82fb723c55384bd34b15c9a232598581b3e47ed015cd03f51e8
+  checksum: 10c0/89c36b551806533b364addc3c862450195a185ea754ab61c44aa57fb2a6fd297631f6dc6c518402343f903a1df58582997ff357a9b9f84ebba9be329f8844ae9
   languageName: node
   linkType: hard
 
@@ -17149,23 +17149,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-mosaic-component@npm:6.2.0":
-  version: 6.2.0
-  resolution: "react-mosaic-component@npm:6.2.0"
+"react-mosaic-component@npm:7.0.0":
+  version: 7.0.0
+  resolution: "react-mosaic-component@npm:7.0.0"
   dependencies:
-    classnames: "npm:^2.3.2"
+    classnames: "npm:^2.5.1"
+    dnd-core: "npm:16.0.1"
     immutability-helper: "npm:^3.1.1"
-    lodash: "npm:^4.18.1"
+    lodash-es: "npm:^4.18.1"
     prop-types: "npm:^15.8.1"
-    rdndmb-html5-to-touch: "npm:^8.0.0"
+    rdndmb-html5-to-touch: "npm:^9.0.0"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
-    react-dnd-multi-backend: "npm:^8.0.0"
+    react-dnd-multi-backend: "npm:^9.0.0"
     react-dnd-touch-backend: "npm:^16.0.1"
-    uuid: "npm:^9.0.0"
+    uuid: "npm:^11.1.0"
   peerDependencies:
-    react: ">=16"
-  checksum: 10c0/e54fa1b0695371216b981216c3f18ff77273771b9084927a5842a10194ddccbe1fe6807a12366c2db794cc094f05ac0ae914f63aba12b12605dfda7529f87548
+    react: 16 - 19
+  checksum: 10c0/6fb82e19ab71872001150bc5b519572e7eeff73ea84622151e518357ef201f7e3f7513a3a63fd7a3f0bfa995781cf7715a2301480495da1c3684e8458af87501
   languageName: node
   linkType: hard
 
@@ -19956,12 +19957,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^9.0.0":
-  version: 9.0.1
-  resolution: "uuid@npm:9.0.1"
+"uuid@npm:^11.1.0":
+  version: 11.1.1
+  resolution: "uuid@npm:11.1.1"
   bin:
-    uuid: dist/bin/uuid
-  checksum: 10c0/1607dd32ac7fc22f2d8f77051e6a64845c9bce5cd3dd8aa0070c074ec73e666a1f63c7b4e0f4bf2bc8b9d59dc85a15e17807446d9d2b17c8485fbc2147b27f9b
+    uuid: dist/esm/bin/uuid
+  checksum: 10c0/9e3af58eba872ece5a5e76f4773a94fc78a0ef2c2444c38dbe6b42f41dadf76c01850fd783604f27986f6195e6286aef064d45987d401b2a33127b98ddf7c0c5
   languageName: node
   linkType: hard
 

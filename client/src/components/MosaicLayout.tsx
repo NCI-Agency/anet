@@ -15,7 +15,6 @@ import {
   getOtherDirection,
   getPathToCorner,
   Mosaic,
-  MosaicNode,
   MosaicWindow,
   updateTree
 } from "react-mosaic-component"
@@ -27,10 +26,10 @@ interface MosaicLayoutProps {
     id: string
     icons: string[]
     title: string // icon names from @blueprintjs/icons IconNames
-    renderer: (...args: unknown[]) => unknown
+    renderer: (id: string) => React.ReactNode
   }[]
   initialNode?: any | string
-  description?: MosaicNode
+  description?: string
   style?: any
 }
 
@@ -139,9 +138,9 @@ const MosaicLayout = ({
           path,
           spec: {
             $set: {
+              type: "split",
               direction,
-              first,
-              second
+              children: [first, second]
             }
           }
         }

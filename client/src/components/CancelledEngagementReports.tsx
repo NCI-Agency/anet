@@ -346,17 +346,20 @@ const CancelledEngagementReports = ({
     }
   ]
   const INITIAL_LAYOUT = {
+    type: "split",
     direction: "column",
-    first: {
-      direction: "row",
-      first: VISUALIZATIONS[0].id,
-      second: VISUALIZATIONS[1].id
-    },
-    second: {
-      direction: "row",
-      first: VISUALIZATIONS[2].id,
-      second: VISUALIZATIONS[3].id
-    }
+    children: [
+      {
+        type: "split",
+        direction: "row",
+        children: [VISUALIZATIONS[0].id, VISUALIZATIONS[1].id]
+      },
+      {
+        type: "split",
+        direction: "row",
+        children: [VISUALIZATIONS[2].id, VISUALIZATIONS[3].id]
+      }
+    ]
   }
   const DESCRIPTION = `The reports are grouped by ${advisorOrgLabel} or reason for cancellation.
     In order to see the list of cancelled engagement reports for an organization or a reason,
