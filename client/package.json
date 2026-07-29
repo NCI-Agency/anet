@@ -160,7 +160,7 @@
     "react-dnd-html5-backend": "16.0.1",
     "react-dom": "18.3.1",
     "react-joyride": "3.2.0",
-    "react-mosaic-component": "6.2.0",
+    "react-mosaic-component": "7.0.0",
     "react-redux": "9.3.0",
     "react-redux-loading-bar": "5.0.8",
     "react-resize-detector": "12.3.0",
