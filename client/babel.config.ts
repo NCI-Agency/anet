@@ -1,15 +1,30 @@
-module.exports = {
+import corejsPackage from "core-js/package.json" with { type: "json" }
+
+export default {
   env: {
     test: {
       plugins: ["@babel/plugin-transform-modules-commonjs"]
     }
   },
-  presets: ["@babel/preset-env", "@babel/preset-react"],
+  presets: [
+    [
+      "@babel/preset-env",
+      {
+        corejs: corejsPackage.version
+      }
+    ],
+    [
+      "@babel/preset-react",
+      {
+        runtime: "automatic"
+      }
+    ]
+  ],
   plugins: [
     [
       "@babel/plugin-proposal-decorators",
       {
-        legacy: true
+        version: "2023-11"
       }
     ],
     "@babel/plugin-proposal-do-expressions",
@@ -18,7 +33,7 @@ module.exports = {
     [
       "@babel/plugin-proposal-pipeline-operator",
       {
-        proposal: "minimal"
+        proposal: "fsharp"
       }
     ],
     "@babel/plugin-proposal-throw-expressions",
