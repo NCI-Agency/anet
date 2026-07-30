@@ -5,14 +5,15 @@ import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import graphql.GraphQLContext;
 import jakarta.mail.Authenticator;
+import jakarta.mail.Message.RecipientType;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.util.ByteArrayDataSource;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,9 +37,11 @@ import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.email.EmailPopulatingBuilder;
+import org.simplejavamail.api.email.Recipient;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailValidationException;
 import org.simplejavamail.mailer.MailerBuilder;
+import org.simplejavamail.recipient.RecipientsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -197,9 +200,12 @@ public class AnetEmailWorker extends AbstractWorker {
     temp.process(emailContext, writer);
 
     final Session session = Session.getInstance(smtpProps, smtpAuth);
-    final EmailPopulatingBuilder builder = EmailBuilder.startingBlank()
-        .from(new InternetAddress(config.getEmailFromAddr())).toMultiple(email.getToAddresses())
-        .withSubject(getEmailSubject(email, emailContext)).withHTMLText(writer.toString());
+    final Collection<Recipient> recipients = new RecipientsBuilder()
+        .withRecipientsWithFixedName(null, email.getToAddresses(), RecipientType.TO)
+        .buildRecipients();
+    final EmailPopulatingBuilder builder =
+        EmailBuilder.startingBlank().from(config.getEmailFromAddr()).withRecipients(recipients)
+            .withSubject(getEmailSubject(email, emailContext)).withHTMLText(writer.toString());
     addAttachments(emailContext, builder);
     final Email mail = builder.buildEmail();
 
@@ -220,14 +226,15 @@ public class AnetEmailWorker extends AbstractWorker {
     if (attachments != null) {
       attachments.forEach(attachment -> {
         if (!Utils.hasContent(attachment)) {
-          builder.withAttachment(attachment.getUuid(),
+          builder.withAttachment(attachment.getFileName(),
               new ByteArrayDataSource(new byte[0], attachment.getMimeType()),
               attachment.getCaption());
         } else if (Utils.isImage(attachment)) {
-          builder.withEmbeddedImage(attachment.getUuid(),
-              attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()));
+          builder.withEmbeddedImage(attachment.getFileName(),
+              attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()),
+              attachment.getUuid());
         } else {
-          builder.withAttachment(attachment.getUuid(),
+          builder.withAttachment(attachment.getFileName(),
               attachmentDao.getContentBlob(attachment.getUuid(), attachment.getMimeType()),
               attachment.getCaption());
         }
