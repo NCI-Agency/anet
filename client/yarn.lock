@@ -7745,11 +7745,11 @@ __metadata:
     rxjs: "npm:7.8.2"
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.46.0"
-    slate: "npm:0.124.1"
-    slate-dom: "npm:0.124.1"
+    slate: "npm:0.126.0"
+    slate-dom: "npm:0.126.0"
     slate-history: "npm:0.113.1"
     slate-hyperscript: "npm:0.125.0"
-    slate-react: "npm:0.124.2"
+    slate-react: "npm:0.126.0"
     style-loader: "npm:4.0.0"
     sync-fetch: "npm:0.6.0"
     tap-xunit: "npm:2.4.1"
@@ -18454,9 +18454,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-dom@npm:0.124.1":
-  version: 0.124.1
-  resolution: "slate-dom@npm:0.124.1"
+"slate-dom@npm:0.126.0":
+  version: 0.126.0
+  resolution: "slate-dom@npm:0.126.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18467,7 +18467,7 @@ __metadata:
     tiny-invariant: "npm:1.3.1"
   peerDependencies:
     slate: ">=0.121.0"
-  checksum: 10c0/1956f90986b614e6d590c3a8a2107dc60d27ed6502fd6d2d19c2aa343d4e0fe385494864cf8b48ad32d1c82c599dcf84faa78fe1a2a2d2e7df1ec268fb589fd3
+  checksum: 10c0/c6c80e101d06b9421ddd602230b33af975a0ca31eac8b5f25a54cd3b92824b9f6ae496ff8c5b38113e2b47e210e0675042bd889493396ac7a877fb448f0d9e09
   languageName: node
   linkType: hard
 
@@ -18491,9 +18491,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.124.2":
-  version: 0.124.2
-  resolution: "slate-react@npm:0.124.2"
+"slate-react@npm:0.126.0":
+  version: 0.126.0
+  resolution: "slate-react@npm:0.126.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18506,14 +18506,14 @@ __metadata:
     react-dom: ">=18.2.0"
     slate: ">=0.121.0"
     slate-dom: ">=0.119.1"
-  checksum: 10c0/e32c66cac9ebb6effb7018fa3bd83e1cb991075155e2b8aeb7b9a236a171e084d9c3a0aa3e0a189f1b8d6f015243e8c4c16b8a74f40ef8faa62fbc648659511e
+  checksum: 10c0/522030be554e8dd57bef8bbf0148b4f10e8ba0bf9737c888113cbbf2b19f885710d7a803eab64151f604bb4e6e2e8a4a0a0577a5293bb236803a7f9ccfd005a4
   languageName: node
   linkType: hard
 
-"slate@npm:0.124.1":
-  version: 0.124.1
-  resolution: "slate@npm:0.124.1"
-  checksum: 10c0/761fff36a83748ce77c14db341d53a816f4997c3737bdd94de63374ad05fe9b857d49f60eab804440121a0283fde1ab3c4f9d36e4d05fa44375f4388be9c2f80
+"slate@npm:0.126.0":
+  version: 0.126.0
+  resolution: "slate@npm:0.126.0"
+  checksum: 10c0/3672bb3d81646e314c4f0756867076c61f68096abdf1b98a99b7be79d5fc69cdc18e7c912723f156e90bd9ea53ae4a5b222705f40c294bbd629a0275d5f17ab9
   languageName: node
   linkType: hard
 
