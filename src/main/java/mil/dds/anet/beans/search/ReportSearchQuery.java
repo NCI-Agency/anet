@@ -104,6 +104,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   @GraphQLQuery
   @GraphQLInputField
   private String reportCommunityUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> tenantUuid;
   // internal search parameter:
   @JsonIgnore
   private boolean systemSearch;
@@ -353,6 +356,14 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.reportCommunityUuid = reportCommunityUuid;
   }
 
+  public List<String> getTenantUuid() {
+    return tenantUuid;
+  }
+
+  public void setTenantUuid(List<String> tenantUuid) {
+    this.tenantUuid = tenantUuid;
+  }
+
   public boolean isSystemSearch() {
     return systemSearch;
   }
@@ -369,7 +380,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         orgUuid, orgRecurseStrategy, locationUuid, locationRecurseStrategy, taskUuid,
         pendingApprovalOf, state, engagementStatus, cancelledReason, authorPositionUuid,
         attendeePositionUuid, authorizationGroupUuid, sensitiveInfo, classification, eventUuid,
-        reportCommunityUuid, systemSearch);
+        reportCommunityUuid, tenantUuid, systemSearch);
   }
 
   @Override
@@ -408,6 +419,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getClassification(), other.getClassification())
         && Objects.equals(getEventUuid(), other.getEventUuid())
         && Objects.equals(getReportCommunityUuid(), other.getReportCommunityUuid())
+        && Objects.equals(getTenantUuid(), other.getTenantUuid())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
 
@@ -434,6 +446,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     }
     if (notTaskUuid != null) {
       clone.setTaskUuid(new ArrayList<>(notTaskUuid));
+    }
+    if (tenantUuid != null) {
+      clone.setTenantUuid(new ArrayList<>(tenantUuid));
     }
     return clone;
   }

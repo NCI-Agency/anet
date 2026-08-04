@@ -27,7 +27,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.DatabaseHandler;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
@@ -308,6 +307,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         qb.addStringEqualsClause("classification", "reports.classification",
             query.getClassification());
       }
+    }
+
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      qb.addFromClause(
+          "LEFT JOIN \"reportTenants\" reptens ON reptens.\"reportUuid\" = reports.uuid");
+      qb.addWhereClause(
+          "(reports.\"allTenants\" IS TRUE OR reptens.\"tenantUuid\" IN ( <tenantUuids> ))");
+      qb.addListArg("tenantUuids", query.getTenantUuid());
     }
 
     // Apply a filter to restrict access to reports if necessary.
