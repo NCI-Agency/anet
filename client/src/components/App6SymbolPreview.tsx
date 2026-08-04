@@ -5,13 +5,13 @@ import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 
-interface FieldRow {
+interface FieldRowProps {
   fieldName: string
   values: any[]
   parentValues: object
 }
 
-const FieldRow = ({ fieldName, values, parentValues }: FieldRow) => {
+const FieldRow = ({ fieldName, values, parentValues }: FieldRowProps) => {
   const mergedValues = { ...values }
   Object.entries(parentValues).forEach(([key, value]) => {
     if (value !== null && mergedValues[key] === null) {
