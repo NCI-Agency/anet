@@ -304,6 +304,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       }
     }
 
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      qb.addFromClause(
+          "LEFT JOIN \"reportTenants\" reptens ON reptens.\"reportUuid\" = reports.uuid");
+      qb.addWhereClause(
+          "(reports.\"allTenants\" IS TRUE OR reptens.\"tenantUuid\" IN ( <tenantUuids> ))");
+      qb.addListArg("tenantUuids", query.getTenantUuid());
+    }
+
     // Apply a filter to restrict access to reports if necessary.
     if (DaoUtils.isAccessToken(query.getPrincipal())
         || !query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
