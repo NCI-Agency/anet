@@ -2149,6 +2149,7 @@ input ReportSearchQueryInput {
   status: Status
   subscribed: Boolean
   taskUuid: [String]
+  tenantUuid: [String]
   text: String
   updatedAtEnd: Instant
   updatedAtStart: Instant
