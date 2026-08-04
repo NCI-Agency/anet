@@ -206,6 +206,7 @@ const assertAssessmentDetails = async (
     assessmentKey,
     recurrence
   )
+  await browser.pause(500) // first wait for assessment modal to be fully rendered
   for (const [index, detail] of await (await details).entries()) {
     const pre = `${index}-) `
     const det = await (await detail).getText()

@@ -151,6 +151,7 @@ class ShowTask extends Page {
 
   async fillAssessmentQuestion(valuesArr, prevTextToClear) {
     // NOTE: assuming assessment content, 2 questions; process them in order
+    await browser.pause(500) // first wait for assessment modal to be fully rendered
 
     // Select text editor input
     await this.fillRichTextInput(

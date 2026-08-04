@@ -195,6 +195,7 @@ class ShowPerson extends Page {
 
   async fillAssessmentQuestion(valuesArr, prevTextToClear) {
     // NOTE: assuming assessment content, 4 questions; process them in order
+    await browser.pause(500) // first wait for assessment modal to be fully rendered
 
     // Select first button
     await this.clickButton(
