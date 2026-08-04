@@ -32,6 +32,9 @@ import SelectFilter, {
 import TaskFilter, {
   deserialize as deserializeTaskFilter
 } from "components/advancedSearch/TaskFilter"
+import TenantFilter, {
+  deserialize as deserializeTenantFilter
+} from "components/advancedSearch/TenantFilter"
 import {
   CountryOverlayRow,
   EventSeriesOverlayRow,
@@ -299,6 +302,14 @@ export const searchFilters = function (
         isDefault: true,
         props: {
           queryKey: "state"
+        }
+      },
+      "Shared with Tenant": {
+        component: TenantFilter,
+        deserializer: deserializeTenantFilter,
+        isDefault: true,
+        props: {
+          queryKey: "tenantUuid"
         }
       }
     }
