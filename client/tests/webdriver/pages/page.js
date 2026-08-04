@@ -224,11 +224,10 @@ class Page {
   }
 
   async clickButton(buttonContainer, buttonSelector) {
-    const button = await buttonContainer.$(buttonSelector)
-    // wait for a bit and click twice, sometimes it does not go through
     await browser.pause(300)
-    await button.click({ x: 10, y: 10 })
-    await button.click({ x: 10, y: 10 })
+    await (
+      await (await buttonContainer).$(buttonSelector)
+    ).click({ x: 10, y: 10 })
     await browser.pause(300)
   }
 
