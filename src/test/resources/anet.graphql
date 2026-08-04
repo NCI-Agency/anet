@@ -1,3 +1,8 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
 """"""
 type AccessToken {
   accessTokenActivities: [AccessTokenActivity]
@@ -588,7 +593,10 @@ type Event {
   outcomes: String
   ownerOrg: Organization
   people: [Person]
-  reports(query: ReportSearchQueryInput): [Report]
+  reports(
+    """"""
+    query: ReportSearchQueryInput
+  ): [Report]
   startDate: Instant
   status: Status
   tasks: [Task]
@@ -756,14 +764,23 @@ scalar Instant
 """"""
 type Location {
   approvalSteps: [ApprovalStep]
-  ascendantLocations(query: LocationSearchQueryInput): [Location]
+  ascendantLocations(
+    """"""
+    query: LocationSearchQueryInput
+  ): [Location]
   assessments: [Assessment]
   attachments: [Attachment]
-  childrenLocations(query: LocationSearchQueryInput): [Location]
+  childrenLocations(
+    """"""
+    query: LocationSearchQueryInput
+  ): [Location]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  descendantLocations(query: LocationSearchQueryInput): [Location]
+  descendantLocations(
+    """"""
+    query: LocationSearchQueryInput
+  ): [Location]
   description: String
   digram: String
   entityAvatar: EntityAvatar
@@ -773,7 +790,10 @@ type Location {
   lng: Float
   name: String
   notes: [Note]
-  parentLocations(query: LocationSearchQueryInput): [Location]
+  parentLocations(
+    """"""
+    query: LocationSearchQueryInput
+  ): [Location]
   planningApprovalSteps: [ApprovalStep]
   status: Status
   trigram: String
@@ -883,76 +903,379 @@ enum MartImportedReportSearchSortBy {
 
 """Mutation root"""
 type Mutation {
-  addComment(comment: CommentInput, uuid: String): Comment
-  approvePerson(uuid: String): Int
-  approveReport(comment: CommentInput, uuid: String): Int!
+  addComment(
+    """"""
+    comment: CommentInput
+
+    """"""
+    uuid: String
+  ): Comment
+  approvePerson(
+    """"""
+    uuid: String
+  ): Int
+  approveReport(
+    """"""
+    comment: CommentInput
+
+    """"""
+    uuid: String
+  ): Int!
   clearCache: String
-  createAccessToken(accessToken: AccessTokenInput): AccessToken
-  createAssessment(assessment: AssessmentInput): Assessment
-  createAttachment(attachment: AttachmentInput): String
-  createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
-  createEvent(event: EventInput): Event
-  createEventSeries(eventSeries: EventSeriesInput): EventSeries
-  createEventType(eventType: EventTypeInput): EventType
-  createLocation(location: LocationInput): Location
-  createNote(note: NoteInput): Note
-  createOrUpdateEntityAvatar(entityAvatar: EntityAvatarInput): Int
-  createOrganization(organization: OrganizationInput): Organization
-  createPerson(person: PersonInput): Person
-  createPosition(position: PositionInput): Position
-  createReport(report: ReportInput): Report
-  createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
-  createSubscription(subscription: SubscriptionInput): Subscription
-  createTask(task: TaskInput): Task
-  deleteAccessToken(uuid: String): Int
-  deleteAssessment(uuid: String): Int
-  deleteAttachment(uuid: String): Int
-  deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
-  deleteEventType(uuid: String): Int!
-  deleteNote(uuid: String): Int
-  deleteObjectSubscription(uuid: String): Int
-  deletePerson(uuid: String): Int
-  deletePersonFromPosition(uuid: String): Int
-  deletePosition(uuid: String): Int
-  deleteReport(uuid: String): Int
-  deleteSavedSearch(uuid: String): Int
-  deleteSubscription(uuid: String): Int
-  emailReport(email: AnetEmailInput, uuid: String): Int
-  mergeEventSeries(loserUuid: String, winnerEventSeries: EventSeriesInput): Int
-  mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
-  mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
-  mergePeople(loserUuid: String, useWinnerPositionHistory: Boolean = true, winnerPerson: PersonInput): Int
-  mergePositions(loserUuid: String, useWinnerPersonHistory: Boolean = true, winnerPosition: PositionInput): Int
-  mergeTasks(loserUuid: String, winnerTask: TaskInput): Int
-  publishReport(uuid: String): Int!
-  putPersonInPosition(person: PersonInput, previousPositionUuid: String, primary: Boolean = true, uuid: String): Int!
-  rejectReport(comment: CommentInput, uuid: String): Int!
+  createAccessToken(
+    """"""
+    accessToken: AccessTokenInput
+  ): AccessToken
+  createAssessment(
+    """"""
+    assessment: AssessmentInput
+  ): Assessment
+  createAttachment(
+    """"""
+    attachment: AttachmentInput
+  ): String
+  createAuthorizationGroup(
+    """"""
+    authorizationGroup: AuthorizationGroupInput
+  ): AuthorizationGroup
+  createEvent(
+    """"""
+    event: EventInput
+  ): Event
+  createEventSeries(
+    """"""
+    eventSeries: EventSeriesInput
+  ): EventSeries
+  createEventType(
+    """"""
+    eventType: EventTypeInput
+  ): EventType
+  createLocation(
+    """"""
+    location: LocationInput
+  ): Location
+  createNote(
+    """"""
+    note: NoteInput
+  ): Note
+  createOrUpdateEntityAvatar(
+    """"""
+    entityAvatar: EntityAvatarInput
+  ): Int
+  createOrganization(
+    """"""
+    organization: OrganizationInput
+  ): Organization
+  createPerson(
+    """"""
+    person: PersonInput
+  ): Person
+  createPosition(
+    """"""
+    position: PositionInput
+  ): Position
+  createReport(
+    """"""
+    report: ReportInput
+  ): Report
+  createSavedSearch(
+    """"""
+    savedSearch: SavedSearchInput
+  ): SavedSearch
+  createSubscription(
+    """"""
+    subscription: SubscriptionInput
+  ): Subscription
+  createTask(
+    """"""
+    task: TaskInput
+  ): Task
+  deleteAccessToken(
+    """"""
+    uuid: String
+  ): Int
+  deleteAssessment(
+    """"""
+    uuid: String
+  ): Int
+  deleteAttachment(
+    """"""
+    uuid: String
+  ): Int
+  deleteEntityAvatar(
+    """"""
+    relatedObjectType: String
+
+    """"""
+    relatedObjectUuid: String
+  ): Int
+  deleteEventType(
+    """"""
+    uuid: String
+  ): Int!
+  deleteNote(
+    """"""
+    uuid: String
+  ): Int
+  deleteObjectSubscription(
+    """"""
+    uuid: String
+  ): Int
+  deletePerson(
+    """"""
+    uuid: String
+  ): Int
+  deletePersonFromPosition(
+    """"""
+    uuid: String
+  ): Int
+  deletePosition(
+    """"""
+    uuid: String
+  ): Int
+  deleteReport(
+    """"""
+    uuid: String
+  ): Int
+  deleteSavedSearch(
+    """"""
+    uuid: String
+  ): Int
+  deleteSubscription(
+    """"""
+    uuid: String
+  ): Int
+  emailReport(
+    """"""
+    email: AnetEmailInput
+
+    """"""
+    uuid: String
+  ): Int
+  mergeEventSeries(
+    """"""
+    loserUuid: String
+
+    """"""
+    winnerEventSeries: EventSeriesInput
+  ): Int
+  mergeLocations(
+    """"""
+    loserUuid: String
+
+    """"""
+    winnerLocation: LocationInput
+  ): Int
+  mergeOrganizations(
+    """"""
+    loserUuid: String
+
+    """"""
+    winnerOrganization: OrganizationInput
+  ): Int
+  mergePeople(
+    """"""
+    loserUuid: String
+
+    """"""
+    useWinnerPositionHistory: Boolean = true
+
+    """"""
+    winnerPerson: PersonInput
+  ): Int
+  mergePositions(
+    """"""
+    loserUuid: String
+
+    """"""
+    useWinnerPersonHistory: Boolean = true
+
+    """"""
+    winnerPosition: PositionInput
+  ): Int
+  mergeTasks(
+    """"""
+    loserUuid: String
+
+    """"""
+    winnerTask: TaskInput
+  ): Int
+  publishReport(
+    """"""
+    uuid: String
+  ): Int!
+  putPersonInPosition(
+    """"""
+    person: PersonInput
+
+    """"""
+    previousPositionUuid: String
+
+    """"""
+    primary: Boolean = true
+
+    """"""
+    uuid: String
+  ): Int!
+  rejectReport(
+    """"""
+    comment: CommentInput
+
+    """"""
+    uuid: String
+  ): Int!
   reloadDictionary: String
-  saveAdminSettings(settings: [AdminSettingInput]): Int
-  submitReport(uuid: String): Int!
-  unpublishReport(uuid: String): Int
-  updateAccessToken(accessToken: AccessTokenInput, force: Boolean = false): Int
-  updateAssessment(assessment: AssessmentInput, force: Boolean = false): Assessment
-  updateAssociatedPosition(position: PositionInput): Int
-  updateAttachment(attachment: AttachmentInput, force: Boolean = false): String
-  updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput, force: Boolean = false): Int
-  updateEvent(event: EventInput, force: Boolean = false): Int
-  updateEventSeries(eventSeries: EventSeriesInput, force: Boolean = false): Int
-  updateEventType(eventType: EventTypeInput, force: Boolean = false): Int!
-  updateLocation(force: Boolean = false, location: LocationInput): Int
-  updateMe(force: Boolean = false, person: PersonInput): Int
-  updateNote(force: Boolean = false, note: NoteInput): Note
-  updateOrganization(force: Boolean = false, organization: OrganizationInput): Int
-  updatePerson(force: Boolean = false, person: PersonInput): Int
-  updatePersonHistory(person: PersonInput): Int!
-  updatePersonPreferences(preferences: [PersonPreferenceInput]): Int
-  updatePosition(force: Boolean = false, position: PositionInput): Int
-  updatePositionHistory(position: PositionInput): Int!
-  updatePreferences(preferences: [PreferenceInput]): Int
-  updateReport(force: Boolean = false, report: ReportInput, sendEditEmail: Boolean = true): Report
-  updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
-  updateSavedSearch(savedSearch: SavedSearchInput): Int
-  updateTask(force: Boolean = false, task: TaskInput): Int
+  saveAdminSettings(
+    """"""
+    settings: [AdminSettingInput]
+  ): Int
+  submitReport(
+    """"""
+    uuid: String
+  ): Int!
+  unpublishReport(
+    """"""
+    uuid: String
+  ): Int
+  updateAccessToken(
+    """"""
+    accessToken: AccessTokenInput
+
+    """"""
+    force: Boolean = false
+  ): Int
+  updateAssessment(
+    """"""
+    assessment: AssessmentInput
+
+    """"""
+    force: Boolean = false
+  ): Assessment
+  updateAssociatedPosition(
+    """"""
+    position: PositionInput
+  ): Int
+  updateAttachment(
+    """"""
+    attachment: AttachmentInput
+
+    """"""
+    force: Boolean = false
+  ): String
+  updateAuthorizationGroup(
+    """"""
+    authorizationGroup: AuthorizationGroupInput
+
+    """"""
+    force: Boolean = false
+  ): Int
+  updateEvent(
+    """"""
+    event: EventInput
+
+    """"""
+    force: Boolean = false
+  ): Int
+  updateEventSeries(
+    """"""
+    eventSeries: EventSeriesInput
+
+    """"""
+    force: Boolean = false
+  ): Int
+  updateEventType(
+    """"""
+    eventType: EventTypeInput
+
+    """"""
+    force: Boolean = false
+  ): Int!
+  updateLocation(
+    """"""
+    force: Boolean = false
+
+    """"""
+    location: LocationInput
+  ): Int
+  updateMe(
+    """"""
+    force: Boolean = false
+
+    """"""
+    person: PersonInput
+  ): Int
+  updateNote(
+    """"""
+    force: Boolean = false
+
+    """"""
+    note: NoteInput
+  ): Note
+  updateOrganization(
+    """"""
+    force: Boolean = false
+
+    """"""
+    organization: OrganizationInput
+  ): Int
+  updatePerson(
+    """"""
+    force: Boolean = false
+
+    """"""
+    person: PersonInput
+  ): Int
+  updatePersonHistory(
+    """"""
+    person: PersonInput
+  ): Int!
+  updatePersonPreferences(
+    """"""
+    preferences: [PersonPreferenceInput]
+  ): Int
+  updatePosition(
+    """"""
+    force: Boolean = false
+
+    """"""
+    position: PositionInput
+  ): Int
+  updatePositionHistory(
+    """"""
+    position: PositionInput
+  ): Int!
+  updatePreferences(
+    """"""
+    preferences: [PreferenceInput]
+  ): Int
+  updateReport(
+    """"""
+    force: Boolean = false
+
+    """"""
+    report: ReportInput
+
+    """"""
+    sendEditEmail: Boolean = true
+  ): Report
+  updateReportAssessments(
+    """"""
+    assessments: [AssessmentInput]
+
+    """"""
+    reportUuid: String
+  ): Int!
+  updateSavedSearch(
+    """"""
+    savedSearch: SavedSearchInput
+  ): Int
+  updateTask(
+    """"""
+    force: Boolean = false
+
+    """"""
+    task: TaskInput
+  ): Int
 }
 
 """"""
@@ -989,16 +1312,28 @@ type Organization {
   app6standardIdentity: String
   app6symbolSet: String
   approvalSteps: [ApprovalStep]
-  ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  ascendantOrgs(
+    """"""
+    query: OrganizationSearchQueryInput
+  ): [Organization]
   assessments: [Assessment]
   attachments: [Attachment]
   authorizationGroups: [AuthorizationGroup]
-  childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
+  childrenOrgs(
+    """"""
+    query: OrganizationSearchQueryInput
+  ): [Organization]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
-  emailAddresses(network: String): [EmailAddress]
+  descendantOrgs(
+    """"""
+    query: OrganizationSearchQueryInput
+  ): [Organization]
+  emailAddresses(
+    """"""
+    network: String
+  ): [EmailAddress]
   entityAvatar: EntityAvatar
   identificationCode: String
   isSubscribed: Boolean
@@ -1007,7 +1342,10 @@ type Organization {
   notes: [Note]
   parentOrg: Organization
   planningApprovalSteps: [ApprovalStep]
-  positions(query: PositionSearchQueryInput): [Position]
+  positions(
+    """"""
+    query: PositionSearchQueryInput
+  ): [Position]
   profile: String
   shortName: String
   status: Status
@@ -1080,8 +1418,14 @@ type Person {
   additionalPositions: [Position]
   assessments: [Assessment]
   attachments: [Attachment]
-  attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
-  authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  attendedReports(
+    """"""
+    query: ReportSearchQueryInput
+  ): AnetBeanList_Report
+  authoredReports(
+    """"""
+    query: ReportSearchQueryInput
+  ): AnetBeanList_Report
   authorizationGroups: [AuthorizationGroup]
   biography: String
   code: String
@@ -1089,7 +1433,10 @@ type Person {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  emailAddresses(network: String): [EmailAddress]
+  emailAddresses(
+    """"""
+    network: String
+  ): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
   familyName: String
@@ -1227,7 +1574,10 @@ type Position {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
-  emailAddresses(network: String): [EmailAddress]
+  emailAddresses(
+    """"""
+    network: String
+  ): [EmailAddress]
   entityAvatar: EntityAvatar
   isApprover: Boolean
   isSubscribed: Boolean
@@ -1238,7 +1588,10 @@ type Position {
   organizationsAdministrated: [Organization]
   person: Person
   previousPeople: [PersonPositionHistory]
-  responsibleTasks(query: TaskSearchQueryInput): [Task]
+  responsibleTasks(
+    """"""
+    query: TaskSearchQueryInput
+  ): [Task]
   role: PositionRole
   status: Status
   superuserType: SuperuserType
@@ -1363,48 +1716,156 @@ enum PreferenceSearchSortBy {
 
 """Query root"""
 type Query {
-  accessToken(uuid: String): AccessToken
+  accessToken(
+    """"""
+    uuid: String
+  ): AccessToken
   accessTokenList: [AccessToken]
   adminSettings: [AdminSetting]
-  approvalStepInUse(uuid: String): Boolean!
-  attachment(uuid: String): Attachment
-  attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
-  auditTrailList(query: AuditTrailSearchQueryInput): AnetBeanList_AuditTrail
-  authorizationGroup(uuid: String): AuthorizationGroup
-  authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
-  engagementsBetweenCommunities(query: EngagementsBetweenCommunitiesSearchQueryInput): [EngagementInformation]
-  event(uuid: String): Event
-  eventList(query: EventSearchQueryInput): AnetBeanList_Event
-  eventSeries(uuid: String): EventSeries
-  eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
-  eventType(uuid: String): EventType
+  approvalStepInUse(
+    """"""
+    uuid: String
+  ): Boolean!
+  attachment(
+    """"""
+    uuid: String
+  ): Attachment
+  attachmentList(
+    """"""
+    query: AttachmentSearchQueryInput
+  ): AnetBeanList_Attachment
+  auditTrailList(
+    """"""
+    query: AuditTrailSearchQueryInput
+  ): AnetBeanList_AuditTrail
+  authorizationGroup(
+    """"""
+    uuid: String
+  ): AuthorizationGroup
+  authorizationGroupList(
+    """"""
+    query: AuthorizationGroupSearchQueryInput
+  ): AnetBeanList_AuthorizationGroup
+  engagementsBetweenCommunities(
+    """"""
+    query: EngagementsBetweenCommunitiesSearchQueryInput
+  ): [EngagementInformation]
+  event(
+    """"""
+    uuid: String
+  ): Event
+  eventList(
+    """"""
+    query: EventSearchQueryInput
+  ): AnetBeanList_Event
+  eventSeries(
+    """"""
+    uuid: String
+  ): EventSeries
+  eventSeriesList(
+    """"""
+    query: EventSeriesSearchQueryInput
+  ): AnetBeanList_EventSeries
+  eventType(
+    """"""
+    uuid: String
+  ): EventType
   eventTypes: [EventType]
-  location(uuid: String): Location
-  locationList(query: LocationSearchQueryInput): AnetBeanList_Location
-  locations(uuids: [String]): [Location]
-  martImportedReportList(query: MartImportedReportSearchQueryInput): AnetBeanList_MartImportedReport
+  location(
+    """"""
+    uuid: String
+  ): Location
+  locationList(
+    """"""
+    query: LocationSearchQueryInput
+  ): AnetBeanList_Location
+  locations(
+    """"""
+    uuids: [String]
+  ): [Location]
+  martImportedReportList(
+    """"""
+    query: MartImportedReportSearchQueryInput
+  ): AnetBeanList_MartImportedReport
   me: Person
-  mySearches(forHomepage: Boolean = false): [SavedSearch]
-  mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
-  mySubscriptions(query: SubscriptionSearchQueryInput): AnetBeanList_Subscription
-  organization(uuid: String): Organization
-  organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
-  organizations(uuids: [String]): [Organization]
-  pendingEmails(pageNum: Int = 0, pageSize: Int = 0): AnetBeanList_AnetEmail
-  person(uuid: String): Person
-  personList(query: PersonSearchQueryInput): AnetBeanList_Person
-  position(uuid: String): Position
-  positionList(query: PositionSearchQueryInput): AnetBeanList_Position
-  preferenceList(query: PreferenceSearchQueryInput): AnetBeanList_Preference
+  mySearches(
+    """"""
+    forHomepage: Boolean = false
+  ): [SavedSearch]
+  mySubscriptionUpdates(
+    """"""
+    query: SubscriptionUpdateSearchQueryInput
+  ): AnetBeanList_SubscriptionUpdate
+  mySubscriptions(
+    """"""
+    query: SubscriptionSearchQueryInput
+  ): AnetBeanList_Subscription
+  organization(
+    """"""
+    uuid: String
+  ): Organization
+  organizationList(
+    """"""
+    query: OrganizationSearchQueryInput
+  ): AnetBeanList_Organization
+  organizations(
+    """"""
+    uuids: [String]
+  ): [Organization]
+  pendingEmails(
+    """"""
+    pageNum: Int = 0
+
+    """"""
+    pageSize: Int = 0
+  ): AnetBeanList_AnetEmail
+  person(
+    """"""
+    uuid: String
+  ): Person
+  personList(
+    """"""
+    query: PersonSearchQueryInput
+  ): AnetBeanList_Person
+  position(
+    """"""
+    uuid: String
+  ): Position
+  positionList(
+    """"""
+    query: PositionSearchQueryInput
+  ): AnetBeanList_Position
+  preferenceList(
+    """"""
+    query: PreferenceSearchQueryInput
+  ): AnetBeanList_Preference
   preferences: [Preference]
   projectVersion: String
   recentActivities: RecentActivities
-  report(uuid: String): Report
-  reportList(query: ReportSearchQueryInput): AnetBeanList_Report
-  task(uuid: String): Task
-  taskList(query: TaskSearchQueryInput): AnetBeanList_Task
-  tasks(uuids: [String]): [Task]
-  userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
+  report(
+    """"""
+    uuid: String
+  ): Report
+  reportList(
+    """"""
+    query: ReportSearchQueryInput
+  ): AnetBeanList_Report
+  task(
+    """"""
+    uuid: String
+  ): Task
+  taskList(
+    """"""
+    query: TaskSearchQueryInput
+  ): AnetBeanList_Task
+  tasks(
+    """"""
+    uuids: [String]
+  ): [Task]
+  userActivityList(
+    """"""
+    query: UserActivitySearchQueryInput
+  ): AnetBeanList_UserActivity
 }
 
 """"""
@@ -1536,10 +1997,16 @@ type ReportPerson {
   additionalPositions: [Position]
   assessments: [Assessment]
   attachments: [Attachment]
-  attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  attendedReports(
+    """"""
+    query: ReportSearchQueryInput
+  ): AnetBeanList_Report
   attendee: Boolean!
   author: Boolean!
-  authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  authoredReports(
+    """"""
+    query: ReportSearchQueryInput
+  ): AnetBeanList_Report
   authorizationGroups: [AuthorizationGroup]
   biography: String
   code: String
@@ -1547,7 +2014,10 @@ type ReportPerson {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  emailAddresses(network: String): [EmailAddress]
+  emailAddresses(
+    """"""
+    network: String
+  ): [EmailAddress]
   endOfTourDate: Instant
   entityAvatar: EntityAvatar
   familyName: String
@@ -1830,15 +2300,24 @@ enum SuperuserType {
 """"""
 type Task {
   approvalSteps: [ApprovalStep]
-  ascendantTasks(query: TaskSearchQueryInput): [Task]
+  ascendantTasks(
+    """"""
+    query: TaskSearchQueryInput
+  ): [Task]
   assessments: [Assessment]
   attachments: [Attachment]
   category: String
-  childrenTasks(query: TaskSearchQueryInput): [Task]
+  childrenTasks(
+    """"""
+    query: TaskSearchQueryInput
+  ): [Task]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
-  descendantTasks(query: TaskSearchQueryInput): [Task]
+  descendantTasks(
+    """"""
+    query: TaskSearchQueryInput
+  ): [Task]
   description: String
   isSubscribed: Boolean
   longName: String
@@ -1847,7 +2326,10 @@ type Task {
   plannedCompletion: Instant
   planningApprovalSteps: [ApprovalStep]
   projectedCompletion: Instant
-  reports(query: ReportSearchQueryInput): [Report]
+  reports(
+    """"""
+    query: ReportSearchQueryInput
+  ): [Report]
   responsiblePositions: [Position]
   selectable: Boolean
   shortName: String
