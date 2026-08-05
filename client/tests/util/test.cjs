@@ -1,6 +1,6 @@
 const path = require("path")
 const { URL } = require("url")
-const test = require("ava")
+const { default: test } = require("ava")
 const webdriver = require("selenium-webdriver")
 const { By, until, Key, error } = webdriver
 const moment = require("moment")
