@@ -1,4 +1,5 @@
 const { defineConfig, globalIgnores } = require("eslint/config")
+const neostandard = require("neostandard")
 
 const globals = require("globals")
 const babelParser = require("@babel/eslint-parser")
@@ -6,25 +7,24 @@ const chaiExpect = require("eslint-plugin-chai-expect")
 const _import = require("eslint-plugin-import")
 const jest = require("eslint-plugin-jest")
 const jsxA11Y = require("eslint-plugin-jsx-a11y")
-const n = require("eslint-plugin-n")
-const promise = require("eslint-plugin-promise")
 const react = require("eslint-plugin-react")
 const reactHooks = require("eslint-plugin-react-hooks")
+const eslintConfigPrettier = require("eslint-config-prettier")
 
 const tsParser = require("@typescript-eslint/parser")
 const typescriptEslint = require("@typescript-eslint/eslint-plugin")
-const js = require("@eslint/js")
-
-const { FlatCompat } = require("@eslint/eslintrc")
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
-})
 
 module.exports = defineConfig([
+  ...neostandard({
+    noJSX: false
+  }),
+
   {
+    settings: {
+      react: {
+        version: "18"
+      }
+    },
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -35,26 +35,18 @@ module.exports = defineConfig([
       },
       parser: babelParser
     },
-    extends: compat.extends(
-      "eslint:recommended",
-      "plugin:chai-expect/recommended",
-      "plugin:react/recommended",
-      "standard",
-      "standard-jsx",
-      "standard-react",
-      "prettier"
-    ),
     plugins: {
       "chai-expect": chaiExpect,
       import: _import,
       jest,
       "jsx-a11y": jsxA11Y,
-      n,
-      promise,
       react,
       "react-hooks": reactHooks
     },
     rules: {
+      ...chaiExpect.configs.recommended.rules,
+      ...react.configs.recommended.rules,
+
       eqeqeq: [
         "error",
         "always",
@@ -91,9 +83,9 @@ module.exports = defineConfig([
       curly: ["error", "all"]
     }
   },
+
   {
     files: ["**/*.ts", "**/*.tsx"],
-    extends: compat.extends("plugin:@typescript-eslint/recommended"),
     languageOptions: {
       parser: tsParser
     },
@@ -101,6 +93,7 @@ module.exports = defineConfig([
       "@typescript-eslint": typescriptEslint
     },
     rules: {
+      ...typescriptEslint.configs.recommended.rules,
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-namespace": "warn",
       "@typescript-eslint/no-unused-expressions": "warn",
@@ -108,5 +101,8 @@ module.exports = defineConfig([
       "prefer-spread": "warn"
     }
   },
+
+  eslintConfigPrettier,
+
   globalIgnores(["**/build/", "**/node_modules/"])
 ])

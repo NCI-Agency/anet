@@ -1,5 +1,6 @@
 import _isArray from "lodash/isArray"
 import _isEmpty from "lodash/isEmpty"
+import React from "react"
 import {
   AdvancedMultiSelectOverlayTable,
   AdvancedSingleSelectOverlayTable

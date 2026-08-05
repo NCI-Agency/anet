@@ -60,6 +60,7 @@ export interface CoordinatesPropType {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const locationFormats: string[] = Object.keys(Location.LOCATION_FORMATS)
+const displayTypes: string[] = Object.keys(GEO_LOCATION_DISPLAY_TYPE)
 interface BaseGeoLocationProps {
   labels?: any
   locationFormat: (typeof locationFormats)[number]
@@ -73,8 +74,7 @@ interface BaseGeoLocationProps {
   // FIXME: required when editable
   setFieldTouched?: (...args: unknown[]) => unknown
   isSubmitting?: boolean
-  displayType?:
-    GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD | GEO_LOCATION_DISPLAY_TYPE.GENERIC
+  displayType?: (typeof displayTypes)[number]
   showAllFormatsInfo: boolean
 }
 

@@ -5,7 +5,7 @@ import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import { GQL_DELETE_ASSESSMENT } from "components/Model"
+import { GQL_DELETE_ASSESSMENT, ModelNS } from "components/Model"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
@@ -26,7 +26,7 @@ interface PeriodicAssessmentProps {
   assessmentValues: any
   assessmentConfig: AssessmentPeriodsConfigPropType
   assessmentYupSchema: any
-  assessment: Model.assessmentPropType
+  assessment: ModelNS.assessmentPropType
   entity: any
   period: AssessmentPeriodPropType
   recurrence: string
