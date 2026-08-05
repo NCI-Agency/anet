@@ -2,7 +2,11 @@ import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { CountryOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  CountryOverlayRow,
+  TenantOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import AttachmentContext from "components/Attachment/AttachmentContext"
@@ -23,17 +27,19 @@ import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
+import TenantTable from "components/TenantTable"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import UserInputTable from "components/UserInputTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Location, Person } from "models"
+import { Location, Person, Tenant } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
@@ -98,7 +104,7 @@ const PersonForm = ({
   notesComponent
 }: PersonFormProps) => {
   const routerLocation = useLocation()
-  const { loadAppData, currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser, allTenants } = useContext(AppContext)
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -118,6 +124,7 @@ const PersonForm = ({
   )
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
+  const isAdmin = currentUser?.isAdmin()
   const attachmentsEnabled =
     !Settings.fields.attachment.featureDisabled && !forOnboarding
   const attachmentEditEnabled =
@@ -161,6 +168,19 @@ const PersonForm = ({
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
     }
   }
+  const tenantsFilters = {
+    allTenants: {
+      label: "All Tenants",
+      list: allTenants
+    }
+  }
+  const activeTenants = allTenants?.filter(
+    t => t?.status === Model.STATUS.ACTIVE
+  )
+  const defaultTenants = activeTenants?.length === 1 ? activeTenants : null
+  if (forOnboarding && _isEmpty(initialValues.tenantAccessRequests)) {
+    initialValues.tenantAccessRequests = defaultTenants ?? []
+  }
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
     checkPotentialDuplicates,
     400
@@ -173,7 +193,13 @@ const PersonForm = ({
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Person.yupSchema}
+      validationSchema={
+        isAdmin
+          ? Person.yupAdminSchema
+          : forOnboarding
+            ? Person.yupOnboardingSchema
+            : Person.yupSchema
+      }
       initialValues={initialValues}
     >
       {({
@@ -188,7 +214,6 @@ const PersonForm = ({
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
-        const isAdmin = currentUser && currentUser.isAdmin()
         const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast =
           values.endOfTourDate && values.endOfTourDate <= Date.now()
@@ -203,6 +228,15 @@ const PersonForm = ({
             values.position
           )
         const ranks = Settings.fields.person.ranks || []
+        const unselectedTenants = allTenants?.filter(
+          t => !values?.tenants?.some(pt => pt?.uuid === t.uuid)
+        )
+        const tenantAccessRequestsFilters = {
+          allTenants: {
+            label: "Unselected Tenants",
+            list: unselectedTenants
+          }
+        }
         // admins can edit all persons,
         // superusers for their organization hierarchy or position-less people,
         // and the user themselves when onboarding
@@ -249,6 +283,7 @@ const PersonForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div>
+              {isAdmin && <NoTenantWarning person={values} />}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <Form className="form-horizontal" method="post">
                 <MessagesWithConflict
@@ -756,6 +791,92 @@ const PersonForm = ({
                     />
                   )}
 
+                  {values.user && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.person.tenants}
+                        name="tenants"
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tenants", value, true)
+                        }}
+                        widget={
+                          <AdvancedMultiSelect
+                            fieldName="tenants"
+                            placeholder="Search for tenants…"
+                            value={values.tenants}
+                            renderSelected={
+                              <TenantTable
+                                tenants={values.tenants}
+                                showStatus
+                                showDelete={isAdmin}
+                                noTenantsMessage={
+                                  isAdmin ? (
+                                    "No tenants selected; click in the box above to select any"
+                                  ) : (
+                                    <div style={{ paddingTop: 9 }}>
+                                      No tenants found
+                                    </div>
+                                  )
+                                }
+                              />
+                            }
+                            overlayColumns={["Name", "Status"]}
+                            overlayRenderRow={TenantOverlayRow}
+                            filterDefs={tenantsFilters}
+                            objectType={Tenant}
+                            fields={Tenant.autocompleteQuery}
+                            disabled={!isAdmin}
+                          />
+                        }
+                      />
+
+                      {(forOnboarding || isSelf) &&
+                        !_isEmpty(unselectedTenants) && (
+                          <DictionaryField
+                            wrappedComponent={Field}
+                            dictProps={
+                              Settings.fields.person.tenantAccessRequests
+                            }
+                            name="tenantAccessRequests"
+                            component={FieldHelper.SpecialField}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched(
+                                "tenantAccessRequests",
+                                true,
+                                false
+                              ) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenantAccessRequests", value, true)
+                            }}
+                            widget={
+                              <AdvancedMultiSelect
+                                fieldName="tenantAccessRequests"
+                                placeholder="Search for tenants…"
+                                value={values.tenantAccessRequests}
+                                renderSelected={
+                                  <TenantTable
+                                    tenants={values.tenantAccessRequests}
+                                    showStatus
+                                    showDelete
+                                    noTenantsMessage="No access requests for tenants"
+                                  />
+                                }
+                                overlayColumns={["Name", "Status"]}
+                                overlayRenderRow={TenantOverlayRow}
+                                filterDefs={tenantAccessRequestsFilters}
+                                objectType={Tenant}
+                                fields={Tenant.autocompleteQuery}
+                              />
+                            }
+                          />
+                        )}
+                    </>
+                  )}
+
                   {edit && attachmentEditEnabled && (
                     <Field
                       name="uploadAttachments"
@@ -896,6 +1017,10 @@ const PersonForm = ({
       person.pendingVerification = false
     }
     person.country = utils.getReference(person.country)
+    person.tenantAccessRequests = person.tenantAccessRequests.map(t =>
+      Tenant.filterClientSideFields(t)
+    )
+    person.tenants = person.tenants.map(t => Tenant.filterClientSideFields(t))
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON

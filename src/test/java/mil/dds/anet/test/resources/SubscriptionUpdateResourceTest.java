@@ -258,6 +258,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
             personToPrimaryReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
                 false),
             personToReportPerson(getChristopfTopferness(), true))))
+        .withAllTenants(true)
         .withReportCommunities(List.of(getAuthorizationGroupInput(
             getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
         .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))

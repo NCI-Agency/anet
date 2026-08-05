@@ -11,6 +11,7 @@ import Position from "models/Position"
 import Report from "models/Report"
 import RollupGraph from "models/RollupGraph"
 import Task from "models/Task"
+import Tenant from "models/Tenant"
 
 export {
   Attachment,
@@ -25,5 +26,6 @@ export {
   Position,
   Report,
   RollupGraph,
-  Task
+  Task,
+  Tenant
 }

@@ -70,8 +70,9 @@ public class PersonResourceTest extends AbstractResourceTest {
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
   public static final String FIELDS =
-      String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
-          AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
+      String.format("{ %s position { %s } attachments %s %s tenants { uuid name } }",
+          _PERSON_FIELDS, _POSITION_FIELDS, AttachmentResourceTest.ATTACHMENT_FIELDS,
+          _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
   public static final String PREFERENCES_FIELDS = "{ uuid name }";
 
   @Autowired
