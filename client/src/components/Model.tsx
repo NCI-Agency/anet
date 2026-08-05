@@ -1006,7 +1006,7 @@ export default class Model {
   }
 }
 
-namespace Model {
+export namespace ModelNS {
   export interface relatedObjectPropType {
     objectUuid?: string
     relatedObjectType: string
@@ -1014,7 +1014,7 @@ namespace Model {
     relatedObject?: any
   }
 
-  export type relatedObjectsPropType = Model.relatedObjectPropType[]
+  export type relatedObjectsPropType = ModelNS.relatedObjectPropType[]
 
   export interface assessmentPropType {
     uuid?: string
@@ -1026,7 +1026,7 @@ namespace Model {
       name?: string
       rank?: string
     }
-    assessmentRelatedObjects?: Model.relatedObjectsPropType
+    assessmentRelatedObjects?: ModelNS.relatedObjectsPropType
   }
 
   export interface notePropType {
@@ -1038,7 +1038,7 @@ namespace Model {
       name?: string
       rank?: string
     }
-    noteRelatedObjects?: Model.relatedObjectsPropType
+    noteRelatedObjects?: ModelNS.relatedObjectsPropType
   }
 
   export interface attachmentRelatedObjectType {
@@ -1049,5 +1049,5 @@ namespace Model {
   }
 
   export type attachmentRelatedObjectsPropType =
-    Model.attachmentRelatedObjectType[]
+    ModelNS.attachmentRelatedObjectType[]
 }

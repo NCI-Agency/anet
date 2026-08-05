@@ -45,10 +45,10 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
 
+const specialWidgetTypes: string[] = Object.keys(SPECIAL_WIDGET_TYPES)
 interface SpecialFieldProps {
   name: string
-  widget:
-    SPECIAL_WIDGET_TYPES.LIKERT_SCALE | SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  widget: (typeof specialWidgetTypes)[number]
   formikProps?: any
 }
 
@@ -82,8 +82,7 @@ const SpecialField = ({
 
 interface ReadonlySpecialFieldProps {
   name: string
-  widget:
-    SPECIAL_WIDGET_TYPES.LIKERT_SCALE | SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  widget: (typeof specialWidgetTypes)[number]
   values?: any
   isCompact?: boolean
 }
