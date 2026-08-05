@@ -131,3 +131,31 @@
     margin-top: 10px;
   }
 }
+
+.attachment-link-container {
+  margin: 0 0 15px 0;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+.attachment-link-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.attachment-link-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.attachment-link-count {
+  font-size: 12px;
+  color: #445566;
+}
