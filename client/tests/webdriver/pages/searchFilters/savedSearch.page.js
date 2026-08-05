@@ -5,10 +5,11 @@ class SavedSearch extends Page {
     const searchLink = browser.$(".search-popover-target.bp6-popover-target")
     await (await searchLink).waitForDisplayed()
     await (await searchLink).click()
+    await browser.pause(1500) // wait for filters to be shown
 
-    const reportsButton = browser.$('.btn-group > button[value="TASKS"]')
-    await (await reportsButton).waitForDisplayed()
-    await (await reportsButton).click()
+    const tasksButton = browser.$('.btn-group > button[value="TASKS"]')
+    await (await tasksButton).waitForDisplayed()
+    await (await tasksButton).click()
     await browser.pause(1500) // wait for filters to be updated
 
     const addFilterButton = browser.$("#addFilterDropdown")

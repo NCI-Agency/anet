@@ -5,10 +5,12 @@ class TaskFilter extends Page {
     const searchLink = browser.$(".search-popover-target.bp6-popover-target")
     await (await searchLink).waitForDisplayed()
     await (await searchLink).click()
+    await browser.pause(1500) // wait for filters to be shown
 
     const reportsButton = browser.$('.btn-group > button[value="REPORTS"]')
     await (await reportsButton).waitForDisplayed()
     await (await reportsButton).click()
+    await browser.pause(1500) // wait for filters to be updated
 
     const removeFilterButtons = await browser.$$(
       '.form-group button[title="Remove this filter"]'
@@ -17,10 +19,12 @@ class TaskFilter extends Page {
       await (await removeFilterButton).waitForDisplayed()
       await (await removeFilterButton).click()
     }
+    await browser.pause(1500) // wait for filters to be updated
 
     const addFilterButton = browser.$("#addFilterDropdown")
     await (await addFilterButton).waitForDisplayed()
     await (await addFilterButton).click()
+    await browser.pause(1500) // wait for filters to be shown
 
     const withinObjectiveButton = browser.$("a*=Within Objective")
     await (await withinObjectiveButton).waitForDisplayed()
