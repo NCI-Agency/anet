@@ -1,4 +1,4 @@
-import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
+import { PopoverInteractionKind, PopoverNext } from "@blueprintjs/core"
 import App6Symbol, { getChoices } from "components/App6Symbol"
 import { Organization } from "models"
 import React from "react"
@@ -57,12 +57,13 @@ const App6SymbolPreview = ({
   )
 
   return (
-    <Popover
+    <PopoverNext
       captureDismiss
       interactionKind={PopoverInteractionKind.HOVER}
       placement="bottom-start"
       autoFocus
       enforceFocus={false}
+      shouldReturnFocusOnClose={false}
       content={
         <div
           style={{
@@ -117,7 +118,7 @@ const App6SymbolPreview = ({
           maxHeight={maxHeight}
         />
       </div>
-    </Popover>
+    </PopoverNext>
   )
 }
 
