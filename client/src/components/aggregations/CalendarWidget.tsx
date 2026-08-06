@@ -8,6 +8,7 @@ import {
 import _isEmpty from "lodash/isEmpty"
 import React, { useRef } from "react"
 import { useNavigate } from "react-router"
+import Settings from "settings"
 import "../Calendar.css"
 
 const DATE_FORMAT = "YYYY-MM-DD"
@@ -56,6 +57,9 @@ const CalendarWidget = ({
       }}
       height="auto" // assume a natural height, no scrollbars will be used
       aspectRatio={3} // ratio of width-to-height
+      fixedWeekCount={false}
+      firstDay={Settings.useISO8601 ? 1 : 0}
+      weekNumberCalculation={Settings.useISO8601 ? "ISO" : "local"}
       ref={calendarComponentRef}
       events={events}
       eventClick={info => {
