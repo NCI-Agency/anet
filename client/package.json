@@ -57,7 +57,7 @@
     "babel-jest": "30.4.1",
     "babel-loader": "10.1.1",
     "chai": "6.2.2",
-    "config": "4.4.2",
+    "config": "5.0.0",
     "copy-webpack-plugin": "14.0.0",
     "countries-list": "3.4.1",
     "cross-fetch": "4.1.0",
