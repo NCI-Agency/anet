@@ -5,6 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
+import moment from "moment"
 import React from "react"
 import Settings from "settings"
 import "./Calendar.css"
@@ -35,6 +36,10 @@ const Calendar = ({
     initialView="dayGridMonth"
     views={{
       timeGridWeek: {
+        // Note: dayHeaderFormat: { weekday: "short", day: "numeric" } doesn't work, prints e.g. "3 Mon" instead of "Mon 3"
+        dayHeaderContent: args => {
+          return moment(args.date).format("ddd D")
+        },
         moreLinkClick: "day"
       },
       dayGrid: {
