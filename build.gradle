@@ -14,7 +14,7 @@ plugins {
 	id "com.netflix.nebula.rpm" version "12.3.0"
 	id "org.springframework.boot" version "4.1.0" apply false
 	id 'io.mateo.cxf-codegen' version '3.0.0'
-	id 'org.cyclonedx.bom' version '3.4.0'
+	id 'org.cyclonedx.bom' version '3.4.1'
 }
 
 apply plugin: 'java'
