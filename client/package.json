@@ -35,7 +35,7 @@
     "@fregante/circular-dependency-plugin": "5.2.5",
     "@graphql-codegen/cli": "7.2.0",
     "@graphql-codegen/schema-ast": "6.1.0",
-    "@graphql-codegen/visitor-plugin-common": "7.2.3",
+    "@graphql-codegen/visitor-plugin-common": "7.2.5",
     "@ianvs/prettier-plugin-sort-imports": "4.7.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "7.0.0",
