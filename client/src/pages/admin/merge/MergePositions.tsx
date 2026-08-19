@@ -706,6 +706,7 @@ const PositionColumn = ({
           <MergeField
             label="Person"
             fieldName="person"
+            fieldSetsUuid
             value={<LinkTo modelType="Person" model={position.person} />}
             align={align}
             action={() => {
