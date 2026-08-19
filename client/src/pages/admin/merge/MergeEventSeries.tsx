@@ -438,6 +438,7 @@ const EventSeriesColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.eventSeries.name}
             fieldName="name"
+            fieldSetsUuid
             value={eventSeries.name}
             align={align}
             action={() => {

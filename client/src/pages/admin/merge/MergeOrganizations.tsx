@@ -623,6 +623,7 @@ const OrganizationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.shortName}
             fieldName="shortName"
+            fieldSetsUuid
             value={organization.shortName}
             align={align}
             action={() => {
