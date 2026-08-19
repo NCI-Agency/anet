@@ -537,6 +537,7 @@ const LocationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.name}
             fieldName="name"
+            fieldSetsUuid
             value={location.name}
             align={align}
             action={() => {

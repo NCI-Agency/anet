@@ -468,6 +468,7 @@ const TaskColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.task.shortName}
             fieldName="shortName"
+            fieldSetsUuid
             value={task.shortName}
             align={align}
             action={() => {

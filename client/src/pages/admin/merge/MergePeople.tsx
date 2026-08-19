@@ -642,6 +642,7 @@ const PersonColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.familyName}
             fieldName="familyName"
+            fieldSetsUuid
             value={person.familyName}
             align={align}
             action={() => {
