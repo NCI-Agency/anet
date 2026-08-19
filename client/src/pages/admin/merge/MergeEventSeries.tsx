@@ -427,9 +427,6 @@ const EventSeriesColumn = ({
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
-              dispatchMergeActions(
                 setAMergedField("status", eventSeries.status, align)
               )
             }}
@@ -445,10 +442,10 @@ const EventSeriesColumn = ({
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
+                setAMergedField("name", eventSeries.name, align)
               )
               dispatchMergeActions(
-                setAMergedField("name", eventSeries.name, align)
+                setAMergedField("uuid", eventSeries.uuid, align)
               )
             }}
             autoMerge
@@ -462,9 +459,6 @@ const EventSeriesColumn = ({
             value={<RichTextEditor readOnly value={eventSeries.description} />}
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("description", eventSeries.description, align)
               )
@@ -482,9 +476,6 @@ const EventSeriesColumn = ({
             }
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("ownerOrg", eventSeries.ownerOrg, align)
               )
@@ -521,9 +512,6 @@ const EventSeriesColumn = ({
             }
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("adminOrg", eventSeries.adminOrg, align)
               )
