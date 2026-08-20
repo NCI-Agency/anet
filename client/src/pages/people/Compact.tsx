@@ -98,6 +98,7 @@ const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
 const NORMAL_FIELD_OPTIONS = Object.entries(
   Object.without(
     Settings.fields.person,
+    "ldapImport",
     "ranks",
     "customFields",
     "familyName",

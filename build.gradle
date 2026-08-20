@@ -1,5 +1,6 @@
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
+import com.bmuschko.gradle.docker.tasks.network.*
 import io.mateo.cxf.codegen.wsdl2java.Wsdl2Java
 import org.gradle.internal.os.OperatingSystem
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
@@ -75,6 +76,13 @@ run.environment("ANET_SMTP_PORT", run.environment["ANET_SMTP_PORT"] ?: isTestEnv
 run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "true")
 run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
+run.environment("ANET_LDAP_URLS", run.environment["ANET_LDAP_URLS"] ?: "ldap://localhost:3890")
+run.environment("ANET_LDAP_BASE", run.environment["ANET_LDAP_BASE"] ?: "dc=example,dc=org")
+run.environment("ANET_LDAP_USERNAME", run.environment["ANET_LDAP_USERNAME"] ?: "cn=admin,dc=example,dc=org")
+run.environment("ANET_LDAP_PASSWORD", run.environment["ANET_LDAP_PASSWORD"] ?: "admin")
+run.environment("ANET_LDAP_PORT", run.environment["ANET_LDAP_PORT"] ?: 3890)
+run.environment("ANET_LDAPS_PORT", run.environment["ANET_LDAPS_PORT"] ?: 6860)
+run.environment("ANET_LDAP_GUI_PORT", run.environment["ANET_LDAP_GUI_PORT"] ?: 5000)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 run.environment("ANET_TEST_MODE", run.environment["ANET_TEST_MODE"] ?: isTestEnv ? "true" : "false")
 run.environment("ANET_MART_EXCHANGE_SERVER", run.environment["ANET_MART_EXCHANGE_SERVER"] ?: "test-ex-09.nsf.kfor.nato.int")
@@ -96,6 +104,9 @@ String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "a
 String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
+String ldapNetworkName = "anet-ldap-network"
+String ldapContainerName = "anet-ldap-server"
+String ldapGuiContainerName = "anet-ldap-gui"
 
 String mainWsdl = "nato/common/nvg20/common-ws.nvg20.wsdl"
 String cxfSources = "build/generated/sources/cxf"
@@ -167,10 +178,12 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-web-services" // Required for NVG-WS
 	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 	implementation "org.springframework.boot:spring-boot-starter-freemarker"
+	implementation "org.springframework.boot:spring-boot-starter-ldap"
 	implementation "org.springframework.boot:spring-boot-starter-liquibase"
 	implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
 	implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
 	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation "org.springframework.data:spring-data-ldap"
 	implementation "org.springframework.security:spring-security-config"
 	implementation "org.springframework.shell:spring-shell-starter:${springShellVersion}"
 
@@ -697,7 +710,6 @@ tasks.register('dockerCreateFakeSmtpServer', DockerCreateContainer) {
 	imageId = dockerPullFakeSmtpServer.getImage()
 	containerName = fakeSmtpContainerName
 	description = "Creates a fake-smtp-server container named ${fakeSmtpContainerName}."
-	exposePorts("tcp", [1025, 8025])
 	hostConfig.portBindings.set(["${run.environment["ANET_SMTP_PORT"]}:1025", "${run.environment["ANET_SMTP_HTTP_PORT"]}:8025"])
 }
 
@@ -719,6 +731,97 @@ tasks.register('dockerRemoveFakeSmtpServer', DockerRemoveContainer) {
 	containerId = fakeSmtpContainerName
 }
 dockerRemoveFakeSmtpServer.mustRunAfter('dockerStopFakeSmtpServer')
+
+// LDAP network, used by the LDAP server and GUI containers to be able to communicate
+
+tasks.register('dockerCreateLdapNetwork', DockerCreateNetwork) {
+	networkName = ldapNetworkName
+}
+
+tasks.register('dockerRemoveLdapNetwork', DockerRemoveNetwork) {
+	networkId = ldapNetworkName
+}
+
+// LDAP server container
+
+tasks.register('dockerPullLdapServer', DockerPullImage) {
+	group = "ldap-server container"
+	image = "osixia/openldap:latest"
+	description = "Pulls a docker image for the ldap-server from ${image}."
+}
+
+tasks.register('dockerCreateLdapServer', DockerCreateContainer) {
+	dependsOn dockerPullLdapServer
+	group = "ldap-server container"
+	imageId = dockerPullLdapServer.getImage()
+	containerName = ldapContainerName
+	description = "Creates an ldap-server container named ${ldapContainerName}."
+	hostConfig.portBindings.set(["${run.environment["ANET_LDAP_PORT"]}:389", "${run.environment["ANET_LDAPS_PORT"]}:686"])
+	hostConfig.binds.set([new File(projectDir, "ldap/import"): "/container/service/slapd/assets/config/bootstrap/ldif/custom"] as Map<? extends String, ? extends String>)
+	hostConfig.network.set(ldapNetworkName)
+	cmd = ["--copy-service", "--loglevel", "debug"]
+}
+
+tasks.register('dockerStartLdapServer', DockerStartContainer) {
+	group = "ldap-server container"
+	description = "Starts ${ldapContainerName} container."
+	containerId = ldapContainerName
+}
+
+tasks.register('dockerStopLdapServer', DockerStopContainer) {
+	group = "ldap-server container"
+	description = "Stops ${ldapContainerName} container."
+	containerId = ldapContainerName
+}
+
+tasks.register('dockerRemoveLdapServer', DockerRemoveContainer) {
+	group = "ldap-server container"
+	description = "Removes ${ldapContainerName} container."
+	containerId = ldapContainerName
+}
+dockerRemoveLdapServer.mustRunAfter('dockerStopLdapServer')
+
+// LDAP GUI container
+
+tasks.register('dockerPullLdapGui', DockerPullImage) {
+	group = "ldap-gui container"
+	image = "dnknth/ldap-ui:latest"
+	description = "Pulls a docker image for the ldap-gui from ${image}."
+}
+
+tasks.register('dockerCreateLdapGui', DockerCreateContainer) {
+	dependsOn dockerPullLdapGui
+	group = "ldap-gui container"
+	imageId = dockerPullLdapGui.getImage()
+	containerName = ldapGuiContainerName
+	description = "Creates an ldap-gui container named ${ldapGuiContainerName}."
+	hostConfig.portBindings.set(["${run.environment["ANET_LDAP_GUI_PORT"]}:5000"])
+	hostConfig.network.set(ldapNetworkName)
+	withEnvVar("LDAP_URL", "ldap://${ldapContainerName}:389")
+	withEnvVar("BASE_DN", "${run.environment["ANET_LDAP_BASE"]}")
+	withEnvVar("BIND_DN", "${run.environment["ANET_LDAP_USERNAME"]}")
+	withEnvVar("BIND_PASSWORD", "${run.environment["ANET_LDAP_PASSWORD"]}")
+}
+dockerCreateLdapGui.mustRunAfter('dockerCreateLdapNetwork')
+
+tasks.register('dockerStartLdapGui', DockerStartContainer) {
+	group = "ldap-gui container"
+	description = "Starts ${ldapGuiContainerName} container."
+	containerId = ldapGuiContainerName
+}
+
+tasks.register('dockerStopLdapGui', DockerStopContainer) {
+	group = "ldap-gui container"
+	description = "Stops ${ldapGuiContainerName} container."
+	containerId = ldapGuiContainerName
+}
+
+tasks.register('dockerRemoveLdapGui', DockerRemoveContainer) {
+	group = "ldap-gui container"
+	description = "Removes ${ldapGuiContainerName} container."
+	containerId = ldapGuiContainerName
+}
+dockerRemoveLdapGui.mustRunAfter('dockerStopLdapGui')
 
 // Create the task that runs the maintenance command. Run e.g. with:
 //   ./gradlew dbMaintenance -Pargs="clearEmptyBiographies"
@@ -812,6 +915,11 @@ generateClientCodeConf {
 			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
 		],
 		[
+			graphQLTypeName: "Map_String_StringScalar",
+			javaType: "java.util.HashMap",
+			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
+		],
+		[
 			graphQLTypeName: "UNREPRESENTABLE",
 			javaType: "java.lang.Object",
 			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
@@ -823,7 +931,7 @@ jar.dependsOn buildClient
 run.dependsOn(compileJava, buildClient, pushPsqlImageData)
 test.dependsOn(pushPsqlImageData)
 
-run.mustRunAfter('dockerStartKeycloak')
+run.mustRunAfter('dockerStartKeycloak', 'dockerStartLdapServer')
 test.mustRunAfter('dockerStartKeycloak', 'dockerStartFakeSmtpServer')
 
 jar {

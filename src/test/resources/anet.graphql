@@ -763,6 +763,12 @@ input GenericRelatedObjectInput {
 scalar Instant
 
 """"""
+type LdapPersonRecord {
+  attributes: Map_String_StringScalar
+  person: Person
+}
+
+""""""
 type Location {
   approvalSteps: [ApprovalStep]
   ascendantLocations(
@@ -867,6 +873,9 @@ scalar Long
 
 """Built-in scalar for map-like structures"""
 scalar Map_String_ObjectScalar
+
+"""Built-in scalar for map-like structures"""
+scalar Map_String_StringScalar
 
 """"""
 type MartImportedReport {
@@ -1053,6 +1062,10 @@ type Mutation {
     """"""
     uuid: String
   ): Int
+  importLdapPeople(
+    """"""
+    ldapUuids: [String]
+  ): [LdapPersonRecord]
   mergeEventSeries(
     """"""
     loserUuid: String
@@ -1772,6 +1785,10 @@ type Query {
     uuid: String
   ): EventType
   eventTypes: [EventType]
+  getLdapPeople(
+    """"""
+    name: String
+  ): [LdapPersonRecord]
   location(
     """"""
     uuid: String
