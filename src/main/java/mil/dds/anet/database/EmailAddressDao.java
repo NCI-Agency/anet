@@ -66,6 +66,13 @@ public class EmailAddressDao extends AbstractDao {
         + " AND \"relatedObjectUuid\" = :relatedObjectUuid")
     void deleteEmailAddresses(@Bind("relatedObjectType") String relatedObjectType,
         @Bind("relatedObjectUuid") String relatedObjectUuid);
+
+    @SqlBatch("INSERT INTO \"emailAddresses\""
+        + " (\"relatedObjectType\", \"relatedObjectUuid\", network, address)"
+        + " VALUES (:relatedObjectType, :relatedObjectUuid, :network, :address)"
+        + " ON CONFLICT(\"relatedObjectType\", \"relatedObjectUuid\", network) DO UPDATE"
+        + " SET address = :address")
+    void upsertEmailAddresses(@BindBean List<EmailAddress> emailAddresses);
   }
 
   @Transactional
@@ -90,6 +97,17 @@ public class EmailAddressDao extends AbstractDao {
         // insert new emailAddresses
         eab.insertEmailAddresses(relatedObjectType, relatedObjectUuid, filteredEmailAddresses);
       }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void upsertEmailAddresses(List<EmailAddress> emailAddresses) {
+    final Handle handle = getDbHandle();
+    try {
+      final EmailAddressBatch eab = handle.attach(EmailAddressBatch.class);
+      eab.upsertEmailAddresses(emailAddresses);
     } finally {
       closeDbHandle(handle);
     }
