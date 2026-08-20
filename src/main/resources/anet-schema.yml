@@ -6,6 +6,22 @@
 #########################################################
 $defs:
 
+  ldapImport:
+    title: Settings for LDAP import
+    type: object
+    required: [enabled, searchBase, attributeMappings]
+    properties:
+      enabled:
+        type: boolean
+      searchBase:
+        type: string
+      attributeMappings:
+        type: object
+        minProperties: 1
+        patternProperties:
+          ".*":
+            type: string
+
   uuid:
     title: Universally unique Identifier  (UUID)
     type: string
@@ -423,6 +439,7 @@ required:
   - featureMartGuiEnabled
   - martNewPositionDaysInThePast
   - maxShownAccessTokenActivities
+  - enableLdapImport
   - dateFormats
   - calendarOptions
   - reportWorkflow
@@ -501,6 +518,10 @@ properties:
     minimum: 2
     title: Maximum number of recent web service access token activities to show in the pop-up
     description: Used in the Web service access tokens admin GUI
+
+  enableLdapImport:
+    type: boolean
+    title: Whether to enable the LDAP import
 
   dateFormats:
     type: object
@@ -945,6 +966,8 @@ properties:
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
+          ldapImport:
+            "$ref": "#/$defs/ldapImport"
           status:
             "$ref": "#/$defs/labeledField"
           givenName:
