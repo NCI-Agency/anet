@@ -5,6 +5,9 @@ import AccessTokensList from "pages/admin/accessTokens/Index"
 import AuditTrailTable from "pages/admin/auditTrail/Index"
 import ConfigureEventTypesShow from "pages/admin/configureEventTypes/Show"
 import AdminIndex from "pages/admin/Index"
+import LdapImportOrganizations from "pages/admin/ldapImport/LdapImportOganizations"
+import LdapImportPeople from "pages/admin/ldapImport/LdapImportPeople"
+import LdapImportPositions from "pages/admin/ldapImport/LdapImportPositions"
 import MartImporterShow from "pages/admin/martImporter/Show"
 import MergeEventSeries from "pages/admin/merge/MergeEventSeries"
 import MergeLocations from "pages/admin/merge/MergeLocations"
@@ -285,6 +288,65 @@ const routes = [
                   {
                     path: "usersPendingVerification",
                     element: <UsersPendingVerification />
+                  }
+                ]
+              },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={() => Settings.enableLdapImport}
+                  />
+                ),
+                children: [
+                  {
+                    path: "ldapImport",
+                    children: [
+                      {
+                        element: (
+                          <ProtectedRoute
+                            authorizationCallback={() =>
+                              Settings.fields.person.ldapImport?.enabled
+                            }
+                          />
+                        ),
+                        children: [
+                          {
+                            path: "people",
+                            element: <LdapImportPeople />
+                          }
+                        ]
+                      },
+                      {
+                        element: (
+                          <ProtectedRoute
+                            authorizationCallback={() =>
+                              Settings.fields.position.ldapImport?.enabled
+                            }
+                          />
+                        ),
+                        children: [
+                          {
+                            path: "positions",
+                            element: <LdapImportPositions />
+                          }
+                        ]
+                      },
+                      {
+                        element: (
+                          <ProtectedRoute
+                            authorizationCallback={() =>
+                              Settings.fields.organization.ldapImport?.enabled
+                            }
+                          />
+                        ),
+                        children: [
+                          {
+                            path: "organizations",
+                            element: <LdapImportOrganizations />
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               },

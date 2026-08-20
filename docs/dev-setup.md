@@ -112,6 +112,10 @@ To log in as one of the base data users, when prompted for a username and passwo
     For background info on some of these Liquibase commands, see: https://www.dropwizard.io/en/latest/manual/migrations.html
     1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `env ANET_DB_DROP=true ./gradlew run` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Make sure the [Keycloak authentication server](keycloak.md#dev) is started (in a Docker container) in your local development environment: `./gradlew dockerConfigureKeycloak dockerStartKeycloak`
+1. If you have LDAP import enabled in your dictionary (via `enableLdapImport: true`), set up the LDAP containers:
+    1. Create the LDAP network (so the LDAP containers can communicate): `./gradlew dockerCreateLdapNetwork`
+    1. Start the LDAP server (in a Docker container): `./gradlew dockerCreateLdapServer dockerStartLdapServer`
+    1. Start the LDAP GUI (in a Docker container): `./gradlew dockerCreateLdapGui dockerStartLdapGui`
 1. Run `./gradlew run` to run the server via Gradle
     1. If you have set **smtp: disabled** to **true** in `application.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
     1. The following output indicates that the server is ready:

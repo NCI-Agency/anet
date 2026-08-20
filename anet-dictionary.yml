@@ -10,6 +10,7 @@ eventTypeVisitBanUuid: 54d88b80-6af5-4327-ab42-d1bc292745e9
 featureMartGuiEnabled: true
 martNewPositionDaysInThePast: 30
 maxShownAccessTokenActivities: 10
+enableLdapImport: true
 
 calendarOptions:
   attendeesType: advisor
@@ -649,6 +650,21 @@ fields:
         widget: richTextEditor
 
   person:
+    # Settings for the LDAP import
+    ldapImport:
+      enabled: true
+      searchBase: ou=Staff Users
+      # Map these attributes: <person field>: <LDAP attribute>
+      attributeMappings:
+        ldapUuid: entryUUID
+        ldapUpdatedAt: modifyTimestamp
+        givenName: givenName
+        familyName: sn
+        emailAddresses: mail
+        phoneNumber: telephoneNumber
+        gender: gender
+        country: countryOfCitizenship
+        endOfTourDate: expirationDate
     status:
       label: Status
     givenName:
