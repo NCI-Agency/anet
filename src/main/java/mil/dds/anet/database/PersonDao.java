@@ -47,9 +47,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields =
       {"uuid", "familyName", "givenName", "rank", "createdAt"};
-  public static final String[] additionalFields =
-      {"status", "user", "phoneNumber", "biography", "obsoleteCountry", "countryUuid", "gender",
-          "endOfTourDate", "pendingVerification", "code", "updatedAt", "customFields"};
+  public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
+      "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "pendingVerification", "code",
+      "updatedAt", "customFields", "ldapUuid", "ldapUpdatedAt"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -176,6 +176,21 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       // Evict original person as well as current person
       personCache.evictFromCache(personCache.findInCache(p));
       personCache.evictFromCache(p);
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int updateLdapFields(Person p, String ldapUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      final String sql = "/* personUpdateLdapUuid */ UPDATE people "
+          + "SET \"ldapUuid\" = :ldapUuid, \"ldapUpdatedAt\" = :ldapUpdatedAt WHERE uuid = :uuid";
+      final int nr = handle.createUpdate(sql).bindBean(p)
+          .bind("ldapUpdatedAt", DaoUtils.asLocalDateTime(p.getLdapUpdatedAt())).execute();
+      // No need to update subscriptions, this is an internal change
       return nr;
     } finally {
       closeDbHandle(handle);

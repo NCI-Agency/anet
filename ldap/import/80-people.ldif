@@ -1,0 +1,592 @@
+dn: cn=Anderson Andrew,ou=Staff Users,dc=example,dc=org
+cn: Anderson Andrew
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Anderson
+givenName: Andrew
+telephoneNumber: +1-412-7324
+mail: andrew@example.com
+gender: M
+title: EF 1 Manager
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Beau Yoshie,ou=Staff Users,dc=example,dc=org
+cn: Beau Yoshie
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Beau
+givenName: Yoshie
+telephoneNumber: +1-202-7320
+mail: yoshie@example.com
+gender: F
+title: EF 9 Approver
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Beccabon Rebecca,ou=Staff Users,dc=example,dc=org
+cn: Beccabon Rebecca
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Beccabon
+givenName: Rebecca
+telephoneNumber: +2-456-7324
+mail: rebecca@example.com
+gender: F
+title: EF 2.2 Final Reviewer
+countryOfCitizenship: DEU
+expirationDate: 20270811141512.226Z
+
+dn: cn=Bemerged Myposwill,ou=Staff Users,dc=example,dc=org
+cn: Bemerged Myposwill
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Bemerged
+givenName: Myposwill
+telephoneNumber: +1-412-7324
+mail: bemerged.myposwill@example.com
+gender: M
+title: Merge One
+countryOfCitizenship: AFG
+
+dn: cn=Bobtown Bob,ou=Staff Users,dc=example,dc=org
+cn: Bobtown Bob
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Bobtown
+givenName: Bob
+telephoneNumber: +1-444-7324
+mail: bob@example.com
+gender: M
+title: EF 1.1 Superuser
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Bratton Creed,ou=Staff Users,dc=example,dc=org
+cn: Bratton Creed
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Bratton
+givenName: Creed
+telephoneNumber: +444-44-4444
+mail: creed.bratton@example.com
+gender: M
+title: EF 5.1 Advisor Quality Assurance
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Chrisville Chris,ou=Staff Users,dc=example,dc=org
+cn: Chrisville Chris
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Chrisville
+givenName: Chris
+telephoneNumber: +1-412-7324
+mail: chrisville.chris@example.com
+gender: M
+title: Chief of Tests
+countryOfCitizenship: AFG
+
+dn: cn=Dmin Arthur,ou=Staff Users,dc=example,dc=org
+cn: Dmin Arthur
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Dmin
+givenName: Arthur
+mail: arthur@example.com
+gender: M
+title: ANET Administrator
+countryOfCitizenship: ALB
+expirationDate: 20270811141512.226Z
+
+dn: cn=Dvisor A,ou=Staff Users,dc=example,dc=org
+cn: Dvisor A
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Dvisor
+givenName: A
+telephoneNumber: +444-44-4444
+mail: advisor@example.com
+gender: F
+title: EF 2.2 Advisor Sewing Facilities
+countryOfCitizenship: CAN
+expirationDate: 20270811141512.226Z
+
+dn: cn=Elizawell Elizabeth,ou=Staff Users,dc=example,dc=org
+cn: Elizawell Elizabeth
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Elizawell
+givenName: Elizabeth
+telephoneNumber: +1-777-7777
+mail: liz@example.com
+gender: F
+title: EF 1.1 Advisor A
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Erinson Erin,ou=Staff Users,dc=example,dc=org
+cn: Erinson Erin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Erinson
+givenName: Erin
+telephoneNumber: +9-23-2323-2323
+mail: erin@example.com
+gender: F
+title: EF 2.2 Advisor D
+countryOfCitizenship: AUS
+expirationDate: 20270811141512.226Z
+
+dn: cn=Guist Lin,ou=Staff Users,dc=example,dc=org
+cn: Guist Lin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Guist
+givenName: Lin
+telephoneNumber: +444-44-4444
+mail: lin.guist@example.com
+gender: F
+title: LNG Advisor A
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Halpert Jim,ou=Staff Users,dc=example,dc=org
+cn: Halpert Jim
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Halpert
+givenName: Jim
+telephoneNumber: +1-412-7324
+mail: jim.halpert@example.com
+gender: M
+title: EF 5.1 Superuser Sales 1
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Henderson Henry,ou=Staff Users,dc=example,dc=org
+cn: Henderson Henry
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Henderson
+givenName: Henry
+telephoneNumber: +2-456-7324
+mail: henry@example.com
+gender: M
+title: EF 2.1 Superuser
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Huntman Hunter,ou=Staff Users,dc=example,dc=org
+cn: Huntman Hunter
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Huntman
+givenName: Hunter
+telephoneNumber: +1-412-9314
+mail: hunter@example.com
+gender: M
+countryOfCitizenship: USA
+
+dn: cn=Jackson Jack,ou=Staff Users,dc=example,dc=org
+cn: Jackson Jack
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Jackson
+givenName: Jack
+telephoneNumber: 123-456-78960
+mail: jack@example.com
+gender: M
+title: EF 2.1 Advisor B
+countryOfCitizenship: DEU
+expirationDate: 20270811141512.226Z
+
+dn: cn=Jacobson Jacob,ou=Staff Users,dc=example,dc=org
+cn: Jacobson Jacob
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Jacobson
+givenName: Jacob
+telephoneNumber: +2-456-7324
+mail: jacob@example.com
+gender: M
+title: EF 2.2 Superuser
+countryOfCitizenship: ITA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Kyleson Kyle,ou=Staff Users,dc=example,dc=org
+cn: Kyleson Kyle
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Kyleson
+givenName: Kyle
+telephoneNumber: +1-412-7324
+mail: kyleson.kyle@example.com
+gender: M
+title: Director of Tests
+countryOfCitizenship: AFG
+
+dn: cn=Linton Billie,ou=Staff Users,dc=example,dc=org
+cn: Linton Billie
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Linton
+givenName: Billie
+telephoneNumber: +1-264-7324
+mail: billie.linton@example.com
+gender: F
+title: EF 9 Superuser
+countryOfCitizenship: AIA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Malone Kevin,ou=Staff Users,dc=example,dc=org
+cn: Malone Kevin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Malone
+givenName: Kevin
+telephoneNumber: +444-44-4444
+mail: kevin.malone@example.com
+gender: F
+title: EF 5.1 Advisor Accounting
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Merged Duplicate Loser,ou=Staff Users,dc=example,dc=org
+cn: Merged Duplicate Loser
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Merged
+givenName: Duplicate Loser
+gender: F
+title: Chief of Merge People Test 2
+countryOfCitizenship: AFG
+
+dn: cn=Merged Duplicate Winner,ou=Staff Users,dc=example,dc=org
+cn: Merged Duplicate Winner
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Merged
+givenName: Duplicate Winner
+telephoneNumber: +1-234-5678
+mail: merged.winner@example.com
+gender: M
+title: Chief of Merge People Test 1
+countryOfCitizenship: AFG
+
+dn: cn=Nicholson Nick,ou=Staff Users,dc=example,dc=org
+cn: Nicholson Nick
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Nicholson
+givenName: Nick
+telephoneNumber: +1-202-7324
+mail: nick@example.com
+gender: M
+title: EF 9 Advisor
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Noposition Ihave,ou=Staff Users,dc=example,dc=org
+cn: Noposition Ihave
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Noposition
+givenName: Ihave
+telephoneNumber: +444-44-4545
+gender: F
+countryOfCitizenship: CAN
+expirationDate: 20270811141512.226Z
+
+dn: cn=Preter Inter,ou=Staff Users,dc=example,dc=org
+cn: Preter Inter
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Preter
+givenName: Inter
+telephoneNumber: +444-44-4444
+mail: inter.preter@example.com
+gender: M
+title: LNG Advisor B
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Reinton Reina,ou=Staff Users,dc=example,dc=org
+cn: Reinton Reina
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Reinton
+givenName: Reina
+telephoneNumber: +23-23-11222
+mail: reina@example.com
+gender: F
+title: EF 2.2 Advisor C
+countryOfCitizenship: ITA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Reportgirl Ima,ou=Staff Users,dc=example,dc=org
+cn: Reportgirl Ima
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Reportgirl
+givenName: Ima
+telephoneNumber: +444-44-4545
+mail: ima.reportgirl@example.com
+gender: F
+countryOfCitizenship: MEX
+expirationDate: 20270811141512.226Z
+
+dn: cn=Reportguy Ima,ou=Staff Users,dc=example,dc=org
+cn: Reportguy Ima
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Reportguy
+givenName: Ima
+telephoneNumber: +444-44-4545
+mail: ima.reportguy@example.com
+gender: M
+countryOfCitizenship: FRA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Rivers Kevin,ou=Staff Users,dc=example,dc=org
+cn: Rivers Kevin
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Rivers
+givenName: Kevin
+telephoneNumber: +99-9999-9999
+mail: kevin+rivers@example.com
+gender: M
+title: EF 6 Approver
+countryOfCitizenship: ITA
+
+dn: cn=Rogers Ben,ou=Staff Users,dc=example,dc=org
+cn: Rogers Ben
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Rogers
+givenName: Ben
+telephoneNumber: +99-9999-9999
+mail: ben+rogers@example.com
+gender: M
+title: EF 6.1 Advisor
+countryOfCitizenship: ITA
+
+dn: cn=Rogwell Roger,ou=Staff Users,dc=example,dc=org
+cn: Rogwell Roger
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Rogwell
+givenName: Roger
+telephoneNumber: +1-412-7324
+mail: roger@example.com
+gender: M
+title: Chief of Police
+countryOfCitizenship: AFG
+
+dn: cn=Schrute Dwight,ou=Staff Users,dc=example,dc=org
+cn: Schrute Dwight
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Schrute
+givenName: Dwight
+telephoneNumber: +1-412-7324
+mail: dwight.schrute@example.com
+gender: M
+title: EF 5.1 Superuser Sales 2
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Scott Michael,ou=Staff Users,dc=example,dc=org
+cn: Scott Michael
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Scott
+givenName: Michael
+mail: michael.scott@example.com
+gender: M
+title: EF 5 Admin
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Solenoid Selena,ou=Staff Users,dc=example,dc=org
+cn: Solenoid Selena
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Solenoid
+givenName: Selena
+telephoneNumber: +1-111-1111
+mail: selena@example.com
+gender: F
+title: EF 1.2 Advisor
+countryOfCitizenship: USA
+expirationDate: 20270811141512.226Z
+
+dn: cn=Steveson Steve,ou=Staff Users,dc=example,dc=org
+cn: Steveson Steve
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Steveson
+givenName: Steve
+telephoneNumber: +011-232-12324
+mail: steve@example.com
+gender: M
+title: Cost Adder - MoD
+countryOfCitizenship: AFG
+
+dn: cn=Topferness Christopf,ou=Staff Users,dc=example,dc=org
+cn: Topferness Christopf
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: naturalPerson
+objectClass: customPerson
+sn: Topferness
+givenName: Christopf
+telephoneNumber: +1-422222222
+mail: christopf@example.com
+gender: M
+title: Planning Captain
+countryOfCitizenship: AFG
+
