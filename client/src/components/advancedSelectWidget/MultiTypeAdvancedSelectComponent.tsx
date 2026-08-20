@@ -129,11 +129,16 @@ const widgetPropsAuthorizationGroup = {
   addon: COMMUNITIES_ICON
 }
 
-const generateAttachmentFilters = (_, currentUser, mainObject) => {
+const generateAttachmentFilters = (
+  _,
+  currentUser,
+  mainObject,
+  options = {}
+) => {
   const filters = {}
-  if (mainObject?.uuid) {
+  if (mainObject?.uuid && !options.hideAttachedHereFilter) {
     filters.objectAttachments = {
-      label: "Attached here",
+      label: "Attached here",
       queryVars: {
         relatedObjectUuid: mainObject.uuid
       }
@@ -142,13 +147,13 @@ const generateAttachmentFilters = (_, currentUser, mainObject) => {
   return {
     ...filters,
     myAttachments: {
-      label: "My attachments",
+      label: "My attachments",
       queryVars: {
         authorUuid: currentUser?.uuid
       }
     },
     allAttachments: {
-      label: "All attachments"
+      label: "All attachments"
     }
   }
 }
@@ -232,9 +237,11 @@ interface MultiTypeAdvancedSelectComponentProps {
   entityTypes: string[]
   value?: any | any[]
   valueKey?: string
+  disabledValue?: any | any[]
   isMultiSelect: boolean
   filters?: any[]
   className?: string
+  hideAttachedHereFilter?: boolean
 }
 
 const MultiTypeAdvancedSelectComponent = ({
@@ -244,9 +251,11 @@ const MultiTypeAdvancedSelectComponent = ({
   entityTypes = COMMON_ENTITY_TYPES,
   value,
   valueKey,
+  disabledValue,
   isMultiSelect = false,
   filters = [],
-  className
+  className,
+  hideAttachedHereFilter
 }: MultiTypeAdvancedSelectComponentProps) => {
   const { currentUser } = useContext(AppContext)
   const mainObject = useContext(AttachmentContext)
@@ -276,7 +285,9 @@ const MultiTypeAdvancedSelectComponent = ({
   const filterElement = filters?.find(f => f?.[entityType])?.[entityType] ?? {}
   const filterDefs =
     typeof advancedSelectProps.filterDefs === "function"
-      ? advancedSelectProps.filterDefs(filterElement, currentUser, mainObject)
+      ? advancedSelectProps.filterDefs(filterElement, currentUser, mainObject, {
+          hideAttachedHereFilter
+        })
       : { ...advancedSelectProps.filterDefs, ...filterElement }
 
   return (
@@ -314,6 +325,7 @@ const MultiTypeAdvancedSelectComponent = ({
         placeholder={searchPlaceholder}
         value={value}
         valueKey={valueKey}
+        disabledValue={disabledValue}
         showEmbedded
         keepSearchText
         overlayColumns={advancedSelectProps.overlayColumns}
