@@ -30,6 +30,17 @@ spring:
           keycloak:
             issuer-uri: http://${ANET_KEYCLOAK_SERVER:localhost}:${ANET_KEYCLOAK_PORT:9080}/realms/${ANET_KEYCLOAK_REALM:ANET}
 
+  ldap:
+    urls: ${ANET_LDAP_URLS}
+    base: ${ANET_LDAP_BASE}
+    username: ${ANET_LDAP_USERNAME}
+    password: ${ANET_LDAP_PASSWORD}
+    properties:
+      com.sun.jndi.ldap.connect.timeout: 5000
+      com.sun.jndi.ldap.read.timeout: 5000
+    template:
+      ignore-partial-result-exception: true
+
 anet:
   # Flag to tell the server to redirect all HTTP traffic to HTTPS
   redirect-to-https: false
