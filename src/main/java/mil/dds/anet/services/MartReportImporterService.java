@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.EmailAddress;
@@ -27,6 +28,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
@@ -44,6 +46,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.utils.ResourceUtils;
@@ -71,6 +74,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
   private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
+  private final AnetObjectEngine engine;
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
   private final TaskDao taskDao;
@@ -81,15 +85,19 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final AttachmentDao attachmentDao;
   private final EmailAddressDao emailAddressDao;
   private final CommentDao commentDao;
+  private final TenantDao tenantDao;
 
   private final int martNewPositionDaysInThePast;
   private final Map<String, Object> martImportCustomFields;
+  private final String martTenantName;
 
   @SuppressWarnings("unchecked")
-  public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
-      PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
-      LocationDao locationDao, MartImportedReportDao martImportedReportDao,
-      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao) {
+  public MartReportImporterService(AnetObjectEngine engine, AnetDictionary dict,
+      ReportDao reportDao, PersonDao personDao, PositionDao positionDao, TaskDao taskDao,
+      OrganizationDao organizationDao, LocationDao locationDao,
+      MartImportedReportDao martImportedReportDao, AttachmentDao attachmentDao,
+      EmailAddressDao emailAddressDao, CommentDao commentDao, TenantDao tenantDao) {
+    this.engine = engine;
     this.reportDao = reportDao;
     this.personDao = personDao;
     this.positionDao = positionDao;
@@ -100,11 +108,13 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
     this.commentDao = commentDao;
+    this.tenantDao = tenantDao;
 
     this.martNewPositionDaysInThePast =
         (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
     this.martImportCustomFields =
         (Map<String, Object>) dict.getDictionaryEntry("martReportImport.customFields");
+    this.martTenantName = (String) dict.getDictionaryEntry("martTenantName");
   }
 
   @Override
@@ -440,6 +450,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     anetReport.setReportPeople(List.of(createReportPerson(personForReport)));
     // Set advisor organization
     anetReport.setAdvisorOrg(organizationForReport);
+    // Assign tenants
+    final List<Tenant> tenants = tenantDao.getByName(martTenantName);
+    anetReport.setTenants(tenants);
   }
 
   private Person createNewPerson(ReportDto martReport, List<String> errors) {
@@ -451,10 +464,16 @@ public class MartReportImporterService implements IMartReportImporterService {
     getPersonCountry(person, martReport, errors);
 
     person = personDao.insert(person);
+
     // Update email address
     final EmailAddress emailAddress = new EmailAddress("Internet", martReport.getEmail());
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
         List.of(emailAddress));
+
+    // Update tenants
+    final List<Tenant> tenants = tenantDao.getByName(martTenantName);
+    personDao.insertPersonTenants(person.getUuid(), tenants);
+
     return person;
   }
 

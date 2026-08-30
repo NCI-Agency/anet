@@ -643,6 +643,50 @@
         </#if>
       </#if>
 
+      <#if report.allTenants>
+        <div class="row" style="margin-bottom: 1rem;">
+          <label for="allTenants" class="col-sm-3 form-label">${fields.report.allTenants.label!}</label>
+          <div class="col-sm-9">
+            <div id="allTenants" class="form-control-plaintext">
+              ${(report.allTenants)!?string("Yes", "No")}
+            </div>
+          </div>
+        </div>
+      <#else>
+        <#assign tenants = (report.loadTenants(context).get())!>
+        <div class="row" style="margin-bottom: 1rem;">
+          <label for="tenants" class="col-sm-3 form-label">${fields.report.tenants.label!}</label>
+          <div class="col-sm-9">
+            <div id="tenants" class="form-control-plaintext">
+              <table class="borderless table">
+                <thead>
+                <tr>
+                  <th>
+                    ${fields.tenant.name.label!}
+                  </th>
+                  <th>
+                    ${fields.tenant.status.label!}
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                <#list tenants as tenant>
+                  <tr>
+                    <td>
+                      ${(tenant.name)!}
+                    </td>
+                    <td>
+                      ${(tenant.status)!?lower_case?cap_first}
+                    </td>
+                  </tr>
+                </#list>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </#if>
+
       <#macro renderAttachment attachment>
         <#assign confidentialityLabel = Utils.getAttachmentConfidentialityLabel(dict, attachment)>
         <div class="attachment-card">

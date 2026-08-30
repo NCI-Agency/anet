@@ -4,10 +4,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.database.mappers.AccessTokenMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +129,51 @@ public class AccessTokenDao extends AbstractDao {
       return handle
           .createQuery("/* getAccessTokens */ SELECT * FROM \"" + TABLE_NAME + "\" ORDER BY name")
           .map(new AccessTokenMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public interface AccessTokenBatch {
+    @SqlBatch("INSERT INTO \"accessTokenTenants\" (\"accessTokenUuid\", \"tenantUuid\") VALUES (:accessTokenUuid, :uuid)")
+    void insertAccessTokenTenants(@Bind("accessTokenUuid") String accessTokenUuid,
+        @BindBean List<Tenant> tenants);
+  }
+
+  @Transactional
+  public void insertAccessTokenTenants(String uuid, List<Tenant> accessTokenTenants) {
+    final Handle handle = getDbHandle();
+    try {
+      if (!Utils.isEmptyOrNull(accessTokenTenants)) {
+        final AccessTokenDao.AccessTokenBatch atb = handle.attach(AccessTokenBatch.class);
+        atb.insertAccessTokenTenants(uuid, accessTokenTenants);
+      }
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int addTenantToAccessToken(Tenant t, AccessToken at) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* addTenantToAccessToken */ INSERT INTO \"accessTokenTenants\" (\"tenantUuid\", \"accessTokenUuid\") "
+              + "VALUES (:tenantUuid, :accessTokenUuid)")
+          .bind("accessTokenUuid", at.getUuid()).bind("tenantUuid", t.getUuid()).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int removeTenantFromAccessToken(String tenantUuid, AccessToken at) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* removeTenantFromAccessToken */ DELETE FROM \"accessTokenTenants\" "
+              + "WHERE \"accessTokenUuid\" = :accessTokenUuid AND \"tenantUuid\" = :tenantUuid")
+          .bind("accessTokenUuid", at.getUuid()).bind("tenantUuid", tenantUuid).execute();
     } finally {
       closeDbHandle(handle);
     }
