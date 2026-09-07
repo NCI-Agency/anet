@@ -19,6 +19,7 @@ const EXAMPLE_LOCATIONS = {
     type: "Point location",
     fullName: "Merge Location Winner",
     latLon: "38.58809, -28.71611",
+    geoJson: "No shape defined",
     status: "ACTIVE",
     parentLocations: "Name Type\nPortugal\nCountry",
     planningApprovalSteps:
@@ -32,6 +33,7 @@ const EXAMPLE_LOCATIONS = {
     type: "Country",
     fullName: "Andorra",
     latLon: "",
+    geoJson: "No shape defined",
     status: "ACTIVE",
     parentLocations: "No locations found",
     digram: "AN",
@@ -46,6 +48,7 @@ const EXAMPLE_LOCATIONS = {
     type: "Point location",
     fullName: "Merge Location Loser",
     latLon: "-46.4035948, 51.69093",
+    geoJson: "No shape defined",
     status: "ACTIVE",
     parentLocations: "Name Type\nFrench Southern Territories\nCountry",
     planningApprovalSteps:
@@ -234,6 +237,17 @@ describe("Merge locations page", () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.right.status)
+
+    expect(
+      await (
+        await MergeLocations.getColumnContent("mid", "Shape (GeoJSON)")
+      ).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.leftCountry.geoJson)
+    expect(
+      await (
+        await MergeLocations.getColumnContent("mid", "Shape (GeoJSON)")
+      ).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.geoJson)
   })
 
   it("Should be able to select all fields from left location", async () => {

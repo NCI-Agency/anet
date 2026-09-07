@@ -651,11 +651,9 @@ const LocationColumn = ({
             }
             align={align}
             action={() => {
-              if (location.geoJson) {
-                dispatchMergeActions(
-                  setAMergedField("geoJson", location.geoJson, align)
-                )
-              }
+              dispatchMergeActions(
+                setAMergedField("geoJson", location.geoJson, align)
+              )
             }}
             mergeState={mergeState}
             autoMerge
