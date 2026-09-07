@@ -227,6 +227,12 @@ public class TestData {
     return reportDto;
   }
 
+  public static ReportDto createReportForAutomaticSubmitFlagCheck(long sequence, String uuid) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setUuid(uuid);
+    return reportDto;
+  }
+
   public static List<LogDto> createTransmissionLog(long maxSequence, String missingReportUuid1,
       String missingReportUuid2) {
     final List<LogDto> transmissionLog = new ArrayList<>();

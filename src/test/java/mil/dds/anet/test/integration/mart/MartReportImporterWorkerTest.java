@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -80,6 +82,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
   private final String missingReportUuid1 = "missingReportUuid1";
   private final String missingReportUuid2 = "missingReportUuid2";
+  private final String reportForAutomaticSubmitCheckUuid = "reportForAutomaticSubmitCheckUuid";
 
   @BeforeAll
   void setUp() throws Exception {
@@ -123,6 +126,11 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     final EmailMessage reportMessage10 = createReportMockEmail(
         TestData.createRetryOfMissingReport(sequence + 2, missingReportUuid2), true);
 
+    // Another good report to test automatically submit flag
+    final EmailMessage reportMessage11 =
+        createReportMockEmail(TestData.createReportForAutomaticSubmitFlagCheck(++sequence,
+            reportForAutomaticSubmitCheckUuid), true);
+
     // Mock the mail exchange server
     final IMailReceiver mailReceiverMock = Mockito.mock();
     when(mailReceiverMock.downloadEmails()).thenReturn(
@@ -131,7 +139,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
             reportMessage5, reportMessage6, reportMessage7, reportMessage8, reportMessage9,
             transmissionLogMessage),
         // 10th report
-        List.of(reportMessage10));
+        List.of(reportMessage10), List.of(reportMessage11));
 
     martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
@@ -149,6 +157,25 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
   private Long getMaxExistingSequence() {
     return existingSequences.stream().max(Long::compareTo).orElse(0L);
+  }
+
+  /**
+   * Test the worker
+   *
+   */
+  @Test
+  void testWorkerNoAutomaticSubmission() {
+    final Map<String, Object> newDict = new HashMap<>(dict.getDictionary());
+    final Map<String, Object> reportWorkflowSettings =
+        (Map<String, Object>) newDict.get("martReportImport");
+    // Make sure publication is immediate
+    reportWorkflowSettings.put("automaticallySubmit", false);
+    dict.setDictionary(newDict);
+    martReportImporterWorker.run();
+    AnetBeanList<MartImportedReport> martImportedReportsList =
+        martImportedReportDao.search(new MartImportedReportSearchQuery());
+    assertThat(martImportedReportsList.getTotalCount()).isEqualTo(12);
+
   }
 
   /**
@@ -334,6 +361,19 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     martImportedReportSearchQuery = new MartImportedReportSearchQuery();
     martImportedReportSearchQuery.setReportUuid(missingReportUuid1);
     martImportedReportSearchQuery.setState(MartImportedReport.State.NOT_RECEIVED);
+    martImportedReportsList = martImportedReportDao.search(martImportedReportSearchQuery);
+    assertThat(martImportedReportsList.getTotalCount()).isEqualTo(1);
+
+    // Change automaticallySubmit flag in dictionary
+    final Map<String, Object> newDict = new HashMap<>(dict.getDictionary());
+    final Map<String, Object> reportWorkflowSettings =
+        (Map<String, Object>) newDict.get("martReportImport");
+    reportWorkflowSettings.put("automaticallySubmit", false);
+    dict.setDictionary(newDict);
+    martReportImporterWorker.run();
+    martImportedReportSearchQuery = new MartImportedReportSearchQuery();
+    martImportedReportSearchQuery.setReportUuid(reportForAutomaticSubmitCheckUuid);
+    martImportedReportSearchQuery.setState(MartImportedReport.State.NOT_SUBMITTED);
     martImportedReportsList = martImportedReportDao.search(martImportedReportSearchQuery);
     assertThat(martImportedReportsList.getTotalCount()).isEqualTo(1);
   }

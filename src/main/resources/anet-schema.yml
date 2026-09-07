@@ -1531,15 +1531,19 @@ properties:
                      when not specified, it will use the checkIntervalInSecs setting.
 
   martReportImport:
-    title: Definition of extra fields to be added when importing MART reports
+    title: Definition of extra fields to be added when importing MART reports and properties to set the flow
     type: object
     additionalProperties: false
     required:
       - customFields
+      - automaticallySubmit
     properties:
       customFields:
         title: Custom fields to be added when importing MART reports
         type: object
+      automaticallySubmit:
+        title: Whether or not the MART report gets automatically submitted.
+        type: boolean
 
   martDictionaryExport:
     title: Configuration of MART ANET dictionary export
