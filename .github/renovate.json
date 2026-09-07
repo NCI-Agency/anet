@@ -78,7 +78,7 @@
       ],
       "groupName": "most non-major Gradle dependencies",
       "groupSlug": "most-minor-gradle-patch",
-      "branchName" : "renovate/most-minor-gradle-patch"
+      "branchTopic" : "most-minor-gradle-patch"
     },
     {
       "labels": [
@@ -117,7 +117,7 @@
       ],
       "groupName": "most non-major Gradle devDependencies",
       "groupSlug": "most-minor-gradle-dev-patch",
-      "branchName" : "renovate/most-minor-gradle-dev-patch"
+      "branchTopic" : "most-minor-gradle-dev-patch"
     },
     {
       "matchPackageNames": [
