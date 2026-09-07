@@ -282,6 +282,7 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 value={mergedOrganization.shortName}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="shortName"
+                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -623,7 +624,10 @@ const OrganizationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.shortName}
             fieldName="shortName"
-            fieldSetsUuid
+            fieldSetsUuid={
+              !mergeState?.merged?.uuid ||
+              mergeState?.merged?.uuid === organization.uuid
+            }
             value={organization.shortName}
             align={align}
             action={() => {

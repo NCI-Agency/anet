@@ -246,6 +246,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 value={mergedPerson.familyName}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="familyName"
+                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -642,7 +643,10 @@ const PersonColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.familyName}
             fieldName="familyName"
-            fieldSetsUuid
+            fieldSetsUuid={
+              !mergeState?.merged?.uuid ||
+              mergeState?.merged?.uuid === person.uuid
+            }
             value={person.familyName}
             align={align}
             action={() => {

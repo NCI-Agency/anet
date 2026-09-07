@@ -316,6 +316,7 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="person"
+                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -706,7 +707,10 @@ const PositionColumn = ({
           <MergeField
             label="Person"
             fieldName="person"
-            fieldSetsUuid
+            fieldSetsUuid={
+              !mergeState?.merged?.uuid ||
+              mergeState?.merged?.uuid === position.uuid
+            }
             value={<LinkTo modelType="Person" model={position.person} />}
             align={align}
             action={() => {

@@ -209,6 +209,7 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
                 value={mergedEventSeries.name}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="name"
+                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -437,7 +438,10 @@ const EventSeriesColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.eventSeries.name}
             fieldName="name"
-            fieldSetsUuid
+            fieldSetsUuid={
+              !mergeState?.merged?.uuid ||
+              mergeState?.merged?.uuid === eventSeries.uuid
+            }
             value={eventSeries.name}
             align={align}
             action={() => {

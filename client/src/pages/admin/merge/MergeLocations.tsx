@@ -213,6 +213,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
                 value={mergedLocation.name}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="name"
+                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -537,7 +538,10 @@ const LocationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.name}
             fieldName="name"
-            fieldSetsUuid
+            fieldSetsUuid={
+              !mergeState?.merged?.uuid ||
+              mergeState?.merged?.uuid === location.uuid
+            }
             value={location.name}
             align={align}
             action={() => {

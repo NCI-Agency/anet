@@ -225,6 +225,7 @@ const MergeTasks = ({ pageDispatchers }: MergeTasksProps) => {
                 value={mergedTask.shortName}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="shortName"
+                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -468,7 +469,10 @@ const TaskColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.task.shortName}
             fieldName="shortName"
-            fieldSetsUuid
+            fieldSetsUuid={
+              !mergeState?.merged?.uuid ||
+              mergeState?.merged?.uuid === task.uuid
+            }
             value={task.shortName}
             align={align}
             action={() => {
