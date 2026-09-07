@@ -84,6 +84,7 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private final int martNewPositionDaysInThePast;
   private final Map<String, Object> martImportCustomFields;
+  private final boolean automaticallySubmit;
 
   @SuppressWarnings("unchecked")
   public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
@@ -105,6 +106,7 @@ public class MartReportImporterService implements IMartReportImporterService {
         (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
     this.martImportCustomFields =
         (Map<String, Object>) dict.getDictionaryEntry("martReportImport.customFields");
+    this.automaticallySubmit = (boolean) dict.getDictionaryEntry("automaticallySubmit");
   }
 
   @Override
@@ -336,7 +338,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     martImportedReport.setPerson(reportPerson);
 
     // Check errors to determine whether to submit or not and marImportedReport state
-    if (errors.isEmpty()) {
+    if (errors.isEmpty() && automaticallySubmit) {
       // All good, submit without warnings
       reportDao.submit(anetReport, reportPerson);
       martImportedReport.setState(MartImportedReport.State.SUBMITTED_OK);
@@ -351,7 +353,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       comment.setReportUuid(anetReport.getUuid());
       commentDao.insert(comment);
       // Submit the report only if the submitter organization is there
-      if (anetReport.getAdvisorOrg() != null) {
+      if (anetReport.getAdvisorOrg() != null && automaticallySubmit) {
         reportDao.submit(anetReport, reportPerson);
         martImportedReport.setState(MartImportedReport.State.SUBMITTED_WARNINGS);
       } else {

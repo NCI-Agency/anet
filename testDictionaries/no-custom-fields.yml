@@ -1620,6 +1620,7 @@ dashboards:
     type: decisives
 
 martReportImport:
+  automaticallySubmit: true
   customFields:
     reportType: lmt
 
