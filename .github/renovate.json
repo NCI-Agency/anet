@@ -61,27 +61,6 @@
     },
     {
       "labels": [
-        "dependencies"
-      ],
-      "matchManagers": [
-        "gradle"
-      ],
-      "matchDepTypes": [
-        "plugin"
-      ],
-      "matchDepNames": [
-        "org.springframework.boot", "io.mateo.cxf-codegen"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "most non-major Gradle dependencies",
-      "groupSlug": "most-minor-gradle-patch",
-      "branchTopic" : "most-minor-gradle-patch"
-    },
-    {
-      "labels": [
         "devDependencies"
       ],
       "matchManagers": [
@@ -97,6 +76,28 @@
       ],
       "groupName": "most non-major Gradle devDependencies",
       "groupSlug": "most-minor-gradle-dev-patch"
+    },
+    {
+      "labels": [
+        "dependencies"
+      ],
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchDepTypes": [
+        "plugin"
+      ],
+      "matchDepNames": [
+        "org.springframework.boot",
+        "io.mateo.cxf-codegen"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "most non-major Gradle dependencies",
+      "groupSlug": "most-minor-gradle-patch",
+      "branchTopic" : "most-minor-gradle-patch"
     },
     {
       "labels": [
