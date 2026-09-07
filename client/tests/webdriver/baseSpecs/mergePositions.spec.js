@@ -5,6 +5,7 @@ import MergePositions from "../pages/mergePositions.page"
 const EXAMPLE_POSITIONS = {
   validLeft: {
     search: "merge one",
+    uuid: "25fe500c-3503-4ba8-a9a4-09b29b50c1f1",
     name: "Merge One",
     fullName: "Merge One, MOD-M1-HQ-00001",
     organization: "MoD | Ministry of Defense",
@@ -28,6 +29,7 @@ const EXAMPLE_POSITIONS = {
   },
   validRight: {
     search: "merge two",
+    uuid: "e87f0f60-ad13-4c1c-96f7-672c595b81c7",
     name: "Merge Two",
     fullName: "Merge Two, MOD-M2-HQ-00001",
     organization: "MoD | Ministry of Defense",
@@ -110,10 +112,14 @@ describe("Merge positions page", () => {
     await browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.name,
+      EXAMPLE_POSITIONS.validLeft.uuid,
       "left",
-      "Position Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergePositions.getColumnContent("left", "UUID")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.uuid)
     expect(
       await (
         await MergePositions.getColumnContent("left", "Position Name")
@@ -190,10 +196,14 @@ describe("Merge positions page", () => {
     await browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validRight.name,
+      EXAMPLE_POSITIONS.validRight.uuid,
       "right",
-      "Position Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergePositions.getColumnContent("right", "UUID")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validRight.uuid)
     expect(
       await (
         await MergePositions.getColumnContent("right", "Position Name")
@@ -250,12 +260,16 @@ describe("Merge positions page", () => {
   it("Should be able to select all fields from left position", async () => {
     await (await MergePositions.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
-
+    // Check if the fields displayed properly after selecting a position from left side.
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.name,
+      EXAMPLE_POSITIONS.validLeft.uuid,
       "mid",
-      "Position Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergePositions.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.uuid)
     expect(
       await (
         await MergePositions.getColumnContent("mid", "Position Name")
@@ -299,12 +313,16 @@ describe("Merge positions page", () => {
   it("Should be able to select all fields from right position", async () => {
     await (await MergePositions.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
-
+    // Check if the fields displayed properly after selecting a position from left side.
     await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validRight.name,
+      EXAMPLE_POSITIONS.validRight.uuid,
       "mid",
-      "Position Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergePositions.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validRight.uuid)
     expect(
       await (
         await MergePositions.getColumnContent("mid", "Position Name")
@@ -346,6 +364,16 @@ describe("Merge positions page", () => {
   })
 
   it("Should be able to select from both left and right side", async () => {
+    await (await MergePositions.getSelectButton("left", "UUID")).click()
+    await MergePositions.waitForColumnToChange(
+      EXAMPLE_POSITIONS.validLeft.uuid,
+      "mid",
+      "UUID"
+    )
+    expect(
+      await (await MergePositions.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.uuid)
+
     await (
       await MergePositions.getSelectButton("left", "Position Name")
     ).click()
