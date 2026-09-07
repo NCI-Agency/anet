@@ -35,6 +35,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   LeafletMap,
   LeafletMode,
   MERGE_SIDES,
@@ -188,6 +190,15 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
           {areAllSet(location1, location2, mergedLocation) && (
             <fieldset>
               <MergeField
+                label="UUID"
+                value={mergedLocation.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
                 label="Avatar"
                 value={
                   <EntityAvatarDisplay
@@ -213,7 +224,6 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
                 value={mergedLocation.name}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="name"
-                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -509,6 +519,24 @@ const LocationColumn = ({
       {areAllSet(location) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={location.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", location.uuid, align)
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -538,18 +566,11 @@ const LocationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.name}
             fieldName="name"
-            fieldSetsUuid={
-              !mergeState?.merged?.uuid ||
-              mergeState?.merged?.uuid === location.uuid
-            }
             value={location.name}
             align={align}
             action={() => {
               dispatchMergeActions(
                 setAMergedField("name", location.name, align)
-              )
-              dispatchMergeActions(
-                setAMergedField("uuid", location.uuid, align)
               )
             }}
             mergeState={mergeState}

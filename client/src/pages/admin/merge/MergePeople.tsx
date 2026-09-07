@@ -37,6 +37,9 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelected,
+  isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   mergedPersonIsValid,
   selectAllFields,
@@ -221,6 +224,15 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
           {areAllSet(person1, person2, mergedPerson) && (
             <fieldset>
               <MergeField
+                label="UUID"
+                value={mergedPerson.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
                 label="Avatar"
                 value={
                   <EntityAvatarDisplay
@@ -246,7 +258,6 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 value={mergedPerson.familyName}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="familyName"
-                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -614,6 +625,22 @@ const PersonColumn = ({
       {areAllSet(person) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={person.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -643,17 +670,12 @@ const PersonColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.familyName}
             fieldName="familyName"
-            fieldSetsUuid={
-              !mergeState?.merged?.uuid ||
-              mergeState?.merged?.uuid === person.uuid
-            }
             value={person.familyName}
             align={align}
             action={() => {
               dispatchMergeActions(
                 setAMergedField("familyName", person.familyName, align)
               )
-              dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
             }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

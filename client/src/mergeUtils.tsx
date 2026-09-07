@@ -325,27 +325,56 @@ export function areAllSet(...args) {
   })
 }
 
+export function isMergeFieldSelected(
+  mergeState: any,
+  fieldName: string,
+  mergeSide?: (typeof MERGE_SIDES)[keyof typeof MERGE_SIDES]
+) {
+  return mergeState?.selectedMap?.[fieldName] === mergeSide
+}
+
+export function isMergeFieldEmpty(mergeState: any, fieldName: string) {
+  return !mergeState?.selectedMap?.[fieldName]
+}
+
+export function isMergeFieldSelectedOrEmpty(
+  mergeState: any,
+  fieldName: string,
+  mergeSide?: (typeof MERGE_SIDES)[keyof typeof MERGE_SIDES]
+) {
+  return (
+    isMergeFieldSelected(mergeState, fieldName, mergeSide) ||
+    isMergeFieldEmpty(mergeState, fieldName)
+  )
+}
+
 export function getActionButton(
-  onClickAction,
-  align,
-  mergeState,
-  fieldName,
-  disabled = false,
-  text = ""
+  onClickAction: () => void,
+  mergeSide: (typeof MERGE_SIDES)[keyof typeof MERGE_SIDES],
+  mergeState: any,
+  fieldName: string,
+  disabled: boolean = false,
+  text: string = ""
 ) {
   return (
     <small>
       <Button
         variant={
-          mergeState?.selectedMap?.[fieldName] === align ? "success" : "primary"
+          isMergeFieldSelected(mergeState, fieldName, mergeSide)
+            ? "success"
+            : "primary"
         }
         onClick={onClickAction}
         disabled={disabled}
         style={{ textAlign: "center" }}
       >
-        {align === "right" && <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />}
+        {mergeSide === MERGE_SIDES.RIGHT && (
+          <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
+        )}
         {text}
-        {align !== "right" && <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />}
+        {mergeSide !== MERGE_SIDES.RIGHT && (
+          <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
+        )}
       </Button>
     </small>
   )

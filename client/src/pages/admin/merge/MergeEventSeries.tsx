@@ -34,6 +34,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -175,6 +177,15 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
           {areAllSet(eventSeries1, eventSeries2, mergedEventSeries) && (
             <fieldset>
               <MergeField
+                label="UUID"
+                value={mergedEventSeries.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
                 label="Avatar"
                 value={
                   <EntityAvatarDisplay
@@ -209,7 +220,6 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
                 value={mergedEventSeries.name}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="name"
-                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -394,6 +404,24 @@ const EventSeriesColumn = ({
       {areAllSet(eventSeries) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={eventSeries.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", eventSeries.uuid, align)
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -438,18 +466,11 @@ const EventSeriesColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.eventSeries.name}
             fieldName="name"
-            fieldSetsUuid={
-              !mergeState?.merged?.uuid ||
-              mergeState?.merged?.uuid === eventSeries.uuid
-            }
             value={eventSeries.name}
             align={align}
             action={() => {
               dispatchMergeActions(
                 setAMergedField("name", eventSeries.name, align)
-              )
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
               )
             }}
             autoMerge

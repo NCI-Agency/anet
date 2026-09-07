@@ -40,6 +40,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -219,13 +221,21 @@ const MergeTasks = ({ pageDispatchers }: MergeTasksProps) => {
           )}
           {areAllSet(task1, task2, mergedTask) && (
             <fieldset>
+              <MergeField
+                label="UUID"
+                value={mergedTask.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.task.shortName}
                 value={mergedTask.shortName}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="shortName"
-                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -465,18 +475,29 @@ const TaskColumn = ({
       </ColTitle>
       {areAllSet(task) && (
         <fieldset>
+          <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={task.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(setAMergedField("uuid", task.uuid, align))
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.task.shortName}
             fieldName="shortName"
-            fieldSetsUuid={
-              !mergeState?.merged?.uuid ||
-              mergeState?.merged?.uuid === task.uuid
-            }
             value={task.shortName}
             align={align}
             action={() => {
-              dispatchMergeActions(setAMergedField("uuid", task.uuid, align))
               dispatchMergeActions(
                 setAMergedField("shortName", task.shortName, align)
               )

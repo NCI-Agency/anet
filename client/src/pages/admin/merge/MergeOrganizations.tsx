@@ -45,6 +45,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   LeafletMap,
   MERGE_SIDES,
   mergedOrganizationIsValid,
@@ -257,6 +259,15 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
           {areAllSet(organization1, organization2, mergedOrganization) && (
             <fieldset>
               <MergeField
+                label="UUID"
+                value={mergedOrganization.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
                 label="Avatar"
                 value={
                   <EntityAvatarDisplay
@@ -282,7 +293,6 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 value={mergedOrganization.shortName}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="shortName"
-                fieldSetsUuid={!!mergeState?.merged?.uuid}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -591,6 +601,24 @@ const OrganizationColumn = ({
       {areAllSet(organization) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={organization.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", organization.uuid, align)
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -624,16 +652,9 @@ const OrganizationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.shortName}
             fieldName="shortName"
-            fieldSetsUuid={
-              !mergeState?.merged?.uuid ||
-              mergeState?.merged?.uuid === organization.uuid
-            }
             value={organization.shortName}
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", organization.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("shortName", organization.shortName, align)
               )
