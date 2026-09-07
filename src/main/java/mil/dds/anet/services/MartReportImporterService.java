@@ -338,7 +338,6 @@ public class MartReportImporterService implements IMartReportImporterService {
     // Check errors to determine whether to submit or not and marImportedReport state
     if (errors.isEmpty()) {
       // All good, submit without warnings
-      reportDao.submit(anetReport, reportPerson);
       martImportedReport.setState(MartImportedReport.State.SUBMITTED_OK);
     } else {
       final String errorMsg = String.format("While importing report %s:<ul><li>%s</li></ul>",
@@ -352,12 +351,17 @@ public class MartReportImporterService implements IMartReportImporterService {
       commentDao.insert(comment);
       // Submit the report only if the submitter organization is there
       if (anetReport.getAdvisorOrg() != null) {
-        reportDao.submit(anetReport, reportPerson);
         martImportedReport.setState(MartImportedReport.State.SUBMITTED_WARNINGS);
       } else {
         martImportedReport.setState(MartImportedReport.State.NOT_SUBMITTED);
       }
     }
+
+    // Submit only when explicitly requested and the submitter organization exists
+    if (martReport.isSubmitReport() && anetReport.getAdvisorOrg() != null) {
+      reportDao.submit(anetReport, reportPerson);
+    }
+
   }
 
   public static void addDictionaryCustomFields(Report anetReport,

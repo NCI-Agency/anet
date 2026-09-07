@@ -36,6 +36,8 @@ public class ReportDto {
   private String customFields;
   private Map<String, String> tasks = new HashMap<>();
 
+  private boolean submitReport = true;
+
   public ReportDto() {}
 
   public Long getSequence() {
@@ -212,5 +214,13 @@ public class ReportDto {
 
   public void setSecurityMarking(String securityMarking) {
     this.securityMarking = securityMarking;
+  }
+
+  public boolean isSubmitReport() {
+    return submitReport;
+  }
+
+  public void setSubmitReport(boolean submitReport) {
+    this.submitReport = submitReport;
   }
 }
