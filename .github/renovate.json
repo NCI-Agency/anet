@@ -76,6 +76,8 @@
         "minor",
         "patch"
       ],
+      "groupName": "most non-major Gradle dependencies",
+      "groupSlug": "most-minor-gradle-patch",
       "branchName" : "renovate/most-minor-gradle-patch"
     },
     {
@@ -113,6 +115,8 @@
         "minor",
         "patch"
       ],
+      "groupName": "most non-major Gradle devDependencies",
+      "groupSlug": "most-minor-gradle-dev-patch",
       "branchName" : "renovate/most-minor-gradle-dev-patch"
     },
     {
