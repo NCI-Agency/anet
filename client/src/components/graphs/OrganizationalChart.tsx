@@ -14,8 +14,7 @@ import {
 } from "components/Page"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import { toPng } from "html-to-image"
-import { Organization } from "models"
-import { PositionRole } from "models/Position"
+import { Organization, PositionRole } from "models"
 import React, {
   useCallback,
   useContext,
