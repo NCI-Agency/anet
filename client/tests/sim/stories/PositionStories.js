@@ -1,8 +1,7 @@
 import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Location, Person, Position } from "models"
-import { PositionRole } from "models/Position"
+import { Location, Person, Position, PositionRole } from "models"
 import moment from "moment"
 import {
   createEmailAddresses,

@@ -39,8 +39,7 @@ import useMergeObjects, {
   setAMergedField,
   setMergeable
 } from "mergeUtils"
-import { Position } from "models"
-import EventSeries from "models/EventSeries"
+import { EventSeries, Position } from "models"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
