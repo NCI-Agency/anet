@@ -8032,7 +8032,6 @@ __metadata:
     jest: "npm:30.5.1"
     jest-environment-jsdom: "npm:30.5.1"
     jest-junit: "npm:17.0.0"
-    js-yaml: "npm:5.4.1"
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.4.0"
     keycloak-connect: "npm:26.1.1"
@@ -14736,17 +14735,6 @@ __metadata:
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
   checksum: 10c0/e248708d377aa058eacf2037b07ded847790e6de892bbad3dac0abba2e759cb9f121b00099a65195616badcb6eca8d14d975cb3e89eb1cfda644756402c8aeed
-  languageName: node
-  linkType: hard
-
-"js-yaml@npm:5.4.1":
-  version: 5.4.1
-  resolution: "js-yaml@npm:5.4.1"
-  dependencies:
-    argparse: "npm:^2.0.1"
-  bin:
-    js-yaml: bin/js-yaml.mjs
-  checksum: 10c0/efe9dfaf222809694d375ad5ecca825561d2432eb55bc0f628911c0dfa4dbce98a71dcbc3252f630208bbdf5f4e9ac363847e4a7f49845b577ae2548b8fcf147
   languageName: node
   linkType: hard
 
