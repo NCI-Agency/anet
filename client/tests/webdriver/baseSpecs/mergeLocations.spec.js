@@ -14,10 +14,12 @@ const EXAMPLE_LOCATIONS = {
   },
   left: {
     search: "Location Winner",
+    uuid: "64795e03-ba83-4bc3-b647-d37fcb1c0694",
     name: "Merge Location Winner",
     type: "Point location",
     fullName: "Merge Location Winner",
     latLon: "38.58809, -28.71611",
+    geoJson: "No shape defined",
     status: "ACTIVE",
     parentLocations: "Name Type\nPortugal\nCountry",
     planningApprovalSteps:
@@ -31,6 +33,7 @@ const EXAMPLE_LOCATIONS = {
     type: "Country",
     fullName: "Andorra",
     latLon: "",
+    geoJson: "No shape defined",
     status: "ACTIVE",
     parentLocations: "No locations found",
     digram: "AN",
@@ -40,10 +43,12 @@ const EXAMPLE_LOCATIONS = {
   },
   right: {
     search: "Location Loser",
-    type: "Point location",
+    uuid: "4694bb3c-275a-4e74-9197-033e8e9c53ed",
     name: "Merge Location Loser",
+    type: "Point location",
     fullName: "Merge Location Loser",
     latLon: "-46.4035948, 51.69093",
+    geoJson: "No shape defined",
     status: "ACTIVE",
     parentLocations: "Name Type\nFrench Southern Territories\nCountry",
     planningApprovalSteps:
@@ -162,6 +167,7 @@ describe("Merge locations page", () => {
     )
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.leftCountry.name,
       "left",
@@ -200,12 +206,16 @@ describe("Merge locations page", () => {
     )
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeLocations.waitForColumnToChange(
-      EXAMPLE_LOCATIONS.right.name,
+      EXAMPLE_LOCATIONS.right.uuid,
       "right",
-      "Name"
+      "UUID"
     )
 
+    expect(
+      await (await MergeLocations.getColumnContent("right", "UUID")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.uuid)
     expect(
       await (await MergeLocations.getColumnContent("right", "Name")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.right.name)
@@ -223,17 +233,27 @@ describe("Merge locations page", () => {
   it("Should autoMerge some identical fields from both locations", async () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Status")).getText()
-    ).to.eq(EXAMPLE_LOCATIONS.left.status)
+    ).to.eq(EXAMPLE_LOCATIONS.leftCountry.status)
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.status)
+
     expect(
       await (
-        await MergeLocations.getColumnContent("mid", "Status")
-      ).getText(MergeLocations)
-    ).to.eq(EXAMPLE_LOCATIONS.right.status)
+        await MergeLocations.getColumnContent("mid", "Shape (GeoJSON)")
+      ).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.leftCountry.geoJson)
+    expect(
+      await (
+        await MergeLocations.getColumnContent("mid", "Shape (GeoJSON)")
+      ).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.geoJson)
   })
 
   it("Should be able to select all fields from left location", async () => {
     await (await MergeLocations.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.leftCountry.name,
       "mid",
@@ -300,12 +320,16 @@ describe("Merge locations page", () => {
   it("Should be able to select all fields from right location", async () => {
     await (await MergeLocations.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeLocations.waitForColumnToChange(
-      EXAMPLE_LOCATIONS.right.name,
+      EXAMPLE_LOCATIONS.right.uuid,
       "mid",
-      "Name"
+      "UUID"
     )
 
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.uuid)
     expect(
       await (await MergeLocations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.right.name)
@@ -356,12 +380,16 @@ describe("Merge locations page", () => {
     )
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeLocations.waitForColumnToChange(
-      EXAMPLE_LOCATIONS.left.name,
+      EXAMPLE_LOCATIONS.left.uuid,
       "left",
-      "Name"
+      "UUID"
     )
 
+    expect(
+      await (await MergeLocations.getColumnContent("left", "UUID")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.uuid)
     expect(
       await (await MergeLocations.getColumnContent("left", "Name")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.left.name)
@@ -393,6 +421,16 @@ describe("Merge locations page", () => {
   })
 
   it("Should be able to select from both left and right side", async () => {
+    await (await MergeLocations.getSelectButton("left", "UUID")).click()
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.left.uuid,
+      "mid",
+      "UUID"
+    )
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.uuid)
+
     await (await MergeLocations.getSelectButton("left", "Name")).click()
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.left.name,

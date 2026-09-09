@@ -8,6 +8,7 @@ const hasCustomFields = !!Settings?.fields?.person?.customFields
 const EXAMPLE_PEOPLE = {
   validLeft: {
     search: "winner",
+    uuid: "3cb2076c-5317-47fe-86ad-76f298993917",
     fullName: "CIV Duplicate Winner Merged",
     familyName: "Merged",
     givenName: "Duplicate Winner",
@@ -54,6 +55,7 @@ const EXAMPLE_PEOPLE = {
   },
   validRight: {
     search: "loser",
+    uuid: "c725aef3-cdd1-4baf-ac72-f28219b234e9",
     fullName: "CTR Duplicate Loser Merged",
     familyName: "Merged",
     givenName: "Duplicate Loser",
@@ -100,6 +102,7 @@ const EXAMPLE_PEOPLE = {
   },
   userRight: {
     search: "andrew",
+    uuid: "1a557db0-5af5-4ea3-b926-28b5f2e88bf7",
     fullName: "CIV Andrew Anderson",
     familyName: "Anderson",
     givenName: "Andrew",
@@ -194,13 +197,16 @@ describe("Merge people who are both non-users", () => {
     )
     await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500) // wait for the rendering of custom fields
-    // Check if the fields displayed properly after selecting a person from left side.
+    // Check if the fields displayed properly after selecting from left side.
     await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.familyName,
+      EXAMPLE_PEOPLE.validLeft.uuid,
       "left",
-      "Family name"
+      "UUID"
     )
 
+    expect(
+      await (await MergePeople.getColumnContent("left", "UUID")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.uuid)
     expect(
       await (
         await MergePeople.getColumnContent("left", "Family name")
@@ -272,13 +278,16 @@ describe("Merge people who are both non-users", () => {
     )
     await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500) // wait for the rendering of custom fields
-    // Check if the fields displayed properly after selecting a person from left side.
+    // Check if the fields displayed properly after selecting from right side.
     await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validRight.familyName,
+      EXAMPLE_PEOPLE.validRight.uuid,
       "right",
-      "Family name"
+      "UUID"
     )
 
+    expect(
+      await (await MergePeople.getColumnContent("right", "UUID")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.uuid)
     expect(
       await (
         await MergePeople.getColumnContent("right", "Family name")
@@ -391,12 +400,16 @@ describe("Merge people who are both non-users", () => {
   it("Should be able to select all fields from left person", async () => {
     await (await MergePeople.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.familyName,
+      EXAMPLE_PEOPLE.validLeft.uuid,
       "mid",
-      "Family name"
+      "UUID"
     )
 
+    expect(
+      await (await MergePeople.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.uuid)
     expect(
       await (await MergePeople.getColumnContent("mid", "Family name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.familyName)
@@ -454,12 +467,16 @@ describe("Merge people who are both non-users", () => {
   it("Should be able to select all fields from right person", async () => {
     await (await MergePeople.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validRight.familyName,
+      EXAMPLE_PEOPLE.validRight.uuid,
       "mid",
-      "Family name"
+      "UUID"
     )
 
+    expect(
+      await (await MergePeople.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.uuid)
     expect(
       await (await MergePeople.getColumnContent("mid", "Family name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.familyName)
@@ -515,6 +532,16 @@ describe("Merge people who are both non-users", () => {
   })
 
   it("Should be able to select from both left and right side", async () => {
+    await (await MergePeople.getSelectButton("left", "UUID")).click()
+    await MergePeople.waitForColumnToChange(
+      EXAMPLE_PEOPLE.validLeft.uuid,
+      "mid",
+      "UUID"
+    )
+    expect(
+      await (await MergePeople.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.uuid)
+
     await (await MergePeople.getSelectButton("left", "Family name")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.familyName,

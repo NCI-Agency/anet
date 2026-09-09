@@ -35,6 +35,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   LeafletMap,
   LeafletMode,
   MERGE_SIDES,
@@ -187,6 +189,15 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
           )}
           {areAllSet(location1, location2, mergedLocation) && (
             <fieldset>
+              <MergeField
+                label="UUID"
+                value={mergedLocation.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <MergeField
                 label="Avatar"
                 value={
@@ -508,6 +519,24 @@ const LocationColumn = ({
       {areAllSet(location) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={location.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", location.uuid, align)
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -542,9 +571,6 @@ const LocationColumn = ({
             action={() => {
               dispatchMergeActions(
                 setAMergedField("name", location.name, align)
-              )
-              dispatchMergeActions(
-                setAMergedField("uuid", location.uuid, align)
               )
             }}
             mergeState={mergeState}
@@ -625,11 +651,9 @@ const LocationColumn = ({
             }
             align={align}
             action={() => {
-              if (location.geoJson) {
-                dispatchMergeActions(
-                  setAMergedField("geoJson", location.geoJson, align)
-                )
-              }
+              dispatchMergeActions(
+                setAMergedField("geoJson", location.geoJson, align)
+              )
             }}
             mergeState={mergeState}
             autoMerge

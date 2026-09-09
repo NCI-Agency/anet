@@ -4,16 +4,19 @@ import MergeEventSeries from "../pages/mergeEventSeries.page"
 const EXAMPLE_EVENT_SERIES = {
   validLeft: {
     search: "Merged Duplicated Winner",
+    uuid: "19a98fee-4864-4b04-a983-b837aadbfe8c",
     name: "Merged Duplicated Winner",
     status: "ACTIVE"
   },
   validRight: {
     search: "Merged Duplicated Loser",
+    uuid: "071ce130-78fa-4c81-951f-9175b677c7b1",
     name: "Merged Duplicated Loser",
     description: "Loser test event series that will be merged",
     status: "ACTIVE"
   },
   result: {
+    uuid: "19a98fee-4864-4b04-a983-b837aadbfe8c",
     name: "Merged Duplicated Winner",
     description: "Loser test event series that will be merged",
     ownerOrganization: "EF 2.2",
@@ -80,12 +83,17 @@ describe("Merge event series page", () => {
       EXAMPLE_EVENT_SERIES.validLeft.name
     )
     await (await MergeEventSeries.getItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeEventSeries.waitForColumnToChange(
-      EXAMPLE_EVENT_SERIES.validLeft.name,
+      EXAMPLE_EVENT_SERIES.validLeft.uuid,
       "left",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeEventSeries.getColumnContent("left", "UUID")).getText()
+    ).to.eq(EXAMPLE_EVENT_SERIES.validLeft.uuid)
     expect(
       await (await MergeEventSeries.getColumnContent("left", "Name")).getText()
     ).to.eq(EXAMPLE_EVENT_SERIES.validLeft.name)
@@ -115,12 +123,17 @@ describe("Merge event series page", () => {
       EXAMPLE_EVENT_SERIES.validRight.name
     )
     await (await MergeEventSeries.getItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeEventSeries.waitForColumnToChange(
-      EXAMPLE_EVENT_SERIES.validRight.name,
+      EXAMPLE_EVENT_SERIES.validRight.uuid,
       "right",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeEventSeries.getColumnContent("right", "UUID")).getText()
+    ).to.eq(EXAMPLE_EVENT_SERIES.validRight.uuid)
     expect(
       await (await MergeEventSeries.getColumnContent("right", "Name")).getText()
     ).to.eq(EXAMPLE_EVENT_SERIES.validRight.name)
@@ -137,13 +150,17 @@ describe("Merge event series page", () => {
 
   it("Should be able to select all fields from left event series", async () => {
     await (await MergeEventSeries.getUseAllButton("left")).click()
-    await browser.pause(500)
-
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeEventSeries.waitForColumnToChange(
-      EXAMPLE_EVENT_SERIES.validLeft.name,
+      EXAMPLE_EVENT_SERIES.validLeft.uuid,
       "mid",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeEventSeries.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_EVENT_SERIES.validLeft.uuid)
     expect(
       await (await MergeEventSeries.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_EVENT_SERIES.validLeft.name)
@@ -151,28 +168,32 @@ describe("Merge event series page", () => {
 
   it("Should be able to select all fields from right event series", async () => {
     await (await MergeEventSeries.getUseAllButton("right")).click()
-    await browser.pause(500)
-
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeEventSeries.waitForColumnToChange(
-      EXAMPLE_EVENT_SERIES.validRight.name,
+      EXAMPLE_EVENT_SERIES.validRight.uuid,
       "mid",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeEventSeries.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_EVENT_SERIES.validRight.uuid)
     expect(
       await (await MergeEventSeries.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_EVENT_SERIES.validRight.name)
   })
 
   it("Should be able to select from both left and right side", async () => {
-    await (await MergeEventSeries.getLeftEventSeriesField()).click()
-    await (
-      await MergeEventSeries.getLeftEventSeriesField()
-    ).setValue(EXAMPLE_EVENT_SERIES.validLeft.search)
-    await MergeEventSeries.waitForAdvancedSelectLoading(
-      EXAMPLE_EVENT_SERIES.validLeft.name
+    await (await MergeEventSeries.getSelectButton("left", "UUID")).click()
+    await MergeEventSeries.waitForColumnToChange(
+      EXAMPLE_EVENT_SERIES.validLeft.uuid,
+      "mid",
+      "UUID"
     )
-    await (await MergeEventSeries.getItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    expect(
+      await (await MergeEventSeries.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_EVENT_SERIES.validLeft.uuid)
 
     await (await MergeEventSeries.getSelectButton("left", "Name")).click()
     await MergeEventSeries.waitForColumnToChange(

@@ -34,6 +34,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   LeafletMap,
   MERGE_SIDES,
   selectAllFields,
@@ -172,6 +174,15 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
           )}
           {areAllSet(position1, position2, mergedPosition) && (
             <fieldset>
+              <MergeField
+                label="UUID"
+                value={mergedPosition.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <MergeField
                 label="Avatar"
                 value={
@@ -530,6 +541,24 @@ const PositionColumn = ({
       {areAllSet(position) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={position.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", position.uuid, align)
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -711,10 +740,6 @@ const PositionColumn = ({
             action={() => {
               dispatchMergeActions(
                 setAMergedField("person", position.person, align)
-              )
-              // setting person should also set uuid so we select the position's uuid with person assigned
-              dispatchMergeActions(
-                setAMergedField("uuid", position.uuid, align)
               )
             }}
             mergeState={mergeState}
