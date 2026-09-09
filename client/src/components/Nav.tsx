@@ -228,6 +228,7 @@ const Navigation = ({
   const inAdmin = path.startsWith("/admin")
   const inMerge = path.startsWith("/admin/merge")
   const inUserActivities = path.startsWith("/admin/userActivities")
+  const inTenants = path.startsWith("/admin/tenants")
 
   const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
     const inOrg = path.startsWith("/organizations")
@@ -242,6 +243,7 @@ const Navigation = ({
   const inMyCounterParts = path.startsWith("/positions/counterparts")
   const inMyTasks = path.startsWith("/tasks/mine")
   const inMyAuthorizationGroups = path.startsWith("/communities/mine")
+  const inMyTenants = path.startsWith("/tenants/mine")
   const inMyReports = path.startsWith("/reports/mine")
   const inMySubscriptions = path.startsWith("/subscriptions/mine")
   const inInsights = path.startsWith("/insights")
@@ -251,6 +253,10 @@ const Navigation = ({
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
   const allOrgsSorted = allOrganizations.toSorted(compareByApp6StandardIdentity)
+  const nrTenantsWithAccessRequests =
+    currentUser?.position?.tenantsAdministrated?.filter(
+      t => !_isEmpty(t.accessRequests)
+    )?.length ?? 0
 
   useEffect(() => {
     if (
@@ -259,6 +265,7 @@ const Navigation = ({
       inMyReports ||
       inMyTasks ||
       inMyAuthorizationGroups ||
+      inMyTenants ||
       inMySubscriptions ||
       inMySavedSearches ||
       inMyEvents
@@ -271,6 +278,7 @@ const Navigation = ({
     inMyReports,
     inMyTasks,
     inMyAuthorizationGroups,
+    inMyTenants,
     inMySubscriptions,
     inMySavedSearches,
     inMyEvents
@@ -402,6 +410,20 @@ const Navigation = ({
               handleOnClick={resetPages}
             >
               My Communities
+            </SidebarLink>
+          )}
+          {!_isEmpty(currentUser?.position?.tenantsAdministrated) && (
+            <SidebarLink
+              id="my-tenants-nav"
+              linkTo="/tenants/mine"
+              handleOnClick={resetPages}
+            >
+              My Tenants
+              {!!nrTenantsWithAccessRequests && (
+                <NotificationBadge>
+                  {nrTenantsWithAccessRequests}
+                </NotificationBadge>
+              )}
             </SidebarLink>
           )}
           {(currentUser.isAdmin() ||
@@ -557,6 +579,14 @@ const Navigation = ({
                   handleOnClick={resetPages}
                 >
                   Configure event types
+                </SidebarLink>
+                <SidebarLink
+                  id="tenants"
+                  linkTo="/admin/tenants"
+                  handleOnClick={resetPages}
+                  isActive={inTenants}
+                >
+                  Tenants
                 </SidebarLink>
                 {Settings.featureMartGuiEnabled && (
                   <SidebarLink

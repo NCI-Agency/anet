@@ -8,6 +8,7 @@ eventsIncludeStartAndEndTime: true
 eventTypeVisitBanUuid: 54d88b80-6af5-4327-ab42-d1bc292745e9
 featureMartGuiEnabled: true
 martNewPositionDaysInThePast: 30
+martTenantName: "Tenant #1"
 maxShownAccessTokenActivities: 10
 
 calendarOptions:
@@ -490,6 +491,10 @@ fields:
       label: Communities of interest
       placeholder: Search for Communities…
       exclude: false
+    allTenants:
+      label: Shared with all tenants
+    tenants:
+      label: Shared with these tenants
 
   person:
     status:
@@ -592,6 +597,10 @@ fields:
       placeholder: Fill in the biography of this person
     authorizationGroups:
       label: Communities
+    tenantAccessRequests:
+      label: Request access to these tenants
+    tenants:
+      label: Member of these tenants
     customSensitiveInformation:
       birthday:
         type: date
@@ -875,6 +884,17 @@ fields:
               t5:
                 label: T5
                 color: '#aaaaaa'
+
+  tenant:
+    status:
+      label: Status
+    name:
+      label: Name
+      placeholder: Fill in the unique name of this tenant
+    emailAddresses:
+      label: Archive email addresses
+    administrativePositions:
+      label: Tenant administrators
 
   advisor:
     person:

@@ -38,7 +38,7 @@ class NoteResourceTest extends AbstractResourceTest {
       "{ uuid name type status organization { uuid } location { uuid } %1$s }", _NOTES_FIELDS);
   private static final String REPORT_FIELDS = String.format(
       "{ uuid intent state reportPeople { uuid familyName givenName author attendee primary interlocutor }"
-          + " tasks { uuid shortName } %1$s }",
+          + " tasks { uuid shortName } allTenants tenants { uuid name } %1$s }",
       _NOTES_FIELDS);
 
   @Autowired
@@ -51,7 +51,7 @@ class NoteResourceTest extends AbstractResourceTest {
         ReportInput.builder().withIntent("a test report created by testDeleteDanglingReportNote")
             .withReportPeople(
                 getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
-            .build();
+            .withAllTenants(true).build();
     final Report testReport = withCredentials(adminUser,
         t -> mutationExecutor.createReport(REPORT_FIELDS, testReportInput));
     assertThat(testReport).isNotNull();

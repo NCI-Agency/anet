@@ -74,6 +74,7 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.client.TaskSearchSortBy;
+import mil.dds.anet.test.client.Tenant;
 import mil.dds.anet.test.client.User;
 import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.utils.UtilsTest;
@@ -124,7 +125,8 @@ public class ReportResourceTest extends AbstractResourceTest {
           + " comments %6$s notes %7$s authorizedMembers %8$s"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
           + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } "
-          + " attachments %9$s reportCommunities { uuid status distributionList } }",
+          + " attachments %9$s reportCommunities { uuid status distributionList }"
+          + " allTenants tenants { uuid name } }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AUTHORIZED_MEMBERS_FIELDS,
       AttachmentResourceTest.ATTACHMENT_FIELDS);
@@ -161,7 +163,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person approver1 = findOrPutPersonInDb(getDomainUsername(approver1tpl), approver1tpl);
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
       // Approve newly created user
-      withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver1.getUuid()));
+      final List<Tenant> tenants =
+          withCredentials(adminUser, t -> queryExecutor.tenantList("{ uuid }"));
+      withCredentials(adminUser,
+          t -> mutationExecutor.approvePerson("", getTenantsInput(tenants), approver1.getUuid()));
     }
     final EmailAddress emailAddress2 =
         EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
@@ -173,7 +178,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person approver2 = findOrPutPersonInDb(getDomainUsername(approver2tpl), approver2tpl);
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
       // Approve newly created user
-      withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver2.getUuid()));
+      final List<Tenant> tenants =
+          withCredentials(adminUser, t -> queryExecutor.tenantList("{ uuid }"));
+      withCredentials(adminUser,
+          t -> mutationExecutor.approvePerson("", getTenantsInput(tenants), approver2.getUuid()));
     }
 
     final PositionInput approver1PosInput = PositionInput.builder()
@@ -282,7 +290,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final List<ReportPerson> reportPeople =
         List.of(interlocutor, personToPrimaryReportAuthor(author), nonAttendingAuthor);
     final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
-        .withDuration(120).withReportPeople(getReportPeopleInput(reportPeople))
+        .withDuration(120).withReportPeople(getReportPeopleInput(reportPeople)).withAllTenants(true)
         .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
         .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
         .withIntent("A testing report to test that reporting reports")
@@ -701,8 +709,9 @@ public class ReportResourceTest extends AbstractResourceTest {
         ReportInput.builder().withEngagementDate(Instant.now()).withDuration(120)
             .withReportPeople(
                 getReportPeopleInput(List.of(reportAttendee, personToPrimaryReportAuthor(author))))
-            .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
-            .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
+            .withAllTenants(true).withTasks(List.of(getTaskInput(action)))
+            .withLocation(getLocationInput(loc)).withAtmosphere(Atmosphere.POSITIVE)
+            .withAtmosphereDetails("Everybody was super nice!")
             .withIntent("A testing report to test that reporting reports")
             // set HTML of report text
             .withReportText(UtilsTest.getCombinedHtmlTestCase().getInput())
@@ -982,7 +991,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Write a report as that person
     final ReportInput rInput = ReportInput.builder()
         .withIntent("I am a new Advisor and wish to be included in things")
-        .withAtmosphere(Atmosphere.NEUTRAL).withReportPeople(reportPeopleInput)
+        .withAtmosphere(Atmosphere.NEUTRAL).withReportPeople(reportPeopleInput).withAllTenants(true)
         .withReportText(
             "I just got here in town and am writing a report for the first time, but have no reporting structure set up")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
@@ -1144,7 +1153,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText("This report was generated by ReportsResourceTest#reportEditTest")
         .withReportPeople(getReportPeopleInput(
             List.of(personToPrimaryReportPerson(roger, true), personToReportAuthor(elizabeth))))
-        .withTasks(List.of(getTaskInput(taskSearchResults.getList().get(0)))).build();
+        .withAllTenants(true).withTasks(List.of(getTaskInput(taskSearchResults.getList().get(0))))
+        .build();
     Report returned = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(returned).isNotNull();
@@ -1774,7 +1784,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Write a report as that person
     final ReportInput rInput = ReportInput.builder()
         .withIntent("This is a report that should be deleted").withAtmosphere(Atmosphere.NEUTRAL)
-        .withReportPeople(reportPeopleInput)
+        .withReportPeople(reportPeopleInput).withAllTenants(true)
         .withReportText("I'm writing a report that I intend to delete very soon.")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
         .withEngagementDate(Instant.now()).withDuration(15).build();
@@ -1851,6 +1861,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withEngagementDate(Instant.now()).withDuration(45)
             .withReportPeople(getReportPeopleInput(List.of(personToPrimaryReportAuthor(elizabeth),
                 personToPrimaryReportPerson(steve, true))))
+            .withAllTenants(true)
             .withCancelledReason(ReportCancelledReason.CANCELLED_BY_INTERLOCUTOR).build();
 
     final Report saved = withCredentials(getDomainUsername(elizabeth),
@@ -1904,6 +1915,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withText(UtilsTest.getCombinedHtmlTestCase().getInput()).build();
     final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
         .withReportPeople(getReportPeopleInput(List.of(personToPrimaryReportAuthor(elizabeth))))
+        .withAllTenants(true)
         .withReportText(
             "This reportTest was generated by ReportsResourceTest#testSensitiveInformation")
         .withReportSensitiveInformation(rsiInput).build();
@@ -2092,7 +2104,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             getReportPeopleInput(List.of(personToPrimaryReportPerson(getSteveSteveson(), true),
                 personToPrimaryReportPerson(getElizabethElizawell(), false),
                 personToReportAuthor(author))))
-        .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
+        .withAllTenants(true).withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing the report approval flow")
         .withKeyOutcomes("Report approval flow works")
         .withNextSteps("Approve through the organization, task and location flow")
@@ -2200,7 +2212,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person author = getJackJackson();
     final ReportInput rInput = ReportInput.builder()
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(author))))
-        .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
+        .withAllTenants(true).withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing report authors").withEngagementDate(Instant.now()).build();
     final Report reportFirstAuthor = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(FIELDS, rInput));
@@ -2295,7 +2307,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportPeople(
             getReportPeopleInput(List.of(personToPrimaryReportPerson(getSteveSteveson(), true),
                 personToPrimaryReportAuthor(author))))
-        .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
+        .withAllTenants(true).withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing unpublishing").withKeyOutcomes("Unpublishing works")
         .withNextSteps("Approve before unpublishing")
         .withReportText("<p>Trying to get this report unpublished</p>")
@@ -2512,7 +2524,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Write a report
     final ReportInput rInput = ReportInput.builder()
         .withIntent("This is a report that should be deleted").withAtmosphere(Atmosphere.NEUTRAL)
-        .withReportPeople(reportPeopleInput)
+        .withReportPeople(reportPeopleInput).withAllTenants(true)
         .withReportText("I'm writing a report that I intend to delete very soon.")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
         .withReportCommunities(inactiveAgs.getList().stream()

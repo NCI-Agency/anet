@@ -99,6 +99,10 @@ public class Person extends AbstractEmailableAnetBean
   private String code;
   // annotated below
   private EntityAvatar entityAvatar;
+  // annotated below
+  private List<Tenant> tenantAccessRequests;
+  // annotated below
+  private List<Tenant> tenants;
 
   // non-GraphQL
   private Deque<Activity> recentActivities;
@@ -360,7 +364,7 @@ public class Person extends AbstractEmailableAnetBean
       query = new ReportSearchQuery();
     }
     query.setAuthorUuid(uuid);
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return engine().getReportDao().search(context, query);
   }
 
@@ -373,7 +377,7 @@ public class Person extends AbstractEmailableAnetBean
       query = new ReportSearchQuery();
     }
     query.setAttendeeUuid(uuid);
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return engine().getReportDao().search(context, query);
   }
 
@@ -472,6 +476,52 @@ public class Person extends AbstractEmailableAnetBean
   @GraphQLInputField(name = "preferences")
   public void setPreferences(List<PersonPreference> preferences) {
     this.preferences = preferences;
+  }
+
+  @GraphQLQuery(name = "tenantAccessRequests")
+  @AllowUnverifiedUsers
+  public CompletableFuture<List<Tenant>> loadTenantAccessRequests(
+      @GraphQLRootContext GraphQLContext context) {
+    if (tenantAccessRequests != null) {
+      return CompletableFuture.completedFuture(tenantAccessRequests);
+    } else {
+      return engine().getTenantDao().getTenantAccessRequestsForPerson(context, uuid)
+          .thenApply(o -> {
+            tenantAccessRequests = o;
+            return o;
+          });
+    }
+  }
+
+  public List<Tenant> getTenantAccessRequests() {
+    return tenantAccessRequests;
+  }
+
+  @GraphQLInputField(name = "tenantAccessRequests")
+  public void setTenantAccessRequests(List<Tenant> tenantAccessRequests) {
+    this.tenantAccessRequests = tenantAccessRequests;
+  }
+
+  @GraphQLQuery(name = "tenants")
+  @AllowUnverifiedUsers
+  public CompletableFuture<List<Tenant>> loadTenants(@GraphQLRootContext GraphQLContext context) {
+    if (tenants != null) {
+      return CompletableFuture.completedFuture(tenants);
+    } else {
+      return engine().getTenantDao().getTenantsForPerson(context, uuid).thenApply(o -> {
+        tenants = o;
+        return o;
+      });
+    }
+  }
+
+  public List<Tenant> getTenants() {
+    return tenants;
+  }
+
+  @GraphQLInputField(name = "tenants")
+  public void setTenants(List<Tenant> tenants) {
+    this.tenants = tenants;
   }
 
   @Override

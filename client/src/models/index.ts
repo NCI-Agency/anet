@@ -11,6 +11,7 @@ import Position, { PositionRole } from "./Position"
 import Report from "./Report"
 import RollupGraph from "./RollupGraph"
 import Task from "./Task"
+import Tenant from "./Tenant"
 
 export {
   Attachment,
@@ -26,5 +27,6 @@ export {
   PositionRole,
   Report,
   RollupGraph,
-  Task
+  Task,
+  Tenant
 }

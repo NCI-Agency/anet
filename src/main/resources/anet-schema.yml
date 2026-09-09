@@ -422,6 +422,7 @@ required:
   - eventTypeVisitBanUuid
   - featureMartGuiEnabled
   - martNewPositionDaysInThePast
+  - martTenantName
   - maxShownAccessTokenActivities
   - dateFormats
   - calendarOptions
@@ -495,6 +496,11 @@ properties:
     minimum: 1
     title: Offset in days in the past for new position
     description: Used for MART; determines the offset of days in the past for a new position created for MART
+
+  martTenantName:
+    type: string
+    title: The Tenant to which MART users and MART reports will be linked
+    description: Used for MART; determines the the Tenant to be used for MART related users and reports
 
   maxShownAccessTokenActivities:
     type: integer
@@ -676,7 +682,7 @@ properties:
     type: object
     additionalProperties: false
     required: [task, attachment, authorizationGroup, eventSeries, event, report, person,
-               position, organization, advisor, interlocutor, regular, superuser, administrator]
+               position, organization, tenant, advisor, interlocutor, regular, superuser, administrator]
     properties:
 
       task:
@@ -856,7 +862,7 @@ properties:
         additionalProperties: false
         required: [intent, engagementDate, duration, atmosphere, atmosphereDetails, cancelled,
                    cancelledReason, nextSteps, keyOutcomes, reportText, location, reportPeople,
-                   event, reportCommunities]
+                   event, reportCommunities, allTenants, tenants]
         properties:
           canUnpublishReports:
             type: boolean
@@ -933,6 +939,10 @@ properties:
             "$ref": "#/$defs/inputField"
           reportCommunities:
             "$ref": "#/$defs/excludableInputField"
+          allTenants:
+            "$ref": "#/$defs/inputField"
+          tenants:
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:
@@ -943,7 +953,7 @@ properties:
         additionalProperties: false
         required: [status, givenName, familyName, position, additionalPositions, prevPositions, prevAdditionalPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
-                   biography, authorizationGroups]
+                   biography, authorizationGroups, tenantAccessRequests, tenants]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -992,6 +1002,10 @@ properties:
             "$ref": "#/$defs/inputField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
+          tenantAccessRequests:
+            "$ref": "#/$defs/inputField"
+          tenants:
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:
@@ -1177,6 +1191,20 @@ properties:
             type: object
             additionalProperties:
               "$ref": "#/$defs/customField"
+
+      tenant:
+        type: object
+        additionalProperties: false
+        required: [status, name, emailAddresses, administrativePositions]
+        properties:
+          status:
+            "$ref": "#/$defs/labeledField"
+          name:
+            "$ref": "#/$defs/inputField"
+          emailAddresses:
+            "$ref": "#/$defs/labeledField"
+          administrativePositions:
+            "$ref": "#/$defs/labeledField"
 
       advisor:
         type: object

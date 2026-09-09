@@ -23,7 +23,7 @@ public class AuditTrailResource {
   @GraphQLQuery(name = "auditTrailList")
   public AnetBeanList<AuditTrail> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") AuditTrailSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

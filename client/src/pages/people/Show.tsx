@@ -33,6 +33,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
@@ -47,6 +48,7 @@ import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
+import TenantTable from "components/TenantTable"
 import UserTable from "components/UserTable"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -81,6 +83,12 @@ const GQL_GET_PERSON = gql`
         organization {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenantAccessRequests {
+        ${gqlEntityFieldsMap.Tenant}
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
       attachments {
         ${gqlAllAttachmentFields}
@@ -157,6 +165,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const position = person.position
 
   // User can always edit themselves
+  const isSelf = Person.isEqual(currentUser, person)
   // Admins can always edit anybody
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser?.isAdmin()
@@ -168,7 +177,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         position.organization
       )) ||
     (!hasPosition && currentUser.isSuperuser())
-  const canEdit = canEditPosition || Person.isEqual(currentUser, person)
+  const canEdit = canEditPosition || isSelf
   // When the person is not in a position, any superuser can assign them.
   const canAssignPosition = currentUser.isSuperuser()
   const canAddPeriodicAssessment =
@@ -267,6 +276,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             onEnd={() => (localStorage.hasSeenPersonTour = "true")}
           />
         </div>
+        {isAdmin && <NoTenantWarning person={person} />}
         <Messages error={stateError} success={stateSuccess} />
         <div className="form-horizontal">
           <Fieldset
@@ -307,6 +317,35 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                 <Col md={6}>{rightColumn}</Col>
               </Row>
               <Row>
+                {person.user && (
+                  <>
+                    <Col md={12}>
+                      <FieldHelper.ReadonlyField
+                        field={{ name: "tenants" }}
+                        label={Settings.fields.person.tenants?.label}
+                        humanValue={
+                          <TenantTable tenants={person.tenants} showStatus />
+                        }
+                      />
+                    </Col>
+                    {isSelf && !_isEmpty(person.tenantAccessRequests) && (
+                      <Col md={12}>
+                        <FieldHelper.ReadonlyField
+                          field={{ name: "tenantAccessRequests" }}
+                          label={
+                            Settings.fields.person.tenantAccessRequests?.label
+                          }
+                          humanValue={
+                            <TenantTable
+                              tenants={person.tenantAccessRequests}
+                              showStatus
+                            />
+                          }
+                        />
+                      </Col>
+                    )}
+                  </>
+                )}
                 <Col md={12}>{fullWidthFields}</Col>
                 {attachmentsEnabled && (
                   <Col md={12}>
