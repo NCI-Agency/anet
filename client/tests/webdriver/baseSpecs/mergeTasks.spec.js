@@ -14,6 +14,7 @@ const EXAMPLE_TASKS = {
   },
   validLeft: {
     search: "Merge Task 1",
+    uuid: "cb18b0c1-17d6-417e-951f-9db8b2f39b25",
     shortName: "Merge Task 1",
     longName: "Long Merge 1 Name",
     status: "ACTIVE",
@@ -22,6 +23,7 @@ const EXAMPLE_TASKS = {
   },
   validRight: {
     search: "Merge Task 2",
+    uuid: "867ff6b6-07f7-4448-b2a3-a1bdc9b423be",
     shortName: "Merge Task 2",
     longName: "Long Merge 2 Name",
     status: "ACTIVE",
@@ -133,12 +135,17 @@ describe("Merge tasks page", () => {
       EXAMPLE_TASKS.validLeft.displayedName
     )
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeTasks.waitForColumnToChange(
-      EXAMPLE_TASKS.validLeft.shortName,
+      EXAMPLE_TASKS.validLeft.uuid,
       "left",
-      "Short name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeTasks.getColumnContent("left", "UUID")).getText()
+    ).to.eq(EXAMPLE_TASKS.validLeft.uuid)
     expect(
       await (await MergeTasks.getColumnContent("left", "Short name")).getText()
     ).to.eq(EXAMPLE_TASKS.validLeft.shortName)
@@ -173,12 +180,17 @@ describe("Merge tasks page", () => {
       EXAMPLE_TASKS.validRight.displayedName
     )
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeTasks.waitForColumnToChange(
-      EXAMPLE_TASKS.validRight.shortName,
+      EXAMPLE_TASKS.validRight.uuid,
       "right",
-      "Short name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeTasks.getColumnContent("right", "UUID")).getText()
+    ).to.eq(EXAMPLE_TASKS.validRight.uuid)
     expect(
       await (await MergeTasks.getColumnContent("right", "Short name")).getText()
     ).to.eq(EXAMPLE_TASKS.validRight.shortName)
@@ -211,13 +223,17 @@ describe("Merge tasks page", () => {
 
   it("Should be able to select all fields from left task", async () => {
     await (await MergeTasks.getUseAllButton("left")).click()
-    await browser.pause(500)
-
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeTasks.waitForColumnToChange(
-      EXAMPLE_TASKS.validLeft.shortName,
+      EXAMPLE_TASKS.validLeft.uuid,
       "mid",
-      "Short name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeTasks.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_TASKS.validLeft.uuid)
     expect(
       await (await MergeTasks.getColumnContent("mid", "Short name")).getText()
     ).to.eq(EXAMPLE_TASKS.validLeft.shortName)
@@ -225,19 +241,24 @@ describe("Merge tasks page", () => {
 
   it("Should be able to select all fields from right task", async () => {
     await (await MergeTasks.getUseAllButton("right")).click()
-    await browser.pause(500)
-
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeTasks.waitForColumnToChange(
-      EXAMPLE_TASKS.validRight.shortName,
+      EXAMPLE_TASKS.validRight.uuid,
       "mid",
-      "Short name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeTasks.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_TASKS.validRight.uuid)
     expect(
       await (await MergeTasks.getColumnContent("mid", "Short name")).getText()
     ).to.eq(EXAMPLE_TASKS.validRight.shortName)
   })
 
   it("Should be able to select from both left and right side", async () => {
+    // Perform a fresh search to clear the merge state
     await (await MergeTasks.getLeftTaskField()).click()
     await (
       await MergeTasks.getLeftTaskField()
@@ -247,6 +268,16 @@ describe("Merge tasks page", () => {
     )
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
     await browser.pause(500)
+
+    await (await MergeTasks.getSelectButton("left", "UUID")).click()
+    await MergeTasks.waitForColumnToChange(
+      EXAMPLE_TASKS.validLeft.uuid,
+      "mid",
+      "UUID"
+    )
+    expect(
+      await (await MergeTasks.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_TASKS.validLeft.uuid)
 
     await (await MergeTasks.getSelectButton("left", "Short name")).click()
     await MergeTasks.waitForColumnToChange(

@@ -15,6 +15,7 @@ const EXAMPLE_ORGANIZATIONS = {
   },
   validLeft: {
     search: "Merge Org 1",
+    uuid: "381d5435-8852-45d2-91b1-530560ca9d8c",
     shortName: "Merge Org 1",
     longName: "Long Merge 1 Name",
     status: "ACTIVE",
@@ -24,6 +25,7 @@ const EXAMPLE_ORGANIZATIONS = {
   },
   validRight: {
     search: "Merge Org 2",
+    uuid: "e706f443-7d4d-4356-82bc-1456f55e3d75",
     shortName: "Merge Org 2",
     longName: "Long Merge 2 Name",
     status: "ACTIVE",
@@ -145,12 +147,19 @@ describe("Merge organizations page", () => {
       EXAMPLE_ORGANIZATIONS.validLeft.displayedName
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeOrganizations.waitForColumnToChange(
-      EXAMPLE_ORGANIZATIONS.validLeft.shortName,
+      EXAMPLE_ORGANIZATIONS.validLeft.uuid,
       "left",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("left", "UUID")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.uuid)
     expect(
       await (
         await MergeOrganizations.getColumnContent("left", "Name")
@@ -193,12 +202,19 @@ describe("Merge organizations page", () => {
       EXAMPLE_ORGANIZATIONS.validRight.displayedName
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
-    await browser.pause(500)
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeOrganizations.waitForColumnToChange(
-      EXAMPLE_ORGANIZATIONS.validRight.shortName,
+      EXAMPLE_ORGANIZATIONS.validRight.uuid,
       "right",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("right", "UUID")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.uuid)
     expect(
       await (
         await MergeOrganizations.getColumnContent("right", "Name")
@@ -246,13 +262,17 @@ describe("Merge organizations page", () => {
 
   it("Should be able to select all fields from left organization", async () => {
     await (await MergeOrganizations.getUseAllButton("left")).click()
-    await browser.pause(500)
-
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from left side.
     await MergeOrganizations.waitForColumnToChange(
-      EXAMPLE_ORGANIZATIONS.validLeft.shortName,
+      EXAMPLE_ORGANIZATIONS.validLeft.uuid,
       "mid",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeOrganizations.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.uuid)
     expect(
       await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
@@ -266,13 +286,17 @@ describe("Merge organizations page", () => {
 
   it("Should be able to select all fields from right organization", async () => {
     await (await MergeOrganizations.getUseAllButton("right")).click()
-    await browser.pause(500)
-
+    await browser.pause(500) // wait for the rendering of custom fields
+    // Check if the fields displayed properly after selecting from right side.
     await MergeOrganizations.waitForColumnToChange(
-      EXAMPLE_ORGANIZATIONS.validRight.shortName,
+      EXAMPLE_ORGANIZATIONS.validRight.uuid,
       "mid",
-      "Name"
+      "UUID"
     )
+
+    expect(
+      await (await MergeOrganizations.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.uuid)
     expect(
       await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.shortName)
@@ -285,6 +309,7 @@ describe("Merge organizations page", () => {
   })
 
   it("Should be able to select from both left and right side", async () => {
+    // Perform a fresh search to clear the merge state
     await (await MergeOrganizations.getLeftOrganizationField()).click()
     await (
       await MergeOrganizations.getLeftOrganizationField()
@@ -294,6 +319,16 @@ describe("Merge organizations page", () => {
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500)
+
+    await (await MergeOrganizations.getSelectButton("left", "UUID")).click()
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validLeft.uuid,
+      "mid",
+      "UUID"
+    )
+    expect(
+      await (await MergeOrganizations.getColumnContent("mid", "UUID")).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.uuid)
 
     await (await MergeOrganizations.getSelectButton("left", "Name")).click()
     await MergeOrganizations.waitForColumnToChange(

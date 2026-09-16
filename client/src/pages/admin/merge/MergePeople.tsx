@@ -37,6 +37,9 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelected,
+  isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   mergedPersonIsValid,
   selectAllFields,
@@ -220,6 +223,15 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
           )}
           {areAllSet(person1, person2, mergedPerson) && (
             <fieldset>
+              <MergeField
+                label="UUID"
+                value={mergedPerson.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <MergeField
                 label="Avatar"
                 value={
@@ -613,6 +625,22 @@ const PersonColumn = ({
       {areAllSet(person) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={person.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -648,7 +676,6 @@ const PersonColumn = ({
               dispatchMergeActions(
                 setAMergedField("familyName", person.familyName, align)
               )
-              dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
             }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

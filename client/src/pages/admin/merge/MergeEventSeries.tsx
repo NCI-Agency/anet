@@ -34,6 +34,8 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getOtherSide,
+  isMergeFieldEmpty,
+  isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -174,6 +176,15 @@ const MergeEventSeries = ({ pageDispatchers }: MergeEventSeriesProps) => {
           )}
           {areAllSet(eventSeries1, eventSeries2, mergedEventSeries) && (
             <fieldset>
+              <MergeField
+                label="UUID"
+                value={mergedEventSeries.uuid}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                fieldSetsUuid={!isMergeFieldEmpty(mergeState, "uuid")}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <MergeField
                 label="Avatar"
                 value={
@@ -393,6 +404,24 @@ const EventSeriesColumn = ({
       {areAllSet(eventSeries) && (
         <fieldset>
           <MergeField
+            label="UUID"
+            fieldName="uuid"
+            fieldSetsUuid={isMergeFieldSelectedOrEmpty(
+              mergeState,
+              "uuid",
+              align
+            )}
+            value={eventSeries.uuid}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", eventSeries.uuid, align)
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
             label="Avatar"
             fieldName="entityAvatar"
             value={
@@ -426,9 +455,6 @@ const EventSeriesColumn = ({
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
-              dispatchMergeActions(
                 setAMergedField("status", eventSeries.status, align)
               )
             }}
@@ -444,9 +470,6 @@ const EventSeriesColumn = ({
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
-              dispatchMergeActions(
                 setAMergedField("name", eventSeries.name, align)
               )
             }}
@@ -461,9 +484,6 @@ const EventSeriesColumn = ({
             value={<RichTextEditor readOnly value={eventSeries.description} />}
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("description", eventSeries.description, align)
               )
@@ -481,9 +501,6 @@ const EventSeriesColumn = ({
             }
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("ownerOrg", eventSeries.ownerOrg, align)
               )
@@ -520,9 +537,6 @@ const EventSeriesColumn = ({
             }
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("uuid", eventSeries.uuid, align)
-              )
               dispatchMergeActions(
                 setAMergedField("adminOrg", eventSeries.adminOrg, align)
               )

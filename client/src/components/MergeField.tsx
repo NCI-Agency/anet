@@ -1,4 +1,5 @@
 import styled from "@emotion/styled"
+import classNames from "classnames"
 import _get from "lodash/get"
 import _has from "lodash/has"
 import _isEqual from "lodash/isEqual"
@@ -15,6 +16,7 @@ const alignOptions: string[] = Object.values(ALIGN_OPTIONS)
 interface MergeFieldProps {
   label: string
   fieldName: string
+  fieldSetsUuid?: boolean
   value?: React.ReactNode
   align: (typeof alignOptions)[number]
   action?: (...args: unknown[]) => unknown
@@ -28,6 +30,7 @@ interface MergeFieldProps {
 const MergeField = ({
   label,
   fieldName,
+  fieldSetsUuid,
   value,
   align,
   action,
@@ -96,6 +99,7 @@ const MergeField = ({
 
   return (
     <MergeFieldBox
+      className={classNames({ "bg-info-subtle": fieldSetsUuid })}
       align={align}
       ref={fieldRef}
       /* We first let its height be auto to get the natural height */
