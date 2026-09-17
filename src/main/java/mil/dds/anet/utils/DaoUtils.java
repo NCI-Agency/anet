@@ -30,6 +30,7 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -118,6 +119,21 @@ public class DaoUtils {
       return null;
     }
     return context.get("principal");
+  }
+
+  public static boolean isAccessToken(Principal principal) {
+    return principal instanceof AccessTokenPrincipal;
+  }
+
+  public static AccessTokenPrincipal getAccessTokenFromContext(GraphQLContext context) {
+    if (!(getPrincipalFromContext(context) instanceof AccessTokenPrincipal accessToken)) {
+      return null;
+    }
+    return accessToken;
+  }
+
+  public static boolean isUser(Principal principal) {
+    return principal instanceof Person;
   }
 
   public static Person getUserFromContext(GraphQLContext context) {
@@ -311,23 +327,41 @@ public class DaoUtils {
         + getAuthorizationOuterQuery("") + memberQuery + " UNION ALL " + communityQuery + "))";
   }
 
-  public static String getReportsWhereClause() {
-    // Users can see their own reports, other users only ever see non-draft/non-rejected reports,
-    // and approvers also see reports pending their approval.
-    return "((reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
-        + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid))"
-        + " OR (reports.state NOT IN (:draftState, :rejectedState))"
-        + " OR (reports.\"approvalStepUuid\" IN ("
-        + " SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN ("
-        + " SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :userUuid))))";
+  public static String getReportsWhereClause(Principal principal, String tableName) {
+    final String sql;
+    if (DaoUtils.isAccessToken(principal)) {
+      // Access tokens only ever see non-draft/non-rejected reports within their tenants.
+      sql = "((%1$s.state NOT IN (:draftState, :rejectedState))"
+          + " AND (%1$s.\"allTenants\" IS TRUE OR %1$s.uuid IN ("
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" IN ("
+          + " SELECT \"tenantUuid\" FROM \"accessTokenTenants\" WHERE \"accessTokenUuid\" = :accessTokenUuid"
+          + "))))";
+    } else {
+      // Users can see their own %1$s, other users only ever see non-draft/non-rejected %1$s
+      // within their tenants, and approvers also see %1$s pending their approval.
+      sql = "((%1$s.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid))"
+          + " OR ((%1$s.state NOT IN (:draftState, :rejectedState))"
+          + " AND (%1$s.\"allTenants\" IS TRUE OR %1$s.uuid IN ("
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" IN ("
+          + " SELECT \"tenantUuid\" FROM \"peopleTenants\" where \"personUuid\" = :userUuid))))"
+          + " OR (%1$s.\"approvalStepUuid\" IN ("
+          + " SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN ("
+          + " SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :userUuid))))";
+    }
+    return sql.formatted(tableName);
   }
 
-  public static Map<String, Object> getReportsParamsMap(Person user) {
+  public static Map<String, Object> getReportsParamsMap(Principal principal) {
     final Map<String, Object> params = new HashMap<>();
-    params.put("isAuthor", true);
-    params.put("userUuid", getUuid(user));
     params.put("draftState", getEnumId(Report.ReportState.DRAFT));
     params.put("rejectedState", getEnumId(Report.ReportState.REJECTED));
+    if (principal instanceof AccessTokenPrincipal accessToken) {
+      params.put("accessTokenUuid", accessToken.getUuid());
+    } else {
+      params.put("isAuthor", true);
+      params.put("userUuid", principal instanceof Person user ? getUuid(user) : null);
+    }
     return params;
   }
 
