@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:4.2.12":
-  version: 4.2.12
-  resolution: "@apollo/client@npm:4.2.12"
+"@apollo/client@npm:4.3.0":
+  version: 4.3.0
+  resolution: "@apollo/client@npm:4.3.0"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -39,7 +39,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/97852e2a88231ea15b3cc6f1cef307f0df655d96d8f96531717f764cb8440b0a8931ca13b8a73623b6fffe156cccdfaf75f940e0d72f928fbc68edad6345e301
+  checksum: 10c0/6fb4030482d88b9d1e4c96faf09f600fc5c4bd8973ea568ccdb579387b698ce8ad8a8e08989b9e725d02733c89f4d9ae95b930e4d09abd3f1da7bba50c35c356
   languageName: node
   linkType: hard
 
@@ -7933,7 +7933,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:4.2.12"
+    "@apollo/client": "npm:4.3.0"
     "@babel/core": "npm:8.0.5"
     "@babel/eslint-parser": "npm:8.0.5"
     "@babel/plugin-proposal-decorators": "npm:8.0.2"
@@ -8051,7 +8051,7 @@ __metadata:
     lodash: "npm:4.18.1"
     milsymbol: "npm:3.0.4"
     ml-matrix: "npm:6.15.0"
-    moment: "npm:2.30.1"
+    moment: "npm:2.31.0"
     moment-timezone: "npm:0.6.3"
     neostandard: "npm:0.13.0"
     pluralize: "npm:8.0.0"
@@ -8066,11 +8066,11 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
     react-joyride: "npm:3.2.0"
-    react-mosaic-component: "npm:7.0.0"
+    react-mosaic-component: "npm:7.1.0"
     react-redux: "npm:9.3.0"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
-    react-router: "npm:7.18.3"
+    react-router: "npm:7.18.4"
     react-scroll: "npm:1.9.3"
     react-test-renderer: "npm:18.3.1"
     react-toastify: "npm:11.1.0"
@@ -15931,10 +15931,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:2.30.1, moment@npm:^2.29.4":
-  version: 2.30.1
-  resolution: "moment@npm:2.30.1"
-  checksum: 10c0/865e4279418c6de666fca7786607705fd0189d8a7b7624e2e56be99290ac846f90878a6f602e34b4e0455c549b85385b1baf9966845962b313699e7cb847543a
+"moment@npm:2.31.0, moment@npm:^2.29.4":
+  version: 2.31.0
+  resolution: "moment@npm:2.31.0"
+  checksum: 10c0/3755b186b8ff62c565685ce69dde55bf46003c0329139be5c8dd7845cd567bfd7d02be3a13e379a25acb9e98f6b87136c4776745e440615a4f5ca8dd9a8815b9
   languageName: node
   linkType: hard
 
@@ -17515,9 +17515,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-mosaic-component@npm:7.0.0":
-  version: 7.0.0
-  resolution: "react-mosaic-component@npm:7.0.0"
+"react-mosaic-component@npm:7.1.0":
+  version: 7.1.0
+  resolution: "react-mosaic-component@npm:7.1.0"
   dependencies:
     classnames: "npm:^2.5.1"
     dnd-core: "npm:16.0.1"
@@ -17529,10 +17529,10 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dnd-multi-backend: "npm:^9.0.0"
     react-dnd-touch-backend: "npm:^16.0.1"
-    uuid: "npm:^11.1.0"
+    uuid: "npm:^11.1.1"
   peerDependencies:
     react: 16 - 19
-  checksum: 10c0/6fb82e19ab71872001150bc5b519572e7eeff73ea84622151e518357ef201f7e3f7513a3a63fd7a3f0bfa995781cf7715a2301480495da1c3684e8458af87501
+  checksum: 10c0/fd71d9f2fa7d2e085b825dc0e0cc31ef2fd58497ee5b6f45f378b54573b0ec07a966a552dcb1fbe74dab2af057251ba2a80c1e9c54dabfb50045417a1e3a2606
   languageName: node
   linkType: hard
 
@@ -17630,9 +17630,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.18.3":
-  version: 7.18.3
-  resolution: "react-router@npm:7.18.3"
+"react-router@npm:7.18.4":
+  version: 7.18.4
+  resolution: "react-router@npm:7.18.4"
   dependencies:
     cookie: "npm:^1.0.1"
     set-cookie-parser: "npm:^2.6.0"
@@ -17642,7 +17642,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10c0/77686cad916f8928e6c4aeafe5f8dc26384e84897849ff7d771ddee67af02b788c103503d029ffa442f7bf42aa47b3779440e70fc1aeae90532120fae4036b0f
+  checksum: 10c0/352d103f9d738c7bf56cbb135c0d3d44e6325d15e360f58b6e844c1f5f8cbcd4ccb2de347f14e53984683fc237505a045633e9cb92c5457a1162dae054e08a32
   languageName: node
   linkType: hard
 
@@ -20351,7 +20351,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^11.1.0":
+"uuid@npm:^11.1.1":
   version: 11.1.1
   resolution: "uuid@npm:11.1.1"
   bin:
