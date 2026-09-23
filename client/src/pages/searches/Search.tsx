@@ -1,7 +1,4 @@
-import {
-  gqlPreferenceFields,
-  gqlSavedSearchFields
-} from "constants/GraphQLDefinitions"
+import { gqlSavedSearchFields } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
@@ -28,7 +25,11 @@ import {
   usePageTitle
 } from "components/Page"
 import PollingContext from "components/PollingContext"
-import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
+import {
+  CATEGORY_EXPORT,
+  CATEGORY_SEARCH,
+  NAME_SEARCH_SORT_ORDER
+} from "components/preferences/PreferencesFieldSet"
 import UserPreferences from "components/preferences/UserPreferences"
 import ReportCollection from "components/ReportCollection"
 import AttachmentSearchResults from "components/search/AttachmentSearchResults"
@@ -81,13 +82,6 @@ import utils from "utils"
 const MAX_NR_OF_EXPORTS = 1000
 export const UNLIMITED_EXPORTS_COMMUNITY = "UNLIMITED_EXPORTS_COMMUNITY"
 
-const GQL_GET_PREFERENCES = gql`
-  query {
-    preferences {
-      ${gqlPreferenceFields}
-    }
-  }
-`
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {
     createSavedSearch(savedSearch: $savedSearch) {
@@ -228,11 +222,19 @@ const Search = ({
   pagination,
   setPagination
 }: SearchProps) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, genericPreferences } = useContext(AppContext)
   const { appSettings } = useContext(PollingContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
-  const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER)
+  const sortOrderPreference = utils.getPreference(
+    currentUser.preferences,
+    genericPreferences,
+    NAME_SEARCH_SORT_ORDER,
+    CATEGORY_SEARCH
+  )
+  const [sortOrder, setSortOrder] = useState(
+    sortOrderPreference ?? DEFAULT_SORT_ORDER
+  )
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
   const [showExportResults, setShowExportResults] = useState(false)
@@ -849,11 +851,9 @@ const Search = ({
   }
 
   async function exportSearchResults(exportType, contentType) {
-    // Get generic preferences that exportResults needs to decide on which columns to include
-    const genericPreferences = await API.query(GQL_GET_PREFERENCES, {})
     await exportResults(
-      genericPreferences.preferences,
       currentUser.preferences,
+      genericPreferences,
       searchQueryParams,
       resultObjectTypes,
       exportType,
