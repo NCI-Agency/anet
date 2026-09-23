@@ -484,8 +484,8 @@ const buildGqlGetDataQuery = ({
 }
 
 export const exportResults = (
-  genericPreferences,
   userPreferences,
+  genericPreferences,
   searchQueryParams,
   queryTypes,
   exportType,
