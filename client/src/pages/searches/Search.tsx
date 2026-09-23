@@ -104,6 +104,8 @@ const GQL_GET_SAVED_SEARCHES = gql`
   }
 `
 
+const SORT_ORDERS = ["Standard Order", "Relevance"]
+const DEFAULT_SORT_ORDER = "Standard Order"
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 10
 const SEARCH_ITEMS = {
@@ -230,6 +232,7 @@ const Search = ({
   const { appSettings } = useContext(PollingContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
   const [showExportResults, setShowExportResults] = useState(false)
@@ -297,37 +300,53 @@ const Search = ({
     () => ({
       ...searchQueryParams,
       pageSize,
-      sortBy: "NAME",
-      sortOrder: "ASC"
+      ...(sortOrder !== DEFAULT_SORT_ORDER
+        ? {}
+        : {
+            sortBy: "NAME",
+            sortOrder: "ASC"
+          })
     }),
-    [searchQueryParams, pageSize]
+    [searchQueryParams, pageSize, sortOrder]
   )
   const attachmentSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
       pageSize,
-      sortBy: "CREATED_AT",
-      sortOrder: "DESC"
+      ...(sortOrder !== DEFAULT_SORT_ORDER
+        ? {}
+        : {
+            sortBy: "CREATED_AT",
+            sortOrder: "DESC"
+          })
     }),
-    [searchQueryParams, pageSize]
+    [searchQueryParams, pageSize, sortOrder]
   )
   const reportsSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
       pageSize,
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC"
+      ...(sortOrder !== DEFAULT_SORT_ORDER
+        ? {}
+        : {
+            sortBy: "ENGAGEMENT_DATE",
+            sortOrder: "DESC"
+          })
     }),
-    [searchQueryParams, pageSize]
+    [searchQueryParams, pageSize, sortOrder]
   )
   const eventSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
       pageSize,
-      sortBy: "START_DATE",
-      sortOrder: "DESC"
+      ...(sortOrder !== DEFAULT_SORT_ORDER
+        ? {}
+        : {
+            sortBy: "START_DATE",
+            sortOrder: "DESC"
+          })
     }),
-    [searchQueryParams, pageSize]
+    [searchQueryParams, pageSize, sortOrder]
   )
   const getSearchQueryParams = (queryType: string) => {
     switch (queryType) {
@@ -551,21 +570,38 @@ const Search = ({
           </Button>
         </span>
         {numResults > 0 && (
-          <div className="ms-2">
-            Results per page:
-            <FormSelect
-              defaultValue={pageSize}
-              onChange={e =>
-                setPageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)
-              }
-            >
-              {PAGESIZES.map(size => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </FormSelect>
-          </div>
+          <>
+            <div className="ms-2">
+              Sort results by:
+              <FormSelect
+                defaultValue={sortOrder}
+                onChange={e => setSortOrder(e.target.value)}
+              >
+                {SORT_ORDERS.map(sortOrder => (
+                  <option key={sortOrder} value={sortOrder}>
+                    {sortOrder}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+            <div className="ms-2">
+              Results per page:
+              <FormSelect
+                defaultValue={pageSize}
+                onChange={e =>
+                  setPageSize(
+                    Number.parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
+                  )
+                }
+              >
+                {PAGESIZES.map(size => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+          </>
         )}
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
