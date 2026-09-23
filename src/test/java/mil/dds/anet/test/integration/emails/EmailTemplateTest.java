@@ -9,6 +9,7 @@ import java.util.List;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
@@ -20,11 +21,13 @@ import mil.dds.anet.emails.AnetEmailAction;
 import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.FutureEngagementUpdated;
 import mil.dds.anet.emails.NewReportCommentEmail;
+import mil.dds.anet.emails.NewUserEmail;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
 import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.emails.ReportRejectionEmail;
+import mil.dds.anet.emails.TenantAccessRequestEmail;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
@@ -101,10 +104,29 @@ class EmailTemplateTest extends AbstractResourceTest {
   }
 
   @Test
+  void testEmailReportTemplate() throws IOException, InterruptedException {
+    final Report report = getTestReport();
+    final Person person = getAdminBean();
+    final ReportEmail action = new ReportEmail();
+    action.setReport(report);
+    action.setSender(person);
+    action.setComment("Test report email");
+    assertActionCanBeSent(action);
+  }
+
+  @Test
   void testFutureEngagementUpdatedTemplate() throws IOException, InterruptedException {
     final Report report = getTestReport();
     final FutureEngagementUpdated action = new FutureEngagementUpdated();
     action.setReport(report);
+    assertActionCanBeSent(action);
+  }
+
+  @Test
+  void testNewUserTemplate() throws IOException, InterruptedException {
+    final Person person = getAdminBean();
+    final NewUserEmail action = new NewUserEmail();
+    action.setPersonUuid(person.getUuid());
     assertActionCanBeSent(action);
   }
 
@@ -143,17 +165,6 @@ class EmailTemplateTest extends AbstractResourceTest {
   }
 
   @Test
-  void testReportTemplate() throws IOException, InterruptedException {
-    final Report report = getTestReport();
-    final Person person = getAdminBean();
-    final ReportEmail action = new ReportEmail();
-    action.setReport(report);
-    action.setSender(person);
-    action.setComment("Test report email");
-    assertActionCanBeSent(action);
-  }
-
-  @Test
   void testReportPublishedTemplate() throws IOException, InterruptedException {
     final Report report = getTestReport();
     final ReportPublishedEmail action = new ReportPublishedEmail();
@@ -174,6 +185,16 @@ class EmailTemplateTest extends AbstractResourceTest {
     deleteComment(comment);
   }
 
+  @Test
+  void testTenantAccessRequestTemplate() throws IOException, InterruptedException {
+    final Tenant tenant = getTestTenant();
+    final Person person = getAdminBean();
+    final TenantAccessRequestEmail action = new TenantAccessRequestEmail();
+    action.setTenantUuid(tenant.getUuid());
+    action.setPersonUuid(person.getUuid());
+    assertActionCanBeSent(action);
+  }
+
   private Report getTestReport() {
     // A test report from Arthur
     final mil.dds.anet.test.client.Report report = withCredentials(adminUser, t -> queryExecutor
@@ -191,6 +212,12 @@ class EmailTemplateTest extends AbstractResourceTest {
 
   private void deleteComment(Comment comment) {
     commentDao.delete(comment.getUuid());
+  }
+
+  private Tenant getTestTenant() {
+    final List<mil.dds.anet.test.client.Tenant> tenants =
+        withCredentials(adminUser, t -> queryExecutor.tenantList("{ uuid }"));
+    return getInput(tenants.getFirst(), Tenant.class);
   }
 
   void assertActionCanBeSent(AnetEmailAction action) throws IOException, InterruptedException {

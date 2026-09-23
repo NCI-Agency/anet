@@ -84,6 +84,8 @@ public class Position extends AbstractEmailableAnetBean
   // annotated below
   private List<AuthorizationGroup> authorizationGroupsAdministrated;
   // annotated below
+  private List<Tenant> tenantsAdministrated;
+  // annotated below
   private List<AuthorizationGroup> authorizationGroups;
 
   public String getName() {
@@ -352,6 +354,14 @@ public class Position extends AbstractEmailableAnetBean
           engine().getAuthorizationGroupDao().getAuthorizationGroupsAdministratedByPosition(uuid);
     }
     return authorizationGroupsAdministrated;
+  }
+
+  @GraphQLQuery(name = "tenantsAdministrated")
+  public List<Tenant> getTenantsAdministrated() {
+    if (tenantsAdministrated == null) {
+      tenantsAdministrated = engine().getTenantDao().getTenantsAdministratedByPosition(uuid);
+    }
+    return tenantsAdministrated;
   }
 
   @GraphQLQuery(name = "authorizationGroups")

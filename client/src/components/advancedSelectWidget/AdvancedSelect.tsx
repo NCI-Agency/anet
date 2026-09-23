@@ -95,6 +95,32 @@ const FETCH_TYPE = {
   DEBOUNCED: "DEBOUNCED"
 }
 
+function matchSearchTerm(item: object, searchTerm: string) {
+  for (const prop in item) {
+    if (["__typename", "uuid", "status"].includes(prop)) {
+      continue
+    }
+    const value = item[prop]
+    if (typeof value !== "string") {
+      continue
+    }
+    if (value?.toLowerCase()?.includes(searchTerm?.toLowerCase())) {
+      return true
+    }
+  }
+  return false
+}
+
+function matchSearchTerms(item: object, searchTerms: string) {
+  const searchTermArray = searchTerms?.match(/\S+/g) ?? []
+  for (const searchTerm of searchTermArray) {
+    if (!matchSearchTerm(item, searchTerm)) {
+      return false
+    }
+  }
+  return true
+}
+
 export interface AdvancedSelectProps {
   fieldName: string
   className?: string // input field name
@@ -194,9 +220,19 @@ const AdvancedSelect = ({
     : null
   const [items, totalCount] = [results?.list ?? [], results?.totalCount ?? 0]
 
+  const staticList = useMemo(() => {
+    const prefilteredList = inclInactive
+      ? selectedFilter?.list
+      : selectedFilter?.list?.filter(
+          // reversed condition, so items without any status at all are also included
+          item => item?.status !== Model.STATUS.INACTIVE
+        )
+    return prefilteredList?.filter(item => matchSearchTerms(item, searchTerms))
+  }, [selectedFilter?.list, inclInactive, searchTerms])
+
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilter?.list) {
+      if (staticList == null) {
         const resourceName = objectType.resourceName
         const listName = selectedFilter?.listName || objectType.listName
         const queryVars = { pageNum, pageSize }
@@ -246,7 +282,7 @@ const AdvancedSelect = ({
       objectType.resourceName,
       pageNum,
       pageSize,
-      selectedFilter?.list,
+      staticList,
       selectedFilter?.listName,
       selectedFilter?.queryVars
     ]
@@ -285,17 +321,17 @@ const AdvancedSelect = ({
 
   useEffect(() => {
     // No need to fetch the data, it is already provided in the filter definition
-    if (selectedFilter?.list) {
+    if (staticList != null) {
       setIsLoading(false)
       setResults(oldResults => ({
         ...oldResults,
-        list: selectedFilter.list,
+        list: staticList,
         pageNum,
         pageSize,
-        totalCount: selectedFilter.list.length
+        totalCount: staticList.length
       }))
     }
-  }, [pageNum, pageSize, selectedFilter?.list])
+  }, [pageNum, pageSize, staticList])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -314,12 +350,14 @@ const AdvancedSelect = ({
       if (!keepSearchText) {
         setSearchTerms(selectedValueAsString)
       }
-      setResults({})
+      if (staticList == null) {
+        setResults({})
+      }
       setPageNum(0)
       setFetchType(FETCH_TYPE.NONE)
       setDoReset(false)
     }
-  }, [doReset, firstFilter, selectedValueAsString, keepSearchText])
+  }, [doReset, firstFilter, selectedValueAsString, keepSearchText, staticList])
 
   const computedDisabledItems = useMemo(() => {
     if (!disableCheckboxIfNullPath) {
@@ -435,7 +473,7 @@ const AdvancedSelect = ({
                                 </div>
                               }
                             />
-                            {!selectedFilter?.list && (
+                            {staticList == null && (
                               <UltimatePagination
                                 Component="footer"
                                 componentClassName="searchPagination"
@@ -481,6 +519,7 @@ const AdvancedSelect = ({
                 <InputGroup>
                   <Form.Control
                     name={fieldName}
+                    className={className}
                     autoComplete={autoComplete}
                     value={searchTerms || ""}
                     placeholder={placeholder}
@@ -558,7 +597,9 @@ const AdvancedSelect = ({
           if (!keepSearchText) {
             setSearchTerms("")
           }
-          setIsLoading(true)
+          if (staticList == null) {
+            setIsLoading(true)
+          }
           setFetchType(FETCH_TYPE.NORMAL)
         } else {
           // overlay is being closed
@@ -573,14 +614,12 @@ const AdvancedSelect = ({
   }
 
   function changeSearchTerms(event) {
-    if (!selectedFilter?.list) {
-      setSearchTerms(event.target.value)
-      // Reset the results state when the search terms change
-      setResults({})
-      setPageNum(0)
-      // Make sure we don't do a fetch for each character being typed
-      setFetchType(FETCH_TYPE.DEBOUNCED)
-    }
+    setSearchTerms(event.target.value)
+    // Reset the results state when the search terms change
+    setResults({})
+    setPageNum(0)
+    // Make sure we don't do a fetch for each character being typed
+    setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
   function handleOnChangeSelect(event) {

@@ -102,6 +102,9 @@ const GQL_GET_REPORT = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
+      }
       ${gqlReportCommunitiesFields}
       approvalStep {
         ${gqlApprovalStepFields}
