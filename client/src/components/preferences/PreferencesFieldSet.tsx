@@ -21,8 +21,10 @@ import utils from "utils"
 import ExportFieldsPanel from "./ExportFieldsPanel"
 
 export const NAME_SYNC_MATRIX_PERIOD = "SYNC_MATRIX_PERIOD"
+export const NAME_SEARCH_SORT_ORDER = "SEARCH_SORT_ORDER"
 export const CATEGORY_SYNC_MATRIX = "sync-matrix"
 export const CATEGORY_EXPORT = "export"
+export const CATEGORY_SEARCH = "search"
 
 const GQL_GET_PREFERENCES = gql`
   query ($preferenceQuery: PreferenceSearchQueryInput) {
