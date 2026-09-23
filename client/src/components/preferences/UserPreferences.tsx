@@ -33,7 +33,7 @@ const UserPreferences = ({
   return (
     <PreferencesFieldset
       category={category}
-      userPreferences={currentUser.preferences}
+      useUserPreferences
       onSubmit={onSubmit}
       saveSuccess={saveSuccess}
       saveError={saveError}
@@ -43,7 +43,7 @@ const UserPreferences = ({
     />
   )
 
-  function onSubmit(values, form, _, preferences) {
+  function onSubmit(values, form, preferences) {
     Object.entries(values).forEach(([key, value]) => {
       // See if the logged user has a value for this preference
       const currentUserPreference = currentUser.preferences.find(

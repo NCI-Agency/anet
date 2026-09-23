@@ -1,7 +1,6 @@
 import {
   gqlAllTaskFields,
-  gqlEntityFieldsMap,
-  gqlPreferenceFields
+  gqlEntityFieldsMap
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, Tooltip } from "@blueprintjs/core"
@@ -31,14 +30,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
-
-const GQL_GET_PREFERENCES = gql`
-  query {
-    preferences {
-      ${gqlPreferenceFields}
-    }
-  }
-`
+import utils from "utils"
 
 const GET_TASKS = gql`
   query ($taskUuid: String, $includeTask: Boolean!) {
@@ -148,9 +140,17 @@ const EventMatrix = ({
   eventSeries
 }: EventMatrixProps) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, genericPreferences } = useContext(AppContext)
   const { securityBannerOffset } = useContext(ResponsiveLayoutContext)
-  const [periodLengthInDays, setPeriodLengthInDays] = useState<number>(0)
+  const periodLengthInDaysPreference = utils.getPreference(
+    currentUser.preferences,
+    genericPreferences,
+    NAME_SYNC_MATRIX_PERIOD,
+    CATEGORY_SYNC_MATRIX
+  )
+  const [periodLengthInDays, setPeriodLengthInDays] = useState<number>(
+    periodLengthInDaysPreference ?? 0
+  )
   const [startDay, setStartDay] = useState(moment())
   const [periodDays, setPeriodDays] = useState([])
   const [events, setEvents] = useState([])
@@ -158,32 +158,6 @@ const EventMatrix = ({
   const [fetchError, setFetchError] = useState(null)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const includeTask = !!taskUuid
-
-  useEffect(() => {
-    const loadPreferences = async () => {
-      const userPreference = currentUser.preferences?.find(
-        p =>
-          p.preference?.name === NAME_SYNC_MATRIX_PERIOD &&
-          p.preference?.category === CATEGORY_SYNC_MATRIX
-      )
-      if (userPreference) {
-        setPeriodLengthInDays(userPreference.value)
-      } else {
-        try {
-          const genericPreferences = await API.query(GQL_GET_PREFERENCES)
-          const genericPreference = genericPreferences.preferences.find(
-            p =>
-              p.name === NAME_SYNC_MATRIX_PERIOD &&
-              p.category === CATEGORY_SYNC_MATRIX
-          )
-          setPeriodLengthInDays(genericPreference.defaultValue)
-        } catch (err) {
-          setFetchError(err)
-        }
-      }
-    }
-    loadPreferences()
-  }, [currentUser])
 
   function shiftPeriod(days: number) {
     setStartDay(prev => moment(prev).add(days, "days"))
