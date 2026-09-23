@@ -283,6 +283,48 @@ const PreferencesFieldset = ({
                             }}
                           </FastField>
                         )}
+
+                      {preference.type === "enum" && (
+                        <FastField name={preference.uuid}>
+                          {({ field, form }) => {
+                            const choices = preference.allowedValues
+                              ? Object.fromEntries(
+                                  preference.allowedValues
+                                    .split(",")
+                                    .map((v: string) => [
+                                      v.trim(),
+                                      {
+                                        label: getLabelFromDictionary(
+                                          preference.name,
+                                          v.trim()
+                                        )
+                                      }
+                                    ])
+                                )
+                              : {}
+                            const buttons =
+                              FieldHelper.customEnumButtons(choices)
+                            const selected = field.value
+                              ? field.value.split(",").map(v => v.trim())
+                              : []
+
+                            return (
+                              <FieldHelper.RadioButtonToggleGroupField
+                                field={{ ...field, value: selected }}
+                                form={form}
+                                label={preference.description}
+                                buttons={buttons}
+                                onChange={selectedValue => {
+                                  form.setFieldValue(
+                                    preference.uuid,
+                                    selectedValue
+                                  )
+                                }}
+                              />
+                            )
+                          }}
+                        </FastField>
+                      )}
                     </React.Fragment>
                   ))}
                 </Fieldset>
