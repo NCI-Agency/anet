@@ -7,6 +7,7 @@ import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
 import { CATEGORY_EXPORT } from "components/preferences/PreferencesFieldSet"
 import FileSaver from "file-saver"
+import utils from "utils"
 
 const getEmailAddresses = () => `
   emailAddresses(network: $emailNetwork) {
@@ -642,17 +643,12 @@ export const exportResults = (
     preferenceName: string,
     preferenceCategory: string
   ): string[] {
-    const preference =
-      userPreferences.find(
-        p =>
-          p.preference.name === preferenceName &&
-          p.preference.category === preferenceCategory
-      ) ??
-      genericPreferences.find(
-        p => p.name === preferenceName && p.category === preferenceCategory
-      )
-
-    const value = preference?.value ?? preference?.defaultValue
+    const value = utils.getPreference(
+      userPreferences,
+      genericPreferences,
+      preferenceName,
+      preferenceCategory
+    )
 
     return value ? value.split(",") : []
   }
