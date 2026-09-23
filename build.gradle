@@ -524,30 +524,6 @@ tasks.register('dbRestore', DockerExecContainer) {
 }
 dbRestore.finalizedBy('dbDropLargeObjects')
 
-tasks.register('dockerBuildImage', DockerBuildImage) {
-	dependsOn installDist
-	description = "Builds anet-app-server container image."
-	doFirst {
-		copy {
-			from 'docker/anet-app-server/Dockerfile'
-			into 'build/install'
-		}
-	}
-	inputDir = project.file('build/install')
-	List<String> resultTags = ["ncia/anet-app-server:${projectVersion}"]
-	if (projectBranch == "main")
-		resultTags << 'ncia/anet-app-server:latest'
-	images.set(resultTags)
-}
-
-tasks.register('dockerPushLatestImage', DockerPushImage) {
-	images.set(['ncia/anet-app-server:latest'])
-}
-
-tasks.register('dockerPushImage', DockerPushImage) {
-	images.set(["ncia/anet-app-server:${projectVersion}"])
-}
-
 // Database container (PostgreSQL)
 
 tasks.register('dockerPullDB', DockerPullImage) {
