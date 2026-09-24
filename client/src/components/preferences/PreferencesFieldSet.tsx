@@ -1,48 +1,25 @@
-import { gqlPreferenceFields } from "constants/GraphQLDefinitions"
-import { gql } from "@apollo/client"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API from "api"
+import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import {
-  mapPageDispatchersToProps,
-  PageDispatchersPropType,
-  useBoilerplate
-} from "components/Page"
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
-import React, { useMemo } from "react"
+import React, { useContext, useMemo } from "react"
 import { Button } from "react-bootstrap"
-import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import utils from "utils"
 import ExportFieldsPanel from "./ExportFieldsPanel"
 
 export const NAME_SYNC_MATRIX_PERIOD = "SYNC_MATRIX_PERIOD"
+export const NAME_SEARCH_SORT_ORDER = "SEARCH_SORT_ORDER"
 export const CATEGORY_SYNC_MATRIX = "sync-matrix"
 export const CATEGORY_EXPORT = "export"
-
-const GQL_GET_PREFERENCES = gql`
-  query ($preferenceQuery: PreferenceSearchQueryInput) {
-    preferenceList(query: $preferenceQuery) {
-      list {
-        ${gqlPreferenceFields}
-      }
-    }
-  }
-`
-
-interface UserPreference {
-  preference: { uuid: string }
-  value: string
-}
+export const CATEGORY_SEARCH = "search"
 
 interface PreferencesFieldsetProps {
-  pageDispatchers?: PageDispatchersPropType
   category?: string
-  userPreferences?: UserPreference[]
+  useUserPreferences?: boolean
   onSubmit: (
     values: Record<string, any>,
     formikBag: any,
@@ -79,9 +56,8 @@ function convertStringValueToType(value: any, type: string) {
 }
 
 const PreferencesFieldset = ({
-  pageDispatchers,
   category = null,
-  userPreferences = [],
+  useUserPreferences,
   onSubmit,
   title = "Preferences",
   actionLabel = "Save preferences",
@@ -89,37 +65,24 @@ const PreferencesFieldset = ({
   saveError,
   exportObjectTypes = []
 }: PreferencesFieldsetProps) => {
-  const { loading, error, data, refetch } = API.useApiQuery(
-    GQL_GET_PREFERENCES,
-    {
-      preferenceQuery: { category, pageSize: 0 }
-    }
-  )
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageProps: DEFAULT_PAGE_PROPS,
-    searchProps: DEFAULT_SEARCH_PROPS,
-    pageDispatchers
-  })
+  const { currentUser, genericPreferences } = useContext(AppContext)
 
   const preferences = useMemo(() => {
-    const useUserPrefs =
-      Array.isArray(userPreferences) && userPreferences.length > 0
-
-    const prefs = (data?.preferenceList?.list ?? []).map(genericPref => {
-      let valueToUse = genericPref.defaultValue
-      if (useUserPrefs) {
-        const match = userPreferences.find(
-          up => up.preference.uuid === genericPref.uuid
-        )
-        valueToUse = match ? match.value : genericPref.defaultValue
-      }
-      return {
-        ...genericPref,
-        value: convertStringValueToType(valueToUse, genericPref.type)
-      }
-    })
+    const prefs = (genericPreferences ?? [])
+      .filter(genericPref => !category || genericPref.category === category)
+      .map(genericPref => {
+        let valueToUse = genericPref.defaultValue
+        if (useUserPreferences) {
+          const match = currentUser.preferences?.find(
+            up => up.preference.uuid === genericPref.uuid
+          )
+          valueToUse = match ? match.value : genericPref.defaultValue
+        }
+        return {
+          ...genericPref,
+          value: convertStringValueToType(valueToUse, genericPref.type)
+        }
+      })
 
     if (!exportObjectTypes || exportObjectTypes.length === 0) {
       return prefs
@@ -131,7 +94,13 @@ const PreferencesFieldset = ({
       }
       return exportObjectTypes.includes(pref.name)
     })
-  }, [data?.preferenceList?.list, userPreferences, exportObjectTypes])
+  }, [
+    genericPreferences,
+    currentUser.preferences,
+    category,
+    useUserPreferences,
+    exportObjectTypes
+  ])
 
   const exportPrefs = useMemo(
     () => preferences.filter(p => isExportFieldsPref(p.category)),
@@ -149,17 +118,14 @@ const PreferencesFieldset = ({
     }, {})
   }, [preferences])
 
-  if (done) {
-    return result
-  }
-  if (_get(data.preferenceList.list, "length", 0) === 0) {
+  if (_get(genericPreferences, "length", 0) === 0) {
     return <em>No preferences found</em>
   }
 
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values, form) => onSubmit(values, form, refetch, preferences)}
+      onSubmit={(values, form) => onSubmit(values, form, preferences)}
       enableReinitialize
       validate={vals => {
         const errors = {}
@@ -281,6 +247,48 @@ const PreferencesFieldset = ({
                             }}
                           </FastField>
                         )}
+
+                      {preference.type === "enum" && (
+                        <FastField name={preference.uuid}>
+                          {({ field, form }) => {
+                            const choices = preference.allowedValues
+                              ? Object.fromEntries(
+                                  preference.allowedValues
+                                    .split(",")
+                                    .map((v: string) => [
+                                      v.trim(),
+                                      {
+                                        label: getLabelFromDictionary(
+                                          preference.name,
+                                          v.trim()
+                                        )
+                                      }
+                                    ])
+                                )
+                              : {}
+                            const buttons =
+                              FieldHelper.customEnumButtons(choices)
+                            const selected = field.value
+                              ? field.value.split(",").map(v => v.trim())
+                              : []
+
+                            return (
+                              <FieldHelper.RadioButtonToggleGroupField
+                                field={{ ...field, value: selected }}
+                                form={form}
+                                label={preference.description}
+                                buttons={buttons}
+                                onChange={selectedValue => {
+                                  form.setFieldValue(
+                                    preference.uuid,
+                                    selectedValue
+                                  )
+                                }}
+                              />
+                            )
+                          }}
+                        </FastField>
+                      )}
                     </React.Fragment>
                   ))}
                 </Fieldset>
@@ -319,4 +327,4 @@ const PreferencesFieldset = ({
   )
 }
 
-export default connect(null, mapPageDispatchersToProps)(PreferencesFieldset)
+export default PreferencesFieldset

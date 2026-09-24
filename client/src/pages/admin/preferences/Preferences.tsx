@@ -1,8 +1,9 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import AppContext from "components/AppContext"
 import { jumpToTop, usePageTitle } from "components/Page"
 import PreferencesFieldset from "components/preferences/PreferencesFieldSet"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 
 const GQL_UPDATE_PREFERENCES = gql`
   mutation ($preferences: [PreferenceInput]!) {
@@ -10,6 +11,7 @@ const GQL_UPDATE_PREFERENCES = gql`
   }
 `
 const Preferences = () => {
+  const { loadAppData } = useContext(AppContext)
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const title = "Default Application Preferences"
@@ -23,27 +25,27 @@ const Preferences = () => {
     />
   )
 
-  function onSubmit(values, form, refetch) {
+  function onSubmit(values, form) {
     const preferences = Object.entries(values).map(([key, value]) => ({
       uuid: key,
       defaultValue: String(value)
     }))
 
     return API.mutation(GQL_UPDATE_PREFERENCES, { preferences })
-      .then(() => onSubmitSuccess(values, form, refetch))
+      .then(() => onSubmitSuccess(values, form))
       .catch(error => {
         handleError(error)
         form.setSubmitting(false)
       })
   }
 
-  function onSubmitSuccess(values, form, refetch) {
+  async function onSubmitSuccess(values, form) {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess(`${title} saved`)
-    refetch()
+    await loadAppData()
     jumpToTop()
   }
 

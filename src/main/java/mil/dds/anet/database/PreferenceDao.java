@@ -43,9 +43,8 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
   public List<Preference> getAllPreferences() {
     final Handle handle = getDbHandle();
     try {
-      return handle
-          .createQuery("/* getAllPreferences */ SELECT " + PREFERENCE_FIELDS + " FROM preferences")
-          .map(new PreferenceMapper()).list();
+      return handle.createQuery("/* getAllPreferences */ SELECT " + PREFERENCE_FIELDS
+          + " FROM preferences ORDER BY category, name").map(new PreferenceMapper()).list();
     } finally {
       closeDbHandle(handle);
     }
