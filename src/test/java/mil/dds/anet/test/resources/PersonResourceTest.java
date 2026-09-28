@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.text.Collator;
 import java.time.Instant;
@@ -31,6 +32,9 @@ import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.PersonPreferenceInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.PersonSearchSortBy;
+import mil.dds.anet.test.client.PhoneNumber;
+import mil.dds.anet.test.client.PhoneNumberInput;
+import mil.dds.anet.test.client.PhoneNumberType;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
@@ -61,7 +65,8 @@ public class PersonResourceTest extends AbstractResourceTest {
       String.format("uuid updatedAt name code type role status organization { uuid } %1$s",
           _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS = String
-      .format("uuid familyName givenName status user phoneNumber rank biography obsoleteCountry"
+      .format("uuid familyName givenName status user phoneNumber { type details }"
+          + " rank biography obsoleteCountry"
           + " country { uuid name } code gender endOfTourDate"
           + " users { uuid domainUsername } pendingVerification createdAt updatedAt"
           + " preferences { value } customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
@@ -342,6 +347,14 @@ public class PersonResourceTest extends AbstractResourceTest {
         .anyMatch(ea -> "jack@example.com".equals(ea.getAddress()))).count();
     assertThat(matchCount).isEqualTo(1);
 
+    // Search by phone number digits
+    query2.setText("123");
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
+    matchCount =
+        searchResults.getList().stream().filter(p -> p.getFamilyName().equals("Jackson")).count();
+    assertThat(matchCount).isEqualTo(1);
+
     // Search for persons with biography filled
     final PersonSearchQueryInput query3 =
         PersonSearchQueryInput.builder().withHasBiography(true).build();
@@ -355,6 +368,46 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query4));
     assertThat(searchResults.getList()).isNotEmpty();
+  }
+
+  @Test
+  void testPersonPhoneNumbers() {
+    // Seed people with no phone stay null; migrated numbers are WORK
+    final Person arthur =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, admin.getUuid()));
+    assertThat(arthur.getPhoneNumber()).isNull();
+
+    final String erinUuid = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9";
+    final Person erin = withCredentials(adminUser, t -> queryExecutor.person(FIELDS, erinUuid));
+    assertThat(erin.getPhoneNumber()).extracting(PhoneNumber::getType, PhoneNumber::getDetails)
+        .containsExactly(tuple(PhoneNumberType.WORK, "+9-23-2323-2323"));
+
+    // Create a person with two numbers; empty details are dropped
+    final PersonInput personInput = PersonInput.builder().withFamilyName("PhoneNumbers Test")
+        .withStatus(Status.ACTIVE)
+        .withPhoneNumber(List.of(
+            PhoneNumberInput.builder().withType(PhoneNumberType.MOBILE)
+                .withDetails("+31 6 12345678").build(),
+            PhoneNumberInput.builder().withType(PhoneNumberType.WORK).withDetails("+1-555-0100")
+                .build(),
+            PhoneNumberInput.builder().withType(PhoneNumberType.WORK).withDetails("  ").build()))
+        .build();
+    final Person created =
+        withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, personInput));
+    assertThat(created).isNotNull();
+    assertThat(created.getPhoneNumber()).extracting(PhoneNumber::getType, PhoneNumber::getDetails)
+        .containsExactly(tuple(PhoneNumberType.MOBILE, "+31 6 12345678"),
+            tuple(PhoneNumberType.WORK, "+1-555-0100"));
+
+    // Empty list is stored as null
+    final PersonInput clearInput = getPersonInput(created);
+    clearInput.setPhoneNumber(List.of());
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updatePerson("", false, clearInput));
+    assertThat(nrUpdated).isOne();
+    final Person cleared =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, created.getUuid()));
+    assertThat(cleared.getPhoneNumber()).isNull();
   }
 
   @ParameterizedTest
