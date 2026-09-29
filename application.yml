@@ -77,14 +77,21 @@ anet:
   # Settings for the Exchange server to receive MART reports
   mart:
     hostname: ${ANET_MART_EXCHANGE_SERVER:localhost}
-    username: ${ANET_MART_EXCHANGE_USERNAME}
-    password: ${ANET_MART_EXCHANGE_PASSWORD}
     trusted-sender: ${ANET_MART_TRUSTED_SENDER}
     disable-certificate-validation: ${ANET_MART_DISABLE_CERTIFICATE_VALIDATION:false}
     mark-as-read: ${ANET_MART_MARK_AS_READ:true}
     disabled: ${ANET_MART_DISABLE:true}
     mail-polling-delay-in-seconds: 10
     max-number-emails-pulled: 40
+    tenants:
+      mart:
+        tenantName: "Tenant #1"
+        username: ${ANET_MART_EXCHANGE_USERNAME}
+        password: ${ANET_MART_EXCHANGE_PASSWORD}
+      mart2:
+        tenantName: "Department Q"
+        username: ${ANET_MART2_EXCHANGE_USERNAME}
+        password: ${ANET_MART2_EXCHANGE_PASSWORD}
 
   # Set path of dictionary to be loaded
   # If you want to place the dictionary file under a subfolder of main application folder,
