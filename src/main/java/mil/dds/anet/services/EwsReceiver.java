@@ -31,13 +31,11 @@ public class EwsReceiver implements IMailReceiver {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final ExchangeService exchangeService;
+  private final ExchangeServiceFactory exchangeServiceFactory;
   private final AnetConfig.MartExchangeConfiguration mailClientConfiguration;
 
   public EwsReceiver(AnetConfig config) {
-    final ExchangeServiceFactory exchangeServiceFactory =
-        new ExchangeServiceFactory(config.getMart());
-    this.exchangeService = exchangeServiceFactory.getExchangeService();
+    this.exchangeServiceFactory = new ExchangeServiceFactory(config.getMart());
     this.mailClientConfiguration = config.getMart();
   }
 
@@ -54,7 +52,7 @@ public class EwsReceiver implements IMailReceiver {
     }
   }
 
-  public List<EmailMessage> downloadEmails() {
+  public List<EmailMessage> downloadEmails(AnetConfig.TenantProperties tenantProperties) {
     try {
       final PropertySet itemPropertySet = new PropertySet(BasePropertySet.FirstClassProperties);
       itemPropertySet.setRequestedBodyType(BodyType.Text);
@@ -69,6 +67,8 @@ public class EwsReceiver implements IMailReceiver {
 
       // Get oldest e-mails first, process in sequence
       view.getOrderBy().add(ItemSchema.DateTimeSent, SortDirection.Ascending);
+      final ExchangeService exchangeService =
+          exchangeServiceFactory.getExchangeService(tenantProperties);
       final FindItemsResults<Item> findResults =
           exchangeService.findItems(WellKnownFolderName.Inbox, filterUnreadEmails, view);
 

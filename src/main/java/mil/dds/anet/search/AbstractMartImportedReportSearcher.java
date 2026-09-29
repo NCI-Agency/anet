@@ -49,6 +49,10 @@ public abstract class AbstractMartImportedReportSearcher
     qb.addFromClause(", mir2");
     qb.addWhereClause("mir2.\"reportUuid\" = " + tableName + ".\"reportUuid\"");
 
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      qb.addStringEqualsClause("tenantUuid", tableName + ".\"tenantUuid\"", query.getTenantUuid());
+    }
+
     if (!Utils.isEmptyOrNull(query.getPersonUuid())) {
       qb.addStringEqualsClause("personUuid", tableName + ".\"personUuid\"", query.getPersonUuid());
     }

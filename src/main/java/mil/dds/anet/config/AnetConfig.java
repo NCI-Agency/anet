@@ -6,6 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
 import java.util.Map;
 import mil.dds.anet.utils.AnetConstants;
 import org.slf4j.Logger;
@@ -299,14 +300,13 @@ public class AnetConfig {
 
   public static class MartExchangeConfiguration {
     private String hostname;
-    private String userName;
-    private String password;
     private String trustedSender;
     private boolean disableCertificateValidation;
     private boolean markAsRead;
     private boolean disabled;
     private long mailPollingDelayInSeconds;
     private int maxNumberEmailsPulled;
+    private Map<String, TenantProperties> tenants = new HashMap<>();
 
     public String getHostname() {
       return hostname;
@@ -314,22 +314,6 @@ public class AnetConfig {
 
     public void setHostname(String host) {
       this.hostname = host;
-    }
-
-    public String getUserName() {
-      return userName;
-    }
-
-    public void setUserName(String userName) {
-      this.userName = userName;
-    }
-
-    public String getPassword() {
-      return password;
-    }
-
-    public void setPassword(String password) {
-      this.password = password;
     }
 
     public String getTrustedSender() {
@@ -378,6 +362,44 @@ public class AnetConfig {
 
     public void setMaxNumberEmailsPulled(int maxNumberEmailsPulled) {
       this.maxNumberEmailsPulled = maxNumberEmailsPulled;
+    }
+
+    public Map<String, TenantProperties> getTenants() {
+      return tenants;
+    }
+
+    public void setTenants(Map<String, TenantProperties> tenants) {
+      this.tenants = tenants;
+    }
+  }
+
+  public static class TenantProperties {
+    private String tenantName;
+    private String userName;
+    private String password;
+
+    public String getTenantName() {
+      return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+      this.tenantName = tenantName;
+    }
+
+    public String getUserName() {
+      return userName;
+    }
+
+    public void setUserName(String userName) {
+      this.userName = userName;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
     }
   }
 }
