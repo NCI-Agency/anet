@@ -11,6 +11,7 @@ public class MartImportedReportMapper implements RowMapper<MartImportedReport> {
   @Override
   public MartImportedReport map(ResultSet rs, StatementContext ctx) throws SQLException {
     final MartImportedReport martImportedReport = new MartImportedReport();
+    martImportedReport.setTenantUuid(rs.getString("martImportedReports_tenantUuid"));
     martImportedReport.setPersonUuid(rs.getString("martImportedReports_personUuid"));
     martImportedReport.setReportUuid(rs.getString("martImportedReports_reportUuid"));
     martImportedReport.setSubmittedAt(

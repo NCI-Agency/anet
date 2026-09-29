@@ -22,16 +22,15 @@ public class ExchangeServiceFactory {
     this.mailClientConfiguration = mailClientConfiguration;
   }
 
-  public ExchangeService getExchangeService() {
+  public ExchangeService getExchangeService(AnetConfig.TenantProperties tenantProperties) {
     if (disableCertificateCheck) {
       logger.warn(
           "Security warning: EWS SSL X.509 certificate check has been disabled! Do not use this option in production / operations / on high side.");
     }
     final ExchangeService service =
         disableCertificateCheck ? new TrustEveryoneExchangeService() : new ExchangeService();
-
-    final ExchangeCredentials credentials = new WebCredentials(
-        this.mailClientConfiguration.getUserName(), mailClientConfiguration.getPassword());
+    final ExchangeCredentials credentials =
+        new WebCredentials(tenantProperties.getUserName(), tenantProperties.getPassword());
     service.setCredentials(credentials);
     final URI ewsUrl = makeEwsUrl(mailClientConfiguration.getHostname());
     logger.info("EWS-URL {}", ewsUrl);
