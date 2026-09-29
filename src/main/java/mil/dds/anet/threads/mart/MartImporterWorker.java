@@ -9,6 +9,7 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceL
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.JobHistory;
+import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.services.IMailReceiver;
@@ -26,45 +27,48 @@ public class MartImporterWorker extends AbstractWorker {
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
   public static final String TRANSMISSION_LOG_ATTACHMENT = "mart_transmission_log.json";
 
+  private final AnetConfig.MartExchangeConfiguration mailClientConfiguration;
   private final IMailReceiver mailReceiver;
   private final IMartReportImporterService reportImporter;
   private final IMartTransmissionLogImporterService transmissionLogImporter;
 
-  public MartImporterWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
+  public MartImporterWorker(AnetConfig config, AnetDictionary dict, JobHistoryDao jobHistoryDao,
       IMailReceiver mailReceiver, IMartReportImporterService reportImporter,
       IMartTransmissionLogImporterService transmissionLogImporter) {
     super(dict, jobHistoryDao, "MartReportImporterWorker waking up to get MART reports!");
+    this.mailClientConfiguration = config.getMart();
     this.mailReceiver = mailReceiver;
     this.reportImporter = reportImporter;
     this.transmissionLogImporter = transmissionLogImporter;
   }
 
-  private List<EmailMessage> messages;
-
   @Scheduled(initialDelay = 35, fixedDelayString = "${anet.mart.mail-polling-delay-in-seconds:10}",
       timeUnit = TimeUnit.SECONDS)
   @Override
   public void run() {
-    this.messages = mailReceiver.downloadEmails();
-    if (!this.messages.isEmpty()) {
-      super.run();
-    }
+    super.run();
   }
 
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
-    try {
-      for (final EmailMessage email : this.messages) {
-        processEmailMessage(email);
+    mailClientConfiguration.getTenants().forEach((tenantKey, tenantProperties) -> {
+      final List<EmailMessage> messages = mailReceiver.downloadEmails(tenantProperties);
+      if (!messages.isEmpty()) {
+        try {
+          for (final EmailMessage email : messages) {
+            processEmailMessage(tenantProperties.getTenantName(), email);
+          }
+          // If we get here transaction was successful, post-process emails
+          mailReceiver.postProcessEmails(messages);
+        } catch (Exception e) {
+          logger.error("Exception processing MART email messages for tenant with key={}", tenantKey,
+              e);
+        }
       }
-      // If we get here transaction was successful, post-process emails
-      mailReceiver.postProcessEmails(this.messages);
-    } catch (Exception e) {
-      logger.error("Exception processing MART email messages", e);
-    }
+    });
   }
 
-  private void processEmailMessage(EmailMessage email) {
+  private void processEmailMessage(String tenantName, EmailMessage email) {
     final List<FileAttachment> attachments = new ArrayList<>();
     try {
       email.load();
@@ -78,12 +82,12 @@ public class MartImporterWorker extends AbstractWorker {
         }
       }
       // Process mart report in email
-      reportImporter.processMartReport(attachments);
+      reportImporter.processMartReport(tenantName, attachments);
       // If transmission log in email process
       attachments.stream()
           .filter(attachment -> attachment.getName().equalsIgnoreCase(TRANSMISSION_LOG_ATTACHMENT))
           .findFirst().ifPresent(attachment -> transmissionLogImporter
-              .processTransmissionLog(attachment, getEmailReceivedTime(email)));
+              .processTransmissionLog(tenantName, attachment, getEmailReceivedTime(email)));
     } catch (Exception e) {
       logger.error("Could not load information from email", e);
     }

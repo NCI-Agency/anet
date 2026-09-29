@@ -881,6 +881,7 @@ type MartImportedReport {
   sequence: Long
   state: State
   submittedAt: Instant
+  tenant: Tenant
 }
 
 """"""
@@ -895,6 +896,7 @@ input MartImportedReportSearchQueryInput {
   sortOrder: SortOrder
   state: State
   status: Status
+  tenantUuid: String
   text: String
 }
 
