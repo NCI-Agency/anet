@@ -35,10 +35,10 @@ test.beforeEach(t => {
   let builder = new webdriver.Builder()
   const chrome = require("selenium-webdriver/chrome")
   const options = new chrome.Options(capabilities)
-    .setBrowserVersion("131") // or "stable"
+    .setBrowserVersion("stable") // "stable" or a specific version, e.g. "131"
     .addArguments([
       "--incognito",
-      "--headless=old",
+      "--headless",
       "--disable-gpu",
       "--disable-search-engine-choice-screen",
       "--disable-dev-shm-usage",
