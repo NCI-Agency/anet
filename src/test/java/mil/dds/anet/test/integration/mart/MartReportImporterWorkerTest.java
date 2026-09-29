@@ -128,15 +128,17 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
     // Mock the mail exchange server
     final IMailReceiver mailReceiverMock = Mockito.mock();
-    when(mailReceiverMock.downloadEmails()).thenReturn(
-        // reports and a transmission log (for 9 reports)
-        List.of(reportMessage1, reportMessage1dup, reportMessage2, reportMessage3, reportMessage4,
-            reportMessage5, reportMessage6, reportMessage7, reportMessage8, reportMessage9,
-            transmissionLogMessage),
-        // 10th report
-        List.of(reportMessage10));
+    when(mailReceiverMock.downloadEmails(
+        Mockito.argThat(tenantProperties -> MART_TENANT.equals(tenantProperties.getTenantName()))))
+        .thenReturn(
+            // reports and a transmission log (for 9 reports)
+            List.of(reportMessage1, reportMessage1dup, reportMessage2, reportMessage3,
+                reportMessage4, reportMessage5, reportMessage6, reportMessage7, reportMessage8,
+                reportMessage9, transmissionLogMessage),
+            // 10th report
+            List.of(reportMessage10));
 
-    martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
+    martReportImporterWorker = new MartImporterWorker(config, dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
   }
 

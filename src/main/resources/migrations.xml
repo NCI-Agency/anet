@@ -7586,6 +7586,27 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="add-martImportedReports-tenant" author="gjvoosten">
+		<addColumn tableName="martImportedReports">
+			<column name="tenantUuid" type="${uuid_type}" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			constraintName="FK_martImportedReports_tenant"
+			baseTableName="martImportedReports"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<!-- Link martImportedReports to initial tenant -->
+		<sql>
+			UPDATE "martImportedReports"
+			SET "tenantUuid" = (SELECT uuid FROM tenants WHERE name = 'Tenant #1');
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
