@@ -1893,8 +1893,8 @@ INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "
 -- End of test data for assessments
 
 -- Add mart imported report
-INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "state", "submittedAt", "receivedAt", "errors") VALUES
-  (1, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+INSERT INTO "martImportedReports" ("sequence", "tenantUuid", "personUuid", "reportUuid", "state", "submittedAt", "receivedAt", "errors") VALUES
+  (1, (SELECT uuid FROM tenants WHERE name = 'Tenant #1'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
 -- Link reports to tenant
 INSERT INTO "reportTenants" ("tenantUuid", "reportUuid")
