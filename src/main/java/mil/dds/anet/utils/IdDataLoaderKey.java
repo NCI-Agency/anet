@@ -23,6 +23,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 
 // ID batching data loaders
 public enum IdDataLoaderKey {
@@ -46,7 +47,8 @@ public enum IdDataLoaderKey {
   REPORTS(ReportDao.TABLE_NAME), // -
   SAVED_SEARCHES(SavedSearchDao.TABLE_NAME), // -
   SUBSCRIPTIONS(SubscriptionDao.TABLE_NAME), // -
-  TASKS(TaskDao.TABLE_NAME);
+  TASKS(TaskDao.TABLE_NAME), // -
+  TENANTS(TenantDao.TABLE_NAME);
 
   private static final Map<String, IdDataLoaderKey> BY_TABLE_NAME = new HashMap<>();
   static {

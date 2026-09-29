@@ -42,6 +42,12 @@ public abstract class AbstractMartImportedReportSearcher
                 + " ORDER BY \"reportUuid\", sequence DESC) AS "
             : "") + tableName);
 
+    // Note: statement order matters here, because of the addFromClause below
+    if (!Utils.isEmptyOrNull(query.getTenantName())) {
+      qb.addFromClause("JOIN tenants mirt ON mirt.uuid = " + tableName + ".\"tenantUuid\"");
+      qb.addStringEqualsClause("tenantName", "mirt.name", query.getTenantName());
+    }
+
     // Add the count for each imported report
     qb.addWithClause(
         "mir2 AS (SELECT COUNT(*), \"reportUuid\" FROM " + tableName + " GROUP BY \"reportUuid\")");
