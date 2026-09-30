@@ -677,6 +677,9 @@ fields:
     phoneNumber:
       label: Phone
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']
+      types:
+        - Work
+        - Mobile
     country:
       label: Nationality
       optional: false
