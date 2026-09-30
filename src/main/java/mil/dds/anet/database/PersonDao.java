@@ -414,9 +414,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, winnerUuid,
           winner.getEmailAddresses());
 
-      // Phone numbers are JSON on people.phoneNumber; update(winner) already saved the merged list
-      // chosen in the UI (same as emailAddresses: loser values are not kept unless selected).
-
       // Update customSensitiveInformation for winner
       DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, PersonDao.TABLE_NAME, winnerUuid,
           winner.customSensitiveInformationKey(), winner.getCustomSensitiveInformation());

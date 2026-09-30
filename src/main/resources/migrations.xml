@@ -7379,8 +7379,7 @@
 			  Fully self-contained migration for the complete full-text indexing set-up;
 			  can be run multiple times, and will be run every time it changes (runOnchange).
 			-->
-			-- Rebuild after people.phoneNumber JSON: that migration drops more_text CASCADE,
-			-- which removes mv_fts_people. XML comments are not part of the Liquibase checksum.
+			-- Recreate after people.phoneNumber JSON.
 
 			<!-- Drop materialized views -->
 			DROP MATERIALIZED VIEW IF EXISTS mv_fts_attachments;
