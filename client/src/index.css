@@ -1353,6 +1353,19 @@ header.searchPagination {
   align-items: center;
 }
 
+#fg-phoneNumber > .row {
+  align-items: flex-start;
+}
+
+#fg-phoneNumber .form-control-plaintext {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#fg-phoneNumber .form-label {
+  padding-top: 0.5rem;
+}
+
 #fg-position .col-sm-3,
 #fg-additionalPositions .col-sm-3,
 #fg-prevPositions .col-sm-3,

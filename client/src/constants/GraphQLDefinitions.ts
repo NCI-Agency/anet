@@ -188,12 +188,19 @@ export const gqlMinimalPersonFields = `
   user
 `
 
+export const gqlPhoneNumberFields = `
+  phoneNumber {
+    type
+    details
+  }
+`
+
 export const gqlBasicPersonFields = `
   ${gqlMinimalPersonFields}
   ${gqlCommonSubscribableEntityFields}
   endOfTourDate
   gender
-  phoneNumber
+  ${gqlPhoneNumberFields}
   pendingVerification
   obsoleteCountry
 `
