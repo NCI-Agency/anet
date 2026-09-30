@@ -525,7 +525,7 @@ const Search = ({
               </Tooltip>
             }
           >
-            <span className="me-2">
+            <span className="align-self-end me-2">
               <Button
                 href={prepareEmailButtonProps.href}
                 id="prepareEmailButton"
@@ -538,31 +538,29 @@ const Search = ({
           </OverlayTrigger>
         )}
         {numResultsThatCanBeExported > 0 && (
-          <>
-            <Dropdown id="dropdown-custom-1">
-              <Dropdown.Toggle variant="outline-secondary">
-                Export{" "}
-                <img
-                  src={DOWNLOAD_ICON}
-                  height={16}
-                  alt="Export search results"
-                />
-              </Dropdown.Toggle>
-              {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
-              <Dropdown.Menu className="super-colors">
-                <Dropdown.Item onClick={openExportResultsModal}>
-                  Excel (xlsx)
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => exportSearchResults("kml", "application/xml")}
-                >
-                  Google Earth (kml)
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </>
+          <Dropdown id="dropdown-custom-1" className="align-self-end">
+            <Dropdown.Toggle variant="outline-secondary">
+              Export{" "}
+              <img
+                src={DOWNLOAD_ICON}
+                height={16}
+                alt="Export search results"
+              />
+            </Dropdown.Toggle>
+            {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
+            <Dropdown.Menu className="super-colors">
+              <Dropdown.Item onClick={openExportResultsModal}>
+                Excel (xlsx)
+              </Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => exportSearchResults("kml", "application/xml")}
+              >
+                Google Earth (kml)
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         )}
-        <span className="ms-2">
+        <span className="align-self-end ms-2">
           <Button
             onClick={openSaveModal}
             id="saveSearchButton"
@@ -573,7 +571,7 @@ const Search = ({
         </span>
         {numResults > 0 && (
           <>
-            <div className="ms-2">
+            <div className="align-self-end ms-2">
               Sort results by their:
               <FormSelect
                 defaultValue={sortOrder}
@@ -586,7 +584,7 @@ const Search = ({
                 ))}
               </FormSelect>
             </div>
-            <div className="ms-2">
+            <div className="align-self-end ms-2">
               Results per page:
               <FormSelect
                 defaultValue={pageSize}
