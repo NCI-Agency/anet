@@ -325,8 +325,9 @@ class PersonMergeTest extends AbstractResourceTest {
         PhoneNumberInput.builder().withType("Work").withDetails("+9-999").build(),
         PhoneNumberInput.builder().withType("Mobile").withDetails("+9-888").build(),
         PhoneNumberInput.builder().withType("Fax").withDetails("+1-222").build()));
-    assertThat(withCredentials(adminUser,
-        t -> mutationExecutor.mergePeople("", loser.getUuid(), true, winnerInput))).isOne();
+    final Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.mergePeople("", loser.getUuid(), true, winnerInput));
+    assertThat(nrUpdated).isOne();
 
     final Person merged =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, winner.getUuid()));
