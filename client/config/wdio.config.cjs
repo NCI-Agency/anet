@@ -64,7 +64,7 @@ const config = {
       // 5 instances get started at a time.
       maxInstances: 10,
       browserName: "chrome",
-      browserVersion: "131", // or "stable"
+      browserVersion: "stable", // "stable" or a specific version, e.g. "131"
       acceptInsecureCerts: true,
       // Don't use the Bidi protocol, as some XPath selectors currently fail to work there;
       // see https://github.com/webdriverio/webdriverio/issues/14675
@@ -76,7 +76,7 @@ const config = {
         // therefore we would get failing tests related to these fields.
         args: [
           // "--incognito",
-          "--headless=old",
+          "--headless",
           "--disable-gpu",
           "--disable-search-engine-choice-screen",
           "--disable-dev-shm-usage",
