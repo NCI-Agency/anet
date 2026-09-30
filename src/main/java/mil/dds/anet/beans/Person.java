@@ -186,7 +186,8 @@ public class Person extends AbstractEmailableAnetBean
       return;
     }
     final List<PhoneNumber> cleaned = phoneNumber.stream()
-        .filter(pn -> pn != null && !Utils.isEmptyOrNull(pn.getDetails())).toList();
+        .filter(Person::nonEmptyPhoneNumber)
+        .toList();
     this.phoneNumber = cleaned.isEmpty() ? null : cleaned;
   }
 
@@ -542,5 +543,9 @@ public class Person extends AbstractEmailableAnetBean
     final Person p = new Person();
     p.setUuid(uuid);
     return p;
+  }
+
+  private static boolean nonEmptyPhoneNumber(PhoneNumber pn) {
+    return Objects.nonNull(pn) && !Utils.isEmptyOrNull(pn.getDetails());
   }
 }
