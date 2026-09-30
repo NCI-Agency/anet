@@ -154,6 +154,7 @@ test.beforeEach(t => {
     await t.context.driver.sleep(t.context.shortWaitMs)
     const $logoutFormSubmitButton = await t.context.$("#kc-logout")
     await $logoutFormSubmitButton.click()
+    await t.context.driver.sleep(t.context.shortWaitMs)
   }
 
   // For debugging purposes.
