@@ -27,6 +27,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
@@ -44,6 +45,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.utils.ResourceUtils;
@@ -81,6 +83,7 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final AttachmentDao attachmentDao;
   private final EmailAddressDao emailAddressDao;
   private final CommentDao commentDao;
+  private final TenantDao tenantDao;
 
   private final int martNewPositionDaysInThePast;
   private final Map<String, Object> martImportCustomFields;
@@ -89,7 +92,8 @@ public class MartReportImporterService implements IMartReportImporterService {
   public MartReportImporterService(AnetDictionary dict, ReportDao reportDao, PersonDao personDao,
       PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
       LocationDao locationDao, MartImportedReportDao martImportedReportDao,
-      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao) {
+      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao,
+      TenantDao tenantDao) {
     this.reportDao = reportDao;
     this.personDao = personDao;
     this.positionDao = positionDao;
@@ -100,6 +104,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
     this.commentDao = commentDao;
+    this.tenantDao = tenantDao;
 
     this.martNewPositionDaysInThePast =
         (int) dict.getDictionaryEntry("martNewPositionDaysInThePast");
@@ -108,7 +113,7 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   @Override
-  public void processMartReport(List<FileAttachment> attachments) {
+  public void processMartReport(String tenantName, List<FileAttachment> attachments) {
     final Optional<FileAttachment> martReportAttachmentOpt = attachments.stream()
         .filter(attachment -> attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
         .findFirst();
@@ -140,16 +145,18 @@ public class MartReportImporterService implements IMartReportImporterService {
           existingMartImportedReportSequences.getList().isEmpty();
       if (noExistingEntriesForMartReport) {
         // New report, import
-        logger.info("Report with UUID={} will be imported", reportDto.getUuid());
-        processReportInfo(reportDto, newMartImportedReport, attachments);
+        logger.info("Report with UUID={} will be imported to tenant={}", reportDto.getUuid(),
+            tenantName);
+        processReportInfo(tenantName, reportDto, newMartImportedReport, attachments);
         martImportedReportDao.insert(newMartImportedReport);
       } else {
         final var firstMartImportedReportEntry =
             existingMartImportedReportSequences.getList().getFirst();
         if (firstMartImportedReportEntry.getState() == MartImportedReport.State.NOT_RECEIVED) {
           // This report was last marked as failed or missing earlier, re-import
-          logger.info("Report with UUID={} will be imported", reportDto.getUuid());
-          processReportInfo(reportDto, newMartImportedReport, attachments);
+          logger.info("Report with UUID={} will be imported to tenant={}", reportDto.getUuid(),
+              tenantName);
+          processReportInfo(tenantName, reportDto, newMartImportedReport, attachments);
           if (Objects.equals(firstMartImportedReportEntry.getSequence(),
               newMartImportedReport.getSequence())) {
             // Replace existing import record
@@ -268,14 +275,14 @@ public class MartReportImporterService implements IMartReportImporterService {
     }
   }
 
-  private void processReportInfo(ReportDto martReport, MartImportedReport martImportedReport,
-      List<FileAttachment> attachments) {
+  private void processReportInfo(String tenantName, ReportDto martReport,
+      MartImportedReport martImportedReport, List<FileAttachment> attachments) {
     final List<String> errors = new ArrayList<>();
 
     Report anetReport = new Report();
 
     // Handle report people
-    handleReportPeople(anetReport, martReport, errors);
+    handleReportPeople(tenantName, anetReport, martReport, errors);
 
     // Handle report location
     final Location location = locationDao.getByUuid(martReport.getLocationUuid());
@@ -331,6 +338,8 @@ public class MartReportImporterService implements IMartReportImporterService {
         .toList(), anetReport, errors);
 
     // Complete the MART imported report record
+    final Tenant tenant = tenantDao.getByName(tenantName).getFirst();
+    martImportedReport.setTenant(tenant);
     final ReportPerson reportPerson = anetReport.getReportPeople().getFirst();
     martImportedReport.setReport(anetReport);
     martImportedReport.setPerson(reportPerson);
@@ -393,7 +402,8 @@ public class MartReportImporterService implements IMartReportImporterService {
     return null;
   }
 
-  private void handleReportPeople(Report anetReport, ReportDto martReport, List<String> errors) {
+  private void handleReportPeople(String tenantName, Report anetReport, ReportDto martReport,
+      List<String> errors) {
     // Validate organization coming from MART
     Organization organizationForReport =
         organizationDao.getByUuid(martReport.getOrganizationUuid());
@@ -409,7 +419,7 @@ public class MartReportImporterService implements IMartReportImporterService {
 
     if (isNewPerson) {
       // This is a new person -> CREATE from MART report information
-      personForReport = createNewPerson(martReport, errors);
+      personForReport = createNewPerson(tenantName, martReport, errors);
       createPositionForPerson(organizationForReport, martReport.getPositionName(), personForReport,
           martReport);
     } else {
@@ -440,9 +450,12 @@ public class MartReportImporterService implements IMartReportImporterService {
     anetReport.setReportPeople(List.of(createReportPerson(personForReport)));
     // Set advisor organization
     anetReport.setAdvisorOrg(organizationForReport);
+    // Assign tenants
+    final List<Tenant> tenants = tenantDao.getByName(tenantName);
+    anetReport.setTenants(tenants);
   }
 
-  private Person createNewPerson(ReportDto martReport, List<String> errors) {
+  private Person createNewPerson(String tenantName, ReportDto martReport, List<String> errors) {
     Person person = new Person();
     person.setFamilyName(martReport.getLastName());
     person.setGivenName(martReport.getFirstName());
@@ -451,10 +464,16 @@ public class MartReportImporterService implements IMartReportImporterService {
     getPersonCountry(person, martReport, errors);
 
     person = personDao.insert(person);
+
     // Update email address
     final EmailAddress emailAddress = new EmailAddress("Internet", martReport.getEmail());
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
         List.of(emailAddress));
+
+    // Update tenant
+    final List<Tenant> tenants = tenantDao.getByName(tenantName);
+    personDao.updateTenantForPerson(tenants.getFirst(), person, true);
+
     return person;
   }
 

@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -28,6 +29,7 @@ import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.UserDao;
 import mil.dds.anet.emails.NewUserEmail;
+import mil.dds.anet.emails.TenantAccessRequestEmail;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -109,6 +111,7 @@ public class PersonResource {
 
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
+      dao.updateTenantForPerson(p.getTenant(), p, Boolean.TRUE.equals(p.getUser()));
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
@@ -224,8 +227,17 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
+    // Update Tenant access request:
+    if (Boolean.TRUE.equals(p.getUser()) && DaoUtils.getUuid(p.getTenantAccessRequest()) != null) {
+      final Instant now = Instant.now();
+      dao.upsertPersonTenantAccessRequest(p.getTenantAccessRequest(), p, now);
+    } else {
+      dao.deletePersonTenantAccessRequest(p.getUuid());
+    }
+
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
+      dao.updateTenantForPerson(p.getTenant(), p, Boolean.TRUE.equals(p.getUser()));
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
@@ -300,23 +312,24 @@ public class PersonResource {
   public AnetBeanList<Person> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(Utils.getSubFields(env), query);
   }
 
   @GraphQLMutation(name = "approvePerson")
   public Integer approvePerson(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "uuid") String personUuid) {
-    return approveOrDeletePerson(context, personUuid, true);
+      @GraphQLArgument(name = "uuid") String personUuid,
+      @GraphQLArgument(name = "tenant") Tenant tenant) {
+    return approveOrDeletePerson(context, personUuid, tenant, true);
   }
 
   @GraphQLMutation(name = "deletePerson")
   public Integer deletePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String personUuid) {
-    return approveOrDeletePerson(context, personUuid, false);
+    return approveOrDeletePerson(context, personUuid, null, false);
   }
 
-  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid,
+  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid, Tenant tenant,
       boolean isApproved) {
     Person user = DaoUtils.getUserFromContext(context);
     final Person person = dao.getByUuid(personUuid);
@@ -333,6 +346,11 @@ public class PersonResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
+    }
+
+    if (isApproved && tenant != null) {
+      dao.updateTenantForPerson(tenant, person, Boolean.TRUE.equals(person.getUser()));
+      dao.deletePersonTenantAccessRequest(personUuid);
     }
 
     // Log the change
@@ -429,6 +447,14 @@ public class PersonResource {
       dao.updateSubscriptions(p, auditTrailUuid, false);
     }
 
+    // Update Tenant access request:
+    if (Boolean.TRUE.equals(p.getUser()) && DaoUtils.getUuid(p.getTenantAccessRequest()) != null) {
+      final Instant now = Instant.now();
+      dao.upsertPersonTenantAccessRequest(p.getTenantAccessRequest(), p, now);
+    } else {
+      dao.deletePersonTenantAccessRequest(p.getUuid());
+    }
+
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
@@ -513,5 +539,12 @@ public class PersonResource {
     final NewUserEmail action = new NewUserEmail();
     action.setPersonUuid(DaoUtils.getUuid(p));
     dao.sendEmailToAdmins(action);
+  }
+
+  private void sendTenantAccessRequestEmail(Tenant t, Person p) {
+    final TenantAccessRequestEmail action = new TenantAccessRequestEmail();
+    action.setTenantUuid(DaoUtils.getUuid(t));
+    action.setPersonUuid(DaoUtils.getUuid(p));
+    dao.sendEmailToTenantAdministrators(t, action);
   }
 }

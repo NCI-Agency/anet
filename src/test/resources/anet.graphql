@@ -12,6 +12,7 @@ type AccessToken {
   name: String
   pointOfContact: String
   scope: TokenScope
+  tenant: Tenant
   tokenHash: String
   updatedAt: Instant
   uuid: String
@@ -32,6 +33,7 @@ input AccessTokenInput {
   name: String
   pointOfContact: String
   scope: TokenScope
+  tenant: TenantInput
   tokenHash: String
   updatedAt: Instant
   uuid: String
@@ -878,6 +880,7 @@ type MartImportedReport {
   sequence: Long
   state: State
   submittedAt: Instant
+  tenant: Tenant
 }
 
 """"""
@@ -892,6 +895,7 @@ input MartImportedReportSearchQueryInput {
   sortOrder: SortOrder
   state: State
   status: Status
+  tenantName: String
   text: String
 }
 
@@ -912,6 +916,9 @@ type Mutation {
     uuid: String
   ): Comment
   approvePerson(
+    """"""
+    tenant: TenantInput
+
     """"""
     uuid: String
   ): Int
@@ -991,6 +998,10 @@ type Mutation {
     """"""
     task: TaskInput
   ): Task
+  createTenant(
+    """"""
+    tenant: TenantInput
+  ): Tenant
   deleteAccessToken(
     """"""
     uuid: String
@@ -1277,6 +1288,13 @@ type Mutation {
     """"""
     task: TaskInput
   ): Int
+  updateTenant(
+    """"""
+    force: Boolean = false
+
+    """"""
+    tenant: TenantInput
+  ): Int
 }
 
 """"""
@@ -1453,6 +1471,8 @@ type Person {
   previousPositions: [PersonPositionHistory]
   rank: String
   status: Status
+  tenant: Tenant
+  tenantAccessRequest: Tenant
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -1482,6 +1502,8 @@ input PersonInput {
   previousPositions: [PersonPositionHistoryInput]
   rank: String
   status: Status
+  tenant: TenantInput
+  tenantAccessRequest: TenantInput
   updatedAt: Instant
   user: Boolean
   users: [UserInput]
@@ -1596,6 +1618,7 @@ type Position {
   role: PositionRole
   status: Status
   superuserType: SuperuserType
+  tenantsAdministrated: [Tenant]
   type: PositionType
   updatedAt: Instant
   uuid: String
@@ -1863,6 +1886,11 @@ type Query {
     """"""
     uuids: [String]
   ): [Task]
+  tenant(
+    """"""
+    uuid: String
+  ): Tenant
+  tenantList: [Tenant]
   userActivityList(
     """"""
     query: UserActivitySearchQueryInput
@@ -1894,6 +1922,7 @@ union RelatableObject = AccessToken | Assessment | Attachment | AuthorizationGro
 """"""
 type Report {
   advisorOrg: Organization
+  allTenants: Boolean
   approvalStep: ApprovalStep
   assessments: [Assessment]
   atmosphere: Atmosphere
@@ -1930,6 +1959,7 @@ type Report {
   reportText: String
   state: ReportState
   tasks: [Task]
+  tenants: [Tenant]
   updatedAt: Instant
   uuid: String
   workflow: [ReportAction]
@@ -1962,6 +1992,7 @@ enum ReportCancelledReason {
 """"""
 input ReportInput {
   advisorOrg: OrganizationInput
+  allTenants: Boolean
   approvalStep: ApprovalStepInput
   atmosphere: Atmosphere
   atmosphereDetails: String
@@ -1989,6 +2020,7 @@ input ReportInput {
   reportText: String
   state: ReportState
   tasks: [TaskInput]
+  tenants: [TenantInput]
   updatedAt: Instant
   uuid: String
 }
@@ -2037,6 +2069,8 @@ type ReportPerson {
   rank: String
   reportPosition: Position
   status: Status
+  tenant: Tenant
+  tenantAccessRequest: Tenant
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -2071,6 +2105,8 @@ input ReportPersonInput {
   rank: String
   reportPosition: PositionInput
   status: Status
+  tenant: TenantInput
+  tenantAccessRequest: TenantInput
   updatedAt: Instant
   user: Boolean
   users: [UserInput]
@@ -2115,6 +2151,7 @@ input ReportSearchQueryInput {
   status: Status
   subscribed: Boolean
   taskUuid: [String]
+  tenantUuid: [String]
   text: String
   updatedAtEnd: Instant
   updatedAtStart: Instant
@@ -2395,6 +2432,32 @@ enum TaskSearchSortBy {
   CREATED_AT
   NAME
   RECENT
+}
+
+""""""
+type Tenant {
+  accessRequests: [Person]
+  administrativePositions: [Position]
+  createdAt: Instant
+  emailAddresses: [String]
+  members: [Person]
+  name: String
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input TenantInput {
+  accessRequests: [PersonInput]
+  administrativePositions: [PositionInput]
+  createdAt: Instant
+  emailAddresses: [String]
+  members: [PersonInput]
+  name: String
+  status: Status
+  updatedAt: Instant
+  uuid: String
 }
 
 """"""

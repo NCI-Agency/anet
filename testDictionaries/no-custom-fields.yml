@@ -490,6 +490,10 @@ fields:
       label: Communities of interest
       placeholder: Search for Communities…
       exclude: false
+    allTenants:
+      label: Shared with all tenants
+    tenants:
+      label: Shared with these tenants
 
   person:
     status:
@@ -592,6 +596,10 @@ fields:
       placeholder: Fill in the biography of this person
     authorizationGroups:
       label: Communities
+    tenantAccessRequest:
+      label: Request access to this tenant
+    tenant:
+      label: Member of this tenant
     customSensitiveInformation:
       birthday:
         type: date
@@ -875,6 +883,17 @@ fields:
               t5:
                 label: T5
                 color: '#aaaaaa'
+
+  tenant:
+    status:
+      label: Status
+    name:
+      label: Name
+      placeholder: Fill in the unique name of this tenant
+    emailAddresses:
+      label: Archive email addresses
+    administrativePositions:
+      label: Tenant administrators
 
   advisor:
     person:

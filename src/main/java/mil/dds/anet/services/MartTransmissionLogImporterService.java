@@ -5,11 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.LogDto;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
 import mil.dds.anet.database.MartImportedReportDao;
+import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +31,17 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
 
   private final MartImportedReportDao martImportedReportDao;
+  private final TenantDao tenantDao;
 
-  public MartTransmissionLogImporterService(MartImportedReportDao martImportedReportDao) {
+  public MartTransmissionLogImporterService(MartImportedReportDao martImportedReportDao,
+      TenantDao tenantDao) {
     this.martImportedReportDao = martImportedReportDao;
+    this.tenantDao = tenantDao;
   }
 
   @Override
-  public void processTransmissionLog(FileAttachment martTransmissionLogAttachment,
-      Instant emailReceivedTime) {
+  public void processTransmissionLog(String tenantName,
+      FileAttachment martTransmissionLogAttachment, Instant emailReceivedTime) {
     try {
       // Get the transmission log JSON from the attachment
       martTransmissionLogAttachment.load();
@@ -45,6 +50,7 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
               new String(martTransmissionLogAttachment.getContent(), StandardCharsets.UTF_8)),
           new TypeReference<>() {});
       final MartImportedReportSearchQuery query = new MartImportedReportSearchQuery();
+      query.setTenantName(tenantName);
       query.setSequences(transmissionLog.stream().map(LogDto::getSequence).toList());
       final AnetBeanList<MartImportedReport> existingMartImportedReports =
           martImportedReportDao.search(query);
@@ -58,6 +64,8 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
         for (final LogDto logDto : missing) {
           final MartImportedReport martImportedReport = new MartImportedReport();
           martImportedReport.setSequence(logDto.getSequence());
+          final Tenant tenant = tenantDao.getByName(tenantName).getFirst();
+          martImportedReport.setTenant(tenant);
           martImportedReport.setState(MartImportedReport.State.NOT_RECEIVED);
           martImportedReport.setSubmittedAt(logDto.getSubmittedAt());
           martImportedReport.setReceivedAt(emailReceivedTime);

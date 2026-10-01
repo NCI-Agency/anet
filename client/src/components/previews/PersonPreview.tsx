@@ -65,6 +65,9 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Position}
         }
       }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
   }
 `
@@ -208,6 +211,14 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
             />
           </Col>
         </Row>
+
+        {person.user && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.person.tenant}
+            value={person.tenant?.name}
+          />
+        )}
 
         <div className="preview-field-label">
           {Settings.fields.person.biography?.label}

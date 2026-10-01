@@ -10,6 +10,9 @@ public class MartImportedReportSearchQuery
 
   @GraphQLQuery
   @GraphQLInputField
+  private String tenantName;
+  @GraphQLQuery
+  @GraphQLInputField
   private String personUuid;
   @GraphQLQuery
   @GraphQLInputField
@@ -25,6 +28,14 @@ public class MartImportedReportSearchQuery
     super(MartImportedReportSearchSortBy.SEQUENCE);
     this.setSortOrder(SortOrder.DESC);
     this.setPageSize(0);
+  }
+
+  public String getTenantName() {
+    return tenantName;
+  }
+
+  public void setTenantName(String tenantName) {
+    this.tenantName = tenantName;
   }
 
   public String getPersonUuid() {
@@ -58,5 +69,4 @@ public class MartImportedReportSearchQuery
   public void setSequences(List<Long> sequences) {
     this.sequences = sequences;
   }
-
 }

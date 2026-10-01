@@ -4,10 +4,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.database.mappers.AccessTokenMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.ws.security.AccessTokenPrincipal;
 import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +127,24 @@ public class AccessTokenDao extends AbstractDao {
       return handle
           .createQuery("/* getAccessTokens */ SELECT * FROM \"" + TABLE_NAME + "\" ORDER BY name")
           .map(new AccessTokenMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  public interface AccessTokenBatch {
+    @SqlUpdate("UPDATE \"accessTokens\" SET \"tenantUuid\" = :tenantUuid WHERE uuid = :accessTokenUuid")
+    void updateTenantForAccessToken(@Bind("accessTokenUuid") String accessTokenUuid,
+        @Bind("tenantUuid") String tenantUuid);
+  }
+
+
+  @Transactional
+  public void updateTenantForAccessToken(Tenant t, AccessToken a) {
+    final Handle handle = getDbHandle();
+    try {
+      final AccessTokenBatch ab = handle.attach(AccessTokenBatch.class);
+      ab.updateTenantForAccessToken(a.getUuid(), t == null ? null : t.getUuid());
     } finally {
       closeDbHandle(handle);
     }

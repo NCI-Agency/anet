@@ -49,7 +49,7 @@ export default class Person extends Model {
   static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
   static regularShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
 
-  static yupSchema = yup
+  static yupBaseSchema = yup
     .object()
     .shape({
       uuid: yup.string().nullable().default(null),
@@ -168,6 +168,53 @@ export default class Person extends Model {
     .concat(Person.customFieldsSchema)
     .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
+
+  static yupSchema = yup
+    .object()
+    .shape({
+      tenantAccessRequest: yup.object().nullable().default(null),
+      tenant: yup.object().nullable().default(null)
+    })
+    .concat(Person.yupBaseSchema)
+
+  static yupOnboardingSchema = yup
+    .object()
+    .shape({
+      tenantAccessRequest: yup
+        .object()
+        .nullable()
+        .required("You must request access to a tenant")
+        .default(null),
+      tenant: yup.object().nullable().default(null)
+    })
+    .concat(Person.yupBaseSchema)
+
+  static yupAdminSchema = yup
+    .object()
+    .shape({
+      tenantAccessRequest: yup.object().nullable().default(null),
+      tenant: yup
+        .object()
+        .nullable()
+        .when(["status", "user"], ([status, user], schema) =>
+          status !== Model.STATUS.ACTIVE || !user
+            ? schema
+            : schema.test(
+                "no-tenant",
+                "no tenant error",
+                (tenant, testContext) => {
+                  return tenant?.status !== Model.STATUS.ACTIVE
+                    ? testContext.createError({
+                        message:
+                          "An active user must be a member of an active Tenant"
+                      })
+                    : true
+                }
+              )
+        )
+        .default(null)
+    })
+    .concat(Person.yupBaseSchema)
 
   static autocompleteQuery = `
     ${gqlEntityFieldsMap.Person}

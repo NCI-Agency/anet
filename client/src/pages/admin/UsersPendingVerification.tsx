@@ -6,9 +6,14 @@ import {
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { TenantOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
+import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -17,9 +22,13 @@ import {
   usePageTitle
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
-import React, { useState } from "react"
+import { FastField, Formik } from "formik"
+import { Tenant } from "models"
+import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
+import Settings from "settings"
+import * as yup from "yup"
 
 const GQL_GET_USERS_PENDING_VERIFICATION = gql`
   query ($personQuery: PersonSearchQueryInput) {
@@ -29,13 +38,19 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         ${gqlEntityFieldsMap.Person}
         pendingVerification
         ${gqlEmailAddressesFields}
+        tenantAccessRequest {
+          ${gqlEntityFieldsMap.Tenant}
+        }
+        tenant {
+          ${gqlEntityFieldsMap.Tenant}
+        }
       }
     }
   }
 `
 const GQL_APPROVE_USER = gql`
-  mutation ($uuid: String!) {
-    approvePerson(uuid: $uuid)
+  mutation ($uuid: String!, $tenant: TenantInput!) {
+    approvePerson(uuid: $uuid, tenant: $tenant)
   }
 `
 const GQL_DELETE_USER = gql`
@@ -44,6 +59,21 @@ const GQL_DELETE_USER = gql`
   }
 `
 
+const yupSchema = yup.object().shape({
+  tenant: yup
+    .object()
+    .nullable()
+    .required()
+    .test("tenant", "tenant error", (tenant, testContext) =>
+      tenant?.status !== Model.STATUS.ACTIVE
+        ? testContext.createError({
+            message: "Select an active Tenant before allowing access"
+          })
+        : true
+    )
+    .default(null)
+})
+
 interface UsersPendingVerificationProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -51,6 +81,7 @@ interface UsersPendingVerificationProps {
 const UsersPendingVerification = ({
   pageDispatchers
 }: UsersPendingVerificationProps) => {
+  const { allTenants } = useContext(AppContext)
   const [pageNum, setPageNum] = useState(0)
   const [stateSuccess, setStateSuccess] = useState(null)
   const [stateError, setStateError] = useState(null)
@@ -73,6 +104,17 @@ const UsersPendingVerification = ({
   }
 
   const { pageSize, totalCount, list } = data.personList
+  const tenantsFilters = {
+    allTenants: {
+      label: "All Tenants",
+      list: allTenants
+    }
+  }
+  const activeTenants = allTenants?.filter(
+    t => t?.status === Model.STATUS.ACTIVE
+  )
+  const defaultTenant = activeTenants?.length === 1 ? activeTenants[0] : null
+
   return (
     <Fieldset title="Users Pending Verification">
       <Messages success={stateSuccess} error={stateError} />
@@ -90,37 +132,80 @@ const UsersPendingVerification = ({
           <Table responsive hover striped id="users-pending-verification">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Pending Verification</th>
+                <th className="col-sm-3">Name</th>
+                <th className="col-sm-6">Tenants</th>
+                <th className="col-sm-3">Pending Verification</th>
               </tr>
             </thead>
             <tbody>
-              {list.map(person => (
-                <tr key={person.uuid}>
-                  <td>
-                    <LinkTo
-                      modelType="Person"
-                      model={person}
-                      showAvatar={false}
-                    />
-                  </td>
-                  <td>
-                    <Button
-                      variant="primary"
-                      onClick={() => updateAccess(person, true)}
-                    >
-                      Allow Access
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      className="ms-2"
-                      onClick={() => updateAccess(person, false)}
-                    >
-                      Deny Access
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {list.map(person => {
+                person.tenant = person.tenantAccessRequest ?? defaultTenant
+                return (
+                  <Formik
+                    key={person.uuid}
+                    enableReinitialize
+                    initialValues={person}
+                    validationSchema={yupSchema}
+                    validateOnMount
+                  >
+                    {({ values, isValid, setFieldValue, setFieldTouched }) => (
+                      <tr>
+                        <td>
+                          <LinkTo
+                            modelType="Person"
+                            model={values}
+                            showAvatar={false}
+                          />
+                        </td>
+                        <td>
+                          <FastField
+                            name="tenant"
+                            label={null}
+                            component={FieldHelper.SpecialField}
+                            extraColElem={null}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenant", value, true)
+                            }}
+                            widget={
+                              <AdvancedSingleSelect
+                                fieldName="tenant"
+                                placeholder={
+                                  Settings.fields.person.tenant.placeholder
+                                }
+                                value={values.tenant}
+                                overlayColumns={["Name", "Status"]}
+                                overlayRenderRow={TenantOverlayRow}
+                                filterDefs={tenantsFilters}
+                                objectType={Tenant}
+                                fields={Tenant.autocompleteQuery}
+                                valueKey="name"
+                              />
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Button
+                            variant="primary"
+                            disabled={!isValid}
+                            onClick={() => updateAccess(values, true)}
+                          >
+                            Allow Access
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            className="ms-2"
+                            onClick={() => updateAccess(values, false)}
+                          >
+                            Deny Access
+                          </Button>
+                        </td>
+                      </tr>
+                    )}
+                  </Formik>
+                )
+              })}
             </tbody>
           </Table>
         </UltimatePaginationTopDown>
@@ -129,8 +214,11 @@ const UsersPendingVerification = ({
   )
 
   function updateAccess(person, isApproved) {
+    person.tenant = Tenant.filterClientSideFields(person.tenant)
+
     return API.mutation(isApproved ? GQL_APPROVE_USER : GQL_DELETE_USER, {
-      uuid: person.uuid
+      uuid: person.uuid,
+      ...(isApproved ? { tenant: person.tenant } : {})
     })
       .then(() => {
         const msg = (
