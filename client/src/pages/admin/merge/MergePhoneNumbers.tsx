@@ -102,9 +102,7 @@ const PhoneNumberTable = ({
     const currentState = getMerged().find(p => p?.type === type)
     const typeValue = phoneNumber?.find(p => p?.type === type)
     return (
-      currentState &&
-      typeValue &&
-      currentState.details === typeValue.details
+      currentState && typeValue && currentState.details === typeValue.details
     )
   }
 
