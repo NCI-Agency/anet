@@ -530,7 +530,7 @@ const AdvancedSelect = ({
                     }}
                     disabled={disabled}
                   />
-                  {searchTerms && (
+                  {searchTerms && !disabled && (
                     <InputGroup.Text
                       style={{
                         maxHeight: "38px",

@@ -114,9 +114,7 @@ public class PersonResource {
 
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
-      if (Boolean.TRUE.equals(p.getUser()) && p.getTenants() != null) {
-        dao.insertPersonTenants(p.getUuid(), p.getTenants());
-      }
+      dao.updateTenantForPerson(p.getTenant(), p, Boolean.TRUE.equals(p.getUser()));
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
@@ -249,17 +247,7 @@ public class PersonResource {
 
     if (AuthUtils.isAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
-
-      // Update Tenants:
-      if (p.getTenants() != null) {
-        final List<Tenant> existingTenants =
-            tenantDao.getTenantsForPerson(engine.getContext(), p.getUuid()).join();
-        final List<Tenant> newTenants =
-            Boolean.TRUE.equals(p.getUser()) ? p.getTenants() : List.of();
-        Utils.addRemoveElementsByUuid(existingTenants, newTenants,
-            newTenant -> dao.addTenantToPerson(newTenant, p),
-            oldTenant -> dao.removeTenantFromPerson(oldTenant, p));
-      }
+      dao.updateTenantForPerson(p.getTenant(), p, Boolean.TRUE.equals(p.getUser()));
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
@@ -341,8 +329,8 @@ public class PersonResource {
   @GraphQLMutation(name = "approvePerson")
   public Integer approvePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String personUuid,
-      @GraphQLArgument(name = "tenants") List<Tenant> tenants) {
-    return approveOrDeletePerson(context, personUuid, tenants, true);
+      @GraphQLArgument(name = "tenant") Tenant tenant) {
+    return approveOrDeletePerson(context, personUuid, tenant, true);
   }
 
   @GraphQLMutation(name = "deletePerson")
@@ -351,8 +339,8 @@ public class PersonResource {
     return approveOrDeletePerson(context, personUuid, null, false);
   }
 
-  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid,
-      List<Tenant> tenants, boolean isApproved) {
+  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid, Tenant tenant,
+      boolean isApproved) {
     Person user = DaoUtils.getUserFromContext(context);
     final Person person = dao.getByUuid(personUuid);
     if (person == null) {
@@ -370,8 +358,8 @@ public class PersonResource {
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
     }
 
-    if (isApproved && tenants != null) {
-      dao.insertPersonTenants(personUuid, tenants);
+    if (isApproved && tenant != null) {
+      dao.updateTenantForPerson(tenant, person, Boolean.TRUE.equals(person.getUser()));
       dao.deletePersonTenantAccessRequests(personUuid);
     }
 

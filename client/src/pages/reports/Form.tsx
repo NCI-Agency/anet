@@ -536,8 +536,8 @@ const ReportForm = ({
 
         const tenantsFilters = {
           myTenants: {
-            label: "My Tenants",
-            list: currentUser.tenants
+            label: "My Tenant",
+            list: currentUser?.tenant ? [currentUser.tenant] : []
           },
           allTenants: {
             label: "All Tenants",

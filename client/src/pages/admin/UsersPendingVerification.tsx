@@ -6,8 +6,8 @@ import {
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { TenantOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -21,14 +21,13 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import TenantTable from "components/TenantTable"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { FastField, Formik } from "formik"
-import _isEmpty from "lodash/isEmpty"
 import { Tenant } from "models"
 import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
+import Settings from "settings"
 import * as yup from "yup"
 
 const GQL_GET_USERS_PENDING_VERIFICATION = gql`
@@ -42,7 +41,7 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         tenantAccessRequests {
           ${gqlEntityFieldsMap.Tenant}
         }
-        tenants {
+        tenant {
           ${gqlEntityFieldsMap.Tenant}
         }
       }
@@ -50,8 +49,8 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
   }
 `
 const GQL_APPROVE_USER = gql`
-  mutation ($uuid: String!, $tenants: [TenantInput]!) {
-    approvePerson(uuid: $uuid, tenants: $tenants)
+  mutation ($uuid: String!, $tenant: TenantInput!) {
+    approvePerson(uuid: $uuid, tenant: $tenant)
   }
 `
 const GQL_DELETE_USER = gql`
@@ -61,17 +60,18 @@ const GQL_DELETE_USER = gql`
 `
 
 const yupSchema = yup.object().shape({
-  tenants: yup
-    .array()
+  tenant: yup
+    .object()
+    .nullable()
     .required()
-    .test("tenants", "tenants error", (tenants, testContext) =>
-      _isEmpty(tenants?.filter(t => t?.status === Model.STATUS.ACTIVE))
+    .test("tenant", "tenant error", (tenant, testContext) =>
+      tenant?.status !== Model.STATUS.ACTIVE
         ? testContext.createError({
-            message: "Select at least one active Tenant before allowing access"
+            message: "Select an active Tenant before allowing access"
           })
         : true
     )
-    .default([])
+    .default(null)
 })
 
 interface UsersPendingVerificationProps {
@@ -113,7 +113,7 @@ const UsersPendingVerification = ({
   const activeTenants = allTenants?.filter(
     t => t?.status === Model.STATUS.ACTIVE
   )
-  const defaultTenants = activeTenants?.length === 1 ? activeTenants : null
+  const defaultTenant = activeTenants?.length === 1 ? activeTenants[0] : null
 
   return (
     <Fieldset title="Users Pending Verification">
@@ -139,10 +139,8 @@ const UsersPendingVerification = ({
             </thead>
             <tbody>
               {list.map(person => {
-                person.tenants = person.tenantAccessRequests
-                if (_isEmpty(person?.tenants)) {
-                  person.tenants = defaultTenants
-                }
+                person.tenant =
+                  person.tenantAccessRequests?.[0] ?? defaultTenant
                 return (
                   <Formik
                     key={person.uuid}
@@ -162,33 +160,28 @@ const UsersPendingVerification = ({
                         </td>
                         <td>
                           <FastField
-                            name="tenants"
+                            name="tenant"
                             label={null}
                             component={FieldHelper.SpecialField}
                             extraColElem={null}
                             onChange={value => {
                               // validation will be done by setFieldValue
-                              setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
-                              setFieldValue("tenants", value, true)
+                              setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenant", value, true)
                             }}
                             widget={
-                              <AdvancedMultiSelect
-                                fieldName="tenants"
-                                placeholder="Search for tenants…"
-                                value={values.tenants}
-                                renderSelected={
-                                  <TenantTable
-                                    tenants={values.tenants}
-                                    showStatus
-                                    showDelete
-                                    noTenantsMessage="No tenants selected; click in the box above to select any"
-                                  />
+                              <AdvancedSingleSelect
+                                fieldName="tenant"
+                                placeholder={
+                                  Settings.fields.person.tenant.placeholder
                                 }
+                                value={values.tenant}
                                 overlayColumns={["Name", "Status"]}
                                 overlayRenderRow={TenantOverlayRow}
                                 filterDefs={tenantsFilters}
                                 objectType={Tenant}
                                 fields={Tenant.autocompleteQuery}
+                                valueKey="name"
                               />
                             }
                           />
@@ -222,11 +215,11 @@ const UsersPendingVerification = ({
   )
 
   function updateAccess(person, isApproved) {
-    person.tenants = person.tenants?.map(t => Tenant.filterClientSideFields(t))
+    person.tenant = Tenant.filterClientSideFields(person.tenant)
 
     return API.mutation(isApproved ? GQL_APPROVE_USER : GQL_DELETE_USER, {
       uuid: person.uuid,
-      ...(isApproved ? { tenants: person.tenants } : {})
+      ...(isApproved ? { tenant: person.tenant } : {})
     })
       .then(() => {
         const msg = (
