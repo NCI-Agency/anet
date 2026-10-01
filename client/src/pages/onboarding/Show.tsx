@@ -21,7 +21,6 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import TenantTable from "components/TenantTable"
 import { Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
@@ -39,7 +38,7 @@ const GQL_GET_SELF = gql`
       country {
         ${gqlEntityFieldsMap.Location}
       }
-      tenantAccessRequests {
+      tenantAccessRequest {
         ${gqlEntityFieldsMap.Tenant}
       }
       tenant {
@@ -126,14 +125,9 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
             <Row>
               <Col md={12}>
                 <FieldHelper.ReadonlyField
-                  field={{ name: "tenantAccessRequests" }}
-                  label={Settings.fields.person.tenantAccessRequests?.label}
-                  humanValue={
-                    <TenantTable
-                      tenants={person.tenantAccessRequests}
-                      showStatus
-                    />
-                  }
+                  field={{ name: "tenantAccessRequest" }}
+                  label={Settings.fields.person.tenantAccessRequest?.label}
+                  humanValue={person.tenantAccessRequest?.name}
                 />
               </Col>
               <Col md={12}>{fullWidthFields}</Col>

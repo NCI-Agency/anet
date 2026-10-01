@@ -29,7 +29,7 @@ const GQL_GET_SELF = gql`
       country {
         ${gqlEntityFieldsMap.Location}
       }
-      tenantAccessRequests {
+      tenantAccessRequest {
         ${gqlEntityFieldsMap.Tenant}
       }
       tenant {

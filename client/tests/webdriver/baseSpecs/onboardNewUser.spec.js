@@ -102,20 +102,20 @@ describe("Onboard new user login", () => {
       await OnboardPage.getCountryHelpBlock()
     ).waitForExist({ reverse: true })
 
-    await (await OnboardPage.getTenantAccessRequestsInput()).click()
+    await (await OnboardPage.getTenantAccessRequestInput()).click()
     await (
-      await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+      await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
     ).waitForExist()
     expect(
       await (
-        await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+        await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
       ).getText()
     ).to.include(personDetails.tenant)
     await (
-      await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+      await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
     ).click()
     await (
-      await OnboardPage.getTenantAccessRequestsHelpBlock()
+      await OnboardPage.getTenantAccessRequestHelpBlock()
     ).waitForExist({ reverse: true })
 
     await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())
