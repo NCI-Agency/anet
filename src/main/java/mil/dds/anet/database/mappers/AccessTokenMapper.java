@@ -20,6 +20,7 @@ public class AccessTokenMapper implements RowMapper<AccessToken> {
     accessToken.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
     accessToken.setUpdatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "updatedAt"));
     accessToken.setExpiresAt(MapperUtils.getInstantAsLocalDateTime(rs, "expiresAt"));
+    accessToken.setTenantUuid(MapperUtils.getOptionalString(rs, "tenantUuid"));
     return accessToken;
   }
 }

@@ -1,7 +1,6 @@
 -- Do a cascading TRUNCATE of all tables created for ANET
 TRUNCATE TABLE "accessTokenActivities" CASCADE;
 TRUNCATE TABLE "accessTokens" CASCADE;
-TRUNCATE TABLE "accessTokenTenants" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
@@ -1630,9 +1629,12 @@ INSERT INTO "accessTokens" (uuid, name, "pointOfContact", description, "tokenHas
   ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', NULL, 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 1);
 
 -- Link accessTokens to tenant
-INSERT INTO "accessTokenTenants" ("tenantUuid", "accessTokenUuid")
-  SELECT tenants.uuid, "accessTokens".uuid
-  FROM tenants, "accessTokens";
+UPDATE "accessTokens"
+SET "tenantUuid" = (
+  SELECT uuid
+  FROM tenants
+  WHERE name = 'Tenant #1'
+);
 
 -- Test data for assessments
 
