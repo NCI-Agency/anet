@@ -120,24 +120,24 @@ test.describe(() => {
       ).waitFor({
         state: "detached"
       })
-      await (await OnboardPage.getTenantAccessRequestsInput()).click()
+      await (await OnboardPage.getTenantAccessRequestInput()).click()
       await (
-        await OnboardPage.getTenantAccessRequestsInput()
+        await OnboardPage.getTenantAccessRequestInput()
       ).fill(String(personDetails.tenant))
       await OnboardPage.waitForElementToChange(
-        () => OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem(),
+        () => OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem(),
         personDetails.tenant
       )
       await expect(
-        await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+        await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
       ).toContainText(personDetails.tenant, {
         useInnerText: true
       })
       await (
-        await OnboardPage.getTenantAccessRequestsAdvancedSelectFirstItem()
+        await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
       ).click()
       await (
-        await OnboardPage.getTenantAccessRequestsHelpBlock()
+        await OnboardPage.getTenantAccessRequestHelpBlock()
       ).waitFor({
         state: "detached"
       })

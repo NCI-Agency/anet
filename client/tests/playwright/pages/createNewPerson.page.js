@@ -104,21 +104,21 @@ export class CreatePerson extends Page {
     return this.page.locator("#fg-country div.invalid-feedback").first()
   }
 
-  async getTenantAccessRequestsInput() {
-    return this.page.locator("#tenantAccessRequests").first()
+  async getTenantAccessRequestInput() {
+    return this.page.locator("#tenantAccessRequest").first()
   }
 
-  async getTenantAccessRequestsAdvancedSelectFirstItem() {
+  async getTenantAccessRequestAdvancedSelectFirstItem() {
     return this.page
       .locator(
-        "#tenantAccessRequests-popover tbody tr:first-child td:nth-child(2)"
+        "#tenantAccessRequest-popover tbody tr:first-child td:nth-child(2)"
       )
       .first()
   }
 
-  async getTenantAccessRequestsHelpBlock() {
+  async getTenantAccessRequestHelpBlock() {
     return this.page
-      .locator("#fg-tenantAccessRequests div.invalid-feedback")
+      .locator("#fg-tenantAccessRequest div.invalid-feedback")
       .first()
   }
 
