@@ -301,30 +301,30 @@ class PersonMergeTest extends AbstractResourceTest {
   void testMergePhoneNumbers() {
     final PersonInput loserInput = PersonInput.builder().withFamilyName("Loser Phone Merge")
         .withStatus(Status.ACTIVE)
-        .withPhoneNumber(List.of(
-            PhoneNumberInput.builder().withType("Work").withDetails("+1-111").build(),
-            PhoneNumberInput.builder().withType("Fax").withDetails("+1-222").build()))
+        .withPhoneNumber(
+            List.of(PhoneNumberInput.builder().withType("Work").withDetails("+1-111").build(),
+                PhoneNumberInput.builder().withType("Fax").withDetails("+1-222").build()))
         .build();
     final Person loser =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, loserInput));
     assertThat(loser).isNotNull();
 
-    final PersonInput winnerInput = PersonInput.builder().withFamilyName("Winner Phone Merge")
-        .withStatus(Status.ACTIVE)
-        .withPhoneNumber(List.of(
-            PhoneNumberInput.builder().withType("Work").withDetails("+9-999").build(),
-            PhoneNumberInput.builder().withType("Mobile").withDetails("+9-888").build()))
-        .build();
+    final PersonInput winnerInput =
+        PersonInput.builder().withFamilyName("Winner Phone Merge").withStatus(Status.ACTIVE)
+            .withPhoneNumber(
+                List.of(PhoneNumberInput.builder().withType("Work").withDetails("+9-999").build(),
+                    PhoneNumberInput.builder().withType("Mobile").withDetails("+9-888").build()))
+            .build();
     final Person winner =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, winnerInput));
     assertThat(winner).isNotNull();
 
     // Same as the merge UI: keep winner Work/Mobile, take loser Fax (one number per type)
     winnerInput.setUuid(winner.getUuid());
-    winnerInput.setPhoneNumber(List.of(
-        PhoneNumberInput.builder().withType("Work").withDetails("+9-999").build(),
-        PhoneNumberInput.builder().withType("Mobile").withDetails("+9-888").build(),
-        PhoneNumberInput.builder().withType("Fax").withDetails("+1-222").build()));
+    winnerInput.setPhoneNumber(
+        List.of(PhoneNumberInput.builder().withType("Work").withDetails("+9-999").build(),
+            PhoneNumberInput.builder().withType("Mobile").withDetails("+9-888").build(),
+            PhoneNumberInput.builder().withType("Fax").withDetails("+1-222").build()));
     final Integer nrUpdated = withCredentials(adminUser,
         t -> mutationExecutor.mergePeople("", loser.getUuid(), true, winnerInput));
     assertThat(nrUpdated).isOne();
@@ -332,7 +332,8 @@ class PersonMergeTest extends AbstractResourceTest {
     final Person merged =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, winner.getUuid()));
     assertThat(merged.getPhoneNumber()).extracting(PhoneNumber::getType, PhoneNumber::getDetails)
-        .containsExactly(tuple("Work", "+9-999"), tuple("Mobile", "+9-888"), tuple("Fax", "+1-222"));
+        .containsExactly(tuple("Work", "+9-999"), tuple("Mobile", "+9-888"),
+            tuple("Fax", "+1-222"));
   }
 
   @Test

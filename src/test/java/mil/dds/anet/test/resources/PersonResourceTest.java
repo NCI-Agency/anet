@@ -63,10 +63,9 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _POSITION_FIELDS =
       String.format("uuid updatedAt name code type role status organization { uuid } %1$s",
           _EMAIL_ADDRESSES_FIELDS);
-  private static final String _PERSON_FIELDS = String
-      .format("uuid familyName givenName status user phoneNumber { type details }"
-          + " rank biography obsoleteCountry"
-          + " country { uuid name } code gender endOfTourDate"
+  private static final String _PERSON_FIELDS =
+      String.format("uuid familyName givenName status user phoneNumber { type details }"
+          + " rank biography obsoleteCountry" + " country { uuid name } code gender endOfTourDate"
           + " users { uuid domainUsername } pendingVerification createdAt updatedAt"
           + " preferences { value } customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
@@ -382,14 +381,14 @@ public class PersonResourceTest extends AbstractResourceTest {
         .containsExactly(tuple("Work", "+9-23-2323-2323"));
 
     // Create a person with dictionary types plus a custom type; empty details are dropped
-    final PersonInput personInput = PersonInput.builder().withFamilyName("PhoneNumbers Test")
-        .withStatus(Status.ACTIVE)
-        .withPhoneNumber(List.of(
-            PhoneNumberInput.builder().withType("Mobile").withDetails("+31 6 12345678").build(),
-            PhoneNumberInput.builder().withType("Work").withDetails("+1-555-0100").build(),
-            PhoneNumberInput.builder().withType("Home").withDetails("+44 20 7946 0958").build(),
-            PhoneNumberInput.builder().withType("Work").withDetails("  ").build()))
-        .build();
+    final PersonInput personInput =
+        PersonInput.builder().withFamilyName("PhoneNumbers Test").withStatus(Status.ACTIVE)
+            .withPhoneNumber(List.of(
+                PhoneNumberInput.builder().withType("Mobile").withDetails("+31 6 12345678").build(),
+                PhoneNumberInput.builder().withType("Work").withDetails("+1-555-0100").build(),
+                PhoneNumberInput.builder().withType("Home").withDetails("+44 20 7946 0958").build(),
+                PhoneNumberInput.builder().withType("Work").withDetails("  ").build()))
+            .build();
     final Person created =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, personInput));
     assertThat(created).isNotNull();

@@ -185,9 +185,8 @@ public class Person extends AbstractEmailableAnetBean
       this.phoneNumber = null;
       return;
     }
-    final List<PhoneNumber> cleaned = phoneNumber.stream()
-        .filter(Person::nonEmptyPhoneNumber)
-        .toList();
+    final List<PhoneNumber> cleaned =
+        phoneNumber.stream().filter(Person::nonEmptyPhoneNumber).toList();
     this.phoneNumber = cleaned.isEmpty() ? null : cleaned;
   }
 
