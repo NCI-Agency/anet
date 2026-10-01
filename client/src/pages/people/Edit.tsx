@@ -56,7 +56,7 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
-      tenantAccessRequests {
+      tenantAccessRequest {
         ${gqlEntityFieldsMap.Tenant}
       }
       tenant {
