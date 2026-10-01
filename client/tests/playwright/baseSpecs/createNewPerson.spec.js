@@ -260,26 +260,26 @@ test.describe("Create new Person form page", () => {
       })
       await CreatePerson.submitForm()
       await pwExpect(await CreatePerson.getAlertSuccess()).toHaveCount(0)
-      await waitFor(await CreatePerson.getTenantsError(), "attached")
-      await waitFor(await CreatePerson.getTenantsError(), "visible")
-      await pwExpect(await CreatePerson.getTenantsError()).toHaveText(
-        "An active user must be a member of at least one active Tenant",
+      await waitFor(await CreatePerson.getTenantError(), "attached")
+      await waitFor(await CreatePerson.getTenantError(), "visible")
+      await pwExpect(await CreatePerson.getTenantError()).toHaveText(
+        "An active user must be a member of an active Tenant",
         {
           useInnerText: true
         }
       )
-      await (await CreatePerson.getTenantsInput()).scrollIntoViewIfNeeded()
-      await (await CreatePerson.getTenantsInput()).click()
+      await (await CreatePerson.getTenantInput()).scrollIntoViewIfNeeded()
+      await (await CreatePerson.getTenantInput()).click()
       await waitFor(
-        await CreatePerson.getTenantsAdvancedSelectFirstItem(),
+        await CreatePerson.getTenantAdvancedSelectFirstItem(),
         "attached"
       )
       await waitFor(
-        await CreatePerson.getTenantsAdvancedSelectFirstItem(),
+        await CreatePerson.getTenantAdvancedSelectFirstItem(),
         "visible"
       )
-      await (await CreatePerson.getTenantsAdvancedSelectFirstItem()).click()
-      await waitFor(await CreatePerson.getTenantsError(), "attached", {
+      await (await CreatePerson.getTenantAdvancedSelectFirstItem()).click()
+      await waitFor(await CreatePerson.getTenantError(), "attached", {
         timeout: 1000,
         reverse: true
       })
