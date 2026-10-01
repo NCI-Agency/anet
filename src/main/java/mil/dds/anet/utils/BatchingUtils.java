@@ -438,12 +438,6 @@ public final class BatchingUtils {
             (BatchLoader<String, List<Person>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getTenantDao().getAccessRequests(foreignKeys), dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.TENANT_ACCESS_TOKEN.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<Tenant>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getTenantDao().getTenantsForAccessToken(foreignKeys),
-                dispatcherService),
-            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.TENANT_ADMINISTRATIVE_POSITIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
