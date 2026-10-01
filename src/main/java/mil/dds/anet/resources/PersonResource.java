@@ -27,7 +27,6 @@ import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.UserDao;
 import mil.dds.anet.emails.NewUserEmail;
 import mil.dds.anet.emails.TenantAccessRequestEmail;
@@ -50,12 +49,11 @@ public class PersonResource {
   private final EmailAddressDao emailAddressDao;
   private final PersonPreferenceDao personPreferenceDao;
   private final PositionDao positionDao;
-  private final TenantDao tenantDao;
   private final UserDao userDao;
 
   public PersonResource(AnetDictionary dict, AnetObjectEngine engine, AuditTrailDao auditTrailDao,
       PersonDao dao, EmailAddressDao emailAddressDao, PersonPreferenceDao personPreferenceDao,
-      PositionDao positionDao, TenantDao tenantDao, UserDao userDao) {
+      PositionDao positionDao, UserDao userDao) {
     this.dict = dict;
     this.engine = engine;
     this.auditTrailDao = auditTrailDao;
@@ -63,7 +61,6 @@ public class PersonResource {
     this.emailAddressDao = emailAddressDao;
     this.personPreferenceDao = personPreferenceDao;
     this.positionDao = positionDao;
-    this.tenantDao = tenantDao;
     this.userDao = userDao;
   }
 
@@ -230,19 +227,14 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
-    // Update Tenant access requests:
-    if (p.getTenantAccessRequests() != null) {
-      final List<Tenant> existingTenantAccessRequests =
-          tenantDao.getTenantAccessRequestsForPerson(engine.getContext(), p.getUuid()).join();
-      final List<Tenant> newTenantAccessRequests =
-          Boolean.TRUE.equals(p.getUser()) ? p.getTenantAccessRequests() : List.of();
+    // Update Tenant access request:
+    if (Boolean.TRUE.equals(p.getUser()) && DaoUtils.getUuid(p.getTenantAccessRequest()) != null) {
       final Instant now = Instant.now();
-      Utils.addRemoveElementsByUuid(existingTenantAccessRequests, newTenantAccessRequests,
-          newTenant -> {
-            dao.addTenantAccessRequestToPerson(newTenant, p, now);
-            // Send email to the tenant administrators that a user requests access
-            sendTenantAccessRequestEmail(newTenant, p);
-          }, oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
+      dao.upsertPersonTenantAccessRequest(p.getTenantAccessRequest(), p, now);
+      // Send email to the tenant administrators that a user requests access
+      sendTenantAccessRequestEmail(p.getTenantAccessRequest(), p);
+    } else {
+      dao.deletePersonTenantAccessRequest(p.getUuid());
     }
 
     if (AuthUtils.isAdmin(user)) {
@@ -360,7 +352,7 @@ public class PersonResource {
 
     if (isApproved && tenant != null) {
       dao.updateTenantForPerson(tenant, person, Boolean.TRUE.equals(person.getUser()));
-      dao.deletePersonTenantAccessRequests(personUuid);
+      dao.deletePersonTenantAccessRequest(personUuid);
     }
 
     // Log the change
@@ -457,19 +449,14 @@ public class PersonResource {
       dao.updateSubscriptions(p, auditTrailUuid, false);
     }
 
-    // Update Tenant access requests:
-    if (p.getTenantAccessRequests() != null) {
-      final List<Tenant> existingTenantAccessRequests =
-          tenantDao.getTenantAccessRequestsForPerson(engine.getContext(), p.getUuid()).join();
-      final List<Tenant> newTenantAccessRequests =
-          Boolean.TRUE.equals(p.getUser()) ? p.getTenantAccessRequests() : List.of();
+    // Update Tenant access request:
+    if (Boolean.TRUE.equals(p.getUser()) && DaoUtils.getUuid(p.getTenantAccessRequest()) != null) {
       final Instant now = Instant.now();
-      Utils.addRemoveElementsByUuid(existingTenantAccessRequests, newTenantAccessRequests,
-          newTenant -> {
-            dao.addTenantAccessRequestToPerson(newTenant, p, now);
-            // Send email to the tenant administrators that a user requests access
-            sendTenantAccessRequestEmail(newTenant, p);
-          }, oldTenant -> dao.removeTenantAccessRequestFromPerson(oldTenant, p));
+      dao.upsertPersonTenantAccessRequest(p.getTenantAccessRequest(), p, now);
+      // Send email to the tenant administrators that a user requests access
+      sendTenantAccessRequestEmail(p.getTenantAccessRequest(), p);
+    } else {
+      dao.deletePersonTenantAccessRequest(p.getUuid());
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows

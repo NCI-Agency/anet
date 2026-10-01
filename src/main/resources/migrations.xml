@@ -7553,7 +7553,7 @@
 		<addUniqueConstraint
 			constraintName="UQ_uniqueTenantAccessRequests"
 			tableName="tenantAccessRequests"
-			columnNames="tenantUuid, personUuid"
+			columnNames="personUuid"
 		/>
 		<addForeignKeyConstraint
 			constraintName="FK_tenantAccessRequests_tenant"
@@ -7564,7 +7564,7 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 		/>
 		<addForeignKeyConstraint
-			constraintName="FK_tenantAccessRequests_position"
+			constraintName="FK_tenantAccessRequests_person"
 			baseTableName="tenantAccessRequests"
 			baseColumnNames="personUuid"
 			referencedTableName="people"
@@ -7578,7 +7578,7 @@
 			<column name="tenantUuid"/>
 		</createIndex>
 		<createIndex
-			indexName="IDX_tenantAccessRequests_positionUuid"
+			indexName="IDX_tenantAccessRequests_personUuid"
 			tableName="tenantAccessRequests"
 		>
 			<column name="personUuid"/>
