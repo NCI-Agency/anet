@@ -300,26 +300,26 @@ test.describe(() => {
         await CreatePerson.submitForm()
         await expect(await CreatePerson.getAlertSuccess()).toHaveCount(0)
         await (
-          await CreatePerson.getTenantsError()
+          await CreatePerson.getTenantError()
         ).waitFor({
           state: "visible"
         })
-        await expect(await CreatePerson.getTenantsError()).toHaveText(
-          "An active user must be a member of at least one active Tenant",
+        await expect(await CreatePerson.getTenantError()).toHaveText(
+          "An active user must be a member of an active Tenant",
           {
             useInnerText: true
           }
         )
-        await (await CreatePerson.getTenantsInput()).scrollIntoViewIfNeeded()
-        await (await CreatePerson.getTenantsInput()).click()
+        await (await CreatePerson.getTenantInput()).scrollIntoViewIfNeeded()
+        await (await CreatePerson.getTenantInput()).click()
         await (
-          await CreatePerson.getTenantsAdvancedSelectFirstItem()
+          await CreatePerson.getTenantAdvancedSelectFirstItem()
         ).waitFor({
           state: "visible"
         })
-        await (await CreatePerson.getTenantsAdvancedSelectFirstItem()).click()
+        await (await CreatePerson.getTenantAdvancedSelectFirstItem()).click()
         await (
-          await CreatePerson.getTenantsError()
+          await CreatePerson.getTenantError()
         ).waitFor({
           state: "detached"
         })

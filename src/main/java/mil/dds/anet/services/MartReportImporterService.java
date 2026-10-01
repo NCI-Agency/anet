@@ -470,9 +470,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
         List.of(emailAddress));
 
-    // Update tenants
+    // Update tenant
     final List<Tenant> tenants = tenantDao.getByName(tenantName);
-    personDao.insertPersonTenants(person.getUuid(), tenants);
+    personDao.updateTenantForPerson(tenants.getFirst(), person, true);
 
     return person;
   }

@@ -113,9 +113,10 @@ const ReportNewConditional = ({
     reportPerson.interlocutor = false
     reportPerson.reportPosition = currentUser.position
     report.reportPeople.push(reportPerson)
-    report.tenants = currentUser.tenants?.filter(
-      t => t?.status === Model.STATUS.ACTIVE
-    )
+    report.tenants =
+      currentUser?.tenant?.status === Model.STATUS.ACTIVE
+        ? [currentUser.tenant]
+        : []
   }
   const reportInitialValues = Object.assign(
     report,

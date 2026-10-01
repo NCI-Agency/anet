@@ -138,7 +138,7 @@ public abstract class AnetApplicationTest {
       "{ uuid familyName givenName user users { uuid domainUsername } rank status phoneNumber { type details } biography"
           + " pendingVerification createdAt updatedAt position { uuid name type superuserType status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } "
-          + " emailAddresses { network address } tenants { uuid name } }";
+          + " emailAddresses { network address } tenant { uuid name } }";
   public static final String SUBSCRIPTION_FIELDS = "uuid createdAt updatedAt subscriber { uuid }"
       + " subscribedObjectType subscribedObjectUuid subscribedObject {"
       + " ... on AuthorizationGroup { uuid } ... on Event { uuid }"

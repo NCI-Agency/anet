@@ -42,7 +42,6 @@ public enum FkDataLoaderKey {
   TENANT_ACCESS_TOKEN, // tenant.accessToken
   TENANT_ADMINISTRATIVE_POSITIONS, // tenant.administrativePositions
   TENANT_MEMBERS, // tenant.members
-  TENANT_PERSON, // tenant.person
   TENANT_REPORT, // tenant.report
   USER_PERSON, // user.person
 }

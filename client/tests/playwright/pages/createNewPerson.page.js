@@ -140,18 +140,18 @@ export class CreatePerson extends Page {
     return this.page.locator("#no-tenant-warning").first()
   }
 
-  async getTenantsInput() {
-    return this.page.locator("#tenants").first()
+  async getTenantInput() {
+    return this.page.locator("#tenant").first()
   }
 
-  async getTenantsAdvancedSelectFirstItem() {
+  async getTenantAdvancedSelectFirstItem() {
     return this.page
-      .locator("#tenants-popover tbody tr:first-child td:nth-child(2)")
+      .locator("#tenant-popover tbody tr:first-child td:nth-child(2)")
       .first()
   }
 
-  async getTenantsError() {
-    return this.page.locator("#fg-tenants div.invalid-feedback").first()
+  async getTenantError() {
+    return this.page.locator("#fg-tenant div.invalid-feedback").first()
   }
 
   async getCustomFieldsContainer() {
