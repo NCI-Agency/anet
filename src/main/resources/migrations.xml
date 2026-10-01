@@ -7432,44 +7432,27 @@
 				FROM tenants, reports;
 		</sql>
 
-		<createTable tableName="accessTokenTenants">
-			<column name="tenantUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
-			<column name="accessTokenUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
+		<addColumn tableName="accessTokens">
+			<column name="tenantUuid" type="${uuid_type}" />
+		</addColumn>
 
 		<addForeignKeyConstraint
-			constraintName="FK_accessTokenTenants_tenant"
-			baseTableName="accessTokenTenants"
+			constraintName="FK_accessTokens_tenant"
+			baseTableName="accessTokens"
 			baseColumnNames="tenantUuid"
 			referencedTableName="tenants"
 			referencedColumnNames="uuid"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 		/>
 
-		<addForeignKeyConstraint
-			constraintName="FK_accessTokenTenants_token"
-			baseTableName="accessTokenTenants"
-			baseColumnNames="accessTokenUuid"
-			referencedTableName="accessTokens"
-			referencedColumnNames="uuid"
-			onDelete="CASCADE" onUpdate="CASCADE"
-		/>
-
-		<addUniqueConstraint
-			constraintName="UQ_accessTokenTenants_Tenant_AccessToken"
-			tableName="accessTokenTenants"
-			columnNames="tenantUuid, accessTokenUuid"
-		/>
-
 		<!-- Link accessTokens to initial tenant -->
 		<sql>
-			INSERT INTO "accessTokenTenants" ("tenantUuid", "accessTokenUuid")
-			SELECT tenants.uuid, "accessTokens".uuid
-			FROM tenants, "accessTokens";
+			UPDATE "accessTokens"
+			SET "tenantUuid" = (
+				SELECT uuid
+				FROM tenants
+				WHERE name = 'Tenant #1'
+			);
 		</sql>
 	</changeSet>
 

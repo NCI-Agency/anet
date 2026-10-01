@@ -333,9 +333,8 @@ public class DaoUtils {
       // Access tokens only ever see non-draft/non-rejected reports within their tenants.
       sql = "((%1$s.state NOT IN (:draftState, :rejectedState))"
           + " AND (%1$s.\"allTenants\" IS TRUE OR %1$s.uuid IN ("
-          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" IN ("
-          + " SELECT \"tenantUuid\" FROM \"accessTokenTenants\" WHERE \"accessTokenUuid\" = :accessTokenUuid"
-          + "))))";
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" = ("
+          + " SELECT \"tenantUuid\" FROM \"accessTokens\" WHERE uuid = :accessTokenUuid" + "))))";
     } else {
       // Users can see their own %1$s, other users only ever see non-draft/non-rejected %1$s
       // within their tenant, and approvers also see %1$s pending their approval.

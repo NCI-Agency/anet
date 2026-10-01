@@ -225,30 +225,6 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     return new TenantsForReportBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<Tenant>> getTenantsForAccessToken(GraphQLContext context,
-      String accessTokenUuid) {
-    return new ForeignKeyFetcher<Tenant>().load(context, FkDataLoaderKey.TENANT_ACCESS_TOKEN,
-        accessTokenUuid);
-  }
-
-  class TenantsForAccessTokenBatcher extends ForeignKeyBatcher<Tenant> {
-    private static final String SQL =
-        "/* batch.getTenantsForAccessToken */ SELECT \"accessTokenTenants\".\"accessTokenUuid\", "
-            + TABLE_NAME + ".*  FROM \"accessTokenTenants\" INNER JOIN " + TABLE_NAME
-            + " ON tenants.uuid = \"accessTokenTenants\".\"tenantUuid\""
-            + " WHERE \"accessTokenTenants\".\"accessTokenUuid\" IN ( <foreignKeys> )"
-            + " ORDER BY tenants.name";
-
-    public TenantsForAccessTokenBatcher() {
-      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new TenantMapper(),
-          "accessTokenUuid");
-    }
-  }
-
-  public List<List<Tenant>> getTenantsForAccessToken(List<String> foreignKeys) {
-    return new TenantsForAccessTokenBatcher().getByForeignKeys(foreignKeys);
-  }
-
   class AccessRequestsBatcher extends ForeignKeyBatcher<Person> {
     private static final String SQL =
         "/* batch.getAccessRequestsForTenant */ SELECT \"tenantAccessRequests\".\"tenantUuid\", "
