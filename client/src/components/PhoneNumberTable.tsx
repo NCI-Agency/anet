@@ -14,7 +14,7 @@ const PhoneNumberTable = ({ label, phoneNumber }: PhoneNumberTableProps) => {
   }
 
   return (
-    <Table striped hover responsive className="mb-0">
+    <Table striped hover className="mb-0">
       <tbody>
         {numbers.map((pn, i) => (
           <tr key={`${pn.type}-${pn.details}-${i}`}>

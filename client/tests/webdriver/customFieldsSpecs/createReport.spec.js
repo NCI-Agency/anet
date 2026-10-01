@@ -230,15 +230,8 @@ describe("Create report form page", () => {
           )
         ).getText()
       ).to.include(SEARCH_PEOPLE_COMPLETE_1)
-      // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
-      // Change input type to Organizations
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("Organizations")
-      ).scrollIntoView()
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("Organizations")
-      ).click()
+      // Close overlay, then change input type to Organizations
+      await CreateReport.clickTestMultiReferenceFieldButton("Organizations")
       // Wait for the filters to change
       await browser.pause(500)
       expect(
@@ -261,15 +254,8 @@ describe("Create report form page", () => {
           )
         ).getText()
       ).to.include(SEARCH_ORGANIZATION_COMPLETE)
-      // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
-      // Change input type to Positions
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("Positions")
-      ).scrollIntoView()
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("Positions")
-      ).click()
+      // Close overlay, then change input type to Positions
+      await CreateReport.clickTestMultiReferenceFieldButton("Positions")
       // Wait for the filters to change
       await browser.pause(500)
       expect(
@@ -298,13 +284,8 @@ describe("Create report form page", () => {
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
-      // Change input type to People
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("People")
-      ).scrollIntoView()
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("People")
-      ).click()
+      // Close overlay, then change input type to People
+      await CreateReport.clickTestMultiReferenceFieldButton("People")
       // Wait for the filters to change
       await browser.pause(500)
       await (await CreateReport.getTestMultiReferenceField()).click()
@@ -379,15 +360,8 @@ describe("Create report form page", () => {
         ).getText()
       ).to.include(PERSON_VALUE_2)
 
-      // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
-      // Change input type to Positions
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("Positions")
-      ).scrollIntoView()
-      await (
-        await CreateReport.getTestMultiReferenceFieldButton("Positions")
-      ).click()
+      // Close overlay, then change input type to Positions
+      await CreateReport.clickTestMultiReferenceFieldButton("Positions")
       // Wait for the filters to change
       await browser.pause(500)
       expect(

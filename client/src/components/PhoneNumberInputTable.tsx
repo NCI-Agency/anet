@@ -37,7 +37,7 @@ const PhoneNumberInputTable = ({
           {_get(phoneNumber, "length", 0) === 0 ? (
             <em className="clearfix">No phone number found</em>
           ) : (
-            <Table striped hover responsive>
+            <Table striped hover>
               <thead>
                 <tr>
                   <th>Type</th>
