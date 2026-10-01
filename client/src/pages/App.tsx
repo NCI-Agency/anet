@@ -149,6 +149,10 @@ const GQL_GET_APP_DATA = gql`
         app6standardIdentity
       }
     }
+
+    preferences {
+      ${gqlPreferenceFields}
+    }
   }
 `
 
@@ -171,10 +175,12 @@ function processData(data) {
   }
   const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
   const currentUser = new Person(data.me)
+  const genericPreferences = data.preferences ?? {}
   const notifications = getNotifications(currentUser.position)
   return {
     currentUser,
     allOrganizations,
+    genericPreferences,
     notifications
   }
 }
@@ -197,12 +203,14 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
     () => ({
       currentUser: appState.currentUser,
       allOrganizations: appState.allOrganizations,
+      genericPreferences: appState.genericPreferences,
       loadAppData: refetch,
       notifications: appState.notifications
     }),
     [
       appState.allOrganizations,
       appState.currentUser,
+      appState.genericPreferences,
       appState.notifications,
       refetch
     ]

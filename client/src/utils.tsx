@@ -595,6 +595,31 @@ export default {
       .split(",")
       .map(s => s.trim())
       .filter(Boolean)
+  },
+
+  findUserPreference: function (userPreferences, name, category) {
+    return userPreferences?.find(
+      p => p.preference.name === name && p.preference.category === category
+    )
+  },
+
+  findGenericPreference: function (genericPreferences, name, category) {
+    return genericPreferences?.find(
+      p => p.name === name && p.category === category
+    )
+  },
+
+  getPreference: function (
+    userPreferences,
+    genericPreferences,
+    name,
+    category
+  ) {
+    return (
+      this.findUserPreference(userPreferences, name, category)?.value ??
+      this.findGenericPreference(genericPreferences, name, category)
+        ?.defaultValue
+    )
   }
 }
 
