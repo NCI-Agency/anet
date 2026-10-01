@@ -1,5 +1,4 @@
 import Model from "components/Model"
-import _isEmpty from "lodash/isEmpty"
 import React from "react"
 import utils from "utils"
 
@@ -18,7 +17,7 @@ const NoTenantBanner = ({ person }: NoTenantBannerProps) => {
     !person?.pendingVerification &&
     person?.status === Model.STATUS.ACTIVE &&
     person?.user &&
-    _isEmpty(person?.tenants?.filter(t => t?.status === Model.STATUS.ACTIVE))
+    person?.tenant?.status !== Model.STATUS.ACTIVE
   return (
     showNoTenantBanner && (
       <div className="banner" style={css}>

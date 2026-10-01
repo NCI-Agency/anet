@@ -338,13 +338,13 @@ public class DaoUtils {
           + "))))";
     } else {
       // Users can see their own %1$s, other users only ever see non-draft/non-rejected %1$s
-      // within their tenants, and approvers also see %1$s pending their approval.
+      // within their tenant, and approvers also see %1$s pending their approval.
       sql = "((%1$s.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
           + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid))"
           + " OR ((%1$s.state NOT IN (:draftState, :rejectedState))"
           + " AND (%1$s.\"allTenants\" IS TRUE OR %1$s.uuid IN ("
-          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" IN ("
-          + " SELECT \"tenantUuid\" FROM \"peopleTenants\" where \"personUuid\" = :userUuid))))"
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" = ("
+          + " SELECT \"tenantUuid\" FROM people where uuid = :userUuid))))"
           + " OR (%1$s.\"approvalStepUuid\" IN ("
           + " SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN ("
           + " SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :userUuid))))";

@@ -59,7 +59,7 @@ const GQL_GET_PERSON = gql`
       tenantAccessRequests {
         ${gqlEntityFieldsMap.Tenant}
       }
-      tenants {
+      tenant {
         ${gqlEntityFieldsMap.Tenant}
       }
       attachments {

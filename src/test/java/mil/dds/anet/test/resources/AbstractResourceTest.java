@@ -120,7 +120,7 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
       "{ uuid familyName givenName user users { uuid domainUsername } rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type superuserType status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } "
-          + " emailAddresses { network address } tenants { uuid name } }";
+          + " emailAddresses { network address } tenant { uuid name } }";
 
   @BeforeAll
   void setUp() {

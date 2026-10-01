@@ -23,7 +23,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
   private static final Set<String> ALL_FIELDS = Sets.newHashSet(PersonDao.allFields);
   private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(PersonDao.minimalFields);
-  private static final Map<String, String> FIELD_MAPPING = Map.of("country", "countryUuid");
+  private static final Map<String, String> FIELD_MAPPING =
+      Map.of("country", "countryUuid", "tenant", "tenantUuid");
 
   protected AbstractPersonSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Person, PersonSearchQuery> qb) {

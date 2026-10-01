@@ -41,8 +41,6 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,9 +51,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields =
       {"uuid", "familyName", "givenName", "rank", "createdAt"};
-  public static final String[] additionalFields =
-      {"status", "user", "phoneNumber", "biography", "obsoleteCountry", "countryUuid", "gender",
-          "endOfTourDate", "pendingVerification", "code", "updatedAt", "customFields"};
+  public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
+      "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "pendingVerification", "code",
+      "updatedAt", "tenantUuid", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -616,18 +614,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   public interface PersonBatch {
-    @SqlBatch("INSERT INTO \"peopleTenants\" (\"personUuid\", \"tenantUuid\") "
-        + "VALUES (:personUuid, :uuid)")
-    void insertPersonTenants(@Bind("personUuid") String personUuid, @BindBean List<Tenant> tenants);
-
-    @SqlUpdate("INSERT INTO \"peopleTenants\" (\"personUuid\", \"tenantUuid\") "
-        + "VALUES (:personUuid, :tenantUuid)")
-    void addTenantToPerson(@Bind("personUuid") String personUuid,
-        @Bind("tenantUuid") String tenantUuid);
-
-    @SqlUpdate("DELETE FROM \"peopleTenants\" "
-        + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
-    void removeTenantFromPerson(@Bind("personUuid") String personUuid,
+    @SqlUpdate("UPDATE people SET \"tenantUuid\" = :tenantUuid WHERE uuid = :personUuid")
+    void updateTenantForPerson(@Bind("personUuid") String personUuid,
         @Bind("tenantUuid") String tenantUuid);
 
     @SqlUpdate("INSERT INTO \"tenantAccessRequests\" (\"personUuid\", \"tenantUuid\", \"createdAt\") "
@@ -642,19 +630,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     @SqlUpdate("DELETE FROM \"tenantAccessRequests\" WHERE \"personUuid\" = :personUuid")
     void deletePersonTenantAccessRequests(@Bind("personUuid") String personUuid);
-  }
-
-  @Transactional
-  public void insertPersonTenants(String uuid, List<Tenant> personTenants) {
-    final Handle handle = getDbHandle();
-    try {
-      if (!Utils.isEmptyOrNull(personTenants)) {
-        final PersonBatch pb = handle.attach(PersonBatch.class);
-        pb.insertPersonTenants(uuid, personTenants);
-      }
-    } finally {
-      closeDbHandle(handle);
-    }
   }
 
   @Transactional
@@ -692,22 +667,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  public void addTenantToPerson(Tenant t, Person p) {
+  public void updateTenantForPerson(Tenant t, Person p, boolean setTenant) {
     final Handle handle = getDbHandle();
     try {
       final PersonBatch pb = handle.attach(PersonBatch.class);
-      pb.addTenantToPerson(p.getUuid(), t.getUuid());
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public void removeTenantFromPerson(Tenant t, Person p) {
-    final Handle handle = getDbHandle();
-    try {
-      final PersonBatch pb = handle.attach(PersonBatch.class);
-      pb.removeTenantFromPerson(p.getUuid(), t.getUuid());
+      pb.updateTenantForPerson(p.getUuid(), setTenant && t != null ? t.getUuid() : null);
     } finally {
       closeDbHandle(handle);
     }

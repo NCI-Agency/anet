@@ -180,7 +180,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(person1.getPosition().getName()).isEqualTo(goodReport.getPositionName());
     assertThat(person1.getCountry()).isNotNull();
     assertThat(person1.getCountry().getName()).isEqualTo("Spain");
-    assertTenants(person1.getTenants());
+    assertTenant(person1.getTenant());
     // The OF-5, came with country name = Spain
     queryPerson.setRank("OF-5");
     searchResults = withCredentials("arthur",
@@ -189,7 +189,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     Person person2 = searchResults.getList().getFirst();
     assertThat(person2.getCountry()).isNotNull();
     assertThat(person2.getCountry().getName()).isEqualTo("Spain");
-    assertTenants(person2.getTenants());
+    assertTenant(person2.getTenant());
     // The OF-4, missing country
     queryPerson.setRank("OF-4");
     searchResults = withCredentials("arthur",
@@ -197,7 +197,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(searchResults.getTotalCount()).isPositive();
     Person person3 = searchResults.getList().getFirst();
     assertThat(person3.getCountry()).isNull();
-    assertTenants(person3.getTenants());
+    assertTenant(person3.getTenant());
     // The OF-3, his position was created, must be there
     queryPerson.setRank("OF-3");
     searchResults = withCredentials("arthur",
@@ -205,7 +205,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(searchResults.getTotalCount()).isPositive();
     Person person4 = searchResults.getList().getFirst();
     assertThat(person4.getPosition().getName()).isEqualTo(goodReport.getPositionName());
-    assertTenants(person4.getTenants());
+    assertTenant(person4.getTenant());
 
     // We imported goodReport and everything was fine
     final mil.dds.anet.test.client.Report createdGoodReport = withCredentials("arthur",
@@ -228,7 +228,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdGoodReport.getClassification()).isEqualTo("NU");
     assertThat(createdGoodReport.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertReportType(createdGoodReport);
-    assertTenants(createdGoodReport.getTenants());
+    assertTenant(createdGoodReport.getTenants().getFirst());
     // Now we will edit and approve goodReport, we should not lose the advisorOrg of the report
     // Edit the report
     createdGoodReport.setAtmosphereDetails("Everybody was super nice! Again!");
@@ -454,8 +454,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(reportType.stringValue()).isEqualTo("lmt");
   }
 
-  private void assertTenants(List<Tenant> tenants) {
-    assertThat(tenants).hasSize(1);
-    assertThat(tenants.getFirst().getName()).isEqualTo(MART_TENANT);
+  private void assertTenant(Tenant tenant) {
+    assertThat(tenant.getName()).isEqualTo(MART_TENANT);
   }
 }
