@@ -48,7 +48,6 @@ import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
-import TenantTable from "components/TenantTable"
 import UserTable from "components/UserTable"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -84,7 +83,7 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
-      tenantAccessRequests {
+      tenantAccessRequest {
         ${gqlEntityFieldsMap.Tenant}
       }
       tenant {
@@ -326,19 +325,14 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                         humanValue={person.tenant?.name}
                       />
                     </Col>
-                    {isSelf && !_isEmpty(person.tenantAccessRequests) && (
+                    {isSelf && person.tenantAccessRequest && (
                       <Col md={12}>
                         <FieldHelper.ReadonlyField
-                          field={{ name: "tenantAccessRequests" }}
+                          field={{ name: "tenantAccessRequest" }}
                           label={
-                            Settings.fields.person.tenantAccessRequests?.label
+                            Settings.fields.person.tenantAccessRequest?.label
                           }
-                          humanValue={
-                            <TenantTable
-                              tenants={person.tenantAccessRequests}
-                              showStatus
-                            />
-                          }
+                          humanValue={person.tenantAccessRequest?.name}
                         />
                       </Col>
                     )}

@@ -100,7 +100,7 @@ public class Person extends AbstractEmailableAnetBean
   // annotated below
   private EntityAvatar entityAvatar;
   // annotated below
-  private List<Tenant> tenantAccessRequests;
+  private Tenant tenantAccessRequest;
   // annotated below
   private ForeignObjectHolder<Tenant> tenant = new ForeignObjectHolder<>();
 
@@ -478,28 +478,26 @@ public class Person extends AbstractEmailableAnetBean
     this.preferences = preferences;
   }
 
-  @GraphQLQuery(name = "tenantAccessRequests")
+  @GraphQLQuery(name = "tenantAccessRequest")
   @AllowUnverifiedUsers
-  public CompletableFuture<List<Tenant>> loadTenantAccessRequests(
+  public CompletableFuture<Tenant> loadTenantAccessRequest(
       @GraphQLRootContext GraphQLContext context) {
-    if (tenantAccessRequests != null) {
-      return CompletableFuture.completedFuture(tenantAccessRequests);
-    } else {
-      return engine().getTenantDao().getTenantAccessRequestsForPerson(context, uuid)
-          .thenApply(o -> {
-            tenantAccessRequests = o;
-            return o;
-          });
+    if (tenantAccessRequest != null) {
+      return CompletableFuture.completedFuture(tenantAccessRequest);
     }
+    return engine().getTenantDao().getTenantAccessRequestsForPerson(context, uuid).thenApply(o -> {
+      tenantAccessRequest = Utils.isEmptyOrNull(o) ? null : o.getFirst();
+      return tenantAccessRequest;
+    });
   }
 
-  public List<Tenant> getTenantAccessRequests() {
-    return tenantAccessRequests;
+  public Tenant getTenantAccessRequest() {
+    return tenantAccessRequest;
   }
 
-  @GraphQLInputField(name = "tenantAccessRequests")
-  public void setTenantAccessRequests(List<Tenant> tenantAccessRequests) {
-    this.tenantAccessRequests = tenantAccessRequests;
+  @GraphQLInputField(name = "tenantAccessRequest")
+  public void setTenantAccessRequests(Tenant tenantAccessRequest) {
+    this.tenantAccessRequest = tenantAccessRequest;
   }
 
   @GraphQLQuery(name = "tenant")
