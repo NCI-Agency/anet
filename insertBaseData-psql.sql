@@ -33,7 +33,6 @@ TRUNCATE TABLE "organizations" CASCADE;
 TRUNCATE TABLE "pendingEmails" CASCADE;
 TRUNCATE TABLE "peoplePreferences" CASCADE;
 TRUNCATE TABLE "peoplePositions" CASCADE;
-TRUNCATE TABLE "peopleTenants" CASCADE;
 TRUNCATE TABLE "positionRelationships" CASCADE;
 TRUNCATE TABLE "positions" CASCADE;
 -- Skip preferences, as these are inserted by the migrations
@@ -145,11 +144,14 @@ INSERT INTO users (uuid, "domainUsername", "personUuid", "createdAt", "updatedAt
   (uuid_generate_v4(), 'michael', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Link users to tenant
-INSERT INTO "peopleTenants" ("tenantUuid", "personUuid")
-  SELECT tenants.uuid, people.uuid
-  FROM tenants, people
-  WHERE people.status = 0
-  AND people."user" IS TRUE;
+UPDATE people
+SET "tenantUuid" = (
+  SELECT uuid
+  FROM tenants
+  WHERE name = 'Tenant #1'
+)
+WHERE people.status = 0
+AND people."user" IS TRUE;
 
 UPDATE people
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"Lorem ipsum dolor sit amet","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'

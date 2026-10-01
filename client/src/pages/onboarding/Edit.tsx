@@ -32,7 +32,7 @@ const GQL_GET_SELF = gql`
       tenantAccessRequests {
         ${gqlEntityFieldsMap.Tenant}
       }
-      tenants {
+      tenant {
         ${gqlEntityFieldsMap.Tenant}
       }
     }
