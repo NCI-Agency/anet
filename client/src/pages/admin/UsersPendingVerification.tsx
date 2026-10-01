@@ -38,7 +38,7 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         ${gqlEntityFieldsMap.Person}
         pendingVerification
         ${gqlEmailAddressesFields}
-        tenantAccessRequests {
+        tenantAccessRequest {
           ${gqlEntityFieldsMap.Tenant}
         }
         tenant {
@@ -133,14 +133,13 @@ const UsersPendingVerification = ({
             <thead>
               <tr>
                 <th className="col-sm-3">Name</th>
-                <th className="col-sm-6">Tenants</th>
+                <th className="col-sm-6">Tenant</th>
                 <th className="col-sm-3">Pending Verification</th>
               </tr>
             </thead>
             <tbody>
               {list.map(person => {
-                person.tenant =
-                  person.tenantAccessRequests?.[0] ?? defaultTenant
+                person.tenant = person.tenantAccessRequest ?? defaultTenant
                 return (
                   <Formik
                     key={person.uuid}
