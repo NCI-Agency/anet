@@ -917,7 +917,7 @@ type Mutation {
   ): Comment
   approvePerson(
     """"""
-    tenants: [TenantInput]
+    tenant: TenantInput
 
     """"""
     uuid: String
@@ -1471,8 +1471,8 @@ type Person {
   previousPositions: [PersonPositionHistory]
   rank: String
   status: Status
+  tenant: Tenant
   tenantAccessRequests: [Tenant]
-  tenants: [Tenant]
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -1502,8 +1502,8 @@ input PersonInput {
   previousPositions: [PersonPositionHistoryInput]
   rank: String
   status: Status
+  tenant: TenantInput
   tenantAccessRequests: [TenantInput]
-  tenants: [TenantInput]
   updatedAt: Instant
   user: Boolean
   users: [UserInput]
@@ -2069,8 +2069,8 @@ type ReportPerson {
   rank: String
   reportPosition: Position
   status: Status
+  tenant: Tenant
   tenantAccessRequests: [Tenant]
-  tenants: [Tenant]
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -2105,8 +2105,8 @@ input ReportPersonInput {
   rank: String
   reportPosition: PositionInput
   status: Status
+  tenant: TenantInput
   tenantAccessRequests: [TenantInput]
-  tenants: [TenantInput]
   updatedAt: Instant
   user: Boolean
   users: [UserInput]

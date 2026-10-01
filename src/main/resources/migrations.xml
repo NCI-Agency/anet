@@ -7368,46 +7368,29 @@
 				(${uuid_function}, 'Tenant #1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 		</sql>
 
-		<createTable tableName="peopleTenants">
-			<column name="tenantUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
-			<column name="personUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
+		<addColumn tableName="people">
+			<column name="tenantUuid" type="${uuid_type}" />
+		</addColumn>
 
 		<addForeignKeyConstraint
-			constraintName="FK_peopleTenants_tenant"
-			baseTableName="peopleTenants"
+			constraintName="FK_people_tenant"
+			baseTableName="people"
 			baseColumnNames="tenantUuid"
 			referencedTableName="tenants"
 			referencedColumnNames="uuid"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 		/>
 
-		<addForeignKeyConstraint
-			constraintName="FK_peopleTenants_person"
-			baseTableName="peopleTenants"
-			baseColumnNames="personUuid"
-			referencedTableName="people"
-			referencedColumnNames="uuid"
-			onDelete="NO ACTION" onUpdate="NO ACTION"
-		/>
-
-		<addUniqueConstraint
-			constraintName="UQ_PeopleTenants_Tenant_Person"
-			tableName="peopleTenants"
-			columnNames="tenantUuid, personUuid"
-		/>
-
 		<!-- Link users to initial tenant -->
 		<sql>
-			INSERT INTO "peopleTenants" ("tenantUuid", "personUuid")
-				SELECT tenants.uuid, people.uuid
-				FROM tenants, people
-				WHERE people.status = 0
-				AND people."user" IS TRUE;
+			UPDATE people
+			SET "tenantUuid" = (
+			    SELECT uuid
+			    FROM tenants
+			    WHERE name = 'Tenant #1'
+			)
+			WHERE people.status = 0
+			AND people."user" IS TRUE;
 		</sql>
 
 		<addColumn tableName="reports">

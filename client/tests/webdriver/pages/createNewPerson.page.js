@@ -138,16 +138,16 @@ export class CreatePerson extends Page {
     return browser.$("#no-tenant-warning")
   }
 
-  async getTenantsInput() {
-    return browser.$("#tenants")
+  async getTenantInput() {
+    return browser.$("#tenant")
   }
 
-  async getTenantsAdvancedSelectFirstItem() {
-    return browser.$("#tenants-popover tbody tr:first-child td:nth-child(2)")
+  async getTenantAdvancedSelectFirstItem() {
+    return browser.$("#tenant-popover tbody tr:first-child td:nth-child(2)")
   }
 
-  async getTenantsError() {
-    return browser.$("#fg-tenants div.invalid-feedback")
+  async getTenantError() {
+    return browser.$("#fg-tenant div.invalid-feedback")
   }
 
   async getCustomFieldsContainer() {

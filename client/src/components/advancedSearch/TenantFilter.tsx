@@ -36,8 +36,9 @@ const TenantFilter = ({
   const defaultValue = {
     value:
       inputValue.value ??
-      currentUser?.tenants?.filter(t => t.status === Model.STATUS.ACTIVE) ??
-      []
+      (currentUser?.tenant?.status === Model.STATUS.ACTIVE
+        ? [currentUser.tenant]
+        : [])
   }
   const toQuery = val => ({
     [queryKey]: val.value?.map(v => v?.uuid).filter(v => v != null) ?? []
@@ -52,8 +53,8 @@ const TenantFilter = ({
 
   const advancedSelectFilters = {
     myTenants: {
-      label: "My Tenants",
-      list: currentUser?.tenants ?? []
+      label: "My Tenant",
+      list: currentUser?.tenant ? [currentUser.tenant] : []
     }
   }
   if (currentUser?.isAdmin()) {

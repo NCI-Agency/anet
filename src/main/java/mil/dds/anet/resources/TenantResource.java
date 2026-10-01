@@ -160,13 +160,12 @@ public class TenantResource {
     }
 
     // If a person pending verification had their access request to this tenant denied, doesn't have
-    // any other access requests, and also doesn't have any tenants, remove them
+    // any other access requests, and also doesn't have a tenant, remove them
     accessRequestsPendingVerification.forEach((uuid, person) -> {
-      final List<Tenant> tenants = person.loadTenants(engine.getContext()).join();
+      final Tenant tenant = person.loadTenant(engine.getContext()).join();
       final List<Tenant> accessRequests =
           person.loadTenantAccessRequests(engine.getContext()).join();
-      if (Utils.isEmptyOrNull(tenants)
-          && (Utils.isEmptyOrNull(accessRequests) || accessRequests.size() == 1)) {
+      if (tenant == null && (Utils.isEmptyOrNull(accessRequests) || accessRequests.size() == 1)) {
         personDao.delete(uuid);
         auditTrailDao.logDelete(user, PersonDao.TABLE_NAME, person,
             "person has been denied access");
