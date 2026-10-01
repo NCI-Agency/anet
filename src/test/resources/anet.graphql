@@ -12,7 +12,7 @@ type AccessToken {
   name: String
   pointOfContact: String
   scope: TokenScope
-  tenants: [Tenant]
+  tenant: Tenant
   tokenHash: String
   updatedAt: Instant
   uuid: String
@@ -33,7 +33,7 @@ input AccessTokenInput {
   name: String
   pointOfContact: String
   scope: TokenScope
-  tenants: [TenantInput]
+  tenant: TenantInput
   tokenHash: String
   updatedAt: Instant
   uuid: String
