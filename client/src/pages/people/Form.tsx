@@ -229,7 +229,7 @@ const PersonForm = ({
           )
         const ranks = Settings.fields.person.ranks || []
         const unselectedTenants = allTenants?.filter(
-          t => !values?.tenants?.some(pt => pt?.uuid === t.uuid)
+          t => t.uuid !== values?.tenant?.uuid
         )
         const tenantAccessRequestsFilters = {
           allTenants: {
@@ -795,41 +795,29 @@ const PersonForm = ({
                     <>
                       <DictionaryField
                         wrappedComponent={FastField}
-                        dictProps={Settings.fields.person.tenants}
-                        name="tenants"
+                        dictProps={Settings.fields.person.tenant}
+                        name="tenant"
                         component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
-                          setFieldTouched("tenants", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tenants", value, true)
+                          setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tenant", value)
                         }}
                         widget={
-                          <AdvancedMultiSelect
-                            fieldName="tenants"
-                            placeholder="Search for tenants…"
-                            value={values.tenants}
-                            renderSelected={
-                              <TenantTable
-                                tenants={values.tenants}
-                                showStatus
-                                showDelete={isAdmin}
-                                noTenantsMessage={
-                                  isAdmin ? (
-                                    "No tenants selected; click in the box above to select any"
-                                  ) : (
-                                    <div style={{ paddingTop: 9 }}>
-                                      No tenants found
-                                    </div>
-                                  )
-                                }
-                              />
+                          <AdvancedSingleSelect
+                            fieldName="tenant"
+                            placeholder={
+                              Settings.fields.person.tenant.placeholder
                             }
+                            value={values.tenant}
                             overlayColumns={["Name", "Status"]}
                             overlayRenderRow={TenantOverlayRow}
                             filterDefs={tenantsFilters}
                             objectType={Tenant}
                             fields={Tenant.autocompleteQuery}
+                            valueKey="name"
                             disabled={!isAdmin}
+                            showRemoveButton={isAdmin}
                           />
                         }
                       />
@@ -1020,7 +1008,7 @@ const PersonForm = ({
     person.tenantAccessRequests = person.tenantAccessRequests.map(t =>
       Tenant.filterClientSideFields(t)
     )
-    person.tenants = person.tenants.map(t => Tenant.filterClientSideFields(t))
+    person.tenant = Tenant.filterClientSideFields(person.tenant)
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON

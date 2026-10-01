@@ -173,7 +173,7 @@ export default class Person extends Model {
     .object()
     .shape({
       tenantAccessRequests: yup.array().nullable().default([]),
-      tenants: yup.array().nullable().default([])
+      tenant: yup.object().nullable().default(null)
     })
     .concat(Person.yupBaseSchema)
 
@@ -185,35 +185,33 @@ export default class Person extends Model {
         .min(1, "You must request access to at least one tenant")
         .nullable()
         .default([]),
-      tenants: yup.array().nullable().default([])
+      tenant: yup.object().nullable().default(null)
     })
     .concat(Person.yupBaseSchema)
 
   static yupAdminSchema = yup
     .object()
     .shape({
-      tenants: yup
-        .array()
+      tenant: yup
+        .object()
         .nullable()
         .when(["status", "user"], ([status, user], schema) =>
           status !== Model.STATUS.ACTIVE || !user
             ? schema
             : schema.test(
-                "no-tenants",
-                "no tenants error",
-                (tenants, testContext) => {
-                  return _isEmpty(
-                    tenants?.filter(t => t?.status === Model.STATUS.ACTIVE)
-                  )
+                "no-tenant",
+                "no tenant error",
+                (tenant, testContext) => {
+                  return tenant?.status !== Model.STATUS.ACTIVE
                     ? testContext.createError({
                         message:
-                          "An active user must be a member of at least one active Tenant"
+                          "An active user must be a member of an active Tenant"
                       })
                     : true
                 }
               )
         )
-        .default([])
+        .default(null)
     })
     .concat(Person.yupBaseSchema)
 

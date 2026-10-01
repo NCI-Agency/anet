@@ -87,7 +87,7 @@ const GQL_GET_PERSON = gql`
       tenantAccessRequests {
         ${gqlEntityFieldsMap.Tenant}
       }
-      tenants {
+      tenant {
         ${gqlEntityFieldsMap.Tenant}
       }
       attachments {
@@ -321,11 +321,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                   <>
                     <Col md={12}>
                       <FieldHelper.ReadonlyField
-                        field={{ name: "tenants" }}
-                        label={Settings.fields.person.tenants?.label}
-                        humanValue={
-                          <TenantTable tenants={person.tenants} showStatus />
-                        }
+                        field={{ name: "tenant" }}
+                        label={Settings.fields.person.tenant?.label}
+                        humanValue={person.tenant?.name}
                       />
                     </Col>
                     {isSelf && !_isEmpty(person.tenantAccessRequests) && (

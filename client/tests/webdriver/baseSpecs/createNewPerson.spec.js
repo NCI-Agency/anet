@@ -272,22 +272,22 @@ describe("Create new Person form page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await (await CreatePerson.getAlertSuccess()).isExisting()).to.be
         .false
-      await (await CreatePerson.getTenantsError()).waitForExist()
-      await (await CreatePerson.getTenantsError()).waitForDisplayed()
-      expect(await (await CreatePerson.getTenantsError()).getText()).to.equal(
-        "An active user must be a member of at least one active Tenant"
+      await (await CreatePerson.getTenantError()).waitForExist()
+      await (await CreatePerson.getTenantError()).waitForDisplayed()
+      expect(await (await CreatePerson.getTenantError()).getText()).to.equal(
+        "An active user must be a member of an active Tenant"
       )
-      await (await CreatePerson.getTenantsInput()).scrollIntoView()
-      await (await CreatePerson.getTenantsInput()).click()
+      await (await CreatePerson.getTenantInput()).scrollIntoView()
+      await (await CreatePerson.getTenantInput()).click()
       await (
-        await CreatePerson.getTenantsAdvancedSelectFirstItem()
+        await CreatePerson.getTenantAdvancedSelectFirstItem()
       ).waitForExist()
       await (
-        await CreatePerson.getTenantsAdvancedSelectFirstItem()
+        await CreatePerson.getTenantAdvancedSelectFirstItem()
       ).waitForDisplayed()
-      await (await CreatePerson.getTenantsAdvancedSelectFirstItem()).click()
+      await (await CreatePerson.getTenantAdvancedSelectFirstItem()).click()
       await (
-        await CreatePerson.getTenantsError()
+        await CreatePerson.getTenantError()
       ).waitForExist({ reverse: true })
       // eslint-disable-next-line no-unused-expressions
       expect(await (await CreatePerson.getNoTenantWarning()).isExisting()).to.be

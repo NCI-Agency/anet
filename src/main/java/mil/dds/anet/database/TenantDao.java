@@ -85,18 +85,12 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
   }
 
   public interface TenantBatch {
-    @SqlBatch("INSERT INTO \"peopleTenants\" (\"tenantUuid\", \"personUuid\") "
-        + "VALUES (:tenantUuid, :uuid)")
-    void insertTenantPeople(@Bind("tenantUuid") String tenantUuid, @BindBean List<Person> people);
+    @SqlBatch("UPDATE people SET \"tenantUuid\" = :tenantUuid WHERE uuid IN ( <personUuids> )")
+    void insertTenantPeople(@Bind("tenantUuid") String tenantUuid,
+        @BindList(value = "personUuids", onEmpty = NULL_STRING) List<String> personUuids);
 
-    @SqlUpdate("INSERT INTO \"peopleTenants\" (\"personUuid\", \"tenantUuid\") "
-        + "VALUES (:personUuid, :tenantUuid)")
-    void addMemberToTenant(@Bind("personUuid") String personUuid,
-        @Bind("tenantUuid") String tenantUuid);
-
-    @SqlUpdate("DELETE FROM \"peopleTenants\" "
-        + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
-    void removeMemberFromTenant(@Bind("personUuid") String personUuid,
+    @SqlUpdate("UPDATE people SET \"tenantUuid\" = :tenantUuid WHERE uuid = :personUuid")
+    void updateMemberOfTenant(@Bind("personUuid") String personUuid,
         @Bind("tenantUuid") String tenantUuid);
 
     @SqlBatch("INSERT INTO \"tenantAdministrativePositions\" (\"tenantUuid\", \"positionUuid\")"
@@ -129,7 +123,7 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
           .bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
       final TenantBatch tb = handle.attach(TenantBatch.class);
       if (t.getMembers() != null) {
-        tb.insertTenantPeople(t.getUuid(), t.getMembers());
+        tb.insertTenantPeople(t.getUuid(), t.getMembers().stream().map(Person::getUuid).toList());
       }
       return t;
     } catch (UnableToExecuteStatementException e) {
@@ -204,28 +198,6 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
 
   public List<List<Tenant>> getTenantAccessRequestsForPerson(List<String> foreignKeys) {
     return new TenantAccessRequestsForPersonBatcher().getByForeignKeys(foreignKeys);
-  }
-
-  public CompletableFuture<List<Tenant>> getTenantsForPerson(GraphQLContext context,
-      String personUuid) {
-    return new ForeignKeyFetcher<Tenant>().load(context, FkDataLoaderKey.TENANT_PERSON, personUuid);
-  }
-
-  class TenantsForPersonBatcher extends ForeignKeyBatcher<Tenant> {
-    private static final String SQL =
-        "/* batch.getTenantsForPerson */ SELECT \"peopleTenants\".\"personUuid\", " + TENANT_FIELDS
-            + " FROM \"peopleTenants\" INNER JOIN " + TABLE_NAME
-            + " ON tenants.uuid = \"peopleTenants\".\"tenantUuid\""
-            + " WHERE \"peopleTenants\".\"personUuid\" IN ( <foreignKeys> )"
-            + " ORDER BY tenants.name";
-
-    public TenantsForPersonBatcher() {
-      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new TenantMapper(), "personUuid");
-    }
-  }
-
-  public List<List<Tenant>> getTenantsForPerson(List<String> foreignKeys) {
-    return new TenantsForPersonBatcher().getByForeignKeys(foreignKeys);
   }
 
   public CompletableFuture<List<Tenant>> getTenantsForReport(GraphQLContext context,
@@ -310,14 +282,13 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
 
   class MembersBatcher extends ForeignKeyBatcher<Person> {
     private static final String SQL =
-        "/* batch.getMembersForTenant */ SELECT \"peopleTenants\".\"tenantUuid\", "
-            + PersonDao.PERSON_FIELDS + " FROM \"peopleTenants\" "
-            + "INNER JOIN people ON people.uuid = \"peopleTenants\".\"personUuid\" "
-            + "WHERE \"peopleTenants\".\"tenantUuid\" IN ( <foreignKeys> ) "
+        "/* batch.getMembersForTenant */ SELECT " + PersonDao.PERSON_FIELDS + " FROM people "
+            + "WHERE people.\"tenantUuid\" IN ( <foreignKeys> ) "
             + "ORDER BY people.\"familyName\", people.\"givenName\", people.uuid";
 
     public MembersBatcher() {
-      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new PersonMapper(), "tenantUuid");
+      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new PersonMapper(),
+          "people_tenantUuid");
     }
   }
 
@@ -336,7 +307,7 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     final Handle handle = getDbHandle();
     try {
       final TenantBatch tb = handle.attach(TenantBatch.class);
-      tb.addMemberToTenant(p.getUuid(), t.getUuid());
+      tb.updateMemberOfTenant(p.getUuid(), t.getUuid());
     } finally {
       closeDbHandle(handle);
     }
@@ -347,7 +318,7 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     final Handle handle = getDbHandle();
     try {
       final TenantBatch tb = handle.attach(TenantBatch.class);
-      tb.removeMemberFromTenant(p.getUuid(), t.getUuid());
+      tb.updateMemberOfTenant(p.getUuid(), null);
     } finally {
       closeDbHandle(handle);
     }

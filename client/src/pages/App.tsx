@@ -144,7 +144,7 @@ const GQL_GET_APP_DATA = gql`
           }
         }
       }
-      tenants {
+      tenant {
         ${gqlEntityFieldsMap.Tenant}
       }
     }
