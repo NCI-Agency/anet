@@ -1472,7 +1472,7 @@ type Person {
   rank: String
   status: Status
   tenant: Tenant
-  tenantAccessRequests: [Tenant]
+  tenantAccessRequest: Tenant
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -1503,7 +1503,7 @@ input PersonInput {
   rank: String
   status: Status
   tenant: TenantInput
-  tenantAccessRequests: [TenantInput]
+  tenantAccessRequest: TenantInput
   updatedAt: Instant
   user: Boolean
   users: [UserInput]
@@ -2070,7 +2070,7 @@ type ReportPerson {
   reportPosition: Position
   status: Status
   tenant: Tenant
-  tenantAccessRequests: [Tenant]
+  tenantAccessRequest: Tenant
   updatedAt: Instant
   user: Boolean
   users: [User]
@@ -2106,7 +2106,7 @@ input ReportPersonInput {
   reportPosition: PositionInput
   status: Status
   tenant: TenantInput
-  tenantAccessRequests: [TenantInput]
+  tenantAccessRequest: TenantInput
   updatedAt: Instant
   user: Boolean
   users: [UserInput]

@@ -2,7 +2,6 @@ import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   CountryOverlayRow,
   TenantOverlayRow
@@ -33,7 +32,6 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
-import TenantTable from "components/TenantTable"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import UserInputTable from "components/UserInputTable"
 import { FastField, Field, Form, Formik } from "formik"
@@ -177,9 +175,9 @@ const PersonForm = ({
   const activeTenants = allTenants?.filter(
     t => t?.status === Model.STATUS.ACTIVE
   )
-  const defaultTenants = activeTenants?.length === 1 ? activeTenants : null
-  if (forOnboarding && _isEmpty(initialValues.tenantAccessRequests)) {
-    initialValues.tenantAccessRequests = defaultTenants ?? []
+  const defaultTenant = activeTenants?.length === 1 ? activeTenants[0] : null
+  if (forOnboarding && !initialValues.tenantAccessRequest) {
+    initialValues.tenantAccessRequest = defaultTenant
   }
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
     checkPotentialDuplicates,
@@ -827,37 +825,34 @@ const PersonForm = ({
                           <DictionaryField
                             wrappedComponent={Field}
                             dictProps={
-                              Settings.fields.person.tenantAccessRequests
+                              Settings.fields.person.tenantAccessRequest
                             }
-                            name="tenantAccessRequests"
+                            name="tenantAccessRequest"
                             component={FieldHelper.SpecialField}
                             onChange={value => {
                               // validation will be done by setFieldValue
                               setFieldTouched(
-                                "tenantAccessRequests",
+                                "tenantAccessRequest",
                                 true,
                                 false
                               ) // onBlur doesn't work when selecting an option
-                              setFieldValue("tenantAccessRequests", value, true)
+                              setFieldValue("tenantAccessRequest", value)
                             }}
                             widget={
-                              <AdvancedMultiSelect
-                                fieldName="tenantAccessRequests"
-                                placeholder="Search for tenants…"
-                                value={values.tenantAccessRequests}
-                                renderSelected={
-                                  <TenantTable
-                                    tenants={values.tenantAccessRequests}
-                                    showStatus
-                                    showDelete
-                                    noTenantsMessage="No access requests for tenants"
-                                  />
+                              <AdvancedSingleSelect
+                                fieldName="tenantAccessRequest"
+                                placeholder={
+                                  Settings.fields.person.tenantAccessRequest
+                                    .placeholder
                                 }
+                                value={values.tenantAccessRequest}
                                 overlayColumns={["Name", "Status"]}
                                 overlayRenderRow={TenantOverlayRow}
                                 filterDefs={tenantAccessRequestsFilters}
                                 objectType={Tenant}
                                 fields={Tenant.autocompleteQuery}
+                                valueKey="name"
+                                showRemoveButton
                               />
                             }
                           />
@@ -1005,8 +1000,8 @@ const PersonForm = ({
       person.pendingVerification = false
     }
     person.country = utils.getReference(person.country)
-    person.tenantAccessRequests = person.tenantAccessRequests.map(t =>
-      Tenant.filterClientSideFields(t)
+    person.tenantAccessRequest = Tenant.filterClientSideFields(
+      person.tenantAccessRequest
     )
     person.tenant = Tenant.filterClientSideFields(person.tenant)
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
