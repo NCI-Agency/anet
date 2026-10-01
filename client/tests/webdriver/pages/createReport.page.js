@@ -126,14 +126,6 @@ export class CreateReport extends Page {
     )
   }
 
-  async clickTestMultiReferenceFieldButton(buttonText) {
-    await browser.keys("Escape")
-    const button = await this.getTestMultiReferenceFieldButton(buttonText)
-    await button.scrollIntoView({ block: "center", inline: "nearest" })
-    await button.waitForClickable()
-    await button.click()
-  }
-
   async getTestMultiReferenceFieldLabel() {
     return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `label[for="${ADDITIONAL_ENGAGEMENTS_ID}"]`
