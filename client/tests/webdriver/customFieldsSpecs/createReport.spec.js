@@ -231,7 +231,7 @@ describe("Create report form page", () => {
         ).getText()
       ).to.include(SEARCH_PEOPLE_COMPLETE_1)
       // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
+      await (await CreateReport.getEngagementInformationTitle()).click()
       // Change input type to Organizations
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Organizations")
@@ -262,7 +262,7 @@ describe("Create report form page", () => {
         ).getText()
       ).to.include(SEARCH_ORGANIZATION_COMPLETE)
       // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
+      await (await CreateReport.getEngagementInformationTitle()).click()
       // Change input type to Positions
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Positions")
@@ -293,7 +293,7 @@ describe("Create report form page", () => {
         ).getText()
       ).to.include(SEARCH_POSITION_COMPLETE_1)
       // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
+      await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input does not get empty
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
@@ -380,7 +380,7 @@ describe("Create report form page", () => {
       ).to.include(PERSON_VALUE_2)
 
       // Click outside the overlay
-      await (await CreateReport.getTestMultiReferenceFieldIcon()).click()
+      await (await CreateReport.getEngagementInformationTitle()).click()
       // Change input type to Positions
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Positions")
