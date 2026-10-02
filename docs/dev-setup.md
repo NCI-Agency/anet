@@ -86,6 +86,7 @@ context you want to connect to.
 
 1. Create the DB Docker container and the initial database: `./gradlew dockerCreateDB`
 1. Start the DB Docker container: `./gradlew dockerStartDB`
+1. Create and start the [Keycloak authentication server](keycloak.md#dev): `./gradlew dockerConfigureKeycloak dockerStartKeycloak`. If the container already exists, use `./gradlew dockerStartKeycloak`.
 1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn), build the project, and start the server.
     When starting the server, database migrations are run automatically, and the initial data is loaded.
     1. The database schema is stored in [`src/main/resources/migrations.xml`](../src/main/resources/migrations.xml).
@@ -108,30 +109,60 @@ Provided with the ANET source code is the file `insertBaseData-psql.sql`.  This 
 To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password. See [Users defined locally in the realm](keycloak.md#dev-users) for other possible users.
 
 ### Developing
+
+For day-to-day development, run ANET from your IDE. The Gradle commands below provide a command-line alternative; the ANET backend container is optional.
+
 1. When starting the server, database migrations are run automatically.
-    For background info on some of these Liquibase commands, see: https://www.dropwizard.io/en/latest/manual/migrations.html
     1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `env ANET_DB_DROP=true ./gradlew run` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
-1. Make sure the [Keycloak authentication server](keycloak.md#dev) is started (in a Docker container) in your local development environment: `./gradlew dockerConfigureKeycloak dockerStartKeycloak`
+1. Make sure the [Keycloak authentication server](keycloak.md#dev) created during setup is running: `./gradlew dockerStartKeycloak`.
 1. Run `./gradlew run` to run the server via Gradle
     1. If you have set **smtp: disabled** to **true** in `application.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
-    1. The following output indicates that the server is ready:
-        ```
-        INFO  [2017-02-10 16:44:59,902] org.eclipse.jetty.server.Server: Started @4098ms
-        > Building 75% > :run
-        ```
+    1. The server is ready when the log contains `Started AnetApplication` and reports that Tomcat has started on port `8080`.
 1. Go to [http://localhost:8080/](http://localhost:8080/) in your browser.
-    1. When prompted for credentials:
-        - **Username:** `erin`
-        - **Password:** same as username
-    1. You will get an error about a missing `index.ftl` file; this is expected and means the backend server is working. The error looks like:
-        ```
-        ERROR [2017-02-10 16:49:33,967] javax.ws.rs.ext.MessageBodyWriter: Template Error
-        ! freemarker.template.TemplateNotFoundException: Template not found for name "/views/index.ftl".
-        ```
+    1. Log in with a [base data user](#the-base-data-set), for example `erin`, using the username as the password.
+    1. The backend serves the web assets built by Gradle. For frontend development with the React development server, continue to the [React Frontend](#react-frontend) instructions.
 
-    The web page will say ***Template Error***
+### Optional: containerizing the backend
 
-1. If you want to see the app running, continue to the [React Frontend](#react-frontend) instructions.
+This is a starting point for containerized deployment. It packages the backend and built web assets in a non-root, shell-free [Chainguard JRE image](https://images.chainguard.dev/directory/image/jre/overview). The steps below let you try the image against your local development services; adapt the configuration and networking for deployment.
+
+1. Complete the [Docker setup](#set-up-docker) and [development database setup](#setup-development-database), including loading the base data. Keep PostgreSQL and [Keycloak](keycloak.md#dev) running.
+1. Stop any backend already using port `8080`, then build, create, and start the container:
+    ```shell
+    ./gradlew dockerCreateBackend dockerStartBackend
+    ```
+1. Follow startup with `docker logs -f anet-backend-server`. When the log contains `Started AnetApplication`, open [http://localhost:8080/](http://localhost:8080/) and log in with a [base data user](#the-base-data-set).
+
+Use `./gradlew dockerBuildBackend` to build only the image. Manage an existing container with:
+
+```shell
+./gradlew dockerStopBackend
+./gradlew dockerStartBackend
+./gradlew dockerStopBackend dockerRemoveBackend
+```
+
+Starting reuses the existing container. After changing the image or container settings, stop and remove it, then create and start it again.
+
+The defaults use host networking to reach PostgreSQL at `localhost:5432` and Keycloak at `localhost:9080`. Docker Desktop requires host networking to be enabled. The Docker CLI and Gradle must target the same daemon (see [Set Up Docker](#set-up-docker)).
+
+`application.yml` and `anet-dictionary.yml` from the project root are mounted individually, read-only, under `/config`; they must be readable by UID/GID `65532:65532`. The container uses a read-only filesystem with writable `/tmp`, and logs to standard output.
+
+The create task reuses `ANET_*` settings from `localSettings.gradle`, with exported environment variables taking precedence. It also forwards exported `SPRING_*`, `LOGGING_*`, and `JAVA_TOOL_OPTIONS`. `ANET_DB_DROP` is forwarded only when explicitly exported; `ANET_DICTIONARY_NAME` defaults to `/config/anet-dictionary.yml` rather than the host path.
+
+Override container settings with `-P<property>=<value>`:
+
+| Property | Default | Purpose |
+| --- | --- | --- |
+| `backendConfigDir` | Project root | Source of the two configuration files |
+| `backendContainerName` | `anet-backend-server` | Name used by lifecycle tasks |
+| `backendImage` | `anet-backend:latest` | Output image tag |
+| `backendJavaImage` | `cgr.dev/chainguard/jre:latest` | Base image; use an approved digest for reproducible builds |
+| `backendNetwork` | `host` | Docker network |
+| `backendPort` | `ANET_PORT` | Published port; ignored with host networking |
+
+With host networking, change `ANET_PORT` to change the listening port. For a custom network, attach the dependency containers to it and configure reachable hostnames and internal ports, including `ANET_DB_EXPOSED_PORT`. The Keycloak issuer URL must also be reachable from the browser.
+
+The public base image's Java version changes over time; versioned Chainguard images may require subscription access. `-PtestEnv` selects `localTestSettings.gradle`, the test database, container name `anet-backend-test-server`, and port `8180`. The image still defaults to the `prod` Spring profile: migrations run, but development base data is not loaded. Use the existing [test setup](#testing) for the test suite.
 
 ## Testing
 ### Initial Setup Test Database

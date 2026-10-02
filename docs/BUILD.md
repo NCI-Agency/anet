@@ -23,3 +23,6 @@ Other, informal, distribution formats may be generated with the following Gradle
 
 This will a.o. create zip or rpm distribution files in `build/distributions` which contain all the necessary files to
 install ANET.
+
+For the Chainguard backend container build and lifecycle tasks, see
+[Optional: containerizing the backend](dev-setup.md#optional-containerizing-the-backend).

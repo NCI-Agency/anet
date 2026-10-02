@@ -32,6 +32,8 @@ jobs:
     - run: ./gradlew prettierCheck
     - run: ./gradlew yarn_run_lint
     - run: ./gradlew jar buildClient
+    - name: Build backend container image
+      run: ./gradlew dockerBuildBackend
 
   test-init:
     needs: build
