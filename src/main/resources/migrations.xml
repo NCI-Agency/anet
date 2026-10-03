@@ -7341,6 +7341,36 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="migrate-people-phoneNumber-to-json" author="thanoschal">
+		<sql>
+			<!-- Drop more_text (needs CASCADE as e.g. some Materialized Views depend on it,
+			     which will be recreated below) -->
+			ALTER TABLE people DROP COLUMN IF EXISTS more_text CASCADE;
+
+			ALTER TABLE people ALTER COLUMN "phoneNumber" TYPE ${long_text_type};
+
+			<!-- Existing non-empty strings become a single WORK entry; null stays null -->
+			UPDATE people
+			SET "phoneNumber" = CASE
+				WHEN BTRIM("phoneNumber") = '' THEN NULL
+				ELSE json_build_array(
+					json_build_object('type', 'WORK', 'details', BTRIM("phoneNumber"))
+				)::text
+			END
+			WHERE "phoneNumber" IS NOT NULL;
+		</sql>
+	</changeSet>
+
+	<changeSet id="migrate-people-phoneNumber-type-to-dictionary-labels" author="thanoschal">
+		<sql>
+			UPDATE people
+			SET "phoneNumber" = REPLACE(REPLACE("phoneNumber",
+				'"type":"WORK"', '"type":"Work"'),
+				'"type":"MOBILE"', '"type":"Mobile"')
+			WHERE "phoneNumber" IS NOT NULL;
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -7349,6 +7379,7 @@
 			  Fully self-contained migration for the complete full-text indexing set-up;
 			  can be run multiple times, and will be run every time it changes (runOnchange).
 			-->
+			-- Recreate after people.phoneNumber JSON.
 
 			<!-- Drop materialized views -->
 			DROP MATERIALIZED VIEW IF EXISTS mv_fts_attachments;
@@ -7689,6 +7720,7 @@
 						|| to_tsvector('simple', jsonb_value_agg(organizations."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
+			<!-- people.phoneNumber is JSON text; index the raw column so the digits stay searchable -->
 			ALTER TABLE people
 				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
 					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
