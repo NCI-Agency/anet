@@ -7,30 +7,26 @@ import mil.dds.anet.utils.Utils;
 
 public class PhoneNumber {
 
-  public enum PhoneNumberType {
-    MOBILE, WORK
-  }
-
   @GraphQLQuery
   @GraphQLInputField
-  private PhoneNumberType type;
+  private String type;
   @GraphQLQuery
   @GraphQLInputField
   private String details;
 
   public PhoneNumber() {}
 
-  public PhoneNumber(final PhoneNumberType type, final String details) {
-    this.type = type;
+  public PhoneNumber(final String type, final String details) {
+    this.type = Utils.trimStringReturnNull(type);
     this.details = Utils.trimStringReturnNull(details);
   }
 
-  public PhoneNumberType getType() {
+  public String getType() {
     return type;
   }
 
-  public void setType(PhoneNumberType type) {
-    this.type = type;
+  public void setType(String type) {
+    this.type = Utils.trimStringReturnNull(type);
   }
 
   public String getDetails() {
@@ -49,7 +45,7 @@ public class PhoneNumber {
     if (!(o instanceof PhoneNumber that)) {
       return false;
     }
-    return type == that.type && Objects.equals(details, that.details);
+    return Objects.equals(type, that.type) && Objects.equals(details, that.details);
   }
 
   @Override
