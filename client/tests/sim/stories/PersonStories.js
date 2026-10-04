@@ -106,7 +106,7 @@ async function randomPerson(isUser, status) {
     country: () => country,
     rank: () => rank,
     gender: () => gender,
-    phoneNumber: () => faker.phone.phoneNumber(),
+    phoneNumber: () => [{ type: "Work", details: faker.phone.phoneNumber() }],
     endOfTourDate: () => faker.date.future(),
     biography: async () => await createHtmlParagraphs(),
     user: () => isUser,
@@ -123,7 +123,7 @@ function modifiedPerson() {
     country: identity,
     rank: identity,
     gender: identity,
-    phoneNumber: () => faker.phone.phoneNumber(),
+    phoneNumber: () => [{ type: "Work", details: faker.phone.phoneNumber() }],
     endOfTourDate: () => faker.date.future(),
     biography: async () => await createHtmlParagraphs(),
     user: identity,
@@ -217,7 +217,10 @@ const updatePerson = async function (user) {
               uuid
               domainUsername
             }
-            phoneNumber
+            phoneNumber {
+              type
+              details
+            }
             rank
             role
             status
@@ -294,7 +297,10 @@ const _deletePerson = async function (user) {
             }
             endOfTourDate
             gender
-            phoneNumber
+            phoneNumber {
+              type
+              details
+            }
             rank
             status
             position {
