@@ -65,8 +65,12 @@ export class CreatePerson extends Page {
     )
   }
 
-  async getPhoneNumber() {
-    return browser.$("#phoneNumber")
+  async getPhoneNumber(index = 0) {
+    return browser.$(`input[name="phoneNumber.${index}.details"]`)
+  }
+
+  async getAddPhoneNumberButton() {
+    return browser.$("#addphoneNumberButton")
   }
 
   async getRank() {
