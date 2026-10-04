@@ -56,6 +56,7 @@ import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
 import MergeEmailAddresses from "./MergeEmailAddresses"
+import MergePhoneNumbers from "./MergePhoneNumbers"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -366,7 +367,15 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.phoneNumber}
-                value={mergedPerson.phoneNumber}
+                value={
+                  <MergePhoneNumbers
+                    label={Settings.fields.person.phoneNumber.label}
+                    phoneNumber={mergedPerson.phoneNumber}
+                    align={ALIGN_OPTIONS.CENTER}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
+                  />
+                }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="phoneNumber"
                 mergeState={mergeState}
@@ -836,7 +845,15 @@ const PersonColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.phoneNumber}
             fieldName="phoneNumber"
-            value={person.phoneNumber}
+            value={
+              <MergePhoneNumbers
+                label={Settings.fields.person.phoneNumber.label}
+                phoneNumber={person.phoneNumber}
+                align={align}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+            }
             align={align}
             action={() => {
               dispatchMergeActions(
