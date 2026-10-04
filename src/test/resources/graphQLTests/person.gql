@@ -19,7 +19,10 @@ person(uuid:"${personUuid}") {
     network
     address
   }
-  phoneNumber
+  phoneNumber {
+    type
+    details
+  }
   user
   users {
     uuid
