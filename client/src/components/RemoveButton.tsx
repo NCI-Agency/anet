@@ -5,6 +5,7 @@ import React from "react"
 import { Button } from "react-bootstrap"
 
 interface RemoveButtonProps {
+  id?: string
   title?: string
   className?: string
   onClick?: (...args: unknown[]) => unknown
@@ -13,6 +14,7 @@ interface RemoveButtonProps {
 }
 
 const RemoveButton = ({
+  id,
   title,
   className = "float-end",
   onClick,
@@ -20,6 +22,7 @@ const RemoveButton = ({
   disabled = false
 }: RemoveButtonProps) => (
   <Button
+    id={id}
     className={classNames(className, "remove-button")}
     variant={buttonStyle}
     title={title}
