@@ -64,7 +64,7 @@ public class Person extends AbstractEmailableAnetBean
   private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
-  private String phoneNumber;
+  private List<PhoneNumber> phoneNumber;
   @GraphQLQuery
   @GraphQLInputField
   private String gender;
@@ -176,12 +176,18 @@ public class Person extends AbstractEmailableAnetBean
   @AllowUnverifiedUsers
   @RestrictToAuthorizationGroups(
       authorizationGroupSetting = "fields.person.phoneNumber.authorizationGroupUuids")
-  public String getPhoneNumber() {
+  public List<PhoneNumber> getPhoneNumber() {
     return phoneNumber;
   }
 
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = Utils.trimStringReturnNull(phoneNumber);
+  public void setPhoneNumber(List<PhoneNumber> phoneNumber) {
+    if (Utils.isEmptyOrNull(phoneNumber)) {
+      this.phoneNumber = null;
+      return;
+    }
+    final List<PhoneNumber> cleaned =
+        phoneNumber.stream().filter(Person::nonEmptyPhoneNumber).toList();
+    this.phoneNumber = cleaned.isEmpty() ? null : cleaned;
   }
 
   @AllowUnverifiedUsers
@@ -536,5 +542,9 @@ public class Person extends AbstractEmailableAnetBean
     final Person p = new Person();
     p.setUuid(uuid);
     return p;
+  }
+
+  private static boolean nonEmptyPhoneNumber(PhoneNumber pn) {
+    return Objects.nonNull(pn) && !Utils.isEmptyOrNull(pn.getDetails());
   }
 }

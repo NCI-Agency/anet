@@ -1,15 +1,29 @@
 package mil.dds.anet.database.mappers;
 
+import java.lang.invoke.MethodHandles;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PhoneNumber;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.User;
+import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 public class PersonMapper implements RowMapper<Person> {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
+  private static final TypeReference<List<PhoneNumber>> PHONE_NUMBER_LIST_TYPE =
+      new TypeReference<>() {};
 
   @Override
   public Person map(ResultSet rs, StatementContext ctx) throws SQLException {
@@ -39,7 +53,7 @@ public class PersonMapper implements RowMapper<Person> {
     a.setGivenName(MapperUtils.getOptionalString(rs, "people_givenName"));
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", Person.Status.class));
     a.setUser(MapperUtils.getOptionalBoolean(rs, "people_user"));
-    a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));
+    a.setPhoneNumber(getPhoneNumbers(MapperUtils.getOptionalString(rs, "people_phoneNumber")));
     a.setObsoleteCountry(MapperUtils.getOptionalString(rs, "people_obsoleteCountry"));
     a.setCountryUuid(MapperUtils.getOptionalString(rs, "people_countryUuid"));
     a.setGender(MapperUtils.getOptionalString(rs, "people_gender"));
@@ -50,5 +64,29 @@ public class PersonMapper implements RowMapper<Person> {
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
 
     return a;
+  }
+
+  public static String getPhoneNumberJson(List<PhoneNumber> phoneNumbers) {
+    if (Utils.isEmptyOrNull(phoneNumbers)) {
+      return null;
+    }
+    try {
+      return mapper.writeValueAsString(phoneNumbers);
+    } catch (JacksonException e) {
+      logger.error("Error mapping phone numbers", e);
+      return null;
+    }
+  }
+
+  public static List<PhoneNumber> getPhoneNumbers(String json) {
+    if (Utils.isEmptyOrNull(json)) {
+      return null;
+    }
+    try {
+      return mapper.readValue(json, PHONE_NUMBER_LIST_TYPE);
+    } catch (JacksonException e) {
+      logger.error("Error mapping phone numbers", e);
+      return null;
+    }
   }
 }
