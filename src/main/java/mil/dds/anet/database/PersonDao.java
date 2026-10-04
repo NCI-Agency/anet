@@ -124,6 +124,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
           + ":createdAt, :updatedAt, :customFields)";
       handle.createUpdate(sql).bindBean(p)
+          .bind("phoneNumber", PersonMapper.getPhoneNumberJson(p.getPhoneNumber()))
           .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
@@ -170,6 +171,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + "WHERE uuid = :uuid";
 
       final int nr = handle.createUpdate(sql).bindBean(p)
+          .bind("phoneNumber", PersonMapper.getPhoneNumberJson(p.getPhoneNumber()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
