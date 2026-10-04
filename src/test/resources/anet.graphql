@@ -1566,19 +1566,13 @@ enum PersonSearchSortBy {
 """"""
 type PhoneNumber {
   details: String
-  type: PhoneNumberType
+  type: String
 }
 
 """"""
 input PhoneNumberInput {
   details: String
-  type: PhoneNumberType
-}
-
-""""""
-enum PhoneNumberType {
-  MOBILE
-  WORK
+  type: String
 }
 
 """"""

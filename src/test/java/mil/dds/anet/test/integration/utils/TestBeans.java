@@ -9,7 +9,6 @@ import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PhoneNumber;
-import mil.dds.anet.beans.PhoneNumber.PhoneNumberType;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
@@ -23,7 +22,7 @@ public class TestBeans {
     Person p = new Person();
     p.setFamilyName("TEST");
     p.setGivenName("Test");
-    p.setPhoneNumber(List.of(new PhoneNumber(PhoneNumberType.WORK, "+0-00000")));
+    p.setPhoneNumber(List.of(new PhoneNumber("Work", "+0-00000")));
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
     p.setBiography("");
