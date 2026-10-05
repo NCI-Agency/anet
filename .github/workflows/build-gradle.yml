@@ -33,6 +33,33 @@ jobs:
     - run: ./gradlew yarn_run_lint
     - run: ./gradlew jar buildClient
 
+  package-rpm:
+    name: Package RHEL 9 RPM
+    needs: [build, test-init, test-server, test-client, test-sim]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-java@v6
+      with:
+        distribution: "temurin"
+        java-version: 21
+    - name: Install packaging tools
+      run: sudo apt-get update && sudo apt-get install -y binutils
+    - name: Build ANET RPM
+      run: ./scripts/build-rpm.sh
+    - name: Validate installation in minimal UBI 9
+      run: ./scripts/test-rpm.sh build/distributions/*.el9.x86_64.rpm
+    - name: Upload RHEL 9 RPM
+      uses: actions/upload-artifact@v7
+      with:
+        path: build/distributions/*.el9.x86_64.rpm
+        if-no-files-found: error
+        archive: false
+
   test-init:
     needs: build
     name: Test ANET init
