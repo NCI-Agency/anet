@@ -34,7 +34,7 @@ jobs:
     - run: ./gradlew jar buildClient
 
   package-rpm:
-    name: Package RHEL 9 RPM
+    name: Package RHEL 9 RPM and UBI 9 container
     needs: [build, test-init, test-server, test-client, test-sim]
     runs-on: ubuntu-latest
 
@@ -53,6 +53,41 @@ jobs:
       run: ./scripts/build-rpm.sh
     - name: Validate installation in minimal UBI 9
       run: ./scripts/test-rpm.sh build/distributions/*.el9.x86_64.rpm
+    - name: Prepare backend image context
+      run: |
+        mkdir -p "$RUNNER_TEMP/anet-backend"
+        cp docker/backend/Dockerfile docker/backend/logback-spring.xml "$RUNNER_TEMP/anet-backend/"
+        cp build/distributions/*.el9.x86_64.rpm "$RUNNER_TEMP/anet-backend/anet.rpm"
+    - uses: docker/setup-buildx-action@v4
+    - name: Build UBI 9 backend container
+      uses: docker/build-push-action@v7
+      with:
+        context: ${{ runner.temp }}/anet-backend
+        platforms: linux/amd64
+        tags: anet-backend:ubi9
+        load: true
+        cache-from: type=gha,scope=anet-backend-ubi9
+        cache-to: type=gha,scope=anet-backend-ubi9,mode=max
+    - name: Export UBI 9 backend container
+      id: export-backend
+      shell: bash
+      run: |
+        shopt -s nullglob
+        rpms=(build/distributions/anet-*.el9.x86_64.rpm)
+        if [ "${#rpms[@]}" -ne 1 ]; then
+          echo "Expected exactly one RHEL 9 RPM to name the container archive." >&2
+          exit 1
+        fi
+        rpm_name=$(basename "${rpms[0]}" .rpm)
+        archive="$RUNNER_TEMP/anet-backend-ubi9-${rpm_name#anet-}.tar.gz"
+        docker image save anet-backend:ubi9 | gzip > "$archive"
+        echo "archive=$archive" >> "$GITHUB_OUTPUT"
+    - name: Upload UBI 9 backend container
+      uses: actions/upload-artifact@v7
+      with:
+        path: ${{ steps.export-backend.outputs.archive }}
+        if-no-files-found: error
+        archive: false
     - name: Upload RHEL 9 RPM
       uses: actions/upload-artifact@v7
       with:
