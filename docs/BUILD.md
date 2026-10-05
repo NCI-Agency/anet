@@ -76,3 +76,26 @@ Other, informal, distribution formats may be generated with the following Gradle
 
 This will a.o. create zip or rpm distribution files in `build/distributions` which contain all the necessary files to
 install ANET.
+
+## UBI 9 backend container
+
+Build a backend image on UBI 9 minimal from the RHEL 9 RPM, using its bundled trimmed Java runtime:
+
+```shell
+./scripts/build-rpm.sh
+./gradlew dockerBuildBackend
+```
+
+The default image tag is `anet-backend:ubi9`. To use an existing RPM, skip the
+first command and pass `-PbackendRpm=/path/to/anet-<version>-0.el9.x86_64.rpm`.
+Without that property, exactly one matching RPM must exist in
+`build/container/distributions`. The image build validates the RPM's name,
+release, and architecture. It requires Docker CE with BuildKit and targets
+`linux/amd64`; no host-built Java runtime or separate JRE image is used.
+
+See [Optional: containerizing the backend](dev-setup.md#optional-containerizing-the-backend)
+for configuration and lifecycle tasks.
+
+On this branch, the GitHub Actions packaging job also builds the backend image
+from the exported RPM, with a separate Docker cache scope. The image is loaded
+into the runner's local Docker daemon and is not pushed to a registry.

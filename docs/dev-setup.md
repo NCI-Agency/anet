@@ -133,6 +133,50 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 1. If you want to see the app running, continue to the [React Frontend](#react-frontend) instructions.
 
+## Optional: containerizing the backend
+
+This is a starting point for containerized deployment. It installs the RHEL 9 ANET RPM in a Red Hat UBI 9 minimal image and runs as a non-root user with the trimmed Java runtime bundled in the RPM. The steps below let you try the image against your local development services; adapt the configuration and networking for deployment.
+
+1. Complete the [Docker setup](#set-up-docker) and [development database setup](#setup-development-database), including loading the base data. Keep PostgreSQL and [Keycloak](keycloak.md#dev) running.
+1. Build the RHEL 9 RPM with `./scripts/build-rpm.sh`, or select an existing RPM with `-PbackendRpm=<path>` in the commands below.
+1. Stop any backend already using port `8080`, then build, create, and start the container:
+    ```shell
+    ./gradlew dockerCreateBackend dockerStartBackend
+    ```
+1. Follow startup with `docker logs -f anet-backend-server`. When the log contains `Started AnetApplication`, open [http://localhost:8080/](http://localhost:8080/) and log in with a [base data user](#the-base-data-set).
+
+Use `./gradlew dockerBuildBackend` to build only the image. Manage an existing container with:
+
+```shell
+./gradlew dockerStopBackend
+./gradlew dockerStartBackend
+./gradlew dockerStopBackend dockerRemoveBackend
+```
+
+Starting reuses the existing container. After changing the image or container settings, stop and remove it, then create and start it again.
+
+The defaults use host networking to reach PostgreSQL at `localhost:5432` and Keycloak at `localhost:9080`. Docker Desktop requires host networking to be enabled. The Docker CLI and Gradle must target the same daemon (see [Set Up Docker](#set-up-docker)).
+
+`application.yml` and `anet-dictionary.yml` from the project root are mounted individually, read-only, under `/config`; they must be readable by UID/GID `65532:65532`. The container uses a read-only filesystem with writable `/tmp`, and logs to standard output.
+
+The create task reuses `ANET_*` settings from `localSettings.gradle`, with exported environment variables taking precedence. It also forwards exported `SPRING_*`, `LOGGING_*`, and `JAVA_TOOL_OPTIONS`. `ANET_DB_DROP` is forwarded only when explicitly exported; `ANET_DICTIONARY_NAME` defaults to `/config/anet-dictionary.yml` rather than the host path.
+
+Override container settings with `-P<property>=<value>`:
+
+| Property | Default | Purpose |
+| --- | --- | --- |
+| `backendConfigDir` | Project root | Source of the two configuration files |
+| `backendContainerName` | `anet-backend-server` | Name used by lifecycle tasks |
+| `backendImage` | `anet-backend:ubi9` | Output image tag |
+| `backendRpm` | One `.el9.x86_64.rpm` in `build/container/distributions` | RPM to install in the image |
+| `backendBaseImage` | `registry.access.redhat.com/ubi9/ubi-minimal:latest` | UBI 9 minimal base image; use an approved digest to pin the base |
+| `backendNetwork` | `host` | Docker network |
+| `backendPort` | `ANET_PORT` | Published port; ignored with host networking |
+
+With host networking, change `ANET_PORT` to change the listening port. For a custom network, attach the dependency containers to it and configure reachable hostnames and internal ports, including `ANET_DB_EXPOSED_PORT`. The Keycloak issuer URL must also be reachable from the browser.
+
+The Java version comes from the selected RPM. The UBI 9 build installs native Java dependencies and CA certificates without installing another JRE. Docker CE with BuildKit is required for the build. `-PtestEnv` selects `localTestSettings.gradle`, the test database, container name `anet-backend-test-server`, and port `8180`. The image still defaults to the `prod` Spring profile: migrations run, but development base data is not loaded. Use the existing [test setup](#testing) for the test suite.
+
 ## Testing
 ### Initial Setup Test Database
 First [configure the database backend](#development-database-backend-configuration).

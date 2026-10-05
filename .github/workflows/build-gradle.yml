@@ -57,6 +57,20 @@ jobs:
         outputs: type=local,dest=${{ runner.temp }}/anet-rpm
         cache-from: type=gha,scope=anet-rpm
         cache-to: type=gha,scope=anet-rpm,mode=max
+    - name: Prepare backend image context
+      run: |
+        mkdir -p "$RUNNER_TEMP/anet-backend"
+        cp docker/backend/Dockerfile docker/backend/logback-spring.xml "$RUNNER_TEMP/anet-backend/"
+        cp "$RUNNER_TEMP"/anet-rpm/artifacts/distributions/*.el9.x86_64.rpm "$RUNNER_TEMP/anet-backend/anet.rpm"
+    - name: Build UBI 9 backend container
+      uses: docker/build-push-action@v7
+      with:
+        context: ${{ runner.temp }}/anet-backend
+        platforms: linux/amd64
+        tags: anet-backend:ubi9
+        load: true
+        cache-from: type=gha,scope=anet-backend-ubi9
+        cache-to: type=gha,scope=anet-backend-ubi9,mode=max
     - name: Upload RHEL 9 RPM
       uses: actions/upload-artifact@v7
       with:

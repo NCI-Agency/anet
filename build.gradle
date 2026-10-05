@@ -96,6 +96,7 @@ String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "a
 String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
+String backendContainerName = providers.gradleProperty('backendContainerName').getOrElse(isTestEnv ? "anet-backend-test-server" : "anet-backend-server")
 
 String mainWsdl = "nato/common/nvg20/common-ws.nvg20.wsdl"
 String cxfSources = "build/generated/sources/cxf"
@@ -810,6 +811,109 @@ jar {
 	manifest {
 		attributes "Class-Path": configurations.runtimeClasspath.files*.name.join(" ")
 	}
+}
+
+// Stage the selected RPM without local configuration or credentials.
+def backendRpm = providers.provider {
+	def configured = providers.gradleProperty('backendRpm').orNull
+	if (configured != null) {
+		def rpm = file(configured)
+		if (!rpm.isFile()) {
+			throw new GradleException("Missing backend RPM: ${rpm}")
+		}
+		return rpm
+	}
+	def rpms = fileTree('build/container/distributions') {
+		include 'anet-*.el9.x86_64.rpm'
+	}.files
+	if (rpms.size() != 1) {
+		throw new GradleException("Expected one RHEL 9 RPM in build/container/distributions; run scripts/build-rpm.sh or select one with -PbackendRpm=<path>.")
+	}
+	return rpms.first()
+}
+
+tasks.register('prepareBackendImage', Sync) {
+	group = "backend container"
+	description = "Stages the RHEL 9 RPM for the UBI 9 backend image."
+	into layout.buildDirectory.dir('docker/backend')
+	from('docker/backend')
+	from(backendRpm) { rename { 'anet.rpm' } }
+}
+
+// Docker CE's BuildKit mounts the RPM during installation without storing the
+// RPM archive in the final image layers.
+tasks.register('dockerBuildBackend', Exec) {
+	dependsOn 'prepareBackendImage'
+	group = "backend container"
+	description = "Builds the UBI 9 backend image with the RPM's trimmed Java runtime."
+	commandLine 'docker', 'build', '--platform', 'linux/amd64', '--pull',
+		'--tag', providers.gradleProperty('backendImage').getOrElse('anet-backend:ubi9'),
+		'--build-arg', "BASE_IMAGE=${providers.gradleProperty('backendBaseImage').getOrElse('registry.access.redhat.com/ubi9/ubi-minimal:latest')}",
+		layout.buildDirectory.dir('docker/backend').get().asFile.absolutePath
+}
+
+// Use the CLI for creation: DockerCreateContainer does not expose read-only rootfs
+// or security-opt in the current plugin. Other lifecycle tasks use the plugin.
+tasks.register('dockerCreateBackend', Exec) {
+	dependsOn 'dockerBuildBackend'
+	group = "backend container"
+	description = "Creates an ANET backend container named ${backendContainerName}."
+	def configDir = file(providers.gradleProperty('backendConfigDir').getOrElse(rootProject.projectDir.absolutePath))
+	// Reuse the connection settings used to create the supporting service containers.
+	// Keep container paths and destructive database options separate from host-run defaults.
+	def backendEnvironment = run.environment.findAll { key, value ->
+		key.startsWith('ANET_') && !(key in ['ANET_DICTIONARY_NAME', 'ANET_DB_DROP'])
+	}.collectEntries { key, value -> [(key): value.toString()] }
+	backendEnvironment.putAll(System.getenv().findAll { key, value ->
+		key.startsWith('ANET_') || key.startsWith('SPRING_') || key.startsWith('LOGGING_') || key == 'JAVA_TOOL_OPTIONS'
+	})
+	environment backendEnvironment
+	def containerPort = backendEnvironment['ANET_PORT'] ?: '8080'
+	def exposedPort = providers.gradleProperty('backendPort').getOrElse(isTestEnv ? '8180' : containerPort)
+	def network = providers.gradleProperty('backendNetwork').getOrElse('host')
+	def createCommand = [
+		'docker', 'create', '--name', backendContainerName,
+		'--network', network, '--read-only',
+		'--tmpfs', '/tmp:rw,nosuid,nodev,size=256m,mode=1777',
+		'--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true',
+		'--mount', "type=bind,src=${new File(configDir, 'application.yml').absolutePath},dst=/config/application.yml,readonly",
+		'--mount', "type=bind,src=${new File(configDir, 'anet-dictionary.yml').absolutePath},dst=/config/anet-dictionary.yml,readonly"
+	]
+	if (network != 'host') {
+		createCommand.addAll(['--publish', "${exposedPort}:${containerPort}"])
+	}
+	backendEnvironment.keySet().sort().each { key ->
+		createCommand.addAll(['--env', key])
+	}
+	createCommand.add(providers.gradleProperty('backendImage').getOrElse('anet-backend:ubi9'))
+	commandLine createCommand
+	doFirst {
+		['application.yml', 'anet-dictionary.yml'].each { name ->
+			if (!new File(configDir, name).isFile()) {
+				throw new GradleException("Missing ${name} in ${configDir}; configure -PbackendConfigDir with the deployment configuration directory.")
+			}
+		}
+	}
+}
+
+tasks.register('dockerStartBackend', DockerStartContainer) {
+	group = "backend container"
+	description = "Starts ${backendContainerName} container."
+	containerId = backendContainerName
+	mustRunAfter 'dockerCreateBackend'
+}
+
+tasks.register('dockerStopBackend', DockerStopContainer) {
+	group = "backend container"
+	description = "Stops ${backendContainerName} container."
+	containerId = backendContainerName
+}
+
+tasks.register('dockerRemoveBackend', DockerRemoveContainer) {
+	group = "backend container"
+	description = "Removes ${backendContainerName} container."
+	containerId = backendContainerName
+	mustRunAfter 'dockerStopBackend'
 }
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
