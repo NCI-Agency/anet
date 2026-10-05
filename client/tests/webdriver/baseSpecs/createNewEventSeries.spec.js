@@ -175,7 +175,7 @@ describe("Create event series page", () => {
 
       await CreateEventSeries.submitForm()
       expect(await (await CreateEventSeries.getAlertDanger()).getText()).to.eq(
-        "You must fill in the Admin Organization"
+        "You do not have permissions to do this"
       )
 
       const adminOrg = "EF 2.2"
