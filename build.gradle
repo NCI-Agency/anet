@@ -233,10 +233,13 @@ jacocoTestReport {
 	}
 }
 
-//Set project version to git tag
-def proc = "git describe".execute(null, projectDir)
-proc.waitFor()
-def projectVersion = proc.text.trim()
+// Allow release builds to pass the application version explicitly.
+def projectVersion = providers.gradleProperty('distributionVersion').orNull
+if (projectVersion == null) {
+	def proc = "git describe".execute(null, projectDir)
+	proc.waitFor()
+	projectVersion = proc.text.trim()
+}
 project.version = projectVersion
 
 runtime {
@@ -876,10 +879,25 @@ tasks.register('prettierCheck', YarnTask) {
 
 tasks.register('distRpm', Rpm) {
 	dependsOn "jpackageImage"
-	release = '0'
+	def rpmDist = providers.gradleProperty('rpmDist').orNull
+	release = rpmDist ? "0.${rpmDist}" : '0'
 	prefix '/opt' // Relocations: /opt
 	arch = 'x86_64'
 	os = LINUX
+	// Native libraries used by the bundled Java runtime and jpackage launcher.
+	requires('glibc')
+	requires('zlib')
+	requires('libstdc++')
+	requires('freetype')
+	requires('fontconfig')
+	requires('libX11')
+	requires('libXext')
+	requires('libXi')
+	requires('libXrender')
+	requires('libXtst')
+	requires('alsa-lib')
+	// Supplies /etc/pki/java/cacerts used by applicationDefaultJvmArgs.
+	requires('ca-certificates')
 	into '/opt'
 	from(jpackageImage.outputs.files)
 	into('anet/') {
