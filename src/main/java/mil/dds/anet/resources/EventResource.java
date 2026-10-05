@@ -14,6 +14,7 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.utils.AuthUtils;
@@ -39,16 +40,18 @@ public class EventResource {
     this.auditTrailDao = auditTrailDao;
   }
 
-  public static boolean hasPermission(final Person user, final String orgUuid) {
-    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
+  public static boolean hasPermission(final Person user, final String eventUuid) {
+    return hasPermission(user,
+        ApplicationContextProvider.getEngine().getEventDao().getByUuid(eventUuid));
   }
 
-  public void assertPermission(final Person user, final String orgUuid) {
-    if (!hasPermission(user, orgUuid)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          String.format(
-              orgUuid == null ? AuthUtils.MISSING_ORG_MESSAGE : AuthUtils.UNAUTH_ORG_MESSAGE,
-              dict.getDictionaryEntry("fields.event.adminOrg.label")));
+  public static boolean hasPermission(final Person user, final Event event) {
+    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, event.getAdminOrgUuid());
+  }
+
+  public void assertPermission(final Person user, final Event event) {
+    if (!hasPermission(user, event)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
 
@@ -89,7 +92,7 @@ public class EventResource {
       @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Event existing = dao.getByUuid(event.getUuid());
-    assertPermission(user, existing.getAdminOrgUuid());
+    assertPermission(user, existing);
     DaoUtils.assertObjectIsFresh(event, existing, force);
 
     validateEvent(user, event);
@@ -175,7 +178,7 @@ public class EventResource {
     if (event.getEndDate() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must not be empty");
     }
-    assertPermission(user, event.getAdminOrgUuid());
+    assertPermission(user, event);
   }
 
 }

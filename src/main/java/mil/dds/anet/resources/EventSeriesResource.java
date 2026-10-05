@@ -11,6 +11,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSeriesSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.utils.AuthUtils;
@@ -33,16 +34,19 @@ public class EventSeriesResource {
     this.dao = dao;
   }
 
-  public static boolean hasPermission(final Person user, final String orgUuid) {
-    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
+  public static boolean hasPermission(final Person user, final String eventSeriesUuid) {
+    return hasPermission(user,
+        ApplicationContextProvider.getEngine().getEventSeriesDao().getByUuid(eventSeriesUuid));
   }
 
-  public void assertPermission(final Person user, final String orgUuid) {
-    if (!hasPermission(user, orgUuid)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          String.format(
-              orgUuid == null ? AuthUtils.MISSING_ORG_MESSAGE : AuthUtils.UNAUTH_ORG_MESSAGE,
-              dict.getDictionaryEntry("fields.eventSeries.adminOrg.label")));
+  public static boolean hasPermission(final Person user, final EventSeries eventSeries) {
+    return AuthUtils.isAdmin(user)
+        || AuthUtils.canAdministrateOrg(user, eventSeries.getAdminOrgUuid());
+  }
+
+  public void assertPermission(final Person user, final EventSeries eventSeries) {
+    if (!hasPermission(user, eventSeries)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
 
@@ -84,7 +88,7 @@ public class EventSeriesResource {
       @GraphQLArgument(name = "force", defaultValue = "false") boolean force) {
     final Person user = DaoUtils.getUserFromContext(context);
     final EventSeries existing = dao.getByUuid(eventSeries.getUuid());
-    assertPermission(user, existing.getAdminOrgUuid());
+    assertPermission(user, existing);
     DaoUtils.assertObjectIsFresh(eventSeries, existing, force);
 
     validateEventSeries(user, eventSeries);
@@ -117,7 +121,7 @@ public class EventSeriesResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Event Series name must not be empty");
     }
-    assertPermission(user, eventSeries.getAdminOrgUuid());
+    assertPermission(user, eventSeries);
   }
 
   @GraphQLMutation(name = "mergeEventSeries")
