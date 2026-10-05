@@ -233,10 +233,13 @@ jacocoTestReport {
 	}
 }
 
-//Set project version to git tag
-def proc = "git describe".execute(null, projectDir)
-proc.waitFor()
-def projectVersion = proc.text.trim()
+// Container builds pass the version from the checkout without copying Git metadata.
+def projectVersion = providers.gradleProperty('distributionVersion').orNull
+if (projectVersion == null) {
+	def proc = "git describe".execute(null, projectDir)
+	proc.waitFor()
+	projectVersion = proc.text.trim()
+}
 project.version = projectVersion
 
 runtime {
@@ -875,7 +878,8 @@ tasks.register('prettierCheck', YarnTask) {
 
 tasks.register('distRpm', Rpm) {
 	dependsOn "jpackageImage"
-	release = '0'
+	def rpmDist = providers.gradleProperty('rpmDist').orNull
+	release = rpmDist ? "0.${rpmDist}" : '0'
 	prefix '/opt' // Relocations: /opt
 	arch = 'x86_64'
 	os = LINUX

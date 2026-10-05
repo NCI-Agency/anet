@@ -1,0 +1,8 @@
+# Keep Git metadata, credentials, and host build products out of the CI builder.
+.git
+.gradle
+build
+**/node_modules
+.env
+localSettings.gradle
+localTestSettings.gradle

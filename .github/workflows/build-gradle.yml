@@ -33,6 +33,38 @@ jobs:
     - run: ./gradlew yarn_run_lint
     - run: ./gradlew jar buildClient
 
+  package-rpm:
+    name: Package RHEL 9 RPM
+    needs: [build, test-init, test-server, test-client, test-sim]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Determine RPM version
+      id: rpm-version
+      run: echo "version=$(git describe)" >> "$GITHUB_OUTPUT"
+    - uses: docker/setup-buildx-action@v4
+    - name: Build RHEL 9 RPM
+      uses: docker/build-push-action@v7
+      with:
+        context: .
+        file: packaging/Containerfile
+        platforms: linux/amd64
+        build-args: ANET_VERSION=${{ steps.rpm-version.outputs.version }}
+        outputs: type=local,dest=${{ runner.temp }}/anet-rpm
+        cache-from: type=gha,scope=anet-rpm
+        cache-to: type=gha,scope=anet-rpm,mode=max
+    - name: Upload RHEL 9 RPM
+      uses: actions/upload-artifact@v7
+      with:
+        name: anet-rpm-el9-x86_64
+        path: ${{ runner.temp }}/anet-rpm/artifacts/distributions/*.el9.x86_64.rpm
+        if-no-files-found: error
+        compression-level: 0
+
   test-init:
     needs: build
     name: Test ANET init

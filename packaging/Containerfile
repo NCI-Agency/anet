@@ -1,0 +1,22 @@
+FROM registry.access.redhat.com/ubi9/ubi:latest AS builder
+
+# jmods is a separate package on RHEL; binutils supplies jpackage's objcopy.
+RUN dnf install -y java-21-openjdk-devel java-21-openjdk-jmods \
+        binutils git tar gzip unzip findutils \
+    && dnf clean all
+
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+WORKDIR /workspace
+COPY . .
+ARG ANET_VERSION
+RUN test -n "${ANET_VERSION}" \
+    && sh ./gradlew --no-daemon -PdistributionVersion="${ANET_VERSION}" -PrpmDist=el9 distRpm \
+    && build/jre/bin/java --list-modules \
+    && mkdir -p /artifacts \
+    && cp -a build/jre build/jpackage build/distributions /artifacts/
+
+# Export artifacts without retaining the JDK, source, or dependency caches.
+FROM scratch
+COPY --from=builder /artifacts /artifacts
+CMD ["/unused"]
