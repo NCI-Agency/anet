@@ -94,7 +94,7 @@ const TenantForm = ({
   initialValues
 }: TenantFormProps) => {
   const navigate = useNavigate()
-  const { loadAppData } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -108,12 +108,50 @@ const TenantForm = ({
       label: "Inactive"
     }
   ]
-  const peopleFilters = {
-    allPersons: {
-      label: "All",
+  const commonQueryVars = {
+    pendingVerification: false,
+    isUser: true
+  }
+  let peopleFilters = {
+    noTenantPersons: {
+      label: "Without tenant",
       queryVars: {
-        pendingVerification: false,
-        isUser: true
+        ...commonQueryVars,
+        hasTenant: false
+      }
+    }
+  }
+  if (currentUser?.isAdmin()) {
+    if (edit) {
+      peopleFilters = {
+        ...peopleFilters,
+        currentTenantPersons: {
+          label: "Within current tenant",
+          queryVars: {
+            ...commonQueryVars,
+            tenantUuid: initialValues?.uuid
+          }
+        }
+      }
+    }
+    peopleFilters = {
+      ...peopleFilters,
+      allPersons: {
+        label: "All",
+        queryVars: {
+          ...commonQueryVars
+        }
+      }
+    }
+  } else {
+    peopleFilters = {
+      ...peopleFilters,
+      myTenantPersons: {
+        label: "Within my tenant",
+        queryVars: {
+          ...commonQueryVars,
+          tenantUuid: currentUser?.tentant?.uuid
+        }
       }
     }
   }

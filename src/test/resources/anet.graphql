@@ -1558,6 +1558,7 @@ input PersonSearchQueryInput {
   endOfTourDateEnd: Instant
   endOfTourDateStart: Instant
   hasBiography: Boolean
+  hasTenant: Boolean
   inMyReports: Boolean
   isUser: Boolean
   locationRecurseStrategy: RecurseStrategy
@@ -1574,6 +1575,7 @@ input PersonSearchQueryInput {
   sortOrder: SortOrder
   status: Status
   subscribed: Boolean
+  tenantUuid: String
   text: String
 }
 

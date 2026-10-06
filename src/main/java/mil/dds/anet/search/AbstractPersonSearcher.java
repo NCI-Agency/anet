@@ -142,6 +142,18 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       qb.addIsNotNullOrEmptyClause("\"pplEmail\".address");
     }
 
+    if (query.getHasTenant() != null) {
+      if (query.getHasTenant()) {
+        qb.addWhereClause("people.\"tenantUuid\" IS NOT NULL");
+      } else {
+        qb.addWhereClause("people.\"tenantUuid\" IS NULL");
+      }
+    }
+
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      qb.addStringEqualsClause("tenantUuid", "people.\"tenantUuid\"", query.getTenantUuid());
+    }
+
     addOrderByClauses(qb, query);
   }
 

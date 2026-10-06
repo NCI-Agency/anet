@@ -101,6 +101,12 @@ public class TenantResource {
           tenantDao.getAccessRequestsForTenant(engine.getContext(), t.getUuid()).join();
       Utils.addRemoveElementsByUuid(existingAccessRequests, t.getAccessRequests(), null,
           oldPerson -> {
+            // Tenant admins can only update access requests for their own tenant
+            if (!AuthUtils.isAdmin(user) && !Objects.equals(DaoUtils.getUuid(user.getTenant()),
+                DaoUtils.getUuid(oldPerson.getTenantAccessRequest()))) {
+              throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+            }
+
             tenantDao.removeAccessRequestFromTenant(oldPerson, t);
             auditTrailDao.logUpdate(user, TenantDao.TABLE_NAME, t,
                 "access request for person has been removed from this tenant",
@@ -118,6 +124,14 @@ public class TenantResource {
       final List<Person> existingPeople =
           tenantDao.getMembersForTenant(engine.getContext(), t.getUuid()).join();
       Utils.addRemoveElementsByUuid(existingPeople, t.getMembers(), newPerson -> {
+        // Tenant admins can only add tenant-less users
+        if (!AuthUtils.isAdmin(user)) {
+          final Person existingNewPerson = personDao.getByUuid(newPerson.getUuid());
+          if (existingNewPerson.getTenantUuid() != null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+          }
+        }
+
         tenantDao.addMemberToTenant(newPerson, t);
         auditTrailDao.logUpdate(user, TenantDao.TABLE_NAME, t,
             "person has been added to this tenant",
