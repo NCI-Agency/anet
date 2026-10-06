@@ -518,7 +518,7 @@ const ReportForm = ({
           }
         }
 
-        if (currentUser.isAdmin()) {
+        if (currentUser.isTenantAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
             queryVars: {
