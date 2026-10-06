@@ -352,17 +352,17 @@ const UsersPendingVerification = ({
 
 const PendingTenantAccessRequests = () => {
   const { currentUser } = useContext(AppContext)
-  const nrTenantsWithAccessRequests =
-    currentUser?.position?.tenantsAdministrated?.filter(
-      t => !_isEmpty(t.accessRequests)
-    )?.length ?? 0
+  const nrTenantAccessRequests =
+    currentUser?.position?.tenantsAdministrated
+      ?.map(t => t.accessRequests?.length ?? 0)
+      ?.reduce((acc, v) => acc + v, 0) ?? 0
   return (
-    <Fieldset title="My tenants with pending access requests">
-      {nrTenantsWithAccessRequests <= 0 ? (
-        <em>No tenants with pending access requests</em>
+    <Fieldset title="Pending access requests for my tenant">
+      {nrTenantAccessRequests <= 0 ? (
+        <em>No pending access requests</em>
       ) : (
         <Link to="/tenants/mine">
-          {nrTenantsWithAccessRequests} tenant(s) with pending access requests
+          {nrTenantAccessRequests} pending access request(s)
         </Link>
       )}
     </Fieldset>
@@ -679,9 +679,7 @@ const Home = ({
         />
       )}
 
-      {!_isEmpty(currentUser?.position?.tenantsAdministrated) && (
-        <PendingTenantAccessRequests />
-      )}
+      {currentUser?.isTenantAdmin() && <PendingTenantAccessRequests />}
 
       <MySubscriptionUpdates />
 

@@ -7,20 +7,24 @@ class Help extends Page {
     await super.open(PAGE_URL)
   }
 
+  async getUsers(selector) {
+    const elem = await browser.$(selector)
+    await elem.waitForExist()
+    await elem.waitForDisplayed()
+    const users = await elem.$$("span")
+    return users.map(async user => await user.getText())
+  }
+
   async getSuperusers() {
-    const superusersDiv = await browser.$(".superusers-list")
-    await superusersDiv.waitForExist()
-    await superusersDiv.waitForDisplayed()
-    const superusers = await superusersDiv.$$("span")
-    return superusers.map(async user => await user.getText())
+    return this.getUsers(".superusers-list")
+  }
+
+  async getTenantAdministrators() {
+    return this.getUsers(".tenant-admins-list")
   }
 
   async getAdministrators() {
-    const adminsDiv = await browser.$(".admins-list")
-    await adminsDiv.waitForExist()
-    await adminsDiv.waitForDisplayed()
-    const admins = await adminsDiv.$$("span")
-    return admins.map(async user => await user.getText())
+    return this.getUsers(".admins-list")
   }
 
   async hasHelpText() {

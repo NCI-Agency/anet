@@ -347,7 +347,7 @@ const positionTour = (currentUser, navigate) => {
       },
       {
         title: "Type of user",
-        content: `There are three types of users: user, superuser, and administrator. Superusers can give other positions either user or superuser privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Superusers are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations.`,
+        content: `There are several types of users: user, superuser, tenant administrator, and administrator. Superusers can give other positions either user or superuser privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Superusers are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations.`,
         disableBeacon: true,
         target: "#fg-type",
         placement: "bottom"

@@ -1352,6 +1352,26 @@ properties:
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a superuser position.
 
+      tenantAdministrator:
+        type: object
+        additionalProperties: false
+        required: [position]
+        properties:
+
+          position:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+              name:
+                type: string
+                title: The permission name of this field
+                description: Used in the UI for the type filter of position.
+              type:
+                type: string
+                title: The permissions type of this field
+                description: Used in the UI for the type/permissions of a tenant administrator position.
+
       administrator:
         type: object
         additionalProperties: false

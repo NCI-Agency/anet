@@ -46,7 +46,7 @@ const MyTenants = ({ pageDispatchers }: MyTenantsProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("My Tenants")
+  usePageTitle("My Tenant")
   if (done) {
     return result
   }
@@ -54,7 +54,7 @@ const MyTenants = ({ pageDispatchers }: MyTenantsProps) => {
   const tenantsAdministrated = data?.me?.position?.tenantsAdministrated || []
 
   return (
-    <Fieldset id="my-tenants" title="Tenants I administrate">
+    <Fieldset id="my-tenants" title="Tenant I administrate">
       <TenantTable
         tenants={tenantsAdministrated}
         showLink

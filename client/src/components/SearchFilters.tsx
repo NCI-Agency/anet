@@ -448,11 +448,13 @@ export const searchFilters = function (
           options: [
             Position.TYPE.REGULAR,
             Position.TYPE.SUPERUSER,
+            Position.TYPE.TENANT_ADMINISTRATOR,
             Position.TYPE.ADMINISTRATOR
           ],
           labels: [
             Settings.fields.regular.position.name,
             Settings.fields.superuser.position.name,
+            Settings.fields.tenantAdministrator.position.name,
             Settings.fields.administrator.position.name
           ]
         }
@@ -532,11 +534,13 @@ export const searchFilters = function (
           options: [
             Position.TYPE.REGULAR,
             Position.TYPE.SUPERUSER,
+            Position.TYPE.TENANT_ADMINISTRATOR,
             Position.TYPE.ADMINISTRATOR
           ],
           labels: [
             Settings.fields.regular.position.name,
             Settings.fields.superuser.position.name,
+            Settings.fields.tenantAdministrator.position.name,
             Settings.fields.administrator.position.name
           ]
         }

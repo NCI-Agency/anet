@@ -25,11 +25,8 @@ import mil.dds.anet.views.UuidFetcher;
 public class Position extends AbstractEmailableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
-  public static enum PositionType {
-    REGULAR, // -
-    @Deprecated
-    _PLACEHOLDER_1_, // Should no longer be used but remain in place to keep the correct values
-    SUPERUSER, ADMINISTRATOR
+  public enum PositionType {
+    REGULAR, SUPERUSER, TENANT_ADMINISTRATOR, ADMINISTRATOR
   }
 
   public static enum SuperuserType {

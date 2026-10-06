@@ -127,8 +127,8 @@ const AssignPositionModal = ({
     const permissionsWillBeConvertedToRegularType = (
       <li>
         Permissions of the <b>{currentPosition?.name}</b> position will be
-        converted from <b>{Position.convertType(currentPosition?.type)}</b> to{" "}
-        <b>{Settings.fields.regular.position.type}</b>.
+        converted from <b>{Position.humanNameOfType(currentPosition?.type)}</b>{" "}
+        to <b>{Settings.fields.regular.position.type}</b>.
       </li>
     )
     const permissionsWillBeConvertedFromOldTypeToCurrentType = (
@@ -138,14 +138,14 @@ const AssignPositionModal = ({
           <LinkTo modelType="Position" model={position} isLink={false} />
         </b>{" "}
         position will be converted from{" "}
-        <b>{Position.convertType(position?.type)}</b> to{" "}
-        <b>{Position.convertType(currentPosition?.type)}</b>.{" "}
+        <b>{Position.humanNameOfType(position?.type)}</b> to{" "}
+        <b>{Position.humanNameOfType(currentPosition?.type)}</b>.{" "}
       </li>
     )
     const permissionsWillBeConvertedToCurrentPositionType = (
       <li>
         Permissions of the <b>{position?.name}</b> position will be converted to{" "}
-        <b>{Position.convertType(currentPosition?.type)}</b>.
+        <b>{Position.humanNameOfType(currentPosition?.type)}</b>.
       </li>
     )
 
@@ -208,8 +208,11 @@ const AssignPositionModal = ({
   }
   if (currentUser.isAdmin()) {
     // only admins can put people in admin billets.
-    positionSearchQuery.type.push(Position.TYPE.ADMINISTRATOR)
-    positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
+    positionSearchQuery.type.push(
+      Position.TYPE.ADMINISTRATOR,
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.SUPERUSER
+    )
   } else if (currentUser.isSuperuser()) {
     // Only superusers can put people in superuser billets
     positionSearchQuery.type.push(Position.TYPE.SUPERUSER)

@@ -290,23 +290,20 @@ export default class Person extends Model {
   }
 
   isAdmin() {
-    return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
+    return this.position?.type === Position.TYPE.ADMINISTRATOR
   }
 
   isSuperuser() {
-    return (
-      this.position &&
-      (this.position.type === Position.TYPE.SUPERUSER ||
-        this.position.type === Position.TYPE.ADMINISTRATOR)
+    return [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR].includes(
+      this.position?.type
     )
   }
 
   isEnhancedSuperuser() {
     return (
-      this.position &&
-      ((this.position.type === Position.TYPE.SUPERUSER &&
-        this.position.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
-        this.position.type === Position.TYPE.ADMINISTRATOR)
+      (this.position?.type === Position.TYPE.SUPERUSER &&
+        this.position?.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
+      this.position?.type === Position.TYPE.ADMINISTRATOR
     )
   }
 

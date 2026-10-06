@@ -1690,7 +1690,7 @@ enum PositionType {
   ADMINISTRATOR
   REGULAR
   SUPERUSER
-  _PLACEHOLDER_1_ @deprecated(reason: "Deprecated")
+  TENANT_ADMINISTRATOR
 }
 
 """"""
