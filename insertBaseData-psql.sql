@@ -105,6 +105,8 @@ INSERT INTO people (uuid, "familyName", "givenName", status, "phoneNumber", rank
   ('ad442c97-ca89-4c63-9a4d-336f17ca856b', 'Schrute', 'Dwight', 0, '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('b6754f19-b67e-4603-bfe6-af8c61760eef', 'Halpert', 'Jim', 0, '+1-412-7324', 'CIV', 'Lets prank dwight.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('c94abd40-21ba-4592-9ce4-95e6c2cfd912', 'Linton', 'Billie', 0, '+1-264-7324', 'CIV', 'Billie is a powerful superuser', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Anguilla'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Tenant Administrators
+  ('66807020-58aa-42f9-affd-4f456244b875', 'Madsen', 'Mads', '0', NULL, 'CIV', 'A tenant administrator', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Denmark'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Administrators
   ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Dmin', 'Arthur', '0', NULL, 'CIV', 'An administrator', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Albania'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'Scott', 'Michael', '0', NULL, 'CIV', 'Worlds best boss.', true, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -138,6 +140,8 @@ INSERT INTO users (uuid, "domainUsername", "personUuid", "createdAt", "updatedAt
   (uuid_generate_v4(), 'dwight', 'ad442c97-ca89-4c63-9a4d-336f17ca856b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'jim', 'b6754f19-b67e-4603-bfe6-af8c61760eef', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'billie', 'c94abd40-21ba-4592-9ce4-95e6c2cfd912', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Tenant Administrators
+  (uuid_generate_v4(), 'mads', '66807020-58aa-42f9-affd-4f456244b875', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Administrators
   (uuid_generate_v4(), 'arthur', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'michael', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -227,6 +231,9 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
   ('NS', 'jim.halpert@example.ns', 'people', 'b6754f19-b67e-4603-bfe6-af8c61760eef'),
   ('Internet', 'billie.linton@example.com', 'people', 'c94abd40-21ba-4592-9ce4-95e6c2cfd912'),
   ('NS', 'billie.linton@example.ns', 'people', 'c94abd40-21ba-4592-9ce4-95e6c2cfd912'),
+-- Tenant Administrators
+  ('Internet', 'mads@example.com', 'people', '66807020-58aa-42f9-affd-4f456244b875'),
+  ('NS', 'mads@example.ns', 'people', '66807020-58aa-42f9-affd-4f456244b875'),
 -- Administrators
   ('Internet', 'arthur@example.com', 'people', '87fdbc6a-3109-4e11-9702-a894d6ca31ef'),
   ('NS', 'arthur@example.ns', 'people', '87fdbc6a-3109-4e11-9702-a894d6ca31ef'),
@@ -321,7 +328,8 @@ WHERE uuid='178dfbba-f15a-400b-9135-6ff800246be0';
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, "superuserType", role, status, "currentPersonUuid", "locationUuid", "createdAt", "updatedAt") VALUES
   (uuid_generate_v4(), 'ANET Administrator', 3, NULL, 0, 0, NULL, 'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('38274eea-3438-40f7-8f1e-6529fd4f6191', 'EF 1 Manager', 2, 0, 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Tenant #1 Admin', 2, NULL, 0, 0, NULL, 'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('38274eea-3438-40f7-8f1e-6529fd4f6191', 'EF 1 Manager', 1, 0, 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor A', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor B', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.1 Advisor C', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -334,19 +342,19 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 1.1 Advisor for Mining', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('5e2414d2-b440-4e43-85b3-d1c10222cb5d', 'EF 1.1 Advisor for Space Issues', 0, NULL, 0, 0, '31cba227-f6c6-49e9-9483-fce441bea624', 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('44ba17f5-fcf7-4743-a6b9-baf922b172c2', 'EF 1.1 Advisor for Interagency Advising', 0, NULL, 0, 0, '31cba227-f6c6-49e9-9483-fce441bea624', 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c829e8bc-959e-4e57-9e6f-0a8fc128145f', 'EF 1.1 Superuser', 2, 0, 1, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c829e8bc-959e-4e57-9e6f-0a8fc128145f', 'EF 1.1 Superuser', 1, 0, 1, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('525d6c4b-deaa-4218-b8fd-abfb7c81a4c2', 'EF 1.2 Advisor', 0, NULL, 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('92f2d8ed-e6c6-46c1-a05d-3a7a6bbde803', 'EF 2.1 Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor for Accounting', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1 Advisor for Kites', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.1 Superuser', 2, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 2.1 Superuser', 1, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Advisor C', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Advisor D', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Old and Inactive', 0, NULL, 0, 1, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('2b7d86a9-3ed4-4843-ab4e-136c3ab109bf', 'EF 2.2 Advisor Sewing Facilities', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('2867ef24-39cb-4c3f-b344-f58633f7a086', 'EF 2.2 Advisor Local Kebabs', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.2 Superuser', 2, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.2 Final Reviewer', 2, 0, 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 2.2 Superuser', 1, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 2.2 Final Reviewer', 1, 0, 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1 Advisor A', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1 Advisor for Coffee', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1 Advisor on Software Engineering', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -355,13 +363,13 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 5 Admin', 3, NULL, 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (N'05c42ce0-34a0-4391-8b2f-c4cd85ee6b47', 'EF 5.1 Advisor Quality Assurance', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Advisor Accounting', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.1 Superuser Sales 1', 2, 1, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 2, 0, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.1 Superuser Sales 1', 1, 1, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 1, 0, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6 Approver', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.1 Advisor', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 9 Advisor', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 9 Approver', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 9 Superuser', 2, 2, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 9 Superuser', 1, 2, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor A', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
@@ -444,6 +452,11 @@ UPDATE positions SET "currentPersonUuid" = '19fe53bb-90f4-4482-abfc-d85b85deabd9
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'), 'f683335a-91e3-4788-aa3f-9eed384f4ac1', '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = 'f683335a-91e3-4788-aa3f-9eed384f4ac1' WHERE name = 'EF 2.2 Final Reviewer';
+
+-- Put Mads into the Tenant #1 Admin Billet
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
+  ((SELECT uuid from positions where name = 'Tenant #1 Admin'), '66807020-58aa-42f9-affd-4f456244b875', '2026-01-01');
+UPDATE positions SET "currentPersonUuid" = '66807020-58aa-42f9-affd-4f456244b875' WHERE name = 'Tenant #1 Admin';
 
 -- Put Arthur into the Admin Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
@@ -585,7 +598,7 @@ UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE 
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 6.1') WHERE name LIKE 'EF 6.1%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 9') WHERE name LIKE 'EF 9%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='LNG') WHERE name LIKE 'LNG%';
-UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='ANET Administrators') where name = 'ANET Administrator';
+UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='ANET Administrators') WHERE name IN ('ANET Administrator', 'Tenant #1 Admin');
 
 -- Assign responsible positions for organizations
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid") VALUES

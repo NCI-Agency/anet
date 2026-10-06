@@ -47,6 +47,7 @@ export default class Position extends Model {
   static TYPE = {
     REGULAR: "REGULAR",
     SUPERUSER: "SUPERUSER",
+    TENANT_ADMINISTRATOR: "TENANT_ADMINISTRATOR",
     ADMINISTRATOR: "ADMINISTRATOR"
   }
 
@@ -173,6 +174,8 @@ export default class Position extends Model {
       return Settings.fields.regular.position.type
     } else if (type === Position.TYPE.SUPERUSER) {
       return Settings.fields.superuser.position.type
+    } else if (type === Position.TYPE.TENANT_ADMINISTRATOR) {
+      return Settings.fields.tenantAdministrator.position.type
     } else if (type === Position.TYPE.ADMINISTRATOR) {
       return Settings.fields.administrator.position.type
     }
@@ -228,19 +231,6 @@ export default class Position extends Model {
 
   toString() {
     return Position.toString(this)
-  }
-
-  static convertType(type) {
-    switch (type) {
-      case "REGULAR":
-        return Settings.fields.regular.position.type
-      case "SUPERUSER":
-        return Settings.fields.superuser.position.type
-      case "ADMINISTRATOR":
-        return Settings.fields.administrator.position.type
-      default:
-        return "Default Case"
-    }
   }
 
   static isRegular(position) {
