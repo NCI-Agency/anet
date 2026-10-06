@@ -107,21 +107,21 @@ const AssignPersonModal = ({
     const permissionsWillBeConvertedToRegularType = (
       <>
         and the position's permissions will be converted from{" "}
-        <b>{Position.convertType(person?.position?.type)}</b> to{" "}
+        <b>{Position.humanNameOfType(person?.position?.type)}</b> to{" "}
         <b>{Settings.fields.regular.position.type}</b>.
       </>
     )
     const permissionsWillBeConvertedFromOldTypeToCurrentType = (
       <>
         Furthermore, permissions of the <b>{position?.name}</b> position will be
-        converted from <b>{Position.convertType(position?.type)}</b> to{" "}
-        <b>{Position.convertType(person?.position?.type)}</b>.
+        converted from <b>{Position.humanNameOfType(position?.type)}</b> to{" "}
+        <b>{Position.humanNameOfType(person?.position?.type)}</b>.
       </>
     )
     const positionPermissionsWillBeConvertedToRegularType = (
       <>
         If you save, permissions of the <b>{position.name}</b> position will be
-        converted from <b>{Position.convertType(position.type)}</b> to{" "}
+        converted from <b>{Position.humanNameOfType(position.type)}</b> to{" "}
         <b>{Settings.fields.regular.position.type}</b>.
       </>
     )

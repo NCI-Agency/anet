@@ -253,10 +253,10 @@ const Navigation = ({
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
   const allOrgsSorted = allOrganizations.toSorted(compareByApp6StandardIdentity)
-  const nrTenantsWithAccessRequests =
-    currentUser?.position?.tenantsAdministrated?.filter(
-      t => !_isEmpty(t.accessRequests)
-    )?.length ?? 0
+  const nrTenantAccessRequests =
+    currentUser?.position?.tenantsAdministrated
+      ?.map(t => t.accessRequests?.length ?? 0)
+      ?.reduce((acc, v) => acc + v, 0) ?? 0
 
   useEffect(() => {
     if (
@@ -414,15 +414,13 @@ const Navigation = ({
           )}
           {!_isEmpty(currentUser?.position?.tenantsAdministrated) && (
             <SidebarLink
-              id="my-tenants-nav"
+              id="my-tenant-nav"
               linkTo="/tenants/mine"
               handleOnClick={resetPages}
             >
-              My Tenants
-              {!!nrTenantsWithAccessRequests && (
-                <NotificationBadge>
-                  {nrTenantsWithAccessRequests}
-                </NotificationBadge>
+              My Tenant
+              {!!nrTenantAccessRequests && (
+                <NotificationBadge>{nrTenantAccessRequests}</NotificationBadge>
               )}
             </SidebarLink>
           )}

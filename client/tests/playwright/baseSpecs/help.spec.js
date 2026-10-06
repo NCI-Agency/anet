@@ -4,16 +4,23 @@ import Help from "../pages/help.page.js"
 import { test } from "../support.js"
 
 const ERIN_SUPERUSERS = ["CTR Rebecca Beccabon", "CIV Jacob Jacobson"]
+const ERIN_TENANT_ADMINS = ["CIV Mads Madsen"]
 const ERIN_ADMINS = ["CIV Arthur Dmin", "CIV Michael Scott"]
 const HELP_TEXT = "This is a help text"
 test.describe("When checking the help page", () => {
-  test("Should see links to the user's superusers and administrators", async () => {
+  test("Should see links to the user's superusers, tenant administrators and administrators", async () => {
     await Help.open()
     const superusers = await Help.getSuperuserLinks()
     for (const name of ERIN_SUPERUSERS) {
       // Match visible text rather than the accessible name, which may include
       // the avatar's alt text.
       const link = superusers.filter({ hasText: name })
+      await expect(link).toBeVisible()
+      await expect(link).toHaveText(name)
+    }
+    const tenantAdministrators = await Help.getTenantAdministratorLinks()
+    for (const name of ERIN_TENANT_ADMINS) {
+      const link = tenantAdministrators.filter({ hasText: name })
       await expect(link).toBeVisible()
       await expect(link).toHaveText(name)
     }

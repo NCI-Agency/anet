@@ -1397,6 +1397,11 @@ fields:
       name: Superuser
       type: ANET Superuser
 
+  tenantAdministrator:
+    position:
+      name: Tenant Administrator
+      type: ANET Tenant Administrator
+
   administrator:
     position:
       name: Administrator

@@ -153,7 +153,7 @@ public class AuthUtils {
   }
 
   public static boolean canCreateSubTask(final Person user, final String parentTaskUuid) {
-    // Admins can create any organization
+    // Admins can create any task
     if (AuthUtils.isAdmin(user)) {
       return true;
     }
@@ -177,6 +177,7 @@ public class AuthUtils {
   public static boolean isSuperuser(Person user) {
     Position position = DaoUtils.getPosition(user);
     return position != null && (position.getType() == PositionType.SUPERUSER
+        || position.getType() == PositionType.TENANT_ADMINISTRATOR
         || position.getType() == PositionType.ADMINISTRATOR);
   }
 
