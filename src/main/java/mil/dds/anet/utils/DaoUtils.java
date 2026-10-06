@@ -335,6 +335,11 @@ public class DaoUtils {
           + " AND (%1$s.\"allTenants\" IS TRUE OR %1$s.uuid IN ("
           + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" = ("
           + " SELECT \"tenantUuid\" FROM \"accessTokens\" WHERE uuid = :accessTokenUuid))))";
+    } else if (principal instanceof Person user && AuthUtils.isTenantAdmin(user)) {
+      // Tenant administrators see all reports within their tenant
+      sql = "(%1$s.\"allTenants\" IS TRUE OR %1$s.uuid IN ("
+          + " SELECT \"reportUuid\" FROM \"reportTenants\" WHERE \"tenantUuid\" = ("
+          + " SELECT \"tenantUuid\" FROM people where uuid = :userUuid)))";
     } else {
       // Users can see their own reports, other users only ever see non-draft/non-rejected reports
       // within their tenant, and approvers also see reports pending their approval.
@@ -353,11 +358,15 @@ public class DaoUtils {
 
   public static Map<String, Object> getReportsParamsMap(Principal principal) {
     final Map<String, Object> params = new HashMap<>();
-    params.put("draftState", getEnumId(Report.ReportState.DRAFT));
-    params.put("rejectedState", getEnumId(Report.ReportState.REJECTED));
     if (principal instanceof AccessTokenPrincipal accessToken) {
+      params.put("draftState", getEnumId(Report.ReportState.DRAFT));
+      params.put("rejectedState", getEnumId(Report.ReportState.REJECTED));
       params.put("accessTokenUuid", accessToken.getUuid());
+    } else if (principal instanceof Person user && AuthUtils.isTenantAdmin(user)) {
+      params.put("userUuid", getUuid(user));
     } else {
+      params.put("draftState", getEnumId(Report.ReportState.DRAFT));
+      params.put("rejectedState", getEnumId(Report.ReportState.REJECTED));
       params.put("isAuthor", true);
       params.put("userUuid", principal instanceof Person user ? getUuid(user) : null);
     }

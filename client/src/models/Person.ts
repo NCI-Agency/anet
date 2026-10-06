@@ -293,6 +293,13 @@ export default class Person extends Model {
     return this.position?.type === Position.TYPE.ADMINISTRATOR
   }
 
+  isTenantAdmin() {
+    return [
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.ADMINISTRATOR
+    ].includes(this.position?.type)
+  }
+
   isSuperuser() {
     return [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR].includes(
       this.position?.type
