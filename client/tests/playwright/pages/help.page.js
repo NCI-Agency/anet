@@ -8,24 +8,23 @@ class Help extends Page {
     await super.open(PAGE_URL)
   }
 
+  async getUsers(selector) {
+    const elem = await currentPage().locator(selector).first()
+    await waitFor(elem, "visible")
+    const users = await elem.locator("span").all()
+    return Promise.all(users.map(async user => (await user.innerText()).trim()))
+  }
+
   async getSuperusers() {
-    const superusersDiv = await currentPage()
-      .locator(".superusers-list")
-      .first()
-    await waitFor(superusersDiv, "visible")
-    const superusers = await superusersDiv.locator("span").all()
-    return Promise.all(
-      superusers.map(async user => (await user.innerText()).trim())
-    )
+    return this.getUsers(".superusers-list")
+  }
+
+  async getTenantAdministrators() {
+    return this.getUsers(".tenant-admins-list")
   }
 
   async getAdministrators() {
-    const adminsDiv = await currentPage().locator(".admins-list").first()
-    await waitFor(adminsDiv, "visible")
-    const admins = await adminsDiv.locator("span").all()
-    return Promise.all(
-      admins.map(async user => (await user.innerText()).trim())
-    )
+    return this.getUsers(".admins-list")
   }
 
   async getHelpText() {

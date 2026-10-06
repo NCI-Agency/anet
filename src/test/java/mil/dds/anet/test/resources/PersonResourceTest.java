@@ -359,8 +359,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = PositionType.class, names = {"_PLACEHOLDER_1_"},
-      mode = EnumSource.Mode.EXCLUDE)
+  @EnumSource(value = PositionType.class)
   void searchUsersByPositionType(PositionType positionType) {
     final PersonSearchQueryInput query = PersonSearchQueryInput.builder().withPageSize(0)
         .withPositionType(List.of(positionType)).build();

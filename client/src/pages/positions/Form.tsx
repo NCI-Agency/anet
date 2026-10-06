@@ -132,6 +132,11 @@ const PositionForm = ({
       label: Settings.fields.superuser.position.type
     },
     {
+      id: "permsTenantAdminButton",
+      value: Position.TYPE.TENANT_ADMINISTRATOR,
+      label: Settings.fields.tenantAdministrator.position.type
+    },
+    {
       id: "permsAdminButton",
       value: Position.TYPE.ADMINISTRATOR,
       label: Settings.fields.administrator.position.type

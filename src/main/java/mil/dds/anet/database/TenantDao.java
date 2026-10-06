@@ -4,7 +4,9 @@ import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRIN
 
 import graphql.GraphQLContext;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -21,7 +23,6 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -93,16 +94,6 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
     void updateMemberOfTenant(@Bind("personUuid") String personUuid,
         @Bind("tenantUuid") String tenantUuid);
 
-    @SqlBatch("INSERT INTO \"tenantAdministrativePositions\" (\"tenantUuid\", \"positionUuid\")"
-        + " VALUES (:tenantUuid, :uuid)")
-    void insertAdministrativePositions(@Bind("tenantUuid") String tenantUuid,
-        @BindBean List<Position> positions);
-
-    @SqlUpdate("DELETE FROM \"tenantAdministrativePositions\""
-        + " WHERE \"tenantUuid\" = :tenantUuid AND \"positionUuid\" IN ( <positionUuids> )")
-    void deleteAdministrativePositions(@Bind("tenantUuid") String tenantUuid,
-        @BindList(value = "positionUuids", onEmpty = NULL_STRING) List<String> positionUuids);
-
     @SqlUpdate("DELETE FROM \"tenantAccessRequests\" "
         + "WHERE \"tenantUuid\" = :tenantUuid AND \"personUuid\" = :personUuid")
     void removeAccessRequestFromTenant(@Bind("personUuid") String personUuid,
@@ -146,32 +137,6 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
           .bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
     } catch (UnableToExecuteStatementException e) {
       throw ResponseUtils.handleSqlException(e, DUPLICATE_TENANT_NAME);
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public void addAdministrativePositions(String tenantUuid, List<Position> positions) {
-    final Handle handle = getDbHandle();
-    try {
-      final TenantBatch ab = handle.attach(TenantBatch.class);
-      if (positions != null) {
-        ab.insertAdministrativePositions(tenantUuid, positions);
-      }
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public void removeAdministrativePositions(String tenantUuid, List<String> positionUuids) {
-    final Handle handle = getDbHandle();
-    try {
-      final TenantBatch ab = handle.attach(TenantBatch.class);
-      if (positionUuids != null) {
-        ab.deleteAdministrativePositions(tenantUuid, positionUuids);
-      }
     } finally {
       closeDbHandle(handle);
     }
@@ -302,14 +267,23 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
 
   class TenantAdministrativePositionsBatcher extends ForeignKeyBatcher<Position> {
     private static final String SQL = "/* batch.getTenantAdministrativePositions */"
-        + " SELECT \"tenantAdministrativePositions\".\"tenantUuid\"," + PositionDao.POSITION_FIELDS
-        + " FROM \"tenantAdministrativePositions\""
-        + " INNER JOIN positions on positions.uuid = \"tenantAdministrativePositions\".\"positionUuid\""
-        + " WHERE \"tenantAdministrativePositions\".\"tenantUuid\" IN ( <foreignKeys> )"
+        + " SELECT people.\"tenantUuid\"," + PositionDao.POSITION_FIELDS + " FROM positions"
+        + " INNER JOIN \"peoplePositions\" ON \"peoplePositions\".\"positionUuid\" = positions.uuid"
+        + " INNER JOIN people ON people.uuid = \"peoplePositions\".\"personUuid\""
+        + " WHERE positions.type = :tenantAdminType"
+        + " AND \"peoplePositions\".primary IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL"
+        + " AND people.\"tenantUuid\" IN ( <foreignKeys> )"
         + " ORDER BY positions.name, positions.uuid";
+    private static final Map<String, Object> additionalParams = new HashMap<>();
+
+    static {
+      additionalParams.put("tenantAdminType",
+          DaoUtils.getEnumId(Position.PositionType.TENANT_ADMINISTRATOR));
+    }
 
     public TenantAdministrativePositionsBatcher() {
-      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(), "tenantUuid");
+      super(TenantDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(), "tenantUuid",
+          additionalParams);
     }
   }
 
@@ -327,12 +301,17 @@ public class TenantDao extends AnetBaseDao<Tenant, AbstractSearchQuery<?>> {
   public List<Tenant> getTenantsAdministratedByPosition(String positionUuid) {
     final Handle handle = getDbHandle();
     try {
-      final String sql = "/* getTenantsAdministratedByPosition */ SELECT " + TENANT_FIELDS
-          + " FROM " + TABLE_NAME + " JOIN \"tenantAdministrativePositions\" tap"
-          + " ON tap.\"tenantUuid\" = tenants.uuid WHERE tap.\"positionUuid\" = :positionUuid"
+      final String sql = "/* getTenantsAdministratedByPosition */ SELECT positions.uuid, "
+          + TENANT_FIELDS + " FROM " + TABLE_NAME
+          + " INNER JOIN people ON people.\"tenantUuid\" = tenants.uuid"
+          + " INNER JOIN \"peoplePositions\" ON \"peoplePositions\".\"personUuid\" = people.uuid"
+          + " INNER JOIN positions ON positions.uuid = \"peoplePositions\".\"positionUuid\""
+          + " WHERE positions.uuid = :positionUuid AND positions.type = :tenantAdminType"
+          + " AND \"peoplePositions\".primary IS TRUE AND \"peoplePositions\".\"endedAt\" IS NULL"
           + " ORDER BY tenants.name";
-      return handle.createQuery(sql).bind("positionUuid", positionUuid).map(new TenantMapper())
-          .list();
+      return handle.createQuery(sql).bind("positionUuid", positionUuid)
+          .bind("tenantAdminType", DaoUtils.getEnumId(Position.PositionType.TENANT_ADMINISTRATOR))
+          .map(new TenantMapper()).list();
     } finally {
       closeDbHandle(handle);
     }

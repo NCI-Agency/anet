@@ -98,10 +98,10 @@ const TenantShow = ({ pageDispatchers }: TenantShowProps) => {
   }
 
   const tenant = new Tenant(data ? data.tenant : {})
-  const isAssignedSuperuser = currentUser.position?.tenantsAdministrated?.some(
+  const isTenantAdmin = currentUser.position?.tenantsAdministrated?.some(
     t => t.uuid === tenant.uuid
   )
-  const canEdit = currentUser.isAdmin() || isAssignedSuperuser
+  const canEdit = currentUser.isAdmin() || isTenantAdmin
 
   const action = (
     <>

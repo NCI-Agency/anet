@@ -272,8 +272,7 @@ const routes = [
         element: (
           <ProtectedRoute
             authorizationCallback={currentUser =>
-              currentUser?.isAdmin() ||
-              !_isEmpty(currentUser?.position?.tenantsAdministrated)
+              currentUser?.isAdmin() || currentUser?.isTenantAdmin()
             }
           />
         ),
