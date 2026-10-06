@@ -53,7 +53,6 @@ import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.database.UserDao;
-import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
@@ -283,14 +282,7 @@ public class AnetObjectEngine {
 
   public CompletableFuture<Boolean> canUserRejectStep(GraphQLContext context, String userUuid,
       ApprovalStep approvalStep, String advisorOrgUuid) {
-    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, userUuid)
-        .thenCompose(p -> {
-          // Admin users may reject any step
-          if (AuthUtils.isAdmin(p)) {
-            return CompletableFuture.completedFuture(true);
-          }
-          return canUserApproveStep(context, userUuid, approvalStep, advisorOrgUuid);
-        });
+    return canUserApproveStep(context, userUuid, approvalStep, advisorOrgUuid);
   }
 
   /**

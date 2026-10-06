@@ -1,5 +1,7 @@
 package mil.dds.anet.resources;
 
+import static mil.dds.anet.utils.AuthUtils.UNAUTH_MESSAGE;
+
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -109,7 +111,7 @@ public class ReportResource {
       return false;
     }
 
-    if (AuthUtils.isAdmin(user)) {
+    if (hasAdminPrivilegesForReport(user, report)) {
       // Admins can do *anything*
       return true;
     }
@@ -262,7 +264,7 @@ public class ReportResource {
     // State should change to draft when the report is being edited by one of the existing authors,
     // except when the editor is admin and is editing their own published report
     if (isAuthor) {
-      if (AuthUtils.isAdmin(editor)
+      if (hasAdminPrivilegesForReport(editor, r)
           && (r.getState() == ReportState.PUBLISHED || r.getState() == ReportState.CANCELLED)) {
         // Keep the existing release date
         r.setReleasedAt(existing.getReleasedAt());
@@ -375,7 +377,7 @@ public class ReportResource {
   }
 
   private void assertCanUpdateReport(Report report, Person editor, boolean isAuthor) {
-    if (AuthUtils.isAdmin(editor)) {
+    if (hasAdminPrivilegesForReport(editor, report)) {
       // Admins can do *anything*
       return;
     }
@@ -420,7 +422,7 @@ public class ReportResource {
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
     final boolean isAuthor = r.isAuthor(user);
-    if (!isAuthor && !AuthUtils.isAdmin(user)) {
+    if (!isAuthor && !hasAdminPrivilegesForReport(user, r)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           "Cannot submit report unless you are a report's author, or an admin");
     }
@@ -484,7 +486,7 @@ public class ReportResource {
     }
 
     // Verify that this user can approve for this step.
-    final boolean canApprove = AuthUtils.isAdmin(approver) || engine
+    final boolean canApprove = hasAdminPrivilegesForReport(approver, r) || engine
         .canUserApproveStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
         .join();
     if (!canApprove) {
@@ -516,6 +518,25 @@ public class ReportResource {
     return numRows;
   }
 
+  private static boolean hasAdminPrivilegesForReport(Person approver, Report r) {
+    if (r == null || approver == null) {
+      return false;
+    }
+    if (AuthUtils.isAdmin(approver)) {
+      return true;
+    }
+    if (AuthUtils.isTenantAdmin(approver)) {
+      if (Boolean.TRUE.equals(r.getAllTenants())) {
+        return true;
+      }
+      final AnetObjectEngine anetObjectEngine = ApplicationContextProvider.getEngine();
+      final List<Tenant> reportTenants = r.loadTenants(anetObjectEngine.getContext()).join();
+      return reportTenants.stream()
+          .anyMatch(t -> Objects.equals(DaoUtils.getUuid(t), approver.getTenantUuid()));
+    }
+    return false;
+  }
+
   @GraphQLMutation(name = "rejectReport")
   public int rejectReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid,
@@ -529,13 +550,14 @@ public class ReportResource {
     ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
     // Report can be rejected when pending approval or by an admin when pending approval or in
     // approved state
-    if (step == null && !((r.getState() == ReportState.APPROVED) && AuthUtils.isAdmin(approver))) {
+    if (step == null
+        && !((r.getState() == ReportState.APPROVED) && hasAdminPrivilegesForReport(approver, r))) {
       logger.info("Report UUID {} does not currently need an approval", r.getUuid());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "This report is not pending approval");
     } else if (step != null) {
       // Verify that this user can reject for this step.
-      final boolean canReject = engine
+      final boolean canReject = hasAdminPrivilegesForReport(approver, r) || engine
           .canUserRejectStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
           .join();
       if (!canReject) {
@@ -603,8 +625,8 @@ public class ReportResource {
     logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // Only admin may publish a report
-    if (!AuthUtils.isAdmin(user)) {
+    // Only admins may publish a report
+    if (!hasAdminPrivilegesForReport(user, r)) {
       logger.info("User {} cannot publish report UUID {}", user, r.getUuid());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot publish this report");
     }
@@ -630,8 +652,10 @@ public class ReportResource {
       @GraphQLArgument(name = "uuid") String uuid) {
     // TODO: Do we need a reason here (like with rejectReport)?
     final Person unpublisher = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(unpublisher);
     final Report r = reportDao.getByUuid(uuid, unpublisher);
+    if (!hasAdminPrivilegesForReport(unpublisher, r)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
+    }
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
@@ -736,7 +760,7 @@ public class ReportResource {
   }
 
   private void assertCanDeleteReport(Report report, Person user) {
-    if (AuthUtils.isAdmin(user)) {
+    if (hasAdminPrivilegesForReport(user, report)) {
       return;
     }
 

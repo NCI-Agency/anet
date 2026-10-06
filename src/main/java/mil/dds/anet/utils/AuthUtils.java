@@ -187,6 +187,12 @@ public class AuthUtils {
         && position.getSuperuserType() != Position.SuperuserType.REGULAR);
   }
 
+  public static boolean isTenantAdmin(Person user) {
+    Position position = DaoUtils.getPosition(user);
+    return (position != null) && (position.getType() == PositionType.TENANT_ADMINISTRATOR
+        || position.getType() == PositionType.ADMINISTRATOR);
+  }
+
   public static boolean isAdmin(Person user) {
     Position position = DaoUtils.getPosition(user);
     return (position != null) && (position.getType() == PositionType.ADMINISTRATOR);
