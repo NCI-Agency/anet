@@ -65,6 +65,14 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   @GraphQLInputField
   private Boolean isUser;
 
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean hasTenant;
+
+  @GraphQLQuery
+  @GraphQLInputField
+  private String tenantUuid;
+
   public PersonSearchQuery() {
     super(PersonSearchSortBy.NAME);
     this.setPageSize(100);
@@ -181,6 +189,22 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
 
   public void setIsUser(Boolean isUser) {
     this.isUser = isUser;
+  }
+
+  public Boolean getHasTenant() {
+    return hasTenant;
+  }
+
+  public void setHasTenant(Boolean hasTenant) {
+    this.hasTenant = hasTenant;
+  }
+
+  public String getTenantUuid() {
+    return tenantUuid;
+  }
+
+  public void setTenantUuid(String tenantUuid) {
+    this.tenantUuid = tenantUuid;
   }
 
   @Override
