@@ -201,8 +201,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       }
       return handle
           .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
-              + PositionDao.POSITION_FIELDS
-              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+              + PositionDao.POSITION_FIELDS + "FROM people "
+              + "LEFT JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = people.uuid "
+              + "AND pp.\"endedAt\" IS NULL AND pp.primary IS TRUE "
+              + "LEFT JOIN positions ON positions.uuid = pp.\"positionUuid\" "
               + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
               + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
               + "WHERE people.status = :status AND \"emailAddresses\".address = :emailAddress")
