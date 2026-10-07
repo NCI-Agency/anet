@@ -1,5 +1,6 @@
 import { allFakers, allLocales, faker } from "@faker-js/faker"
 import Model from "components/Model"
+import { OTHER_PHONE_NUMBER_TYPE } from "components/PhoneNumberInputTable"
 import { countries, getCountryCode } from "countries-list"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Person } from "models"
@@ -16,6 +17,11 @@ import {
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
 
+const PHONE_NUMBER_TYPES = [
+  ...Settings.fields.person.phoneNumber.types,
+  OTHER_PHONE_NUMBER_TYPE
+]
+
 const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
@@ -30,35 +36,8 @@ function afghanName(gender) {
   }
 }
 
-function personName(gender, locale) {
-  const genderForName =
-    gender === "NOT SPECIFIED" ? undefined : gender.toLowerCase()
-  const localeFaker = allFakers[locale]
-  return {
-    givenName: localeFaker.person.firstName(genderForName),
-    familyName: localeFaker.person.lastName(genderForName)
-  }
-}
-
-function createUsers(domainUsername) {
-  if (domainUsername) {
-    return [{ domainUsername }]
-  }
-  return null
-}
-
-async function randomPerson(isUser, status) {
-  const gender = fuzzy.withProbability(0.1)
-    ? "NOT SPECIFIED"
-    : fuzzy.withProbability(0.5)
-      ? "MALE"
-      : "FEMALE"
+function getLocale(country) {
   const defaultLangCode = "en"
-  const country = await getRandomObject(
-    "locations",
-    { type: Location.LOCATION_TYPES.COUNTRY },
-    "uuid name digram"
-  )
   const countryCode = getCountryCode(country.name) || country.digram
   const countryByCode = countries[countryCode]
   // Some hacks for picking country-specific languages supported by faker
@@ -76,9 +55,51 @@ async function randomPerson(isUser, status) {
     (_isEmpty(countryByCode?.languages)
       ? defaultLangCode
       : faker.helpers.arrayElement(countryByCode.languages))
-  const locale = availableLocales.includes(langCode)
-    ? langCode
-    : defaultLangCode
+
+  return availableLocales.includes(langCode) ? langCode : defaultLangCode
+}
+
+function personName(gender, locale) {
+  const genderForName =
+    gender === "NOT SPECIFIED" ? undefined : gender.toLowerCase()
+  const localeFaker = allFakers[locale]
+  return {
+    givenName: localeFaker.person.firstName(genderForName),
+    familyName: localeFaker.person.lastName(genderForName)
+  }
+}
+
+function phoneNumbers(locale) {
+  const localeFaker = allFakers[locale]
+  const phoneNumbers = []
+  const n = faker.number.int({ max: 3 })
+  for (let i = 0; i < n; i++) {
+    const type = faker.helpers.arrayElement(PHONE_NUMBER_TYPES)
+    const details = localeFaker.phone.number()
+    phoneNumbers.push({ type, details })
+  }
+  return phoneNumbers
+}
+
+function createUsers(domainUsername) {
+  if (domainUsername) {
+    return [{ domainUsername }]
+  }
+  return null
+}
+
+async function randomPerson(isUser, status) {
+  const gender = fuzzy.withProbability(0.1)
+    ? "NOT SPECIFIED"
+    : fuzzy.withProbability(0.5)
+      ? "MALE"
+      : "FEMALE"
+  const country = await getRandomObject(
+    "locations",
+    { type: Location.LOCATION_TYPES.COUNTRY },
+    "uuid name digram"
+  )
+  const locale = getLocale(country)
   const name = (fuzzy.withProbability(0.1) ? afghanName : personName)(
     gender,
     locale
@@ -106,7 +127,7 @@ async function randomPerson(isUser, status) {
     country: () => country,
     rank: () => rank,
     gender: () => gender,
-    phoneNumber: () => [{ type: "Work", details: faker.phone.phoneNumber() }],
+    phoneNumber: () => phoneNumbers(locale),
     endOfTourDate: () => faker.date.future(),
     biography: async () => await createHtmlParagraphs(),
     user: () => isUser,
@@ -115,7 +136,7 @@ async function randomPerson(isUser, status) {
   }
 }
 
-function modifiedPerson() {
+function modifiedPerson(locale) {
   return {
     familyName: identity,
     givenName: identity,
@@ -123,7 +144,7 @@ function modifiedPerson() {
     country: identity,
     rank: identity,
     gender: identity,
-    phoneNumber: () => [{ type: "Work", details: faker.phone.phoneNumber() }],
+    phoneNumber: () => phoneNumbers(locale),
     endOfTourDate: () => faker.date.future(),
     biography: async () => await createHtmlParagraphs(),
     user: identity,
@@ -150,6 +171,7 @@ const _createPerson = async function (user, isUser, status) {
   await personGenerator.rank.always()
   await personGenerator.user.always()
   await personGenerator.users.always()
+  await personGenerator.phoneNumber.always()
   await personGenerator.country.always()
   await personGenerator.gender.always()
   await personGenerator.endOfTourDate.always()
@@ -233,7 +255,10 @@ const updatePerson = async function (user) {
   ).data.personList.list
 
   const person = people && people[0]
-  const personGenerator = await populate(person, modifiedPerson())
+  const personGenerator = await populate(
+    person,
+    modifiedPerson(getLocale(person.country))
+  )
   await personGenerator.familyName.rarely()
   await personGenerator.givenName.rarely()
   await personGenerator.user.never()
