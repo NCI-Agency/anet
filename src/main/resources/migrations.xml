@@ -7713,7 +7713,7 @@
 
 			ALTER TABLE people
 				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', jsonb_value_agg(people."phoneNumber"::jsonb, '{"type"}')), ${fts_low}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
 						|| to_tsvector('simple', coalesce(people.biography, '')), ${fts_low}) ||
 					setweight(to_tsvector(${fts_config}, jsonb_value_agg(people."customFields"::jsonb))
