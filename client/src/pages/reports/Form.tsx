@@ -312,7 +312,7 @@ const ReportForm = ({
   }
 
   let recentTasksVarUser
-  if (currentUser.isAdmin()) {
+  if (currentUser?.isAdmin()) {
     recentTasksVarUser = recentTasksVarCommon
   } else {
     recentTasksVarUser = {

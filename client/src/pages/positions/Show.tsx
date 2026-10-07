@@ -124,10 +124,11 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
   const position = new Position(data ? data.position : {})
 
   const isSuperuser = position.type === Position.TYPE.SUPERUSER
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const isAdmin = currentUser?.isAdmin()
   const canEdit =
     // Admins can edit anybody
-    isAdmin ||
+    isTenantAdmin ||
     // Superusers can edit positions if they have administrative permissions for the organization of the position
     (position?.organization?.uuid &&
       currentUser.hasAdministrativePermissionsForOrganization(
@@ -138,7 +139,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
     attachments?.some(a => a.uuid === position?.entityAvatar?.attachmentUuid) &&
     position.entityAvatar
   const canDelete =
-    isAdmin &&
+    isTenantAdmin &&
     position.status === Model.STATUS.INACTIVE &&
     position.uuid &&
     (!position.person || !position.person.uuid)
@@ -455,11 +456,11 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
           <Fieldset title="Previous position holders" id="previous-people">
             <PreviousPeople
               history={position.previousPeople}
-              canEditHistory={isAdmin}
+              canEditHistory={isTenantAdmin}
               action={() => setShowEditHistoryModal(true)}
             />
           </Fieldset>
-          {isAdmin && (
+          {isTenantAdmin && (
             <EditHistory
               historyEntityType="person"
               parentEntityUuid={position.uuid}
@@ -479,7 +480,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                 Settings.fields.position.organizationsAdministrated.label
               )}
               action={
-                isAdmin && (
+                isTenantAdmin && (
                   <Button
                     onClick={() => setShowOrganizationsAdministratedModal(true)}
                     variant="outline-secondary"

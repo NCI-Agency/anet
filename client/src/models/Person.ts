@@ -301,16 +301,21 @@ export default class Person extends Model {
   }
 
   isSuperuser() {
-    return [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR].includes(
-      this.position?.type
-    )
+    return [
+      Position.TYPE.SUPERUSER,
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.ADMINISTRATOR
+    ].includes(this.position?.type)
   }
 
   isEnhancedSuperuser() {
     return (
       (this.position?.type === Position.TYPE.SUPERUSER &&
         this.position?.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
-      this.position?.type === Position.TYPE.ADMINISTRATOR
+      [
+        Position.TYPE.TENANT_ADMINISTRATOR,
+        Position.TYPE.ADMINISTRATOR
+      ].includes(this.position?.type)
     )
   }
 
@@ -375,7 +380,7 @@ export default class Person extends Model {
     if (!task) {
       return false
     }
-    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
+    if (this.isTenantAdmin()) {
       return true
     }
     if (

@@ -164,7 +164,7 @@ public class OrganizationResource {
     // Check for loops in the hierarchy
     checkForLoops(org.getUuid(), org.getParentOrgUuid());
 
-    if (!AuthUtils.isAdmin(user)
+    if (!AuthUtils.isTenantAdmin(user)
         && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
       // Check if user has administrative permission for the organizations that will be
       // modified with the parent organization update
@@ -223,7 +223,7 @@ public class OrganizationResource {
               .removeTaskedOrganizationsFromTask(org.getUuid(), DaoUtils.getUuid(oldTask)));
     }
 
-    if (AuthUtils.isAdmin(user) && org.getAdministratingPositions() != null) {
+    if (AuthUtils.isTenantAdmin(user) && org.getAdministratingPositions() != null) {
       logger.debug("Editing administrating positions for {}", org);
       Utils.addRemoveElementsByUuid(
           existing.loadAdministratingPositions(engine.getContext()).join(),

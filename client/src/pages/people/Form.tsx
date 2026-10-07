@@ -123,6 +123,7 @@ const PersonForm = ({
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
   const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const attachmentsEnabled =
     !Settings.fields.attachment.featureDisabled && !forOnboarding
   const attachmentEditEnabled =
@@ -235,11 +236,17 @@ const PersonForm = ({
             list: unselectedTenants
           }
         }
+        // Tenant admin can edit people without tenant or in their own tenant
+        const isTenantAdminAndCanEditPerson =
+          isTenantAdmin &&
+          (!values.tenant?.uuid ||
+            values.tenant?.uuid === currentUser?.tenant?.uuid)
         // admins can edit all persons,
         // superusers for their organization hierarchy or position-less people,
         // and the user themselves when onboarding
         const canEditName =
           isAdmin ||
+          isTenantAdminAndCanEditPerson ||
           currentUser?.hasAdministrativePermissionsForOrganization(
             values?.position?.organization
           ) ||
@@ -527,54 +534,57 @@ const PersonForm = ({
                         </Row>
                       </FormGroup>
 
-                      {!forOnboarding && isAdmin && (
-                        <>
-                          <DictionaryField
-                            wrappedComponent={FastField}
-                            dictProps={Settings.fields.person.user}
-                            name="user"
-                            component={FieldHelper.RadioButtonToggleGroupField}
-                            buttons={[
-                              {
-                                id: "isUser",
-                                value: true,
-                                label: "Yes"
-                              },
-                              {
-                                id: "isNotUser",
-                                value: false,
-                                label: "No"
-                              }
-                            ]}
-                            onChange={value => setFieldValue("user", value)}
-                          >
-                            {values.user && (
-                              <Alert variant="warning">
-                                Creating a user in ANET could result in
-                                duplicate accounts if this person logs in later.
-                                If you notice duplicate accounts you should take
-                                action.
-                              </Alert>
-                            )}
-                          </DictionaryField>
-
-                          {values.user && (
+                      {!forOnboarding &&
+                        (isAdmin || isTenantAdminAndCanEditPerson) && (
+                          <>
                             <DictionaryField
                               wrappedComponent={FastField}
-                              as="div"
-                              dictProps={Settings.fields.person.users}
-                              component={FieldHelper.SpecialField}
-                              extraColElem={
-                                <span className="text-danger">
-                                  Be careful when editing this field; you might
-                                  lock someone out.
-                                </span>
+                              dictProps={Settings.fields.person.user}
+                              name="user"
+                              component={
+                                FieldHelper.RadioButtonToggleGroupField
                               }
-                              widget={<UserInputTable users={values.users} />}
-                            />
-                          )}
-                        </>
-                      )}
+                              buttons={[
+                                {
+                                  id: "isUser",
+                                  value: true,
+                                  label: "Yes"
+                                },
+                                {
+                                  id: "isNotUser",
+                                  value: false,
+                                  label: "No"
+                                }
+                              ]}
+                              onChange={value => setFieldValue("user", value)}
+                            >
+                              {values.user && (
+                                <Alert variant="warning">
+                                  Creating a user in ANET could result in
+                                  duplicate accounts if this person logs in
+                                  later. If you notice duplicate accounts you
+                                  should take action.
+                                </Alert>
+                              )}
+                            </DictionaryField>
+
+                            {values.user && (
+                              <DictionaryField
+                                wrappedComponent={FastField}
+                                as="div"
+                                dictProps={Settings.fields.person.users}
+                                component={FieldHelper.SpecialField}
+                                extraColElem={
+                                  <span className="text-danger">
+                                    Be careful when editing this field; you
+                                    might lock someone out.
+                                  </span>
+                                }
+                                widget={<UserInputTable users={values.users} />}
+                              />
+                            )}
+                          </>
+                        )}
 
                       {disableStatusChange ? (
                         <DictionaryField
@@ -735,7 +745,7 @@ const PersonForm = ({
                     dictProps={Settings.fields.person.code}
                     name="code"
                     component={FieldHelper.InputField}
-                    disabled={!isAdmin}
+                    disabled={!isTenantAdmin}
                   />
                   <DictionaryField
                     wrappedComponent={FastField}

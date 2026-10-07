@@ -652,11 +652,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  public void updateTenantForPerson(Tenant t, Person p, boolean setTenant) {
+  public void updateTenantForPerson(String tenantUuid, String personUuid, boolean setTenant) {
     final Handle handle = getDbHandle();
     try {
       final PersonBatch pb = handle.attach(PersonBatch.class);
-      pb.updateTenantForPerson(p.getUuid(), setTenant && t != null ? t.getUuid() : null);
+      pb.updateTenantForPerson(personUuid, setTenant ? tenantUuid : null);
     } finally {
       closeDbHandle(handle);
     }

@@ -96,7 +96,7 @@ public class PersonResource {
     }
 
     // Only admins can set user/domainUsername
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       p.setUser(false);
       p.setUsers(null);
     }
@@ -109,9 +109,13 @@ public class PersonResource {
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final Person created = dao.insert(p);
 
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
-      dao.updateTenantForPerson(p.getTenant(), p, Boolean.TRUE.equals(p.getUser()));
+      if (!AuthUtils.isAdmin(user)) {
+        // Tenant admin can only create users in their own tenant
+        p.setTenantUuid(user.getTenantUuid());
+      }
+      dao.updateTenantForPerson(p.getTenantUuid(), p.getUuid(), Boolean.TRUE.equals(p.getUser()));
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
@@ -142,6 +146,12 @@ public class PersonResource {
     if (editorPos.getType() == PositionType.ADMINISTRATOR) {
       return true;
     }
+    if (editorPos.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      if (subject.getTenantUuid() == null
+          || Objects.equals(subject.getTenantUuid(), editor.getTenantUuid())) {
+        return true;
+      }
+    }
     if (editorPos.getType() == PositionType.SUPERUSER) {
       if (create) {
         // Superusers can create new people.
@@ -170,7 +180,7 @@ public class PersonResource {
     DaoUtils.assertObjectIsFresh(p, existing, force);
 
     // Only admins can update user/domainUsername
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       p.setUser(existing.getUser());
       p.setUsers(existing.getUsers());
     }
@@ -237,9 +247,13 @@ public class PersonResource {
       dao.deletePersonTenantAccessRequest(p.getUuid());
     }
 
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
-      dao.updateTenantForPerson(p.getTenant(), p, Boolean.TRUE.equals(p.getUser()));
+      if (!AuthUtils.isAdmin(user)) {
+        // Tenant admin can only create users in their own tenant
+        p.setTenantUuid(user.getTenantUuid());
+      }
+      dao.updateTenantForPerson(p.getTenantUuid(), p.getUuid(), Boolean.TRUE.equals(p.getUser()));
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
@@ -260,6 +274,7 @@ public class PersonResource {
   public int updatePersonHistory(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
+    // TODO: tenant admins in the same tenant should also be allowed?
     AuthUtils.assertAdministrator(user);
 
     final String existingPositionUuid = DaoUtils.getUuid(p.getPosition());
@@ -351,7 +366,8 @@ public class PersonResource {
     }
 
     if (isApproved && tenant != null) {
-      dao.updateTenantForPerson(tenant, person, Boolean.TRUE.equals(person.getUser()));
+      dao.updateTenantForPerson(tenant.getUuid(), person.getUuid(),
+          Boolean.TRUE.equals(person.getUser()));
       dao.deletePersonTenantAccessRequest(personUuid);
     }
 
@@ -401,7 +417,7 @@ public class PersonResource {
     }
 
     // Only admins can update user/domainUsername
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       p.setUser(existing.getUser());
       p.setUsers(existing.getUsers());
     }

@@ -183,16 +183,16 @@ public class AttachmentResource {
     final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
     DaoUtils.assertObjectIsFresh(attachment, existing, force);
 
-    final boolean isAdmin = AuthUtils.isAdmin(user);
+    final boolean isTenantAdmin = AuthUtils.isTenantAdmin(user);
     final boolean isAuthor = Objects.equals(existing.getAuthorUuid(), DaoUtils.getUuid(user));
-    final boolean canEditMetadata = isAdmin || isAuthor;
+    final boolean canEditMetadata = isTenantAdmin || isAuthor;
     final boolean hasRelatedObjectsUpdate = attachment.getAttachmentRelatedObjects() != null;
     final boolean hasMetadataChanges = hasAttachmentMetadataChanges(attachment, existing);
 
     if (!canEditMetadata) {
       final var attachmentSettings = getAttachmentSettings();
       final Boolean restrictToAdmins = (Boolean) attachmentSettings.get("restrictToAdmins");
-      if (Boolean.TRUE.equals(restrictToAdmins) && !isAdmin) {
+      if (Boolean.TRUE.equals(restrictToAdmins) && !isTenantAdmin) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "You don't have permission to update this attachment");
       }
@@ -374,7 +374,7 @@ public class AttachmentResource {
 
   private void assertAttachmentPermission(final Person user, final Attachment attachment,
       final String message) {
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       return;
     }
     final var attachmentSettings = getAttachmentSettings();
