@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -17,6 +19,8 @@ import mil.dds.anet.test.client.AnetBeanList_Attachment;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AttachmentSearchQueryInput;
+import mil.dds.anet.test.client.Event;
+import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
@@ -827,6 +831,230 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 4);
   }
 
+  @Test
+  void testEventSeriesAttachments() {
+    // Get test event series
+    final EventSeries testEventSeries = withCredentials(adminUser,
+        t -> queryExecutor.eventSeries(OBJECT_FIELDS, "b7b70191-54e4-462f-8e40-679dd2e71ec4"));
+    assertThat(testEventSeries).isNotNull();
+    assertThat(testEventSeries.getUuid()).isNotNull();
+    final int nrOfAttachments = testEventSeries.getAttachments().size();
+
+    // Add attachment to test event series
+    final AttachmentInput testAttachmentInput =
+        buildAttachment(EventSeriesDao.TABLE_NAME, testEventSeries.getUuid());
+
+    // Test attachment create
+    final CreateEventSeriesAttachmentsResult result =
+        testCreateEventSeriesAttachments(testAttachmentInput);
+
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 2;
+    testFindAttachmentsByRelatedObject(testEventSeries.getUuid(), totalNrOfAttachments);
+
+    // Check the event series
+    final EventSeries eventSeries = withCredentials(adminUser,
+        t -> queryExecutor.eventSeries(OBJECT_FIELDS, testEventSeries.getUuid()));
+    assertThat(eventSeries.getAttachments()).hasSize(totalNrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment superUserAttachment = eventSeries.getAttachments().stream()
+        .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.superuserAttachmentUuid1(), testAttachmentInput,
+        superUserAttachment);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment adminAttachment = eventSeries.getAttachments().stream()
+        .filter(a -> result.adminAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.adminAttachmentUuid(), testAttachmentInput, adminAttachment);
+
+    // Test attachment update
+    testUpdateEventSeriesAttachments(eventSeries.getUuid(), eventSeries.getAttachments().size(),
+        superUserAttachment, adminAttachment);
+
+    // Test attachment delete
+    testDeleteEventSeriesAttachments(eventSeries.getUuid(), eventSeries.getAttachments().size(),
+        superUserAttachment, adminAttachment);
+  }
+
+  private CreateEventSeriesAttachmentsResult testCreateEventSeriesAttachments(
+      AttachmentInput testAttachmentInput) {
+    // F - create attachment as normal user
+    failAttachmentCreate("erin", testAttachmentInput);
+    // F - create attachment as superuser of different organization
+    failAttachmentCreate("henry", testAttachmentInput);
+    // S - create attachment as superuser of the organization
+    final Attachment superuserAttachment1 = succeedAttachmentCreate("jacob", testAttachmentInput);
+    // S - create attachment as admin
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
+
+    return new CreateEventSeriesAttachmentsResult(superuserAttachment1.getUuid(),
+        adminAttachment.getUuid());
+  }
+
+  private record CreateEventSeriesAttachmentsResult(String superuserAttachmentUuid1,
+      String adminAttachmentUuid) {
+  }
+
+  private void testUpdateEventSeriesAttachments(final String eventSeriesUuid,
+      final int nrOfAttachments, final Attachment superuserAttachment,
+      final Attachment adminAttachment) {
+    // F - update attachment as normal user
+    superuserAttachment.setFileName("erinUpdatedAttachment.jpg");
+    failAttachmentUpdate("erin", getInput(superuserAttachment, AttachmentInput.class));
+    // F - update attachment as superuser of different org
+    superuserAttachment.setFileName("henryUpdatedAttachment.jpg");
+    failAttachmentUpdate("henry", getInput(superuserAttachment, AttachmentInput.class));
+    // S - update attachment as superuser of the right org
+    superuserAttachment.setFileName("jacobUpdatedAttachment.jpg");
+    succeedAttachmentUpdate("jacob", getInput(superuserAttachment, AttachmentInput.class));
+    EventSeries eventSeries =
+        withCredentials(adminUser, t -> queryExecutor.eventSeries(OBJECT_FIELDS, eventSeriesUuid));
+    assertThat(eventSeries.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedSuperuserAttachment = eventSeries.getAttachments().stream()
+        .filter(a -> superuserAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedSuperuserAttachment.getFileName())
+        .isEqualTo(superuserAttachment.getFileName());
+    // S - update attachment as admin
+    adminAttachment.setFileName("adminUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(adminUser, getInput(adminAttachment, AttachmentInput.class));
+    eventSeries =
+        withCredentials(adminUser, t -> queryExecutor.eventSeries(OBJECT_FIELDS, eventSeriesUuid));
+    assertThat(eventSeries.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedAdmimAttachment = eventSeries.getAttachments().stream()
+        .filter(a -> adminAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedAdmimAttachment.getFileName()).isEqualTo(adminAttachment.getFileName());
+  }
+
+  private void testDeleteEventSeriesAttachments(final String eventSeriesUuid,
+      final int nrOfAttachments, final Attachment superuserAttachment,
+      final Attachment adminAttachment) {
+    // F - delete attachment as normal user
+    failAttachmentDelete("erin", superuserAttachment.getUuid());
+    // F - delete attachment as superuser of different org
+    failAttachmentDelete("henry", superuserAttachment.getUuid());
+    // S - delete superuser attachment as superuser of the right org
+    succeedAttachmentDelete("jacob", superuserAttachment.getUuid());
+    EventSeries eventSeries =
+        withCredentials(adminUser, t -> queryExecutor.eventSeries(OBJECT_FIELDS, eventSeriesUuid));
+    assertThat(eventSeries.getAttachments()).hasSize(nrOfAttachments - 1);
+    // S - delete admin attachment as admin
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    eventSeries =
+        withCredentials(adminUser, t -> queryExecutor.eventSeries(OBJECT_FIELDS, eventSeriesUuid));
+    assertThat(eventSeries.getAttachments()).hasSize(nrOfAttachments - 2);
+  }
+
+
+
+  @Test
+  void testEventAttachments() {
+    // Get test event
+    final Event testEvent = withCredentials(adminUser,
+        t -> queryExecutor.event(OBJECT_FIELDS, "7cb0fc5d-74d0-4deb-86dd-7c84761b8ac6"));
+    assertThat(testEvent).isNotNull();
+    assertThat(testEvent.getUuid()).isNotNull();
+    final int nrOfAttachments = testEvent.getAttachments().size();
+
+    // Add attachment to test event
+    final AttachmentInput testAttachmentInput =
+        buildAttachment(EventDao.TABLE_NAME, testEvent.getUuid());
+
+    // Test attachment create
+    final CreateEventAttachmentsResult result = testCreateEventAttachments(testAttachmentInput);
+
+    // Find attachment by relatedObjectUuid
+    final int totalNrOfAttachments = nrOfAttachments + 2;
+    testFindAttachmentsByRelatedObject(testEvent.getUuid(), totalNrOfAttachments);
+
+    // Check the event
+    final Event event =
+        withCredentials(adminUser, t -> queryExecutor.event(OBJECT_FIELDS, testEvent.getUuid()));
+    assertThat(event.getAttachments()).hasSize(totalNrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment superUserAttachment = event.getAttachments().stream()
+        .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.superuserAttachmentUuid1(), testAttachmentInput,
+        superUserAttachment);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment adminAttachment = event.getAttachments().stream()
+        .filter(a -> result.adminAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.adminAttachmentUuid(), testAttachmentInput, adminAttachment);
+
+    // Test attachment update
+    testUpdateEventAttachments(event.getUuid(), event.getAttachments().size(), superUserAttachment,
+        adminAttachment);
+
+    // Test attachment delete
+    testDeleteEventAttachments(event.getUuid(), event.getAttachments().size(), superUserAttachment,
+        adminAttachment);
+  }
+
+  private CreateEventAttachmentsResult testCreateEventAttachments(
+      AttachmentInput testAttachmentInput) {
+    // F - create attachment as normal user
+    failAttachmentCreate("erin", testAttachmentInput);
+    // F - create attachment as superuser of different organization
+    failAttachmentCreate("henry", testAttachmentInput);
+    // S - create attachment as superuser of the organization
+    final Attachment superuserAttachment1 = succeedAttachmentCreate("jacob", testAttachmentInput);
+    // S - create attachment as admin
+    final Attachment adminAttachment = succeedAttachmentCreate(adminUser, testAttachmentInput);
+
+    return new CreateEventAttachmentsResult(superuserAttachment1.getUuid(),
+        adminAttachment.getUuid());
+  }
+
+  private record CreateEventAttachmentsResult(String superuserAttachmentUuid1,
+      String adminAttachmentUuid) {
+  }
+
+  private void testUpdateEventAttachments(final String eventUuid, final int nrOfAttachments,
+      final Attachment superuserAttachment, final Attachment adminAttachment) {
+    // F - update attachment as normal user
+    superuserAttachment.setFileName("erinUpdatedAttachment.jpg");
+    failAttachmentUpdate("erin", getInput(superuserAttachment, AttachmentInput.class));
+    // F - update attachment as superuser of different org
+    superuserAttachment.setFileName("henryUpdatedAttachment.jpg");
+    failAttachmentUpdate("henry", getInput(superuserAttachment, AttachmentInput.class));
+    // S - update attachment as superuser of the right org
+    superuserAttachment.setFileName("jacobUpdatedAttachment.jpg");
+    succeedAttachmentUpdate("jacob", getInput(superuserAttachment, AttachmentInput.class));
+    Event event = withCredentials(adminUser, t -> queryExecutor.event(OBJECT_FIELDS, eventUuid));
+    assertThat(event.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedSuperuserAttachment = event.getAttachments().stream()
+        .filter(a -> superuserAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedSuperuserAttachment.getFileName())
+        .isEqualTo(superuserAttachment.getFileName());
+    // S - update attachment as admin
+    adminAttachment.setFileName("adminUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(adminUser, getInput(adminAttachment, AttachmentInput.class));
+    event = withCredentials(adminUser, t -> queryExecutor.event(OBJECT_FIELDS, eventUuid));
+    assertThat(event.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedAdmimAttachment = event.getAttachments().stream()
+        .filter(a -> adminAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedAdmimAttachment.getFileName()).isEqualTo(adminAttachment.getFileName());
+  }
+
+  private void testDeleteEventAttachments(final String eventUuid, final int nrOfAttachments,
+      final Attachment superuserAttachment, final Attachment adminAttachment) {
+    // F - delete attachment as normal user
+    failAttachmentDelete("erin", superuserAttachment.getUuid());
+    // F - delete attachment as superuser of different org
+    failAttachmentDelete("henry", superuserAttachment.getUuid());
+    // S - delete superuser attachment as superuser of the right org
+    succeedAttachmentDelete("jacob", superuserAttachment.getUuid());
+    Event event = withCredentials(adminUser, t -> queryExecutor.event(OBJECT_FIELDS, eventUuid));
+    assertThat(event.getAttachments()).hasSize(nrOfAttachments - 1);
+    // S - delete admin attachment as admin
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    event = withCredentials(adminUser, t -> queryExecutor.event(OBJECT_FIELDS, eventUuid));
+    assertThat(event.getAttachments()).hasSize(nrOfAttachments - 2);
+  }
+
+
   private void testFindAttachmentsByRelatedObject(String relatedObjectUuid, int nrOfAttachments) {
     final AttachmentSearchQueryInput query = AttachmentSearchQueryInput.builder()
         .withRelatedObjectUuid(relatedObjectUuid).withPageSize(0).build();
@@ -878,11 +1106,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 
-  private GenericRelatedObjectInput createAttachmentRelatedObject(final String tableName,
-      final String uuid) {
-    return GenericRelatedObjectInput.builder().withRelatedObjectType(tableName)
-        .withRelatedObjectUuid(uuid).build();
-  }
 
   private Attachment succeedAttachmentCreate(final String username,
       final AttachmentInput attachmentInput) {
@@ -964,19 +1187,5 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(attachment.getClassification()).isEqualTo(attachmentInput.getClassification());
     assertThat(attachment.getAttachmentRelatedObjects())
         .hasSameSizeAs(attachmentInput.getAttachmentRelatedObjects());
-  }
-
-  private AttachmentInput buildAttachment(final String tableName, final String uuid) {
-    return AttachmentInput.builder().withFileName("testAttachment.jpg")
-        .withMimeType(getFirstMimeType())
-        .withDescription("a test attachment created by AttachmentResourceTest")
-        .withCaption("testCaption").withClassification(getFirstClassification())
-        .withAttachmentRelatedObjects(List.of(createAttachmentRelatedObject(tableName, uuid)))
-        .build();
-  }
-
-  private String getFirstMimeType() {
-    final var allowedMimeTypes = AttachmentResource.getAllowedMimeTypes();
-    return allowedMimeTypes.get(0);
   }
 }
