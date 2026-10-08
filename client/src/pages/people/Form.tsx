@@ -26,6 +26,7 @@ import NavigationWarning from "components/NavigationWarning"
 import ObjectHistory from "components/ObjectHistory"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
+import PhoneNumberInputTable from "components/PhoneNumberInputTable"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
@@ -129,6 +130,7 @@ const PersonForm = ({
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
+  initialValues.phoneNumber = initialValues.phoneNumber ?? []
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -602,9 +604,13 @@ const PersonForm = ({
                   />
                   <DictionaryField
                     wrappedComponent={FastField}
+                    as="div"
                     dictProps={Settings.fields.person.phoneNumber}
                     name="phoneNumber"
-                    component={FieldHelper.InputField}
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <PhoneNumberInputTable phoneNumber={values.phoneNumber} />
+                    }
                   />
                   <DictionaryField
                     wrappedComponent={FastField}
@@ -892,6 +898,9 @@ const PersonForm = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form, force) {
     const person = Person.filterClientSideFields(new Person(values))
+    person.phoneNumber = (person.phoneNumber ?? [])
+      .filter(pn => pn?.details?.trim())
+      .map(pn => ({ ...pn, type: pn.type?.trim() }))
     if (values.pendingVerification && Settings.automaticallyAllowAllNewUsers) {
       person.pendingVerification = false
     }
