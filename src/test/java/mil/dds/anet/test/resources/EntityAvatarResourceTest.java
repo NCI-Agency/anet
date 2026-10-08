@@ -3,13 +3,18 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.test.client.Attachment;
+import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.EntityAvatar;
 import mil.dds.anet.test.client.EntityAvatarInput;
+import mil.dds.anet.test.client.Event;
+import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
@@ -270,6 +275,152 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     assertThat(numRows).isOne();
     position = withCredentials(adminUser, t -> queryExecutor.position(FIELDS, ENTITY_UUID));
     entityAvatar = position.getEntityAvatar();
+    assertThat(entityAvatar).isNull();
+  }
+
+  @Test
+  void testEventSeriesAvatar() {
+    final String ENTITY_UUID = "b7b70191-54e4-462f-8e40-679dd2e71ec4";
+    // First upload an attachment to the event series
+    final AttachmentInput testAttachmentInput =
+        buildAttachment(EventSeriesDao.TABLE_NAME, ENTITY_UUID);
+    final String createdAttachmentUuid =
+        withCredentials(adminUser, t -> mutationExecutor.createAttachment("", testAttachmentInput));
+    assertThat(createdAttachmentUuid).isNotNull();
+    final EntityAvatarInput newEntityAvatarInput =
+        EntityAvatarInput.builder().withApplyCrop(true).withAttachmentUuid(createdAttachmentUuid)
+            .withRelatedObjectType(EventSeriesDao.TABLE_NAME).withRelatedObjectUuid(ENTITY_UUID)
+            .withCropHeight(1).withCropLeft(2).withCropWidth(3).withCropTop(4).build();
+
+    // Regular user can not do this
+    try {
+      withCredentials(getDomainUsername(getRegularUser()),
+          t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+      fail("Expected exception creating entity avatar");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Superuser of other organization can not do this
+    try {
+      withCredentials("henry",
+          t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+      fail("Expected exception creating entity avatar");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // The organization's superuser can do this
+    Integer numRows = withCredentials("jacob",
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Admin can do this
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Get the entity avatar via the event series
+    EventSeries eventSeries =
+        withCredentials(adminUser, t -> queryExecutor.eventSeries(FIELDS, ENTITY_UUID));
+    EntityAvatar entityAvatar = eventSeries.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getRelatedObjectUuid()).isEqualTo(ENTITY_UUID);
+    assertThat(entityAvatar.getAttachmentUuid()).isEqualTo(createdAttachmentUuid);
+    assertThat(entityAvatar.getApplyCrop()).isTrue();
+    assertThat(entityAvatar.getCropHeight()).isEqualTo(1);
+    assertThat(entityAvatar.getCropLeft()).isEqualTo(2);
+    assertThat(entityAvatar.getCropWidth()).isEqualTo(3);
+    assertThat(entityAvatar.getCropTop()).isEqualTo(4);
+
+    // Update the entity avatar
+    newEntityAvatarInput.setCropHeight(10);
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+    eventSeries = withCredentials(adminUser, t -> queryExecutor.eventSeries(FIELDS, ENTITY_UUID));
+    entityAvatar = eventSeries.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getCropHeight()).isEqualTo(10);
+
+    // Delete the entity avatar
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.deleteEntityAvatar("", EventSeriesDao.TABLE_NAME, ENTITY_UUID));
+    assertThat(numRows).isOne();
+    eventSeries = withCredentials(adminUser, t -> queryExecutor.eventSeries(FIELDS, ENTITY_UUID));
+    entityAvatar = eventSeries.getEntityAvatar();
+    assertThat(entityAvatar).isNull();
+  }
+
+  @Test
+  void testEventAvatar() {
+    final String ENTITY_UUID = "7cb0fc5d-74d0-4deb-86dd-7c84761b8ac6";
+    // First upload an attachment to the event
+    final AttachmentInput testAttachmentInput = buildAttachment(EventDao.TABLE_NAME, ENTITY_UUID);
+    final String createdAttachmentUuid =
+        withCredentials(adminUser, t -> mutationExecutor.createAttachment("", testAttachmentInput));
+    assertThat(createdAttachmentUuid).isNotNull();
+    final EntityAvatarInput newEntityAvatarInput =
+        EntityAvatarInput.builder().withApplyCrop(true).withAttachmentUuid(createdAttachmentUuid)
+            .withRelatedObjectType(EventDao.TABLE_NAME).withRelatedObjectUuid(ENTITY_UUID)
+            .withCropHeight(1).withCropLeft(2).withCropWidth(3).withCropTop(4).build();
+
+    // Regular user can not do this
+    try {
+      withCredentials(getDomainUsername(getRegularUser()),
+          t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+      fail("Expected exception creating entity avatar");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Superuser of other organization can not do this
+    try {
+      withCredentials("henry",
+          t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+      fail("Expected exception creating entity avatar");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // The organization's superuser can do this
+    Integer numRows = withCredentials("jacob",
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Admin can do this
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Get the entity avatar via the event
+    Event event = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, ENTITY_UUID));
+    EntityAvatar entityAvatar = event.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getRelatedObjectUuid()).isEqualTo(ENTITY_UUID);
+    assertThat(entityAvatar.getAttachmentUuid()).isEqualTo(createdAttachmentUuid);
+    assertThat(entityAvatar.getApplyCrop()).isTrue();
+    assertThat(entityAvatar.getCropHeight()).isEqualTo(1);
+    assertThat(entityAvatar.getCropLeft()).isEqualTo(2);
+    assertThat(entityAvatar.getCropWidth()).isEqualTo(3);
+    assertThat(entityAvatar.getCropTop()).isEqualTo(4);
+
+    // Update the entity avatar
+    newEntityAvatarInput.setCropHeight(10);
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+    event = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, ENTITY_UUID));
+    entityAvatar = event.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getCropHeight()).isEqualTo(10);
+
+    // Delete the entity avatar
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.deleteEntityAvatar("", EventDao.TABLE_NAME, ENTITY_UUID));
+    assertThat(numRows).isOne();
+    event = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, ENTITY_UUID));
+    entityAvatar = event.getEntityAvatar();
     assertThat(entityAvatar).isNull();
   }
 }

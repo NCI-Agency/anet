@@ -169,7 +169,7 @@ describe("Create event page", () => {
 
       await CreateEvent.submitForm()
       expect(await (await CreateEvent.getAlertDanger()).getText()).to.eq(
-        "You must fill in the Admin Organization"
+        "You do not have permissions to do this"
       )
 
       const adminOrg = "EF 2.2"
