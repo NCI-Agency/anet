@@ -217,9 +217,9 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     }
   }
   const person = new Person(data ? data.person : {})
-  const isAdmin = currentUser && currentUser.isAdmin()
+  const isAdmin = currentUser?.isAdmin()
   const position = person.position
-  const hasPosition = position && position.uuid
+  const hasPosition = position?.uuid
   // Keys of fields which should span over 2 columns
   const fullWidthFieldKeys = person.getFullWidthFields()
   const orderedFields = orderPersonFields().filter(

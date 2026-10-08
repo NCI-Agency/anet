@@ -15,6 +15,7 @@ const personDetails = {
   rank: "CIV",
   gender: "FEMALE",
   country: "Albania",
+  tenant: "Department Q",
   endOfTourDate: moment().add(1, "days").format("DD-MM-YYYY")
 }
 
@@ -99,6 +100,22 @@ describe("Onboard new user login", () => {
     await (await OnboardPage.getCountryAdvancedSelectFirstItem()).click()
     await (
       await OnboardPage.getCountryHelpBlock()
+    ).waitForExist({ reverse: true })
+
+    await (await OnboardPage.getTenantAccessRequestInput()).click()
+    await (
+      await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
+    ).waitForExist()
+    expect(
+      await (
+        await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
+      ).getText()
+    ).to.include(personDetails.tenant)
+    await (
+      await OnboardPage.getTenantAccessRequestAdvancedSelectFirstItem()
+    ).click()
+    await (
+      await OnboardPage.getTenantAccessRequestHelpBlock()
     ).waitForExist({ reverse: true })
 
     await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())

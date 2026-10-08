@@ -70,8 +70,9 @@ public class PersonResourceTest extends AbstractResourceTest {
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
   public static final String FIELDS =
-      String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
-          AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
+      String.format("{ %s position { %s } attachments %s %s tenant { uuid name } }", _PERSON_FIELDS,
+          _POSITION_FIELDS, AttachmentResourceTest.ATTACHMENT_FIELDS,
+          _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
   public static final String PREFERENCES_FIELDS = "{ uuid name }";
 
   @Autowired
@@ -358,8 +359,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = PositionType.class, names = {"_PLACEHOLDER_1_"},
-      mode = EnumSource.Mode.EXCLUDE)
+  @EnumSource(value = PositionType.class)
   void searchUsersByPositionType(PositionType positionType) {
     final PersonSearchQueryInput query = PersonSearchQueryInput.builder().withPageSize(0)
         .withPositionType(List.of(positionType)).build();

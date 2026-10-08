@@ -64,10 +64,11 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
 
   const eventSeries = new EventSeries(data ? data.eventSeries : {})
 
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const isAdmin = currentUser?.isAdmin()
 
   const canAdministrateOrg =
-    isAdmin ||
+    isTenantAdmin ||
     currentUser?.hasAdministrativePermissionsForOrganization(
       eventSeries.adminOrg
     )

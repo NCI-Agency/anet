@@ -17,10 +17,6 @@ export class CreatePerson extends Page {
     return browser.$("form.form-horizontal")
   }
 
-  async getAlertSuccess() {
-    return browser.$(".alert-success")
-  }
-
   async getFamilyName() {
     return (await this.getForm()).$("#familyName")
   }
@@ -108,6 +104,20 @@ export class CreatePerson extends Page {
     return browser.$("#fg-country div.invalid-feedback")
   }
 
+  async getTenantAccessRequestInput() {
+    return browser.$("#tenantAccessRequest")
+  }
+
+  async getTenantAccessRequestAdvancedSelectFirstItem() {
+    return browser.$(
+      "#tenantAccessRequest-popover tbody tr:first-child td:nth-child(2)"
+    )
+  }
+
+  async getTenantAccessRequestHelpBlock() {
+    return browser.$("#fg-tenantAccessRequest div.invalid-feedback")
+  }
+
   async getEndOfTourDate() {
     return browser.$("#endOfTourDate")
   }
@@ -122,6 +132,22 @@ export class CreatePerson extends Page {
 
   async getEndOfTourToday() {
     return browser.$(".bp6-datepicker-footer button.bp6-button:first-child")
+  }
+
+  async getNoTenantWarning() {
+    return browser.$("#no-tenant-warning")
+  }
+
+  async getTenantInput() {
+    return browser.$("#tenant")
+  }
+
+  async getTenantAdvancedSelectFirstItem() {
+    return browser.$("#tenant-popover tbody tr:first-child td:nth-child(2)")
+  }
+
+  async getTenantError() {
+    return browser.$("#fg-tenant div.invalid-feedback")
   }
 
   async getCustomFieldsContainer() {

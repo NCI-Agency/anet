@@ -8,6 +8,9 @@ Closes #
 #### Superuser changes
 -
 
+#### Tenant Admin changes
+-
+
 #### Admin changes
 -
 

@@ -7348,6 +7348,195 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-multi-tenant-capability" author="gjvoosten">
+		<createTable tableName="tenants">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="status" type="int" />
+			<column name="emailAddresses" type="${long_text_type}" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<!-- Create initial tenant -->
+		<sql>
+			INSERT INTO tenants (uuid, name, status, "createdAt", "updatedAt") VALUES
+				(${uuid_function}, 'Tenant #1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		</sql>
+
+		<addColumn tableName="people">
+			<column name="tenantUuid" type="${uuid_type}" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			constraintName="FK_people_tenant"
+			baseTableName="people"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<!-- Link users to initial tenant -->
+		<sql>
+			UPDATE people
+			SET "tenantUuid" = (
+			    SELECT uuid
+			    FROM tenants
+			    WHERE name = 'Tenant #1'
+			)
+			WHERE people.status = 0
+			AND people."user" IS TRUE;
+		</sql>
+
+		<addColumn tableName="reports">
+			<column name="allTenants" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+
+		<createTable tableName="reportTenants">
+			<column name="tenantUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="reportUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_reportTenants_tenant"
+			baseTableName="reportTenants"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<addForeignKeyConstraint
+			constraintName="FK_reportTenants_report"
+			baseTableName="reportTenants"
+			baseColumnNames="reportUuid"
+			referencedTableName="reports"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="CASCADE"
+		/>
+
+		<addUniqueConstraint
+			constraintName="UQ_ReportTenants_Tenant_Report"
+			tableName="reportTenants"
+			columnNames="tenantUuid, reportUuid"
+		/>
+
+		<!-- Link reports to initial tenant -->
+		<sql>
+			INSERT INTO "reportTenants" ("tenantUuid", "reportUuid")
+				SELECT tenants.uuid, reports.uuid
+				FROM tenants, reports;
+		</sql>
+
+		<addColumn tableName="accessTokens">
+			<column name="tenantUuid" type="${uuid_type}" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			constraintName="FK_accessTokens_tenant"
+			baseTableName="accessTokens"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<!-- Link accessTokens to initial tenant -->
+		<sql>
+			UPDATE "accessTokens"
+			SET "tenantUuid" = (
+				SELECT uuid
+				FROM tenants
+				WHERE name = 'Tenant #1'
+			);
+		</sql>
+	</changeSet>
+
+	<changeSet id="renumber-superuser-positions" author="gjvoosten">
+		<!-- Re-number superusers -->
+		<update tableName="positions">
+			<column name="type" value="1" />
+			<where>type = 2</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="add-tenantAccessRequests" author="gjvoosten">
+		<createTable tableName="tenantAccessRequests">
+			<column name="tenantUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+			<column name="createdAt" type="datetime" />
+		</createTable>
+		<addUniqueConstraint
+			constraintName="UQ_uniqueTenantAccessRequests"
+			tableName="tenantAccessRequests"
+			columnNames="personUuid"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_tenantAccessRequests_tenant"
+			baseTableName="tenantAccessRequests"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_tenantAccessRequests_person"
+			baseTableName="tenantAccessRequests"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<createIndex
+			indexName="IDX_tenantAccessRequests_tenantUuid"
+			tableName="tenantAccessRequests"
+		>
+			<column name="tenantUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tenantAccessRequests_personUuid"
+			tableName="tenantAccessRequests"
+		>
+			<column name="personUuid"/>
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="add-martImportedReports-tenant" author="gjvoosten">
+		<addColumn tableName="martImportedReports">
+			<column name="tenantUuid" type="${uuid_type}" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			constraintName="FK_martImportedReports_tenant"
+			baseTableName="martImportedReports"
+			baseColumnNames="tenantUuid"
+			referencedTableName="tenants"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<!-- Link martImportedReports to initial tenant -->
+		<sql>
+			UPDATE "martImportedReports"
+			SET "tenantUuid" = (SELECT uuid FROM tenants WHERE name = 'Tenant #1');
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

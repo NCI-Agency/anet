@@ -33,6 +33,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
@@ -81,6 +82,12 @@ const GQL_GET_PERSON = gql`
         organization {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenantAccessRequest {
+        ${gqlEntityFieldsMap.Tenant}
+      }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
       }
       attachments {
         ${gqlAllAttachmentFields}
@@ -157,20 +164,27 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const position = person.position
 
   // User can always edit themselves
+  const isSelf = Person.isEqual(currentUser, person)
   // Admins can always edit anybody
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const hasPosition = position?.uuid
+  // When the person is not in a position, any superuser can assign them.
+  const canAssignPosition = !hasPosition && currentUser.isSuperuser()
+  // Tenant admin can edit people without tenant or in their own tenant
+  const isTenantAdminAndCanEditPerson =
+    isTenantAdmin &&
+    (!person.tenant?.uuid || person.tenant?.uuid === currentUser?.tenant?.uuid)
   const canEditPosition =
     isAdmin ||
+    isTenantAdminAndCanEditPerson ||
     (hasPosition &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
-    (!hasPosition && currentUser.isSuperuser())
-  const canEdit = canEditPosition || Person.isEqual(currentUser, person)
-  // When the person is not in a position, any superuser can assign them.
-  const canAssignPosition = currentUser.isSuperuser()
+    canAssignPosition
+  const canEdit = canEditPosition || isSelf
   const canAddPeriodicAssessment =
     Position.isRegular(position) &&
     (isAdmin ||
@@ -267,6 +281,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             onEnd={() => (localStorage.hasSeenPersonTour = "true")}
           />
         </div>
+        {isAdmin && <NoTenantWarning person={person} />}
         <Messages error={stateError} success={stateSuccess} />
         <div className="form-horizontal">
           <Fieldset
@@ -307,6 +322,28 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                 <Col md={6}>{rightColumn}</Col>
               </Row>
               <Row>
+                {person.user && (
+                  <>
+                    <Col md={12}>
+                      <FieldHelper.ReadonlyField
+                        field={{ name: "tenant" }}
+                        label={Settings.fields.person.tenant?.label}
+                        humanValue={person.tenant?.name}
+                      />
+                    </Col>
+                    {isSelf && person.tenantAccessRequest && (
+                      <Col md={12}>
+                        <FieldHelper.ReadonlyField
+                          field={{ name: "tenantAccessRequest" }}
+                          label={
+                            Settings.fields.person.tenantAccessRequest?.label
+                          }
+                          humanValue={person.tenantAccessRequest?.name}
+                        />
+                      </Col>
+                    )}
+                  </>
+                )}
                 <Col md={12}>{fullWidthFields}</Col>
                 {attachmentsEnabled && (
                   <Col md={12}>
@@ -426,10 +463,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       user: {
-        accessCond: isAdmin
+        accessCond: isAdmin || isTenantAdminAndCanEditPerson
       },
       users: {
-        accessCond: isAdmin
+        accessCond: isAdmin || isTenantAdminAndCanEditPerson
       }
     }
 
@@ -611,22 +648,21 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         </OverlayTrigger>
       ) : null
 
-    const assignPositionButton =
-      !hasPosition && canAssignPosition ? (
-        <OverlayTrigger
-          key="assign-position-overlay"
-          placement="top"
-          overlay={
-            <Tooltip id="assign-position-tooltip">
-              Assign a Primary Position
-            </Tooltip>
-          }
-        >
-          <Button onClick={() => setShowAssignPositionModal(true)}>
-            <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
-          </Button>
-        </OverlayTrigger>
-      ) : null
+    const assignPositionButton = canAssignPosition ? (
+      <OverlayTrigger
+        key="assign-position-overlay"
+        placement="top"
+        overlay={
+          <Tooltip id="assign-position-tooltip">
+            Assign a Primary Position
+          </Tooltip>
+        }
+      >
+        <Button onClick={() => setShowAssignPositionModal(true)}>
+          <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
+        </Button>
+      </OverlayTrigger>
+    ) : null
 
     // if current user has no access for position actions return null so extraColElem will disappear
     if (!(editPositionButton || changePositionButton || assignPositionButton)) {

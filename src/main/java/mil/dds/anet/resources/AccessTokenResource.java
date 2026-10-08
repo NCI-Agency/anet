@@ -53,6 +53,8 @@ public class AccessTokenResource {
     AuthUtils.assertAdministrator(user);
     final AccessToken created = accessTokenDao.insert(at);
 
+    accessTokenDao.updateTenantForAccessToken(at.getTenant(), at);
+
     // Log the change
     auditTrailDao.logCreate(user, AccessTokenDao.TABLE_NAME, created);
     return created;
@@ -76,6 +78,9 @@ public class AccessTokenResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Couldn't process access token update");
     }
+
+    // Update Tenant:
+    accessTokenDao.updateTenantForAccessToken(at.getTenant(), at);
 
     // Log the change
     auditTrailDao.logUpdate(user, AccessTokenDao.TABLE_NAME, at);

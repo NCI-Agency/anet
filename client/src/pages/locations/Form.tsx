@@ -115,7 +115,7 @@ const LocationForm = ({
   const regularUsersCanCreateLocations = Settings.regularUsersCanCreateLocations
   const canEditName =
     (!edit && (regularUsersCanCreateLocations || currentUser.isSuperuser())) ||
-    (edit && currentUser.isAdmin())
+    (edit && currentUser.isTenantAdmin())
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const attachmentEditEnabled =
     attachmentsEnabled &&

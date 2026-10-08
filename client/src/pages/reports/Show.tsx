@@ -53,6 +53,7 @@ import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
+import TenantTable from "components/TenantTable"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
@@ -145,6 +146,9 @@ const GQL_GET_REPORT = gql`
         taskedOrganizations {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
       ${gqlReportCommunitiesFields}
       ${gqlReportCommentsFields}
@@ -293,7 +297,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
-  const isAdmin = currentUser && currentUser.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
   const isAttending = report.reportPeople?.some(rp =>
     Person.isEqual(currentUser, rp)
@@ -304,12 +308,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   // and user is admin or user is one of the approvers in the current approval step
   const canApprove =
     report.isPending() &&
-    (isAdmin ||
+    (isTenantAdmin ||
       report.approvalStep?.approvers?.some(member =>
         Position.isEqual(member, currentUser?.position)
       ))
   // Approved reports may be published by an admin user
-  const canPublish = report.isApproved() && isAdmin
+  const canPublish = report.isApproved() && isTenantAdmin
   // Approvers and publishers can request changes
   const canRequestChanges = canApprove || canPublish
   // Warn authors when they try to approve their own report
@@ -320,14 +324,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   let canEdit =
     isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers and admins can also edit
-  canEdit = canEdit || canApprove || isAdmin
+  canEdit = canEdit || canApprove || isTenantAdmin
   // Authors, approvers and admins can always read assessments
-  const canReadAssessments = isAuthor || canApprove || isAdmin
+  const canReadAssessments = isAuthor || canApprove || isTenantAdmin
 
   // Only an admin or an author can submit when report is in draft or rejected AND author has an active position
   const hasActivePosition = currentUser.hasActivePosition()
   const canSubmit =
-    (isAdmin || (isAuthor && hasActivePosition)) &&
+    (isTenantAdmin || (isAuthor && hasActivePosition)) &&
     (report.isDraft() || report.isRejected())
 
   const hasAssignedPosition = currentUser.hasAssignedPosition()
@@ -673,6 +677,28 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     />
                   )}
 
+                  {report.allTenants ? (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.allTenants}
+                      field={{ name: "allTenants" }}
+                      humanValue={utils.formatBoolean(report.allTenants)}
+                    />
+                  ) : (
+                    <DictionaryField
+                      wrappedComponent={FieldHelper.ReadonlyField}
+                      dictProps={Settings.fields.report.tenants}
+                      field={{ name: "tenants" }}
+                      humanValue={
+                        <TenantTable
+                          tenants={report.tenants}
+                          noTenantsMessage="No tenants selected"
+                          showStatus
+                        />
+                      }
+                    />
+                  )}
+
                   {attachmentsEnabled && (
                     <FieldHelper.ReadonlyField
                       field={{ name: "attachments" }}
@@ -861,7 +887,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   )}
               </Form>
 
-              {currentUser.isAdmin() && (
+              {isTenantAdmin && (
                 <div className="submit-buttons">
                   {report.isPublished() &&
                     Settings.fields.report.canUnpublishReports && (

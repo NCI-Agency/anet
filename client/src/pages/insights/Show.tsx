@@ -161,8 +161,8 @@ const InsightsShow = ({
     startDate: getCurrentDateTime(),
     endDate: getCurrentDateTime().add(14, "days")
   }
-  const orgQuery = currentUser.isAdmin()
-    ? {}
+  const orgQuery = currentUser.isTenantAdmin()
+    ? {} // FIXME: restrict to currentUser's tenant for tenant admins
     : {
         organizationUuid: currentUser?.position?.organization?.uuid,
         orgRecurseStrategy: currentUser.isSuperuser()

@@ -167,7 +167,7 @@ public class TaskResource {
     // Check for loops in the hierarchy
     checkForLoops(t.getUuid(), t.getParentTaskUuid());
 
-    if (!AuthUtils.isAdmin(user)
+    if (!AuthUtils.isTenantAdmin(user)
         && !AuthUtils.isSuperUserThatCanEditAllOrganizationsOrTasks(user)) {
       // Check if user holds a responsible position for the task that will be
       // modified with the parent task update
@@ -208,7 +208,7 @@ public class TaskResource {
       }
 
       // Update positions:
-      if (AuthUtils.isAdmin(user) && t.getResponsiblePositions() != null) {
+      if (AuthUtils.isTenantAdmin(user) && t.getResponsiblePositions() != null) {
         logger.debug("Editing responsible positions for {}", t);
         final List<Position> existingResponsiblePositions =
             dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
@@ -251,7 +251,7 @@ public class TaskResource {
   @GraphQLQuery(name = "taskList")
   public AnetBeanList<Task> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

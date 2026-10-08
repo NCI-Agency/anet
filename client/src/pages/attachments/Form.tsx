@@ -55,7 +55,8 @@ const AttachmentForm = ({
   const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
   const canEdit =
-    currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
+    currentUser.isTenantAdmin() ||
+    currentUser.uuid === initialValues.author.uuid
   const classificationButtons = utils.getConfidentialityLabelChoices()
 
   return (

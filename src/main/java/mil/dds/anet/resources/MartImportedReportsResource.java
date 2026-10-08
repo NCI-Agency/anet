@@ -27,7 +27,7 @@ public class MartImportedReportsResource {
       @GraphQLArgument(name = "query") MartImportedReportSearchQuery query) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    query.setUser(user);
+    query.setPrincipal(user);
     return martImportedReportDao.search(query);
   }
 

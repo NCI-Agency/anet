@@ -36,6 +36,7 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportState;
+import mil.dds.anet.test.client.Tenant;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.PersonResourceTest;
@@ -57,6 +58,8 @@ import tools.jackson.databind.node.StringNode;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";
+  private static final String MART_TENANT = "Tenant #1";
+
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
@@ -125,15 +128,17 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
     // Mock the mail exchange server
     final IMailReceiver mailReceiverMock = Mockito.mock();
-    when(mailReceiverMock.downloadEmails()).thenReturn(
-        // reports and a transmission log (for 9 reports)
-        List.of(reportMessage1, reportMessage1dup, reportMessage2, reportMessage3, reportMessage4,
-            reportMessage5, reportMessage6, reportMessage7, reportMessage8, reportMessage9,
-            transmissionLogMessage),
-        // 10th report
-        List.of(reportMessage10));
+    when(mailReceiverMock.downloadEmails(
+        Mockito.argThat(tenantProperties -> MART_TENANT.equals(tenantProperties.getTenantName()))))
+        .thenReturn(
+            // reports and a transmission log (for 9 reports)
+            List.of(reportMessage1, reportMessage1dup, reportMessage2, reportMessage3,
+                reportMessage4, reportMessage5, reportMessage6, reportMessage7, reportMessage8,
+                reportMessage9, transmissionLogMessage),
+            // 10th report
+            List.of(reportMessage10));
 
-    martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
+    martReportImporterWorker = new MartImporterWorker(config, dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
   }
 
@@ -175,6 +180,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(person1.getPosition().getName()).isEqualTo(goodReport.getPositionName());
     assertThat(person1.getCountry()).isNotNull();
     assertThat(person1.getCountry().getName()).isEqualTo("Spain");
+    assertTenant(person1.getTenant());
     // The OF-5, came with country name = Spain
     queryPerson.setRank("OF-5");
     searchResults = withCredentials("arthur",
@@ -183,6 +189,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     Person person2 = searchResults.getList().getFirst();
     assertThat(person2.getCountry()).isNotNull();
     assertThat(person2.getCountry().getName()).isEqualTo("Spain");
+    assertTenant(person2.getTenant());
     // The OF-4, missing country
     queryPerson.setRank("OF-4");
     searchResults = withCredentials("arthur",
@@ -190,6 +197,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(searchResults.getTotalCount()).isPositive();
     Person person3 = searchResults.getList().getFirst();
     assertThat(person3.getCountry()).isNull();
+    assertTenant(person3.getTenant());
     // The OF-3, his position was created, must be there
     queryPerson.setRank("OF-3");
     searchResults = withCredentials("arthur",
@@ -197,6 +205,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(searchResults.getTotalCount()).isPositive();
     Person person4 = searchResults.getList().getFirst();
     assertThat(person4.getPosition().getName()).isEqualTo(goodReport.getPositionName());
+    assertTenant(person4.getTenant());
 
     // We imported goodReport and everything was fine
     final mil.dds.anet.test.client.Report createdGoodReport = withCredentials("arthur",
@@ -219,6 +228,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdGoodReport.getClassification()).isEqualTo("NU");
     assertThat(createdGoodReport.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertReportType(createdGoodReport);
+    assertTenant(createdGoodReport.getTenants().getFirst());
     // Now we will edit and approve goodReport, we should not lose the advisorOrg of the report
     // Edit the report
     createdGoodReport.setAtmosphereDetails("Everybody was super nice! Again!");
@@ -442,5 +452,9 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     final JsonNode reportType = jsonTree.get("reportType");
     assertThat(reportType).isInstanceOf(StringNode.class);
     assertThat(reportType.stringValue()).isEqualTo("lmt");
+  }
+
+  private void assertTenant(Tenant tenant) {
+    assertThat(tenant.getName()).isEqualTo(MART_TENANT);
   }
 }

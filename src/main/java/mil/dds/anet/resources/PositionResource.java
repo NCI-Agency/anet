@@ -55,6 +55,9 @@ public class PositionResource {
     if (position.getType() == PositionType.ADMINISTRATOR) {
       return AuthUtils.isAdmin(user);
     }
+    if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      return AuthUtils.isTenantAdmin(user);
+    }
     return AuthUtils.canAdministrateOrg(user, position.getOrganizationUuid());
   }
 
@@ -81,7 +84,7 @@ public class PositionResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Position type must be defined");
     }
     // only admins can make superuser positions
-    if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPERUSER)) {
+    if (!AuthUtils.isTenantAdmin(user) && (pos.getType() == PositionType.SUPERUSER)) {
       final Position existingPos = dao.getByUuid(pos.getUuid());
       if (existingPos.getType() != PositionType.SUPERUSER) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -212,6 +215,7 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
+    // TODO: tenant admins should also be allowed?
     AuthUtils.assertAdministrator(user);
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
@@ -296,7 +300,7 @@ public class PositionResource {
   public CompletableFuture<AnetBeanList<Position>> search(
       @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") PositionSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(context, query);
   }
 
@@ -326,6 +330,7 @@ public class PositionResource {
     // if this position is in an approval chain, we just delete it
     // if this position is in an organization, just remove it
     // if this position has any associated positions, just remove them
+    // if this position is administrating any tenants, just remove them
     final int numRows = dao.delete(positionUuid);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process position delete");

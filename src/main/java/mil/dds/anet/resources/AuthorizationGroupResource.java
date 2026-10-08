@@ -45,7 +45,7 @@ public class AuthorizationGroupResource {
   @GraphQLQuery(name = "authorizationGroupList")
   public AnetBeanList<AuthorizationGroup> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") AuthorizationGroupSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 
@@ -53,7 +53,7 @@ public class AuthorizationGroupResource {
   public AuthorizationGroup createAuthorizationGroup(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup a) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
     if (a.getName() == null || a.getName().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community name must not be empty");
     }
@@ -77,7 +77,7 @@ public class AuthorizationGroupResource {
         dao.getAdministrativePositionsForAuthorizationGroup(
             ApplicationContextProvider.getEngine().getContext(), DaoUtils.getUuid(a)).join();
     // User has to be admin or must hold an administrative position for the community
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       final Position userPosition = DaoUtils.getPosition(user);
       final boolean canUpdate = existingAdministrativePositions.stream()
           .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));

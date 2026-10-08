@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -38,6 +40,8 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +51,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields =
       {"uuid", "familyName", "givenName", "rank", "createdAt"};
-  public static final String[] additionalFields =
-      {"status", "user", "phoneNumber", "biography", "obsoleteCountry", "countryUuid", "gender",
-          "endOfTourDate", "pendingVerification", "code", "updatedAt", "customFields"};
+  public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
+      "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "pendingVerification", "code",
+      "updatedAt", "tenantUuid", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -584,6 +588,77 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       email.setAction(action);
       email.setToAddresses(emailAddresses.stream().toList());
       AnetEmailWorker.sendEmailAsync(email);
+    }
+  }
+
+  public void sendEmailToTenantAdministrators(Tenant tenant, AnetEmailAction action) {
+    final String emailNetworkForNotifications = Utils.getEmailNetworkForNotifications();
+    final Tenant existingTenant = engine().getTenantDao().getByUuid(tenant.getUuid());
+    final List<Position> tenantAdministrativePositions =
+        existingTenant.loadAdministrativePositions(engine().getContext()).join();
+    final List<Person> tenantAdministrators = tenantAdministrativePositions.stream()
+        .map(tap -> tap.loadPerson(engine().getContext()).join()).filter(Objects::nonNull).toList();
+    final Set<String> emailAddresses = tenantAdministrators.stream()
+        .map(
+            ta -> ta.loadEmailAddresses(engine().getContext(), emailNetworkForNotifications).join())
+        .flatMap(Collection::stream).map(EmailAddress::getAddress).collect(Collectors.toSet());
+    if (!emailAddresses.isEmpty()) {
+      final AnetEmail email = new AnetEmail();
+      email.setAction(action);
+      email.setToAddresses(emailAddresses.stream().toList());
+      AnetEmailWorker.sendEmailAsync(email);
+    } else {
+      // No tenant administrators to send mail to, fall back to admins
+      sendEmailToAdmins(action);
+    }
+  }
+
+  public interface PersonBatch {
+    @SqlUpdate("UPDATE people SET \"tenantUuid\" = :tenantUuid WHERE uuid = :personUuid")
+    void updateTenantForPerson(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid);
+
+    @SqlUpdate("INSERT INTO \"tenantAccessRequests\" (\"personUuid\", \"tenantUuid\", \"createdAt\") "
+        + "VALUES (:personUuid, :tenantUuid, :createdAt) ON CONFLICT (\"personUuid\") DO "
+        + "UPDATE SET \"tenantUuid\" = :tenantUuid, \"createdAt\" = :createdAt")
+    void upsertPersonTenantAccessRequest(@Bind("personUuid") String personUuid,
+        @Bind("tenantUuid") String tenantUuid, @Bind("createdAt") LocalDateTime createdAt);
+
+    @SqlUpdate("DELETE FROM \"tenantAccessRequests\" WHERE \"personUuid\" = :personUuid")
+    void deletePersonTenantAccessRequest(@Bind("personUuid") String personUuid);
+  }
+
+  @Transactional
+  public void upsertPersonTenantAccessRequest(Tenant t, Person p, Instant timestamp) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.upsertPersonTenantAccessRequest(p.getUuid(), t.getUuid(),
+          DaoUtils.asLocalDateTime(timestamp));
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void deletePersonTenantAccessRequest(String personUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.deletePersonTenantAccessRequest(personUuid);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public void updateTenantForPerson(String tenantUuid, String personUuid, boolean setTenant) {
+    final Handle handle = getDbHandle();
+    try {
+      final PersonBatch pb = handle.attach(PersonBatch.class);
+      pb.updateTenantForPerson(personUuid, setTenant ? tenantUuid : null);
+    } finally {
+      closeDbHandle(handle);
     }
   }
 }

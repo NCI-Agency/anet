@@ -2,7 +2,10 @@ import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { CountryOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import {
+  CountryOverlayRow,
+  TenantOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import AttachmentContext from "components/Attachment/AttachmentContext"
@@ -23,6 +26,7 @@ import Fieldset from "components/Fieldset"
 import { MessagesWithConflict } from "components/Messages"
 import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
@@ -33,7 +37,7 @@ import UserInputTable from "components/UserInputTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Location, Person } from "models"
+import { Location, Person, Tenant } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
@@ -98,7 +102,7 @@ const PersonForm = ({
   notesComponent
 }: PersonFormProps) => {
   const routerLocation = useLocation()
-  const { loadAppData, currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser, allTenants } = useContext(AppContext)
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -118,6 +122,8 @@ const PersonForm = ({
   )
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
+  const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const attachmentsEnabled =
     !Settings.fields.attachment.featureDisabled && !forOnboarding
   const attachmentEditEnabled =
@@ -161,6 +167,19 @@ const PersonForm = ({
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
     }
   }
+  const tenantsFilters = {
+    allTenants: {
+      label: "All Tenants",
+      list: allTenants
+    }
+  }
+  const activeTenants = allTenants?.filter(
+    t => t?.status === Model.STATUS.ACTIVE
+  )
+  const defaultTenant = activeTenants?.length === 1 ? activeTenants[0] : null
+  if (forOnboarding && !initialValues.tenantAccessRequest) {
+    initialValues.tenantAccessRequest = defaultTenant
+  }
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
     checkPotentialDuplicates,
     400
@@ -173,7 +192,13 @@ const PersonForm = ({
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Person.yupSchema}
+      validationSchema={
+        isAdmin
+          ? Person.yupAdminSchema
+          : forOnboarding
+            ? Person.yupOnboardingSchema
+            : Person.yupSchema
+      }
       initialValues={initialValues}
     >
       {({
@@ -188,7 +213,6 @@ const PersonForm = ({
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
-        const isAdmin = currentUser && currentUser.isAdmin()
         const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast =
           values.endOfTourDate && values.endOfTourDate <= Date.now()
@@ -203,11 +227,26 @@ const PersonForm = ({
             values.position
           )
         const ranks = Settings.fields.person.ranks || []
+        const unselectedTenants = allTenants?.filter(
+          t => t.uuid !== values?.tenant?.uuid
+        )
+        const tenantAccessRequestsFilters = {
+          allTenants: {
+            label: "Unselected Tenants",
+            list: unselectedTenants
+          }
+        }
+        // Tenant admin can edit people without tenant or in their own tenant
+        const isTenantAdminAndCanEditPerson =
+          isTenantAdmin &&
+          (!values.tenant?.uuid ||
+            values.tenant?.uuid === currentUser?.tenant?.uuid)
         // admins can edit all persons,
         // superusers for their organization hierarchy or position-less people,
         // and the user themselves when onboarding
         const canEditName =
           isAdmin ||
+          isTenantAdminAndCanEditPerson ||
           currentUser?.hasAdministrativePermissionsForOrganization(
             values?.position?.organization
           ) ||
@@ -249,6 +288,7 @@ const PersonForm = ({
         return (
           <AttachmentContext.Provider value={values}>
             <div>
+              {isAdmin && <NoTenantWarning person={values} />}
               <NavigationWarning isBlocking={dirty && !isSubmitting} />
               <Form className="form-horizontal" method="post">
                 <MessagesWithConflict
@@ -494,54 +534,57 @@ const PersonForm = ({
                         </Row>
                       </FormGroup>
 
-                      {!forOnboarding && isAdmin && (
-                        <>
-                          <DictionaryField
-                            wrappedComponent={FastField}
-                            dictProps={Settings.fields.person.user}
-                            name="user"
-                            component={FieldHelper.RadioButtonToggleGroupField}
-                            buttons={[
-                              {
-                                id: "isUser",
-                                value: true,
-                                label: "Yes"
-                              },
-                              {
-                                id: "isNotUser",
-                                value: false,
-                                label: "No"
-                              }
-                            ]}
-                            onChange={value => setFieldValue("user", value)}
-                          >
-                            {values.user && (
-                              <Alert variant="warning">
-                                Creating a user in ANET could result in
-                                duplicate accounts if this person logs in later.
-                                If you notice duplicate accounts you should take
-                                action.
-                              </Alert>
-                            )}
-                          </DictionaryField>
-
-                          {values.user && (
+                      {!forOnboarding &&
+                        (isAdmin || isTenantAdminAndCanEditPerson) && (
+                          <>
                             <DictionaryField
                               wrappedComponent={FastField}
-                              as="div"
-                              dictProps={Settings.fields.person.users}
-                              component={FieldHelper.SpecialField}
-                              extraColElem={
-                                <span className="text-danger">
-                                  Be careful when editing this field; you might
-                                  lock someone out.
-                                </span>
+                              dictProps={Settings.fields.person.user}
+                              name="user"
+                              component={
+                                FieldHelper.RadioButtonToggleGroupField
                               }
-                              widget={<UserInputTable users={values.users} />}
-                            />
-                          )}
-                        </>
-                      )}
+                              buttons={[
+                                {
+                                  id: "isUser",
+                                  value: true,
+                                  label: "Yes"
+                                },
+                                {
+                                  id: "isNotUser",
+                                  value: false,
+                                  label: "No"
+                                }
+                              ]}
+                              onChange={value => setFieldValue("user", value)}
+                            >
+                              {values.user && (
+                                <Alert variant="warning">
+                                  Creating a user in ANET could result in
+                                  duplicate accounts if this person logs in
+                                  later. If you notice duplicate accounts you
+                                  should take action.
+                                </Alert>
+                              )}
+                            </DictionaryField>
+
+                            {values.user && (
+                              <DictionaryField
+                                wrappedComponent={FastField}
+                                as="div"
+                                dictProps={Settings.fields.person.users}
+                                component={FieldHelper.SpecialField}
+                                extraColElem={
+                                  <span className="text-danger">
+                                    Be careful when editing this field; you
+                                    might lock someone out.
+                                  </span>
+                                }
+                                widget={<UserInputTable users={values.users} />}
+                              />
+                            )}
+                          </>
+                        )}
 
                       {disableStatusChange ? (
                         <DictionaryField
@@ -702,7 +745,7 @@ const PersonForm = ({
                     dictProps={Settings.fields.person.code}
                     name="code"
                     component={FieldHelper.InputField}
-                    disabled={!isAdmin}
+                    disabled={!isTenantAdmin}
                   />
                   <DictionaryField
                     wrappedComponent={FastField}
@@ -754,6 +797,77 @@ const PersonForm = ({
                         />
                       }
                     />
+                  )}
+
+                  {values.user && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.person.tenant}
+                        name="tenant"
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tenant", value)
+                        }}
+                        widget={
+                          <AdvancedSingleSelect
+                            fieldName="tenant"
+                            placeholder={
+                              Settings.fields.person.tenant.placeholder
+                            }
+                            value={values.tenant}
+                            overlayColumns={["Name", "Status"]}
+                            overlayRenderRow={TenantOverlayRow}
+                            filterDefs={tenantsFilters}
+                            objectType={Tenant}
+                            fields={Tenant.autocompleteQuery}
+                            valueKey="name"
+                            disabled={!isAdmin}
+                            showRemoveButton={isAdmin}
+                          />
+                        }
+                      />
+
+                      {(forOnboarding || isSelf) &&
+                        !_isEmpty(unselectedTenants) && (
+                          <DictionaryField
+                            wrappedComponent={Field}
+                            dictProps={
+                              Settings.fields.person.tenantAccessRequest
+                            }
+                            name="tenantAccessRequest"
+                            component={FieldHelper.SpecialField}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched(
+                                "tenantAccessRequest",
+                                true,
+                                false
+                              ) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenantAccessRequest", value)
+                            }}
+                            widget={
+                              <AdvancedSingleSelect
+                                fieldName="tenantAccessRequest"
+                                placeholder={
+                                  Settings.fields.person.tenantAccessRequest
+                                    .placeholder
+                                }
+                                value={values.tenantAccessRequest}
+                                overlayColumns={["Name", "Status"]}
+                                overlayRenderRow={TenantOverlayRow}
+                                filterDefs={tenantAccessRequestsFilters}
+                                objectType={Tenant}
+                                fields={Tenant.autocompleteQuery}
+                                valueKey="name"
+                                showRemoveButton
+                              />
+                            }
+                          />
+                        )}
+                    </>
                   )}
 
                   {edit && attachmentEditEnabled && (
@@ -896,6 +1010,10 @@ const PersonForm = ({
       person.pendingVerification = false
     }
     person.country = utils.getReference(person.country)
+    person.tenantAccessRequest = Tenant.filterClientSideFields(
+      person.tenantAccessRequest
+    )
+    person.tenant = Tenant.filterClientSideFields(person.tenant)
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON

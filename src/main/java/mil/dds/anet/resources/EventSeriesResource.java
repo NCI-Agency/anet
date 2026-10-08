@@ -34,7 +34,7 @@ public class EventSeriesResource {
   }
 
   public static boolean hasPermission(final Person user, final String orgUuid) {
-    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
+    return AuthUtils.isTenantAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
   }
 
   public void assertPermission(final Person user, final String orgUuid) {
@@ -58,7 +58,7 @@ public class EventSeriesResource {
   @GraphQLQuery(name = "eventSeriesList")
   public AnetBeanList<EventSeries> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") EventSeriesSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 

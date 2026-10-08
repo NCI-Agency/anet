@@ -14,6 +14,8 @@ import MergePositions from "pages/admin/merge/MergePositions"
 import MergeTasks from "pages/admin/merge/MergeTasks"
 import PendingEmailsShow from "pages/admin/pendingEmails/Show"
 import Preferences from "pages/admin/preferences/Preferences"
+import TenantsList from "pages/admin/tenants/Index"
+import TenantNew from "pages/admin/tenants/New"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
@@ -72,6 +74,9 @@ import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import TopTasks from "pages/tasks/Top"
+import TenantEdit from "pages/tenants/Edit"
+import MyTenants from "pages/tenants/MyTenants"
+import TenantShow from "pages/tenants/Show"
 import { PAGE_URLS } from "pages/util"
 import React from "react"
 import Settings from "settings"
@@ -130,7 +135,7 @@ const routes = [
                         authorizationCallback={currentUser =>
                           !Settings.fields.attachment.featureDisabled &&
                           (!Settings.fields.attachment.restrictToAdmins ||
-                            currentUser.isAdmin())
+                            currentUser.isTenantAdmin())
                         }
                       />
                     ),
@@ -236,7 +241,9 @@ const routes = [
           {
             element: (
               <ProtectedRoute
-                authorizationCallback={currentUser => currentUser?.isAdmin()}
+                authorizationCallback={currentUser =>
+                  currentUser?.isTenantAdmin()
+                }
               />
             ),
             children: [{ path: "new", element: <AuthorizationGroupNew /> }]
@@ -259,6 +266,35 @@ const routes = [
               />
             ),
             children: [{ path: "mine", element: <MyAuthorizationGroups /> }]
+          }
+        ]
+      },
+      {
+        path: "tenants",
+        element: (
+          <ProtectedRoute
+            authorizationCallback={currentUser =>
+              currentUser?.isAdmin() || currentUser?.isTenantAdmin()
+            }
+          />
+        ),
+        children: [
+          {
+            path: ":uuid",
+            children: [
+              { index: true, element: <TenantShow /> },
+              { path: "edit", element: <TenantEdit /> }
+            ]
+          },
+          {
+            element: (
+              <ProtectedRoute
+                authorizationCallback={currentUser =>
+                  currentUser?.isTenantAdmin()
+                }
+              />
+            ),
+            children: [{ path: "mine", element: <MyTenants /> }]
           }
         ]
       },
@@ -312,6 +348,13 @@ const routes = [
               {
                 path: "configureEventTypes",
                 element: <ConfigureEventTypesShow />
+              },
+              {
+                path: "tenants",
+                children: [
+                  { index: true, element: <TenantsList /> },
+                  { path: "new", element: <TenantNew /> }
+                ]
               },
               {
                 element: (

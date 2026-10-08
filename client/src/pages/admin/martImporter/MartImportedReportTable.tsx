@@ -7,8 +7,12 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import {
+  PersonDetailedOverlayRow,
+  TenantOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
@@ -19,9 +23,9 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Report } from "models"
+import { Person, Report, Tenant } from "models"
 import moment from "moment"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { FormSelect, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import PEOPLE_ICON from "resources/people.png"
@@ -33,6 +37,9 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
     martImportedReportList(query: $martImportedReportQuery) {
       ${gqlPaginationFields}
       list {
+        tenant {
+          ${gqlEntityFieldsMap.Tenant}
+        }
         person {
           ${gqlEntityFieldsMap.Person}
         }
@@ -85,17 +92,20 @@ const MartImportedReportTable = ({
   onSelectReport
 }: MartImportedReportTableProps) => {
   usePageTitle("MART reports imported")
+  const { allTenants } = useContext(AppContext)
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [sortBy, setSortBy] = useState("SEQUENCE")
   const [sortOrder, setSortOrder] = useState("DESC")
   const [selectedState, setSelectedState] = useState(undefined)
+  const [selectedTenant, setSelectedTenant] = useState(null)
   const [selectedAuthor, setSelectedAuthor] = useState(null)
 
   const martImportedReportQuery = {
     pageNum,
     pageSize,
     state: selectedState,
+    tenantName: selectedTenant?.name,
     personUuid: selectedAuthor?.uuid,
     reportUuid: selectedReportUuid,
     sortBy,
@@ -160,9 +170,21 @@ const MartImportedReportTable = ({
     setPageNum(0)
   }
 
+  const handleTenantChange = tenant => {
+    setSelectedTenant(tenant)
+    setPageNum(0)
+  }
+
   const handleAuthorChange = author => {
     setSelectedAuthor(author)
     setPageNum(0)
+  }
+
+  const tenantsFilters = {
+    allTenants: {
+      label: "All tenants",
+      list: allTenants
+    }
   }
 
   const peopleFilters = {
@@ -177,27 +199,44 @@ const MartImportedReportTable = ({
       action={
         <div className="float-end d-flex flex-column align-items-start gap-3 flex-md-row flex-md-wrap align-items-md-center">
           {!selectedReportUuid && (
-            <div className="d-flex flex-column">
-              Filter by author:
-              <AdvancedSingleSelect
-                fieldName="author"
-                placeholder="Select an author to filter on"
-                value={selectedAuthor}
-                overlayColumns={[
-                  "Name",
-                  "Position",
-                  "Location",
-                  "Organization"
-                ]}
-                overlayRenderRow={PersonDetailedOverlayRow}
-                filterDefs={peopleFilters}
-                onChange={handleAuthorChange}
-                objectType={Person}
-                valueFunc={Person.fullName}
-                fields={Person.autocompleteQuery}
-                addon={PEOPLE_ICON}
-              />
-            </div>
+            <>
+              <div className="d-flex flex-column">
+                Filter by tenant:
+                <AdvancedSingleSelect
+                  fieldName="tenant"
+                  placeholder="Select a tenant to filter on"
+                  value={selectedTenant}
+                  overlayColumns={["Name", "Status"]}
+                  overlayRenderRow={TenantOverlayRow}
+                  filterDefs={tenantsFilters}
+                  onChange={handleTenantChange}
+                  valueFunc={tenant => tenant?.name}
+                  objectType={Tenant}
+                  fields={Tenant.autocompleteQuery}
+                />
+              </div>
+              <div className="d-flex flex-column">
+                Filter by author:
+                <AdvancedSingleSelect
+                  fieldName="author"
+                  placeholder="Select an author to filter on"
+                  value={selectedAuthor}
+                  overlayColumns={[
+                    "Name",
+                    "Position",
+                    "Location",
+                    "Organization"
+                  ]}
+                  overlayRenderRow={PersonDetailedOverlayRow}
+                  filterDefs={peopleFilters}
+                  onChange={handleAuthorChange}
+                  objectType={Person}
+                  valueFunc={Person.fullName}
+                  fields={Person.autocompleteQuery}
+                  addon={PEOPLE_ICON}
+                />
+              </div>
+            </>
           )}
           <div>
             Filter by state:
@@ -298,6 +337,7 @@ const MartImportedReportTable = ({
             <thead>
               <tr>
                 <th>Sequence</th>
+                <th>Tenant</th>
                 <th>Sent by MART</th>
                 <th>Received by ANET</th>
                 <th>Received</th>
@@ -312,6 +352,25 @@ const MartImportedReportTable = ({
                 return (
                   <tr key={index}>
                     <td>{martImportedReport.sequence}</td>
+                    <td>
+                      {martImportedReport.tenant?.name}
+                      {!selectedTenant && martImportedReport.tenant && (
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>Filter all entries by this tenant</Tooltip>
+                          }
+                        >
+                          <Icon
+                            icon={IconNames.SEARCH}
+                            style={{ cursor: "pointer" }}
+                            onClick={() =>
+                              handleTenantChange(martImportedReport.tenant)
+                            }
+                          />
+                        </OverlayTrigger>
+                      )}
+                    </td>
                     <td>
                       {moment(martImportedReport.submittedAt).format(
                         Settings.dateFormats.forms.displayLong.withTime
