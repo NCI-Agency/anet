@@ -9,7 +9,7 @@ const config = {
   failFast: true,
   verbose: true,
   timeout: "3m",
-  serial: false
+  serial: true
 }
 
 /*
