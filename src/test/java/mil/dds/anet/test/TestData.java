@@ -221,6 +221,14 @@ public class TestData {
     return reportDto;
   }
 
+  public static ReportDto createGoodMartReportForExistingUserWithTwoPositions(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setEmail("creed.bratton@example.com");
+    reportDto.setUuid("9cdfcabb-bb4d-46d7-8f5a-13a4f9e5f9c5");
+    reportDto.setOrganizationUuid("7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf");
+    return reportDto;
+  }
+
   public static ReportDto createRetryOfMissingReport(long sequence, String uuid) {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setUuid(uuid);
