@@ -2502,12 +2502,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fullcalendar/core@npm:6.1.21":
-  version: 6.1.21
-  resolution: "@fullcalendar/core@npm:6.1.21"
-  dependencies:
-    preact: "npm:~10.12.1"
-  checksum: 10c0/6856367e4b1aa7941badcd38198efc379aa03c34a1a6c6d97cd4d68fc6f99d26340cbe1007b247cab01af431abbc89ee78a3cb42d67f1e722655e8adca66692e
+"@full-ui/headless-calendar@npm:7.1.1":
+  version: 7.1.1
+  resolution: "@full-ui/headless-calendar@npm:7.1.1"
+  peerDependencies:
+    temporal-polyfill: ^1.0.1
+  checksum: 10c0/640f5150966aa765b2a0921000e62cacaab05f30fce1b2495657a8385e34478ebbea3c17bf340e9aa562669a0eb70a8bc82052543d3dd6cd7293dadd1f23fdac
+  languageName: node
+  linkType: hard
+
+"@fullcalendar/core@npm:7.1.1":
+  version: 7.1.1
+  resolution: "@fullcalendar/core@npm:7.1.1"
+  peerDependencies:
+    "@full-ui/headless-calendar": 7.1.1
+    temporal-polyfill: ^1.0.1
+  checksum: 10c0/94bbfad686275986ae41fa8d00f33925479ec3efe414828a372f81c98a022c66c0005af4d748067a09e4a9fd0983a3432609b6063f36ec81b0e6628d5c5cafc0
   languageName: node
   linkType: hard
 
@@ -2538,14 +2548,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fullcalendar/react@npm:6.1.21":
-  version: 6.1.21
-  resolution: "@fullcalendar/react@npm:6.1.21"
+"@fullcalendar/react@npm:7.1.1":
+  version: 7.1.1
+  resolution: "@fullcalendar/react@npm:7.1.1"
+  dependencies:
+    "@full-ui/headless-calendar": "npm:7.1.1"
+    "@fullcalendar/core": "npm:7.1.1"
   peerDependencies:
-    "@fullcalendar/core": ~6.1.21
-    react: ^16.7.0 || ^17 || ^18 || ^19
-    react-dom: ^16.7.0 || ^17 || ^18 || ^19
-  checksum: 10c0/7103e724676ea12a43c5020e2581902394c0e3d30ace0a15319d869efc099b0a4e053aac1ab52576e8086649679f616236399996bebd5b36a131e5cb338d6ec3
+    react: ^17 || ^18 || ^19
+    react-dom: ^17 || ^18 || ^19
+    temporal-polyfill: ^1.0.1
+  checksum: 10c0/4bcb1a99665c7452d5e74260e22df910b042fa3a0b24fc960171341879fd243bef7038e807b4209d1260d00f28fdb58371f1eda0d6f4a4abb2863705804dcba6
   languageName: node
   linkType: hard
 
@@ -7966,11 +7979,11 @@ __metadata:
     "@emotion/styled": "npm:11.14.1"
     "@faker-js/faker": "npm:10.6.0"
     "@fregante/circular-dependency-plugin": "npm:5.2.5"
-    "@fullcalendar/core": "npm:6.1.21"
+    "@fullcalendar/core": "npm:7.1.1"
     "@fullcalendar/daygrid": "npm:6.1.21"
     "@fullcalendar/interaction": "npm:6.1.21"
     "@fullcalendar/list": "npm:6.1.21"
-    "@fullcalendar/react": "npm:6.1.21"
+    "@fullcalendar/react": "npm:7.1.1"
     "@fullcalendar/timegrid": "npm:6.1.21"
     "@graphql-codegen/cli": "npm:7.4.1"
     "@graphql-codegen/schema-ast": "npm:6.1.0"
@@ -17009,13 +17022,6 @@ __metadata:
   version: 0.1.0
   resolution: "powershell-utils@npm:0.1.0"
   checksum: 10c0/a64713cf3583259c9ed6be211c06b4b19e8608bcb0f7f6287ffac0a95b8c7582b6b662eea0e201fd659492c8e9f9c5fd0bfc4579645c5add9c1a600075621c95
-  languageName: node
-  linkType: hard
-
-"preact@npm:~10.12.1":
-  version: 10.12.1
-  resolution: "preact@npm:10.12.1"
-  checksum: 10c0/c77a55e897dcf298b7aa13637fed29744d3cf6c083f2832856e8551dbf27303c8b6946569736de16b05cba15c0e44ad404beb236ad9e36583a6fc5e2efad7777
   languageName: node
   linkType: hard
 
