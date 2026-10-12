@@ -627,7 +627,6 @@ const PersonColumn = ({
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(person) && (
