@@ -134,7 +134,7 @@ const routes = [
                         authorizationCallback={currentUser =>
                           !Settings.fields.attachment.featureDisabled &&
                           (!Settings.fields.attachment.restrictToAdmins ||
-                            currentUser.isAdmin())
+                            currentUser.isTenantAdmin())
                         }
                       />
                     ),
@@ -240,7 +240,9 @@ const routes = [
           {
             element: (
               <ProtectedRoute
-                authorizationCallback={currentUser => currentUser?.isAdmin()}
+                authorizationCallback={currentUser =>
+                  currentUser?.isTenantAdmin()
+                }
               />
             ),
             children: [{ path: "new", element: <AuthorizationGroupNew /> }]

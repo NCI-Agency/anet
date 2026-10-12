@@ -167,6 +167,13 @@ export default class Task extends Model {
     return this.shortName
   }
 
+  isAuthorizedForAssessment(user, assessmentKey, forReading) {
+    if (user.isTenantAdmin()) {
+      return true
+    }
+    return super.isAuthorizedForAssessment(user, assessmentKey, forReading)
+  }
+
   getAssessmentsConfig() {
     return Settings.fields.task.assessments || {}
   }

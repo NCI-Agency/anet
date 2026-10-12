@@ -85,6 +85,9 @@ const GQL_GET_REPORT = gql`
             ${gqlMinimalLocationFields}
           }
         }
+        tenant {
+          ${gqlEntityFieldsMap.Tenant}
+        }
       }
       tasks {
         ${gqlEntityFieldsMap.Task}
