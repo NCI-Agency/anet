@@ -100,27 +100,30 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     // Good report with another user, comes with country name
     final EmailMessage reportMessage2 =
         createReportMockEmail(TestData.createGoodOldMartReportWithDifferentUser(++sequence), true);
-    // Good report with another user that has wrong country
+    // Good report with another user that has two positions
     final EmailMessage reportMessage3 = createReportMockEmail(
-        TestData.createGoodMartReportWithDifferentUserAndWrongCountry(++sequence), true);
+        TestData.createGoodMartReportForExistingUserWithTwoPositions(++sequence), false);
+
     // Several reports with errors
-    final EmailMessage reportMessage4 =
-        createReportMockEmail(TestData.createMartReportWrongOrganization(++sequence), false);
+    final EmailMessage reportMessage4 = createReportMockEmail(
+        TestData.createGoodMartReportWithDifferentUserAndWrongCountry(++sequence), true);
     final EmailMessage reportMessage5 =
-        createReportMockEmail(TestData.createMartReportWrongLocation(++sequence), false);
+        createReportMockEmail(TestData.createMartReportWrongOrganization(++sequence), false);
     final EmailMessage reportMessage6 =
+        createReportMockEmail(TestData.createMartReportWrongLocation(++sequence), false);
+    final EmailMessage reportMessage7 =
         createReportMockEmail(TestData.createMartReportCompletelyWrong(++sequence), false);
-    final EmailMessage reportMessage7 = createReportMockEmail(
-        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(++sequence), true);
     final EmailMessage reportMessage8 = createReportMockEmail(
-        TestData.createMartReportWithSecurityMarkingNotInDictionary(++sequence), false);
+        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(++sequence), true);
     final EmailMessage reportMessage9 = createReportMockEmail(
+        TestData.createMartReportWithSecurityMarkingNotInDictionary(++sequence), false);
+    final EmailMessage reportMessage10 = createReportMockEmail(
         TestData.createGoodMartReportForUserWithoutPosition(++sequence), false);
 
     // Transmission log
     final EmailMessage transmissionLogMessage = createTransmissionLogMockEmail(sequence);
     // Send a new report
-    final EmailMessage reportMessage10 = createReportMockEmail(
+    final EmailMessage reportMessage11 = createReportMockEmail(
         TestData.createRetryOfMissingReport(sequence + 2, missingReportUuid2), true);
 
     // Mock the mail exchange server
@@ -129,9 +132,9 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         // reports and a transmission log (for 9 reports)
         List.of(reportMessage1, reportMessage1dup, reportMessage2, reportMessage3, reportMessage4,
             reportMessage5, reportMessage6, reportMessage7, reportMessage8, reportMessage9,
-            transmissionLogMessage),
-        // 10th report
-        List.of(reportMessage10));
+            reportMessage10, transmissionLogMessage),
+        // 11th report
+        List.of(reportMessage11));
 
     martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
@@ -160,8 +163,10 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     martReportImporterWorker.run();
     ReportDto goodReport = TestData.createGoodMartReport(1);
     ReportDto goodOldReportWithDifferentUser = TestData.createGoodOldMartReportWithDifferentUser(2);
+    ReportDto goodReportWithTwoPositionsUser =
+        TestData.createGoodMartReportForExistingUserWithTwoPositions(3);
     ReportDto reportWithWarnings =
-        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(3);
+        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(4);
 
     // Validate persons created
     final PersonSearchQueryInput queryPerson =
@@ -264,7 +269,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     // New records in MartImportedReports, verify them
     AnetBeanList<MartImportedReport> martImportedReportsList =
         martImportedReportDao.search(new MartImportedReportSearchQuery());
-    assertThat(martImportedReportsList.getTotalCount()).isEqualTo(12);
+    assertThat(martImportedReportsList.getTotalCount()).isEqualTo(13);
 
     List<MartImportedReport> martImportedReports = martImportedReportsList.getList();
     long sequence = getMaxExistingSequence();
@@ -274,6 +279,10 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
     assertReportSubmittedOK(martImportedReports, ++sequence,
         goodOldReportWithDifferentUser.getUuid(), person2.getUuid());
+
+    // Check report submitted by Creed which has two positions
+    assertReportSubmittedOK(martImportedReports, ++sequence,
+        goodReportWithTwoPositionsUser.getUuid(), "31cba227-f6c6-49e9-9483-fce441bea624");
 
     assertReportSubmittedWithWarnings(martImportedReports, ++sequence,
         "While importing report f35ea806-acac-467c-96a7-75d809cd6705:"
@@ -320,7 +329,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     // as lost when processing the transmission log, but finally came
     martReportImporterWorker.run();
     martImportedReportsList = martImportedReportDao.search(new MartImportedReportSearchQuery());
-    assertThat(martImportedReportsList.getTotalCount()).isEqualTo(12);
+    assertThat(martImportedReportsList.getTotalCount()).isEqualTo(13);
     martImportedReports = martImportedReportsList.getList();
     assertReportSubmittedOK(martImportedReports, sequence, missingReportUuid2, person1.getUuid());
     // Test history of missingReportUuid2
