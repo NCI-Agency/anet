@@ -148,7 +148,7 @@ const TaskForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const isAdmin = currentUser?.isAdmin()
+        const isTenantAdmin = currentUser?.isTenantAdmin()
         const isResponsibleForParentTask =
           _isEmpty(values.parentTask) ||
           currentUser?.isResponsibleForTask(values.parentTask)
@@ -157,7 +157,7 @@ const TaskForm = ({
           : isResponsibleForParentTask
         const taskSearchQuery = {}
         // Superusers can select parent organizations among the ones their position is administrating
-        if (!isAdmin) {
+        if (!isTenantAdmin) {
           const responsibleTasksUuids =
             currentUser.position.responsibleTasks.map(t => t.uuid)
           taskSearchQuery.parentTaskUuid = [...responsibleTasksUuids]
@@ -375,7 +375,7 @@ const TaskForm = ({
               <Fieldset
                 title={Settings.fields.task.responsiblePositions?.label}
               >
-                {!isAdmin ? (
+                {!isTenantAdmin ? (
                   <PositionTable
                     positions={values.responsiblePositions}
                     showLocation

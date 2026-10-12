@@ -217,9 +217,14 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     }
   }
   const person = new Person(data ? data.person : {})
-  const isAdmin = currentUser && currentUser.isAdmin()
+  const canAdmin =
+    // Admins can see anybody's privileged fields
+    currentUser?.isAdmin() ||
+    // Tenant admins can see privileged fields of people without tenant or in their own tenant
+    (currentUser?.isTenantAdmin() &&
+      utils.isFromNoOrSameTenant(currentUser, person))
   const position = person.position
-  const hasPosition = position && position.uuid
+  const hasPosition = position?.uuid
   // Keys of fields which should span over 2 columns
   const fullWidthFieldKeys = person.getFullWidthFields()
   const orderedFields = orderPersonFields().filter(
@@ -315,7 +320,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       users: {
-        accessCond: isAdmin
+        accessCond: canAdmin
       }
     }
 

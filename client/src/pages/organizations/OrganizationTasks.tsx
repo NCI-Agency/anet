@@ -70,7 +70,7 @@ const OrganizationTasks = ({
 
   const paginatedTasks = data.taskList
   const tasks = paginatedTasks ? paginatedTasks.list : []
-  const isAdminUser = currentUser && currentUser.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const taskShortLabel = Settings.fields.task.shortLabel
   const { pageSize, totalCount } = paginatedTasks
 
@@ -79,7 +79,7 @@ const OrganizationTasks = ({
       id="tasks"
       title={pluralize(taskShortLabel)}
       action={
-        isAdminUser && (
+        isTenantAdmin && (
           <LinkTo
             modelType="Task"
             model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}

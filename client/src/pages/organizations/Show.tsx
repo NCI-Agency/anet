@@ -268,8 +268,10 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   const allTasks = data?.taskList?.list ?? []
   const allEventSeries = data?.eventSeriesList?.list ?? []
 
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
+    isTenantAdmin ||
     currentUser?.hasAdministrativePermissionsForOrganization(organization)
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const avatar =
@@ -277,10 +279,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
       a => a.uuid === organization?.entityAvatar?.attachmentUuid
     ) && organization.entityAvatar
 
-  const myOrg =
-    currentUser && currentUser.position
-      ? currentUser.position.organization
-      : null
+  const myOrg = currentUser?.position?.organization
   const isMyOrg = myOrg && organization.uuid === myOrg.uuid
   const orgSubNav = (
     <Nav className="flex-column">

@@ -58,7 +58,7 @@ const AuthorizationGroupForm = ({
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
-  const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const positionsFilters = {
     allSuperusers: {
       label: "All superusers",
@@ -212,11 +212,11 @@ const AuthorizationGroupForm = ({
                       type="checkbox"
                       className="pt-2"
                       checked={values.forSensitiveInformation}
-                      disabled={!isAdmin}
+                      disabled={!isTenantAdmin}
                     />
                   }
                 >
-                  {isAdmin &&
+                  {isTenantAdmin &&
                     initialValues.forSensitiveInformation &&
                     hasReports && (
                       <Alert variant="warning">
@@ -250,7 +250,7 @@ const AuthorizationGroupForm = ({
                         <PositionTable
                           positions={values.administrativePositions}
                           showLocation
-                          showDelete={isAdmin}
+                          showDelete={isTenantAdmin}
                         />
                       }
                       overlayColumns={[
@@ -263,7 +263,7 @@ const AuthorizationGroupForm = ({
                       objectType={Position}
                       fields={Position.autocompleteQuery}
                       addon={POSITIONS_ICON}
-                      disabled={!isAdmin}
+                      disabled={!isTenantAdmin}
                     />
                   }
                 />
