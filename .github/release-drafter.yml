@@ -4,24 +4,32 @@ filter-by-commitish: true
 commitish: main
 version-template: "$MAJOR.$MINOR.$PATCH"
 categories:
+  - type: 'pre-exclude'
+    when:
+      labels:
+        - devDependencies
+        - internal
+        - DevOps
+        - documentation
   - title: '🚀 Features'
-    label: feature
+    when:
+      label: feature
   - title: '🎨 Enhancements'
-    label: enhancement
+    when:
+      label: enhancement
   - title : '🖌 Improvements'
-    label: improvement
+    when:
+      label: improvement
   - title: '🐛 Bug Fixes'
-    label: bug
+    when:
+      label: bug
   - title: '⬆️ Dependency Updates'
-    label: dependencies
+    when:
+      label: dependencies
   - title: '🔧 Under the hood'
-    label: debt
+    when:
+      label: debt
 change-template: "* $TITLE (#$NUMBER)"
-exclude-labels:
-  - devDependencies
-  - internal
-  - DevOps
-  - documentation
 template: |
   ## What’s changed in ANET
 
