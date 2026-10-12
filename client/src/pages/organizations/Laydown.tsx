@@ -48,11 +48,11 @@ const OrganizationLaydown = ({
     showAdministratingPositionsModal,
     setShowAdministratingPositionsModal
   ] = useState(false)
-  const isAdmin = currentUser && currentUser.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const canAdministrateOrg =
     !readOnly &&
-    currentUser &&
-    currentUser.hasAdministrativePermissionsForOrganization(organization)
+    (isTenantAdmin ||
+      currentUser?.hasAdministrativePermissionsForOrganization(organization))
   const numInactivePos = organization.positions.filter(
     p => p.status === Model.STATUS.INACTIVE
   ).length
@@ -131,7 +131,7 @@ const OrganizationLaydown = ({
         )}
         action={
           !readOnly &&
-          isAdmin && (
+          isTenantAdmin && (
             <Button
               onClick={() => setShowAdministratingPositionsModal(true)}
               variant="outline-secondary"

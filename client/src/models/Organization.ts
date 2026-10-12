@@ -123,6 +123,13 @@ export default class Organization extends Model {
     return Organization.assessmentDictionaryPath
   }
 
+  isAuthorizedForAssessment(user, assessmentKey, forReading) {
+    if (user.isTenantAdmin()) {
+      return true
+    }
+    return super.isAuthorizedForAssessment(user, assessmentKey, forReading)
+  }
+
   getAssessmentsConfig() {
     return Organization.assessmentConfig
   }

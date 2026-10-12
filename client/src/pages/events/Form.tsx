@@ -153,7 +153,7 @@ const EventForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const isAdmin = currentUser && currentUser.isAdmin()
+        const isTenantAdmin = currentUser?.isTenantAdmin()
         const canCreateLocation =
           Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
 
@@ -161,7 +161,7 @@ const EventForm = ({
         const eventSeriesSearchQuery = {}
 
         // Superusers can select parent organizations among the ones their position is administrating
-        if (!isAdmin) {
+        if (!isTenantAdmin) {
           const orgsAdministratedUuids =
             currentUser.position.organizationsAdministrated.map(org => org.uuid)
           adminOrgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]

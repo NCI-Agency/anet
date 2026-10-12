@@ -89,7 +89,7 @@ const EditAssociatedPositionsModal = ({
   const positionSearchQuery = {
     matchPersonName: true
   }
-  if (currentUser.isAdmin() === false) {
+  if (currentUser.isSuperuser()) {
     // Superusers can only assign a position in their organization!
     positionSearchQuery.organizationUuid =
       currentUser.position.organization.uuid
