@@ -398,7 +398,6 @@ const EventSeriesColumn = ({
           fields={ALL_EVENT_SERIES_FIELDS}
           addon={EVENT_SERIES_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(eventSeries) && (
