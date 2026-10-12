@@ -710,7 +710,6 @@ const PersonForm = ({
                         fields={Location.autocompleteQuery}
                         valueKey="name"
                         addon={<Icon icon={IconNames.FLAG} />}
-                        showRemoveButton
                       />
                     }
                     extraColElem={
@@ -821,7 +820,6 @@ const PersonForm = ({
                             fields={Tenant.autocompleteQuery}
                             valueKey="name"
                             disabled={!isAdmin}
-                            showRemoveButton={isAdmin}
                           />
                         }
                       />
@@ -858,7 +856,6 @@ const PersonForm = ({
                                 objectType={Tenant}
                                 fields={Tenant.autocompleteQuery}
                                 valueKey="name"
-                                showRemoveButton
                               />
                             }
                           />

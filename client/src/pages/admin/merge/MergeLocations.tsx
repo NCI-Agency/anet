@@ -513,7 +513,6 @@ const LocationColumn = ({
           fields={Location.allFieldsQuery}
           addon={LOCATIONS_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(location) && (
