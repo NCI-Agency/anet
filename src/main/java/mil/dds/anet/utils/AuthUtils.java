@@ -35,6 +35,14 @@ public class AuthUtils {
     throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
   }
 
+  public static void assertTenantAdministrator(Person user) {
+    logger.debug("Asserting tenant admin status for {}", user);
+    if (isTenantAdmin(user)) {
+      return;
+    }
+    throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
+  }
+
   public static boolean canAdministrateOrg(final Person user, final String organizationUuid) {
     if (organizationUuid == null) {
       logger.debug("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
@@ -48,6 +56,10 @@ public class AuthUtils {
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
       logger.debug("User {} is an administrator, can automatically administrate org", user);
+      return true;
+    }
+    if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      logger.debug("User {} is a tenant administrator, can automatically administrate org", user);
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
@@ -93,7 +105,7 @@ public class AuthUtils {
 
   public static boolean canCreateSubOrg(final Person user, final String parentOrganizationUuid) {
     // Admins can create any organization
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       return true;
     }
 
@@ -119,6 +131,11 @@ public class AuthUtils {
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
       logger.debug("User {} is an administrator, is automatically responsible for task", user);
+      return true;
+    }
+    if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      logger.debug("User {} is a tenant administrator, is automatically responsible for task",
+          user);
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
@@ -154,7 +171,7 @@ public class AuthUtils {
 
   public static boolean canCreateSubTask(final Person user, final String parentTaskUuid) {
     // Admins can create any task
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       return true;
     }
 

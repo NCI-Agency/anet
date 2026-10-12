@@ -125,7 +125,7 @@ const PositionForm = ({
       label: Settings.fields.regular.position.type
     }
   ]
-  const adminPermissionsButtons = nonAdminPermissionsButtons.concat([
+  const tenantAdminPermissionsButtons = nonAdminPermissionsButtons.concat([
     {
       id: "permsSuperuserButton",
       value: Position.TYPE.SUPERUSER,
@@ -135,7 +135,9 @@ const PositionForm = ({
       id: "permsTenantAdminButton",
       value: Position.TYPE.TENANT_ADMINISTRATOR,
       label: Settings.fields.tenantAdministrator.position.type
-    },
+    }
+  ])
+  const adminPermissionsButtons = tenantAdminPermissionsButtons.concat([
     {
       id: "permsAdminButton",
       value: Position.TYPE.ADMINISTRATOR,
@@ -216,17 +218,21 @@ const PositionForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const isAdmin = currentUser && currentUser.isAdmin()
+        const isAdmin = currentUser?.isAdmin()
+        const isTenantAdmin = currentUser?.isTenantAdmin() && !isAdmin
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
-          : nonAdminPermissionsButtons
+          : isTenantAdmin
+            ? tenantAdminPermissionsButtons
+            : nonAdminPermissionsButtons
         const administratingOrgUuids =
           currentUser.position.organizationsAdministrated.map(org => org.uuid)
-        const isSuperuser =
-          currentUser && currentUser.isSuperuser() && !currentUser.isAdmin()
-        // Only admin and superuser can assign high role (other than member role) to a position
+        const isSuperuser = currentUser?.isSuperuser() && !isTenantAdmin
+        // Only superuser and above can assign high role (other than member role) to a position
         const positionRoleButtons =
-          isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
+          isAdmin || isTenantAdmin || isSuperuser
+            ? adminRolesButtons
+            : nonAdminRolesButtons
         const positionSuperuserTypeButtons = superUserTypeButtons
         const orgSearchQuery = {}
         if (isSuperuser) {

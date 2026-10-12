@@ -226,6 +226,9 @@ export default class Person extends Model {
         ${gqlEntityFieldsMap.Location}
       }
     }
+    tenant {
+      ${gqlEntityFieldsMap.Tenant}
+    }
   `
 
   static allFieldsQuery = `
@@ -301,16 +304,21 @@ export default class Person extends Model {
   }
 
   isSuperuser() {
-    return [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR].includes(
-      this.position?.type
-    )
+    return [
+      Position.TYPE.SUPERUSER,
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.ADMINISTRATOR
+    ].includes(this.position?.type)
   }
 
   isEnhancedSuperuser() {
     return (
       (this.position?.type === Position.TYPE.SUPERUSER &&
         this.position?.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
-      this.position?.type === Position.TYPE.ADMINISTRATOR
+      [
+        Position.TYPE.TENANT_ADMINISTRATOR,
+        Position.TYPE.ADMINISTRATOR
+      ].includes(this.position?.type)
     )
   }
 
@@ -327,16 +335,12 @@ export default class Person extends Model {
 
   // Checks if this user is a valid superuser for a particular organization
   // Must be either
-  // - an administrator
   // - a superuser of CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK type
   // - a superuser administrating this organization
   // - a superuser administrating this organization's (transitive) parent
   hasAdministrativePermissionsForOrganization(org) {
     if (!org) {
       return false
-    }
-    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
-      return true
     }
     if (
       this.position?.type === Position.TYPE.SUPERUSER &&
@@ -375,7 +379,7 @@ export default class Person extends Model {
     if (!task) {
       return false
     }
-    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
+    if (this.isTenantAdmin()) {
       return true
     }
     if (
@@ -539,6 +543,14 @@ export default class Person extends Model {
 
   getAssessmentDictionaryPath() {
     return Person.assessmentDictionaryPath
+  }
+
+  isAuthorizedForAssessment(user, assessmentKey, forReading) {
+    if (user.isTenantAdmin()) {
+      // Tenant admin is authorized for assessments of tenant-less person or person in same tenant
+      return utils.isFromNoOrSameTenant(user, this)
+    }
+    return super.isAuthorizedForAssessment(user, assessmentKey, forReading)
   }
 
   getAssessmentsConfig() {

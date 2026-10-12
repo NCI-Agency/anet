@@ -16,7 +16,9 @@ const SUPERUSER_ACTIONS = [
 
 const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization, Models.Task]
 
-const ADMIN_ACTIONS = [Models.AuthorizationGroup]
+const TENANT_ADMIN_ACTIONS = [Models.AuthorizationGroup]
+
+const ADMIN_ACTIONS = []
 
 const CreateButton = () => {
   const { currentUser } = useContext(AppContext)
@@ -67,6 +69,9 @@ const CreateButton = () => {
     }
     if (currentUser.isEnhancedSuperuser()) {
       result.push(...ENHANCED_SUPERUSER_ACTIONS)
+    }
+    if (currentUser.isTenantAdmin()) {
+      result.push(...TENANT_ADMIN_ACTIONS)
     }
     if (currentUser.isAdmin()) {
       result.push(...ADMIN_ACTIONS)
