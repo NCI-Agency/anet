@@ -535,7 +535,6 @@ const PositionColumn = ({
           fields={Position.allFieldsQuery}
           addon={POSITIONS_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(position) && (

@@ -38,7 +38,6 @@ import useMergeObjects, {
   getActionButton,
   getOtherSide,
   isMergeFieldEmpty,
-  isMergeFieldSelected,
   isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   mergedPersonIsValid,
@@ -619,7 +618,6 @@ const PersonColumn = ({
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(person) && (
