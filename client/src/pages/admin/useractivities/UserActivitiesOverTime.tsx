@@ -44,18 +44,21 @@ const GQL_GET_USER_ACTIVITY_COUNT = gql`
 const AGGREGATION_DATE_KEYS = {
   DAY: "day",
   WEEK: WeekPeriodKey.ISO_WEEK,
-  MONTH: "month"
+  MONTH: "month",
+  YEAR: "year"
 }
 const AGGREGATION_DATE_FORMATS = {
   DAY: "D MMMM YYYY",
   WEEK: WeekPeriodFormat.ISO_WEEK,
-  MONTH: "MMMM YYYY"
+  MONTH: "MMMM YYYY",
+  YEAR: "YYYY"
 }
 const DEFAULT_AGGREGATION_PERIOD = "MONTH"
 const TIME_WINDOWS = {
   DAY: 31,
   WEEK: 13,
-  MONTH: 6
+  MONTH: 6,
+  YEAR: 2
 }
 const SEARCH_TYPES = {
   PERSON: "PERSON",
@@ -396,6 +399,8 @@ const UserActivitiesOverTime = ({
 
   function showTodayLabel(period) {
     switch (period) {
+      case "YEAR":
+        return "This year"
       case "MONTH":
         return "This month"
       case "WEEK":
