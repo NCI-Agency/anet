@@ -2947,9 +2947,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/delegate@npm:^12.2.0":
-  version: 12.2.0
-  resolution: "@graphql-tools/delegate@npm:12.2.0"
+"@graphql-tools/delegate@npm:^12.2.1":
+  version: 12.2.1
+  resolution: "@graphql-tools/delegate@npm:12.2.1"
   dependencies:
     "@graphql-tools/batch-execute": "npm:^10.2.0"
     "@graphql-tools/executor": "npm:^2.0.1"
@@ -2961,7 +2961,7 @@ __metadata:
     tslib: "npm:^2.8.1"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/056bdcac77895da1330796fb5f7cafdb0430886d97f5211fd418473630c854205426e76d2b92521a758593ca8bf0b9da23f222a65bcfcd50022059d063580079
+  checksum: 10c0/c913011ab49d46616ad38d75e90e9751a0ea0c7cdaa1f8943f65003e70a694b9f2be3032156d1598025844c941a87fc9f4920ea247e408c6555c6126cc8aedb2
   languageName: node
   linkType: hard
 
@@ -3040,18 +3040,18 @@ __metadata:
   linkType: hard
 
 "@graphql-tools/executor@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@graphql-tools/executor@npm:2.0.1"
+  version: 2.0.3
+  resolution: "@graphql-tools/executor@npm:2.0.3"
   dependencies:
-    "@graphql-tools/utils": "npm:^12.0.1"
+    "@graphql-tools/utils": "npm:^12.0.3"
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     "@repeaterjs/repeater": "npm:^3.1.0"
-    "@whatwg-node/disposablestack": "npm:^0.0.6"
-    "@whatwg-node/promise-helpers": "npm:^1.0.0"
+    "@whatwg-node/disposablestack": "npm:^0.1.0"
+    "@whatwg-node/promise-helpers": "npm:^2.0.0"
     tslib: "npm:^2.4.0"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/da0e71e99fd2101ba58634e91cdcf2b626bcb8ca68dc59632a0857c5d3f492889c1afe89dcc98fb25be99cc692f85f6c5f6aa207080d9608ddb4326e850a4157
+  checksum: 10c0/9e32a1dbb289b6d6322b29f981b3a5fa3b4c46aeb1b143c9aca1f8010760c4bdae7ad5bec287d39112989671206841bcf1a7a5014ed520609bd9513dbb3153ad
   languageName: node
   linkType: hard
 
@@ -3246,17 +3246,17 @@ __metadata:
   linkType: hard
 
 "@graphql-tools/wrap@npm:^11.1.1":
-  version: 11.2.0
-  resolution: "@graphql-tools/wrap@npm:11.2.0"
+  version: 11.2.1
+  resolution: "@graphql-tools/wrap@npm:11.2.1"
   dependencies:
-    "@graphql-tools/delegate": "npm:^12.2.0"
+    "@graphql-tools/delegate": "npm:^12.2.1"
     "@graphql-tools/schema": "npm:^10.1.1"
     "@graphql-tools/utils": "npm:^12.0.1"
     "@whatwg-node/promise-helpers": "npm:^1.3.2"
     tslib: "npm:^2.8.1"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/64a1be2d4c6abe09dd4d04b9f1e18786a9bf69c7afe3e866f50290f7410b84f92b565386797a35887858f3b350e2ab5b2722bb58dd01c3e4c422cfa63af3f35c
+  checksum: 10c0/1111f96c6670033bc1d9115eef670219e7f4bb37576227d13bade7b662cf3a4dff55a21195abd9ff06165dc25bc53091febc637ec0d3ae258a91ddb56eb03e6e
   languageName: node
   linkType: hard
 
