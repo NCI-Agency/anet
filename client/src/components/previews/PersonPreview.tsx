@@ -100,11 +100,8 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
   // The position for this person's counterparts
   const position = person.position
 
-  // User can always edit themselves
-  // Admins can always edit anybody
-  // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
-  const isAdmin = currentUser && currentUser.isAdmin()
-  const hasPosition = position && position.uuid
+  const isTenantAdmin = currentUser?.isTenantAdmin()
+  const hasPosition = position?.uuid
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -125,7 +122,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
               value={person.rank}
             />
 
-            {isAdmin && (
+            {isTenantAdmin && (
               <>
                 <DictionaryField
                   wrappedComponent={PreviewField}

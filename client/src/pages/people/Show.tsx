@@ -168,17 +168,24 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   // Admins can always edit anybody
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const hasPosition = position?.uuid
-  const canEditPosition =
+  // When the person is not in a position, any superuser can assign them.
+  const canAssignPosition = !hasPosition && currentUser.isSuperuser()
+  const canAdmin =
+    // Admins can edit anybody
     isAdmin ||
+    // Tenant admins can edit people without tenant or in their own tenant
+    (isTenantAdmin && utils.isFromNoOrSameTenant(currentUser, person))
+  const canEdit =
+    canAdmin ||
     (hasPosition &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
     (!hasPosition && currentUser.isSuperuser())
-  const canEdit = canEditPosition || isSelf
-  // When the person is not in a position, any superuser can assign them.
-  const canAssignPosition = currentUser.isSuperuser()
+  const canEditPosition = canEdit || canAssignPosition
+  const canEditOrSelf = canEdit || isSelf
   const canAddPeriodicAssessment =
     Position.isRegular(position) &&
     (isAdmin ||
@@ -207,7 +214,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       <Button value="compactView" variant="primary" onClick={onCompactClick}>
         Summary / Print
       </Button>
-      {canEdit && (
+      {canEditOrSelf && (
         <LinkTo
           modelType="Person"
           model={person}
@@ -350,7 +357,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                           updateAttachments={setAttachments}
                           relatedObjectType={Person.relatedObjectType}
                           relatedObjectUuid={person.uuid}
-                          allowEdit={canEdit}
+                          allowEdit={canEditOrSelf}
                         />
                       }
                     />
@@ -375,7 +382,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             <Fieldset
               title="Assigned counterparts"
               action={
-                canEdit && (
+                canEditOrSelf && (
                   <Button
                     onClick={() => setShowAssociatedPositionsModal(true)}
                     variant="outline-secondary"
@@ -386,7 +393,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
               }
             >
               {renderCounterparts(position)}
-              {canEdit && (
+              {canEditOrSelf && (
                 <EditAssociatedPositionsModal
                   position={position}
                   showModal={showAssociatedPositionsModal}
@@ -457,10 +464,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       user: {
-        accessCond: isAdmin
+        accessCond: canAdmin
       },
       users: {
-        accessCond: isAdmin
+        accessCond: canAdmin
       }
     }
 
@@ -642,22 +649,21 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         </OverlayTrigger>
       ) : null
 
-    const assignPositionButton =
-      !hasPosition && canAssignPosition ? (
-        <OverlayTrigger
-          key="assign-position-overlay"
-          placement="top"
-          overlay={
-            <Tooltip id="assign-position-tooltip">
-              Assign a Primary Position
-            </Tooltip>
-          }
-        >
-          <Button onClick={() => setShowAssignPositionModal(true)}>
-            <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
-          </Button>
-        </OverlayTrigger>
-      ) : null
+    const assignPositionButton = canAssignPosition ? (
+      <OverlayTrigger
+        key="assign-position-overlay"
+        placement="top"
+        overlay={
+          <Tooltip id="assign-position-tooltip">
+            Assign a Primary Position
+          </Tooltip>
+        }
+      >
+        <Button onClick={() => setShowAssignPositionModal(true)}>
+          <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
+        </Button>
+      </OverlayTrigger>
+    ) : null
 
     // if current user has no access for position actions return null so extraColElem will disappear
     if (!(editPositionButton || changePositionButton || assignPositionButton)) {
