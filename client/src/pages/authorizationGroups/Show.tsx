@@ -99,7 +99,7 @@ const AuthorizationGroupShow = ({
     currentUser.position?.authorizationGroupsAdministrated?.some(
       aga => aga.uuid === authorizationGroup.uuid
     )
-  const canEdit = currentUser.isAdmin() || isAssignedSuperuser
+  const canEdit = currentUser.isTenantAdmin() || isAssignedSuperuser
 
   const searchText = authorizationGroup.name
   const action = (

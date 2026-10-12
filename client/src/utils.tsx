@@ -290,6 +290,14 @@ export default {
     return error?.status === 409
   },
 
+  isFromSameTenant(user, obj) {
+    return user?.tenant?.uuid === obj?.tenant?.uuid
+  },
+
+  isFromNoOrSameTenant(user, obj) {
+    return !obj?.tenant?.uuid || this.isFromSameTenant(user, obj)
+  },
+
   pushHash: function (hash) {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""

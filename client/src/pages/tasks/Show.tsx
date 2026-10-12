@@ -167,10 +167,11 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
     : task.descendantTasks?.map(task => new Task(task))
 
   // Admins can edit tasks or users in positions related to the task
-  const isAdmin = currentUser && currentUser.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
+  const isAdmin = currentUser?.isAdmin()
   const isResponsibleForTask = currentUser?.isResponsibleForTask(task)
   const canAddPeriodicAssessment = isResponsibleForTask
-  const canAddOndemandAssessment = isAdmin
+  const canAddOndemandAssessment = isTenantAdmin
 
   const searchText = [task.shortName, task.longName].join(" ")
   const action = (

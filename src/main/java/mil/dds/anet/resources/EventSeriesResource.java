@@ -38,7 +38,7 @@ public class EventSeriesResource {
   }
 
   public static boolean hasPermission(final Person user, final EventSeries eventSeries) {
-    return AuthUtils.isAdmin(user)
+    return AuthUtils.isTenantAdmin(user)
         || AuthUtils.canAdministrateOrg(user, eventSeries.getAdminOrgUuid());
   }
 

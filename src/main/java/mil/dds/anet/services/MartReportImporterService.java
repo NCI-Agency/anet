@@ -472,7 +472,7 @@ public class MartReportImporterService implements IMartReportImporterService {
 
     // Update tenant
     final List<Tenant> tenants = tenantDao.getByName(tenantName);
-    personDao.updateTenantForPerson(tenants.getFirst(), person, true);
+    personDao.updateTenantForPerson(tenants.getFirst().getUuid(), person.getUuid(), true);
 
     return person;
   }

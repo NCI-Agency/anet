@@ -207,14 +207,20 @@ const AssignPositionModal = ({
     type: [Position.TYPE.REGULAR]
   }
   if (currentUser.isAdmin()) {
-    // only admins can put people in admin billets.
+    // only admins can put people in admin billets
     positionSearchQuery.type.push(
       Position.TYPE.ADMINISTRATOR,
       Position.TYPE.TENANT_ADMINISTRATOR,
       Position.TYPE.SUPERUSER
     )
+  } else if (currentUser.isTenantAdmin()) {
+    // tenant admins can put people in tenant admin billets
+    positionSearchQuery.type.push(
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.SUPERUSER
+    )
   } else if (currentUser.isSuperuser()) {
-    // Only superusers can put people in superuser billets
+    // superusers can put people in superuser billets
     positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
     // Superusers are limited to their organizations
     const administratingOrgUuids =

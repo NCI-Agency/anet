@@ -52,9 +52,11 @@ public class PositionResource {
   }
 
   public static boolean hasPermission(final Person user, final Position position) {
-    if (position.getType() == PositionType.ADMINISTRATOR
-        || position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+    if (position.getType() == PositionType.ADMINISTRATOR) {
       return AuthUtils.isAdmin(user);
+    }
+    if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      return AuthUtils.isTenantAdmin(user);
     }
     return AuthUtils.canAdministrateOrg(user, position.getOrganizationUuid());
   }
@@ -82,7 +84,7 @@ public class PositionResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Position type must be defined");
     }
     // only admins can make superuser positions
-    if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPERUSER)) {
+    if (!AuthUtils.isTenantAdmin(user) && (pos.getType() == PositionType.SUPERUSER)) {
       final Position existingPos = dao.getByUuid(pos.getUuid());
       if (existingPos.getType() != PositionType.SUPERUSER) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -213,6 +215,7 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
+    // TODO: tenant admins should also be allowed?
     AuthUtils.assertAdministrator(user);
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,

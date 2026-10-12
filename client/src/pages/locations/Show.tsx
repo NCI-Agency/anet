@@ -112,6 +112,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   if (done) {
     return result
   }
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
