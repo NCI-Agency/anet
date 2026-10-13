@@ -76,7 +76,8 @@ const DEFAULT_PAGESIZE = 25
 const AGGREGATION_DATE_FORMATS = {
   DAY: "D MMMM YYYY",
   WEEK: WeekPeriodFormat.ISO_WEEK,
-  MONTH: "MMMM YYYY"
+  MONTH: "MMMM YYYY",
+  YEAR: "YYYY"
 }
 const DEFAULT_AGGREGATION_PERIOD = "MONTH"
 const SEARCH_TYPES = {
@@ -465,6 +466,8 @@ const UserActivitiesPerPeriod = ({
 
   function showTodayLabel(period) {
     switch (period) {
+      case "YEAR":
+        return "This year"
       case "MONTH":
         return "This month"
       case "WEEK":

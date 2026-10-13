@@ -16,7 +16,7 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
   }
 
   public enum AggregationPeriod {
-    DAY, WEEK, MONTH
+    DAY, WEEK, MONTH, YEAR
   }
 
   @GraphQLQuery

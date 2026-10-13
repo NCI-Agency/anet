@@ -10,10 +10,6 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class UserActivity {
 
-  public enum AggregationPeriod {
-    DAY, WEEK, MONTH
-  }
-
   private String organizationUuid;
   private String personUuid;
   private Instant visitedAt;

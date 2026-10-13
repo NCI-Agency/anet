@@ -74,6 +74,7 @@ enum AggregationPeriod {
   DAY
   MONTH
   WEEK
+  YEAR
 }
 
 """"""
