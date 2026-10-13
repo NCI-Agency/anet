@@ -48,7 +48,7 @@ public class EventTypeResource {
   public EventType createEventType(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "eventType") EventType eventType) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     if (Utils.isEmptyOrNull(Utils.trimStringReturnNull(eventType.getName()))) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -77,7 +77,7 @@ public class EventTypeResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event type not found");
     }
 
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
     DaoUtils.assertObjectIsFresh(eventType, existing, force);
 
     final int numRows = dao.update(eventType);
@@ -99,7 +99,7 @@ public class EventTypeResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event type not found");
     }
 
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final int numRows;
     try {
