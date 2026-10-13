@@ -223,6 +223,9 @@ const Navigation = ({
   const externalDocumentationUrlText =
     appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
+  const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
+
   const routerLocation = useLocation()
   const path = routerLocation.pathname
   const inAdmin = path.startsWith("/admin")
@@ -424,7 +427,7 @@ const Navigation = ({
               )}
             </SidebarLink>
           )}
-          {(currentUser.isAdmin() ||
+          {(isAdmin ||
             !_isEmpty(currentUser?.position?.organizationsAdministrated)) && (
             <SidebarLink
               id="my-events-nav"
@@ -499,7 +502,7 @@ const Navigation = ({
         Daily Rollup
       </SidebarLink>
 
-      {currentUser.isAdmin() && (
+      {isTenantAdmin && (
         <Nav.Item>
           <SidebarLink
             id="admin-pages"
@@ -516,99 +519,103 @@ const Navigation = ({
           {inAdmin && (
             <Nav className="flex-column">
               <span id="style-nav" style={{ lineHeight: "10pt" }}>
-                {!Settings.automaticallyAllowAllNewUsers && (
-                  <SidebarLink
-                    id="users-pending-verification"
-                    linkTo="/admin/usersPendingVerification"
-                    handleOnClick={resetPages}
-                  >
-                    Users pending verification
-                  </SidebarLink>
-                )}
-                <NavDropdown title="Merge" id="merge" active={inMerge}>
-                  {MERGE_OPTIONS.map(mergeOption => (
-                    <SidebarContainer
-                      key={mergeOption.key}
-                      linkTo={`/admin/merge/${mergeOption.key}`}
+                {isAdmin && (
+                  <>
+                    {!Settings.automaticallyAllowAllNewUsers && (
+                      <SidebarLink
+                        id="users-pending-verification"
+                        linkTo="/admin/usersPendingVerification"
+                        handleOnClick={resetPages}
+                      >
+                        Users pending verification
+                      </SidebarLink>
+                    )}
+                    <NavDropdown title="Merge" id="merge" active={inMerge}>
+                      {MERGE_OPTIONS.map(mergeOption => (
+                        <SidebarContainer
+                          key={mergeOption.key}
+                          linkTo={`/admin/merge/${mergeOption.key}`}
+                          handleOnClick={resetPages}
+                        >
+                          {mergeOption.label}
+                        </SidebarContainer>
+                      ))}
+                    </NavDropdown>
+                    <NavDropdown
+                      title="User activities"
+                      id="user-activities"
+                      active={inUserActivities}
+                    >
+                      {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
+                        <SidebarContainer
+                          key={userActivityOption.key}
+                          linkTo={`/admin/userActivities/${userActivityOption.key}`}
+                        >
+                          {userActivityOption.label}
+                        </SidebarContainer>
+                      ))}
+                    </NavDropdown>
+                    <SidebarLink
+                      id="audit-trail"
+                      linkTo="/admin/auditTrail"
                       handleOnClick={resetPages}
                     >
-                      {mergeOption.label}
-                    </SidebarContainer>
-                  ))}
-                </NavDropdown>
-                <NavDropdown
-                  title="User activities"
-                  id="user-activities"
-                  active={inUserActivities}
-                >
-                  {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
-                    <SidebarContainer
-                      key={userActivityOption.key}
-                      linkTo={`/admin/userActivities/${userActivityOption.key}`}
+                      Audit trail
+                    </SidebarLink>
+                    <SidebarLink
+                      id="email-queue"
+                      linkTo="/admin/pendingEmails"
+                      handleOnClick={resetPages}
                     >
-                      {userActivityOption.label}
-                    </SidebarContainer>
-                  ))}
-                </NavDropdown>
-                <SidebarLink
-                  id="audit-trail"
-                  linkTo="/admin/auditTrail"
-                  handleOnClick={resetPages}
-                >
-                  Audit trail
-                </SidebarLink>
-                <SidebarLink
-                  id="email-queue"
-                  linkTo="/admin/pendingEmails"
-                  handleOnClick={resetPages}
-                >
-                  Pending emails
-                </SidebarLink>
-                <SidebarLink
-                  id="access-tokens"
-                  linkTo="/admin/accessTokens"
-                  handleOnClick={resetPages}
-                >
-                  Web service access tokens
-                </SidebarLink>
-                <SidebarLink
-                  id="configure-event-types"
-                  linkTo="/admin/configureEventTypes"
-                  handleOnClick={resetPages}
-                >
-                  Configure event types
-                </SidebarLink>
-                <SidebarLink
-                  id="tenants"
-                  linkTo="/admin/tenants"
-                  handleOnClick={resetPages}
-                  isActive={inTenants}
-                >
-                  Tenants
-                </SidebarLink>
-                {Settings.featureMartGuiEnabled && (
-                  <SidebarLink
-                    id="mart-imported-reports"
-                    linkTo="/admin/martImporter"
-                    handleOnClick={resetPages}
-                  >
-                    MART importer
-                  </SidebarLink>
+                      Pending emails
+                    </SidebarLink>
+                    <SidebarLink
+                      id="access-tokens"
+                      linkTo="/admin/accessTokens"
+                      handleOnClick={resetPages}
+                    >
+                      Web service access tokens
+                    </SidebarLink>
+                    <SidebarLink
+                      id="configure-event-types"
+                      linkTo="/admin/configureEventTypes"
+                      handleOnClick={resetPages}
+                    >
+                      Configure event types
+                    </SidebarLink>
+                    <SidebarLink
+                      id="tenants"
+                      linkTo="/admin/tenants"
+                      handleOnClick={resetPages}
+                      isActive={inTenants}
+                    >
+                      Tenants
+                    </SidebarLink>
+                    {Settings.featureMartGuiEnabled && (
+                      <SidebarLink
+                        id="mart-imported-reports"
+                        linkTo="/admin/martImporter"
+                        handleOnClick={resetPages}
+                      >
+                        MART importer
+                      </SidebarLink>
+                    )}
+                    <SidebarLink
+                      id="graphQL-nav"
+                      linkTo="/admin/graphiql"
+                      handleOnClick={resetPages}
+                    >
+                      GraphQL
+                    </SidebarLink>
+                    <SidebarLink
+                      id="preferences"
+                      linkTo="/admin/preferences"
+                      handleOnClick={resetPages}
+                    >
+                      Default application preferences
+                    </SidebarLink>
+                  </>
                 )}
-                <SidebarLink
-                  id="graphQL-nav"
-                  linkTo="/admin/graphiql"
-                  handleOnClick={resetPages}
-                >
-                  GraphQL
-                </SidebarLink>
-                <SidebarLink
-                  id="preferences"
-                  linkTo="/admin/preferences"
-                  handleOnClick={resetPages}
-                >
-                  Default application preferences
-                </SidebarLink>
               </span>
             </Nav>
           )}
