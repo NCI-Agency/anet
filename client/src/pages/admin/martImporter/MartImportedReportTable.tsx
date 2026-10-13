@@ -92,13 +92,16 @@ const MartImportedReportTable = ({
   onSelectReport
 }: MartImportedReportTableProps) => {
   usePageTitle("MART reports imported")
-  const { allTenants } = useContext(AppContext)
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [sortBy, setSortBy] = useState("SEQUENCE")
   const [sortOrder, setSortOrder] = useState("DESC")
   const [selectedState, setSelectedState] = useState(undefined)
-  const [selectedTenant, setSelectedTenant] = useState(null)
+  const [selectedTenant, setSelectedTenant] = useState(
+    isAdmin ? null : currentUser?.tenant
+  )
   const [selectedAuthor, setSelectedAuthor] = useState(null)
 
   const martImportedReportQuery = {
@@ -213,6 +216,7 @@ const MartImportedReportTable = ({
                   valueFunc={tenant => tenant?.name}
                   objectType={Tenant}
                   fields={Tenant.autocompleteQuery}
+                  disabled={!isAdmin}
                 />
               </div>
               <div className="d-flex flex-column">
