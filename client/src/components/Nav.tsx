@@ -247,7 +247,6 @@ const Navigation = ({
   const inMyCounterParts = path.startsWith("/positions/counterparts")
   const inMyTasks = path.startsWith("/tasks/mine")
   const inMyAuthorizationGroups = path.startsWith("/communities/mine")
-  const inMyTenants = path.startsWith("/tenants/mine")
   const inMyReports = path.startsWith("/reports/mine")
   const inMySubscriptions = path.startsWith("/subscriptions/mine")
   const inInsights = path.startsWith("/insights")
@@ -269,7 +268,6 @@ const Navigation = ({
       inMyReports ||
       inMyTasks ||
       inMyAuthorizationGroups ||
-      inMyTenants ||
       inMySubscriptions ||
       inMySavedSearches ||
       inMyEvents
@@ -282,7 +280,6 @@ const Navigation = ({
     inMyReports,
     inMyTasks,
     inMyAuthorizationGroups,
-    inMyTenants,
     inMySubscriptions,
     inMySavedSearches,
     inMyEvents
@@ -414,18 +411,6 @@ const Navigation = ({
               handleOnClick={resetPages}
             >
               My Communities
-            </SidebarLink>
-          )}
-          {!_isEmpty(currentUser?.position?.tenantsAdministrated) && (
-            <SidebarLink
-              id="my-tenant-nav"
-              linkTo="/tenants/mine"
-              handleOnClick={resetPages}
-            >
-              My Tenant
-              {!!nrTenantAccessRequests && (
-                <NotificationBadge>{nrTenantAccessRequests}</NotificationBadge>
-              )}
             </SidebarLink>
           )}
           {(isAdmin ||
@@ -586,16 +571,25 @@ const Navigation = ({
                 >
                   Configure event types
                 </SidebarLink>
-                {isAdmin && (
-                  <SidebarLink
-                    id="tenants"
-                    linkTo="/admin/tenants"
-                    handleOnClick={resetPages}
-                    isActive={inTenants}
-                  >
-                    Tenants
-                  </SidebarLink>
-                )}
+                <SidebarLink
+                  id="tenants"
+                  linkTo="/admin/tenants"
+                  handleOnClick={resetPages}
+                  isActive={inTenants}
+                >
+                  {isAdmin ? (
+                    "Tenants"
+                  ) : (
+                    <>
+                      My Tenant
+                      {!!nrTenantAccessRequests && (
+                        <NotificationBadge>
+                          {nrTenantAccessRequests}
+                        </NotificationBadge>
+                      )}
+                    </>
+                  )}
+                </SidebarLink>
                 {Settings.featureMartGuiEnabled && (
                   <SidebarLink
                     id="mart-imported-reports"
