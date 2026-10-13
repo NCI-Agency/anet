@@ -78,6 +78,9 @@ const RECENT_ACTIVITIES = gql`
   fragment recentActivity on RecentUserActivity {
     user {
       ${gqlEntityFieldsMap.Person}
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
     activity {
       time
