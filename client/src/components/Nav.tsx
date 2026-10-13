@@ -526,20 +526,24 @@ const Navigation = ({
                         </SidebarContainer>
                       ))}
                     </NavDropdown>
-                    <NavDropdown
-                      title="User activities"
-                      id="user-activities"
-                      active={inUserActivities}
+                  </>
+                )}
+                <NavDropdown
+                  title="User activities"
+                  id="user-activities"
+                  active={inUserActivities}
+                >
+                  {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
+                    <SidebarContainer
+                      key={userActivityOption.key}
+                      linkTo={`/admin/userActivities/${userActivityOption.key}`}
                     >
-                      {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
-                        <SidebarContainer
-                          key={userActivityOption.key}
-                          linkTo={`/admin/userActivities/${userActivityOption.key}`}
-                        >
-                          {userActivityOption.label}
-                        </SidebarContainer>
-                      ))}
-                    </NavDropdown>
+                      {userActivityOption.label}
+                    </SidebarContainer>
+                  ))}
+                </NavDropdown>
+                {isAdmin && (
+                  <>
                     <SidebarLink
                       id="audit-trail"
                       linkTo="/admin/auditTrail"
