@@ -438,8 +438,8 @@ public class PersonResource {
         sendNewUserEmail(p);
       }
 
-      // Log the change
-      auditTrailDao.logCreate(user, PersonDao.TABLE_NAME, p);
+      // Log the change; creator is `p` because it has the uuid
+      auditTrailDao.logCreate(p, PersonDao.TABLE_NAME, p);
     } else {
       // Log the change
       final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
