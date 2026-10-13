@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.cache.Cache;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.Person;
@@ -168,7 +169,7 @@ public class AdminResource {
   @GraphQLQuery(name = "recentActivities")
   public RecentActivities recentActivities(@GraphQLRootContext GraphQLContext context) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final List<RecentUserActivity> byActivity = new ArrayList<>();
     final List<RecentUserActivity> byUser = new ArrayList<>();
@@ -176,10 +177,12 @@ public class AdminResource {
     final Cache<String, Person> domainUsersCache = personCache.getDomainUsersCache();
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       final Person person = entry.getValue();
-      final Deque<Activity> activities = person.getRecentActivities();
-      if (!Utils.isEmptyOrNull(activities)) {
-        byUser.add(new RecentUserActivity(person, activities.getFirst()));
-        activities.forEach(activity -> byActivity.add(new RecentUserActivity(person, activity)));
+      if (AuthUtils.isAdmin(user) || Objects.equals(user.getTenantUuid(), person.getTenantUuid())) {
+        final Deque<Activity> activities = person.getRecentActivities();
+        if (!Utils.isEmptyOrNull(activities)) {
+          byUser.add(new RecentUserActivity(person, activities.getFirst()));
+          activities.forEach(activity -> byActivity.add(new RecentUserActivity(person, activity)));
+        }
       }
     }
 
