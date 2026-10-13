@@ -88,7 +88,8 @@ const UserActivitiesOverTime = ({
   userActivitiesState,
   setUserActivitiesState
 }: UserActivitiesOverTimeProps) => {
-  const { allTenants } = useContext(AppContext)
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const navigate = useNavigate()
   const { width, height, ref } = useResizeDetector()
   const [aggregationPeriod, setAggregationPeriod] = useState(
@@ -105,7 +106,7 @@ const UserActivitiesOverTime = ({
     .add(timeWindow, aggregationPeriod)
     .endOf(AGGREGATION_DATE_KEYS[aggregationPeriod])
   const [selectedTenant, setSelectedTenant] = useState(
-    userActivitiesState?.selectedTenant
+    isAdmin ? userActivitiesState?.selectedTenant : currentUser?.tenant
   )
   const [searchType, setSearchType] = useState(
     userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
@@ -271,6 +272,7 @@ const UserActivitiesOverTime = ({
                       valueFunc={tenant => tenant?.name}
                       objectType={Tenant}
                       fields={Tenant.autocompleteQuery}
+                      disabled={!isAdmin}
                     />
                   </div>
                   <div className="d-flex align-self-end gap-1">
