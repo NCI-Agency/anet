@@ -11,6 +11,9 @@ import {
   setUserActivitiesState
 } from "actions"
 import API from "api"
+import { TenantOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import BarChart from "components/BarChart"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Checkbox from "components/Checkbox"
@@ -25,11 +28,11 @@ import {
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
-import { Person } from "models"
+import { Person, Tenant } from "models"
 import moment from "moment"
 import { WeekPeriodFormat } from "periodUtils"
 import pluralize from "pluralize"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useResizeDetector } from "react-resize-detector"
@@ -104,6 +107,7 @@ const UserActivitiesPerPeriod = ({
   userActivitiesState,
   setUserActivitiesState
 }: UserActivitiesPerPeriodProps) => {
+  const { allTenants } = useContext(AppContext)
   const { width, height, ref } = useResizeDetector()
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
@@ -119,6 +123,9 @@ const UserActivitiesPerPeriod = ({
         ? userActivitiesState?.startDatePerPeriod
         : startOfCurrentPeriod(aggregationPeriod)
   )
+  const [selectedTenant, setSelectedTenant] = useState(
+    userActivitiesState?.selectedTenant
+  )
   const [searchType, setSearchType] = useState(
     userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
   )
@@ -130,6 +137,7 @@ const UserActivitiesPerPeriod = ({
     pageSize,
     startDate,
     endDate: moment.utc(startDate).endOf(aggregationPeriod),
+    tenantUuid: selectedTenant?.uuid,
     searchType,
     aggregationType: "BY_OBJECT",
     showDeleted
@@ -152,6 +160,13 @@ const UserActivitiesPerPeriod = ({
   })
   if (done) {
     return result
+  }
+
+  const tenantsFilters = {
+    allTenants: {
+      label: "All tenants",
+      list: allTenants
+    }
   }
 
   const paginatedUserActivities = data.userActivityList
@@ -265,25 +280,43 @@ const UserActivitiesPerPeriod = ({
                 >
                   {showTodayLabel(aggregationPeriod)}
                 </Button>
-                <div className="d-flex align-items-center">
-                  <FormSelect
-                    className="me-1"
-                    defaultValue={searchType}
-                    onChange={e =>
-                      changeSearchType(e.target.value || DEFAULT_SEARCH_TYPE)
-                    }
-                  >
-                    {Object.values(SEARCH_TYPES).map(st => (
-                      <option key={st} value={st}>
-                        Show activities by {utils.noCase(st)}
-                      </option>
-                    ))}
-                  </FormSelect>
-                  <Checkbox
-                    checked={showDeleted}
-                    onChange={toggleShowDeleted}
-                    label={showDeletedLabel}
-                  />
+                <div className="d-flex align-items-start gap-3 flex-md-row flex-md-wrap align-items-md-center">
+                  <div className="d-flex flex-column">
+                    Filter by tenant:
+                    <AdvancedSingleSelect
+                      fieldName="tenant"
+                      placeholder="Select a tenant to filter on"
+                      value={selectedTenant}
+                      overlayColumns={["Name", "Status"]}
+                      overlayRenderRow={TenantOverlayRow}
+                      filterDefs={tenantsFilters}
+                      onChange={changeSelectedTenant}
+                      valueFunc={tenant => tenant?.name}
+                      objectType={Tenant}
+                      fields={Tenant.autocompleteQuery}
+                    />
+                  </div>
+                  <div className="d-flex align-self-end gap-1">
+                    <FormSelect
+                      defaultValue={searchType}
+                      onChange={e =>
+                        changeSearchType(e.target.value || DEFAULT_SEARCH_TYPE)
+                      }
+                    >
+                      {Object.values(SEARCH_TYPES).map(st => (
+                        <option key={st} value={st}>
+                          Show activities by {utils.noCase(st)}
+                        </option>
+                      ))}
+                    </FormSelect>
+                    <span className="align-self-center">
+                      <Checkbox
+                        checked={showDeleted}
+                        onChange={toggleShowDeleted}
+                        label={showDeletedLabel}
+                      />
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="float-end">
@@ -484,6 +517,14 @@ const UserActivitiesPerPeriod = ({
       showDeleted: !showDeleted
     })
     setShowDeleted(!showDeleted)
+  }
+
+  function changeSelectedTenant(newSelectedTenant) {
+    setUserActivitiesState({
+      ...userActivitiesState,
+      selectedTenant: newSelectedTenant
+    })
+    setSelectedTenant(newSelectedTenant)
   }
 
   function changeSearchType(newSearchType) {

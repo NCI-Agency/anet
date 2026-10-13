@@ -16,6 +16,9 @@ public class UserActivityMapper implements RowMapper<UserActivity> {
     if (MapperUtils.containsColumnNamed(rs, "personUuid")) {
       ua.setPersonUuid(rs.getString("personUuid"));
     }
+    if (MapperUtils.containsColumnNamed(rs, "tenantUuid")) {
+      ua.setTenantUuid(rs.getString("tenantUuid"));
+    }
     ua.setVisitedAt(MapperUtils.getInstantAsLocalDateTime(rs, "aggregatedDate"));
     ua.setCount(rs.getLong("count"));
     if (MapperUtils.containsColumnNamed(rs, MapperUtils.TOTAL_COUNT_COLUMN)) {
