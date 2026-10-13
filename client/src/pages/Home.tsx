@@ -361,7 +361,7 @@ const PendingTenantAccessRequests = () => {
       {nrTenantAccessRequests <= 0 ? (
         <em>No pending access requests</em>
       ) : (
-        <Link to="/tenants/mine">
+        <Link to="/admin/tenants">
           {nrTenantAccessRequests} pending access request(s)
         </Link>
       )}

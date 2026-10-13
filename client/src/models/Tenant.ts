@@ -29,7 +29,7 @@ export default class Tenant extends Model {
 
   static pathFor(instance, query) {
     const uuid = instance.uuid
-    let url = ["", "tenants", uuid].join("/")
+    let url = ["", "admin", "tenants", uuid].join("/")
     url += utils.formatQueryString(query)
     return url
   }
