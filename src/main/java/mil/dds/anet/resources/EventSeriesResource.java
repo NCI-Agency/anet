@@ -24,12 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class EventSeriesResource {
 
-  private final AnetDictionary dict;
   private final AuditTrailDao auditTrailDao;
   private final EventSeriesDao dao;
 
-  public EventSeriesResource(AnetDictionary dict, AuditTrailDao auditTrailDao, EventSeriesDao dao) {
-    this.dict = dict;
+  public EventSeriesResource(AuditTrailDao auditTrailDao, EventSeriesDao dao) {
     this.auditTrailDao = auditTrailDao;
     this.dao = dao;
   }

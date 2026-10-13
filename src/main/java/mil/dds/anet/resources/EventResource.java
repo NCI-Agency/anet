@@ -13,7 +13,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
-import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventDao;
@@ -27,14 +26,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class EventResource {
 
-  private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final AuditTrailDao auditTrailDao;
   private final EventDao dao;
 
-  public EventResource(AnetDictionary dict, AnetObjectEngine engine, AuditTrailDao auditTrailDao,
-      EventDao dao) {
-    this.dict = dict;
+  public EventResource(AnetObjectEngine engine, AuditTrailDao auditTrailDao, EventDao dao) {
     this.engine = engine;
     this.dao = dao;
     this.auditTrailDao = auditTrailDao;
