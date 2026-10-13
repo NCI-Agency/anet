@@ -554,15 +554,15 @@ const Navigation = ({
                     >
                       Pending emails
                     </SidebarLink>
-                    <SidebarLink
-                      id="access-tokens"
-                      linkTo="/admin/accessTokens"
-                      handleOnClick={resetPages}
-                    >
-                      Web service access tokens
-                    </SidebarLink>
                   </>
                 )}
+                <SidebarLink
+                  id="access-tokens"
+                  linkTo="/admin/accessTokens"
+                  handleOnClick={resetPages}
+                >
+                  Web service access tokens
+                </SidebarLink>
                 <SidebarLink
                   id="configure-event-types"
                   linkTo="/admin/configureEventTypes"

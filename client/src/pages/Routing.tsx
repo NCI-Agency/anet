@@ -328,10 +328,10 @@ const routes = [
                     ]
                   },
                   { path: "auditTrail", element: <AuditTrailTable /> },
-                  { path: "pendingEmails", element: <PendingEmailsShow /> },
-                  { path: "accessTokens", element: <AccessTokensList /> }
+                  { path: "pendingEmails", element: <PendingEmailsShow /> }
                 ]
               },
+              { path: "accessTokens", element: <AccessTokensList /> },
               {
                 path: "configureEventTypes",
                 element: <ConfigureEventTypesShow />

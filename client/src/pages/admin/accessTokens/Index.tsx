@@ -42,8 +42,8 @@ import Settings from "settings"
 import * as yup from "yup"
 
 const GQL_GET_ACCESS_TOKEN_LIST = gql`
-  query {
-    accessTokenList {
+  query ($tenantUuid: String) {
+    accessTokenList(tenantUuid: $tenantUuid) {
       ${gqlAllAccessTokenFields}
       tenant {
         ${gqlEntityFieldsMap.Tenant}
@@ -178,12 +178,16 @@ function createExpirationShortcuts(withTime: boolean) {
 
 interface AccessTokensTableProps {
   accessTokens?: any[]
+  selectedTenant?: any
+  selectTenant: (tenant: any) => void
   onDelete: (...args: unknown[]) => unknown
   onUpdate: (...args: unknown[]) => Promise<unknown>
 }
 
 const AccessTokensTable = ({
   accessTokens,
+  selectedTenant,
+  selectTenant,
   onDelete,
   onUpdate
 }: AccessTokensTableProps) => {
@@ -239,7 +243,23 @@ const AccessTokensTable = ({
                   Settings.dateFormats.forms.displayShort.withTime
                 )}
               </td>
-              <td>{at.tenant?.name}</td>
+              <td>
+                {at.tenant?.name}
+                {!selectedTenant && at.tenant && (
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip>Filter all entries by this tenant</Tooltip>
+                    }
+                  >
+                    <Icon
+                      icon={IconNames.SEARCH}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => selectTenant(at.tenant)}
+                    />
+                  </OverlayTrigger>
+                )}
+              </td>
               <td>
                 {!at?.accessTokenActivities?.[0]?.visitedAt ? (
                   <em>never</em>
@@ -374,8 +394,10 @@ const AccessTokenModal = ({
   setShow,
   onConfirm
 }: AccessTokenModalProps) => {
-  const { allTenants } = useContext(AppContext)
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const [error, setError] = useState(null)
+  const defaultTenant = isAdmin ? null : currentUser?.tenant
   if (isNew) {
     accessToken = {
       name: "",
@@ -384,7 +406,7 @@ const AccessTokenModal = ({
       description: null,
       expiresAt: null,
       tokenValue: b64(getRandomBytes(24)),
-      tenant: null
+      tenant: defaultTenant
     }
   }
   const tenantsFilters = {
@@ -541,6 +563,7 @@ const AccessTokenModal = ({
                         objectType={Tenant}
                         fields={Tenant.autocompleteQuery}
                         valueKey="name"
+                        disabled={!isAdmin}
                       />
                     }
                   />
@@ -605,12 +628,20 @@ interface AccessTokensListProps {
 }
 
 const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const [stateSuccess, setStateSuccess] = useState(null)
   const [stateError, setStateError] = useState(null)
+  const [selectedTenant, setSelectedTenant] = useState(
+    isAdmin ? null : currentUser?.tenant
+  )
   const [showCreateAccessTokenDialog, setShowCreateAccessTokenDialog] =
     useState(false)
   const { loading, error, data, refetch } = API.useApiQuery(
-    GQL_GET_ACCESS_TOKEN_LIST
+    GQL_GET_ACCESS_TOKEN_LIST,
+    {
+      tenantUuid: selectedTenant?.uuid
+    }
   )
   const { done, result } = useBoilerplate({
     loading,
@@ -623,23 +654,53 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
   if (done) {
     return result
   }
+
+  const tenantsFilters = {
+    allTenants: {
+      label: "All tenants",
+      list: allTenants
+    }
+  }
+
   return (
     <>
       <Fieldset
         id="accessTokens"
         title="Web Service Access Tokens"
         action={
-          <Button
-            variant="primary"
-            onClick={() => setShowCreateAccessTokenDialog(true)}
-          >
-            New web service access token
-          </Button>
+          <div className="float-end d-flex flex-column align-items-start gap-3 flex-md-row flex-md-wrap align-items-md-center">
+            <div className="d-flex flex-column">
+              Filter by tenant:
+              <AdvancedSingleSelect
+                fieldName="tenant"
+                placeholder="Select a tenant to filter on"
+                value={selectedTenant}
+                overlayColumns={["Name", "Status"]}
+                overlayRenderRow={TenantOverlayRow}
+                filterDefs={tenantsFilters}
+                onChange={setSelectedTenant}
+                valueFunc={tenant => tenant?.name}
+                objectType={Tenant}
+                fields={Tenant.autocompleteQuery}
+                disabled={!isAdmin}
+              />
+            </div>
+            <span className="align-self-end">
+              <Button
+                variant="primary"
+                onClick={() => setShowCreateAccessTokenDialog(true)}
+              >
+                New web service access token
+              </Button>
+            </span>
+          </div>
         }
       >
         <Messages success={stateSuccess} error={stateError} />
         <AccessTokensTable
           accessTokens={data?.accessTokenList}
+          selectedTenant={selectedTenant}
+          selectTenant={setSelectedTenant}
           onDelete={deleteAccessToken}
           onUpdate={updateAccessToken}
         />
