@@ -29,6 +29,10 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
 
   @GraphQLQuery
   @GraphQLInputField
+  private String tenantUuid;
+
+  @GraphQLQuery
+  @GraphQLInputField
   private SearchType searchType;
 
   @GraphQLQuery
@@ -65,6 +69,14 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
 
   public void setEndDate(final Instant endDate) {
     this.endDate = endDate;
+  }
+
+  public String getTenantUuid() {
+    return tenantUuid;
+  }
+
+  public void setTenantUuid(String tenantUuid) {
+    this.tenantUuid = tenantUuid;
   }
 
   public SearchType getSearchType() {
@@ -119,6 +131,7 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
     final UserActivitySearchQuery other = (UserActivitySearchQuery) obj;
     return Objects.equals(getStartDate(), other.getStartDate())
         && Objects.equals(getEndDate(), other.getEndDate())
+        && Objects.equals(getTenantUuid(), other.getTenantUuid())
         && getSearchType() == other.getSearchType()
         && getAggregationType() == other.getAggregationType()
         && getAggregationPeriod() == other.getAggregationPeriod()
