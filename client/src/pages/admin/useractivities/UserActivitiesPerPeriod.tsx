@@ -107,7 +107,8 @@ const UserActivitiesPerPeriod = ({
   userActivitiesState,
   setUserActivitiesState
 }: UserActivitiesPerPeriodProps) => {
-  const { allTenants } = useContext(AppContext)
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const { width, height, ref } = useResizeDetector()
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
@@ -124,7 +125,7 @@ const UserActivitiesPerPeriod = ({
         : startOfCurrentPeriod(aggregationPeriod)
   )
   const [selectedTenant, setSelectedTenant] = useState(
-    userActivitiesState?.selectedTenant
+    isAdmin ? userActivitiesState?.selectedTenant : currentUser?.tenant
   )
   const [searchType, setSearchType] = useState(
     userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
@@ -294,6 +295,7 @@ const UserActivitiesPerPeriod = ({
                       valueFunc={tenant => tenant?.name}
                       objectType={Tenant}
                       fields={Tenant.autocompleteQuery}
+                      disabled={!isAdmin}
                     />
                   </div>
                   <div className="d-flex align-self-end gap-1">
