@@ -359,11 +359,22 @@ const routes = [
                   },
                   { path: "auditTrail", element: <AuditTrailTable /> },
                   { path: "pendingEmails", element: <PendingEmailsShow /> },
-                  { path: "accessTokens", element: <AccessTokensList /> },
-                  {
-                    path: "configureEventTypes",
-                    element: <ConfigureEventTypesShow />
-                  },
+                  { path: "accessTokens", element: <AccessTokensList /> }
+                ]
+              },
+              {
+                path: "configureEventTypes",
+                element: <ConfigureEventTypesShow />
+              },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={currentUser =>
+                      currentUser?.isAdmin()
+                    }
+                  />
+                ),
+                children: [
                   {
                     path: "tenants",
                     children: [

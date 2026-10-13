@@ -576,13 +576,17 @@ const Navigation = ({
                     >
                       Web service access tokens
                     </SidebarLink>
-                    <SidebarLink
-                      id="configure-event-types"
-                      linkTo="/admin/configureEventTypes"
-                      handleOnClick={resetPages}
-                    >
-                      Configure event types
-                    </SidebarLink>
+                  </>
+                )}
+                <SidebarLink
+                  id="configure-event-types"
+                  linkTo="/admin/configureEventTypes"
+                  handleOnClick={resetPages}
+                >
+                  Configure event types
+                </SidebarLink>
+                {isAdmin && (
+                  <>
                     <SidebarLink
                       id="tenants"
                       linkTo="/admin/tenants"
