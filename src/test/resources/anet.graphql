@@ -2488,6 +2488,7 @@ type UserActivity {
   organizationUuid: String
   person: Person
   personUuid: String
+  tenantUuid: String
   visitedAt: Instant
 }
 
@@ -2504,6 +2505,7 @@ input UserActivitySearchQueryInput {
   sortOrder: SortOrder
   startDate: Instant
   status: Status
+  tenantUuid: String
   text: String
 }
 
