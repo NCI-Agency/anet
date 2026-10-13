@@ -110,7 +110,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "4.3.0",
+    "@apollo/client": "4.3.3",
     "@blueprintjs/core": "6.21.0",
     "@blueprintjs/datetime": "6.3.0",
     "@emotion/react": "11.14.0",
@@ -156,7 +156,7 @@
     "react-dnd-html5-backend": "16.0.1",
     "react-dom": "18.3.1",
     "react-joyride": "3.2.0",
-    "react-mosaic-component": "7.1.0",
+    "react-mosaic-component": "7.2.1",
     "react-redux": "9.3.0",
     "react-redux-loading-bar": "5.0.8",
     "react-resize-detector": "12.3.0",
@@ -178,7 +178,7 @@
     "slate-react": "0.133.0",
     "title-case": "4.3.2",
     "use-debounce": "10.1.1",
-    "uuid": "14.0.2",
+    "uuid": "14.0.3",
     "yup": "1.7.1"
   },
   "resolutions": {
