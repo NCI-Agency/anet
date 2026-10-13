@@ -10,16 +10,7 @@ class Onboard extends CreatePerson {
   }
 
   async waitForWelcomeMessage(value) {
-    if (!(await (await this.getWelcomeText()).isDisplayed())) {
-      await (await this.getWelcomeText()).waitForExist()
-      await (await this.getWelcomeText()).waitForDisplayed()
-    }
-    return browser.waitUntil(
-      async () => {
-        return (await (await this.getWelcomeText()).getText()) === value
-      },
-      { timeout: 5000, timeoutMsg: "Expected different welcome text after 5s" }
-    )
+    return this.waitForElementToChange(this.getWelcomeText, value)
   }
 
   async getBiography() {

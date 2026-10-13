@@ -181,21 +181,9 @@ class CreateOrganization extends Page {
   }
 
   async waitForLocationAdvancedSelectToChange(value) {
-    await (await this.getLocationAdvancedSelectItem()).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (
-          (await (await this.getLocationAdvancedSelectItem()).getText()) ===
-          value
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg:
-          'Expected location advanced select input to contain "' +
-          value +
-          '" after 5s'
-      }
+    return this.waitForElementToChange(
+      this.getLocationAdvancedSelectItem,
+      value
     )
   }
 

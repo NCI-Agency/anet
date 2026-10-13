@@ -63,9 +63,8 @@ describe("Create event page", () => {
       await (
         await CreateEvent.getHostRelatedObjectsInput()
       ).setValue(ORGANIZATION)
-      await CreateEvent.waitForAdvancedSelectToChange(
-        ORGANIZATION_COMPLETE,
-        CreateEvent.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateEvent.waitForRelatedObjectsAdvancedSelectToChange(
+        ORGANIZATION_COMPLETE
       )
       expect(
         await (
@@ -86,9 +85,8 @@ describe("Create event page", () => {
       await (await CreateEvent.getMemberTypeButton("Positions")).click()
       await CreateEvent.deleteInput(CreateEvent.getHostRelatedObjectsInput())
       await (await CreateEvent.getHostRelatedObjectsInput()).setValue(POSITION)
-      await CreateEvent.waitForAdvancedSelectToChange(
-        POSITION_COMPLETE,
-        CreateEvent.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateEvent.waitForRelatedObjectsAdvancedSelectToChange(
+        POSITION_COMPLETE
       )
       expect(
         await (
@@ -114,9 +112,8 @@ describe("Create event page", () => {
       await (await CreateEvent.getMemberTypeButton("People")).click()
       await CreateEvent.deleteInput(CreateEvent.getHostRelatedObjectsInput())
       await (await CreateEvent.getHostRelatedObjectsInput()).setValue(PERSON)
-      await CreateEvent.waitForAdvancedSelectToChange(
-        PERSON_COMPLETE,
-        CreateEvent.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateEvent.waitForRelatedObjectsAdvancedSelectToChange(
+        PERSON_COMPLETE
       )
       expect(
         await (

@@ -104,17 +104,6 @@ class Home extends Page {
     return (await this.getReportsPendingMyApproval()).$("h1")
   }
 
-  async waitForSecurityBannerValue(value) {
-    await (await this.getSecurityBanner()).waitForExist()
-    await (await this.getSecurityBanner()).waitForDisplayed()
-    return browser.waitUntil(
-      async () => {
-        return (await (await this.getSecurityBanner()).getText()) === value
-      },
-      { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
-    )
-  }
-
   async getSavedSearches() {
     return browser.$("fieldset.saved-searches")
   }

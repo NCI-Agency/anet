@@ -32,8 +32,8 @@ describe("Create report form page", () => {
       await (
         await CreateFutureReport.getAttendeesField()
       ).setValue(INTERLOCUTOR)
-      await CreateFutureReport.waitForAdvancedSelectToChange(
-        CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem(),
+      await CreateFutureReport.waitForElementToChange(
+        CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem,
         INTERLOCUTOR_VALUE
       )
       expect(
@@ -62,8 +62,8 @@ describe("Create report form page", () => {
       // Select task
       await (await CreateFutureReport.getTasksFieldLabel()).click()
       await (await CreateFutureReport.getTasksField()).setValue(TASK_SEARCH)
-      await CreateFutureReport.waitForAdvancedSelectToChange(
-        CreateFutureReport.getTasksFieldAdvancedSelectItem(3),
+      await CreateFutureReport.waitForElementToChange(
+        () => CreateFutureReport.getTasksFieldAdvancedSelectItem(3),
         TASK_POPOVER_VALUE
       )
       expect(
