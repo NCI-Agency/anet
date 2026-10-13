@@ -6,12 +6,14 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
+import java.util.Objects;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,29 +33,43 @@ public class AccessTokenResource {
   public AccessToken getByUuid(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
     final AccessToken accessToken = accessTokenDao.getByUuid(uuid);
     if (accessToken == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
+    }
+    if (!AuthUtils.isAdmin(user)
+        && !Objects.equals(accessToken.getTenantUuid(), user.getTenantUuid())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
     }
     return accessToken;
   }
 
   @GraphQLQuery(name = "accessTokenList")
-  public List<AccessToken> getAccessTokenList(@GraphQLRootContext GraphQLContext context) {
+  public List<AccessToken> getAccessTokenList(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "tenantUuid") String tenantUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
-    return accessTokenDao.getAll();
+    AuthUtils.assertTenantAdministrator(user);
+    if (AuthUtils.isAdmin(user)) {
+      return Utils.isEmptyOrNull(tenantUuid) ? accessTokenDao.getAll()
+          : accessTokenDao.getByTenant(tenantUuid);
+    } else {
+      return accessTokenDao.getByTenant(user.getTenantUuid());
+    }
   }
 
   @GraphQLMutation(name = "createAccessToken")
   public AccessToken createAccessToken(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "accessToken") AccessToken at) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
     final AccessToken created = accessTokenDao.insert(at);
 
-    accessTokenDao.updateTenantForAccessToken(at.getTenant(), at);
+    if (AuthUtils.isAdmin(user)) {
+      accessTokenDao.updateTenantForAccessToken(at.getTenantUuid(), at.getUuid());
+    } else {
+      accessTokenDao.updateTenantForAccessToken(user.getTenantUuid(), at.getUuid());
+    }
 
     // Log the change
     auditTrailDao.logCreate(user, AccessTokenDao.TABLE_NAME, created);
@@ -70,7 +86,11 @@ public class AccessTokenResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
     }
 
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
+    if (!AuthUtils.isAdmin(user)
+        && !Objects.equals(existing.getTenantUuid(), user.getTenantUuid())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
+    }
     DaoUtils.assertObjectIsFresh(at, existing, force);
 
     final int numRows = accessTokenDao.update(at);
@@ -79,8 +99,10 @@ public class AccessTokenResource {
           "Couldn't process access token update");
     }
 
-    // Update Tenant:
-    accessTokenDao.updateTenantForAccessToken(at.getTenant(), at);
+    if (AuthUtils.isAdmin(user)) {
+      // Only admin can update tenant
+      accessTokenDao.updateTenantForAccessToken(at.getTenantUuid(), at.getUuid());
+    }
 
     // Log the change
     auditTrailDao.logUpdate(user, AccessTokenDao.TABLE_NAME, at);
@@ -96,7 +118,11 @@ public class AccessTokenResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
     }
 
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
+    if (!AuthUtils.isAdmin(user)
+        && !Objects.equals(existing.getTenantUuid(), user.getTenantUuid())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
+    }
 
     final int numRows = accessTokenDao.delete(uuid);
     if (numRows == 0) {
