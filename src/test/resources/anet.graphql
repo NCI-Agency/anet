@@ -1747,7 +1747,10 @@ type Query {
     """"""
     uuid: String
   ): AccessToken
-  accessTokenList: [AccessToken]
+  accessTokenList(
+    """"""
+    tenantUuid: String
+  ): [AccessToken]
   adminSettings: [AdminSetting]
   approvalStepInUse(
     """"""
