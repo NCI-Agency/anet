@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -537,31 +538,38 @@ public class PendingAssessmentsHelper {
       final GraphQLContext context, final Map<Position, ObjectsToAssess> objectsToAssessByPosition,
       final Map<Position, Set<Recurrence>> allPositionsToAssess,
       final Map<Task, Set<Recurrence>> allTasksToAssess, final boolean sendEmail) {
+    final Person user = DaoUtils.getUserFromContext(context);
     final Map<Position, ObjectsToAssess> includedObjectsToAssessByPosition = new HashMap<>();
     final CompletableFuture<?>[] allFutures =
         objectsToAssessByPosition.entrySet().stream().map(otabp -> {
           final Position pos = otabp.getKey();
           // Get the person to be notified
-          return pos.loadPerson(context)
-              .thenCompose(advisor -> advisor.loadEmailAddresses(context, null).thenCompose(l -> {
-                if (!Boolean.TRUE.equals(advisor.getUser())) {
-                  return CompletableFuture.completedFuture(null);
-                }
-                final ObjectsToAssess ota = otabp.getValue();
-                includedObjectsToAssessByPosition.put(pos, ota);
-                final Set<Position> positionsToAssess = ota.positionsToAssess();
-                final Set<Task> tasksToAssess = ota.tasksToAssess();
-                logger.info("advisor {} should do assessments:", advisor);
-                positionsToAssess
-                    .forEach(pta -> logger.info(" - {} for position {} held by person {}",
-                        allPositionsToAssess.get(pta), pta, pta.getPerson()));
-                tasksToAssess.forEach(
-                    tta -> logger.info(" - {} for task {}", allTasksToAssess.get(tta), tta));
-                if (sendEmail) {
-                  sendEmail(advisor, positionsToAssess, tasksToAssess);
-                }
-                return CompletableFuture.completedFuture(null);
-              }));
+          return pos.loadPerson(context).thenCompose(advisor -> {
+            if (!Boolean.TRUE.equals(advisor.getUser())) {
+              return CompletableFuture.completedFuture(null);
+            }
+            if (!Person.isSystemUser(user) && !AuthUtils.isAdmin(user)
+                && !Objects.equals(user.getTenantUuid(), advisor.getTenantUuid())) {
+              return CompletableFuture.completedFuture(null);
+            }
+
+            return advisor.loadEmailAddresses(context, null).thenCompose(l -> {
+              final ObjectsToAssess ota = otabp.getValue();
+              includedObjectsToAssessByPosition.put(pos, ota);
+              final Set<Position> positionsToAssess = ota.positionsToAssess();
+              final Set<Task> tasksToAssess = ota.tasksToAssess();
+              logger.info("advisor {} should do assessments:", advisor);
+              positionsToAssess
+                  .forEach(pta -> logger.info(" - {} for position {} held by person {}",
+                      allPositionsToAssess.get(pta), pta, pta.getPerson()));
+              tasksToAssess
+                  .forEach(tta -> logger.info(" - {} for task {}", allTasksToAssess.get(tta), tta));
+              if (sendEmail) {
+                sendEmail(advisor, positionsToAssess, tasksToAssess);
+              }
+              return CompletableFuture.completedFuture(null);
+            });
+          });
         }).toArray(CompletableFuture<?>[]::new);
     // Wait for our futures to complete before returning
     return CompletableFuture.allOf(allFutures)
