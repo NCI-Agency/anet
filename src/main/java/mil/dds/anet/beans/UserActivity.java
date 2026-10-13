@@ -12,14 +12,16 @@ public class UserActivity {
 
   private String organizationUuid;
   private String personUuid;
+  private String tenantUuid;
   private Instant visitedAt;
   private long count;
 
   public UserActivity() {}
 
-  public UserActivity(final String personUuid, final String organizationUuid,
-      final Instant visitedAt) {
+  public UserActivity(final String personUuid, final String tenantUuid,
+      final String organizationUuid, final Instant visitedAt) {
     this.personUuid = personUuid;
+    this.tenantUuid = tenantUuid;
     this.organizationUuid = organizationUuid;
     this.visitedAt = visitedAt;
   }
@@ -52,6 +54,15 @@ public class UserActivity {
 
   public void setPersonUuid(final String personUuid) {
     this.personUuid = personUuid;
+  }
+
+  @GraphQLQuery
+  public String getTenantUuid() {
+    return tenantUuid;
+  }
+
+  public void setTenantUuid(String tenantUuid) {
+    this.tenantUuid = tenantUuid;
   }
 
   @GraphQLQuery
