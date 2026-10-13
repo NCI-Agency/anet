@@ -323,58 +323,56 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
         }}
       </Formik>
       {isAdmin && (
-        <>
-          <Fieldset title="Site actions">
-            <Container fluid>
-              <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
-                <Col md={2}>
-                  <Button
-                    disabled={actionLoading}
-                    variant="primary"
-                    onClick={clearCache}
-                    style={{ width: "100%" }}
-                  >
-                    Clear Cache
-                  </Button>
-                </Col>
-                <Col md={10}>Clears the "Domain Users Cache"</Col>
-              </Row>
-              <Row style={actionRowStyle}>
-                <Col md={2}>
-                  <Button
-                    disabled={actionLoading}
-                    variant="primary"
-                    onClick={reloadDictionary}
-                    style={{ width: "100%" }}
-                  >
-                    Reload Dictionary
-                  </Button>
-                </Col>
-                <Col md={10}>
-                  Reloads the ANET Dictionary. After making changes in ANET
-                  dictionary, reloading the dictionary makes those changes
-                  effective immediately without restarting the server.
-                </Col>
-              </Row>
-            </Container>
-          </Fieldset>
-          <Fieldset
-            title={getTitleText(recentActivities, "Recent Activities")}
-            action={recentActivitiesActionButton}
-          >
-            <RecentActivityTable
-              text="recent activities"
-              values={recentActivities}
-            />
-          </Fieldset>
-          <Fieldset
-            title={getTitleText(recentUsers, "Recent Users")}
-            action={recentActivitiesActionButton}
-          >
-            <RecentActivityTable text="recent users" values={recentUsers} />
-          </Fieldset>
-        </>
+        <Fieldset title="Site actions">
+          <Container fluid>
+            <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
+              <Col md={2}>
+                <Button
+                  disabled={actionLoading}
+                  variant="primary"
+                  onClick={clearCache}
+                  style={{ width: "100%" }}
+                >
+                  Clear Cache
+                </Button>
+              </Col>
+              <Col md={10}>Clears the "Domain Users Cache"</Col>
+            </Row>
+            <Row style={actionRowStyle}>
+              <Col md={2}>
+                <Button
+                  disabled={actionLoading}
+                  variant="primary"
+                  onClick={reloadDictionary}
+                  style={{ width: "100%" }}
+                >
+                  Reload Dictionary
+                </Button>
+              </Col>
+              <Col md={10}>
+                Reloads the ANET Dictionary. After making changes in ANET
+                dictionary, reloading the dictionary makes those changes
+                effective immediately without restarting the server.
+              </Col>
+            </Row>
+          </Container>
+        </Fieldset>
       )}
+      <Fieldset
+        title={getTitleText(recentActivities, "Recent Activities")}
+        action={recentActivitiesActionButton}
+      >
+        <RecentActivityTable
+          text="recent activities"
+          values={recentActivities}
+        />
+      </Fieldset>
+      <Fieldset
+        title={getTitleText(recentUsers, "Recent Users")}
+        action={recentActivitiesActionButton}
+      >
+        <RecentActivityTable text="recent users" values={recentUsers} />
+      </Fieldset>
     </div>
   )
 
