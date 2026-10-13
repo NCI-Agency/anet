@@ -381,19 +381,28 @@ const routes = [
                       { index: true, element: <TenantsList /> },
                       { path: "new", element: <TenantNew /> }
                     ]
-                  },
-                  {
-                    element: (
-                      <ProtectedRoute
-                        authorizationCallback={() =>
-                          Settings.featureMartGuiEnabled
-                        }
-                      />
-                    ),
-                    children: [
-                      { path: "martImporter", element: <MartImporterShow /> }
-                    ]
-                  },
+                  }
+                ]
+              },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={() => Settings.featureMartGuiEnabled}
+                  />
+                ),
+                children: [
+                  { path: "martImporter", element: <MartImporterShow /> }
+                ]
+              },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={currentUser =>
+                      currentUser?.isAdmin()
+                    }
+                  />
+                ),
+                children: [
                   {
                     path: "graphiql",
                     element: <GraphiQL />

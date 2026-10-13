@@ -586,24 +586,26 @@ const Navigation = ({
                   Configure event types
                 </SidebarLink>
                 {isAdmin && (
+                  <SidebarLink
+                    id="tenants"
+                    linkTo="/admin/tenants"
+                    handleOnClick={resetPages}
+                    isActive={inTenants}
+                  >
+                    Tenants
+                  </SidebarLink>
+                )}
+                {Settings.featureMartGuiEnabled && (
+                  <SidebarLink
+                    id="mart-imported-reports"
+                    linkTo="/admin/martImporter"
+                    handleOnClick={resetPages}
+                  >
+                    MART importer
+                  </SidebarLink>
+                )}
+                {isAdmin && (
                   <>
-                    <SidebarLink
-                      id="tenants"
-                      linkTo="/admin/tenants"
-                      handleOnClick={resetPages}
-                      isActive={inTenants}
-                    >
-                      Tenants
-                    </SidebarLink>
-                    {Settings.featureMartGuiEnabled && (
-                      <SidebarLink
-                        id="mart-imported-reports"
-                        linkTo="/admin/martImporter"
-                        handleOnClick={resetPages}
-                      >
-                        MART importer
-                      </SidebarLink>
-                    )}
                     <SidebarLink
                       id="graphQL-nav"
                       linkTo="/admin/graphiql"
