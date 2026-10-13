@@ -301,7 +301,7 @@ const routes = [
       {
         element: (
           <ProtectedRoute
-            authorizationCallback={currentUser => currentUser?.isAdmin()}
+            authorizationCallback={currentUser => currentUser?.isTenantAdmin()}
           />
         ),
         children: [
@@ -312,62 +312,87 @@ const routes = [
               {
                 element: (
                   <ProtectedRoute
-                    authorizationCallback={() =>
-                      !Settings.automaticallyAllowAllNewUsers
+                    authorizationCallback={currentUser =>
+                      currentUser?.isAdmin()
                     }
                   />
                 ),
                 children: [
                   {
-                    path: "usersPendingVerification",
-                    element: <UsersPendingVerification />
+                    element: (
+                      <ProtectedRoute
+                        authorizationCallback={() =>
+                          !Settings.automaticallyAllowAllNewUsers
+                        }
+                      />
+                    ),
+                    children: [
+                      {
+                        path: "usersPendingVerification",
+                        element: <UsersPendingVerification />
+                      }
+                    ]
+                  },
+                  {
+                    path: "merge",
+                    children: [
+                      { path: "people", element: <MergePeople /> },
+                      { path: "positions", element: <MergePositions /> },
+                      { path: "locations", element: <MergeLocations /> },
+                      {
+                        path: "organizations",
+                        element: <MergeOrganizations />
+                      },
+                      { path: "tasks", element: <MergeTasks /> },
+                      { path: "eventSeries", element: <MergeEventSeries /> }
+                    ]
+                  },
+                  {
+                    path: "userActivities",
+                    children: [
+                      {
+                        path: "perPeriod",
+                        element: <UserActivitiesPerPeriod />
+                      },
+                      { path: "overTime", element: <UserActivitiesOverTime /> }
+                    ]
+                  },
+                  { path: "auditTrail", element: <AuditTrailTable /> },
+                  { path: "pendingEmails", element: <PendingEmailsShow /> },
+                  { path: "accessTokens", element: <AccessTokensList /> },
+                  {
+                    path: "configureEventTypes",
+                    element: <ConfigureEventTypesShow />
+                  },
+                  {
+                    path: "tenants",
+                    children: [
+                      { index: true, element: <TenantsList /> },
+                      { path: "new", element: <TenantNew /> }
+                    ]
+                  },
+                  {
+                    element: (
+                      <ProtectedRoute
+                        authorizationCallback={() =>
+                          Settings.featureMartGuiEnabled
+                        }
+                      />
+                    ),
+                    children: [
+                      { path: "martImporter", element: <MartImporterShow /> }
+                    ]
+                  },
+                  {
+                    path: "graphiql",
+                    element: <GraphiQL />
+                  },
+                  {
+                    path: "preferences",
+                    element: <Preferences />
                   }
                 ]
-              },
-              {
-                path: "merge",
-                children: [
-                  { path: "people", element: <MergePeople /> },
-                  { path: "positions", element: <MergePositions /> },
-                  { path: "locations", element: <MergeLocations /> },
-                  { path: "organizations", element: <MergeOrganizations /> },
-                  { path: "tasks", element: <MergeTasks /> },
-                  { path: "eventSeries", element: <MergeEventSeries /> }
-                ]
-              },
-              {
-                path: "userActivities",
-                children: [
-                  { path: "perPeriod", element: <UserActivitiesPerPeriod /> },
-                  { path: "overTime", element: <UserActivitiesOverTime /> }
-                ]
-              },
-              { path: "auditTrail", element: <AuditTrailTable /> },
-              { path: "pendingEmails", element: <PendingEmailsShow /> },
-              { path: "accessTokens", element: <AccessTokensList /> },
-              {
-                path: "configureEventTypes",
-                element: <ConfigureEventTypesShow />
-              },
-              {
-                path: "tenants",
-                children: [
-                  { index: true, element: <TenantsList /> },
-                  { path: "new", element: <TenantNew /> }
-                ]
-              },
-              {
-                element: (
-                  <ProtectedRoute
-                    authorizationCallback={() => Settings.featureMartGuiEnabled}
-                  />
-                ),
-                children: [
-                  { path: "martImporter", element: <MartImporterShow /> }
-                ]
-              },
-              { path: "graphiql", element: <GraphiQL /> },
-              { path: "preferences", element: <Preferences /> }
+              }
             ]
           }
         ]
