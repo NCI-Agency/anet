@@ -39,7 +39,7 @@ public class UserActivityFilter extends OncePerRequestFilter {
         personCache.logActivitiesByPersonUuid(DaoUtils.getUuid(person), activity);
         // Store this request in the database (only once per minute)
         final Position position = person.getPosition();
-        final UserActivity userActivity = new UserActivity(person.getUuid(),
+        final UserActivity userActivity = new UserActivity(person.getUuid(), person.getTenantUuid(),
             position == null ? null : position.getOrganizationUuid(), DaoUtils.getCurrentMinute());
         userActivityDao.insert(userActivity);
       }
