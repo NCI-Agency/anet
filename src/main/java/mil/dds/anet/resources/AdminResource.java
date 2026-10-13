@@ -196,7 +196,10 @@ public class AdminResource {
   public AnetBeanList<UserActivity> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") final UserActivitySearchQuery query) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
+    if (!AuthUtils.isAdmin(user)) {
+      query.setTenantUuid(user.getTenantUuid());
+    }
     return userActivityDao.search(query);
   }
 
