@@ -316,17 +316,28 @@ const routes = [
                       { path: "tasks", element: <MergeTasks /> },
                       { path: "eventSeries", element: <MergeEventSeries /> }
                     ]
-                  },
+                  }
+                ]
+              },
+              {
+                path: "userActivities",
+                children: [
                   {
-                    path: "userActivities",
-                    children: [
-                      {
-                        path: "perPeriod",
-                        element: <UserActivitiesPerPeriod />
-                      },
-                      { path: "overTime", element: <UserActivitiesOverTime /> }
-                    ]
+                    path: "perPeriod",
+                    element: <UserActivitiesPerPeriod />
                   },
+                  { path: "overTime", element: <UserActivitiesOverTime /> }
+                ]
+              },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={currentUser =>
+                      currentUser?.isAdmin()
+                    }
+                  />
+                ),
+                children: [
                   { path: "auditTrail", element: <AuditTrailTable /> },
                   { path: "pendingEmails", element: <PendingEmailsShow /> }
                 ]
