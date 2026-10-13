@@ -101,7 +101,7 @@ function convertValueToForm(key, value) {
 
 const SPECIAL_FIELDS = {
   DEFAULT_APPROVAL_ORGANIZATION: {
-    widget: key => (
+    widget: (key, value, isAdmin) => (
       <AdvancedSingleSelect
         fieldName={key}
         overlayColumns={["Name"]}
@@ -154,7 +154,7 @@ const SPECIAL_FIELDS = {
     )
   },
   UNLIMITED_EXPORTS_COMMUNITY: {
-    widget: key => (
+    widget: (key, value, isAdmin) => (
       <AdvancedSingleSelect
         fieldName={key}
         overlayColumns={["Name"]}
@@ -185,7 +185,7 @@ const SPECIAL_FIELDS = {
     }
   },
   HELP_TEXT: {
-    widget: () => <RichTextEditor />,
+    widget: (key, value, isAdmin) => <RichTextEditor readOnly={!isAdmin} />,
     convertValueToForm: value => value,
     convertFormToValue: value =>
       value && !utils.isEmptyHtml(value) ? value : null,
@@ -198,17 +198,18 @@ const SPECIAL_FIELDS = {
   }
 }
 
-function getFieldProps(key, value, setFieldTouched, setFieldValue) {
+function getFieldProps(key, value, setFieldTouched, setFieldValue, isAdmin) {
   let fieldProps = {
     key,
     name: key,
-    component: FieldHelper.InputField
+    component: FieldHelper.InputField,
+    disabled: !isAdmin
   }
   if (SPECIAL_FIELDS[key]) {
     fieldProps = {
       ...fieldProps,
       component: FieldHelper.SpecialField,
-      widget: SPECIAL_FIELDS[key].widget(key, value),
+      widget: SPECIAL_FIELDS[key].widget(key, value, isAdmin),
       ...(SPECIAL_FIELDS[key]?.onChange && {
         onChange: v =>
           SPECIAL_FIELDS[key].onChange(key, v, setFieldTouched, setFieldValue)
@@ -223,7 +224,7 @@ interface AdminIndexProps {
 }
 
 const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
-  const { loadAppData } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const [recentActivities, setRecentActivities] = useState(null)
   const [recentUsers, setRecentUsers] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
@@ -266,6 +267,8 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
 
   const actionRowStyle = { display: "flex", alignItems: "center" }
 
+  const isAdmin = currentUser?.isAdmin()
+
   return (
     <div>
       <Formik enableReinitialize onSubmit={onSubmit} initialValues={settings}>
@@ -277,7 +280,7 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
           values,
           submitForm
         }) => {
-          const action = (
+          const action = isAdmin && (
             <Button
               variant="primary"
               onClick={submitForm}
@@ -298,70 +301,77 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
                       key,
                       value,
                       setFieldTouched,
-                      setFieldValue
+                      setFieldValue,
+                      isAdmin
                     )
                     const { key: fieldKey, ...otherProps } = fieldProps
                     return <Field key={fieldKey} {...otherProps} />
                   })}
                 </Fieldset>
-                <div className="submit-buttons">
-                  <div />
-                  <div>{action}</div>
-                </div>
+                {isAdmin && (
+                  <div className="submit-buttons">
+                    <div />
+                    <div>{action}</div>
+                  </div>
+                )}
               </Form>
             </>
           )
         }}
       </Formik>
-      <Fieldset title="Site actions">
-        <Container fluid>
-          <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
-            <Col md={2}>
-              <Button
-                disabled={actionLoading}
-                variant="primary"
-                onClick={clearCache}
-                style={{ width: "100%" }}
-              >
-                Clear Cache
-              </Button>
-            </Col>
-            <Col md={10}>Clears the "Domain Users Cache"</Col>
-          </Row>
-          <Row style={actionRowStyle}>
-            <Col md={2}>
-              <Button
-                disabled={actionLoading}
-                variant="primary"
-                onClick={reloadDictionary}
-                style={{ width: "100%" }}
-              >
-                Reload Dictionary
-              </Button>
-            </Col>
-            <Col md={10}>
-              Reloads the ANET Dictionary. After making changes in ANET
-              dictionary, reloading the dictionary makes those changes effective
-              immediately without restarting the server.
-            </Col>
-          </Row>
-        </Container>
-      </Fieldset>
-      <Fieldset
-        title={getTitleText(recentActivities, "Recent Activities")}
-        action={recentActivitiesActionButton}
-      >
-        <RecentActivityTable
-          text="recent activities"
-          values={recentActivities}
-        />
-      </Fieldset>
-      <Fieldset
-        title={getTitleText(recentUsers, "Recent Users")}
-        action={recentActivitiesActionButton}
-      >
-        <RecentActivityTable text="recent users" values={recentUsers} />
-      </Fieldset>
+      {isAdmin && (
+        <>
+          <Fieldset title="Site actions">
+            <Container fluid>
+              <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
+                <Col md={2}>
+                  <Button
+                    disabled={actionLoading}
+                    variant="primary"
+                    onClick={clearCache}
+                    style={{ width: "100%" }}
+                  >
+                    Clear Cache
+                  </Button>
+                </Col>
+                <Col md={10}>Clears the "Domain Users Cache"</Col>
+              </Row>
+              <Row style={actionRowStyle}>
+                <Col md={2}>
+                  <Button
+                    disabled={actionLoading}
+                    variant="primary"
+                    onClick={reloadDictionary}
+                    style={{ width: "100%" }}
+                  >
+                    Reload Dictionary
+                  </Button>
+                </Col>
+                <Col md={10}>
+                  Reloads the ANET Dictionary. After making changes in ANET
+                  dictionary, reloading the dictionary makes those changes
+                  effective immediately without restarting the server.
+                </Col>
+              </Row>
+            </Container>
+          </Fieldset>
+          <Fieldset
+            title={getTitleText(recentActivities, "Recent Activities")}
+            action={recentActivitiesActionButton}
+          >
+            <RecentActivityTable
+              text="recent activities"
+              values={recentActivities}
+            />
+          </Fieldset>
+          <Fieldset
+            title={getTitleText(recentUsers, "Recent Users")}
+            action={recentActivitiesActionButton}
+          >
+            <RecentActivityTable text="recent users" values={recentUsers} />
+          </Fieldset>
+        </>
+      )}
     </div>
   )
 
