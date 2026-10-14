@@ -11,7 +11,7 @@ const GQL_UPDATE_PREFERENCES = gql`
   }
 `
 const Preferences = () => {
-  const { loadAppData } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const title = "Default Application Preferences"
@@ -22,6 +22,7 @@ const Preferences = () => {
       saveSuccess={saveSuccess}
       saveError={saveError}
       title={title}
+      disabled={!currentUser?.isAdmin()}
     />
   )
 

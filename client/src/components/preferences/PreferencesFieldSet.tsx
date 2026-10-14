@@ -27,6 +27,7 @@ interface PreferencesFieldsetProps {
     preferences?: object[]
   ) => void
   title?: string
+  disabled?: boolean
   actionLabel?: string
   saveSuccess?: string | null
   saveError?: any
@@ -60,6 +61,7 @@ const PreferencesFieldset = ({
   useUserPreferences,
   onSubmit,
   title = "Preferences",
+  disabled,
   actionLabel = "Save preferences",
   saveSuccess,
   saveError,
@@ -165,15 +167,17 @@ const PreferencesFieldset = ({
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages success={saveSuccess} error={saveError} />
             <Form className="form-horizontal" method="post">
-              <div className="submit-buttons d-flex justify-content-end">
-                <Button
-                  variant="primary"
-                  onClick={handleSaveClick}
-                  disabled={isSubmitting}
-                >
-                  {actionLabel}
-                </Button>
-              </div>
+              {!disabled && (
+                <div className="submit-buttons d-flex justify-content-end">
+                  <Button
+                    variant="primary"
+                    onClick={handleSaveClick}
+                    disabled={isSubmitting}
+                  >
+                    {actionLabel}
+                  </Button>
+                </div>
+              )}
               <Fieldset title={title} />
               {otherPrefs.length > 0 && (
                 <Fieldset title={exportPrefs.length > 0 ? "General" : ""}>
@@ -191,6 +195,7 @@ const PreferencesFieldset = ({
                           onChange={value =>
                             setFieldValue(preference.uuid, value)
                           }
+                          disabled={disabled}
                         />
                       )}
 
@@ -200,12 +205,13 @@ const PreferencesFieldset = ({
                           label={preference.description}
                           component={FieldHelper.InputField}
                           type="number"
+                          disabled={disabled}
                         />
                       )}
 
                       {preference.type === "enumset" &&
                         !isExportFieldsPref(preference.category) && (
-                          <FastField name={preference.uuid}>
+                          <FastField name={preference.uuid} disabled={disabled}>
                             {({ field, form }) => {
                               const choices = preference.allowedValues
                                 ? Object.fromEntries(
@@ -242,6 +248,7 @@ const PreferencesFieldset = ({
                                       newValue
                                     )
                                   }}
+                                  disabled={disabled}
                                 />
                               )
                             }}
@@ -249,7 +256,7 @@ const PreferencesFieldset = ({
                         )}
 
                       {preference.type === "enum" && (
-                        <FastField name={preference.uuid}>
+                        <FastField name={preference.uuid} disabled={disabled}>
                           {({ field, form }) => {
                             const choices = preference.allowedValues
                               ? Object.fromEntries(
@@ -284,6 +291,7 @@ const PreferencesFieldset = ({
                                     selectedValue
                                   )
                                 }}
+                                disabled={disabled}
                               />
                             )
                           }}
@@ -305,20 +313,23 @@ const PreferencesFieldset = ({
                       setFieldValue={setFieldValue}
                       getLabelFromDictionary={getLabelFromDictionary}
                       error={errors?.[pref.uuid] as string | undefined}
+                      disabled={disabled}
                     />
                   ))}
                 </Fieldset>
               )}
 
-              <div className="submit-buttons d-flex justify-content-end">
-                <Button
-                  variant="primary"
-                  onClick={handleSaveClick}
-                  disabled={isSubmitting}
-                >
-                  {actionLabel}
-                </Button>
-              </div>
+              {!disabled && (
+                <div className="submit-buttons d-flex justify-content-end">
+                  <Button
+                    variant="primary"
+                    onClick={handleSaveClick}
+                    disabled={isSubmitting}
+                  >
+                    {actionLabel}
+                  </Button>
+                </div>
+              )}
             </Form>
           </>
         )
