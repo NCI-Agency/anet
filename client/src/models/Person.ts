@@ -132,9 +132,26 @@ export default class Person extends Model {
         .default("")
         .label(Settings.fields.person.gender?.label),
       phoneNumber: yup
-        .string()
+        .array()
+        .of(
+          yup.object().shape({
+            type: yup
+              .string()
+              .nullable()
+              .trim()
+              .when("details", ([details], schema) =>
+                details?.trim()
+                  ? schema.required(
+                      `You must provide the ${Settings.fields.person.phoneNumber?.label} type`
+                    )
+                  : schema
+              )
+              .default(""),
+            details: yup.string().nullable().default("")
+          })
+        )
         .nullable()
-        .default("")
+        .default([])
         .label(Settings.fields.person.phoneNumber?.label),
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
