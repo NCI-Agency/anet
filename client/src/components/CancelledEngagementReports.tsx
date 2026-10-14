@@ -45,6 +45,7 @@ const GQL_GET_REPORT_LIST_BY_REASON = gql`
       totalCount
       list {
         ${gqlMinimalReportFields}
+        cancelledReason
       }
     }
   }
