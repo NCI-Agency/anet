@@ -90,7 +90,7 @@ describe("Create report form page", () => {
         },
         {
           timeout: 3000,
-          timeoutMsg: "Large positive duration value was not sliced "
+          timeoutMsg: "Large positive duration value was not sliced"
         }
       )
       await (
@@ -138,8 +138,8 @@ describe("Create report form page", () => {
       ).to.be.false
       await (await CreateReport.getTestReferenceFieldLabel()).click()
       await (await CreateReport.getTestReferenceField()).setValue(REPORT)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
+      await CreateReport.waitForElementToChange(
+        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem,
         REPORT_COMPLETE
       )
       expect(
@@ -172,8 +172,8 @@ describe("Create report form page", () => {
       await (await CreateReport.getTestReferenceFieldLabel()).click()
       await CreateReport.deleteInput(await CreateReport.getTestReferenceField())
       await (await CreateReport.getTestReferenceField()).setValue(REPORT)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
+      await CreateReport.waitForElementToChange(
+        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem,
         REPORT_COMPLETE
       )
       await (
@@ -219,8 +219,8 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceField()
       ).setValue(SEARCH_KEY)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+      await CreateReport.waitForElementToChange(
+        () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_PEOPLE_COMPLETE_1
       )
       expect(
@@ -250,8 +250,8 @@ describe("Create report form page", () => {
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+      await CreateReport.waitForElementToChange(
+        () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_ORGANIZATION_COMPLETE
       )
       expect(
@@ -281,8 +281,8 @@ describe("Create report form page", () => {
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+      await CreateReport.waitForElementToChange(
+        () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_POSITION_COMPLETE_1
       )
       expect(
@@ -331,8 +331,8 @@ describe("Create report form page", () => {
         await CreateReport.getTestMultiReferenceField()
       )
       await (await CreateReport.getTestMultiReferenceField()).setValue(PERSON)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+      await CreateReport.waitForElementToChange(
+        () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         PERSON_COMPLETE_1
       )
       expect(
@@ -403,8 +403,8 @@ describe("Create report form page", () => {
         await CreateReport.getTestMultiReferenceField()
       )
       await (await CreateReport.getTestMultiReferenceField()).setValue(POSITION)
-      await CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+      await CreateReport.waitForElementToChange(
+        () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         POSITION_COMPLETE_1
       )
       expect(

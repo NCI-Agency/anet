@@ -54,9 +54,8 @@ describe("Create event series page", () => {
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).setValue(ORGANIZATION)
-      await CreateEventSeries.waitForAdvancedSelectToChange(
-        ORGANIZATION_COMPLETE,
-        CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateEventSeries.waitForRelatedObjectsAdvancedSelectToChange(
+        ORGANIZATION_COMPLETE
       )
       expect(
         await (
@@ -83,9 +82,8 @@ describe("Create event series page", () => {
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).setValue(POSITION)
-      await CreateEventSeries.waitForAdvancedSelectToChange(
-        POSITION_COMPLETE,
-        CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateEventSeries.waitForRelatedObjectsAdvancedSelectToChange(
+        POSITION_COMPLETE
       )
       expect(
         await (
@@ -116,9 +114,8 @@ describe("Create event series page", () => {
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).setValue(PERSON)
-      await CreateEventSeries.waitForAdvancedSelectToChange(
-        PERSON_COMPLETE,
-        CreateEventSeries.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateEventSeries.waitForRelatedObjectsAdvancedSelectToChange(
+        PERSON_COMPLETE
       )
       expect(
         await (

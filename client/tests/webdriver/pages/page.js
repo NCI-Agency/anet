@@ -268,16 +268,34 @@ class Page {
     return browser.$('a[id="mergeWithOther"]')
   }
 
-  async waitForAdvancedSelectToChange(value, getFirstItemCallback) {
-    await (await getFirstItemCallback()).waitForExist()
+  async waitForElementToChange(getElementCallback, value) {
+    await (await getElementCallback()).waitForExist()
     return browser.waitUntil(
       async () => {
-        return (await (await getFirstItemCallback()).getText()) === value
+        const el = await getElementCallback()
+        return (await el.getText()) === value
       },
       {
         timeout: 5000,
-        timeoutMsg:
-          'Expected advanced select input to contain "' + value + '" after 5s'
+        timeoutMsg: `Expected element to be "${value}" after 5s, but was "${await (
+          await getElementCallback()
+        ).getText()}"`
+      }
+    )
+  }
+
+  async waitForElementToContain(getElementCallback, value) {
+    await (await getElementCallback()).waitForExist()
+    return browser.waitUntil(
+      async () => {
+        const el = await getElementCallback()
+        return (await el.getText()).includes(value)
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: `Expected element to contain "${value}" after 5s, but was "${await (
+          await getElementCallback()
+        ).getText()}"`
       }
     )
   }
@@ -303,48 +321,29 @@ class Page {
   }
 
   async waitForOwnerOrgAdvancedSelectToChange(value) {
-    await (await this.getOwnerOrgAdvancedSelectFirstItem()).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (
-          (await (
-            await this.getOwnerOrgAdvancedSelectFirstItem()
-          ).getText()) === value
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg:
-          'Expected owner org advanced select input to contain "' +
-          value +
-          '" after 5s'
-      }
+    return this.waitForElementToChange(
+      this.getOwnerOrgAdvancedSelectFirstItem,
+      value
     )
   }
 
   async waitForAdminOrgAdvancedSelectToChange(value) {
-    await (await this.getAdminOrgAdvancedSelectFirstItem()).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (
-          (await (
-            await this.getAdminOrgAdvancedSelectFirstItem()
-          ).getText()) === value
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg:
-          'Expected admin org advanced select input to contain "' +
-          value +
-          '" after 5s'
-      }
+    return this.waitForElementToChange(
+      this.getAdminOrgAdvancedSelectFirstItem,
+      value
     )
   }
 
   async getRelatedObjectsAdvancedSelectFirstItem() {
     return browser.$(
       "#entitySelect-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  async waitForRelatedObjectsAdvancedSelectToChange(value) {
+    return this.waitForElementToChange(
+      this.getRelatedObjectsAdvancedSelectFirstItem,
+      value
     )
   }
 

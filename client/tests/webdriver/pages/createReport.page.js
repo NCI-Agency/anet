@@ -327,21 +327,6 @@ export class CreateReport extends Page {
     await (await this.getAlert()).waitForDisplayed()
   }
 
-  async waitForAdvancedSelectToChange(item, value) {
-    await (await item).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (await (await item).getText()) === value
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: `Expected advanced select input to contain "${value}" after 5s, but was "${await (
-          await item
-        ).getText()}"`
-      }
-    )
-  }
-
   async submitForm() {
     await (await this.getSubmitButton()).waitForClickable()
     await (await this.getSubmitButton()).click()

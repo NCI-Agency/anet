@@ -110,9 +110,8 @@ describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).setValue(POSITION)
-      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
-        POSITION_COMPLETE,
-        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
+        POSITION_COMPLETE
       )
       expect(
         await (
@@ -149,9 +148,8 @@ describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).setValue(ORGANIZATION)
-      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
-        ORGANIZATION_COMPLETE,
-        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
+        ORGANIZATION_COMPLETE
       )
       expect(
         await (
@@ -181,9 +179,8 @@ describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).setValue(PERSON)
-      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
-        PERSON_COMPLETE,
-        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
+        PERSON_COMPLETE
       )
       expect(
         await (
@@ -249,9 +246,8 @@ describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getAdministrativePositionsInput()
       ).setValue(ADMINISTRATIVE_POSITION_1)
-      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
-        ADMINISTRATIVE_POSITION_1_COMPLETE,
-        CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem
+      await CreateAuthorizationGroup.waitForAdministrativePositionsAdvancedSelectToContain(
+        ADMINISTRATIVE_POSITION_1_COMPLETE
       )
       expect(
         await (
@@ -281,9 +277,8 @@ describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getAdministrativePositionsInput()
       ).setValue(ADMINISTRATIVE_POSITION_2)
-      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
-        ADMINISTRATIVE_POSITION_2_COMPLETE,
-        CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem
+      await CreateAuthorizationGroup.waitForAdministrativePositionsAdvancedSelectToContain(
+        ADMINISTRATIVE_POSITION_2_COMPLETE
       )
       expect(
         await (
@@ -423,9 +418,8 @@ describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).setValue(POSITION2)
-      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
-        POSITION2_COMPLETE,
-        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
+        POSITION2_COMPLETE
       )
       expect(
         await (

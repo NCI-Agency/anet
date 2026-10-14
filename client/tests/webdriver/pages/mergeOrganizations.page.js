@@ -67,47 +67,23 @@ class MergeOrganizations extends Page {
     await (await this.getAdvancedSelectPopover()).waitForDisplayed()
     await (await this.getOrganizationHeaderFromPopover()).waitForExist()
     await (await this.getOrganizationHeaderFromPopover()).waitForDisplayed()
-
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
-          compareStr
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't find the searched organization in time"
-      }
+    return this.waitForElementToChange(
+      this.getFirstItemFromAdvancedSelect,
+      compareStr
     )
   }
 
   async waitForColumnToChange(compareStr, side, text) {
-    const field = await this.getColumnContent(side, text)
-
-    await browser.waitUntil(
-      async () => {
-        return (await field.getText()) === compareStr
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't set the organization in time"
-      }
+    return this.waitForElementToChange(
+      async () => this.getColumnContent(side, text),
+      compareStr
     )
   }
 
   async waitForSuccessAlert() {
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (await browser.$(".alert-success")).getText()) ===
-          "Organizations merged. Displaying merged Organization below."
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't see the success alert in time"
-      }
+    return this.waitForElementToChange(
+      this.getAlertSuccess,
+      "Organizations merged. Displaying merged Organization below."
     )
   }
 }

@@ -86,21 +86,9 @@ export class CreatePerson extends Page {
   }
 
   async waitForCountryAdvancedSelectToChange(value) {
-    await (await this.getCountryAdvancedSelectFirstItem()).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (
-          (await (await this.getCountryAdvancedSelectFirstItem()).getText()) ===
-          value
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg:
-          'Expected country advanced select input to contain "' +
-          value +
-          '" after 5s'
-      }
+    return this.waitForElementToChange(
+      this.getCountryAdvancedSelectFirstItem,
+      value
     )
   }
 

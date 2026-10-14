@@ -444,11 +444,10 @@ describe("Merge locations page", () => {
     await (
       await MergeLocations.getSelectButton("left", "Latitude, Longitude")
     ).click()
-    await MergeLocations.waitForColumnToChange(
+    await MergeLocations.waitForColumnToStartWith(
       EXAMPLE_LOCATIONS.left.latLon,
       "mid",
-      "Latitude, Longitude",
-      true
+      "Latitude, Longitude"
     )
     expect(
       await (

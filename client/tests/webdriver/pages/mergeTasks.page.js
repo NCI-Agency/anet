@@ -67,48 +67,23 @@ class MergeTasks extends Page {
     await (await this.getAdvancedSelectPopover()).waitForDisplayed()
     await (await this.getTaskHeaderFromPopover()).waitForExist()
     await (await this.getTaskHeaderFromPopover()).waitForDisplayed()
-
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (
-            await this.getItemFromAdvancedSelect(rowNumber)
-          ).getText()) === compareStr
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't find the searched task in time"
-      }
+    return this.waitForElementToChange(
+      async () => this.getItemFromAdvancedSelect(rowNumber),
+      compareStr
     )
   }
 
   async waitForColumnToChange(compareStr, side, text) {
-    const field = await this.getColumnContent(side, text)
-
-    await browser.waitUntil(
-      async () => {
-        return (await field.getText()) === compareStr
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't set the task in time"
-      }
+    return this.waitForElementToChange(
+      async () => this.getColumnContent(side, text),
+      compareStr
     )
   }
 
   async waitForSuccessAlert() {
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (await browser.$(".alert-success")).getText()) ===
-          "Objectives merged. Displaying merged Objective below."
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't see the success alert in time"
-      }
+    return this.waitForElementToChange(
+      this.getAlertSuccess,
+      "Objectives merged. Displaying merged Objective below."
     )
   }
 }

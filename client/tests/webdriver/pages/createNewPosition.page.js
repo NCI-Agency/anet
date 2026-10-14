@@ -97,21 +97,9 @@ class CreatePosition extends Page {
   }
 
   async waitForOrgAdvancedSelectToChange(value) {
-    await (await this.getOrgAdvancedSelectFirstItem()).waitForExist()
-    return browser.waitUntil(
-      async () => {
-        return (
-          (await (await this.getOrgAdvancedSelectFirstItem()).getText()) ===
-          value
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg:
-          'Expected org advanced select input to contain "' +
-          value +
-          '" after 5s'
-      }
+    return this.waitForElementToChange(
+      this.getOrgAdvancedSelectFirstItem,
+      value
     )
   }
 

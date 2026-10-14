@@ -137,47 +137,23 @@ class MergePositions extends Page {
     await (await this.getAdvancedSelectPopover()).waitForDisplayed()
     await (await this.getPositionHeaderFromPopover()).waitForExist()
     await (await this.getPositionHeaderFromPopover()).waitForDisplayed()
-
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
-          compareStr
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't find the searched position in time"
-      }
+    return this.waitForElementToChange(
+      this.getFirstItemFromAdvancedSelect,
+      compareStr
     )
   }
 
   async waitForColumnToChange(compareStr, side, text) {
-    const field = await this.getColumnContent(side, text)
-
-    await browser.waitUntil(
-      async () => {
-        return (await field.getText()) === compareStr
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't set the position in time"
-      }
+    return this.waitForElementToChange(
+      async () => this.getColumnContent(side, text),
+      compareStr
     )
   }
 
   async waitForSuccessAlert() {
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (await browser.$(".alert-success")).getText()) ===
-          "Positions merged. Displaying merged Position below."
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't see the success alert in time"
-      }
+    return this.waitForElementToChange(
+      this.getAlertSuccess,
+      "Positions merged. Displaying merged Position below."
     )
   }
 

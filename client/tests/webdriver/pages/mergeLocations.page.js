@@ -61,15 +61,9 @@ class MergeLocations extends Page {
     await (await this.getAdvancedSelectPopover()).waitForDisplayed()
     await (await this.getLocationHeaderFromPopover()).waitForExist()
     await (await this.getLocationHeaderFromPopover()).waitForDisplayed()
-
-    await browser.waitUntil(
-      async () =>
-        (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
-        compareStr,
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't find the searched location in time"
-      }
+    return this.waitForElementToChange(
+      this.getFirstItemFromAdvancedSelect,
+      compareStr
     )
   }
 
@@ -79,15 +73,20 @@ class MergeLocations extends Page {
     )
   }
 
-  async waitForColumnToChange(compareStr, side, text, checkStartsWithOnly) {
+  async waitForColumnToChange(compareStr, side, text) {
+    return this.waitForElementToChange(
+      async () => this.getColumnContent(side, text),
+      compareStr
+    )
+  }
+
+  async waitForColumnToStartWith(compareStr, side, text) {
     const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
       async () => {
         const fieldText = await field.getText()
-        return checkStartsWithOnly
-          ? fieldText?.startsWith(compareStr)
-          : fieldText === compareStr
+        return fieldText?.startsWith(compareStr)
       },
       {
         timeout: 5000,
@@ -97,17 +96,9 @@ class MergeLocations extends Page {
   }
 
   async waitForSuccessAlert() {
-    await browser.waitUntil(
-      async () => {
-        return (
-          (await (await browser.$(".alert-success")).getText()) ===
-          "Locations merged. Displaying merged Location below."
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't see the success alert in time"
-      }
+    return this.waitForElementToChange(
+      this.getAlertSuccess,
+      "Locations merged. Displaying merged Location below."
     )
   }
 
