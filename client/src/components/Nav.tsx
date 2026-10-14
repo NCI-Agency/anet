@@ -602,23 +602,21 @@ const Navigation = ({
                     MART importer
                   </SidebarLink>
                 )}
+                <SidebarLink
+                  id="preferences"
+                  linkTo="/admin/preferences"
+                  handleOnClick={resetPages}
+                >
+                  Default application preferences
+                </SidebarLink>
                 {isAdmin && (
-                  <>
-                    <SidebarLink
-                      id="graphQL-nav"
-                      linkTo="/admin/graphiql"
-                      handleOnClick={resetPages}
-                    >
-                      GraphQL
-                    </SidebarLink>
-                    <SidebarLink
-                      id="preferences"
-                      linkTo="/admin/preferences"
-                      handleOnClick={resetPages}
-                    >
-                      Default application preferences
-                    </SidebarLink>
-                  </>
+                  <SidebarLink
+                    id="graphQL-nav"
+                    linkTo="/admin/graphiql"
+                    handleOnClick={resetPages}
+                  >
+                    GraphQL
+                  </SidebarLink>
                 )}
               </span>
             </Nav>
