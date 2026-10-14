@@ -17,6 +17,7 @@ interface ExportFieldsPanelProps {
   setFieldValue: (field: string, value: any) => void
   getLabelFromDictionary: (preferenceName: string, field: string) => string
   error?: string
+  disabled?: boolean
 }
 
 const ExportFieldsPanel = ({
@@ -25,7 +26,8 @@ const ExportFieldsPanel = ({
   initialSnapshot,
   setFieldValue,
   getLabelFromDictionary,
-  error
+  error,
+  disabled
 }: ExportFieldsPanelProps) => {
   const preferenceName = pref.name
 
@@ -64,41 +66,43 @@ const ExportFieldsPanel = ({
       className="card mb-3"
       style={{ border: hasError ? "1px solid #dc3545" : undefined }}
     >
-      <div
-        className="card-header d-flex justify-content-between align-items-center"
-        style={{
-          backgroundColor: "#f2f2f2",
-          borderBottom: hasError ? "1px solid #dc3545" : undefined
-        }}
-      >
-        <strong>{getPanelLabel(preferenceName)}</strong>
-        <div className="d-flex gap-2 align-items-center">
-          <Button
-            size="sm"
-            variant="outline-primary"
-            onClick={selectAll}
-            type="button"
-          >
-            Select all
-          </Button>
-          <Button
-            size="sm"
-            variant="outline-danger"
-            onClick={clearAll}
-            type="button"
-          >
-            Clear
-          </Button>
-          <Button
-            size="sm"
-            variant="outline-secondary"
-            onClick={reset}
-            type="button"
-          >
-            Reset
-          </Button>
+      {!disabled && (
+        <div
+          className="card-header d-flex justify-content-between align-items-center"
+          style={{
+            backgroundColor: "#f2f2f2",
+            borderBottom: hasError ? "1px solid #dc3545" : undefined
+          }}
+        >
+          <strong>{getPanelLabel(preferenceName)}</strong>
+          <div className="d-flex gap-2 align-items-center">
+            <Button
+              size="sm"
+              variant="outline-primary"
+              onClick={selectAll}
+              type="button"
+            >
+              Select all
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-danger"
+              onClick={clearAll}
+              type="button"
+            >
+              Clear
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              onClick={reset}
+              type="button"
+            >
+              Reset
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="card-body">
         {hasError && (
@@ -116,6 +120,7 @@ const ExportFieldsPanel = ({
                   type="checkbox"
                   checked={selected.includes(v)}
                   onChange={() => toggle(v)}
+                  disabled={disabled}
                 />
                 <label
                   className="form-check-label"
