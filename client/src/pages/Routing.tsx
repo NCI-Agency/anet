@@ -380,6 +380,10 @@ const routes = [
                 ]
               },
               {
+                path: "preferences",
+                element: <Preferences />
+              },
+              {
                 element: (
                   <ProtectedRoute
                     authorizationCallback={currentUser =>
@@ -391,10 +395,6 @@ const routes = [
                   {
                     path: "graphiql",
                     element: <GraphiQL />
-                  },
-                  {
-                    path: "preferences",
-                    element: <Preferences />
                   }
                 ]
               }
