@@ -133,7 +133,7 @@ const BarChart = ({
     const xWidth = chartWidth - marginLeft - MARGIN.right
     const yHeight = chartHeight - MARGIN.top - marginBottom
 
-    xScale.rangeRound([0, xWidth]).padding(xPadding)
+    xScale.range([0, xWidth]).padding(xPadding)
     yScale.range([yHeight, 0])
 
     const xAxis = d3.axisBottom(xScale).tickFormat(function (d) {
