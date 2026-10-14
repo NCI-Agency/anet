@@ -25,7 +25,10 @@ export const REPORT_STATES = {
 class MyReports extends Page {
   async open(credentials) {
     await super.open("/", credentials)
+    await (await Home.getLinksMenuButton()).waitForExist()
+    await (await Home.getLinksMenuButton()).waitForDisplayed()
     await (await Home.getLinksMenuButton()).click()
+    await (await Home.getMyReportsLink()).waitForExist()
     await (await Home.getMyReportsLink()).waitForDisplayed()
     await (await Home.getMyReportsLink()).click()
   }
