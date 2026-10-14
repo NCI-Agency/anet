@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
-import ShowEvent from "../pages/showEvent.page"
+import ShowEvent from "../pages/showEvent.page.js"
 
 const EVENT_UUID = "e850846e-9741-40e8-bc51-4dccc30cf47f" // NMI PDT 2024-01 event
 const DATE_FORMAT = "dddd, D MMMM YYYY @ HH:mm"

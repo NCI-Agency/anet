@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import moment from "moment"
-import Settings from "../../../platform/node/settings"
-import MergePeople from "../pages/mergePeople.page"
+import Settings from "../../../platform/node/settings.js"
+import MergePeople from "../pages/mergePeople.page.js"
 
 const hasCustomFields = !!Settings?.fields?.person?.customFields
 

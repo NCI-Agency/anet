@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
-import ShowOrganization from "../pages/showOrganization.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
+import ShowOrganization from "../pages/showOrganization.page.js"
 
 const ORGANIZATION_SEARCH_STRING = "EF 2.2"
 const SUPERUSER_ASSESSMENT_CREATE_DETAILS = [
@@ -207,9 +207,9 @@ const assertAssessmentDetails = async (
     recurrence
   )
   await browser.pause(500) // first wait for assessment modal to be fully rendered
-  for (const [index, detail] of await (await details).entries()) {
+  await details.mapSeries(async (detail, index) => {
     const pre = `${index}-) `
-    const det = await (await detail).getText()
+    const det = await detail.getText()
     expect(`${pre}${det}`).to.equal(
       `${pre}${
         VALUE_TO_TEXT_FOR_PRIORITY[assessmentDetails[index]] ||
@@ -217,5 +217,5 @@ const assertAssessmentDetails = async (
         assessmentDetails[index]
       }`
     )
-  }
+  })
 }

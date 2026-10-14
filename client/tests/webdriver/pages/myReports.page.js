@@ -1,5 +1,5 @@
-import Home from "./home.page"
-import Page from "./page"
+import Home from "./home.page.js"
+import Page from "./page.js"
 
 export const REPORT_STATES = {
   DRAFT: {

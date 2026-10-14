@@ -1,5 +1,5 @@
 import moment from "moment"
-import * as cr from "../createReport.page"
+import * as cr from "../createReport.page.js"
 
 class CreateReport extends cr.CreateReport {
   async getTitle() {

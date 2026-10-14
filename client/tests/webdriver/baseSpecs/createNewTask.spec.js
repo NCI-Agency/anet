@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import CreateTask from "../pages/createNewTask.page"
-import ShowTask from "../pages/showTask.page"
+import CreateTask from "../pages/createNewTask.page.js"
+import ShowTask from "../pages/showTask.page.js"
 
 const SHORT_NAME = "TO 1"
 const LONG_NAME = "To the 1"

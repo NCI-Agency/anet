@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import ShowLocation from "../pages/location/showLocation.page"
-import MergeLocations from "../pages/mergeLocations.page"
+import ShowLocation from "../pages/location/showLocation.page.js"
+import MergeLocations from "../pages/mergeLocations.page.js"
 
 const LOCATION_WITH_ATTACHMENTS_UUID = "e5b3a4b9-acf7-4c79-8224-f248b9a7215d" // Antarctica
 const LOCATION_WITH_ORGANIZATIONS_UUID = "9c982685-5946-4dad-a7ee-0f5a12f5e170" // Wishingwells Park

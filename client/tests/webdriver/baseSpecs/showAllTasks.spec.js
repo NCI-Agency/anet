@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import ShowAllTasks from "../pages/showAllTasks.page"
+import ShowAllTasks from "../pages/showAllTasks.page.js"
 
 const FIRST_TASK_NAME = "EF 1 | Budget and Planning"
 const FIRST_TASK_DESCENDANT_NAME = "1.1 | Budgeting in the MoD"

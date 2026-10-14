@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
-import OnboardPage from "../pages/onboard.page"
+import OnboardPage from "../pages/onboard.page.js"
 
 const REPORT_URL = "/reports/59be259b-30b9-4d04-9e21-e8ceb58cbe9c"
 

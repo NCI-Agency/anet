@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import MergeTasks from "../pages/mergeTasks.page"
+import MergeTasks from "../pages/mergeTasks.page.js"
 
 const EXAMPLE_TASKS = {
   childLeft: {

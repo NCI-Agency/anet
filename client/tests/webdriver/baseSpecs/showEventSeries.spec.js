@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import ShowEventSeries from "../pages/showEventSeries.page"
+import ShowEventSeries from "../pages/showEventSeries.page.js"
 
 const EVENT_SERIES_UUID = "b7b70191-54e4-462f-8e40-679dd2e71ec4" // NMI PDT event series
 

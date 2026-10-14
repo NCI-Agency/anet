@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
-import ShowPerson from "../pages/showPerson.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
+import ShowPerson from "../pages/showPerson.page.js"
 
 const PERSON_SEARCH_STRING = "Steve"
 const ADVISOR1_CREDENTIALS = "elizabeth"
@@ -349,13 +349,13 @@ const assertAssessmentDetails = async (
     i
   )
   await browser.pause(500) // first wait for assessment modal to be fully rendered
-  for (const [index, detail] of await (await details).entries()) {
+  await details.mapSeries(async (detail, index) => {
     const pre = `${index}-) `
-    const det = await (await detail).getText()
+    const det = await detail.getText()
     expect(`${pre}${det}`).to.equal(
       `${pre}${
         valueToText?.[assessmentDetails[index]] || assessmentDetails[index]
       }`
     )
-  }
+  })
 }

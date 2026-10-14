@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import MyEvents from "../pages/myEvents.page"
+import Home from "../pages/home.page.js"
+import MyEvents from "../pages/myEvents.page.js"
 
 describe("Home page", () => {
   describe("When checking the navigation items", () => {

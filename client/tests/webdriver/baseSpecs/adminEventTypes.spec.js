@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import AdminEventTypes from "../pages/adminEventTypes.page"
+import AdminEventTypes from "../pages/adminEventTypes.page.js"
 
 describe("When on the admin event types page", () => {
   it("Should show related events", async () => {

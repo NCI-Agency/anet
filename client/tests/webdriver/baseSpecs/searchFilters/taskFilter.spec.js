@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import TaskFilter from "../../pages/searchFilters/taskFilter.page"
+import TaskFilter from "../../pages/searchFilters/taskFilter.page.js"
 
 const NR_OF_ACTIVE_TOP_LEVEL_TASKS = 14
 const NR_OF_TOP_LEVEL_TASKS = NR_OF_ACTIVE_TOP_LEVEL_TASKS + 1

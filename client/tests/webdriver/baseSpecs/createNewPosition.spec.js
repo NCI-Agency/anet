@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import CreatePosition from "../pages/createNewPosition.page"
+import CreatePosition from "../pages/createNewPosition.page.js"
 
 const ADMIN_ORG = "ANET Admin"
 const ADMIN_ORG_COMPLETE = "ANET Administrators"

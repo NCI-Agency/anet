@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
-import CreatePerson from "../pages/createNewPerson.page"
+import CreatePerson from "../pages/createNewPerson.page.js"
 
 const VALID_PERSON_INTERLOCUTOR = {
   familyName: "Doe",

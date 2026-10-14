@@ -1,13 +1,13 @@
 import { expect } from "chai"
-import CreateNewLocation from "../pages/location/createNewLocation.page"
-import EditLocation from "../pages/location/editLocation.page"
-import ShowLocation from "../pages/location/showLocation.page"
+import CreateNewLocation from "../pages/location/createNewLocation.page.js"
+import EditLocation from "../pages/location/editLocation.page.js"
+import ShowLocation from "../pages/location/showLocation.page.js"
 import {
   LOCATION_COORDS,
   LOCATION_NAME,
   LOCATION_TYPE,
   NEW_COORDS
-} from "./locationUtils"
+} from "./locationUtils.js"
 
 describe("When editing a location", () => {
   beforeEach("Should create a new location first", async () => {

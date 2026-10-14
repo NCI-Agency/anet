@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import MyReports, { REPORT_STATES } from "../pages/myReports.page"
-import EditReport from "../pages/report/editReport.page"
-import ShowReport from "../pages/report/showReport.page"
+import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
+import EditReport from "../pages/report/editReport.page.js"
+import ShowReport from "../pages/report/showReport.page.js"
 
 describe("When unpublishing a report", () => {
   beforeEach("Open the show report page", async () => {

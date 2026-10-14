@@ -1,6 +1,6 @@
 import fs from "fs"
 import { expect } from "chai"
-import ShowAttachment from "../pages/attachment/showAttachment.page"
+import ShowAttachment from "../pages/attachment/showAttachment.page.js"
 
 const ATTACHMENT_UUID = "f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
 const ATTACHMENT_NAME = "attachReport.png"

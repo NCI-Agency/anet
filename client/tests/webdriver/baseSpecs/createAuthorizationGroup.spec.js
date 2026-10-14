@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { v4 as uuidv4 } from "uuid"
-import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
+import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page.js"
 
 const AUTHORIZATION_GROUP_NAME_PREFIX = "test community"
 const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"
@@ -348,10 +348,12 @@ describe("When creating/editing a community", () => {
       await (await CreateAuthorizationGroup.getEditButton()).click()
       await (await CreateAuthorizationGroup.getForm()).waitForExist()
       await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
-      await (await CreateAuthorizationGroup.getName()).setValue("-edited")
+      await (
+        await CreateAuthorizationGroup.getName()
+      ).setValue(`${authorizationGroupName}-edited`)
       await (
         await CreateAuthorizationGroup.getDescription()
-      ).setValue("-edited")
+      ).setValue(`${authorizationGroupDescription}-edited`)
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
       const alertMessage = await (

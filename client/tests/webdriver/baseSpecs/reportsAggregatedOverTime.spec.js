@@ -1,8 +1,10 @@
 import { expect } from "chai"
 import moment from "moment"
-import Settings from "../../../platform/node/settings"
-import AdvancedSearch from "../pages/advancedSearch.page"
-import Insights, { AGGREGATED_REPORTS_OVER_TIME } from "../pages/insights.page"
+import Settings from "../../../platform/node/settings.js"
+import AdvancedSearch from "../pages/advancedSearch.page.js"
+import Insights, {
+  AGGREGATED_REPORTS_OVER_TIME
+} from "../pages/insights.page.js"
 
 const RELEASE_DATE_LABEL = "Release Date"
 const NO_RANGE_MESSAGE =

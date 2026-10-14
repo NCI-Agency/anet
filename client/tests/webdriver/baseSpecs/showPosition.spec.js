@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import MergePositions from "../pages/mergePositions.page"
-import ShowPosition from "../pages/showPosition.page"
+import MergePositions from "../pages/mergePositions.page.js"
+import ShowPosition from "../pages/showPosition.page.js"
 
 const POSITION_WITH_AG_UUID = "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47" // EF 5.1 Advisor Quality Assurance
 const POSITION_WITH_ATTACHMENTS_UUID = "888d6c4b-deaa-4218-b8fd-abfb7c81a4c6" // EF 1.1 Advisor G

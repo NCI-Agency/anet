@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import ShowPerson from "../pages/showPerson.page"
+import Home from "../pages/home.page.js"
+import ShowPerson from "../pages/showPerson.page.js"
 
 const ADMIN_PERSON_UUID = "b5d495af-44d5-4c35-851a-1039352a8307"
 const ADMIN_LINK_ATTACHMENT_UUID = "13318e42-a0a3-438f-8ed5-dc16b1ef17bc"

@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
 
 const SHORT_WAIT_MS = 1000
 

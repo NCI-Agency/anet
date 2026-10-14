@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import CreateReport from "../pages/report/createReport.page"
+import CreateReport from "../pages/report/createReport.page.js"
 
 describe("When creating a report with tasks", () => {
   it("should offer option to search for all unassigned tasks", async () => {

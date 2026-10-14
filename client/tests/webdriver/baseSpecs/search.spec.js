@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
 
 describe("When using search", () => {
   it("Should show results counter and table when searching in all entities and results found", async () => {

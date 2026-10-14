@@ -1,9 +1,9 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import MergeOrganizations from "../pages/mergeOrganizations.page"
-import Search from "../pages/search.page"
-import ShowOrganization from "../pages/showOrganization.page"
-import ShowTask from "../pages/showTask.page"
+import Home from "../pages/home.page.js"
+import MergeOrganizations from "../pages/mergeOrganizations.page.js"
+import Search from "../pages/search.page.js"
+import ShowOrganization from "../pages/showOrganization.page.js"
+import ShowTask from "../pages/showTask.page.js"
 
 const EF1_ORGANIZATION_UUID = "9a35caa7-a095-4963-ac7b-b784fde4d583" // EF 1
 const EF1_1_ORGANIZATION_UUID = "04614b0f-7e8e-4bf1-8bc5-13abaffeab8a" // EF 1.1

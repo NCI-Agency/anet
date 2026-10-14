@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import CreateReport from "../pages/createReport.page"
+import CreateReport from "../pages/createReport.page.js"
 
 const GRID_LOCATION = {
   lat: "52.1178",

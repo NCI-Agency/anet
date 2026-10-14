@@ -137,6 +137,9 @@ const config = {
   // Default request retries count
   connectionRetryCount: 3,
   //
+  // Backwards compatibility with v9
+  strictSelectors: false,
+  //
   // Test runner services
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
@@ -185,7 +188,7 @@ const config = {
   // See the full list at http://mochajs.org/
   mochaOpts: {
     ui: "bdd",
-    compilers: ["js:@babel/register"],
+    require: "@babel/register",
     timeout: 360000
   },
   //

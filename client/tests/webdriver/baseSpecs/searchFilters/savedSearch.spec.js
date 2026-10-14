@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import SavedSearch from "../../pages/searchFilters/savedSearch.page"
+import SavedSearch from "../../pages/searchFilters/savedSearch.page.js"
 
 describe("When trying to save a search", () => {
   it("Should show a successful toast message when the search is unique", async () => {

@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import LocationFilter from "../../pages/searchFilters/locationFilter.page"
+import LocationFilter from "../../pages/searchFilters/locationFilter.page.js"
 
 describe("When using the location filter on the reports search", () => {
   it("Should show all the locations", async () => {

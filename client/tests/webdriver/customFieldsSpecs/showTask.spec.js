@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import MergeTasks from "../pages/mergeTasks.page"
-import ShowTask from "../pages/showTask.page"
+import MergeTasks from "../pages/mergeTasks.page.js"
+import ShowTask from "../pages/showTask.page.js"
 
 const TASK_12B_UUID = "9d3da7f4-8266-47af-b518-995f587250c9"
 const TASK_EF1_UUID = "1145e584-4485-4ce0-89c4-2fa2e1fe846a"

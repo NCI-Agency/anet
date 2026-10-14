@@ -1,4 +1,4 @@
-import { CreateReport } from "./createReport.page"
+import { CreateReport } from "./createReport.page.js"
 
 const PAGE_URL = "/reports/new"
 

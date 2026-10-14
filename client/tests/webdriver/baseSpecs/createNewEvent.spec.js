@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import CreateEvent from "../pages/createNewEvent.page"
+import CreateEvent from "../pages/createNewEvent.page.js"
 
 const ORG = "ANET Admin"
 const ORG_COMPLETE = "ANET Administrators"

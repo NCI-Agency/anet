@@ -1,11 +1,11 @@
 // import { expect } from "chai"
-import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
-import CreateOrganization from "../pages/createNewOrganization.page"
-import CreatePerson from "../pages/createNewPerson.page"
-import CreatePosition from "../pages/createNewPosition.page"
-import CreateTask from "../pages/createNewTask.page"
-import CreateReport from "../pages/createReport.page"
-import CreateNewLocation from "../pages/location/createNewLocation.page"
+import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page.js"
+import CreateOrganization from "../pages/createNewOrganization.page.js"
+import CreatePerson from "../pages/createNewPerson.page.js"
+import CreatePosition from "../pages/createNewPosition.page.js"
+import CreateTask from "../pages/createNewTask.page.js"
+import CreateReport from "../pages/createReport.page.js"
+import CreateNewLocation from "../pages/location/createNewLocation.page.js"
 
 // Forms should work just fine without custom fields
 
