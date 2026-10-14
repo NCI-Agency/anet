@@ -80,6 +80,12 @@ module.exports = defineConfig([
       "react-hooks/rules-of-hooks": "error",
       "react/jsx-handler-names": "off",
       "react/no-did-update-set-state": "warn",
+      "react/no-unescaped-entities": [
+        "error",
+        {
+          forbid: [">", "}"]
+        }
+      ],
       curly: ["error", "all"]
     }
   },
