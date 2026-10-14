@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import MyReports, { REPORT_STATES } from "../pages/myReports.page"
-import ShowReport from "../pages/report/showReport.page"
+import Home from "../pages/home.page.js"
+import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
+import ShowReport from "../pages/report/showReport.page.js"
 
 const INTERLOCUTORS = [
   "OF-3 Chris Chrisville",

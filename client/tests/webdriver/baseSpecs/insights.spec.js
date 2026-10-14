@@ -2,7 +2,7 @@ import { expect } from "chai"
 import Insights, {
   INSIGHTS,
   PENDING_ASSESSMENTS_BY_POSITION
-} from "../pages/insights.page"
+} from "../pages/insights.page.js"
 
 describe("Insights pages", () => {
   it("Should open each insights page for admin user", async () => {

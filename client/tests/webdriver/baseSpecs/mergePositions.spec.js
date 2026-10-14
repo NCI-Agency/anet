@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
-import MergePositions from "../pages/mergePositions.page"
+import MergePositions from "../pages/mergePositions.page.js"
 
 const EXAMPLE_POSITIONS = {
   validLeft: {

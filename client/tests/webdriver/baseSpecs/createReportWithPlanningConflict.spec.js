@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import moment from "moment"
-import CreateReport from "../pages/report/createReport.page"
-import EditReport from "../pages/report/editReport.page"
-import ShowReport from "../pages/report/showReport.page"
+import CreateReport from "../pages/report/createReport.page.js"
+import EditReport from "../pages/report/editReport.page.js"
+import ShowReport from "../pages/report/showReport.page.js"
 
 describe("When creating a Report with conflicts", () => {
   let firstReportUUID

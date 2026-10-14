@@ -1,4 +1,4 @@
-import Page from "../page"
+import Page from "../page.js"
 
 class SavedSearch extends Page {
   async openOrganizationsFilter() {

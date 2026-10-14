@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import CreatePerson from "../pages/createNewPerson.page"
-import CreateReport from "../pages/createReport.page"
+import CreatePerson from "../pages/createNewPerson.page.js"
+import CreateReport from "../pages/createReport.page.js"
 
 const INVALID_NUMBER_INPUT = "-10"
 const VALID_NUMBER_INPUT = "10"

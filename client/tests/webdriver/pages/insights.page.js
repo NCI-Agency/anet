@@ -1,4 +1,4 @@
-import Page from "./page"
+import Page from "./page.js"
 
 // Copied from src/pages/insights/Show.js
 const NOT_APPROVED_REPORTS = "not-approved-reports"

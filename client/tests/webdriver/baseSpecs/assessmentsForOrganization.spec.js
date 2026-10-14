@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
-import ShowOrganization from "../pages/showOrganization.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
+import ShowOrganization from "../pages/showOrganization.page.js"
 
 const ORGANIZATION_SEARCH_STRING = "EF 2.2"
 const SUPERUSER_ASSESSMENT_CREATE_DETAILS = [

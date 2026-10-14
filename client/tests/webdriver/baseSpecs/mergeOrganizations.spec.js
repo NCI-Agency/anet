@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import MergeOrganizations from "../pages/mergeOrganizations.page"
+import MergeOrganizations from "../pages/mergeOrganizations.page.js"
 
 const IMG_PATH = "/api/attachment/view"
 const EXAMPLE_ORGANIZATIONS = {

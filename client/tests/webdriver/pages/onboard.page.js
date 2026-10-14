@@ -1,4 +1,4 @@
-import { CreatePerson } from "./createNewPerson.page"
+import { CreatePerson } from "./createNewPerson.page.js"
 
 class Onboard extends CreatePerson {
   async getWelcomeText() {

@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { v4 as uuidv4 } from "uuid"
-import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
+import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page.js"
 
 const AUTHORIZATION_GROUP_NAME_PREFIX = "test community"
 const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"

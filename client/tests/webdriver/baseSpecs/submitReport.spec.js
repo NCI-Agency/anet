@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import ShowReport from "../pages/report/showReport.page"
+import ShowReport from "../pages/report/showReport.page.js"
 
 const DRAFT_REPORT_UUID = "530b735e-1134-4daa-9e87-4491c888a4f7"
 

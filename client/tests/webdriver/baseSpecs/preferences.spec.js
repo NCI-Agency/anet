@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import Preferences from "../pages/preferences.page"
+import Preferences from "../pages/preferences.page.js"
 
 describe("When checking the preferences page", () => {
   it("Should see the two preferences that can be edited", async () => {

@@ -1,4 +1,4 @@
-import Page from "../page"
+import Page from "../page.js"
 
 const PAGE_URL = "/attachments/:uuid"
 const EDIT_URL = "/attachments/:uuid/edit"

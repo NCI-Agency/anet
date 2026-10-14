@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
+import Home from "../pages/home.page.js"
 
 describe("Anet home page", () => {
   it("should be able to logout using the dropdown in header and login from logout page", async () => {

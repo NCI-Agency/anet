@@ -1,8 +1,8 @@
 import { expect } from "chai"
-import CreatePerson from "../pages/createNewPerson.page"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
-import ShowPerson from "../pages/showPerson.page"
+import CreatePerson from "../pages/createNewPerson.page.js"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
+import ShowPerson from "../pages/showPerson.page.js"
 
 const DEFAULT_USERNAME = "jack"
 

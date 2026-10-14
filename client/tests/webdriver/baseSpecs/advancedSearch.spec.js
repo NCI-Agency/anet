@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import _isEmpty from "lodash/isEmpty"
-import AdvancedSearch from "../pages/advancedSearch.page"
-import Home from "../pages/home.page"
+import _isEmpty from "lodash/isEmpty.js"
+import AdvancedSearch from "../pages/advancedSearch.page.js"
+import Home from "../pages/home.page.js"
 
 const ANET_OBJECT_TYPES = {
   Reports: {

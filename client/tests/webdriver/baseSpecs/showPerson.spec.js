@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import MergePeople from "../pages/mergePeople.page"
-import ShowPerson from "../pages/showPerson.page"
+import MergePeople from "../pages/mergePeople.page.js"
+import ShowPerson from "../pages/showPerson.page.js"
 
 const PERSON_UUID = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"
 const PERSON_WITH_AG_UUID = "31cba227-f6c6-49e9-9483-fce441bea624" // CIV Creed Bratton

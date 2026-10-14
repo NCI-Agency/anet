@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
-import CreateFutureReport from "../pages/createFutureReport.page"
+import CreateFutureReport from "../pages/createFutureReport.page.js"
 
 const INTERLOCUTOR = "Christopf"
 const INTERLOCUTOR_VALUE = `CIV ${INTERLOCUTOR} Topferness`

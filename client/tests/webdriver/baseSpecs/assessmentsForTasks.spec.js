@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
-import ShowTask from "../pages/showTask.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
+import ShowTask from "../pages/showTask.page.js"
 
 const TASK_SEARCH_STRING = "1.1.A"
 // both are responsible from '1.1.A Milestone' task

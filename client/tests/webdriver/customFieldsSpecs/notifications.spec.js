@@ -1,6 +1,6 @@
 // Note: number of assessments are based on the base data, if that changes, change this test as well
 import { expect } from "chai"
-import Home from "../pages/home.page"
+import Home from "../pages/home.page.js"
 
 describe("Home page", () => {
   describe("When checking the notification numbers", () => {

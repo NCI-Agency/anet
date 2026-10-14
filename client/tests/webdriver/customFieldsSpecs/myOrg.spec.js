@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import MyOrg from "../pages/myOrg.page"
+import Home from "../pages/home.page.js"
+import MyOrg from "../pages/myOrg.page.js"
 
 describe("My Organization page", () => {
   beforeEach("Open the My Organization page", async () => {

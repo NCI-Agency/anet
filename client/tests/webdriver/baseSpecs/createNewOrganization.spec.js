@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import CreateOrganization from "../pages/createNewOrganization.page"
-import ShowOrganization from "../pages/showOrganization.page"
+import CreateOrganization from "../pages/createNewOrganization.page.js"
+import ShowOrganization from "../pages/showOrganization.page.js"
 
 const testOrgs = {
   topLevel: {

@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import Home from "../pages/home.page"
-import Search from "../pages/search.page"
-import ShowPerson from "../pages/showPerson.page"
+import Home from "../pages/home.page.js"
+import Search from "../pages/search.page.js"
+import ShowPerson from "../pages/showPerson.page.js"
 
 const SOME_FIELDS = {
   currentPosition: {

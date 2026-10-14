@@ -1,6 +1,6 @@
 import { expect } from "chai"
-import Admin from "../pages/admin.page"
-import Help from "../pages/help.page"
+import Admin from "../pages/admin.page.js"
+import Help from "../pages/help.page.js"
 
 const ERIN_SUPERUSERS = ["CTR Rebecca Beccabon", "CIV Jacob Jacobson"]
 const ERIN_ADMINS = ["CIV Arthur Dmin", "CIV Michael Scott"]

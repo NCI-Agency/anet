@@ -1,8 +1,8 @@
 import { expect } from "chai"
-import MyReports, { REPORT_STATES } from "../pages/myReports.page"
-import EditReport from "../pages/report/editReport.page"
-import ShowReport from "../pages/report/showReport.page"
-import { getRichTextContent } from "./richTextUtils"
+import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
+import EditReport from "../pages/report/editReport.page.js"
+import ShowReport from "../pages/report/showReport.page.js"
+import { getRichTextContent } from "./richTextUtils.js"
 
 const RICH_TEXT_CONTENT = [
   { selector: "h1", content: "Heading 1" },

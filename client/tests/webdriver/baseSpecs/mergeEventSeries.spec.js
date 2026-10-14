@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import MergeEventSeries from "../pages/mergeEventSeries.page"
+import MergeEventSeries from "../pages/mergeEventSeries.page.js"
 
 const EXAMPLE_EVENT_SERIES = {
   validLeft: {

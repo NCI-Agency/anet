@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import CreateNewLocation from "../pages/location/createNewLocation.page"
+import CreateNewLocation from "../pages/location/createNewLocation.page.js"
 import {
   BAD_LAT_LNG_VAL,
   DESCRIPTION,
@@ -8,7 +8,7 @@ import {
   LOCATION_TYPE,
   NOT_SIMILAR_LOCATION,
   SIMILAR_LOCATION
-} from "./locationUtils"
+} from "./locationUtils.js"
 
 const SHORT_WAIT_MS = 1000
 

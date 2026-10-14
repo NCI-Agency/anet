@@ -1,9 +1,9 @@
 import { expect } from "chai"
 import moment from "moment"
-import AssessmentsSection from "../pages/assessments.page"
-import MyCounterparts from "../pages/myCounterparts.page"
-import MyTasks from "../pages/myTasks.page"
-import CreateReport from "../pages/report/createReport.page"
+import AssessmentsSection from "../pages/assessments.page.js"
+import MyCounterparts from "../pages/myCounterparts.page.js"
+import MyTasks from "../pages/myTasks.page.js"
+import CreateReport from "../pages/report/createReport.page.js"
 
 const SHORT_WAIT_MS = 1000
 

@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import moment from "moment"
-import CreateReport from "../pages/report/createReport.page"
-import ShowReport from "../pages/report/showReport.page"
+import CreateReport from "../pages/report/createReport.page.js"
+import ShowReport from "../pages/report/showReport.page.js"
 
 const AUTHOR_NAME = "Erin Erinson"
 const AUTHOR = `CIV ${AUTHOR_NAME}`

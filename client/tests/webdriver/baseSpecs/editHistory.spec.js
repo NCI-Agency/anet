@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import moment from "moment"
-import ShowPerson from "../pages/showPerson.page"
-import ShowPosition from "../pages/showPosition.page"
+import ShowPerson from "../pages/showPerson.page.js"
+import ShowPosition from "../pages/showPosition.page.js"
 
 const PERSON_UUID = "39d02d26-49eb-43b5-9cec-344777213a67"
 const DATE_FORMAT = "DD-MM-YYYY"

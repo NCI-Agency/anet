@@ -1,4 +1,4 @@
-import Page from "./page"
+import Page from "./page.js"
 
 const PAGE_URL = "/positions/new"
 class CreatePosition extends Page {

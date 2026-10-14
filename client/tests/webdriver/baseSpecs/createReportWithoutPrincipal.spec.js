@@ -1,10 +1,10 @@
 import { expect } from "chai"
 import moment from "moment"
-import Home from "../pages/home.page"
-import MyReports, { REPORT_STATES } from "../pages/myReports.page"
-import CreateReport from "../pages/report/createReport.page"
-import ShowReport from "../pages/report/showReport.page"
-import Search from "../pages/search.page"
+import Home from "../pages/home.page.js"
+import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
+import CreateReport from "../pages/report/createReport.page.js"
+import ShowReport from "../pages/report/showReport.page.js"
+import Search from "../pages/search.page.js"
 
 const REPORT_FIELDS = {
   intent: "An engagement report without primary interlocutor",

@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import MergeLocations from "../pages/mergeLocations.page"
+import MergeLocations from "../pages/mergeLocations.page.js"
 
 const EXAMPLE_LOCATIONS = {
   childLeft: {
