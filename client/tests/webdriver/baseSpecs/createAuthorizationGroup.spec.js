@@ -348,10 +348,12 @@ describe("When creating/editing a community", () => {
       await (await CreateAuthorizationGroup.getEditButton()).click()
       await (await CreateAuthorizationGroup.getForm()).waitForExist()
       await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
-      await (await CreateAuthorizationGroup.getName()).setValue("-edited")
+      await (
+        await CreateAuthorizationGroup.getName()
+      ).setValue(`${authorizationGroupName}-edited`)
       await (
         await CreateAuthorizationGroup.getDescription()
-      ).setValue("-edited")
+      ).setValue(`${authorizationGroupDescription}-edited`)
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
       const alertMessage = await (
