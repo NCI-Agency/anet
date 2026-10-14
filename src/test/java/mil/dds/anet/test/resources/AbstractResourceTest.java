@@ -14,6 +14,7 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.GraphQLPluginConfiguration;
 import mil.dds.anet.test.client.AccessToken;
@@ -25,6 +26,7 @@ import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
 import mil.dds.anet.test.client.Assessment;
 import mil.dds.anet.test.client.AssessmentInput;
+import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
 import mil.dds.anet.test.client.Event;
@@ -33,6 +35,7 @@ import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.EventSeriesInput;
 import mil.dds.anet.test.client.EventType;
 import mil.dds.anet.test.client.EventTypeInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.Note;
@@ -672,4 +675,23 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
     return new AccessTokenAuthentication(accessToken.get());
   }
 
+  protected AttachmentInput buildAttachment(final String tableName, final String uuid) {
+    return AttachmentInput.builder().withFileName("testAttachment.jpg")
+        .withMimeType(getFirstMimeType())
+        .withDescription("a test attachment created by AttachmentResourceTest")
+        .withCaption("testCaption").withClassification(getFirstClassification())
+        .withAttachmentRelatedObjects(List.of(createAttachmentRelatedObject(tableName, uuid)))
+        .build();
+  }
+
+  private GenericRelatedObjectInput createAttachmentRelatedObject(final String tableName,
+      final String uuid) {
+    return GenericRelatedObjectInput.builder().withRelatedObjectType(tableName)
+        .withRelatedObjectUuid(uuid).build();
+  }
+
+  protected String getFirstMimeType() {
+    final var allowedMimeTypes = AttachmentResource.getAllowedMimeTypes();
+    return allowedMimeTypes.get(0);
+  }
 }
