@@ -29,3 +29,7 @@ As part of the Defense Digital Service's goal of bringing technology industry pr
 Works created by U.S. Federal employees as part of their jobs typically are not eligible for copyright in the United States. In places where the contributions of U.S. Federal employees are not eligible for copyright, this work is in the public domain. In places where it is eligible for copyright, such as some foreign jurisdictions, this work is licensed as described in `LICENSE.md`.
 
 
+
+## Browser regression tests
+
+The browser regression suite uses Playwright Test with Chromium. See [client-side testing](docs/dev-setup.md#client-side-tests) for service setup and commands. Both the default dictionary and `testDictionaries/no-custom-fields.yml` are exercised in CI.

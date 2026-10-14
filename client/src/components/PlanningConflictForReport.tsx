@@ -125,7 +125,7 @@ const PlanningConflictForReport = ({
   )
 }
 
-/** wdio e2e tests rely on these class names
+/** Playwright e2e tests rely on these class names
  *
  * .reportConflictIcon, .reportConflictLoadingIcon, .reportConflictTooltipContainer
  *

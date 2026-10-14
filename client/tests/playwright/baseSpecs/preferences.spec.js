@@ -1,0 +1,13 @@
+import { expect } from "chai"
+import Preferences from "../pages/preferences.page.js"
+import { test } from "../support.js"
+
+test.describe("When checking the preferences page", () => {
+  test("Should see the two preferences that can be edited", async () => {
+    await Preferences.open()
+    // eslint-disable-next-line no-unused-expressions
+    expect(await Preferences.hasReportsEmailsPreference()).to.be.true
+    // eslint-disable-next-line no-unused-expressions
+    expect(await Preferences.hasSubscriptionsEmailsPreference()).to.be.true
+  })
+})

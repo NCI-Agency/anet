@@ -164,8 +164,9 @@ If you have updated the generated schema and need to update the generated Java c
 
 ### Client-side tests
 #### How the client-side tests work
-Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
-This driver runs the tests locally on your system.
+The browser regression suite uses Playwright Test with Chromium. Specs are multi-step scenarios: cases run sequentially and share a browser context within their spec; different specs have separate contexts and run in parallel. Do not enable `fullyParallel` without first making their browser and database state independent. Failed cases produce screenshots, traces, HTML reports, and JUnit results under `client/build`.
+
+The separate legacy E2E suite (`test-e2e`) uses Selenium and a browser driver. Playwright manages Chromium directly for the regression suite.
 
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
@@ -181,13 +182,16 @@ Run `./gradlew yarn_run_prettier:format` to reformat the JavaScript code accordi
 #### Client-side testing locally
 To run the tests locally, make sure you have the server using the test-database running as above.
 1. Run the client side E2E tests against the test database: `./gradlew yarn_run_test-e2e`
-1. Run the client side wdio tests against the test database: `./gradlew yarn_run_test-wdio`
+1. Install the Playwright Chromium browser: `./gradlew yarn_run_install-playwright`
+1. Run the client side Playwright tests against the test database: `./gradlew yarn_run_test-playwright`
 1. Run the client side jest tests against the test database: `./gradlew yarn_run_test-jest`
 1. Or run all client side tests against the test database: `./gradlew yarn_run_test-all`
 
-To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/package/chromedriver) as an npm dependency, we automatically have access to run in Chrome. To use Firefox instead, see [`geckodriver`](https://www.npmjs.com/package/geckodriver).
+To reproduce both browser CI jobs on Linux, run `./scripts/test-playwright-ci.sh` from the repository root. It starts the test services, installs Chromium, and runs both dictionary configurations with a fresh ANET server and test database for each. Keep port 8180 free before running it. Reports and server logs are retained under `client/build/local-ci`.
 
-When writing browser tests, remember that when you take an action, you need to give the browser time to update in response before you start making assertions. Use the `driver.wait` method to do this.
+The legacy Selenium E2E suite uses Selenium Manager to locate or download Chrome and its driver. Playwright installs its own Chromium browser through the command above.
+
+When writing Playwright tests, use locator actions and retrying `expect` assertions to wait for the page to update. Avoid fixed sleeps. The legacy Selenium tests use `driver.wait`.
 
 If the tests are failing, and you don't know why, run them with env var `DEBUG_LOG=true`:
 

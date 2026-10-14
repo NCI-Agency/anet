@@ -217,7 +217,10 @@ const RichTextEditor = ({
             placeholder={placeholder}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
-            onBlur={onHandleBlur}
+            onBlur={(...args) => {
+              serializeDebounced.flush()
+              onHandleBlur?.(...args)
+            }}
             onKeyDown={e =>
               handleOnKeyDown(
                 e,

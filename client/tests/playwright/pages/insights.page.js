@@ -1,0 +1,40 @@
+import { currentPage } from "../support.js"
+import Page from "./page.js"
+
+// Copied from src/pages/insights/Show.js
+const NOT_APPROVED_REPORTS = "not-approved-reports"
+const CANCELLED_REPORTS = "cancelled-engagement-reports"
+const REPORTS_BY_TASK = "reports-by-task"
+const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
+const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
+export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
+const CADENCE_DASHBOARD = "cadence-dashboard"
+export const AGGREGATED_REPORTS_OVER_TIME = "aggregated-reports-over-time"
+export const INSIGHTS = [
+  NOT_APPROVED_REPORTS,
+  CANCELLED_REPORTS,
+  REPORTS_BY_TASK,
+  FUTURE_ENGAGEMENTS_BY_LOCATION,
+  REPORTS_BY_DAY_OF_WEEK,
+  PENDING_ASSESSMENTS_BY_POSITION,
+  CADENCE_DASHBOARD,
+  AGGREGATED_REPORTS_OVER_TIME
+]
+class Insights extends Page {
+  async getInsightsMenu() {
+    return currentPage().locator("#insights").first()
+  }
+
+  async getInsightLink(insight) {
+    return currentPage().locator(`a[href="/insights/${insight}"]`).first()
+  }
+
+  async getAlert() {
+    return currentPage().locator(".alert").first()
+  }
+
+  async getInsightDiv(insight) {
+    return currentPage().locator(`div[id="${insight}"]`).first()
+  }
+}
+export default new Insights()

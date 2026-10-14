@@ -118,10 +118,10 @@ jobs:
       fail-fast: false
       matrix:
         dictionary: [anet-dictionary.yml]
-        client-tests: [jest, wdio-junit, e2e-junit]
+        client-tests: [jest, playwright-junit, e2e-junit]
         include:
           - dictionary: testDictionaries/no-custom-fields.yml
-            client-tests: wdio-noCF-junit
+            client-tests: playwright-noCF-junit
 
     env:
       ANET_DICTIONARY_NAME: ${{ matrix.dictionary }}
@@ -139,14 +139,33 @@ jobs:
     - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
     - run: ./gradlew -PtestEnv checkConfig
-    - run: |
+    - name: Start ANET and wait for readiness
+      run: |
         ./gradlew -PtestEnv run &
-        sleep 15
+        for attempt in {1..180}; do
+          if curl --fail --silent --header "Accept: text/html" --output /dev/null http://localhost:8180/; then
+            exit 0
+          fi
+          sleep 1
+        done
+        exit 1
+    - name: Install Playwright Chromium
+      if: startsWith(matrix.client-tests, 'playwright')
+      run: ./gradlew yarn_run_install-playwright
     - run: ./gradlew yarn_run_test-${CLIENT_TESTS}
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
       if: always()
+    - name: Upload Playwright diagnostics
+      if: always() && startsWith(matrix.client-tests, 'playwright')
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ matrix.client-tests }}-playwright-diagnostics
+        path: |
+          client/build/playwright-report
+          client/build/test-results/playwright-artifacts
+        if-no-files-found: ignore
     - name: Upload client log
       uses: actions/upload-artifact@v7
       with:
