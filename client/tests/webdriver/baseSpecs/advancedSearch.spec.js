@@ -67,13 +67,13 @@ describe("When using advanced search", () => {
   })
   it("Should show a list of anet object types on toggle buttons in the popover", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
-    for (const [i, button] of buttons.entries()) {
+    await buttons.mapSeries(async (button, i) => {
       const expectedText = (await getObjectType(i)).replace(
         "EventSeries",
         "Event Series"
       )
       expect(await button.getText()).to.equal(expectedText)
-    }
+    })
   })
   it("Should show the common filter even when no object type selected", async () => {
     expect(
@@ -99,7 +99,7 @@ describe("When using advanced search", () => {
   })
   it("Should show the common filter and default filters for each anet object type", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
-    for (const [i, button] of buttons.entries()) {
+    await buttons.mapSeries(async (button, i) => {
       await button.click()
       expect(
         await (await AdvancedSearch.getCommonSearchFilter()).isExisting()
@@ -115,11 +115,11 @@ describe("When using advanced search", () => {
           await (await AdvancedSearch.getPendingVerificationFilter()).getText()
         ).to.equal(PERSON_DEFAULT_FILTER)
       }
-    }
+    })
   })
   it("Should show add another filter button with correct text", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
-    for (const [i, button] of buttons.entries()) {
+    await buttons.mapSeries(async (button, i) => {
       await button.click()
       const sampleFilters =
         ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilters
@@ -130,12 +130,12 @@ describe("When using advanced search", () => {
           await (await AdvancedSearch.getAddFilterButtonText()).getText()
         ).to.equal(ADD_FILTER_BUTTON_TEXT)
       }
-    }
+    })
   })
 
   it("Should show correct sample filters in the additional filters popover", async () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
-    for (const [i, button] of buttons.entries()) {
+    await buttons.mapSeries(async (button, i) => {
       await button.click()
       const sampleFilters =
         ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilters
@@ -150,7 +150,7 @@ describe("When using advanced search", () => {
           await (await AdvancedSearch.getSearchFilter(sampleFilter)).click()
         }
       }
-    }
+    })
   })
 })
 
