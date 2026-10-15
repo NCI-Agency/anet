@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.cache.Cache;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.Person;
@@ -177,7 +176,7 @@ public class AdminResource {
     final Cache<String, Person> domainUsersCache = personCache.getDomainUsersCache();
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       final Person person = entry.getValue();
-      if (AuthUtils.isAdmin(user) || Objects.equals(user.getTenantUuid(), person.getTenantUuid())) {
+      if (AuthUtils.isAdmin(user) || AuthUtils.isFromSameTenant(user, person)) {
         final Deque<Activity> activities = person.getRecentActivities();
         if (!Utils.isEmptyOrNull(activities)) {
           byUser.add(new RecentUserActivity(person, activities.getFirst()));

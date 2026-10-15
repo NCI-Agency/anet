@@ -135,6 +135,9 @@ export default class Position extends Model {
     }
     person {
       ${gqlEntityFieldsMap.Person}
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
     associatedPositions {
       ${gqlEntityFieldsMap.Position}

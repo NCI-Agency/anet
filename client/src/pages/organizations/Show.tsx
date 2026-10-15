@@ -269,7 +269,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   const allEventSeries = data?.eventSeriesList?.list ?? []
 
   const isTenantAdmin = currentUser?.isTenantAdmin()
-  const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
     isTenantAdmin ||
     currentUser?.hasAdministrativePermissionsForOrganization(organization)
@@ -342,7 +341,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   ].join(" ")
   const action = (
     <>
-      {isAdmin && (
+      {isTenantAdmin && (
         <Link
           id="mergeWithOther"
           to="/admin/merge/organizations"

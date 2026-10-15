@@ -201,7 +201,7 @@ public class LocationResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Location loserLocation = dao.getByUuid(loserUuid);
 
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
     // Check that given two locations can be merged
     areLocationsMergeable(winnerLocation, loserLocation);
     validateLocation(winnerLocation);

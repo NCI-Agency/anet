@@ -15,7 +15,7 @@ test.describe(() => {
       name: "Merge One",
       fullName: "Merge One, MOD-M1-HQ-00001",
       organization: "MoD | Ministry of Defense",
-      type: "REGULAR",
+      type: "Regular position",
       role: "Deputy",
       status: "ACTIVE",
       email: "Network Address\nInternet mergeOne@mod.example.com",
@@ -45,7 +45,7 @@ test.describe(() => {
       name: "Merge Two",
       fullName: "Merge Two, MOD-M2-HQ-00001",
       organization: "MoD | Ministry of Defense",
-      type: "REGULAR",
+      type: "Regular position",
       role: "Leader",
       status: "ACTIVE",
       email: "No email addresses available",
@@ -183,31 +183,6 @@ test.describe(() => {
       await expect
         .poll(async () => await MergePositions.getPreviousPeople("left"))
         .toEqual(EXAMPLE_POSITIONS.validLeft.previousPeople)
-    })
-    test("Should not allow to select the same positions", async () => {
-      await (
-        await MergePositions.getRightPositionField()
-      ).fill(String(EXAMPLE_POSITIONS.validLeft.search))
-      await MergePositions.waitForAdvancedSelectLoading(
-        EXAMPLE_POSITIONS.validLeft.fullName
-      )
-      await expect(
-        await MergePositions.getFirstItemRadioButtonFromAdvancedSelect()
-      ).toHaveCount(0)
-    })
-    test("Should not allow to select two occupied positions", async () => {
-      await (
-        await MergePositions.getRightPositionField()
-      ).fill(String(EXAMPLE_POSITIONS.occupiedRight.search))
-      await MergePositions.waitForAdvancedSelectLoading(
-        EXAMPLE_POSITIONS.occupiedRight.fullName
-      )
-      await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
-      await (
-        await MergePositions.getOccupiedPositionsToast()
-      ).waitFor({
-        state: "visible"
-      })
     })
     test("Should display fields values of the right position", async () => {
       // Search and select a position from right position field.

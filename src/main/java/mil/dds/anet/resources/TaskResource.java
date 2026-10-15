@@ -270,7 +270,7 @@ public class TaskResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerTask") Task winnerTask) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final var loserTask = dao.getByUuid(loserUuid);
     checkWhetherTasksAreMergeable(winnerTask, loserTask);
