@@ -44,7 +44,7 @@ const DEPUTY_PERSON_TEXT = "CIV Jacob Jacobson"
 
 describe("Show organization page", () => {
   describe("As an admin", () => {
-    it("Should first search, find and open the organization page", async () => {
+    it("Should search, find and open the EF 2 organization page", async () => {
       await Home.openAsAdminUser()
       await (await Home.getSearchBar()).setValue(ORGANIZATION_EF2_SEARCH_STRING)
       await (await Home.getSubmitSearch()).click()
@@ -206,7 +206,7 @@ describe("Show organization page", () => {
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the organization page", async () => {
+    it("Should search, find and open the EF 2.2 organization page", async () => {
       await Home.openAsAdminUser()
       await (
         await Home.getSearchBar()
