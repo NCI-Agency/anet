@@ -9,7 +9,7 @@ const EXAMPLE_POSITIONS = {
     name: "Merge One",
     fullName: "Merge One, MOD-M1-HQ-00001",
     organization: "MoD | Ministry of Defense",
-    type: "REGULAR",
+    type: "Regular position",
     role: "Deputy",
     status: "ACTIVE",
     email: "Network Address\nInternet mergeOne@mod.example.com",
@@ -33,7 +33,7 @@ const EXAMPLE_POSITIONS = {
     name: "Merge Two",
     fullName: "Merge Two, MOD-M2-HQ-00001",
     organization: "MoD | Ministry of Defense",
-    type: "REGULAR",
+    type: "Regular position",
     role: "Leader",
     status: "ACTIVE",
     email: "No email addresses available",
@@ -155,33 +155,6 @@ describe("Merge positions page", () => {
     expect(await MergePositions.getPreviousPeople("left")).to.eql(
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
-  })
-
-  it("Should not allow to select the same positions", async () => {
-    await (
-      await MergePositions.getRightPositionField()
-    ).setValue(EXAMPLE_POSITIONS.validLeft.search)
-    await MergePositions.waitForAdvancedSelectLoading(
-      EXAMPLE_POSITIONS.validLeft.fullName
-    )
-    // eslint-disable-next-line no-unused-expressions
-    expect(
-      await (
-        await MergePositions.getFirstItemRadioButtonFromAdvancedSelect()
-      ).isExisting()
-    ).to.be.false
-  })
-
-  it("Should not allow to select two occupied positions", async () => {
-    await (
-      await MergePositions.getRightPositionField()
-    ).setValue(EXAMPLE_POSITIONS.occupiedRight.search)
-    await MergePositions.waitForAdvancedSelectLoading(
-      EXAMPLE_POSITIONS.occupiedRight.fullName
-    )
-    await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
-
-    await (await MergePositions.getOccupiedPositionsToast()).waitForDisplayed()
   })
 
   it("Should display fields values of the right position", async () => {

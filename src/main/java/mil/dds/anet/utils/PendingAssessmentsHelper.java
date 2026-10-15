@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -549,7 +548,7 @@ public class PendingAssessmentsHelper {
               return CompletableFuture.completedFuture(null);
             }
             if (!Person.isSystemUser(user) && !AuthUtils.isAdmin(user)
-                && !Objects.equals(user.getTenantUuid(), advisor.getTenantUuid())) {
+                && !AuthUtils.isFromSameTenant(user, advisor)) {
               return CompletableFuture.completedFuture(null);
             }
 
