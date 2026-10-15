@@ -384,19 +384,8 @@ const routes = [
                 element: <Preferences />
               },
               {
-                element: (
-                  <ProtectedRoute
-                    authorizationCallback={currentUser =>
-                      currentUser?.isAdmin()
-                    }
-                  />
-                ),
-                children: [
-                  {
-                    path: "graphiql",
-                    element: <GraphiQL />
-                  }
-                ]
+                path: "graphiql",
+                element: <GraphiQL />
               }
             ]
           }
