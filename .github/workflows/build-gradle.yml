@@ -139,6 +139,7 @@ jobs:
     - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
     - run: ./gradlew -PtestEnv checkConfig
+    - run: ./gradlew -PtestEnv buildClient
     - run: |
         ./gradlew -PtestEnv run &
         sleep 15
