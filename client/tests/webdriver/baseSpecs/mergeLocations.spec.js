@@ -230,7 +230,7 @@ describe("Merge locations page", () => {
     )
   })
 
-  it("Should autoMerge some identical fields from both locations", async () => {
+  it("Should autoMerge identical status and shape from locations of different types", async () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.status)
@@ -402,7 +402,7 @@ describe("Merge locations page", () => {
       .false
   })
 
-  it("Should autoMerge some identical fields from both locations", async () => {
+  it("Should autoMerge identical type and status from locations of the same type", async () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Type")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.left.type)

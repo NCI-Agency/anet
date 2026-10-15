@@ -150,8 +150,18 @@ class ShowReport extends Page {
     return (await browser.$("div[name='reportCommunities']")).getText()
   }
 
-  async getCompactReportCommunities() {
-    return (await browser.$("table#reportCommunities")).getText()
+  async getCompactReportCommunityRows() {
+    const rows = await browser.$$("table#reportCommunities tbody tr")
+    const values = []
+    for (const row of rows) {
+      const cells = await row.$$("td")
+      const cellTexts = []
+      for (const cell of cells) {
+        cellTexts.push(await cell.getText())
+      }
+      values.push(cellTexts)
+    }
+    return values
   }
 
   async getAdvisorOrg() {

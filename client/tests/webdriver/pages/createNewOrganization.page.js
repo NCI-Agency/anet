@@ -46,13 +46,26 @@ class CreateOrganization extends Page {
     )
   }
 
-  async selectParentOrganizationByText(name) {
-    await (await this.getParentOrganizationInput()).click()
-    // wait for parentOrg table loader to disappear
-    await (await this.getParentOrganizationsTable()).waitForDisplayed()
-    await browser.keys(name)
-    await (await this.getParentOrganizationsTable()).waitForDisplayed()
-    await browser.pause(500) // wait for the rendering of the search results
+  async selectParentOrganizationByText(searchText, expectedName = searchText) {
+    const input = await this.getParentOrganizationInput()
+    await input.click()
+    await input.setValue(searchText)
+    // The previous search results can remain visible while the new search runs.
+    await browser.waitUntil(
+      async () => {
+        const name = await (
+          await this.getParentOrganizationsTable()
+        ).$("tbody tr:first-child td:nth-child(2) span")
+        // Organization labels include the long name and optional identification code.
+        return (
+          (await name.isExisting()) &&
+          (await name.getText()).split(" | ")[0].trim() === expectedName
+        )
+      },
+      {
+        timeoutMsg: `Expected parent organization search to return "${expectedName}"`
+      }
+    )
     const radioButton = await (
       await this.getParentOrganizationsTable()
     ).$("tbody tr:first-child td:first-child input.form-check-input")
@@ -188,9 +201,11 @@ class CreateOrganization extends Page {
   }
 
   async fillOrganizationProfile(profile) {
-    await (await this.getProfileInput()).click()
-    await browser.keys(profile)
-    await browser.pause(300)
+    await this.fillRichTextInput(
+      await this.getForm(),
+      "#fg-profile .editable",
+      profile
+    )
   }
 }
 

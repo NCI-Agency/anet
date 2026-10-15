@@ -407,6 +407,7 @@ tasks.register('buildClient', YarnTask) {
 	dependsOn 'yarn'
 	group = "build"
 	description = "Builds the client application."
+	inputs.property("ANET_TEST_MODE", run.environment["ANET_TEST_MODE"])
 	inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
