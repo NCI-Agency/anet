@@ -237,10 +237,25 @@ class Page {
     editorValue,
     oldValue
   ) {
-    await (await editorContainer.$(editorSelector)).click()
+    const editor = await editorContainer.$(editorSelector)
+    await editor.click()
     if (oldValue) {
-      // Delete the text including the empty paragraph at the end
-      await this.deleteText(`${oldValue}\n`)
+      // Replace the entire editor, regardless of the clicked paragraph or caret position.
+      const modifier = /mac/i.test(browser.capabilities.platformName || "")
+        ? "Meta"
+        : "Control"
+      await browser.waitUntil(
+        async () => {
+          // Slate may still be synchronizing selection after the initial click.
+          await browser.keys([modifier, "a"])
+          await browser.keys("Backspace")
+          return (await editor.getText()).trim() === ""
+        },
+        {
+          timeoutMsg:
+            "Expected the rich-text editor to be empty before replacement"
+        }
+      )
     }
     await browser.keys(editorValue)
     // Blur flushes the editor's pending serialization before the next action.
