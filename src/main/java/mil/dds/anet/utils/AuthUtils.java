@@ -3,11 +3,14 @@ package mil.dds.anet.utils;
 import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Objects;
+import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -221,4 +224,19 @@ public class AuthUtils {
         .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK);
   }
 
+  public static boolean isFromSameTenant(Person user, Tenant t) {
+    return Objects.equals(user.getTenantUuid(), t.getUuid());
+  }
+
+  public static boolean isFromSameTenant(Person user, Person p) {
+    return Objects.equals(user.getTenantUuid(), p.getTenantUuid());
+  }
+
+  public static boolean isFromNoOrSameTenant(Person user, Person p) {
+    return p.getTenantUuid() == null || isFromSameTenant(user, p);
+  }
+
+  public static boolean isFromSameTenant(Person user, AccessToken at) {
+    return Objects.equals(user.getTenantUuid(), at.getTenantUuid());
+  }
 }

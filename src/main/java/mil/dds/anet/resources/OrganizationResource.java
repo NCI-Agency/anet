@@ -257,7 +257,7 @@ public class OrganizationResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerOrganization") Organization winnerOrganization) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final var loserOrganization = dao.getByUuid(loserUuid);
     checkWhetherOrganizationsAreMergeable(winnerOrganization, loserOrganization);

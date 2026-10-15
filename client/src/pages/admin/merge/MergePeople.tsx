@@ -5,6 +5,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
 import {
@@ -47,7 +48,7 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Person } from "models"
 import moment from "moment"
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
@@ -559,12 +560,6 @@ const ColTitle = styled(Form.Group)`
   height: 39px;
 `
 
-const peopleFilters = {
-  allPersons: {
-    label: "All"
-  }
-}
-
 interface PersonColumnProps {
   align: "left" | "right"
   label: string
@@ -582,9 +577,23 @@ const PersonColumn = ({
   dispatchMergeActions,
   setSideUsedForHistory
 }: PersonColumnProps) => {
+  const { currentUser } = useContext(AppContext)
   const person = mergeState[align]
   const otherSide = mergeState[getOtherSide(align)]
   const idForPerson = label.replace(/\s+/g, "")
+
+  const queryVars = currentUser?.isAdmin()
+    ? undefined
+    : {
+        hasTenant: false,
+        tenantUuid: currentUser?.tenant?.uuid
+      }
+  const peopleFilters = {
+    allPersons: {
+      label: "All",
+      queryVars
+    }
+  }
 
   return (
     <PersonCol>
