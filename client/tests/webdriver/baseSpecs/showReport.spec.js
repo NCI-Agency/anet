@@ -1,14 +1,14 @@
 import { expect } from "chai"
-import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
 import ShowReport from "../pages/report/showReport.page.js"
+
+// Open seeded fixtures directly so display checks do not depend on report-list results.
+const REPORT_UUID = "59be259b-30b9-4d04-9e21-e8ceb58cbe9c"
+const CLASSIFIED_REPORT_UUID = "c3008f90-6a27-4343-b278-827a0a0dc6bf"
 
 describe("Show report page", () => {
   beforeEach("Open the show report page", async () => {
-    await MyReports.open("arthur")
-    await MyReports.selectReport(
-      "A test report from Arthur",
-      REPORT_STATES.PUBLISHED
-    )
+    await ShowReport.openAsAdminUser(REPORT_UUID)
+    await ShowReport.waitForShowReportToLoad()
   })
   describe("When on the show page of a report with assessments", () => {
     it("We should see a table of tasks instant assessments related to the current report", async () => {
@@ -173,11 +173,8 @@ describe("Show report page", () => {
 const REPORT_CLASSIFICATION = "NATO UNCLASSIFIED"
 describe("Show report page with classification", () => {
   beforeEach("Open the show report page", async () => {
-    await MyReports.open("arthur")
-    await MyReports.selectReport(
-      "A classified report from Arthur",
-      REPORT_STATES.DRAFT
-    )
+    await ShowReport.openAsAdminUser(CLASSIFIED_REPORT_UUID)
+    await ShowReport.waitForShowReportToLoad()
   })
   describe("When on the show page of a report with classification", () => {
     it("We should see the classification related to the current report", async () => {
