@@ -827,12 +827,12 @@ describe("Merge user with non-user", () => {
     ).to.eq(EXAMPLE_PEOPLE.userRight.gender)
   })
 
-  it("Should autoMerge the user accounts field from both persons", async () => {
+  it("Should not autoMerge the user accounts field from both persons", async () => {
     expect(
       await (
         await MergePeople.getColumnContent("mid", "User accounts")
       ).getText()
-    ).to.eq("Domain username\nandrew")
+    ).to.eq("No user accounts available")
   })
 
   it("should be able to individually select email addresses", async () => {
@@ -973,7 +973,7 @@ describe("Merge user with non-user", () => {
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.politicalPosition)
 
-    // It should still have the merged user accounts field from both persons!
+    // It should have merged the user accounts field from both persons!
     expect(
       await (
         await MergePeople.getColumnContent("mid", "User accounts")
@@ -1055,7 +1055,7 @@ describe("Merge user with non-user", () => {
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.politicalPosition)
 
-    // It should still have the merged user accounts field from both persons!
+    // It should have merged the user accounts field from both persons
     expect(
       await (
         await MergePeople.getColumnContent("mid", "User accounts")
@@ -1082,7 +1082,7 @@ describe("Merge user with non-user", () => {
     ).to.eq(true)
   })
 
-  it("Should have the merged user accounts from both persons", async () => {
+  it("Should have merged the user accounts from both persons", async () => {
     expect(await (await MergePeople.getUserAccountsField()).getText()).to.eq(
       "User accounts\nDomain username\nandrew"
     )

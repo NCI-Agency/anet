@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -28,7 +27,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.DatabaseHandler;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
@@ -311,11 +309,19 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       }
     }
 
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      qb.addFromClause(
+          "LEFT JOIN \"reportTenants\" reptens ON reptens.\"reportUuid\" = reports.uuid");
+      qb.addWhereClause(
+          "(reports.\"allTenants\" IS TRUE OR reptens.\"tenantUuid\" IN ( <tenantUuids> ))");
+      qb.addListArg("tenantUuids", query.getTenantUuid());
+    }
+
     // Apply a filter to restrict access to reports if necessary.
-    if (!query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
-      final Person user = query.getUser();
-      qb.addWhereClause(DaoUtils.getReportsWhereClause());
-      qb.addSqlArgs(DaoUtils.getReportsParamsMap(user));
+    if (DaoUtils.isAccessToken(query.getPrincipal())
+        || !query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
+      qb.addWhereClause(DaoUtils.getReportsWhereClause(query.getPrincipal(), "reports"));
+      qb.addSqlArgs(DaoUtils.getReportsParamsMap(query.getPrincipal()));
     }
 
     if (query.getEmailNetwork() != null) {

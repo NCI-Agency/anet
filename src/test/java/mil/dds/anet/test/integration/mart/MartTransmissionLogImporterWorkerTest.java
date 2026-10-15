@@ -84,11 +84,11 @@ class MartTransmissionLogImporterWorkerTest extends AbstractResourceTest {
         createTransmissionLog(Instant.now().minus(5, ChronoUnit.DAYS)));
     // Mock the mail exchange server
     final IMailReceiver mailReceiverMock = Mockito.mock();
-    when(mailReceiverMock.downloadEmails())
+    when(mailReceiverMock.downloadEmails(Mockito.any()))
         .thenReturn(List.of(reportMessage1, transmissionLogMessage, transmissionLogMessage2,
             transmissionLogMessage3, transmissionLogMessage4));
 
-    martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
+    martReportImporterWorker = new MartImporterWorker(config, dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
   }
 

@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.ForeignObjectHolder;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -33,6 +34,7 @@ public class MartImportedReport {
   private Integer historyCount;
 
   // annotated below
+  private ForeignObjectHolder<Tenant> tenant = new ForeignObjectHolder<>();
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
   private ForeignObjectHolder<Report> report = new ForeignObjectHolder<>();
 
@@ -91,6 +93,36 @@ public class MartImportedReport {
 
   public void setHistoryCount(Integer historyCount) {
     this.historyCount = historyCount;
+  }
+
+  @GraphQLQuery(name = "tenant")
+  public CompletableFuture<Tenant> loadTenant(@GraphQLRootContext GraphQLContext context) {
+    if (tenant.hasForeignObject()) {
+      return CompletableFuture.completedFuture(tenant.getForeignObject());
+    }
+    return new UuidFetcher<Tenant>().load(context, IdDataLoaderKey.TENANTS, tenant.getForeignUuid())
+        .thenApply(o -> {
+          tenant.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setTenantUuid(String tenantUuid) {
+    this.tenant = new ForeignObjectHolder<>(tenantUuid);
+  }
+
+  @JsonIgnore
+  public String getTenantUuid() {
+    return tenant.getForeignUuid();
+  }
+
+  public void setTenant(Tenant t) {
+    this.tenant = new ForeignObjectHolder<>(t);
+  }
+
+  public Tenant getTenant() {
+    return tenant.getForeignObject();
   }
 
   @GraphQLQuery(name = "person")

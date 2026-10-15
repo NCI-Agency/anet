@@ -3,14 +3,16 @@ import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import { Person, Position } from "models"
 import React from "react"
-import { Table } from "react-bootstrap"
+import { Button, Table } from "react-bootstrap"
 
 interface NoPaginationPeopleTableProps {
   id?: string
   people?: any[]
   showDelete?: boolean
   onDelete?: (...args: unknown[]) => unknown
-  noPeopleMessage?: string
+  showAccessActions?: boolean
+  onAccessChanged?: (person: any, allow: boolean) => unknown
+  noPeopleMessage?: React.ReactNode
 }
 
 const NoPaginationPeopleTable = ({
@@ -18,6 +20,8 @@ const NoPaginationPeopleTable = ({
   people,
   showDelete = false,
   onDelete,
+  showAccessActions = false,
+  onAccessChanged,
   noPeopleMessage = "No people found"
 }: NoPaginationPeopleTableProps) => {
   const peopleExists = _get(people, "length", 0) > 0
@@ -33,6 +37,7 @@ const NoPaginationPeopleTable = ({
               <th>Position</th>
               <th>Location</th>
               {showDelete && <th />}
+              {showAccessActions && <th className="col-sm-3" />}
             </tr>
           </thead>
           <tbody>
@@ -69,6 +74,23 @@ const NoPaginationPeopleTable = ({
                         title="Remove person"
                         onClick={() => onDelete(person)}
                       />
+                    </td>
+                  )}
+                  {showAccessActions && (
+                    <td>
+                      <Button
+                        variant="primary"
+                        onClick={() => onAccessChanged(person, true)}
+                      >
+                        Allow Access
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        className="ms-2"
+                        onClick={() => onAccessChanged(person, false)}
+                      >
+                        Deny Access
+                      </Button>
                     </td>
                   )}
                 </tr>

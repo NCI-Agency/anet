@@ -42,7 +42,8 @@ public class EventResource {
   }
 
   public static boolean hasPermission(final Person user, final Event event) {
-    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, event.getAdminOrgUuid());
+    return AuthUtils.isTenantAdmin(user)
+        || AuthUtils.canAdministrateOrg(user, event.getAdminOrgUuid());
   }
 
   public void assertPermission(final Person user, final Event event) {
@@ -63,7 +64,7 @@ public class EventResource {
   @GraphQLQuery(name = "eventList")
   public AnetBeanList<Event> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") EventSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 
