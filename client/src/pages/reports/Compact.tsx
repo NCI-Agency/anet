@@ -47,6 +47,7 @@ import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
+import TenantTable from "components/TenantTable"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -112,6 +113,9 @@ const GQL_GET_REPORT = gql`
         taskedOrganizations {
           ${gqlEntityFieldsMap.Organization}
         }
+      }
+      tenants {
+        ${gqlEntityFieldsMap.Tenant}
       }
       ${gqlReportCommunitiesFields}
       ${gqlReportCommentsFields}
@@ -285,6 +289,26 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
               className="reportField"
               hideIfEmpty
             />
+            {report.allTenants ? (
+              <DictionaryField
+                wrappedComponent={CompactRow}
+                dictProps={Settings.fields.report.allTenants}
+                content={utils.formatBoolean(report.allTenants)}
+                className="reportField"
+              />
+            ) : (
+              <DictionaryField
+                wrappedComponent={CompactRow}
+                dictProps={Settings.fields.report.tenants}
+                content={
+                  <TenantTable
+                    tenants={report.tenants}
+                    noTenantsMessage="No tenants selected"
+                  />
+                }
+                className="reportField"
+              />
+            )}
             <CompactRow
               id="interlocutors"
               label="Interlocutors"
