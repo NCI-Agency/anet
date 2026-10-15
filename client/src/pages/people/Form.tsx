@@ -590,6 +590,75 @@ const PersonForm = ({
                           </>
                         )}
 
+                      {values.user && (
+                        <>
+                          <DictionaryField
+                            wrappedComponent={FastField}
+                            dictProps={Settings.fields.person.tenant}
+                            name="tenant"
+                            component={FieldHelper.SpecialField}
+                            onChange={value => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
+                              setFieldValue("tenant", value)
+                            }}
+                            widget={
+                              <AdvancedSingleSelect
+                                fieldName="tenant"
+                                placeholder={
+                                  Settings.fields.person.tenant.placeholder
+                                }
+                                value={values.tenant}
+                                overlayColumns={["Name", "Status"]}
+                                overlayRenderRow={TenantOverlayRow}
+                                filterDefs={tenantsFilters}
+                                objectType={Tenant}
+                                fields={Tenant.autocompleteQuery}
+                                valueKey="name"
+                                disabled={!isAdmin}
+                              />
+                            }
+                          />
+
+                          {(forOnboarding || isSelf) &&
+                            !_isEmpty(unselectedTenants) && (
+                              <DictionaryField
+                                wrappedComponent={Field}
+                                dictProps={
+                                  Settings.fields.person.tenantAccessRequest
+                                }
+                                name="tenantAccessRequest"
+                                component={FieldHelper.SpecialField}
+                                onChange={value => {
+                                  // validation will be done by setFieldValue
+                                  setFieldTouched(
+                                    "tenantAccessRequest",
+                                    true,
+                                    false
+                                  ) // onBlur doesn't work when selecting an option
+                                  setFieldValue("tenantAccessRequest", value)
+                                }}
+                                widget={
+                                  <AdvancedSingleSelect
+                                    fieldName="tenantAccessRequest"
+                                    placeholder={
+                                      Settings.fields.person.tenantAccessRequest
+                                        .placeholder
+                                    }
+                                    value={values.tenantAccessRequest}
+                                    overlayColumns={["Name", "Status"]}
+                                    overlayRenderRow={TenantOverlayRow}
+                                    filterDefs={tenantAccessRequestsFilters}
+                                    objectType={Tenant}
+                                    fields={Tenant.autocompleteQuery}
+                                    valueKey="name"
+                                  />
+                                }
+                              />
+                            )}
+                        </>
+                      )}
+
                       {disableStatusChange ? (
                         <DictionaryField
                           wrappedComponent={FastField}
@@ -800,75 +869,6 @@ const PersonForm = ({
                         />
                       }
                     />
-                  )}
-
-                  {values.user && (
-                    <>
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.person.tenant}
-                        name="tenant"
-                        component={FieldHelper.SpecialField}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tenant", value)
-                        }}
-                        widget={
-                          <AdvancedSingleSelect
-                            fieldName="tenant"
-                            placeholder={
-                              Settings.fields.person.tenant.placeholder
-                            }
-                            value={values.tenant}
-                            overlayColumns={["Name", "Status"]}
-                            overlayRenderRow={TenantOverlayRow}
-                            filterDefs={tenantsFilters}
-                            objectType={Tenant}
-                            fields={Tenant.autocompleteQuery}
-                            valueKey="name"
-                            disabled={!isAdmin}
-                          />
-                        }
-                      />
-
-                      {(forOnboarding || isSelf) &&
-                        !_isEmpty(unselectedTenants) && (
-                          <DictionaryField
-                            wrappedComponent={Field}
-                            dictProps={
-                              Settings.fields.person.tenantAccessRequest
-                            }
-                            name="tenantAccessRequest"
-                            component={FieldHelper.SpecialField}
-                            onChange={value => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched(
-                                "tenantAccessRequest",
-                                true,
-                                false
-                              ) // onBlur doesn't work when selecting an option
-                              setFieldValue("tenantAccessRequest", value)
-                            }}
-                            widget={
-                              <AdvancedSingleSelect
-                                fieldName="tenantAccessRequest"
-                                placeholder={
-                                  Settings.fields.person.tenantAccessRequest
-                                    .placeholder
-                                }
-                                value={values.tenantAccessRequest}
-                                overlayColumns={["Name", "Status"]}
-                                overlayRenderRow={TenantOverlayRow}
-                                filterDefs={tenantAccessRequestsFilters}
-                                objectType={Tenant}
-                                fields={Tenant.autocompleteQuery}
-                                valueKey="name"
-                              />
-                            }
-                          />
-                        )}
-                    </>
                   )}
 
                   {edit && attachmentEditEnabled && (

@@ -275,6 +275,12 @@ export default class Person extends Model {
         }
       }
     }
+    tenantAccessRequest {
+      ${gqlEntityFieldsMap.Tenant}
+    }
+    tenant {
+      ${gqlEntityFieldsMap.Tenant}
+    }
     ${gqlCustomSensitiveInformationFields}
     ${gqlAssessmentsFields}
     ${gqlNotesFields}
