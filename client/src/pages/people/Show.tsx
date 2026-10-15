@@ -201,7 +201,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   const action = (
     <>
-      {isAdmin && (
+      {canAdmin && (
         <Link
           id="mergeWithOther"
           to="/admin/merge/people"

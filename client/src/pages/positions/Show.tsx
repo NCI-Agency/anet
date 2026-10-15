@@ -151,7 +151,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
   const searchText = [position.name, position.code].join(" ")
   const action = (
     <>
-      {isAdmin && (
+      {canAdmin && (
         <Link
           id="mergeWithOther"
           to="/admin/merge/positions"
