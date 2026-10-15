@@ -185,7 +185,7 @@ export class CreatePerson extends Page {
 
   async getBirthday() {
     return (await this.getSensitiveFieldsContainer()).$(
-      'input[id="formSensitiveFields.birthday'
+      'input[id="formSensitiveFields.birthday"]'
     )
   }
 
