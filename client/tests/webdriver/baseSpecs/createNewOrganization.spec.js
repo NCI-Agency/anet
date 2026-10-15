@@ -211,7 +211,10 @@ describe("When creating an organization", () => {
     const url = await browser.getUrl()
     const searchParams = new URL(url).searchParams
     const secondLevelOrgUuid = searchParams.get("parentOrgUuid")
-    await CreateOrganization.selectParentOrganizationByText(secondLevelOrgUuid)
+    await CreateOrganization.selectParentOrganizationByText(
+      secondLevelOrgUuid,
+      secondLevelOrg.shortName
+    )
     await CreateOrganization.openEditApp6Modal()
     // This one should be inherited from the top level
     expect(
