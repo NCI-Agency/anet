@@ -132,6 +132,16 @@ const RichTextEditor = ({
   const [slateValue, setSlateValue] = useState(
     createSlateValue(value, readOnly)
   )
+  // Each editor must retain its own pending change when several fields are edited.
+  const serializeDebounced = useMemo(
+    () =>
+      _debounce((node, onChange) => {
+        onChange?.(serialize(node))
+      }, 100),
+    []
+  )
+  useEffect(() => () => serializeDebounced.cancel(), [serializeDebounced])
+
   const previousValue = usePrevious(value)
 
   useEffect(() => {
@@ -217,7 +227,10 @@ const RichTextEditor = ({
             placeholder={placeholder}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
-            onBlur={onHandleBlur}
+            onBlur={event => {
+              serializeDebounced.flush()
+              onHandleBlur?.(event)
+            }}
             onKeyDown={e =>
               handleOnKeyDown(
                 e,
@@ -317,12 +330,6 @@ const serialize = node => {
       return children
   }
 }
-
-const serializeDebounced = _debounce((node, onChange) => {
-  const serialized = serialize(node)
-  onChange?.(serialized)
-  return serialized
-}, 100)
 
 const deserialize = (el, markAttributes = {}) => {
   if (el.nodeType === Node.TEXT_NODE) {

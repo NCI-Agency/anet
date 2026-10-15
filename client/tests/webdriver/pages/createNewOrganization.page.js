@@ -199,9 +199,11 @@ class CreateOrganization extends Page {
   }
 
   async fillOrganizationProfile(profile) {
-    await (await this.getProfileInput()).click()
-    await browser.keys(profile)
-    await browser.pause(300)
+    await this.fillRichTextInput(
+      await this.getForm(),
+      "#fg-profile .editable",
+      profile
+    )
   }
 }
 
