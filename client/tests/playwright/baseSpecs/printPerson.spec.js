@@ -133,8 +133,8 @@ test.describe(() => {
         await (await ShowPerson.getOptionalFieldsButton()).click()
         await (await ShowPerson.getSelectAllButton()).click()
         await (await ShowPerson.getLeftColumnNumber()).fill(String(4))
-        // Left column contains 2 additional fields name and avatar
-        expect((await ShowPerson.getLeftTableFields()).length).toBe(4)
+        // Left column contains 2 additional fields: name and avatar
+        expect((await ShowPerson.getLeftTableFields()).length).toBe(6)
       })
       test("Should return to the show person page when detailed view button clicked", async () => {
         await (await ShowPerson.getDetailedViewButton()).click()
