@@ -56,8 +56,10 @@ class CreateOrganization extends Page {
         const name = await (
           await this.getParentOrganizationsTable()
         ).$("tbody tr:first-child td:nth-child(2) span")
+        // Organization labels include the long name and optional identification code.
         return (
-          (await name.isExisting()) && (await name.getText()) === expectedName
+          (await name.isExisting()) &&
+          (await name.getText()).split(" | ")[0].trim() === expectedName
         )
       },
       {

@@ -9,7 +9,7 @@ describe("Parent organization selection", () => {
       const input = { click: jest.fn(), setValue: jest.fn() }
       const name = {
         isExisting: async () => true,
-        getText: async () => displayedName
+        getText: async () => `${displayedName} | Full organization name | CODE`
       }
       const radio = {
         isSelected: async () => false,
