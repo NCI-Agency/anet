@@ -150,8 +150,7 @@ public class PersonResource {
       return true;
     }
     if (editorPos.getType() == PositionType.TENANT_ADMINISTRATOR) {
-      if (subject.getTenantUuid() == null
-          || Objects.equals(subject.getTenantUuid(), editor.getTenantUuid())) {
+      if (AuthUtils.isFromNoOrSameTenant(editor, subject)) {
         return true;
       }
     }
@@ -492,7 +491,7 @@ public class PersonResource {
       @GraphQLArgument(name = "useWinnerPositionHistory",
           defaultValue = "true") boolean useWinnerPositionHistory) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final String winnerUuid = DaoUtils.getUuid(winner);
     if (loserUuid.equals(winnerUuid)) {
@@ -508,6 +507,13 @@ public class PersonResource {
     final Person loser = dao.getByUuid(loserUuid);
     if (loser == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
+    }
+
+    if (!AuthUtils.isAdmin(user) && (!AuthUtils.isFromNoOrSameTenant(user, winner)
+        || !AuthUtils.isFromNoOrSameTenant(user, existingWinner)
+        || !AuthUtils.isFromNoOrSameTenant(user, loser))) {
+      // Tenant admins can't merge people from different tenants
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
     }
 
     int numRows = dao.mergePeople(winner, loser, useWinnerPositionHistory);

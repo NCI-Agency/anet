@@ -65,7 +65,6 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
   const eventSeries = new EventSeries(data ? data.eventSeries : {})
 
   const isTenantAdmin = currentUser?.isTenantAdmin()
-  const isAdmin = currentUser?.isAdmin()
 
   const canAdministrateOrg =
     isTenantAdmin ||
@@ -84,7 +83,7 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
   const searchText = eventSeries.name
   const action = (
     <>
-      {isAdmin && (
+      {isTenantAdmin && (
         <Link
           id="mergeWithOther"
           to="/admin/merge/eventSeries"

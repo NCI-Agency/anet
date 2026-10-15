@@ -6,7 +6,6 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
-import java.util.Objects;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.AccessTokenDao;
@@ -38,8 +37,7 @@ public class AccessTokenResource {
     if (accessToken == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access token not found");
     }
-    if (!AuthUtils.isAdmin(user)
-        && !Objects.equals(accessToken.getTenantUuid(), user.getTenantUuid())) {
+    if (!AuthUtils.isAdmin(user) && !AuthUtils.isFromSameTenant(user, accessToken)) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
     }
     return accessToken;
@@ -87,8 +85,7 @@ public class AccessTokenResource {
     }
 
     AuthUtils.assertTenantAdministrator(user);
-    if (!AuthUtils.isAdmin(user)
-        && !Objects.equals(existing.getTenantUuid(), user.getTenantUuid())) {
+    if (!AuthUtils.isAdmin(user) && !AuthUtils.isFromSameTenant(user, existing)) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
     }
     DaoUtils.assertObjectIsFresh(at, existing, force);
@@ -119,8 +116,7 @@ public class AccessTokenResource {
     }
 
     AuthUtils.assertTenantAdministrator(user);
-    if (!AuthUtils.isAdmin(user)
-        && !Objects.equals(existing.getTenantUuid(), user.getTenantUuid())) {
+    if (!AuthUtils.isAdmin(user) && !AuthUtils.isFromSameTenant(user, existing)) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
     }
 

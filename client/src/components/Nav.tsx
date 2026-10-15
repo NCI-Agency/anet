@@ -504,30 +504,26 @@ const Navigation = ({
           {inAdmin && (
             <Nav className="flex-column">
               <span id="style-nav" style={{ lineHeight: "10pt" }}>
-                {isAdmin && (
-                  <>
-                    {!Settings.automaticallyAllowAllNewUsers && (
-                      <SidebarLink
-                        id="users-pending-verification"
-                        linkTo="/admin/usersPendingVerification"
-                        handleOnClick={resetPages}
-                      >
-                        Users pending verification
-                      </SidebarLink>
-                    )}
-                    <NavDropdown title="Merge" id="merge" active={inMerge}>
-                      {MERGE_OPTIONS.map(mergeOption => (
-                        <SidebarContainer
-                          key={mergeOption.key}
-                          linkTo={`/admin/merge/${mergeOption.key}`}
-                          handleOnClick={resetPages}
-                        >
-                          {mergeOption.label}
-                        </SidebarContainer>
-                      ))}
-                    </NavDropdown>
-                  </>
+                {isAdmin && !Settings.automaticallyAllowAllNewUsers && (
+                  <SidebarLink
+                    id="users-pending-verification"
+                    linkTo="/admin/usersPendingVerification"
+                    handleOnClick={resetPages}
+                  >
+                    Users pending verification
+                  </SidebarLink>
                 )}
+                <NavDropdown title="Merge" id="merge" active={inMerge}>
+                  {MERGE_OPTIONS.map(mergeOption => (
+                    <SidebarContainer
+                      key={mergeOption.key}
+                      linkTo={`/admin/merge/${mergeOption.key}`}
+                      handleOnClick={resetPages}
+                    >
+                      {mergeOption.label}
+                    </SidebarContainer>
+                  ))}
+                </NavDropdown>
                 <NavDropdown
                   title="User activities"
                   id="user-activities"

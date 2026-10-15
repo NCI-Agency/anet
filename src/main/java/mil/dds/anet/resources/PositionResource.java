@@ -56,7 +56,16 @@ public class PositionResource {
       return AuthUtils.isAdmin(user);
     }
     if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
-      return AuthUtils.isTenantAdmin(user);
+      final boolean isTenantAdmin = AuthUtils.isTenantAdmin(user);
+      if (isTenantAdmin) {
+        if (position.getPersonUuid() == null) {
+          return true;
+        }
+        final Person person = ApplicationContextProvider.getEngine().getPersonDao()
+            .getByUuid(position.getPersonUuid());
+        return AuthUtils.isFromNoOrSameTenant(user, person);
+      }
+      return false;
     }
     return AuthUtils.canAdministrateOrg(user, position.getOrganizationUuid());
   }
@@ -353,7 +362,34 @@ public class PositionResource {
       throws ResponseStatusException {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
+
+    final String winnerPositionUuid = DaoUtils.getUuid(winnerPosition);
+    if (loserUuid.equals(winnerPositionUuid)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "You selected the same position twice");
+    }
+
+    final Position existingWinnerPosition = dao.getByUuid(winnerPositionUuid);
+    if (existingWinnerPosition == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Winner not found");
+    }
+
+    if (!AuthUtils.isAdmin(user)) {
+      if (isAdminPosition(winnerPosition) || isAdminPosition(existingWinnerPosition)
+          || isAdminPosition(loserPosition)) {
+        // Tenant admins can't merge administrator positions
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
+      }
+
+      if (winnerPosition.getPersonUuid() != null) {
+        final Person winnerPerson = personDao.getByUuid(winnerPosition.getPersonUuid());
+        if (!AuthUtils.isFromSameTenant(user, winnerPerson)) {
+          // Tenant admins can only merge occupied position if the person is in their own tenant
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
+        }
+      }
+    }
 
     if (winnerPosition.getOrganizationUuid() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -383,6 +419,10 @@ public class PositionResource {
     dao.updateSubscriptions(winnerPosition, auditTrailUuid, false);
 
     return numRows;
+  }
+
+  private boolean isAdminPosition(Position position) {
+    return PositionType.ADMINISTRATOR.equals(position.getType());
   }
 
   private void arePositionsMergeable(Position winnerPos, Position loserPos) {

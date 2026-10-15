@@ -531,8 +531,7 @@ public class ReportResource {
       }
       final AnetObjectEngine anetObjectEngine = ApplicationContextProvider.getEngine();
       final List<Tenant> reportTenants = r.loadTenants(anetObjectEngine.getContext()).join();
-      return reportTenants.stream()
-          .anyMatch(t -> Objects.equals(DaoUtils.getUuid(t), approver.getTenantUuid()));
+      return reportTenants.stream().anyMatch(t -> AuthUtils.isFromSameTenant(approver, t));
     }
     return false;
   }
