@@ -1,9 +1,6 @@
 import {
   gqlAllAttachmentFields,
-  gqlAssessmentsFields,
-  gqlCustomSensitiveInformationFields,
-  gqlEntityFieldsMap,
-  gqlNotesFields
+  gqlEntityFieldsMap
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, IconSize } from "@blueprintjs/core"
@@ -77,24 +74,9 @@ const GQL_GET_PERSON = gql`
       authorizationGroups {
         ${gqlEntityFieldsMap.AuthorizationGroup}
       }
-      additionalPositions {
-        ${gqlEntityFieldsMap.Position}
-        organization {
-          ${gqlEntityFieldsMap.Organization}
-        }
-      }
-      tenantAccessRequest {
-        ${gqlEntityFieldsMap.Tenant}
-      }
-      tenant {
-        ${gqlEntityFieldsMap.Tenant}
-      }
       attachments {
         ${gqlAllAttachmentFields}
       }
-      ${gqlCustomSensitiveInformationFields}
-      ${gqlAssessmentsFields}
-      ${gqlNotesFields}
     }
   }
 `
@@ -318,33 +300,33 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                       defaultAvatar={Person.relatedObjectType}
                     />
                   </div>
+                  {person.user && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FieldHelper.ReadonlyField}
+                        dictProps={Settings.fields.person.tenant}
+                        field={{ name: "tenant" }}
+                        humanValue={person.tenant?.name}
+                        extraColElem={null}
+                        labelColumnWidth={4}
+                      />
+                      {isSelf && person.tenantAccessRequest && (
+                        <DictionaryField
+                          wrappedComponent={FieldHelper.ReadonlyField}
+                          dictProps={Settings.fields.person.tenantAccessRequest}
+                          field={{ name: "tenantAccessRequest" }}
+                          humanValue={person.tenantAccessRequest?.name}
+                          extraColElem={null}
+                          labelColumnWidth={4}
+                        />
+                      )}
+                    </>
+                  )}
                   {leftColumnUnderAvatar}
                 </Col>
                 <Col md={6}>{rightColumn}</Col>
               </Row>
               <Row>
-                {person.user && (
-                  <>
-                    <Col md={12}>
-                      <FieldHelper.ReadonlyField
-                        field={{ name: "tenant" }}
-                        label={Settings.fields.person.tenant?.label}
-                        humanValue={person.tenant?.name}
-                      />
-                    </Col>
-                    {isSelf && person.tenantAccessRequest && (
-                      <Col md={12}>
-                        <FieldHelper.ReadonlyField
-                          field={{ name: "tenantAccessRequest" }}
-                          label={
-                            Settings.fields.person.tenantAccessRequest?.label
-                          }
-                          humanValue={person.tenantAccessRequest?.name}
-                        />
-                      </Col>
-                    )}
-                  </>
-                )}
                 <Col md={12}>{fullWidthFields}</Col>
                 {attachmentsEnabled && (
                   <Col md={12}>
