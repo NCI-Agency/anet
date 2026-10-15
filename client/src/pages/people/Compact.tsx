@@ -82,6 +82,9 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Position}
         }
       }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
       ${gqlCustomSensitiveInformationFields}
     }
   }
@@ -102,6 +105,7 @@ const NORMAL_FIELD_OPTIONS = Object.entries(
     "customFields",
     "familyName",
     "givenName",
+    "tenantAccessRequest",
     "customSensitiveInformation"
   )
 ).reduce((accum, [k, v]) => {
@@ -136,6 +140,14 @@ const OTHER_FIELD_OPTIONS = {
   avatar: {
     text: "Avatar",
     active: true
+  },
+  status: {
+    text: Settings.fields.person.status?.label,
+    active: false
+  },
+  tenant: {
+    text: Settings.fields.person.tenant?.label,
+    active: false
   }
 }
 
@@ -260,6 +272,20 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
           />
         }
         className="d-flex justify-content-center"
+      />
+    ),
+    optionalFields.status.active && (
+      <CompactRow
+        key="status"
+        label={optionalFields.status.text}
+        content={Person.humanNameOfStatus(person.status)}
+      />
+    ),
+    optionalFields.tenant.active && (
+      <CompactRow
+        key="tenant"
+        label={optionalFields.tenant.text}
+        content={person.tenant?.name}
       />
     ),
     ...leftColumUnderAvatar
@@ -415,7 +441,8 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
         ),
       position: getPositionHumanValue(),
       prevPositions: getPrevPositionsHumanValue(),
-      status: Person.humanNameOfStatus(person.status)
+      status: Person.humanNameOfStatus(person.status),
+      tenant: person.tenant?.name
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
