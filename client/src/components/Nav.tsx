@@ -605,15 +605,13 @@ const Navigation = ({
                 >
                   Default application preferences
                 </SidebarLink>
-                {isAdmin && (
-                  <SidebarLink
-                    id="graphQL-nav"
-                    linkTo="/admin/graphiql"
-                    handleOnClick={resetPages}
-                  >
-                    GraphQL
-                  </SidebarLink>
-                )}
+                <SidebarLink
+                  id="graphQL-nav"
+                  linkTo="/admin/graphiql"
+                  handleOnClick={resetPages}
+                >
+                  GraphQL
+                </SidebarLink>
               </span>
             </Nav>
           )}
