@@ -2877,9 +2877,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/visitor-plugin-common@npm:7.2.10, @graphql-codegen/visitor-plugin-common@npm:^7.2.10, @graphql-codegen/visitor-plugin-common@npm:^7.2.6, @graphql-codegen/visitor-plugin-common@npm:^7.2.8, @graphql-codegen/visitor-plugin-common@npm:^7.2.9":
-  version: 7.2.10
-  resolution: "@graphql-codegen/visitor-plugin-common@npm:7.2.10"
+"@graphql-codegen/visitor-plugin-common@npm:7.3.0, @graphql-codegen/visitor-plugin-common@npm:^7.2.10, @graphql-codegen/visitor-plugin-common@npm:^7.2.6, @graphql-codegen/visitor-plugin-common@npm:^7.2.8, @graphql-codegen/visitor-plugin-common@npm:^7.2.9":
+  version: 7.3.0
+  resolution: "@graphql-codegen/visitor-plugin-common@npm:7.3.0"
   dependencies:
     "@graphql-codegen/plugin-helpers": "npm:^7.4.2"
     "@graphql-tools/optimize": "npm:^2.0.0"
@@ -2893,7 +2893,7 @@ __metadata:
     tslib: "npm:^2.8.0"
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10c0/dea8a8e717365967029fc2ee1f5e2b9e43406c4ddddbea861aa7718daa571da473b17cf937049cc6ae39ffd7f705694ca590b999885dc93f2b4834543c0ff5e3
+  checksum: 10c0/2ec38f33818eb4358d8ab0d733f371178f0ee546b08d322853967fd773dfdbc62b31309615985738f636045c019de19a9387365f84e6f490770887806a2e50cd
   languageName: node
   linkType: hard
 
@@ -8048,7 +8048,7 @@ __metadata:
     "@fullcalendar/timegrid": "npm:6.1.21"
     "@graphql-codegen/cli": "npm:7.4.6"
     "@graphql-codegen/schema-ast": "npm:6.1.1"
-    "@graphql-codegen/visitor-plugin-common": "npm:7.2.10"
+    "@graphql-codegen/visitor-plugin-common": "npm:7.3.0"
     "@ianvs/prettier-plugin-sort-imports": "npm:4.7.1"
     "@testing-library/dom": "npm:10.4.2"
     "@testing-library/jest-dom": "npm:7.0.1"
