@@ -7,20 +7,32 @@ describe("Anet home page", () => {
     await (await Home.getBannerDropdown()).click()
     await (await Home.getLogoutButton()).waitForDisplayed()
     await (await Home.getLogoutButton()).click()
-    await browser.pause(1000)
-    if (await (await Home.getLogoutFormSubmitButton()).isExisting()) {
-      await (await Home.getLogoutFormSubmitButton()).click()
-    }
+    await browser.waitUntil(
+      async () => {
+        const confirmLogout = await Home.getLogoutFormSubmitButton()
+        if (await confirmLogout.isExisting()) {
+          await confirmLogout.click()
+        }
+        return (await browser.getTitle()) === "ANET Sign Out"
+      },
+      {
+        timeoutMsg: "Expected logout to finish and show the ANET sign-out page"
+      }
+    )
     const title = await browser.getTitle()
     expect(title).to.equal("ANET Sign Out")
     await (await Home.getLoginButton()).waitForDisplayed()
     await (await Home.getLoginButton()).click()
+    await Home.waitForLoginForm()
     const titleLogin = await browser.getTitle()
     expect(titleLogin).to.equal("Sign in to ANET")
   })
   it("should have the right title", async () => {
     await Home.open()
-    await browser.pause(5000) // Wait until the title is set
+    await browser.waitUntil(
+      async () => (await browser.getTitle()) === "Home - ANET",
+      { timeoutMsg: "Expected the home page title to be set" }
+    )
     const title = await browser.getTitle()
     expect(title).to.equal("Home - ANET")
     await Home.logout()
