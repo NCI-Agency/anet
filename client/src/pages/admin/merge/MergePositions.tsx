@@ -232,9 +232,20 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.position.type}
-                value={mergedPosition.type}
+                value={Position.humanNameOfType(mergedPosition.type)}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="type"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.position.superuserType}
+                value={Position.humanNameOfSuperuserType(
+                  mergedPosition.superuserType
+                )}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="superuserType"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -626,6 +637,9 @@ const PositionColumn = ({
               dispatchMergeActions(
                 setAMergedField("type", position.type, align)
               )
+              dispatchMergeActions(
+                setAMergedField("superuserType", position.superuserType, align)
+              )
             }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
@@ -645,7 +659,16 @@ const PositionColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.position.type}
             fieldName="type"
-            value={position.type}
+            value={Position.humanNameOfType(position.type)}
+            align={align}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.position.superuserType}
+            fieldName="superuserType"
+            value={Position.humanNameOfSuperuserType(position.superuserType)}
             align={align}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
