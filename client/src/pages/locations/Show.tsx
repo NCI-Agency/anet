@@ -113,7 +113,6 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     return result
   }
   const isTenantAdmin = currentUser?.isTenantAdmin()
-  const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const avatar =
@@ -135,7 +134,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   )
   const action = (
     <>
-      {isAdmin && (
+      {isTenantAdmin && (
         <Link
           id="mergeWithOther"
           to="/admin/merge/locations"

@@ -302,21 +302,21 @@ const routes = [
                         element: <UsersPendingVerification />
                       }
                     ]
-                  },
-                  {
-                    path: "merge",
-                    children: [
-                      { path: "people", element: <MergePeople /> },
-                      { path: "positions", element: <MergePositions /> },
-                      { path: "locations", element: <MergeLocations /> },
-                      {
-                        path: "organizations",
-                        element: <MergeOrganizations />
-                      },
-                      { path: "tasks", element: <MergeTasks /> },
-                      { path: "eventSeries", element: <MergeEventSeries /> }
-                    ]
                   }
+                ]
+              },
+              {
+                path: "merge",
+                children: [
+                  { path: "people", element: <MergePeople /> },
+                  { path: "positions", element: <MergePositions /> },
+                  { path: "locations", element: <MergeLocations /> },
+                  {
+                    path: "organizations",
+                    element: <MergeOrganizations />
+                  },
+                  { path: "tasks", element: <MergeTasks /> },
+                  { path: "eventSeries", element: <MergeEventSeries /> }
                 ]
               },
               {
