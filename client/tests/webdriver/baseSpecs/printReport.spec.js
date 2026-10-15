@@ -203,9 +203,10 @@ describe("Show print report page", () => {
       }
     })
     it("Should display all reportCommunities", async () => {
-      expect(await ShowReport.getCompactReportCommunities()).to.equal(
-        "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization"
-      )
+      expect(await ShowReport.getCompactReportCommunityRows()).to.deep.equal([
+        ["EF 1.1", "The complete EF 1.1 organisation"],
+        ["EF 5", "The complete EF 5 organization"]
+      ])
     })
     it("Should display attachment images only when enabled", async () => {
       expect(
