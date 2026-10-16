@@ -118,7 +118,7 @@ jobs:
       fail-fast: false
       matrix:
         dictionary: [anet-dictionary.yml]
-        client-tests: [jest, wdio-junit, e2e-junit]
+        client-tests: [jest, wdio-junit]
         include:
           - dictionary: testDictionaries/no-custom-fields.yml
             client-tests: wdio-noCF-junit
@@ -159,6 +159,48 @@ jobs:
       with:
         name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
+      if: always()
+
+  test-e2e:
+    needs: build
+    name: Playwright E2E tests
+    runs-on: ubuntu-latest
+
+    env:
+      ANET_DICTIONARY_NAME: anet-dictionary.yml
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - uses: ./.github/actions/build-cache
+    - run: ./gradlew yarn_run_install-playwright
+    - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
+    - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
+    - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
+    - run: ./gradlew -PtestEnv checkConfig
+    - name: Start test server
+      run: |
+        ./gradlew -PtestEnv run > build/e2e-server.log 2>&1 &
+        for attempt in {1..180}; do
+          if curl --fail --silent --connect-timeout 1 --max-time 2 --header 'Accept: text/html' --output /dev/null http://localhost:8180/; then
+            exit 0
+          fi
+          sleep 1
+        done
+        cat build/e2e-server.log
+        exit 1
+    - run: ./gradlew yarn_run_test-e2e-junit
+    - name: Upload E2E results and diagnostics
+      uses: actions/upload-artifact@v7
+      with:
+        name: e2e-playwright-test-results
+        path: |
+          client/build/test-results/e2e-junit-test-results.xml
+          client/build/test-results/e2e-artifacts
+          client/build/e2e-playwright-report
+          build/e2e-server.log
+          logs/clientLog.log
       if: always()
 
   test-sim:
