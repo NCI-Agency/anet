@@ -4,6 +4,7 @@ import { expect, fail, test } from "./support.js"
 test.describe.configure({
   mode: "serial"
 })
+
 test("Move someone in and out of a position", async ({ app }) => {
   const { $, $$, assertElementText, mediumWaitMs } = app
 
@@ -152,6 +153,7 @@ test("Move someone in and out of a position", async ({ app }) => {
   ).toBe(true)
   await app.logout()
 })
+
 test("Update permissions while changing positions", async ({ app }) => {
   const { $, assertElementText, mediumWaitMs } = app
   const testUserMapper = {

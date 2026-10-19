@@ -5,6 +5,7 @@ import { expect, fail, test } from "./support.js"
 test.describe.configure({
   mode: "serial"
 })
+
 test("checking superuser permissions", async ({ app }) => {
   const { pageHelpers, $, assertElementNotPresent, shortWaitMs } = app
   await app.login("/", "rebecca")
@@ -155,6 +156,7 @@ test("checking superuser permissions", async ({ app }) => {
   )
   await app.logout()
 })
+
 validateUserCannotEditOtherUser(
   "superuser cannot edit administrator",
   "rebecca",
@@ -162,6 +164,7 @@ validateUserCannotEditOtherUser(
   "CIV Arthur Dmin",
   "ANET Administrator"
 )
+
 validateUserCannotEditOtherUser(
   "superuser cannot edit people from the organizations their position is not administrating",
   "jacob",
@@ -169,6 +172,7 @@ validateUserCannotEditOtherUser(
   "CIV Andrew Anderson",
   "EF 1 Manager"
 )
+
 test("checking regular user permissions", async ({ app }) => {
   const { pageHelpers, $, assertElementNotPresent, shortWaitMs } = app
   await app.login("/", "jack")
@@ -188,6 +192,7 @@ test("checking regular user permissions", async ({ app }) => {
   )
   await app.logout()
 })
+
 validateUserCannotEditOtherUser(
   "Regular user cannot edit superuser people or positions",
   "jack",
@@ -195,6 +200,7 @@ validateUserCannotEditOtherUser(
   "CTR Rebecca Beccabon",
   "EF 2.2 Final Reviewer"
 )
+
 validateUserCannotEditOtherUser(
   "Regular user cannot edit admin people or positions",
   "jack",
@@ -202,6 +208,7 @@ validateUserCannotEditOtherUser(
   "CIV Arthur Dmin",
   "ANET Administrator"
 )
+
 test("checking admin permissions", async ({ app }) => {
   const { $, shortWaitMs } = app
   await app.login("/", "arthur")
@@ -260,6 +267,7 @@ test("checking admin permissions", async ({ app }) => {
   await validateAdminLocationPermissions(app)
   await app.logout()
 })
+
 test("admins can edit superusers and their positions", async ({ app }) => {
   await app.login("/", "arthur")
   const $rebeccaPersonLink = await getFromSearchResults(
@@ -276,6 +284,7 @@ test("admins can edit superusers and their positions", async ({ app }) => {
   await editAndSavePositionFromCurrentUserPage(app, true)
   await app.logout()
 })
+
 function validateUserCannotEditOtherUser(
   testTitle,
   user,
@@ -314,6 +323,7 @@ function validateUserCannotEditOtherUser(
     await app.logout()
   })
 }
+
 async function findSuperuserLink(
   app,
   desiredSuperuserName,
@@ -352,6 +362,7 @@ async function findSuperuserLink(
   }
   return $foundSuperuser
 }
+
 async function validateUserCanEditUserForCurrentPage(app, canChangeName) {
   const { $, assertElementEnabled, assertElementText, shortWaitMs } = app
 
@@ -398,12 +409,14 @@ async function validateUserCanEditUserForCurrentPage(app, canChangeName) {
     `${originalBioText}\n${fakeBioText}`
   )
 }
+
 async function editAndSavePositionFromCurrentUserPage(app, validateTrue) {
   const { $ } = app
   const $positionName = await $(".position-name")
   await $positionName.click()
   await validationEditPositionOnCurrentPage(app, validateTrue)
 }
+
 async function validationEditPositionOnCurrentPage(app, validateTrue) {
   const { $, assertElementText, mediumWaitMs } = app
   const $editButton = await $(".edit-position")
@@ -422,6 +435,7 @@ async function validationEditPositionOnCurrentPage(app, validateTrue) {
     )
   }
 }
+
 async function validateSuperuserNonAdministratingOrgPermissions(app) {
   const { assertElementNotPresent, shortWaitMs } = app
   await assertElementNotPresent(
@@ -430,6 +444,7 @@ async function validateSuperuserNonAdministratingOrgPermissions(app) {
     shortWaitMs
   )
 }
+
 async function validateAdminOrgPermissions(app) {
   const { $, assertElementEnabled } = app
   const $editOrgButton = await $("#editButton")
@@ -448,6 +463,7 @@ async function validateAdminOrgPermissions(app) {
     "Field longName of an organization should be enabled for admins"
   )
 }
+
 async function validateSuperuserLocationPermissions(app) {
   const { $, assertElementEnabled, assertElementDisabled } = app
   const $editLocationButton = await $("#editButton")
@@ -462,6 +478,7 @@ async function validateSuperuserLocationPermissions(app) {
     "Field status of a location should be enabled for superusers"
   )
 }
+
 async function validateAdminLocationPermissions(app) {
   const { $, assertElementEnabled } = app
   const $editLocationButton = await $("#editButton")
@@ -476,6 +493,7 @@ async function validateAdminLocationPermissions(app) {
     "Field status of a location should be enabled for admins"
   )
 }
+
 async function getFromSearchResults(
   app,
   searchQuery,
@@ -505,6 +523,7 @@ async function getFromSearchResults(
   }
   return await findLinkWithText(resultText)
 }
+
 test("checking superuser that can create top-level organizations permissions", async ({
   app
 }) => {
@@ -523,6 +542,7 @@ test("checking superuser that can create top-level organizations permissions", a
   await validateSuperuserNonAdministratingOrgPermissions(app)
   await app.logout()
 })
+
 test("checking superuser that can edit any organizations permissions", async ({
   app
 }) => {
@@ -541,6 +561,7 @@ test("checking superuser that can edit any organizations permissions", async ({
   await validateAdminOrgPermissions(app)
   await app.logout()
 })
+
 async function canCreateOrganization(app) {
   const { $, shortWaitMs } = app
   const $createButton = await $("#createButton")
@@ -558,6 +579,7 @@ async function canCreateOrganization(app) {
     .first()
   await $cancelButton.click()
 }
+
 test("checking superuser that can create top-level tasks permissions", async ({
   app
 }) => {
@@ -576,6 +598,7 @@ test("checking superuser that can create top-level tasks permissions", async ({
   await validateSuperuserNotResponsibleForTaskPermissions(app)
   await app.logout()
 })
+
 test("checking superuser that can edit any tasks permissions", async ({
   app
 }) => {
@@ -594,6 +617,7 @@ test("checking superuser that can edit any tasks permissions", async ({
   await validateSuperuserResponsibleForTaskPermissions(app)
   await app.logout()
 })
+
 async function validateSuperuserNotResponsibleForTaskPermissions(app) {
   const { assertElementNotPresent, shortWaitMs } = app
   await assertElementNotPresent(
@@ -602,6 +626,7 @@ async function validateSuperuserNotResponsibleForTaskPermissions(app) {
     shortWaitMs
   )
 }
+
 async function validateSuperuserResponsibleForTaskPermissions(app) {
   const { $, assertElementEnabled } = app
   const $editTaskButton = await $("#editButton")
@@ -620,6 +645,7 @@ async function validateSuperuserResponsibleForTaskPermissions(app) {
     "Field longName of a task should be enabled for admins"
   )
 }
+
 async function canCreateTask(app) {
   const { $, shortWaitMs } = app
   const $createButton = await $("#createButton")

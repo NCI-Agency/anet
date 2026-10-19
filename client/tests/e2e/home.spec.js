@@ -24,6 +24,7 @@ test("Home Page", async ({ app }) => {
   await assertElementTextIsInt($orgReports)
   await assertElementTextIsInt($plannedEngagements)
   await assertElementTextIsInt($sensitiveInfo)
+
   const $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()
   const $guidedTourTitle = await $("div.react-joyride__tooltip h4")

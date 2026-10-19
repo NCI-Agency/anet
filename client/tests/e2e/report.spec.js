@@ -5,6 +5,7 @@ import { expect, test } from "./support.js"
 test.describe.configure({
   mode: "serial"
 })
+
 let testReportURL = null
 test("Draft and submit a report", async ({ app }) => {
   const {
@@ -197,6 +198,7 @@ test("Draft and submit a report", async ({ app }) => {
   )
   await app.logout()
 })
+
 test("Publish report chain", async ({ app }) => {
   const { pageHelpers, $, $$, assertElementText, mediumWaitMs } = app
 
@@ -279,6 +281,7 @@ test("Publish report chain", async ({ app }) => {
   )
   await app.logout()
 })
+
 async function approveReport(app, user) {
   const { pageHelpers, $, $$, mediumWaitMs } = app
   await app.login("/", user)
@@ -322,6 +325,7 @@ async function approveReport(app, user) {
   })
   await app.logout()
 }
+
 test("Verify that validations work", async ({ app }) => {
   const {
     assertElementText,
