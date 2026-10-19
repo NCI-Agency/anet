@@ -1,6 +1,10 @@
 import { v4 as uuidv4 } from "uuid"
 import { expect, fail, test } from "./support.js"
 
+// Permission updates must stay in the same worker.
+test.describe.configure({
+  mode: "serial"
+})
 test("checking superuser permissions", async ({ app }) => {
   const { pageHelpers, $, assertElementNotPresent, shortWaitMs } = app
   await app.login("/", "rebecca")

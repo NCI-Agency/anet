@@ -1,5 +1,9 @@
 import { expect, fail, test } from "./support.js"
 
+// Position updates must stay in the same worker.
+test.describe.configure({
+  mode: "serial"
+})
 test("Move someone in and out of a position", async ({ app }) => {
   const { $, $$, assertElementText, mediumWaitMs } = app
 
