@@ -177,7 +177,6 @@ const EditAdministratingPositionsModal = ({
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form, force) {
     const organization = Organization.filterClientSideFields(
       new Organization(values)

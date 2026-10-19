@@ -617,7 +617,6 @@ const PositionForm = ({
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form, force) {
     const position = new Position(values).filterClientSideFields(
       "previousPeople",

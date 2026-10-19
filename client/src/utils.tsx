@@ -659,7 +659,6 @@ Object.without = function (source, ...keys) {
   return copy
 }
 
-// eslint-disable-next-line
 Promise.prototype.log = function () {
   return this.then(function (data) {
     console.log(data)
