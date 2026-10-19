@@ -364,4 +364,5 @@ class CreateReport extends cr.CreateReport {
     }
   }
 }
+
 export default new CreateReport()

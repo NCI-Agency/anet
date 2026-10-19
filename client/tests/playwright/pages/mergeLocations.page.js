@@ -3,6 +3,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/locations"
+
 class MergeLocations extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
@@ -117,4 +118,5 @@ class MergeLocations extends Page {
     return (await this.getField(fieldName)).locator("fieldset").first()
   }
 }
+
 export default new MergeLocations()

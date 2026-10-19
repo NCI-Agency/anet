@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/people"
+
 class MergePeople extends Page {
   async openPage(path = PATH) {
     await super.openAsAdminUser(path)
@@ -191,4 +192,5 @@ class MergePeople extends Page {
     return currentPage().locator("#fg-users").first()
   }
 }
+
 export default new MergePeople()

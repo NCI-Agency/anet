@@ -34,4 +34,5 @@ class MyOrg extends Page {
     return currentPage().locator("[id*=numberTrained-statistics]").first()
   }
 }
+
 export default new MyOrg()

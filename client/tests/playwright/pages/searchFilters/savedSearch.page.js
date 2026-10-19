@@ -118,4 +118,5 @@ class SavedSearch extends Page {
     return currentPage().locator("fieldset p.mb-0").first()
   }
 }
+
 export default new SavedSearch()

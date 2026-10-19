@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/attachments/mine"
+
 class MyAttachments extends Page {
   async openAsAdminUser() {
     await super.openAsAdminUser(PAGE_URL)
@@ -25,4 +26,5 @@ class MyAttachments extends Page {
     return attachmentCaptionCell.locator(".attachment-classification").first()
   }
 }
+
 export default new MyAttachments()

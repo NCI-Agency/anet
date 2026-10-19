@@ -116,4 +116,5 @@ class Search extends Page {
     await super.waitUntilLoaded()
   }
 }
+
 export default new Search()

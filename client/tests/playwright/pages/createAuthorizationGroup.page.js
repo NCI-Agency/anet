@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/communities/new"
+
 class CreateAuthorizationGroup extends Page {
   async getForm() {
     return currentPage().locator("form").first()
@@ -134,4 +135,5 @@ class CreateAuthorizationGroup extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
+
 export default new CreateAuthorizationGroup()

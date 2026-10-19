@@ -2,6 +2,7 @@ import { currentPage, waitFor, waitUntil } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/people/:uuid"
+
 class ShowPerson extends Page {
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
@@ -432,4 +433,5 @@ class ShowPerson extends Page {
     return currentPage().locator("#additionalPositions table").first()
   }
 }
+
 export default new ShowPerson()

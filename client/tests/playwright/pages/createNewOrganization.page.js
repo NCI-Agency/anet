@@ -3,6 +3,7 @@ import { currentPage, typeKeys, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/organizations/new"
+
 class CreateOrganization extends Page {
   async getForm() {
     return currentPage().locator("form.form-horizontal").first()
@@ -209,4 +210,5 @@ class CreateOrganization extends Page {
     await typeKeys(profile)
   }
 }
+
 export default new CreateOrganization()

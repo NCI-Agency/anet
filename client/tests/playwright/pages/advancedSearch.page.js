@@ -93,4 +93,5 @@ class AdvancedSearch {
       .first()
   }
 }
+
 export default new AdvancedSearch()

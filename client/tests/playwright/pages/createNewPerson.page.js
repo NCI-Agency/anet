@@ -10,6 +10,7 @@ const SENSITIVE_CUSTOM_FIELDS = {
   birthday: "formSensitiveFields.birthday",
   politicalPosition: "formSensitiveFields.politicalPosition"
 }
+
 export class CreatePerson extends Page {
   async getForm() {
     return currentPage().locator("form.form-horizontal").first()
@@ -234,4 +235,5 @@ export class CreatePerson extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
+
 export default new CreatePerson()

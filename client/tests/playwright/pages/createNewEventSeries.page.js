@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/eventSeries/new"
+
 class CreateEventSeries extends Page {
   async getForm() {
     return currentPage().locator("form.form-horizontal").first()
@@ -35,4 +36,5 @@ class CreateEventSeries extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
+
 export default new CreateEventSeries()

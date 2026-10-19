@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/locations/:uuid/edit"
+
 class EditLocation extends Page {
   async getSaveLocationButton() {
     return currentPage().locator('//button[text()="Save Location"]').first()
@@ -107,4 +108,5 @@ class EditLocation extends Page {
     }
   }
 }
+
 export default new EditLocation()

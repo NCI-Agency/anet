@@ -22,6 +22,7 @@ export const REPORT_STATES = {
     id: "cancelled-reports"
   }
 }
+
 class MyReports extends Page {
   async open(credentials) {
     await super.open("/", credentials)
@@ -113,4 +114,5 @@ class MyReports extends Page {
       .first()
   }
 }
+
 export default new MyReports()

@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/events/new"
+
 class CreateEvent extends Page {
   async getForm() {
     return currentPage().locator("form.form-horizontal").first()
@@ -59,4 +60,5 @@ class CreateEvent extends Page {
     return currentPage().locator("#fg-endDate div.invalid-feedback").first()
   }
 }
+
 export default new CreateEvent()

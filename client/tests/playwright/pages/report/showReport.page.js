@@ -2,6 +2,7 @@ import { currentPage, waitFor, waitUntil } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/reports/:uuid"
+
 class ShowReport extends Page {
   REPORT_IS_DRAFT = "This is a DRAFT report and hasn't been submitted."
   REPORT_IS_PLANNED_DRAFT =
@@ -354,4 +355,5 @@ class ShowReport extends Page {
     return attachment.locator("figcaption").first()
   }
 }
+
 export default new ShowReport()

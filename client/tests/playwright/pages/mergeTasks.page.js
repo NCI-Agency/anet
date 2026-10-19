@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/tasks"
+
 class MergeTasks extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
@@ -99,4 +100,5 @@ class MergeTasks extends Page {
     )
   }
 }
+
 export default new MergeTasks()

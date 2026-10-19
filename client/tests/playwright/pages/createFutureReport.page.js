@@ -4,6 +4,7 @@ import { CreateReport } from "./createReport.page.js"
 const PAGE_URL = "/reports/new"
 const attId = "reportPeople"
 const tskId = "tasks"
+
 class CreateFutureReport extends CreateReport {
   async getEngagementDate() {
     return currentPage().locator('input[id="engagementDate"]').first()
@@ -91,4 +92,5 @@ class CreateFutureReport extends CreateReport {
     await super.open(PAGE_URL, "selena")
   }
 }
+
 export default new CreateFutureReport()

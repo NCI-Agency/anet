@@ -3,6 +3,7 @@ import Page from "../page.js"
 
 const PAGE_URL = "/attachments/:uuid"
 const EDIT_URL = "/attachments/:uuid/edit"
+
 class ShowAttachment extends Page {
   async getEditAttachmentButton() {
     return currentPage().locator(".btn").first()
@@ -74,4 +75,5 @@ class ShowAttachment extends Page {
     return currentPage().locator("#formBottomSubmit").first()
   }
 }
+
 export default new ShowAttachment()

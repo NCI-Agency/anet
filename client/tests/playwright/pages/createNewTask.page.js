@@ -2,6 +2,7 @@ import { currentPage, typeKeys, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/tasks/new"
+
 class CreateTask extends Page {
   async getForm() {
     return currentPage().locator("form").first()
@@ -126,4 +127,5 @@ class CreateTask extends Page {
     await typeKeys(description)
   }
 }
+
 export default new CreateTask()

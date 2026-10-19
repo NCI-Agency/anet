@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/organizations"
+
 class MergeOrganizations extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
@@ -101,4 +102,5 @@ class MergeOrganizations extends Page {
     )
   }
 }
+
 export default new MergeOrganizations()

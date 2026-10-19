@@ -20,6 +20,7 @@ export const INSIGHTS = [
   CADENCE_DASHBOARD,
   AGGREGATED_REPORTS_OVER_TIME
 ]
+
 class Insights extends Page {
   async getInsightsMenu() {
     return currentPage().locator("#insights").first()
@@ -37,4 +38,5 @@ class Insights extends Page {
     return currentPage().locator(`div[id="${insight}"]`).first()
   }
 }
+
 export default new Insights()

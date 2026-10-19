@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/positions/new"
+
 class CreatePosition extends Page {
   async getForm() {
     return currentPage().locator("form").first()
@@ -114,4 +115,5 @@ class CreatePosition extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
+
 export default new CreatePosition()

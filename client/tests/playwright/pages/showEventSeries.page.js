@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/eventSeries/:uuid"
+
 class ShowEventSeries extends Page {
   async openAsAdminUser(uuid) {
     await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
@@ -52,4 +53,5 @@ class ShowEventSeries extends Page {
       .first()
   }
 }
+
 export default new ShowEventSeries()

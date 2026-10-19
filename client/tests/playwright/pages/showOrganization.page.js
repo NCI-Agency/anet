@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/organizations/:uuid"
+
 class ShowOrganization extends Page {
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
@@ -295,4 +296,5 @@ class ShowOrganization extends Page {
     return (await this.getModalContent()).locator(".btn-close").first()
   }
 }
+
 export default new ShowOrganization()

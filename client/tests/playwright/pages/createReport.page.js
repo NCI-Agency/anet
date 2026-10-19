@@ -20,6 +20,7 @@ const ADVISE_FIELDS = {
 const OTHER_FIELDS = {
   assetsUsed: "formCustomFields.assetsUsed"
 }
+
 export class CreateReport extends Page {
   async getForm() {
     return currentPage().locator("form").first()
@@ -364,4 +365,5 @@ export class CreateReport extends Page {
     })
   }
 }
+
 export default new CreateReport()

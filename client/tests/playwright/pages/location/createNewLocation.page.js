@@ -2,6 +2,7 @@ import { currentPage, typeKeys, waitFor } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/locations/new"
+
 class CreateNewLocation extends Page {
   async getForm() {
     return currentPage().locator(".form-horizontal").first()
@@ -162,4 +163,5 @@ class CreateNewLocation extends Page {
     await typeKeys(description)
   }
 }
+
 export default new CreateNewLocation()

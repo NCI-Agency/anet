@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/top-tasks"
+
 class ShowAllTasks extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -45,4 +46,5 @@ class ShowAllTasks extends Page {
     return currentPage().locator("#tasks-table-header ~ tr").all()
   }
 }
+
 export default new ShowAllTasks()

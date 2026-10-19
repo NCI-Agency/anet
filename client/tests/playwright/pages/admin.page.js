@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/admin"
+
 class Admin extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -28,4 +29,5 @@ class Admin extends Page {
     await submitButton.click()
   }
 }
+
 export default new Admin()

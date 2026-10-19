@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/help"
+
 class Help extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -40,4 +41,5 @@ class Help extends Page {
     return (await spans[spans.length - 1].innerText()).trim()
   }
 }
+
 export default new Help()

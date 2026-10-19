@@ -122,4 +122,5 @@ class TaskFilter extends Page {
     await (await inclInactiveCheckbox).click()
   }
 }
+
 export default new TaskFilter()

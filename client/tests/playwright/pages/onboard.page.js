@@ -20,4 +20,5 @@ class Onboard extends CreatePerson {
     return currentPage().locator("#biography").first()
   }
 }
+
 export default new Onboard()

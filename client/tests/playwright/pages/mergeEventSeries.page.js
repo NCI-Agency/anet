@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/eventSeries"
+
 class MergeEventSeries extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
@@ -132,4 +133,5 @@ class MergeEventSeries extends Page {
     return hostNames
   }
 }
+
 export default new MergeEventSeries()

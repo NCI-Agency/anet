@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/admin/configureEventTypes"
+
 class AdminEventTypes extends Page {
   async openAsAdminUser() {
     await super.openAsAdminUser(PAGE_URL)
@@ -31,4 +32,5 @@ class AdminEventTypes extends Page {
       .first()
   }
 }
+
 export default new AdminEventTypes()

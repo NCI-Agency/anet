@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/events"
+
 class ShowAllEvents extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -37,4 +38,5 @@ class ShowAllEvents extends Page {
     return Promise.all(elements.map(el => el.innerText()))
   }
 }
+
 export default new ShowAllEvents()

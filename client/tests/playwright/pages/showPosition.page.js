@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/positions/:uuid"
+
 class ShowPosition extends Page {
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
@@ -34,4 +35,5 @@ class ShowPosition extends Page {
       .first()
   }
 }
+
 export default new ShowPosition()

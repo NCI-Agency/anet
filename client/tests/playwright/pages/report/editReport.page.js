@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/reports/:uuid/edit"
+
 class EditReport extends Page {
   async getSubmitButton() {
     return currentPage().locator("#formBottomSubmit").first()
@@ -71,4 +72,5 @@ class EditReport extends Page {
     }
   }
 }
+
 export default new EditReport()

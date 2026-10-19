@@ -351,4 +351,5 @@ class Page {
       .first()
   }
 }
+
 export default Page

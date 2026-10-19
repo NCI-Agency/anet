@@ -137,4 +137,5 @@ class Home extends Page {
     ).trim()
   }
 }
+
 export default new Home()

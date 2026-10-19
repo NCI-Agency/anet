@@ -32,4 +32,5 @@ class AssessmentsSection extends Page {
       .first()
   }
 }
+
 export default new AssessmentsSection()

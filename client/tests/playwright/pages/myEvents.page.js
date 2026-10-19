@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/events/mine"
+
 class MyEvents extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -83,4 +84,5 @@ class MyEvents extends Page {
     await super.waitUntilLoaded()
   }
 }
+
 export default new MyEvents()

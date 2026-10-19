@@ -101,4 +101,5 @@ class LocationFilter extends Page {
     await (await closeButton).click()
   }
 }
+
 export default new LocationFilter()

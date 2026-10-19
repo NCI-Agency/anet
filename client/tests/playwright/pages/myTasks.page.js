@@ -2,6 +2,7 @@ import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/tasks/mine"
+
 class MyTasks extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -41,4 +42,5 @@ class MyTasks extends Page {
       .first()
   }
 }
+
 export default new MyTasks()

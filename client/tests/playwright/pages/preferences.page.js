@@ -2,6 +2,7 @@ import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/preferences"
+
 class Preferences extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -27,4 +28,5 @@ class Preferences extends Page {
     )
   }
 }
+
 export default new Preferences()
