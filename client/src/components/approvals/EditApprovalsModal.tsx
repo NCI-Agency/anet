@@ -133,7 +133,6 @@ const EditApprovalsModal = ({
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- keep signature consistent
   function save(values, form, force) {
     const updatedObject = {
       ...relatedObject,

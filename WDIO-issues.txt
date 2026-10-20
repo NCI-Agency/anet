@@ -1,0 +1,74 @@
+ANET WDIO suite issues found during the Playwright migration
+
+Confirmed issues in the original suite
+
+1. Duplicate test titles
+   client/tests/webdriver/baseSpecs/mergeLocations.spec.js declares
+   "Should autoMerge some identical fields from both locations" twice in the
+   same describe block. showOrganization.spec.js repeats the same search test
+   title inside two "As an admin" blocks under the same parent.
+   WDIO accepts these ambiguous titles; Playwright rejects discovery until they
+   are made unique. The migrated titles now describe the distinct scenarios.
+
+2. Fixed sleeps hide a rich-text persistence race
+   The original suite contains 185 browser.pause() calls, including waits after
+   rich-text entry in pages/page.js. RichTextEditor.tsx debounces serialization
+   for 100 ms. Without those waits, saving immediately can omit the last edited
+   field. Reproduced while creating an annual organization assessment: the
+   Exercises field was empty although TRJU-1 had been entered.
+   The editor now flushes pending serialization on blur; migrated tests blur
+   the editor before saving rather than relying on a fixed sleep.
+
+3. Scenarios depend on earlier test cases and a shared browser page
+   Examples: assessmentsForOrganization.spec.js creates an assessment in one
+   case, validates it in the next, and edits it in another. advancedSearch.spec.js
+   opens its popover in one case and exercises it in subsequent cases.
+   These cases cannot be run independently or parallelized within their file.
+   The migration preserves per-file page state and sequential case execution.
+
+4. Parent-organization selection relies on a fixed search delay
+   pages/createNewOrganization.page.js selects the first result after a fixed
+   500 ms sleep. Waiting for the table to be displayed does not prove that a
+   newly typed search has completed: the previous result table is already
+   visible. Removing the sleep reproduced selection of the wrong parent and
+   incorrect APP-6 inheritance (Reality instead of Exercise).
+   The migrated helper waits for the intended organization name in the result
+   row before selecting it, including when searching by UUID.
+
+5. A test is registered inside another test's callback
+   baseSpecs/printReport.spec.js declares "Should display all reportCommunities"
+   inside "Should display all tasks when assessments are shown", rather than
+   inside its describe block. It is absent from normal test discovery and
+   depends on runtime registration in Mocha. Playwright rejects this.
+   The migrated assertion is now a separate, discoverable test case.
+
+6. Missing import in the no-custom-fields suite
+   noCustomFieldsSpecs/anetObjectForms.spec.js comments out the
+   CreateAuthorizationGroup import but still uses that identifier in the
+   communities form test. This causes ReferenceError and lint errors.
+   The migrated suite restores the import.
+
+7. Malformed birthday field selector
+   pages/createNewPerson.page.js:getBirthday uses the incomplete selector
+   input[id="formSensitiveFields.birthday (missing closing quote and bracket).
+   This is invalid CSS and breaks the sensitive-information creation tests.
+   The migrated selector is input[id="formSensitiveFields.birthday"].
+
+8. Client build cache omits the browser test mode
+   build.gradle:buildClient passes ANET_TEST_MODE to webpack but does not declare
+   it as a task input. A cached production client can therefore be reused in
+   -PtestEnv runs, even though the flag changes hover and autosave behavior.
+   The migration declares this flag as a build input and the local CI runner
+   builds the client with -PtestEnv.
+
+Migration-only differences (not WDIO defects)
+
+- WDIO collection helpers such as mapSeries and async collection mapping need
+  explicit sequential iteration or Promise.all with Playwright.
+- WDIO text selectors and relative XPath selectors need native Playwright
+  locator syntax.
+- WDIO getText trims visible text; Playwright innerText returns raw whitespace.
+- WDIO getValue works on option elements; Playwright requires their value
+  attribute rather than inputValue.
+
+Further confirmed issues will be appended as local verification continues.

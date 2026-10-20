@@ -95,7 +95,7 @@ export default class Position extends Model {
         .label(Settings.fields.position.organization?.label)
         .test(
           "required-object",
-          // eslint-disable-next-line no-template-curly-in-string
+
           "${path} is required",
           org => org && org.uuid
         ),

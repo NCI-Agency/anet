@@ -160,7 +160,7 @@
       ]
     },
     {
-      "groupName": "NPM, dev-dependencies, WebdriverIO",
+      "groupName": "NPM, dev-dependencies, Playwright",
       "matchManagers": [
         "npm"
       ],
@@ -168,8 +168,9 @@
         "devDependencies"
       ],
       "matchPackageNames": [
-        "@wdio/{/,}**",
-        "webdriverio{/,}**"
+        "@playwright/test",
+        "playwright{/,}**",
+        "playwright-core{/,}**"
       ]
     },
     {

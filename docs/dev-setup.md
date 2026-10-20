@@ -164,8 +164,9 @@ If you have updated the generated schema and need to update the generated Java c
 
 ### Client-side tests
 #### How the client-side tests work
-Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
-This driver runs the tests locally on your system.
+The browser regression suite uses Playwright Test with Chromium. Specs are multi-step scenarios: cases run sequentially and share a browser context within their spec; different specs have separate contexts and run in parallel. Do not enable `fullyParallel` without first making their browser and database state independent. Failed cases produce screenshots, traces, HTML reports, and JUnit results under `client/build`.
+
+The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data and run with one worker and no retries.
 
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
@@ -181,27 +182,20 @@ Run `./gradlew yarn_run_prettier:format` to reformat the JavaScript code accordi
 #### Client-side testing locally
 To run the tests locally, make sure you have the server using the test-database running as above.
 1. Run the client side E2E tests against the test database: `./gradlew yarn_run_test-e2e`
-1. Run the client side wdio tests against the test database: `./gradlew yarn_run_test-wdio`
+1. Install the Playwright Chromium browser: `./gradlew yarn_run_install-playwright`
+1. Run the client side Playwright tests against the test database: `./gradlew yarn_run_test-playwright`
 1. Run the client side jest tests against the test database: `./gradlew yarn_run_test-jest`
 1. Or run all client side tests against the test database: `./gradlew yarn_run_test-all`
 
-To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/package/chromedriver) as an npm dependency, we automatically have access to run in Chrome. To use Firefox instead, see [`geckodriver`](https://www.npmjs.com/package/geckodriver).
+To reproduce the two regression browser CI jobs on Linux, run `./scripts/test-playwright-ci.sh` from the repository root. It starts the test services, installs Chromium, and runs both dictionary configurations with a fresh ANET server and test database for each. Keep port 8180 free before running it. Reports and server logs are retained under `client/build/local-ci`.
 
-When writing browser tests, remember that when you take an action, you need to give the browser time to update in response before you start making assertions. Use the `driver.wait` method to do this.
+Install Chromium before the first E2E run: `./gradlew yarn_run_install-playwright` (includes Linux system dependencies), or `./gradlew yarn_run_install-playwright-browser` if system dependencies are already installed.
 
-If the tests are failing, and you don't know why, run them with env var `DEBUG_LOG=true`:
+The E2E configuration is `client/config/playwright-e2e.config.js`. Use Playwright locators and retrying assertions when writing tests. Each E2E test gets a fresh browser context; the report approval scenarios run in a serial group because they depend on a report created by an earlier test.
 
-```shell
-DEBUG_LOG=true ./gradlew yarn_run_test-e2e
-```
+To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn test-e2e --grep "Home Page"`.
 
-You can also insert the following into your code to make the browser pause, allowing you to investigate what is currently happening:
-
-```javascript
-await t.context.waitForever()
-```
-
-In rare circumstances, when using Chrome, the tests will hang on the `data:,` URL. I don't know why this is. If you re-run the test, you should not see the issue a second time.
+JUnit results are written to `client/build/test-results/e2e-junit-test-results.xml`. HTML reports are in `client/build/e2e-playwright-report`, with traces and screenshots for failed tests in `client/build/test-results/e2e-artifacts`. CI uploads these with the server and client logs.
 
 ### Simulator
 ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.

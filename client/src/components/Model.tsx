@@ -231,7 +231,6 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
     .nullable()
     .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.NUMBER])
     .typeError(
-      // eslint-disable-next-line no-template-curly-in-string
       "${path} must be a ${type} type, but the final value was ${originalValue}"
     ),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate

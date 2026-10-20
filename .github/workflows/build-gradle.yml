@@ -49,8 +49,10 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/build-cache
-      - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
-      - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
+      - name: Start DB and Keycloak containers
+        run: |
+          ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerConfigureKeycloak dockerStartKeycloak
+          sleep 30
       # This step should fail:
       - name: Run ANET init on empty database
         id: init-on-empty-db
@@ -94,9 +96,10 @@ jobs:
     - run: |
         rm -rf client/build/test-results
         mkdir -p client/build/test-results
-    - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
-    - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
-    - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
+    - name: Start DB, Keycloak and SMTP containers
+      run: |
+        ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerConfigureKeycloak dockerStartKeycloak dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
+        sleep 30
     - run: ./gradlew -PtestEnv test jacocoTestReport
     - run: ./gradlew yarn_run_server-junit-merge
     - name: Strip slashes from dictionary name
@@ -118,10 +121,10 @@ jobs:
       fail-fast: false
       matrix:
         dictionary: [anet-dictionary.yml]
-        client-tests: [jest, wdio-junit, e2e-junit]
+        client-tests: [jest, playwright, e2e]
         include:
           - dictionary: testDictionaries/no-custom-fields.yml
-            client-tests: wdio-noCF-junit
+            client-tests: playwright-noCF
 
     env:
       ANET_DICTIONARY_NAME: ${{ matrix.dictionary }}
@@ -135,18 +138,38 @@ jobs:
     - run: |
         rm -rf client/build/test-results
         mkdir -p client/build/test-results
-    - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
-    - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
-    - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
+    - name: Start DB, Keycloak and SMTP containers
+      run: |
+        ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerConfigureKeycloak dockerStartKeycloak dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
+        sleep 30
     - run: ./gradlew -PtestEnv checkConfig
-    - run: |
+    - name: Start ANET and wait for readiness
+      run: |
         ./gradlew -PtestEnv run &
-        sleep 15
+        for attempt in {1..180}; do
+          if curl --fail --silent --header "Accept: text/html" --output /dev/null http://localhost:8180/; then
+            exit 0
+          fi
+          sleep 1
+        done
+        exit 1
+    - name: Install Playwright Chromium
+      if: matrix.client-tests != 'jest'
+      run: ./gradlew yarn_run_install-playwright
     - run: ./gradlew yarn_run_test-${CLIENT_TESTS}
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
       if: always()
+    - name: Upload Playwright diagnostics
+      if: always() && matrix.client-tests != 'jest'
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ matrix.client-tests }}-diagnostics for ${{ steps.strip-slashes.outputs.dictionary }}
+        path: |
+          client/build/${{ matrix.client-tests }}-report
+          client/build/test-results/${{ matrix.client-tests }}-artifacts
+        if-no-files-found: ignore
     - name: Upload client log
       uses: actions/upload-artifact@v7
       with:
@@ -171,8 +194,10 @@ jobs:
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
-    - run: ./gradlew dockerCreateDB dockerStartDB
-    - run: ./gradlew dockerConfigureKeycloak dockerStartKeycloak
+    - name: Start DB and Keycloak containers
+      run: |
+        ./gradlew dockerCreateDB dockerStartDB dockerConfigureKeycloak dockerStartKeycloak
+        sleep 30
     - run: ./gradlew checkConfig
     - run: |
         ./gradlew run &

@@ -1,0 +1,320 @@
+import { expect as pwExpect } from "@playwright/test"
+import { expect } from "chai"
+import moment from "moment"
+import CreatePerson from "../pages/createNewPerson.page.js"
+import { currentPage, test, waitFor } from "../support.js"
+
+const VALID_PERSON_INTERLOCUTOR = {
+  familyName: "Doe",
+  country: "Denmark"
+}
+const VALID_PERSON_ADVISOR = {
+  familyName: "Roe",
+  givenName: "Jane",
+  country: "Canada",
+  emailAddresses: ["", "test@NATO.INT"]
+}
+const NOT_SIMILAR_PERSON_ADVISOR = {
+  familyName: "XXX",
+  givenName: "XXX"
+}
+const SIMILAR_PERSON_ADVISOR = {
+  familyName: "Erinson",
+  givenName: "Erin"
+}
+test.describe("Create new Person form page", () => {
+  test.describe("When creating a non-user", () => {
+    test.beforeEach("On the create person page…", async () => {
+      await CreatePerson.openAsSuperuser()
+      await waitFor(await CreatePerson.getForm(), "attached")
+      await waitFor(await CreatePerson.getForm(), "visible")
+    })
+    test.afterEach("On the create person page…", async () => {
+      await CreatePerson.logout()
+    })
+    test("Should not save a person without gender being filled in", async () => {
+      await waitFor(await CreatePerson.getFamilyName(), "visible")
+      await (
+        await CreatePerson.getFamilyName()
+      ).fill(String(VALID_PERSON_INTERLOCUTOR.familyName))
+      await (await CreatePerson.getGender()).click()
+      await (await CreatePerson.getFamilyName()).click()
+      const errorMessage = await currentPage()
+        .locator('select[name="gender"] + div.invalid-feedback')
+        .first()
+      await waitFor(errorMessage, "attached")
+      await waitFor(errorMessage, "visible")
+      await pwExpect(errorMessage).toHaveText("You must provide the Gender", {
+        useInnerText: true
+      })
+      await (
+        await CreatePerson.getGender()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getGender())
+      )
+      await (
+        await CreatePerson.getRank()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getRank())
+      )
+      await (await CreatePerson.getCountryInput()).click()
+      await (
+        await CreatePerson.getCountryInput()
+      ).fill(String(VALID_PERSON_INTERLOCUTOR.country))
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_INTERLOCUTOR.country
+      )
+      await pwExpect(
+        await CreatePerson.getCountryAdvancedSelectFirstItem()
+      ).toContainText(VALID_PERSON_INTERLOCUTOR.country, {
+        useInnerText: true
+      })
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await waitFor(await CreatePerson.getCountryHelpBlock(), "attached", {
+        reverse: true
+      })
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      const alertMessage = (
+        await (await CreatePerson.getAlertSuccess()).innerText()
+      ).trim()
+      expect(alertMessage).to.equal("Person saved")
+    })
+    test("Should save a person without first name", async () => {
+      await waitFor(await CreatePerson.getFamilyName(), "visible")
+      await (
+        await CreatePerson.getFamilyName()
+      ).fill(String(VALID_PERSON_INTERLOCUTOR.familyName))
+      await (
+        await CreatePerson.getRank()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getRank())
+      )
+      await (
+        await CreatePerson.getGender()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getGender())
+      )
+      await (await CreatePerson.getCountryInput()).click()
+      await (
+        await CreatePerson.getCountryInput()
+      ).fill(String(VALID_PERSON_INTERLOCUTOR.country))
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_INTERLOCUTOR.country
+      )
+      await pwExpect(
+        await CreatePerson.getCountryAdvancedSelectFirstItem()
+      ).toContainText(VALID_PERSON_INTERLOCUTOR.country, {
+        useInnerText: true
+      })
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await waitFor(await CreatePerson.getCountryHelpBlock(), "attached", {
+        reverse: true
+      })
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      const alertMessage = (
+        await (await CreatePerson.getAlertSuccess()).innerText()
+      ).trim()
+      expect(alertMessage).to.equal("Person saved")
+    })
+    test("Should not save a person without a valid email address", async () => {
+      await waitFor(await CreatePerson.getFamilyName(), "visible")
+      await (
+        await CreatePerson.getFamilyName()
+      ).fill(String(VALID_PERSON_INTERLOCUTOR.familyName))
+      await (
+        await CreatePerson.getRank()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getRank())
+      )
+      await (
+        await CreatePerson.getGender()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getGender())
+      )
+      await (await CreatePerson.getCountryInput()).click()
+      await (
+        await CreatePerson.getCountryInput()
+      ).fill(String(VALID_PERSON_INTERLOCUTOR.country))
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_INTERLOCUTOR.country
+      )
+      await pwExpect(
+        await CreatePerson.getCountryAdvancedSelectFirstItem()
+      ).toContainText(VALID_PERSON_INTERLOCUTOR.country, {
+        useInnerText: true
+      })
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await waitFor(await CreatePerson.getCountryHelpBlock(), "attached", {
+        reverse: true
+      })
+      await (await CreatePerson.getEmailAddress(0)).fill("notValidEmail@")
+      await (await CreatePerson.getFamilyName()).click()
+      const errorMessage = await CreatePerson.getEmailAddressMessage(0)
+      await waitFor(errorMessage, "attached")
+      await waitFor(errorMessage, "visible")
+      await pwExpect(errorMessage).toHaveText("Address must be a valid email", {
+        useInnerText: true
+      })
+
+      // perform submit form to prevent warning dialog
+      await CreatePerson.deleteInput(CreatePerson.getEmailAddress(0))
+      await (await CreatePerson.getEmailAddress(0)).fill("test@example.com")
+      await (await CreatePerson.getFamilyName()).click()
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      const alertMessage = (
+        await (await CreatePerson.getAlertSuccess()).innerText()
+      ).trim()
+      expect(alertMessage).to.equal("Person saved")
+    })
+  })
+  test.describe("When creating a user", () => {
+    test("Should display possible duplicates with similar names", async () => {
+      await CreatePerson.openAsAdmin()
+      await waitFor(await CreatePerson.getForm(), "attached")
+      await waitFor(await CreatePerson.getForm(), "visible")
+      await waitFor(await CreatePerson.getFamilyName(), "visible")
+      await (
+        await CreatePerson.getFamilyName()
+      ).fill(String(SIMILAR_PERSON_ADVISOR.familyName))
+      await waitFor(await CreatePerson.getGivenName(), "visible")
+      await (
+        await CreatePerson.getGivenName()
+      ).fill(String(SIMILAR_PERSON_ADVISOR.givenName))
+      await waitFor(await CreatePerson.getDuplicatesButton(), "visible")
+      await (await CreatePerson.getDuplicatesButton()).click()
+      await waitFor(await CreatePerson.getModalContent(), "visible")
+      await waitFor(await CreatePerson.getSimilarPerson(), "visible")
+      const similar = (
+        await (await CreatePerson.getSimilarPerson()).innerText()
+      ).trim()
+      await waitFor(await CreatePerson.getModalCloseButton(), "visible")
+      await (await CreatePerson.getModalCloseButton()).click()
+      await waitFor(await CreatePerson.getModalContent(), "visible", {
+        reverse: true
+      })
+      expect(similar).to.equal("CIV Erin Erinson")
+    })
+    test("Should display a warning message specific for duplicate accounts", async () => {
+      // Only admin users can create an advisor user
+      await CreatePerson.openAsAdmin()
+      await waitFor(await CreatePerson.getForm(), "attached")
+      await waitFor(await CreatePerson.getForm(), "visible")
+      await waitFor(await CreatePerson.getUserTrueButton(), "attached")
+      await (await CreatePerson.getUserTrueButton()).click()
+      const warningMessage = await currentPage()
+        .locator(".alert.alert-warning")
+        .first()
+      await waitFor(warningMessage, "attached")
+      await waitFor(warningMessage, "visible")
+      await pwExpect(warningMessage).toHaveText(
+        "Creating a user in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts you should take action.",
+        {
+          useInnerText: true
+        }
+      )
+      // Don't logout, next test continues…
+    })
+    test("Should save even if endOfTourDate is not filled in", async () => {
+      // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
+      await (
+        await CreatePerson.getFamilyName()
+      ).fill(String(VALID_PERSON_ADVISOR.familyName))
+      await (
+        await CreatePerson.getGivenName()
+      ).fill(String(VALID_PERSON_ADVISOR.givenName))
+      await waitFor(await CreatePerson.getUserTrueButton(), "attached")
+      await (await CreatePerson.getUserTrueButton()).click()
+      for (const [
+        index,
+        address
+      ] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        await CreatePerson.deleteInput(CreatePerson.getEmailAddress(index))
+        await (await CreatePerson.getEmailAddress(index)).fill(String(address))
+      }
+      await (
+        await CreatePerson.getRank()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getRank())
+      )
+      await (
+        await CreatePerson.getGender()
+      ).selectOption(
+        await CreatePerson.getRandomOption(await CreatePerson.getGender())
+      )
+      await (await CreatePerson.getCountryInput()).click()
+      await (
+        await CreatePerson.getCountryInput()
+      ).fill(String(VALID_PERSON_ADVISOR.country))
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_ADVISOR.country
+      )
+      await pwExpect(
+        await CreatePerson.getCountryAdvancedSelectFirstItem()
+      ).toContainText(VALID_PERSON_ADVISOR.country, {
+        useInnerText: true
+      })
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await waitFor(await CreatePerson.getCountryHelpBlock(), "attached", {
+        reverse: true
+      })
+      await (await CreatePerson.getEndOfTourDate()).fill("")
+      await (await CreatePerson.getFamilyName()).click()
+      for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        const errorMessage = await CreatePerson.getEmailAddressMessage(index)
+        // element should *not* be visible!
+        await waitFor(errorMessage, "visible", {
+          timeout: 1000,
+          reverse: true
+        })
+      }
+      // Don't logout, next test continues…
+    })
+    test("Should save with a valid email address in uppercase", async () => {
+      // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
+      for (const [
+        index,
+        address
+      ] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        await CreatePerson.deleteInput(CreatePerson.getEmailAddress(index))
+        await (await CreatePerson.getEmailAddress(index)).fill(String(address))
+      }
+      await (await CreatePerson.getFamilyName()).click()
+      for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        const errorMessage = await CreatePerson.getEmailAddressMessage(index)
+        // element should *not* be visible!
+        await waitFor(errorMessage, "visible", {
+          timeout: 1000,
+          reverse: true
+        })
+      }
+      const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
+      await CreatePerson.deleteInput(CreatePerson.getEndOfTourDate())
+      await (await CreatePerson.getEndOfTourDate()).fill(String(tomorrow))
+      await (await CreatePerson.getFamilyName()).click()
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      const alertMessage = (
+        await (await CreatePerson.getAlertSuccess()).innerText()
+      ).trim()
+      expect(alertMessage).to.equal("Person saved")
+      await CreatePerson.logout()
+    })
+    test("Should not display possible duplicates button", async () => {
+      await CreatePerson.openAsAdmin()
+      await waitFor(await CreatePerson.getForm(), "attached")
+      await waitFor(await CreatePerson.getForm(), "visible")
+      await waitFor(await CreatePerson.getFamilyName(), "visible")
+      await (
+        await CreatePerson.getFamilyName()
+      ).fill(String(NOT_SIMILAR_PERSON_ADVISOR.familyName))
+      await waitFor(await CreatePerson.getGivenName(), "visible")
+      await (
+        await CreatePerson.getGivenName()
+      ).fill(String(NOT_SIMILAR_PERSON_ADVISOR.givenName))
+      await pwExpect(await CreatePerson.getDuplicatesButton()).toHaveCount(0)
+    })
+  })
+})
