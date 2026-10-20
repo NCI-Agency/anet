@@ -81,9 +81,9 @@ for dictionary in anet-dictionary.yml testDictionaries/no-custom-fields.yml; do
   fi
   result=0
   if [[ "$dictionary" == anet-dictionary.yml ]]; then
-    ./gradlew yarn_run_test-playwright-junit || result=$?
+    ./gradlew yarn_run_test-playwright || result=$?
   else
-    ./gradlew yarn_run_test-playwright-noCF-junit || result=$?
+    ./gradlew yarn_run_test-playwright-noCF || result=$?
   fi
   for report in client/build/playwright-report client/build/test-results/playwright-artifacts; do
     if [[ -d "$report" ]]; then

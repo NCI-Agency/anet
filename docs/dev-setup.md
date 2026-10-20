@@ -195,7 +195,7 @@ The E2E configuration is `client/config/playwright-e2e.config.js`. Use Playwrigh
 
 To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn test-e2e --grep "Home Page"`.
 
-JUnit results are written to `client/build/test-results/e2e-junit-test-results.xml`. HTML reports are in `client/build/e2e-playwright-report`, with traces and screenshots for failed tests in `client/build/test-results/e2e-artifacts`. CI uploads these with the server and client logs.
+JUnit results are written to `client/build/test-results/e2e-test-results.xml`. HTML reports are in `client/build/e2e-report`, with traces and screenshots for failed tests in `client/build/test-results/e2e-artifacts`. CI uploads these with the server and client logs.
 
 ### Simulator
 ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.
