@@ -10,7 +10,7 @@
 <p>Dear Tenant administrator,</p>
 
 <p>The user <a href="${serverUrl}/people/${person.uuid}">${person.rank!} ${person.name!}</a> has requested access to
-your tenant and needs to be approved via <a href="${serverUrl}/tenants/${tenant.uuid}/edit">${tenant.name}</a>.</p>
+your tenant and needs to be approved via <a href="${serverUrl}/admin/tenants/${tenant.uuid}/edit">${tenant.name}</a>.</p>
 
 <#include "common/supportFooter.ftlh">
 </body>
