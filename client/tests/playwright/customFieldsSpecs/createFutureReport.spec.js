@@ -1,5 +1,4 @@
 import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
 import moment from "moment"
 import CreateFutureReport from "../pages/createFutureReport.page.js"
 import { test, waitFor } from "../support.js"
@@ -47,15 +46,14 @@ test.describe("Create report form page", () => {
       ).click()
       // Click outside the overlay
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
-      /* eslint-disable no-unused-expressions */
       // Advanced select input gets empty, the selected element is shown below the input
-      expect(await (await CreateFutureReport.getAttendeesField()).inputValue())
-        .to.be.empty
+      await pwExpect(await CreateFutureReport.getAttendeesField()).toHaveValue(
+        ""
+      )
       // Value should exist now
       await pwExpect(
         await CreateFutureReport.getAttendeesFieldValue()
       ).not.toHaveCount(0)
-      /* eslint-enable no-unused-expressions */
       await pwExpect(
         await CreateFutureReport.getAttendeesFieldValueRow(2)
       ).toContainText(INTERLOCUTOR_VALUE, {
@@ -79,15 +77,12 @@ test.describe("Create report form page", () => {
       ).click()
       // Click outside the overlay
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
-      /* eslint-disable no-unused-expressions */
       // Advanced select input gets empty, the selected element is shown below the input
-      expect(await (await CreateFutureReport.getTasksField()).inputValue()).to
-        .be.empty
+      await pwExpect(await CreateFutureReport.getTasksField()).toHaveValue("")
       // Value should exist now
       await pwExpect(
         await CreateFutureReport.getTasksFieldValue()
       ).not.toHaveCount(0)
-      /* eslint-enable no-unused-expressions */
       await pwExpect(
         await CreateFutureReport.getTasksFieldValueRow(1)
       ).toContainText(TASK_SELECTED_VALUE, {
