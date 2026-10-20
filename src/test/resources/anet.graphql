@@ -1448,7 +1448,7 @@ type Person {
   notes: [Note]
   obsoleteCountry: String
   pendingVerification: Boolean
-  phoneNumber: String
+  phoneNumber: [PhoneNumber]
   position: Position
   preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
@@ -1477,7 +1477,7 @@ input PersonInput {
   givenName: String
   obsoleteCountry: String
   pendingVerification: Boolean
-  phoneNumber: String
+  phoneNumber: [PhoneNumberInput]
   position: PositionInput
   preferences: [PersonPreferenceInput]
   previousPositions: [PersonPositionHistoryInput]
@@ -1562,6 +1562,18 @@ enum PersonSearchSortBy {
   NAME
   RANK
   RECENT
+}
+
+""""""
+type PhoneNumber {
+  details: String
+  type: String
+}
+
+""""""
+input PhoneNumberInput {
+  details: String
+  type: String
 }
 
 """"""
@@ -2030,7 +2042,7 @@ type ReportPerson {
   notes: [Note]
   obsoleteCountry: String
   pendingVerification: Boolean
-  phoneNumber: String
+  phoneNumber: [PhoneNumber]
   position: Position
   preferences: [PersonPreference]
   previousPositions: [PersonPositionHistory]
@@ -2064,7 +2076,7 @@ input ReportPersonInput {
   interlocutor: Boolean!
   obsoleteCountry: String
   pendingVerification: Boolean
-  phoneNumber: String
+  phoneNumber: [PhoneNumberInput]
   position: PositionInput
   preferences: [PersonPreferenceInput]
   previousPositions: [PersonPositionHistoryInput]

@@ -19,6 +19,7 @@ import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
+import mil.dds.anet.test.client.PhoneNumber;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionSearchQueryInput;
 import mil.dds.anet.utils.Utils;
@@ -33,7 +34,7 @@ class RestrictedFieldsTest extends AbstractResourceTest {
   private static final String EMAIL_ADDRESSES_FIELDS =
       "emailAddresses(network: ?" + EMAIL_NETWORK_PARAMETER + ") { network address }";
   private static final String PERSON_FIELDS =
-      "{ uuid familyName givenName users { uuid domainUsername } phoneNumber "
+      "{ uuid familyName givenName users { uuid domainUsername } phoneNumber { type details } "
           + EMAIL_ADDRESSES_FIELDS + " }";
   private static final String ORGANIZATION_FIELDS =
       "{ uuid shortName longName identificationCode " + EMAIL_ADDRESSES_FIELDS + " }";
@@ -187,8 +188,8 @@ class RestrictedFieldsTest extends AbstractResourceTest {
         .personList(getListFields(PERSON_FIELDS), query, EMAIL_NETWORK_PARAMETER, emailNetwork));
     assertThat(results).isNotNull();
     assertThat(results.getList()).filteredOn(p -> !Utils.isEmptyOrNull(p.getPhoneNumber()))
-        .hasSize(expectedNrOfPhoneNumbers).map(Person::getPhoneNumber)
-        .containsAll(expectedPhoneNumbers);
+        .hasSize(expectedNrOfPhoneNumbers).flatMap(Person::getPhoneNumber)
+        .map(PhoneNumber::getDetails).containsAll(expectedPhoneNumbers);
     assertThat(results.getList())
         .filteredOn(p -> !Utils.isEmptyOrNull(p.getEmailAddresses()) && p.getEmailAddresses()
             .stream().noneMatch(ea -> MART_EMAIL_ADDRESSES.contains(ea.getAddress())))

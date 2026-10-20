@@ -70,8 +70,14 @@ export class CreatePerson extends Page {
       .first()
   }
 
-  async getPhoneNumber() {
-    return currentPage().locator("#phoneNumber").first()
+  async getPhoneNumber(index = 0) {
+    return currentPage()
+      .locator(`input[name="phoneNumber.${index}.details"]`)
+      .first()
+  }
+
+  async getAddPhoneNumberButton() {
+    return currentPage().locator("#addphoneNumberButton").first()
   }
 
   async getRank() {
