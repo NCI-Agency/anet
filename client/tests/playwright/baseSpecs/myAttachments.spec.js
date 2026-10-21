@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import MyAttachments from "../pages/myAttachments.page.js"
 import { test, waitFor } from "../support.js"
@@ -10,7 +9,7 @@ test.describe("Home page", () => {
       await Home.open()
       await (await Home.getLinksMenuButton()).click()
       await waitFor(await Home.getMyAttachmentsLink(), "visible")
-      await pwExpect(await Home.getMyAttachmentsLink()).not.toHaveCount(0)
+      await expect(await Home.getMyAttachmentsLink()).not.toHaveCount(0)
       await Home.logout()
     })
   })
@@ -22,10 +21,10 @@ test.describe("My Attachments page", () => {
       await waitFor(await MyAttachments.getMyAttachments(), "visible")
       const attachmentRows = await MyAttachments.getAttachmentRows()
       // table has 10 attachment rows
-      expect(attachmentRows).to.have.length(10)
+      await expect(attachmentRows).toHaveCount(10)
       // check the classifications
       const attachmentClassifications = {}
-      for (const attachmentRow of attachmentRows) {
+      for (const attachmentRow of await attachmentRows.all()) {
         const attachmentCaptionCell =
           await MyAttachments.getAttachmentCaptionCell(attachmentRow)
         const classification = (
@@ -38,12 +37,12 @@ test.describe("My Attachments page", () => {
         attachmentClassifications[classification] =
           (attachmentClassifications[classification] ?? 0) + 1
       }
-      expect(Object.keys(attachmentClassifications)).to.have.length(3)
-      expect(attachmentClassifications["[Public]"]).to.equal(8)
-      expect(attachmentClassifications["[NATO UNCLASSIFIED]"]).to.equal(1)
+      expect(Object.keys(attachmentClassifications)).toHaveLength(3)
+      expect(attachmentClassifications["[Public]"]).toBe(8)
+      expect(attachmentClassifications["[NATO UNCLASSIFIED]"]).toBe(1)
       expect(
         attachmentClassifications["[NATO UNCLASSIFIED Releasable to EU]"]
-      ).to.equal(1)
+      ).toBe(1)
       await MyAttachments.logout()
     })
   })

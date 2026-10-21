@@ -26,8 +26,7 @@ test("Draft and submit a report", async ({ app }) => {
 
   await pageHelpers.clickTodayButton()
 
-  // send escape key to make sure the date picker is being closed
-  await app.page.keyboard.press("Escape")
+  await pageHelpers.closeDatePicker("#engagementDate")
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "ge",
@@ -130,8 +129,7 @@ test("Draft and submit a report", async ({ app }) => {
   await pageHelpers.writeInForm("#nextSteps", "next steps")
   await pageHelpers.writeInForm(
     ".reportTextField .editable",
-    "engagement details",
-    shortWaitMs // wait for Slate to save the editor contents
+    "engagement details"
   )
   const editorCssPath = ".reportSensitiveInformationField .editable"
   const $reportSensitiveInformationField = await $(editorCssPath)
@@ -142,11 +140,7 @@ test("Draft and submit a report", async ({ app }) => {
   const $addSensitiveInfoButton = await $("#toggleSensitiveInfo")
   await $addSensitiveInfoButton.click()
   await expect($reportSensitiveInformationField).toBeVisible()
-  await pageHelpers.writeInForm(
-    editorCssPath,
-    "sensitive info",
-    shortWaitMs // wait for Slate to save the editor contents
-  )
+  await pageHelpers.writeInForm(editorCssPath, "sensitive info")
   const $communitiesButton = await $('button[value="AuthorizationGroup"]')
   await $communitiesButton.click()
   // Wait for the filters to change
@@ -174,6 +168,17 @@ test("Draft and submit a report", async ({ app }) => {
     /\/reports\/[0-9a-f-]+/
   )
   testReportURL = new URL(app.page.url()).pathname
+  await app.page.reload()
+  await app.waitForLoadingFinished()
+  await expect(app.page.locator("#report-text .editable")).toHaveText(
+    "engagement details"
+  )
+  await expect(
+    app.page
+      .getByRole("heading", { name: "Sensitive information", exact: true })
+      .locator("..")
+      .locator(".editable")
+  ).toHaveText("sensitive info")
   const $submitReportButton = await $("#submitReportButton")
   await $submitReportButton.click()
   await expect($submitReportButton).toBeHidden({
@@ -393,8 +398,7 @@ test("Verify that validations work", async ({ app }) => {
   await $minuteInput.fill("45")
   await $minuteInput.press("Tab")
 
-  // send escape key to make sure the date picker is being closed
-  await app.page.keyboard.press("Escape")
+  await pageHelpers.closeDatePicker("#engagementDate")
 
   // check date and time
   const dateTimeFormat = "DD-MM-YYYY HH:mm"

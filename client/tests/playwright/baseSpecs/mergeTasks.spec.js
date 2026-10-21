@@ -1,7 +1,6 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import MergeTasks from "../pages/mergeTasks.page.js"
-import { currentPage, isClickable, test, waitFor } from "../support.js"
+import { currentPage, test, waitFor } from "../support.js"
 
 const EXAMPLE_TASKS = {
   childLeft: {
@@ -36,7 +35,6 @@ const EXAMPLE_TASKS = {
 test.describe("Merge tasks error", () => {
   test("Should show an error when merging tasks would create a loop", async () => {
     await MergeTasks.openPage()
-    await waitFor(await MergeTasks.getTitle(), "attached")
     await waitFor(await MergeTasks.getTitle(), "visible")
     await (await MergeTasks.getLeftTaskField()).click()
     await (
@@ -68,7 +66,7 @@ test.describe("Merge tasks error", () => {
     await (await MergeTasks.getUseAllButton("left")).click()
     await (await MergeTasks.getMergeTasksButton()).click()
     await MergeTasks.waitForAlertDangerToLoad()
-    await pwExpect(await MergeTasks.getAlertDanger()).toHaveText(
+    await expect(await MergeTasks.getAlertDanger()).toHaveText(
       "Task can not be its own (grand…)parent",
       {
         useInnerText: true
@@ -79,7 +77,6 @@ test.describe("Merge tasks error", () => {
 test.describe("Merge tasks page", () => {
   test("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergeTasks.openPage()
-    await waitFor(await MergeTasks.getTitle(), "attached")
     await waitFor(await MergeTasks.getTitle(), "visible")
     await (await MergeTasks.getLeftTaskField()).click()
     await (
@@ -91,9 +88,8 @@ test.describe("Merge tasks page", () => {
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
     // attempt to leave when only one task is selected, should allow to leave
     await MergeTasks.clickLogo()
-    await pwExpect(await MergeTasks.getModalDialog()).toHaveCount(0)
+    await expect(await MergeTasks.getModalDialog()).toHaveCount(0)
     await MergeTasks.openPage()
-    await waitFor(await MergeTasks.getTitle(), "attached")
     await waitFor(await MergeTasks.getTitle(), "visible")
     await (await MergeTasks.getLeftTaskField()).click()
     await (
@@ -113,12 +109,11 @@ test.describe("Merge tasks page", () => {
     // attempt to leave when both tasks are selected, should show warning
     await (await MergeTasks.getItemFromAdvancedSelect()).click()
     await MergeTasks.clickLogo()
-    await pwExpect(await MergeTasks.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergeTasks.getModalDialog()).not.toHaveCount(0)
     await currentPage().locator(".btn-danger").first().click()
   })
   test("Should display field values of the left task", async () => {
     await MergeTasks.openPage()
-    await waitFor(await MergeTasks.getTitle(), "attached")
     await waitFor(await MergeTasks.getTitle(), "visible")
     await (await MergeTasks.getLeftTaskField()).click()
     await (
@@ -135,17 +130,18 @@ test.describe("Merge tasks page", () => {
       "left",
       "UUID"
     )
-    await pwExpect(
-      await MergeTasks.getColumnContent("left", "UUID")
-    ).toHaveText(EXAMPLE_TASKS.validLeft.uuid, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergeTasks.getColumnContent("left", "UUID")).toHaveText(
+      EXAMPLE_TASKS.validLeft.uuid,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergeTasks.getColumnContent("left", "Short name")
     ).toHaveText(EXAMPLE_TASKS.validLeft.shortName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("left", "Parent objective")
     ).toHaveText(EXAMPLE_TASKS.validLeft.parentTask, {
       useInnerText: true
@@ -158,7 +154,7 @@ test.describe("Merge tasks page", () => {
     await MergeTasks.waitForAdvancedSelectLoading(
       EXAMPLE_TASKS.validLeft.displayedName
     )
-    await pwExpect(
+    await expect(
       await MergeTasks.getItemRadioButtonFromAdvancedSelect()
     ).toHaveCount(0)
   })
@@ -178,43 +174,46 @@ test.describe("Merge tasks page", () => {
       "right",
       "UUID"
     )
-    await pwExpect(
-      await MergeTasks.getColumnContent("right", "UUID")
-    ).toHaveText(EXAMPLE_TASKS.validRight.uuid, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergeTasks.getColumnContent("right", "UUID")).toHaveText(
+      EXAMPLE_TASKS.validRight.uuid,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergeTasks.getColumnContent("right", "Short name")
     ).toHaveText(EXAMPLE_TASKS.validRight.shortName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("right", "Parent objective")
     ).toHaveText(EXAMPLE_TASKS.validRight.parentTask, {
       useInnerText: true
     })
   })
   test("Should autoMerge some identical fields from both tasks", async () => {
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("mid", "Parent objective")
     ).toHaveText(EXAMPLE_TASKS.validLeft.parentTask, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("mid", "Parent objective")
     ).toHaveText(EXAMPLE_TASKS.validRight.parentTask, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergeTasks.getColumnContent("mid", "Status")
-    ).toHaveText(EXAMPLE_TASKS.validLeft.status, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await MergeTasks.getColumnContent("mid", "Status")
-    ).toHaveText(EXAMPLE_TASKS.validRight.status, {
-      useInnerText: true
-    })
+    await expect(await MergeTasks.getColumnContent("mid", "Status")).toHaveText(
+      EXAMPLE_TASKS.validLeft.status,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await MergeTasks.getColumnContent("mid", "Status")).toHaveText(
+      EXAMPLE_TASKS.validRight.status,
+      {
+        useInnerText: true
+      }
+    )
   })
   test("Should be able to select all fields from left task", async () => {
     await (await MergeTasks.getUseAllButton("left")).click()
@@ -225,13 +224,13 @@ test.describe("Merge tasks page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(await MergeTasks.getColumnContent("mid", "UUID")).toHaveText(
+    await expect(await MergeTasks.getColumnContent("mid", "UUID")).toHaveText(
       EXAMPLE_TASKS.validLeft.uuid,
       {
         useInnerText: true
       }
     )
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("mid", "Short name")
     ).toHaveText(EXAMPLE_TASKS.validLeft.shortName, {
       useInnerText: true
@@ -246,13 +245,13 @@ test.describe("Merge tasks page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(await MergeTasks.getColumnContent("mid", "UUID")).toHaveText(
+    await expect(await MergeTasks.getColumnContent("mid", "UUID")).toHaveText(
       EXAMPLE_TASKS.validRight.uuid,
       {
         useInnerText: true
       }
     )
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("mid", "Short name")
     ).toHaveText(EXAMPLE_TASKS.validRight.shortName, {
       useInnerText: true
@@ -274,7 +273,7 @@ test.describe("Merge tasks page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(await MergeTasks.getColumnContent("mid", "UUID")).toHaveText(
+    await expect(await MergeTasks.getColumnContent("mid", "UUID")).toHaveText(
       EXAMPLE_TASKS.validLeft.uuid,
       {
         useInnerText: true
@@ -286,7 +285,7 @@ test.describe("Merge tasks page", () => {
       "mid",
       "Short name"
     )
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("mid", "Short name")
     ).toHaveText(EXAMPLE_TASKS.validLeft.shortName, {
       useInnerText: true
@@ -297,16 +296,14 @@ test.describe("Merge tasks page", () => {
       "mid",
       "Long name"
     )
-    await pwExpect(
+    await expect(
       await MergeTasks.getColumnContent("mid", "Long name")
     ).toHaveText(EXAMPLE_TASKS.validRight.longName, {
       useInnerText: true
     })
   })
   test("Should not be able to click merge button when some fields are empty", async () => {
-    // eslint-disable-next-line no-unused-expressions
-    expect(await isClickable(await MergeTasks.getMergeTasksButton())).to.be
-      .false
+    await expect(await MergeTasks.getMergeTasksButton()).toBeDisabled()
   })
   test("Should be able to merge both tasks when winner is left task", async () => {
     await (await MergeTasks.getUseAllButton("left")).click()

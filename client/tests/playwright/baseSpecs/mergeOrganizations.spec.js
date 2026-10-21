@@ -1,7 +1,6 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import MergeOrganizations from "../pages/mergeOrganizations.page.js"
-import { currentPage, isClickable, test, waitFor } from "../support.js"
+import { currentPage, test, waitFor } from "../support.js"
 
 const IMG_PATH = "/api/attachment/view"
 const EXAMPLE_ORGANIZATIONS = {
@@ -39,7 +38,6 @@ const EXAMPLE_ORGANIZATIONS = {
 test.describe("Merge organizations error", () => {
   test("Should show an error when merging organizations would create a loop", async () => {
     await MergeOrganizations.openPage()
-    await waitFor(await MergeOrganizations.getTitle(), "attached")
     await waitFor(await MergeOrganizations.getTitle(), "visible")
     await (await MergeOrganizations.getLeftOrganizationField()).click()
     await (
@@ -70,7 +68,7 @@ test.describe("Merge organizations error", () => {
     await (await MergeOrganizations.getUseAllButton("left")).click()
     await (await MergeOrganizations.getMergeOrganizationsButton()).click()
     await MergeOrganizations.waitForAlertDangerToLoad()
-    await pwExpect(await MergeOrganizations.getAlertDanger()).toHaveText(
+    await expect(await MergeOrganizations.getAlertDanger()).toHaveText(
       "Organization can not be its own (grand…)parent",
       {
         useInnerText: true
@@ -78,7 +76,7 @@ test.describe("Merge organizations error", () => {
     )
     // attempt to leave when both locations are selected, should show warning
     await MergeOrganizations.clickLogo()
-    await pwExpect(await MergeOrganizations.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergeOrganizations.getModalDialog()).not.toHaveCount(0)
     await (await currentPage().locator(".btn-danger").first()).click()
     await MergeOrganizations.logout()
   })
@@ -86,7 +84,6 @@ test.describe("Merge organizations error", () => {
 test.describe("Merge organizations page", () => {
   test("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergeOrganizations.openPage()
-    await waitFor(await MergeOrganizations.getTitle(), "attached")
     await waitFor(await MergeOrganizations.getTitle(), "visible")
     await (await MergeOrganizations.getLeftOrganizationField()).click()
     await (
@@ -98,9 +95,8 @@ test.describe("Merge organizations page", () => {
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one org is selected, should allow to leave
     await MergeOrganizations.clickLogo()
-    await pwExpect(await MergeOrganizations.getModalDialog()).toHaveCount(0)
+    await expect(await MergeOrganizations.getModalDialog()).toHaveCount(0)
     await MergeOrganizations.openPage()
-    await waitFor(await MergeOrganizations.getTitle(), "attached")
     await waitFor(await MergeOrganizations.getTitle(), "visible")
     await (await MergeOrganizations.getLeftOrganizationField()).click()
     await (
@@ -120,13 +116,12 @@ test.describe("Merge organizations page", () => {
     // attempt to leave when both orgs are selected, should show warning
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
     await MergeOrganizations.clickLogo()
-    await pwExpect(await MergeOrganizations.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergeOrganizations.getModalDialog()).not.toHaveCount(0)
     await (await currentPage().locator(".btn-danger").first()).click()
     await MergeOrganizations.logout()
   })
   test("Should display field values of the left organization", async () => {
     await MergeOrganizations.openPage()
-    await waitFor(await MergeOrganizations.getTitle(), "attached")
     await waitFor(await MergeOrganizations.getTitle(), "visible")
     await (await MergeOrganizations.getLeftOrganizationField()).click()
     await (
@@ -143,12 +138,12 @@ test.describe("Merge organizations page", () => {
       "left",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("left", "UUID")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("left", "Name")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.shortName, {
       useInnerText: true
@@ -158,11 +153,11 @@ test.describe("Merge organizations page", () => {
     )
       .locator("img")
       .first()
-    await pwExpect(avatarImg).toHaveAttribute(
+    await expect(avatarImg).toHaveAttribute(
       "src",
       EXAMPLE_ORGANIZATIONS.validLeft.avatarImg
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("left", "Parent Organization")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.parentOrg, {
       useInnerText: true
@@ -175,7 +170,7 @@ test.describe("Merge organizations page", () => {
     await MergeOrganizations.waitForAdvancedSelectLoading(
       EXAMPLE_ORGANIZATIONS.validLeft.displayedName
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getFirstItemRadioButtonFromAdvancedSelect()
     ).toHaveCount(0)
   })
@@ -195,12 +190,12 @@ test.describe("Merge organizations page", () => {
       "right",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("right", "UUID")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("right", "Name")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.shortName, {
       useInnerText: true
@@ -210,33 +205,33 @@ test.describe("Merge organizations page", () => {
     )
       .locator("img")
       .first()
-    await pwExpect(avatarImg).toHaveAttribute(
+    await expect(avatarImg).toHaveAttribute(
       "src",
       EXAMPLE_ORGANIZATIONS.validRight.avatarImg
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("right", "Parent Organization")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.parentOrg, {
       useInnerText: true
     })
   })
   test("Should autoMerge some identical fields from both organizations", async () => {
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Parent Organization")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.parentOrg, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Parent Organization")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.parentOrg, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.status, {
       useInnerText: true
@@ -251,12 +246,12 @@ test.describe("Merge organizations page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.shortName, {
       useInnerText: true
@@ -266,7 +261,7 @@ test.describe("Merge organizations page", () => {
     )
       .locator("img")
       .first()
-    await pwExpect(avatarImg).toHaveAttribute(
+    await expect(avatarImg).toHaveAttribute(
       "src",
       EXAMPLE_ORGANIZATIONS.validLeft.avatarImg
     )
@@ -280,12 +275,12 @@ test.describe("Merge organizations page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.shortName, {
       useInnerText: true
@@ -295,7 +290,7 @@ test.describe("Merge organizations page", () => {
     )
       .locator("img")
       .first()
-    await pwExpect(avatarImg).toHaveAttribute(
+    await expect(avatarImg).toHaveAttribute(
       "src",
       EXAMPLE_ORGANIZATIONS.validRight.avatarImg
     )
@@ -316,7 +311,7 @@ test.describe("Merge organizations page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.uuid, {
       useInnerText: true
@@ -327,7 +322,7 @@ test.describe("Merge organizations page", () => {
       "mid",
       "Name"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validLeft.shortName, {
       useInnerText: true
@@ -339,7 +334,7 @@ test.describe("Merge organizations page", () => {
     )
       .locator("img")
       .first()
-    await pwExpect(avatarImg).toHaveAttribute(
+    await expect(avatarImg).toHaveAttribute(
       "src",
       EXAMPLE_ORGANIZATIONS.validLeft.avatarImg
     )
@@ -351,17 +346,16 @@ test.describe("Merge organizations page", () => {
       "mid",
       "Description"
     )
-    await pwExpect(
+    await expect(
       await MergeOrganizations.getColumnContent("mid", "Description")
     ).toHaveText(EXAMPLE_ORGANIZATIONS.validRight.longName, {
       useInnerText: true
     })
   })
   test("Should not be able to click merge button when some fields are empty", async () => {
-    // eslint-disable-next-line no-unused-expressions
-    expect(
-      await isClickable(await MergeOrganizations.getMergeOrganizationsButton())
-    ).to.be.false
+    await expect(
+      await MergeOrganizations.getMergeOrganizationsButton()
+    ).toBeDisabled()
   })
   test("Should be able to merge both organizations when winner is left organization", async () => {
     await (await MergeOrganizations.getUseAllButton("left")).click()

@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
@@ -198,8 +198,6 @@ class ShowTask extends Page {
   }
 
   async confirmDelete() {
-    await waitFor(await this.getDeleteConfirmButton(), "attached")
-    await waitFor(await this.getDeleteConfirmButton(), "visible")
     await (await this.getDeleteConfirmButton()).click()
   }
 
@@ -248,7 +246,7 @@ class ShowTask extends Page {
     })
     await currentPage().locator("#previous-period").click()
     await (await updated).finished()
-    await pwExpect(rows).not.toHaveText(previousRows)
+    await expect(rows).not.toHaveText(previousRows)
   }
 }
 

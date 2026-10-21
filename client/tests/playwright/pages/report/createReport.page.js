@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import { currentPage, typeKeys, waitFor } from "../../support.js"
 import * as cr from "../createReport.page.js"
@@ -133,7 +133,7 @@ class CreateReport extends cr.CreateReport {
     const columns = currentPage().locator(
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td`
     )
-    await pwExpect(columns.nth(5)).toBeAttached()
+    await expect(columns.nth(5)).toBeAttached()
     return columns.all()
   }
 
@@ -291,7 +291,6 @@ class CreateReport extends cr.CreateReport {
   }
 
   async setEngagementDate(engagementDate) {
-    await waitFor(await this.getEngagementDate(), "clickable")
     await (await this.getEngagementDate()).click()
     await waitFor(await this.getTodayButton(), "visible")
     await this.deleteInput(this.getEngagementDate())

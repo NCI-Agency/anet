@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import OnboardPage from "../pages/onboard.page.js"
 import { currentPage, test, waitFor } from "../support.js"
@@ -23,10 +22,9 @@ test.describe("Onboard new user login", () => {
     await OnboardPage.openAsOnboardUser(REPORT_URL)
     const welcomeText = "Welcome to ANET"
     await OnboardPage.waitForWelcomeMessage(welcomeText)
-    const securityText = (
-      await (await OnboardPage.getWelcomeText()).innerText()
-    ).trim()
-    expect(securityText).to.equal(welcomeText)
+    await expect(await OnboardPage.getWelcomeText()).toHaveText(welcomeText, {
+      useInnerText: true
+    })
   })
   test("Should click on create your account", async () => {
     await (await OnboardPage.getCreateYourAccountBtn()).scrollIntoViewIfNeeded()
@@ -34,20 +32,17 @@ test.describe("Onboard new user login", () => {
     // wait for the page transition and rendering of custom fields
 
     // Check that these are properly copied from the authentication server
-    await waitFor(await OnboardPage.getFamilyName(), "attached")
     await waitFor(await OnboardPage.getFamilyName(), "visible")
-    await pwExpect(await OnboardPage.getFamilyName()).toHaveValue(
+    await expect(await OnboardPage.getFamilyName()).toHaveValue(
       ONBOARD_USER.familyName
     )
-    await waitFor(await OnboardPage.getGivenName(), "attached")
     await waitFor(await OnboardPage.getGivenName(), "visible")
-    await pwExpect(await OnboardPage.getGivenName()).toHaveValue(
+    await expect(await OnboardPage.getGivenName()).toHaveValue(
       ONBOARD_USER.givenName
     )
-    await waitFor(await OnboardPage.getEmailAddress(0), "attached")
     await waitFor(await OnboardPage.getEmailAddress(0), "visible")
     for (const [index, address] of ONBOARD_USER.emailAddresses.entries()) {
-      await pwExpect(await OnboardPage.getEmailAddress(index)).toHaveValue(
+      await expect(await OnboardPage.getEmailAddress(index)).toHaveValue(
         address
       )
     }
@@ -58,7 +53,6 @@ test.describe("Onboard new user login", () => {
     })
   })
   test("Should not save if endOfTourDate is not in the future", async () => {
-    await waitFor(await OnboardPage.getEndOfTourDate(), "attached")
     await waitFor(await OnboardPage.getEndOfTourDate(), "visible")
     const yesterday = moment().subtract(1, "days").format("DD-MM-YYYY")
     await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())
@@ -73,9 +67,8 @@ test.describe("Onboard new user login", () => {
       .locator("..")
       .locator("div.invalid-feedback")
       .first()
-    await waitFor(errorMessage, "attached")
     await waitFor(errorMessage, "visible")
-    await pwExpect(errorMessage).toHaveText(
+    await expect(errorMessage).toHaveText(
       "The End of tour date must be in the future",
       {
         useInnerText: true
@@ -92,7 +85,7 @@ test.describe("Onboard new user login", () => {
     await OnboardPage.waitForCountryAdvancedSelectToChange(
       personDetails.country
     )
-    await pwExpect(
+    await expect(
       await OnboardPage.getCountryAdvancedSelectFirstItem()
     ).toContainText(personDetails.country, {
       useInnerText: true

@@ -80,9 +80,7 @@ class MergeEventSeries extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr, rowNumber = 1) {
-    await waitFor(await this.getAdvancedSelectPopover(), "attached")
     await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getEventSeriesHeaderFromPopover(), "attached")
     await waitFor(await this.getEventSeriesHeaderFromPopover(), "visible")
     return this.waitForElementToChange(
       () => this.getItemFromAdvancedSelect(rowNumber),

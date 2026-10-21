@@ -41,9 +41,6 @@ class EditReport extends Page {
   async deleteReport(uuid, planned) {
     await (await this.getDeleteButton(planned)).click()
     // wait for modal animation to finish
-    await waitFor(await this.confirmDeleteButton(uuid), "attached")
-    await waitFor(await this.confirmDeleteButton(uuid), "visible")
-    await waitFor(await this.confirmDeleteButton(uuid), "clickable")
     // wait for modal animation to finish
     await (await this.confirmDeleteButton(uuid)).click()
     await this.waitForAlertSuccessToLoad()
@@ -52,9 +49,6 @@ class EditReport extends Page {
   async unpublishReport(uuid) {
     await (await this.getUnpublishButton()).click()
     // wait for modal animation to finish
-    await waitFor(await this.confirmUnpublishButton(uuid), "attached")
-    await waitFor(await this.confirmUnpublishButton(uuid), "visible")
-    await waitFor(await this.confirmUnpublishButton(uuid), "clickable")
     // wait for modal animation to finish
     await (await this.confirmUnpublishButton(uuid)).click()
     await this.waitForAlertSuccessToLoad()
@@ -67,7 +61,6 @@ class EditReport extends Page {
 
   async waitForEditReportToLoad() {
     if (!(await (await this.getSubmitButton()).isVisible())) {
-      await waitFor(await this.getSubmitButton(), "attached")
       await waitFor(await this.getSubmitButton(), "visible")
     }
   }

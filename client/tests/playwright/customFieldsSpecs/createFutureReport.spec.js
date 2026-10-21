@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import CreateFutureReport from "../pages/createFutureReport.page.js"
 import { test, waitFor } from "../support.js"
@@ -13,18 +13,9 @@ test.describe("Create report form page", () => {
   test.describe("When creating a report", () => {
     test("Should be able to load the form", async () => {
       await CreateFutureReport.open()
-      await waitFor(await CreateFutureReport.getForm(), "attached")
       await waitFor(await CreateFutureReport.getForm(), "visible")
     })
     test("Should be able to select interlocutor and task", async () => {
-      await waitFor(
-        await CreateFutureReport.getAttendeesFieldLabel(),
-        "attached"
-      )
-      await waitFor(
-        await CreateFutureReport.getAttendeesFieldLabel(),
-        "visible"
-      )
       // Don't set engagementDate yet
 
       // Select interlocutor
@@ -36,7 +27,7 @@ test.describe("Create report form page", () => {
         CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem,
         INTERLOCUTOR_VALUE
       )
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem()
       ).toContainText(INTERLOCUTOR_VALUE, {
         useInnerText: true
@@ -47,14 +38,12 @@ test.describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
       // Advanced select input gets empty, the selected element is shown below the input
-      await pwExpect(await CreateFutureReport.getAttendeesField()).toHaveValue(
-        ""
-      )
+      await expect(await CreateFutureReport.getAttendeesField()).toHaveValue("")
       // Value should exist now
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesFieldValue()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesFieldValueRow(2)
       ).toContainText(INTERLOCUTOR_VALUE, {
         useInnerText: true
@@ -67,7 +56,7 @@ test.describe("Create report form page", () => {
         () => CreateFutureReport.getTasksFieldAdvancedSelectItem(3),
         TASK_POPOVER_VALUE
       )
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTasksFieldAdvancedSelectItem(3)
       ).toContainText(TASK_POPOVER_VALUE, {
         useInnerText: true
@@ -78,12 +67,12 @@ test.describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
       // Advanced select input gets empty, the selected element is shown below the input
-      await pwExpect(await CreateFutureReport.getTasksField()).toHaveValue("")
+      await expect(await CreateFutureReport.getTasksField()).toHaveValue("")
       // Value should exist now
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTasksFieldValue()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTasksFieldValueRow(1)
       ).toContainText(TASK_SELECTED_VALUE, {
         useInnerText: true
@@ -91,18 +80,18 @@ test.describe("Create report form page", () => {
     })
     test("Should not show assessments without engagement date", async () => {
       // Attendee assessments should not be shown in the form
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesAssessments()
       ).toHaveCount(0)
       // Task assessments should not be shown in the form
-      await pwExpect(
-        await CreateFutureReport.getTasksAssessments()
-      ).toHaveCount(0)
+      await expect(await CreateFutureReport.getTasksAssessments()).toHaveCount(
+        0
+      )
 
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      await pwExpect(await CreateFutureReport.getAlertDanger()).toContainText(
+      await expect(await CreateFutureReport.getAlertDanger()).toContainText(
         "The following errors must be fixed",
         {
           useInnerText: true
@@ -110,21 +99,17 @@ test.describe("Create report form page", () => {
       )
 
       // Attendee assessments should not be shown in the display
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesAssessments()
       ).toHaveCount(0)
       // Task assessments should not be shown in the display
-      await pwExpect(
-        await CreateFutureReport.getTasksAssessments()
-      ).toHaveCount(0)
+      await expect(await CreateFutureReport.getTasksAssessments()).toHaveCount(
+        0
+      )
     })
     test("Should show assessments with past engagement date", async () => {
       // Edit the report
       await (await CreateFutureReport.getEditButton()).click()
-      await waitFor(
-        await CreateFutureReport.getAttendeesFieldLabel(),
-        "attached"
-      )
       await waitFor(
         await CreateFutureReport.getAttendeesFieldLabel(),
         "visible"
@@ -138,10 +123,10 @@ test.describe("Create report form page", () => {
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
 
       // Attendee assessments should be shown in the form
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesAssessments()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeeAssessment(INTERLOCUTOR_VALUE)
       ).not.toHaveCount(0)
       const attendeeAssessmentLabel =
@@ -149,24 +134,24 @@ test.describe("Create report form page", () => {
           INTERLOCUTOR_VALUE,
           1
         )
-      await pwExpect(attendeeAssessmentLabel).not.toHaveCount(0)
-      await pwExpect(attendeeAssessmentLabel).toHaveText(
+      await expect(attendeeAssessmentLabel).not.toHaveCount(0)
+      await expect(attendeeAssessmentLabel).toHaveText(
         "Engagement assessment of interlocutor",
         {
           useInnerText: true
         }
       )
       // Task assessments should be shown in the form
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTasksAssessments()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTaskAssessment(TASK_SELECTED_VALUE)
       ).not.toHaveCount(0)
       const taskAssessment1Label =
         await CreateFutureReport.getTaskAssessmentLabel(TASK_SELECTED_VALUE, 1)
-      await pwExpect(taskAssessment1Label).not.toHaveCount(0)
-      await pwExpect(taskAssessment1Label).toHaveText(
+      await expect(taskAssessment1Label).not.toHaveCount(0)
+      await expect(taskAssessment1Label).toHaveText(
         "Restricted engagement assessment of objective",
         {
           useInnerText: true
@@ -174,8 +159,8 @@ test.describe("Create report form page", () => {
       )
       const taskAssessment2Label =
         await CreateFutureReport.getTaskAssessmentLabel(TASK_SELECTED_VALUE, 3)
-      await pwExpect(taskAssessment2Label).not.toHaveCount(0)
-      await pwExpect(taskAssessment2Label).toHaveText(
+      await expect(taskAssessment2Label).not.toHaveCount(0)
+      await expect(taskAssessment2Label).toHaveText(
         "Engagement assessment of objective",
         {
           useInnerText: true
@@ -185,7 +170,7 @@ test.describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      await pwExpect(await CreateFutureReport.getAlertDanger()).toContainText(
+      await expect(await CreateFutureReport.getAlertDanger()).toContainText(
         "The following errors must be fixed",
         {
           useInnerText: true
@@ -193,27 +178,23 @@ test.describe("Create report form page", () => {
       )
 
       // Attendee assessments should be shown in the display
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTasksAssessments()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeeAssessment(INTERLOCUTOR_VALUE)
       ).not.toHaveCount(0)
       // Task assessments should be shown in the display
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTasksAssessments()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getTaskAssessment(TASK_SELECTED_VALUE)
       ).not.toHaveCount(0)
     })
     test("Should not show assessments with future engagement date", async () => {
       // Edit the report
       await (await CreateFutureReport.getEditButton()).click()
-      await waitFor(
-        await CreateFutureReport.getAttendeesFieldLabel(),
-        "attached"
-      )
       await waitFor(
         await CreateFutureReport.getAttendeesFieldLabel(),
         "visible"
@@ -230,18 +211,18 @@ test.describe("Create report form page", () => {
       await (await CreateFutureReport.getEngagementInformationTitle()).click()
 
       // Attendee assessments should not be shown in the form
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesAssessments()
       ).toHaveCount(0)
       // Task assessments should not be shown in the form
-      await pwExpect(
-        await CreateFutureReport.getTasksAssessments()
-      ).toHaveCount(0)
+      await expect(await CreateFutureReport.getTasksAssessments()).toHaveCount(
+        0
+      )
 
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      await pwExpect(await CreateFutureReport.getAlertInfo()).toContainText(
+      await expect(await CreateFutureReport.getAlertInfo()).toContainText(
         "You'll need to fill out these required fields before you can submit your final planned engagement",
         {
           useInnerText: true
@@ -249,40 +230,32 @@ test.describe("Create report form page", () => {
       )
 
       // Attendee assessments should not be shown in the display
-      await pwExpect(
+      await expect(
         await CreateFutureReport.getAttendeesAssessments()
       ).toHaveCount(0)
       // Task assessments should not be shown in the display
-      await pwExpect(
-        await CreateFutureReport.getTasksAssessments()
-      ).toHaveCount(0)
+      await expect(await CreateFutureReport.getTasksAssessments()).toHaveCount(
+        0
+      )
     })
     test("Should be able to delete the report", async () => {
       // Edit the report
       await (await CreateFutureReport.getEditButton()).click()
       await waitFor(
         await CreateFutureReport.getAttendeesFieldLabel(),
-        "attached"
-      )
-      await waitFor(
-        await CreateFutureReport.getAttendeesFieldLabel(),
         "visible"
       )
 
       // Delete it
-      await waitFor(await CreateFutureReport.getDeleteButton(), "attached")
-      await waitFor(await CreateFutureReport.getDeleteButton(), "visible")
       await (await CreateFutureReport.getDeleteButton()).click()
       // Confirm delete
 
       // wait for the modal to slide in (transition is 300 ms)
-      await waitFor(await CreateFutureReport.getConfirmButton(), "attached")
-      await waitFor(await CreateFutureReport.getConfirmButton(), "visible")
       await (await CreateFutureReport.getConfirmButton()).click()
       // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       await CreateFutureReport.waitForAlertToLoad()
-      await pwExpect(await CreateFutureReport.getAlertSuccess()).toContainText(
+      await expect(await CreateFutureReport.getAlertSuccess()).toContainText(
         "Report deleted",
         {
           useInnerText: true

@@ -353,12 +353,10 @@ export class CreateReport extends Page {
   }
 
   async waitForAlertToLoad() {
-    await waitFor(await this.getAlert(), "attached")
     await waitFor(await this.getAlert(), "visible")
   }
 
   async submitForm() {
-    await waitFor(await this.getSubmitButton(), "clickable")
     await (await this.getSubmitButton()).click()
     await waitFor(await this.getSubmitButton(), "attached", {
       reverse: true

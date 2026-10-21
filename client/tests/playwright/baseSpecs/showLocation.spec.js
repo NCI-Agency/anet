@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import ShowLocation from "../pages/location/showLocation.page.js"
 import MergeLocations from "../pages/mergeLocations.page.js"
 import { currentPage, test, waitFor } from "../support.js"
@@ -13,48 +12,48 @@ test.describe("Show location page", () => {
   test.describe("When on the show page of a location with attachment(s)", () => {
     test("We should see a container for Attachment List", async () => {
       await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
-      await waitFor(await ShowLocation.getAttachments(), "attached")
       await waitFor(await ShowLocation.getAttachments(), "visible")
     })
     test("We should see a card of Attachment", async () => {
-      await waitFor(await ShowLocation.getCard(), "attached")
       await waitFor(await ShowLocation.getCard(), "visible")
-      await pwExpect
-        .poll(async () => await ShowLocation.getClassificationLine())
-        .toEqual("[NATO UNCLASSIFIED Releasable to EU]")
-      await pwExpect
-        .poll(async () => await ShowLocation.getCaptionLine())
-        .toEqual("Antarctica")
+      await expect(await ShowLocation.getClassificationLine()).toHaveText(
+        "[NATO UNCLASSIFIED Releasable to EU]",
+        { useInnerText: true }
+      )
+      await expect(await ShowLocation.getCaptionLine()).toHaveText(
+        "Antarctica",
+        { useInnerText: true }
+      )
     })
     test("We should be able to edit the attachments", async () => {
       const editAttachmentsButton =
         await ShowLocation.getEditAttachmentsButton()
-      await pwExpect(editAttachmentsButton).toHaveText("Edit attachments", {
+      await expect(editAttachmentsButton).toHaveText("Edit attachments", {
         useInnerText: true
       })
       await editAttachmentsButton.click()
-      await pwExpect(editAttachmentsButton).toHaveText("View attachments", {
+      await expect(editAttachmentsButton).toHaveText("View attachments", {
         useInnerText: true
       })
       const editButton = await currentPage()
         .locator(".attachment-card .button-line a")
         .first()
-      await pwExpect
-        .poll(async () => await editButton.getAttribute("href"))
-        .toContain("/attachments/f7cd5b02-ef73-4ee8-814b-c5a7a916685d/edit")
+      await expect(editButton).toHaveAttribute(
+        "href",
+        /\/attachments\/f7cd5b02-ef73-4ee8-814b-c5a7a916685d\/edit/
+      )
       await editAttachmentsButton.click()
     })
     test("We can go to the show page of Attachment", async () => {
       await (await ShowLocation.getImageClick()).click()
-      await pwExpect
-        .poll(async () => await currentPage().url())
-        .toContain("/attachments/f7cd5b02-ef73-4ee8-814b-c5a7a916685d")
+      await expect(currentPage()).toHaveURL(
+        /\/attachments\/f7cd5b02-ef73-4ee8-814b-c5a7a916685d/
+      )
     })
   })
   test.describe("When on the show page of an location with entity avatar", () => {
     test("We should see the avatar", async () => {
       await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
-      await waitFor(await ShowLocation.getEntityAvatar(), "attached")
       await waitFor(await ShowLocation.getEntityAvatar(), "visible")
     })
   })
@@ -63,41 +62,27 @@ test.describe("Show location page", () => {
       await ShowLocation.open(LOCATION_WITH_ORGANIZATIONS_UUID)
       await waitFor(
         await ShowLocation.getTable("organizations_table"),
-        "attached"
-      )
-      await waitFor(
-        await ShowLocation.getTable("organizations_table"),
         "visible"
       )
-      await pwExpect
-        .poll(
-          async () =>
-            (await ShowLocation.getTableRows("organizations_table")).length
-        )
-        .toBeGreaterThan(0)
+      await expect(
+        await ShowLocation.getTableRows("organizations_table")
+      ).not.toHaveCount(0)
     })
   })
   test.describe("When on the show page of a location with positions", () => {
     test("We should see rows in the positions table", async () => {
       await ShowLocation.open(LOCATION_WITH_POSITIONS_UUID)
-      await waitFor(await ShowLocation.getTable("positions_table"), "attached")
       await waitFor(await ShowLocation.getTable("positions_table"), "visible")
-      await pwExpect
-        .poll(
-          async () =>
-            (await ShowLocation.getTableRows("positions_table")).length
-        )
-        .toBeGreaterThan(0)
+      await expect(
+        await ShowLocation.getTableRows("positions_table")
+      ).not.toHaveCount(0)
     })
   })
   test.describe("When on the show page of a location with reports", () => {
     test("We should see rows in the reports table", async () => {
       await ShowLocation.open(LOCATION_WITH_REPORTS_UUID)
-      await waitFor(await ShowLocation.getReportCollection(), "attached")
       await waitFor(await ShowLocation.getReportCollection(), "visible")
-      await pwExpect
-        .poll(async () => (await ShowLocation.getReportSummaries()).length)
-        .toBeGreaterThan(0)
+      await expect(await ShowLocation.getReportSummaries()).not.toHaveCount(0)
       await ShowLocation.logout()
     })
   })
@@ -106,15 +91,11 @@ test.describe("Show location page", () => {
       await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
       await (await ShowLocation.getMergeButton()).click()
       // wait for the merge page to render and load data
-      // eslint-disable-next-line no-unused-expressions
-      expect(await MergeLocations.getTitle()).to.exist
-      await pwExpect
-        .poll(
-          async () =>
-            await (await MergeLocations.getLeftLocationField()).inputValue()
-        )
-        .toContain("Antarctica")
-      await pwExpect(
+      await expect(await MergeLocations.getTitle()).toBeVisible()
+      await expect(await MergeLocations.getLeftLocationField()).toHaveValue(
+        /Antarctica/
+      )
+      await expect(
         await MergeLocations.getLeftLocationField()
       ).not.toBeEnabled()
     })
@@ -122,14 +103,11 @@ test.describe("Show location page", () => {
       await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
       const editButton =
         await ShowLocation.getEditEngagementPlanningApprovalsButton()
-      await waitFor(editButton, "attached")
-      await waitFor(editButton, "visible")
       await editButton.click()
       const modal = await ShowLocation.getEditApprovalsModal()
-      await waitFor(modal, "attached")
       await waitFor(modal, "visible")
       const modalTitle = await modal.locator(".modal-title").first()
-      await pwExpect(modalTitle).toHaveText(
+      await expect(modalTitle).toHaveText(
         "Edit Engagement planning approval process",
         {
           useInnerText: true
@@ -145,14 +123,11 @@ test.describe("Show location page", () => {
       await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
       const editButton =
         await ShowLocation.getEditReportPublicationApprovalsButton()
-      await waitFor(editButton, "attached")
-      await waitFor(editButton, "visible")
       await editButton.click()
       const modal = await ShowLocation.getEditApprovalsModal()
-      await waitFor(modal, "attached")
       await waitFor(modal, "visible")
       const modalTitle = await modal.locator(".modal-title").first()
-      await pwExpect(modalTitle).toHaveText(
+      await expect(modalTitle).toHaveText(
         "Edit Report publication approval process",
         {
           useInnerText: true
@@ -168,9 +143,8 @@ test.describe("Show location page", () => {
   test.describe("When on the show page of a location with events", () => {
     test("We should see a table with events", async () => {
       await ShowLocation.open(LOCATION_WITH_REPORTS_UUID)
-      await waitFor(await ShowLocation.getEventsTable(), "attached")
       await waitFor(await ShowLocation.getEventsTable(), "visible")
-      await pwExpect(await ShowLocation.getEventsTable()).toContainText(
+      await expect(await ShowLocation.getEventsTable()).toContainText(
         "NMI PDT 2024-01",
         {
           useInnerText: true
@@ -179,9 +153,9 @@ test.describe("Show location page", () => {
     })
     test("We can go to the show page of event", async () => {
       await (await ShowLocation.getEvent(1)).click()
-      await pwExpect
-        .poll(async () => await currentPage().url())
-        .toContain("/events/e850846e-9741-40e8-bc51-4dccc30cf47f")
+      await expect(currentPage()).toHaveURL(
+        /\/events\/e850846e-9741-40e8-bc51-4dccc30cf47f/
+      )
     })
   })
 })

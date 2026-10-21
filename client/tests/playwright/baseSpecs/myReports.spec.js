@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
 import { test } from "../support.js"
 
@@ -14,23 +14,23 @@ test.describe("Show My Reports page", () => {
       const reportAttachments = 2
 
       // Validate all columns in row
-      await pwExpect(
+      await expect(
         await MyReports.getReportsTableSpan(reportNoAttachments, 1)
       ).toHaveText("CIV Arthur Dmin", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsTableSpan(reportNoAttachments, 2)
       ).toHaveText("ANET Administrators", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsTableSpan(reportNoAttachments, 3)
       ).toHaveText("A test report to be unpublished from Arthur", {
         useInnerText: true
       })
 
-      await pwExpect(
+      await expect(
         await MyReports.getReportsTableSpan(
           reportNoAttachments,
           5,
@@ -40,14 +40,14 @@ test.describe("Show My Reports page", () => {
 
       // Validate report with attachments
 
-      await pwExpect(
+      await expect(
         await MyReports.getReportsTableSpan(
           reportAttachments,
           5,
           ".bp6-icon-paperclip"
         )
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await MyReports.getReportsTableCell(reportAttachments, 5)
       ).toHaveAttribute("title", "The report has 1 attachment(s)")
     })
@@ -58,32 +58,32 @@ test.describe("Show My Reports page", () => {
       const reportAttachments = 2
 
       // Validate all summary fields
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 1)
       ).toHaveText("CIV Arthur Dmin", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 2)
       ).toHaveText("(\nANET Administrators\n)", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 4)
       ).toHaveText("CIV Shardul Sharton", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 2, 5)
       ).toHaveText("(\nMoI | Ministry of Interior\n)", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 3, 1)
       ).toHaveText("Location:\nGeneral Hospital Point location", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 4, 1)
       ).toHaveText(
         "Engagement purpose: A test report to be unpublished from Arthur",
@@ -91,12 +91,12 @@ test.describe("Show My Reports page", () => {
           useInnerText: true
         }
       )
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 5, 1)
       ).toHaveText("Key outcomes: have reports in organizations", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 6, 1)
       ).toHaveText(
         "Next steps: I need to edit this report so unpublish it please",
@@ -104,12 +104,12 @@ test.describe("Show My Reports page", () => {
           useInnerText: true
         }
       )
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 7, 1)
       ).toHaveText("Atmospherics: Positive", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 8, 1)
       ).toHaveText(
         "Objectives:\nEF 1\n»\nEF 1.2\n»\n1.2.A\nEF 1\n»\nEF 1.2\n»\n1.2.B",
@@ -118,20 +118,20 @@ test.describe("Show My Reports page", () => {
         }
       )
 
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportNoAttachments, 9, 1)
       ).toHaveCount(0)
 
       // Validate report with attachments
 
-      await pwExpect(
+      await expect(
         await (
           await MyReports.getReportsSummarySpan(reportAttachments, 9, 1)
         )
           .locator("span.bp6-icon-paperclip")
           .first()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await MyReports.getReportsSummarySpan(reportAttachments, 9, 1)
       ).toHaveText("1 attachment(s)", {
         useInnerText: true

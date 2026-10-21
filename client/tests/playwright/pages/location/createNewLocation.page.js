@@ -154,7 +154,6 @@ class CreateNewLocation extends Page {
   }
 
   async waitForPageToLoad() {
-    await waitFor(await this.getForm(), "attached")
     await waitFor(await this.getForm(), "visible")
   }
 

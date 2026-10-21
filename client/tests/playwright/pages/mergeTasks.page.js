@@ -76,9 +76,7 @@ class MergeTasks extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr, rowNumber = 1) {
-    await waitFor(await this.getAdvancedSelectPopover(), "attached")
     await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getTaskHeaderFromPopover(), "attached")
     await waitFor(await this.getTaskHeaderFromPopover(), "visible")
     return this.waitForElementToChange(
       async () => this.getItemFromAdvancedSelect(rowNumber),

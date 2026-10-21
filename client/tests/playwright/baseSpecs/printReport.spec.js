@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
 import ShowReport from "../pages/report/showReport.page.js"
@@ -27,17 +26,15 @@ test.describe("Show print report page", () => {
       REPORT_STATES.PUBLISHED
     )
     await (await ShowReport.getCompactViewButton()).click()
-    await waitFor(await ShowReport.getCompactView(), "attached")
     await waitFor(await ShowReport.getCompactView(), "visible")
   })
   test.describe("When on the print report page", () => {
     test("Detailed View button should remove compact view to detailed view", async () => {
       const detailedViewButton = await ShowReport.getDetailedViewButton()
       await detailedViewButton.click()
-      await waitFor(await ShowReport.getDefaultReportView(), "attached")
       await waitFor(await ShowReport.getDefaultReportView(), "visible")
-      await pwExpect(await ShowReport.getCompactView()).not.toBeVisible()
-      await pwExpect(await ShowReport.getCompactViewButton()).toBeVisible()
+      await expect(await ShowReport.getCompactView()).not.toBeVisible()
+      await expect(await ShowReport.getCompactViewButton()).toBeVisible()
     })
     test("We should see the correct report fields", async () => {
       const mustHaveFieldTexts = [
@@ -55,24 +52,23 @@ test.describe("Show print report page", () => {
         fields.map(async field => (await field.innerText()).trim())
       )
       for (const mustHave of mustHaveFieldTexts) {
-        expect(fieldTexts).to.contain(mustHave)
+        expect(fieldTexts).toContain(mustHave)
       }
     })
     test("We should see a title with the correct text", async () => {
-      const title = (
-        await (await ShowReport.getCompactTitle()).innerText()
-      ).trim()
-      expect(title).to.equal("Summary / Print")
+      await expect(await ShowReport.getCompactTitle()).toHaveText(
+        "Summary / Print",
+        { useInnerText: true }
+      )
     })
     test("We should see buttons with the correct text", async () => {
-      const printButtonText = (
-        await (await ShowReport.getPrintButton()).innerText()
-      ).trim()
-      const detailedViewButtonText = (
-        await (await ShowReport.getDetailedViewButton()).innerText()
-      ).trim()
-      expect(printButtonText).to.equal("Print")
-      expect(detailedViewButtonText).to.equal("Detailed View")
+      await expect(await ShowReport.getPrintButton()).toHaveText("Print", {
+        useInnerText: true
+      })
+      await expect(await ShowReport.getDetailedViewButton()).toHaveText(
+        "Detailed View",
+        { useInnerText: true }
+      )
     })
     test("Printable report banner should be the same as security banner", async () => {
       const compactBannerText = (
@@ -82,7 +78,7 @@ test.describe("Show print report page", () => {
       const bannerSecurityText = (
         await (await Home.getBannerSecurityText()).innerText()
       ).trim()
-      expect(compactBannerText.replace(/\n/g, "")).to.equal(bannerSecurityText)
+      expect(compactBannerText.replace(/\n/g, "")).toBe(bannerSecurityText)
     })
     test("Should display all attendees", async () => {
       const displayedInterlocutors =
@@ -90,10 +86,10 @@ test.describe("Show print report page", () => {
       const displayedAdvisors =
         await ShowReport.getCompactViewElements("advisors")
       for (const interlocutor of INTERLOCUTORS) {
-        expect(displayedInterlocutors).to.contain(interlocutor)
+        expect(displayedInterlocutors).toContain(interlocutor)
       }
       for (const advisor of ADVISORS) {
-        expect(displayedAdvisors).to.contain(advisor)
+        expect(displayedAdvisors).toContain(advisor)
       }
     })
     test("Should display all attendees when assessments are shown", async () => {
@@ -103,15 +99,15 @@ test.describe("Show print report page", () => {
         true
       )
       for (const interlocutor of INTERLOCUTORS_WITH_ASSESSMENTS) {
-        expect(displayedInterlocutors).to.contain(interlocutor)
+        expect(displayedInterlocutors).toContain(interlocutor)
         const attendeeAssessmentLabel =
           await ShowReport.getAttendeeAssessmentLabel(
             "interlocutors-assessments",
             interlocutor,
             1
           )
-        await pwExpect(attendeeAssessmentLabel).not.toHaveCount(0)
-        await pwExpect(attendeeAssessmentLabel).toHaveText(
+        await expect(attendeeAssessmentLabel).not.toHaveCount(0)
+        await expect(attendeeAssessmentLabel).toHaveText(
           "Engagement assessment of interlocutor",
           {
             useInnerText: true
@@ -123,15 +119,15 @@ test.describe("Show print report page", () => {
         true
       )
       for (const advisor of ADVISORS_WITH_ASSESSMENTS) {
-        expect(displayedAdvisors).to.contain(advisor)
+        expect(displayedAdvisors).toContain(advisor)
         const attendeeAssessment1Label =
           await ShowReport.getAttendeeAssessmentLabel(
             "advisors-assessments",
             advisor,
             1
           )
-        await pwExpect(attendeeAssessment1Label).not.toHaveCount(0)
-        await pwExpect(attendeeAssessment1Label).toHaveText(
+        await expect(attendeeAssessment1Label).not.toHaveCount(0)
+        await expect(attendeeAssessment1Label).toHaveText(
           "Engagement assessment of linguist",
           {
             useInnerText: true
@@ -143,8 +139,8 @@ test.describe("Show print report page", () => {
             advisor,
             3
           )
-        await pwExpect(attendeeAssessment2Label).not.toHaveCount(0)
-        await pwExpect(attendeeAssessment2Label).toHaveText(
+        await expect(attendeeAssessment2Label).not.toHaveCount(0)
+        await expect(attendeeAssessment2Label).toHaveText(
           "Engagement assessment of linguist Guist, Lin",
           {
             useInnerText: true
@@ -163,9 +159,9 @@ test.describe("Show print report page", () => {
         }
         displayedTasks.push(linkTexts)
       }
-      expect(displayedTasks.length).to.equal(TASKS.length)
+      expect(displayedTasks.length).toBe(TASKS.length)
       for (const task of TASKS) {
-        expect(displayedTasks).to.deep.include(task)
+        expect(displayedTasks).toContainEqual(task)
       }
     })
     test("Should display all tasks when assessments are shown", async () => {
@@ -175,7 +171,7 @@ test.describe("Show print report page", () => {
         true
       )
       for (const task of TASKS_WITH_ASSESSMENTS) {
-        expect(displayedTasks).to.contain(task)
+        expect(displayedTasks).toContain(task)
         const taskShortName = task.split("\n»\n")?.pop()
         const taskAssessment1Label =
           await ShowReport.getTaskEngagementAssessmentLabel(
@@ -183,8 +179,8 @@ test.describe("Show print report page", () => {
             taskShortName,
             1
           )
-        await pwExpect(taskAssessment1Label).not.toHaveCount(0)
-        await pwExpect(taskAssessment1Label).toHaveText(
+        await expect(taskAssessment1Label).not.toHaveCount(0)
+        await expect(taskAssessment1Label).toHaveText(
           "Restricted engagement assessment of objective",
           {
             useInnerText: true
@@ -196,8 +192,8 @@ test.describe("Show print report page", () => {
             taskShortName,
             3
           )
-        await pwExpect(taskAssessment2Label).not.toHaveCount(0)
-        await pwExpect(taskAssessment2Label).toHaveText(
+        await expect(taskAssessment2Label).not.toHaveCount(0)
+        await expect(taskAssessment2Label).toHaveText(
           "Engagement assessment of objective",
           {
             useInnerText: true
@@ -206,27 +202,25 @@ test.describe("Show print report page", () => {
       }
     })
     test("Should display all reportCommunities", async () => {
-      await pwExpect(
-        currentPage().locator("table#reportCommunities")
-      ).toHaveText(
+      await expect(currentPage().locator("table#reportCommunities")).toHaveText(
         "Name Description\nEF 1.1 The complete EF 1.1 organisation\nEF 5 The complete EF 5 organization",
         { useInnerText: true }
       )
     })
 
     test("Should display attachment images only when enabled", async () => {
-      await pwExpect(await ShowReport.getAttachmentsSection()).toHaveCount(0)
+      await expect(await ShowReport.getAttachmentsSection()).toHaveCount(0)
       await ShowReport.selectOptionalField("imageAttachments")
       await waitFor(await ShowReport.getAttachmentsSection(), "visible")
       const attachmentFigures = await ShowReport.getAttachmentFigures()
-      expect(attachmentFigures.length).to.be.equal(1)
-      const attachment = await attachmentFigures[0]
-      await pwExpect(
+      await expect(attachmentFigures).toHaveCount(1)
+      const attachment = attachmentFigures.first()
+      await expect(
         await ShowReport.getAttachmentClassification(attachment)
       ).toHaveText("[NATO UNCLASSIFIED]", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await ShowReport.getAttachmentCaption(attachment)
       ).toHaveText("Arthur's test report", {
         useInnerText: true
@@ -235,17 +229,15 @@ test.describe("Show print report page", () => {
   })
   test.describe("When on the print page of a report without classification", () => {
     test("We should see the default text for classification in the header and footer banners", async () => {
-      await waitFor(await ShowReport.getClassificationHeader(), "attached")
       await waitFor(await ShowReport.getClassificationHeader(), "visible")
-      await pwExpect(await ShowReport.getClassificationHeader()).toHaveText(
+      await expect(await ShowReport.getClassificationHeader()).toHaveText(
         DEFAULT_REPORT_CLASSIFICATION,
         {
           useInnerText: true
         }
       )
-      await waitFor(await ShowReport.getClassificationFooter(), "attached")
       await waitFor(await ShowReport.getClassificationFooter(), "visible")
-      await pwExpect(await ShowReport.getClassificationFooter()).toHaveText(
+      await expect(await ShowReport.getClassificationFooter()).toHaveText(
         DEFAULT_REPORT_CLASSIFICATION,
         {
           useInnerText: true
@@ -263,22 +255,19 @@ test.describe("Show print report page with classification", () => {
       REPORT_STATES.DRAFT
     )
     await (await ShowReport.getCompactViewButton()).click()
-    await waitFor(await ShowReport.getCompactView(), "attached")
     await waitFor(await ShowReport.getCompactView(), "visible")
   })
   test.describe("When on the print page of a report with classification", () => {
     test("We should see the classification in the header and footer banners", async () => {
-      await waitFor(await ShowReport.getClassificationHeader(), "attached")
       await waitFor(await ShowReport.getClassificationHeader(), "visible")
-      await pwExpect(await ShowReport.getClassificationHeader()).toHaveText(
+      await expect(await ShowReport.getClassificationHeader()).toHaveText(
         REPORT_CLASSIFICATION,
         {
           useInnerText: true
         }
       )
-      await waitFor(await ShowReport.getClassificationFooter(), "attached")
       await waitFor(await ShowReport.getClassificationFooter(), "visible")
-      await pwExpect(await ShowReport.getClassificationFooter()).toHaveText(
+      await expect(await ShowReport.getClassificationFooter()).toHaveText(
         REPORT_CLASSIFICATION,
         {
           useInnerText: true

@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import CreatePerson from "../pages/createNewPerson.page.js"
 import Home from "../pages/home.page.js"
 import Search from "../pages/search.page.js"
@@ -52,7 +52,7 @@ test.describe("Visibility of custom sensitive information", () => {
     })
     test("Should be able to see birthday field with the correct value if authorized", async () => {
       await waitFor(await ShowPerson.getBirthday(), "visible")
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText(
+      await expect(await ShowPerson.getBirthday()).toHaveText(
         NON_COUNTERPART_INTERLOCUTOR.birthday,
         {
           useInnerText: true
@@ -75,7 +75,7 @@ test.describe("Visibility of custom sensitive information", () => {
     })
     test("Should be able to see political position field with the correct value if counterpart", async () => {
       await waitFor(await ShowPerson.getPoliticalPosition(), "visible")
-      await pwExpect(await ShowPerson.getPoliticalPosition()).toHaveText(
+      await expect(await ShowPerson.getPoliticalPosition()).toHaveText(
         COUNTERPART_INTERLOCUTOR.politicalPosition,
         {
           useInnerText: true
@@ -84,7 +84,7 @@ test.describe("Visibility of custom sensitive information", () => {
     })
     test("Should be able to see birthday field with the correct value if counterpart", async () => {
       await waitFor(await ShowPerson.getBirthday(), "visible")
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText(
+      await expect(await ShowPerson.getBirthday()).toHaveText(
         COUNTERPART_INTERLOCUTOR.birthday,
         {
           useInnerText: true
@@ -118,7 +118,7 @@ test.describe("Visibility of custom sensitive information", () => {
     })
     test("Should be able to see birthday field with the correct value if authorized", async () => {
       await waitFor(await ShowPerson.getBirthday(), "visible")
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText(
+      await expect(await ShowPerson.getBirthday()).toHaveText(
         NON_COUNTERPART_INTERLOCUTOR.birthday,
         {
           useInnerText: true
@@ -146,7 +146,7 @@ test.describe("Visibility of custom sensitive information", () => {
     })
     test("Should be able to see political position field with the correct value", async () => {
       await waitFor(await ShowPerson.getPoliticalPosition(), "visible")
-      await pwExpect(await ShowPerson.getPoliticalPosition()).toHaveText(
+      await expect(await ShowPerson.getPoliticalPosition()).toHaveText(
         NON_COUNTERPART_INTERLOCUTOR.politicalPosition,
         {
           useInnerText: true
@@ -155,7 +155,7 @@ test.describe("Visibility of custom sensitive information", () => {
     })
     test("Should be able to see birthday field with the correct value", async () => {
       await waitFor(await ShowPerson.getBirthday(), "visible")
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText(
+      await expect(await ShowPerson.getBirthday()).toHaveText(
         NON_COUNTERPART_INTERLOCUTOR.birthday,
         {
           useInnerText: true
@@ -171,7 +171,6 @@ test.describe("Creating and editing custom sensitive information", () => {
   test.describe("Superusers", () => {
     test("Should be able load a new person form and fill normal required fields", async () => {
       await CreatePerson.openAsSuperuser()
-      await waitFor(await CreatePerson.getForm(), "attached")
       await waitFor(await CreatePerson.getForm(), "visible")
       // fill other required fields at the beginning
       await (
@@ -190,7 +189,7 @@ test.describe("Creating and editing custom sensitive information", () => {
       await CreatePerson.waitForCountryAdvancedSelectToChange(
         NEW_PERSON_FIELDS_1.country
       )
-      await pwExpect(
+      await expect(
         await CreatePerson.getCountryAdvancedSelectFirstItem()
       ).toContainText(NEW_PERSON_FIELDS_1.country, {
         useInnerText: true
@@ -216,20 +215,19 @@ test.describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getFamilyName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText("8 June 1963", {
+      await expect(await ShowPerson.getBirthday()).toHaveText("8 June 1963", {
         useInnerText: true
       })
     })
     test("Should be able to edit sensitive information if authorized", async () => {
       await (await ShowPerson.getEditButton()).click()
-      await waitFor(await CreatePerson.getForm(), "attached")
       await waitFor(await CreatePerson.getForm(), "visible")
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).fill("01-01-1956")
       await (await CreatePerson.getFamilyName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText(
+      await expect(await ShowPerson.getBirthday()).toHaveText(
         "1 January 1956",
         {
           useInnerText: true
@@ -243,7 +241,6 @@ test.describe("Creating and editing custom sensitive information", () => {
   test.describe("Admins", () => {
     test("Should be able load a new person form and fill normal required fields", async () => {
       await CreatePerson.openAsAdmin()
-      await waitFor(await CreatePerson.getForm(), "attached")
       await waitFor(await CreatePerson.getForm(), "visible")
       // fill other required fields at the beginning
       await (
@@ -262,7 +259,7 @@ test.describe("Creating and editing custom sensitive information", () => {
       await CreatePerson.waitForCountryAdvancedSelectToChange(
         NEW_PERSON_FIELDS_2.country
       )
-      await pwExpect(
+      await expect(
         await CreatePerson.getCountryAdvancedSelectFirstItem()
       ).toContainText(NEW_PERSON_FIELDS_2.country, {
         useInnerText: true
@@ -279,13 +276,13 @@ test.describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getMiddleButton()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText(
+      await expect(await ShowPerson.getBirthday()).toHaveText(
         "1 January 1956",
         {
           useInnerText: true
         }
       )
-      await pwExpect(await ShowPerson.getPoliticalPosition()).toHaveText(
+      await expect(await ShowPerson.getPoliticalPosition()).toHaveText(
         "Middle",
         {
           useInnerText: true
@@ -294,7 +291,6 @@ test.describe("Creating and editing custom sensitive information", () => {
     })
     test("Should be able to edit sensitive information", async () => {
       await (await ShowPerson.getEditButton()).click()
-      await waitFor(await CreatePerson.getForm(), "attached")
       await waitFor(await CreatePerson.getForm(), "visible")
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
       await (await CreatePerson.getBirthday()).fill("08-06-1963")
@@ -302,15 +298,12 @@ test.describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getLeftButton()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await pwExpect(await ShowPerson.getBirthday()).toHaveText("8 June 1963", {
+      await expect(await ShowPerson.getBirthday()).toHaveText("8 June 1963", {
         useInnerText: true
       })
-      await pwExpect(await ShowPerson.getPoliticalPosition()).toHaveText(
-        "Left",
-        {
-          useInnerText: true
-        }
-      )
+      await expect(await ShowPerson.getPoliticalPosition()).toHaveText("Left", {
+        useInnerText: true
+      })
     })
     test("Should logout", async () => {
       await CreatePerson.logout()

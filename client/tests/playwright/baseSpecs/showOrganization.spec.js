@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import MergeOrganizations from "../pages/mergeOrganizations.page.js"
 import Search from "../pages/search.page.js"
@@ -62,40 +61,39 @@ test.describe("Show organization page", () => {
     test("Should see leader&deputy fields are not listed", async () => {
       // Organization longName should be there
       const longNameField = await ShowOrganization.getLongName()
-      await waitFor(longNameField, "attached")
       await waitFor(longNameField, "visible")
-      await pwExpect(longNameField).not.toHaveCount(0)
+      await expect(longNameField).not.toHaveCount(0)
 
       // Organization leaders should not be there
       const leaderField = await ShowOrganization.getLeaders()
-      await pwExpect(leaderField).toHaveCount(0)
+      await expect(leaderField).toHaveCount(0)
 
       // Organization deputies should not be there
       const deputyField = await ShowOrganization.getDeputies()
-      await pwExpect(deputyField).toHaveCount(0)
+      await expect(deputyField).toHaveCount(0)
     })
     test("Should see assigned tasks on the Show page", async () => {
       const tasks = await ShowOrganization.getTasks()
-      await waitFor(tasks, "attached")
       await waitFor(tasks, "visible")
       const assignedTasks = await ShowOrganization.getAssignedTasks()
       const assignedTasksShortNames = await Promise.all(
         assignedTasks.map(async at => (await at.innerText()).trim())
       )
-      expect(assignedTasksShortNames).to.have.members(EF2_ASSIGNED_TASKS)
+      expect(new Set(assignedTasksShortNames)).toEqual(
+        new Set(EF2_ASSIGNED_TASKS)
+      )
     })
     test("Should see sync matrix on the EF2 Show page", async () => {
       const syncMatrix = await ShowTask.getSyncMatrix()
-      await waitFor(syncMatrix, "attached")
       await waitFor(syncMatrix, "visible")
-      await pwExpect(await syncMatrix.locator(".legend").first()).toContainText(
+      await expect(await syncMatrix.locator(".legend").first()).toContainText(
         "Sync matrix for EF 2",
         {
           useInnerText: true
         }
       )
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(EF2_MATRIX_TASKS.length)
+      expect(tasks.length).toBe(EF2_MATRIX_TASKS.length)
       const taskPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -103,20 +101,19 @@ test.describe("Show organization page", () => {
           ).trim()
         )
       )
-      expect(taskPaths).to.deep.equal(EF2_MATRIX_TASKS)
+      expect(taskPaths).toEqual(EF2_MATRIX_TASKS)
     })
     test("Should see assigned tasks on the Edit page", async () => {
       await (await ShowOrganization.getEditOrganizationButton()).click()
       const editableTasks = await ShowOrganization.getEditableTasks()
-      await waitFor(editableTasks, "attached")
       await waitFor(editableTasks, "visible")
       const editableAssignedTasks =
         await ShowOrganization.getEditableAssignedTasks()
       const editableAssignedTasksShortNames = await Promise.all(
         editableAssignedTasks.map(async at => (await at.innerText()).trim())
       )
-      expect(editableAssignedTasksShortNames).to.have.members(
-        EF2_ASSIGNED_TASKS
+      expect(new Set(editableAssignedTasksShortNames)).toEqual(
+        new Set(EF2_ASSIGNED_TASKS)
       )
 
       // Log out
@@ -125,16 +122,15 @@ test.describe("Show organization page", () => {
     test("Should see sync matrix on the EF1 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF1_ORGANIZATION_UUID)
       const syncMatrix = await ShowTask.getSyncMatrix()
-      await waitFor(syncMatrix, "attached")
       await waitFor(syncMatrix, "visible")
-      await pwExpect(await syncMatrix.locator(".legend").first()).toContainText(
+      await expect(await syncMatrix.locator(".legend").first()).toContainText(
         "Sync matrix for EF 1",
         {
           useInnerText: true
         }
       )
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(EF1_MATRIX_TASKS.length)
+      expect(tasks.length).toBe(EF1_MATRIX_TASKS.length)
       const taskPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -142,21 +138,20 @@ test.describe("Show organization page", () => {
           ).trim()
         )
       )
-      expect(taskPaths).to.deep.equal(EF1_MATRIX_TASKS)
+      expect(taskPaths).toEqual(EF1_MATRIX_TASKS)
     })
     test("Should see sync matrix on the EF1.1 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF1_1_ORGANIZATION_UUID)
       const syncMatrix = await ShowTask.getSyncMatrix()
-      await waitFor(syncMatrix, "attached")
       await waitFor(syncMatrix, "visible")
-      await pwExpect(await syncMatrix.locator(".legend").first()).toContainText(
+      await expect(await syncMatrix.locator(".legend").first()).toContainText(
         "Sync matrix for EF 1.1",
         {
           useInnerText: true
         }
       )
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(EF1_1_MATRIX_TASKS.length)
+      expect(tasks.length).toBe(EF1_1_MATRIX_TASKS.length)
       const taskPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -164,14 +159,13 @@ test.describe("Show organization page", () => {
           ).trim()
         )
       )
-      expect(taskPaths).to.deep.equal(EF1_1_MATRIX_TASKS)
+      expect(taskPaths).toEqual(EF1_1_MATRIX_TASKS)
     })
     test("Should see sync matrix on the EF2.2 Show page", async () => {
       await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       const syncMatrix = await ShowTask.getSyncMatrix()
-      await waitFor(syncMatrix, "attached")
       await waitFor(syncMatrix, "visible")
-      await pwExpect(await syncMatrix.locator(".legend").first()).toContainText(
+      await expect(await syncMatrix.locator(".legend").first()).toContainText(
         "Sync matrix for EF 2.2",
         {
           useInnerText: true
@@ -179,20 +173,20 @@ test.describe("Show organization page", () => {
       )
       const eventSeries = await ShowTask.getEventMatrixEventSeries()
       // Additional eventSeries may have been created during the tests!
-      expect(eventSeries).to.have.lengthOf.at.least(1)
+      expect(eventSeries.length).toBeGreaterThanOrEqual(1)
       const eventSeriesText = (
         await Promise.all(
           eventSeries.map(async es => (await es.innerText()).trim())
         )
       ).join(" ; ")
-      expect(eventSeriesText).to.include("NMI PDT")
-      expect(eventSeriesText).to.include("My active NMI test event")
-      expect(eventSeriesText).to.include("My inactive NMI test event")
-      expect(eventSeriesText).to.include("Inactive event series")
-      expect(eventSeriesText).to.include("My active test event")
-      expect(eventSeriesText).to.include("My inactive test event")
+      expect(eventSeriesText).toContain("NMI PDT")
+      expect(eventSeriesText).toContain("My active NMI test event")
+      expect(eventSeriesText).toContain("My inactive NMI test event")
+      expect(eventSeriesText).toContain("Inactive event series")
+      expect(eventSeriesText).toContain("My active test event")
+      expect(eventSeriesText).toContain("My inactive test event")
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(1)
+      expect(tasks.length).toBe(1)
       const taskPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -200,7 +194,7 @@ test.describe("Show organization page", () => {
           ).trim()
         )
       )
-      expect(taskPaths).to.deep.equal(EF2_2_ASSIGNED_TASKS)
+      expect(taskPaths).toEqual(EF2_2_ASSIGNED_TASKS)
 
       // Move to the previous period, the inactive eventSeries should no longer be shown
       await ShowTask.gotoPreviousPeriod()
@@ -211,14 +205,14 @@ test.describe("Show organization page", () => {
           eventSeriesPrev.map(async es => (await es.innerText()).trim())
         )
       ).join(" ; ")
-      expect(eventSeriesPrevText).to.include("NMI PDT")
-      expect(eventSeriesPrevText).to.not.include("My active NMI test event")
-      expect(eventSeriesPrevText).to.not.include("My inactive NMI test event")
-      expect(eventSeriesPrevText).to.not.include("Inactive event series")
-      expect(eventSeriesPrevText).to.not.include("My active test event")
-      expect(eventSeriesPrevText).to.not.include("My inactive test event")
+      expect(eventSeriesPrevText).toContain("NMI PDT")
+      expect(eventSeriesPrevText).not.toContain("My active NMI test event")
+      expect(eventSeriesPrevText).not.toContain("My inactive NMI test event")
+      expect(eventSeriesPrevText).not.toContain("Inactive event series")
+      expect(eventSeriesPrevText).not.toContain("My active test event")
+      expect(eventSeriesPrevText).not.toContain("My inactive test event")
       const tasksPrev = await ShowTask.getEventMatrixTasks()
-      expect(tasksPrev.length).to.equal(1)
+      expect(tasksPrev.length).toBe(1)
       const tasksPrevPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -226,7 +220,7 @@ test.describe("Show organization page", () => {
           ).trim()
         )
       )
-      expect(tasksPrevPaths).to.deep.equal(EF2_2_ASSIGNED_TASKS)
+      expect(tasksPrevPaths).toEqual(EF2_2_ASSIGNED_TASKS)
     })
   })
   test.describe("As an admin viewing EF 2.2", () => {
@@ -247,9 +241,8 @@ test.describe("Show organization page", () => {
     test("Should see leader&deputy fields are listed", async () => {
       // Organization longName should be there
       const longNameField = await ShowOrganization.getLongName()
-      await waitFor(longNameField, "attached")
       await waitFor(longNameField, "visible")
-      await pwExpect(longNameField).not.toHaveCount(0)
+      await expect(longNameField).not.toHaveCount(0)
 
       // Organization leaders should be there
       const leaderField = await ShowOrganization.getLeaders()
@@ -257,18 +250,19 @@ test.describe("Show organization page", () => {
         timeout: 5000
       })
       await waitFor(leaderField, "visible")
-      await pwExpect(leaderField).not.toHaveCount(0)
-      await pwExpect(await ShowOrganization.getLeaderPosition()).toHaveText(
+      await expect(leaderField).not.toHaveCount(0)
+      await expect(await ShowOrganization.getLeaderPosition()).toHaveText(
         LEADER_POSITION_TEXT,
         {
           useInnerText: true
         }
       )
-      await pwExpect(
-        await ShowOrganization.getLeaderPositionPerson()
-      ).toHaveText(LEADER_PERSON_TEXT, {
-        useInnerText: true
-      })
+      await expect(await ShowOrganization.getLeaderPositionPerson()).toHaveText(
+        LEADER_PERSON_TEXT,
+        {
+          useInnerText: true
+        }
+      )
 
       // Organization deputies should be there
       const deputyField = await ShowOrganization.getDeputies()
@@ -276,18 +270,19 @@ test.describe("Show organization page", () => {
         timeout: 5000
       })
       await waitFor(deputyField, "visible")
-      await pwExpect(deputyField).not.toHaveCount(0)
-      await pwExpect(await ShowOrganization.getDeputyPosition()).toHaveText(
+      await expect(deputyField).not.toHaveCount(0)
+      await expect(await ShowOrganization.getDeputyPosition()).toHaveText(
         DEPUTY_POSITION_TEXT,
         {
           useInnerText: true
         }
       )
-      await pwExpect(
-        await ShowOrganization.getDeputyPositionPerson()
-      ).toHaveText(DEPUTY_PERSON_TEXT, {
-        useInnerText: true
-      })
+      await expect(await ShowOrganization.getDeputyPositionPerson()).toHaveText(
+        DEPUTY_PERSON_TEXT,
+        {
+          useInnerText: true
+        }
+      )
 
       // Log out
       await ShowOrganization.logout()
@@ -298,13 +293,9 @@ test.describe("Show organization page", () => {
       await ShowOrganization.openAsAdminUser(ORGANIZATION_WITH_AG_UUID)
       await waitFor(
         await ShowOrganization.getAuthorizationGroupsTable(),
-        "attached"
-      )
-      await waitFor(
-        await ShowOrganization.getAuthorizationGroupsTable(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await ShowOrganization.getAuthorizationGroupsTable()
       ).toContainText("EF 5", {
         useInnerText: true
@@ -312,50 +303,51 @@ test.describe("Show organization page", () => {
     })
     test("We can go to the show page of a community", async () => {
       await (await ShowOrganization.getAuthorizationGroup(1)).click()
-      await pwExpect
-        .poll(async () => await currentPage().url())
-        .toContain("/communities/ab1a7d99-4529-44b1-a118-bdee3ca8296b")
+      await expect(currentPage()).toHaveURL(
+        /\/communities\/ab1a7d99-4529-44b1-a118-bdee3ca8296b/
+      )
     })
   })
   test.describe("When on the show page of an organization with attachment(s)", () => {
     test("We should see a container for Attachment List", async () => {
       await ShowOrganization.open(EF2_2_ORGANIZATION_UUID)
-      await waitFor(await ShowOrganization.getAttachments(), "attached")
       await waitFor(await ShowOrganization.getAttachments(), "visible")
     })
     test("We should see a card of Attachment", async () => {
-      await waitFor(await ShowOrganization.getCard(), "attached")
       await waitFor(await ShowOrganization.getCard(), "visible")
-      await pwExpect
-        .poll(async () => await ShowOrganization.getClassificationLine())
-        .toEqual("[Public]")
-      await pwExpect
-        .poll(async () => await ShowOrganization.getCaptionLine())
-        .toEqual("EF 2.2")
+      await expect(await ShowOrganization.getClassificationLine()).toHaveText(
+        "[Public]",
+        { useInnerText: true }
+      )
+      await expect(await ShowOrganization.getCaptionLine()).toHaveText(
+        "EF 2.2",
+        { useInnerText: true }
+      )
     })
     test("We should be able to edit the attachments", async () => {
       const editAttachmentsButton =
         await ShowOrganization.getEditAttachmentsButton()
-      await pwExpect(editAttachmentsButton).toHaveText("Edit attachments", {
+      await expect(editAttachmentsButton).toHaveText("Edit attachments", {
         useInnerText: true
       })
       await editAttachmentsButton.click()
-      await pwExpect(editAttachmentsButton).toHaveText("View attachments", {
+      await expect(editAttachmentsButton).toHaveText("View attachments", {
         useInnerText: true
       })
       const editButton = await currentPage()
         .locator(".attachment-card .button-line a")
         .first()
-      await pwExpect
-        .poll(async () => await editButton.getAttribute("href"))
-        .toContain("/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f/edit")
+      await expect(editButton).toHaveAttribute(
+        "href",
+        /\/attachments\/9ac41246-25ac-457c-b7d6-946c5f625f1f\/edit/
+      )
       await editAttachmentsButton.click()
     })
     test("We can go to the show page of Attachment", async () => {
       await (await ShowOrganization.getImageClick()).click()
-      await pwExpect
-        .poll(async () => await currentPage().url())
-        .toContain("/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f")
+      await expect(currentPage()).toHaveURL(
+        /\/attachments\/9ac41246-25ac-457c-b7d6-946c5f625f1f/
+      )
       await ShowOrganization.logout()
     })
   })
@@ -364,17 +356,11 @@ test.describe("Show organization page", () => {
       await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       await (await ShowOrganization.getMergeButton()).click()
       // wait for the merge page to render and load data
-      // eslint-disable-next-line no-unused-expressions
-      expect(await MergeOrganizations.getTitle()).to.exist
-      await pwExpect
-        .poll(
-          async () =>
-            await (
-              await MergeOrganizations.getLeftOrganizationField()
-            ).inputValue()
-        )
-        .toContain("EF 2.2")
-      await pwExpect(
+      await expect(await MergeOrganizations.getTitle()).toBeVisible()
+      await expect(
+        await MergeOrganizations.getLeftOrganizationField()
+      ).toHaveValue(/EF 2\.2/)
+      await expect(
         await MergeOrganizations.getLeftOrganizationField()
       ).not.toBeEnabled()
     })
@@ -382,14 +368,11 @@ test.describe("Show organization page", () => {
       await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       const editButton =
         await ShowOrganization.getEditEngagementPlanningApprovalsButton()
-      await waitFor(editButton, "attached")
-      await waitFor(editButton, "visible")
       await editButton.click()
       const modal = await ShowOrganization.getEditApprovalsModal()
-      await waitFor(modal, "attached")
       await waitFor(modal, "visible")
       const modalTitle = await modal.locator(".modal-title").first()
-      await pwExpect(modalTitle).toHaveText(
+      await expect(modalTitle).toHaveText(
         "Edit Engagement planning approval process",
         {
           useInnerText: true
@@ -405,14 +388,11 @@ test.describe("Show organization page", () => {
       await ShowOrganization.openAsAdminUser(EF2_2_ORGANIZATION_UUID)
       const editButton =
         await ShowOrganization.getEditReportPublicationApprovalsButton()
-      await waitFor(editButton, "attached")
-      await waitFor(editButton, "visible")
       await editButton.click()
       const modal = await ShowOrganization.getEditApprovalsModal()
-      await waitFor(modal, "attached")
       await waitFor(modal, "visible")
       const modalTitle = await modal.locator(".modal-title").first()
-      await pwExpect(modalTitle).toHaveText(
+      await expect(modalTitle).toHaveText(
         "Edit Report publication approval process",
         {
           useInnerText: true
@@ -428,16 +408,14 @@ test.describe("Show organization page", () => {
   test.describe("When on the show page of an organization with entity avatar", () => {
     test("We should see the avatar", async () => {
       await ShowOrganization.open(EF2_2_ORGANIZATION_UUID)
-      await waitFor(await ShowOrganization.getEntityAvatar(), "attached")
       await waitFor(await ShowOrganization.getEntityAvatar(), "visible")
     })
   })
   test.describe("When on the show page of an organization with events", () => {
     test("We should see a table with events", async () => {
       await ShowOrganization.open(EF2_2_ORGANIZATION_UUID)
-      await waitFor(await ShowOrganization.getEventsTable(), "attached")
       await waitFor(await ShowOrganization.getEventsTable(), "visible")
-      await pwExpect(await ShowOrganization.getEventsTable()).toContainText(
+      await expect(await ShowOrganization.getEventsTable()).toContainText(
         "NMI PDT 2024-01",
         {
           useInnerText: true
@@ -446,9 +424,9 @@ test.describe("Show organization page", () => {
     })
     test("We can go to the show page of event", async () => {
       await (await ShowOrganization.getEvent(5)).click()
-      await pwExpect
-        .poll(async () => await currentPage().url())
-        .toContain("/events/e850846e-9741-40e8-bc51-4dccc30cf47f")
+      await expect(currentPage()).toHaveURL(
+        /\/events\/e850846e-9741-40e8-bc51-4dccc30cf47f/
+      )
     })
   })
 })

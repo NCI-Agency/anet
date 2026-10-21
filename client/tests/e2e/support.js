@@ -76,6 +76,13 @@ export const test = base.extend({
       async clickTodayButton() {
         await page.getByRole("button", { name: "Today", exact: true }).click()
       },
+      async closeDatePicker(selector) {
+        // Close from the date input itself: restoring focus from a calendar or
+        // time button would focus the input again and reopen the picker.
+        await page.locator(selector).press("Escape")
+        // Wait for the closing animation and focus restoration before typing.
+        await expect(page.locator(".bp6-datepicker")).toHaveCount(0)
+      },
       async chooseAdvancedSelectOption(selector, text, rowNumber = 1) {
         const input = page.getByRole("textbox").and(page.locator(selector))
         await input.click()
@@ -101,13 +108,10 @@ export const test = base.extend({
         await suggestion.click()
         return input
       },
-      async writeInForm(selector, text, delay) {
+      async writeInForm(selector, text) {
         await page.locator(selector).fill(text)
         await page.locator(selector).blur()
-        if (delay) {
-          // RichTextEditor serializes into form state with a 100 ms debounce.
-          await page.waitForTimeout(delay)
-        }
+        // RichTextEditor flushes pending serialization on blur.
       },
       async assertReportShowStatusText(text) {
         await expect(page.locator(".report-show h4").first()).toHaveText(text)

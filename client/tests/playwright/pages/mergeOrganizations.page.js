@@ -78,9 +78,7 @@ class MergeOrganizations extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "attached")
     await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getOrganizationHeaderFromPopover(), "attached")
     await waitFor(await this.getOrganizationHeaderFromPopover(), "visible")
     return this.waitForElementToChange(
       this.getFirstItemFromAdvancedSelect,

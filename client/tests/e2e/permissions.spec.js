@@ -41,6 +41,10 @@ test("checking superuser permissions", async ({ app }) => {
   await $rebeccaLink.click()
   await expect($rebeccaLink).toBeHidden()
   await validateUserCanEditUserForCurrentPage(app, true)
+  const biography = app.page.locator(".biography .editable")
+  const savedBiography = await biography.innerText()
+  await app.page.reload()
+  await expect(biography).toHaveText(savedBiography)
 
   // User is superuser, they may edit position of type superuser for
   // the organization their position is administrating
@@ -364,7 +368,7 @@ async function findSuperuserLink(
 }
 
 async function validateUserCanEditUserForCurrentPage(app, canChangeName) {
-  const { $, assertElementEnabled, assertElementText, shortWaitMs } = app
+  const { $, assertElementEnabled, assertElementText } = app
 
   const $editPersonButton = await $(".edit-person")
   await expect($editPersonButton).toBeVisible()
@@ -382,10 +386,7 @@ async function validateUserCanEditUserForCurrentPage(app, canChangeName) {
   }
 
   // Check that user can change the biography
-  const $bioTextArea = await $(
-    ".biography .editable",
-    shortWaitMs // wait for Slate to save the editor contents
-  )
+  const $bioTextArea = await $(".biography .editable")
   await expect
     .poll(async () => {
       const originalBioText = await $bioTextArea.innerText()
@@ -398,8 +399,6 @@ async function validateUserCanEditUserForCurrentPage(app, canChangeName) {
   const fakeBioText = ` fake bio ${uuidv4()}`
   await $bioTextArea.fill(`${originalBioText}\n${fakeBioText}`)
   await $bioTextArea.blur()
-  // RichTextEditor serializes into form state with a 100 ms debounce.
-  await app.page.waitForTimeout(150)
 
   await app.pageHelpers.clickFormBottomSubmit()
 

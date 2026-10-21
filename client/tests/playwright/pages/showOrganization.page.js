@@ -107,7 +107,6 @@ class ShowOrganization extends Page {
 
   async waitForAlertSuccessToLoad() {
     if (!(await (await this.getAlertSuccess()).isVisible())) {
-      await waitFor(await this.getAlertSuccess(), "attached")
       await waitFor(await this.getAlertSuccess(), "visible")
     }
   }
@@ -226,8 +225,6 @@ class ShowOrganization extends Page {
   }
 
   async confirmDelete() {
-    await waitFor(await this.getDeleteConfirmButton(), "attached")
-    await waitFor(await this.getDeleteConfirmButton(), "visible")
     await (await this.getDeleteConfirmButton()).click()
   }
 

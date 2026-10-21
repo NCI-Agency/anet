@@ -1,5 +1,5 @@
-import { expect as pwExpect } from "@playwright/test"
-import { currentPage, typeKeys, waitFor, waitUntil } from "../../support.js"
+import { expect } from "@playwright/test"
+import { currentPage, typeKeys, waitUntil } from "../../support.js"
 import Page from "../page.js"
 
 class SavedSearch extends Page {
@@ -7,19 +7,16 @@ class SavedSearch extends Page {
     const searchLink = currentPage()
       .locator(".search-popover-target.bp6-popover-target")
       .first()
-    await waitFor(await searchLink, "visible")
     await (await searchLink).click()
     // wait for filters to be shown
 
     const tasksButton = currentPage()
       .locator('.btn-group > button[value="TASKS"]')
       .first()
-    await waitFor(await tasksButton, "visible")
     await (await tasksButton).click()
     // wait for filters to be updated
 
     const addFilterButton = currentPage().locator("#addFilterDropdown").first()
-    await waitFor(await addFilterButton, "visible")
     await (await addFilterButton).click()
     // wait for filters to be shown
 
@@ -29,7 +26,6 @@ class SavedSearch extends Page {
         exact: false
       })
       .first()
-    await waitFor(await withinOrganizationButton, "visible")
     await (await withinOrganizationButton).click()
   }
 
@@ -37,10 +33,9 @@ class SavedSearch extends Page {
     const openFilterButton = currentPage()
       .locator("input[name='taskedOrgUuid']")
       .first()
-    await waitFor(await openFilterButton, "visible")
     await (await openFilterButton).click()
     await typeKeys(searchText)
-    await pwExpect(
+    await expect(
       currentPage().locator("#taskedOrgUuid-popover tbody tr").first()
     ).toContainText(searchText, { useInnerText: true })
     // wait for the searchText to be processed
@@ -53,7 +48,6 @@ class SavedSearch extends Page {
     const orgCheckbox = currentPage()
       .locator("#taskedOrgUuid-popover tr .orgShortName")
       .first()
-    await waitFor(await orgCheckbox, "visible")
     await (await orgCheckbox).click()
     await this.closeOrganizationsFilter()
   }
@@ -62,19 +56,16 @@ class SavedSearch extends Page {
     const closeButton = currentPage()
       .locator(".bp6-icon.bp6-icon-cross")
       .first()
-    await waitFor(await closeButton, "visible")
     await (await closeButton).click()
   }
 
   async submitSearch() {
     const searchButton = currentPage().locator("button[type='submit']").first()
-    await waitFor(await searchButton, "visible")
     await (await searchButton).click()
   }
 
   async saveSearch() {
     const saveButton = currentPage().locator("#saveSearchButton").first()
-    await waitFor(await saveButton, "visible")
     await (await saveButton).click()
   }
 
@@ -82,7 +73,6 @@ class SavedSearch extends Page {
     const saveButton = currentPage()
       .locator("#saveSearchModalSubmitButton")
       .first()
-    await waitFor(await saveButton, "visible")
     await (await saveButton).click()
   }
 
@@ -109,8 +99,6 @@ class SavedSearch extends Page {
   }
 
   async confirmDelete() {
-    await waitFor(await this.getDeleteConfirmButton(), "attached")
-    await waitFor(await this.getDeleteConfirmButton(), "visible")
     await (await this.getDeleteConfirmButton()).click()
   }
 

@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import MyOrg from "../pages/myOrg.page.js"
 import { test, waitFor } from "../support.js"
@@ -30,7 +29,7 @@ test.describe("My Organization page", () => {
         .locator(".fc-event-title-container")
         .all()
       // There is at least one date with events in the calendar
-      expect(daysWithEvent).to.have.length.above(0)
+      expect(daysWithEvent.length).toBeGreaterThan(0)
 
       // Location statistics map is being loaded
       await waitFor(await MyOrg.getLocationStatistics(), "visible")
@@ -42,8 +41,7 @@ test.describe("My Organization page", () => {
         .locator(".pieLegend")
         .first()
         .locator("span")
-        .all()
-      expect(engagementStatusLegend).to.have.length(4)
+      await expect(engagementStatusLegend).toHaveCount(4)
       await waitFor(await MyOrg.getTasks(), "visible")
       // There are 3 tasks on the x-axis
       const tasks = await (
@@ -53,7 +51,7 @@ test.describe("My Organization page", () => {
         .first()
         .locator(".bars-group")
         .all()
-      expect(tasks).to.have.length(3)
+      expect(tasks).toHaveLength(3)
       let countTasksBars = 0
       for (const bar of tasks) {
         if (
@@ -64,7 +62,7 @@ test.describe("My Organization page", () => {
         }
       }
       // There is at least one bar
-      expect(countTasksBars).to.be.above(0)
+      expect(countTasksBars).toBeGreaterThan(0)
       await waitFor(await MyOrg.getTrainingEvent(), "visible")
       // There are 3 training event options
       const trainingEventLegend = await (
@@ -73,15 +71,14 @@ test.describe("My Organization page", () => {
         .locator(".pieLegend")
         .first()
         .locator("span")
-        .all()
-      expect(trainingEventLegend).to.have.length(3)
+      await expect(trainingEventLegend).toHaveCount(3)
       // Total number of reports is bigger than 0
       const trainingEventTotal = await (
         await MyOrg.getTrainingEvent()
       )
         .locator("svg g text")
         .first()
-      await pwExpect
+      await expect
         .poll(async () => +(await trainingEventTotal.textContent()).trim())
         .toBeGreaterThan(0)
       await waitFor(await MyOrg.getNumberTrained(), "visible")
@@ -90,7 +87,7 @@ test.describe("My Organization page", () => {
       )
         .locator("div em")
         .first()
-      await pwExpect(numberTrained).toHaveText("Not specified", {
+      await expect(numberTrained).toHaveText("Not specified", {
         useInnerText: true
       })
     })

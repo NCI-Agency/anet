@@ -1,4 +1,4 @@
-import { currentPage, waitFor } from "../support.js"
+import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 class Search extends Page {
@@ -100,8 +100,6 @@ class Search extends Page {
 
   async selectReportTable() {
     const tableTab = this.getReportTableButton()
-    await waitFor(await tableTab, "attached")
-    await waitFor(await tableTab, "visible")
     await (await tableTab).click()
     await super.waitUntilLoaded()
     // wait for table to load/render
@@ -110,8 +108,6 @@ class Search extends Page {
   async selectReport(linkText) {
     await this.selectReportTable()
     const reportLink = this.linkOfReportFound(linkText)
-    await waitFor(await reportLink, "attached")
-    await waitFor(await reportLink, "visible")
     await (await reportLink).click()
     await super.waitUntilLoaded()
   }

@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import MergeEventSeries from "../pages/mergeEventSeries.page.js"
 import { currentPage, test, waitFor } from "../support.js"
 
@@ -29,7 +28,6 @@ const EXAMPLE_EVENT_SERIES = {
 test.describe("Merge event series page", () => {
   test("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergeEventSeries.openPage()
-    await waitFor(await MergeEventSeries.getTitle(), "attached")
     await waitFor(await MergeEventSeries.getTitle(), "visible")
     await (await MergeEventSeries.getLeftEventSeriesField()).click()
     await (
@@ -41,9 +39,8 @@ test.describe("Merge event series page", () => {
     await (await MergeEventSeries.getItemFromAdvancedSelect()).click()
     // attempt to leave when only one event series is selected, should allow to leave
     await MergeEventSeries.clickLogo()
-    await pwExpect(await MergeEventSeries.getModalDialog()).toHaveCount(0)
+    await expect(await MergeEventSeries.getModalDialog()).toHaveCount(0)
     await MergeEventSeries.openPage()
-    await waitFor(await MergeEventSeries.getTitle(), "attached")
     await waitFor(await MergeEventSeries.getTitle(), "visible")
     await (await MergeEventSeries.getLeftEventSeriesField()).click()
     await (
@@ -63,12 +60,11 @@ test.describe("Merge event series page", () => {
     // attempt to leave when both event series are selected, should show warning
     await (await MergeEventSeries.getItemFromAdvancedSelect()).click()
     await MergeEventSeries.clickLogo()
-    await pwExpect(await MergeEventSeries.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergeEventSeries.getModalDialog()).not.toHaveCount(0)
     await currentPage().locator(".btn-danger").first().click()
   })
   test("Should display field values of the left event series", async () => {
     await MergeEventSeries.openPage()
-    await waitFor(await MergeEventSeries.getTitle(), "attached")
     await waitFor(await MergeEventSeries.getTitle(), "visible")
     await (await MergeEventSeries.getLeftEventSeriesField()).click()
     await (
@@ -85,12 +81,12 @@ test.describe("Merge event series page", () => {
       "left",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("left", "UUID")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("left", "Name")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.name, {
       useInnerText: true
@@ -103,7 +99,7 @@ test.describe("Merge event series page", () => {
     await MergeEventSeries.waitForAdvancedSelectLoading(
       EXAMPLE_EVENT_SERIES.validLeft.name
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getItemRadioButtonFromAdvancedSelect()
     ).toHaveCount(0)
   })
@@ -123,24 +119,24 @@ test.describe("Merge event series page", () => {
       "right",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("right", "UUID")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("right", "Name")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validRight.name, {
       useInnerText: true
     })
   })
   test("Should autoMerge some identical fields from both event series", async () => {
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validRight.status, {
       useInnerText: true
@@ -155,12 +151,12 @@ test.describe("Merge event series page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.name, {
       useInnerText: true
@@ -175,12 +171,12 @@ test.describe("Merge event series page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validRight.name, {
       useInnerText: true
@@ -193,7 +189,7 @@ test.describe("Merge event series page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.uuid, {
       useInnerText: true
@@ -204,7 +200,7 @@ test.describe("Merge event series page", () => {
       "mid",
       "Name"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validLeft.name, {
       useInnerText: true
@@ -217,7 +213,7 @@ test.describe("Merge event series page", () => {
       "mid",
       "Description"
     )
-    await pwExpect(
+    await expect(
       await MergeEventSeries.getColumnContent("mid", "Description")
     ).toHaveText(EXAMPLE_EVENT_SERIES.validRight.description, {
       useInnerText: true
@@ -237,9 +233,8 @@ test.describe("Merge event series page", () => {
     await MergeEventSeries.waitForSuccessAlert()
   })
   test("Should have correctly set the name of the left event series", async () => {
-    await waitFor(await MergeEventSeries.getName(), "attached")
     await waitFor(await MergeEventSeries.getName(), "visible")
-    await pwExpect(await MergeEventSeries.getName()).toHaveText(
+    await expect(await MergeEventSeries.getName()).toHaveText(
       EXAMPLE_EVENT_SERIES.result.name,
       {
         useInnerText: true
@@ -247,9 +242,8 @@ test.describe("Merge event series page", () => {
     )
   })
   test("Should have correctly set the description of the right event series", async () => {
-    await waitFor(await MergeEventSeries.getDescription(), "attached")
     await waitFor(await MergeEventSeries.getDescription(), "visible")
-    await pwExpect(await MergeEventSeries.getDescription()).toHaveText(
+    await expect(await MergeEventSeries.getDescription()).toHaveText(
       EXAMPLE_EVENT_SERIES.result.description,
       {
         useInnerText: true
@@ -257,9 +251,8 @@ test.describe("Merge event series page", () => {
     )
   })
   test("Should have correctly set the owner organization of the left event series", async () => {
-    await waitFor(await MergeEventSeries.getOwnerOrganization(), "attached")
     await waitFor(await MergeEventSeries.getOwnerOrganization(), "visible")
-    await pwExpect(await MergeEventSeries.getOwnerOrganization()).toHaveText(
+    await expect(await MergeEventSeries.getOwnerOrganization()).toHaveText(
       EXAMPLE_EVENT_SERIES.result.ownerOrganization,
       {
         useInnerText: true
@@ -267,9 +260,8 @@ test.describe("Merge event series page", () => {
     )
   })
   test("Should have correctly set the admin organization of the left event series", async () => {
-    await waitFor(await MergeEventSeries.getAdminOrganization(), "attached")
     await waitFor(await MergeEventSeries.getAdminOrganization(), "visible")
-    await pwExpect(await MergeEventSeries.getAdminOrganization()).toHaveText(
+    await expect(await MergeEventSeries.getAdminOrganization()).toHaveText(
       EXAMPLE_EVENT_SERIES.result.adminOrganization,
       {
         useInnerText: true
@@ -277,8 +269,8 @@ test.describe("Merge event series page", () => {
     )
   })
   test("Should have correctly set the hosts of the left event series", async () => {
-    expect(await MergeEventSeries.getHostNames()).to.have.members(
-      EXAMPLE_EVENT_SERIES.result.hosts
+    expect(new Set(await MergeEventSeries.getHostNames())).toEqual(
+      new Set(EXAMPLE_EVENT_SERIES.result.hosts)
     )
   })
 })

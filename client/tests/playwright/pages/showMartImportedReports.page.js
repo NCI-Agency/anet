@@ -17,7 +17,7 @@ class ShowMartImportedReports extends Page {
   }
 
   async getTableRows() {
-    return (await this.getTable()).locator("tbody tr").all()
+    return (await this.getTable()).locator("tbody tr")
   }
 }
 

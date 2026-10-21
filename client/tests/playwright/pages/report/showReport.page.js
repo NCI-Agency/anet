@@ -99,23 +99,17 @@ class ShowReport extends Page {
     return currentPage().locator("h4.text-danger").first()
   }
 
-  async getReportStatusText() {
-    return (await this.getReportStatus()).innerText()
-  }
-
   async getUuid() {
     const url = new URL(await currentPage().url())
     return url.pathname.slice(url.pathname.lastIndexOf("/") + 1)
   }
 
   async getIntent() {
-    return (await currentPage().locator("#intent").first()).innerText()
+    return currentPage().locator("#intent").first()
   }
 
   async getEngagementDate() {
-    return (
-      await currentPage().locator("div[name='engagementDate']").first()
-    ).innerText()
+    return currentPage().locator("div[name='engagementDate']").first()
   }
 
   async getReportConflictIcon() {
@@ -135,17 +129,13 @@ class ShowReport extends Page {
   }
 
   async getReportConflictTooltipTitle() {
-    return (
-      await currentPage()
-        .locator(".reportConflictTooltipContainer > div")
-        .first()
-    ).innerText()
+    return currentPage()
+      .locator(".reportConflictTooltipContainer > div")
+      .first()
   }
 
   async getDuration() {
-    return (
-      await currentPage().locator("div[name='duration']").first()
-    ).innerText()
+    return currentPage().locator("div[name='duration']").first()
   }
 
   async getCurrentUrl() {
@@ -153,15 +143,11 @@ class ShowReport extends Page {
   }
 
   async getLocation() {
-    return (
-      await currentPage().locator("div[name='location']").first()
-    ).innerText()
+    return currentPage().locator("div[name='location']").first()
   }
 
   async getAuthors() {
-    return (
-      await currentPage().locator("div[name='authors']").first()
-    ).innerText()
+    return currentPage().locator("div[name='authors']").first()
   }
 
   async getReportCommunities() {
@@ -177,15 +163,11 @@ class ShowReport extends Page {
   }
 
   async getAdvisorOrg() {
-    return (
-      await currentPage().locator("div[name='advisorOrg']").first()
-    ).innerText()
+    return currentPage().locator("div[name='advisorOrg']").first()
   }
 
   async getInterlocutorOrg() {
-    return (
-      await currentPage().locator("div[name='interlocutorOrg']").first()
-    ).innerText()
+    return currentPage().locator("div[name='interlocutorOrg']").first()
   }
 
   async getSubmitButton() {
@@ -221,7 +203,7 @@ class ShowReport extends Page {
   }
 
   async getEditAttachmentsButton() {
-    return await currentPage().locator("#edit-attachments").first()
+    return currentPage().locator("#edit-attachments").first()
   }
 
   async getSuccessfullApprovalToast() {
@@ -277,13 +259,11 @@ class ShowReport extends Page {
 
   async waitForShowReportToLoad() {
     await this.waitForReportUrl()
-    await waitFor(await this.getReportStatus(), "attached")
     await waitFor(await this.getReportStatus(), "visible")
   }
 
   async waitForShowReportToFail() {
     await this.waitForReportUrl()
-    await waitFor(await this.getNotFound(), "attached")
     await waitFor(await this.getNotFound(), "visible")
   }
 
@@ -332,11 +312,11 @@ class ShowReport extends Page {
   }
 
   async getKeyOutcomesList() {
-    return currentPage().locator("#keyOutcomes > ul > li").all()
+    return currentPage().locator("#keyOutcomes > ul > li")
   }
 
   async getNextStepsList() {
-    return currentPage().locator("#nextSteps > ul > li").all()
+    return currentPage().locator("#nextSteps > ul > li")
   }
 
   async getAttachmentsSection() {
@@ -344,7 +324,7 @@ class ShowReport extends Page {
   }
 
   async getAttachmentFigures() {
-    return (await this.getAttachmentsSection()).locator("figure").all()
+    return (await this.getAttachmentsSection()).locator("figure")
   }
 
   async getAttachmentClassification(attachment) {

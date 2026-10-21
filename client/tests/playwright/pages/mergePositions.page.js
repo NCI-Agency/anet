@@ -166,9 +166,7 @@ class MergePositions extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "attached")
     await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getPositionHeaderFromPopover(), "attached")
     await waitFor(await this.getPositionHeaderFromPopover(), "visible")
     return this.waitForElementToChange(
       this.getFirstItemFromAdvancedSelect,

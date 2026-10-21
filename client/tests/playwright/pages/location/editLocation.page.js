@@ -103,7 +103,6 @@ class EditLocation extends Page {
 
   async waitForEditLocationPageToLoad() {
     if (!(await (await this.getSaveLocationButton()).isVisible())) {
-      await waitFor(await this.getSaveLocationButton(), "attached")
       await waitFor(await this.getSaveLocationButton(), "visible")
     }
   }
