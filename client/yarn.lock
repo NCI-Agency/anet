@@ -7189,11 +7189,11 @@ __metadata:
     resize-observer-polyfill: "npm:1.5.1"
     rxjs: "npm:7.8.2"
     scroll-into-view-if-needed: "npm:3.1.0"
-    slate: "npm:0.132.0"
-    slate-dom: "npm:0.132.0"
-    slate-history: "npm:0.128.1"
-    slate-hyperscript: "npm:0.129.1"
-    slate-react: "npm:0.133.0"
+    slate: "npm:0.146.0"
+    slate-dom: "npm:0.146.0"
+    slate-history: "npm:0.144.0"
+    slate-hyperscript: "npm:0.138.3"
+    slate-react: "npm:0.145.1"
     style-loader: "npm:4.0.0"
     sync-fetch: "npm:0.7.1"
     thread-loader: "npm:4.0.4"
@@ -15782,9 +15782,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-dom@npm:0.132.0":
-  version: 0.132.0
-  resolution: "slate-dom@npm:0.132.0"
+"slate-dom@npm:0.146.0":
+  version: 0.146.0
+  resolution: "slate-dom@npm:0.146.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -15795,31 +15795,31 @@ __metadata:
     tiny-invariant: "npm:1.3.1"
   peerDependencies:
     slate: ">=0.121.0"
-  checksum: 10c0/176942b0982f0abc738c819dd23830df42d278c29130bcbde340b1101e54ef8f4d1281bdcf67593a89947dfaea05a3d4e981370bcd36fb862f5f9c45c168c989
+  checksum: 10c0/6d531abca0b2b4f6d99c9738cac5ae986cd955c1c18fb9d26141745418b529e39005391a4e6a100826c65dcb7238bddf87c4677bf707c26a96a2f3f5b77c1e43
   languageName: node
   linkType: hard
 
-"slate-history@npm:0.128.1":
-  version: 0.128.1
-  resolution: "slate-history@npm:0.128.1"
+"slate-history@npm:0.144.0":
+  version: 0.144.0
+  resolution: "slate-history@npm:0.144.0"
   peerDependencies:
     slate: ">=0.114.3"
-  checksum: 10c0/6a01771368753fde7569baf66d46260895b76b961de28531f359fe39e4ecb6ebd051255799bf1c6d7195b59039b8ab8eb25396d1c59016de25a0c9af5c279128
+  checksum: 10c0/dd802b93357a0736ac0c61a5c5eb7e1ccd29323435029cb4320162cd43a326427705b39a81e1b35743eb6fecf295578171b448f013038bca3ca9453543969020
   languageName: node
   linkType: hard
 
-"slate-hyperscript@npm:0.129.1":
-  version: 0.129.1
-  resolution: "slate-hyperscript@npm:0.129.1"
+"slate-hyperscript@npm:0.138.3":
+  version: 0.138.3
+  resolution: "slate-hyperscript@npm:0.138.3"
   peerDependencies:
     slate: ">=0.114.3"
-  checksum: 10c0/787700fb17aa9df620818a6a0aa0d2ac52254ac0761e12f0b290c9ff66f3e7d0991b1b1e3fd218373231db87a2be8423291f9214375e1d35f75d723d0619a87b
+  checksum: 10c0/535dc4dcbba2d80ad0c15c199826b4169ee95e63bec9e0b4deb276f602277564c9e9a5d7f0e016adfda271cabe08447a08b8c6ed0b174301cf869fbfa4d004a2
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.133.0":
-  version: 0.133.0
-  resolution: "slate-react@npm:0.133.0"
+"slate-react@npm:0.145.1":
+  version: 0.145.1
+  resolution: "slate-react@npm:0.145.1"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -15833,20 +15833,20 @@ __metadata:
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
     slate: ">=0.121.0"
-    slate-dom: ">=0.119.1"
+    slate-dom: ">=0.141.0"
   peerDependenciesMeta:
     "@types/lodash":
       optional: true
     "@types/react":
       optional: true
-  checksum: 10c0/46d144d37abadc37dae12be43d7c5ecbddc49c3269bce98a10c103d4195d033a9ed2956a6dbda97c62b86bf1d5d05f3ed41bd63d3ad5381243860c82121eb292
+  checksum: 10c0/650ccfbf31c95115eeddc118d64b600787894f05c015e9fd646316f5eb3ecfe47bd4ce32745a8d9e7ed6fbf4d0dc7ccfa5db6c33746ee90e7acfdc06b8018287
   languageName: node
   linkType: hard
 
-"slate@npm:0.132.0":
-  version: 0.132.0
-  resolution: "slate@npm:0.132.0"
-  checksum: 10c0/c9e3598f09ecc5286c7a4865fbee268cda978e20124066d2d0f95afafab5670e96e04a0159e4f3e626500595443dc2d991963938c5d6f69bb26ebf6cf8400e29
+"slate@npm:0.146.0":
+  version: 0.146.0
+  resolution: "slate@npm:0.146.0"
+  checksum: 10c0/c6147d0844be8a4cb4c557367e0fd18dd1a3163c8df405f53970ea8b6600b191423f73de2c1384a176d4341cf8c6364bcdd1c4c4369cefaad02f07d575d4a23f
   languageName: node
   linkType: hard
 
