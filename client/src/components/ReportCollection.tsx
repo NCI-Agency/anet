@@ -12,7 +12,6 @@ import ReportMap from "components/ReportMap"
 import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
-import { RECURRENCE_TYPE, useResponsiveNumberOfPeriods } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -62,17 +61,14 @@ const ReportCollection = ({
   marginBottom,
   event
 }: ReportCollectionProps) => {
-  const [numberOfPeriods, setNumberOfPeriods] = useState(3)
-  const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const [calendarAttendeeType, setCalendarAttendeeType] = useState(
     Settings.calendarOptions.attendeesType
   )
   const showHeader = viewFormats.length > 1 || reportsFilter
-  const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
   const idSuffix = mapId || paginationKey || "reports"
   return (
-    <div className="report-collection" ref={contRef}>
+    <div className="report-collection">
       <div>
         {showHeader && (
           <header>
@@ -182,21 +178,13 @@ const ReportCollection = ({
             />
           )}
           {viewFormat === FORMAT_STATISTICS && (
-            <>
-              {statisticsRecurrence.map(recurrence => (
-                <ReportStatistics
-                  key={`report-statistics-${recurrence}`}
-                  idSuffix={idSuffix}
-                  pageDispatchers={pageDispatchers}
-                  queryParams={queryParams}
-                  setTotalCount={setTotalCount}
-                  periodsDetails={{
-                    recurrence,
-                    numberOfPeriods
-                  }}
-                />
-              ))}
-            </>
+            <ReportStatistics
+              key="report-statistics-monthly"
+              idSuffix={idSuffix}
+              pageDispatchers={pageDispatchers}
+              queryParams={queryParams}
+              setTotalCount={setTotalCount}
+            />
           )}
         </div>
       </div>
