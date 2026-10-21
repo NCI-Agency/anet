@@ -58,7 +58,6 @@ class ShowPerson extends Page {
 
   async openAttachmentsEdit() {
     const edit = await this.getEditAttachmentsButton()
-    await waitFor(edit, "visible")
     await edit.click()
     await waitFor(await this.getAttachments(), "attached")
   }
@@ -67,7 +66,6 @@ class ShowPerson extends Page {
     const input = await currentPage()
       .locator('input[name="linkExistingAttachments"]')
       .first()
-    await waitFor(input, "visible")
     await input.click()
     const popover = await currentPage()
       .locator("#linkExistingAttachments-popover")
@@ -96,7 +94,6 @@ class ShowPerson extends Page {
         `//div[@id="linkExistingAttachments-popover"]//tbody//tr[.//td[contains(normalize-space(.), "${caption}")]]`
       )
       .first()
-    await waitFor(row, "attached")
     await row.click()
   }
 
@@ -148,7 +145,6 @@ class ShowPerson extends Page {
     const unlinkButton = await card
       .locator('button[title^="Unlink from this"]')
       .first()
-    await waitFor(unlinkButton, "clickable")
     await unlinkButton.click()
   }
 
@@ -172,10 +168,8 @@ class ShowPerson extends Page {
   async attemptDeleteAttachmentByUuid(uuid) {
     const card = await this.getAttachmentCardByUuid(uuid)
     const deleteButton = await card.locator("button.btn-outline-danger").first()
-    await waitFor(deleteButton, "visible")
     await deleteButton.click()
     const confirm = await this.getDeleteConfirmButton()
-    await waitFor(confirm, "visible")
     await confirm.click()
   }
 
@@ -384,8 +378,6 @@ class ShowPerson extends Page {
   }
 
   async confirmDelete() {
-    await waitFor(await this.getDeleteConfirmButton(), "attached")
-    await waitFor(await this.getDeleteConfirmButton(), "visible")
     await (await this.getDeleteConfirmButton()).click()
   }
 

@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import Search from "../pages/search.page.js"
 import ShowPerson from "../pages/showPerson.page.js"
@@ -216,7 +215,6 @@ const ASSESSED_PEOPLE = [
 test.describe("As an admin", () => {
   test("Should see the proper assessment sections for each person", async () => {
     await Home.openAsAdminUser()
-    await waitFor(await Home.getSearchBar(), "attached")
     await waitFor(await Home.getSearchBar(), "visible")
     for (const p of ASSESSED_PEOPLE) {
       await (await Home.getSearchBar()).fill(String(p.name))
@@ -228,7 +226,7 @@ test.describe("As an admin", () => {
       await (await Search.linkOfPersonFound(p.name)).click()
       await waitFor(await ShowPerson.getForm(), "visible")
       for (const a of p.visibleAssessments) {
-        await pwExpect(
+        await expect(
           await ShowPerson.getAssessmentContainer(a.key, a.recurrence)
         ).not.toHaveCount(0)
         if (a.details) {
@@ -239,7 +237,6 @@ test.describe("As an admin", () => {
   })
   test("Should not see not-applicable assessment sections for each person", async () => {
     await Home.openAsAdminUser()
-    await waitFor(await Home.getSearchBar(), "attached")
     await waitFor(await Home.getSearchBar(), "visible")
     for (const p of ASSESSED_PEOPLE) {
       await (await Home.getSearchBar()).fill(String(p.name))
@@ -251,7 +248,7 @@ test.describe("As an admin", () => {
       await (await Search.linkOfPersonFound(p.name)).click()
       await waitFor(await ShowPerson.getForm(), "visible")
       for (const a of p.invisibleAssessments) {
-        await pwExpect(
+        await expect(
           await ShowPerson.getAssessmentContainer(a.key, a.recurrence)
         ).toHaveCount(0)
       }
@@ -262,8 +259,6 @@ test.describe("For the periodic person assessments", () => {
   test.describe("As an advisor who has a counterpart who needs to be assessed", () => {
     test("Should first search, find and open the person page", async () => {
       await Home.open("/", ADVISOR1_CREDENTIALS)
-      await waitFor(await Home.getSearchBar(), "attached")
-      await waitFor(await Home.getSearchBar(), "visible")
       await (await Home.getSearchBar()).fill(String(PERSON_SEARCH_STRING))
       await (await Home.getSubmitSearch()).click()
       await waitFor(await Search.getFoundPeopleTable(), "attached", {
@@ -273,13 +268,6 @@ test.describe("For the periodic person assessments", () => {
       await (await Search.linkOfPersonFound(PERSON_SEARCH_STRING)).click()
     })
     test("Should display nested question sets", async () => {
-      await waitFor(
-        await ShowPerson.getAssessmentsTable(
-          "interlocutorQuarterly",
-          "quarterly"
-        ),
-        "attached"
-      )
       await waitFor(
         await ShowPerson.getAssessmentsTable(
           "interlocutorQuarterly",
@@ -302,7 +290,7 @@ test.describe("For the periodic person assessments", () => {
     })
     test("Should display validation error messages on every level", async () => {
       await (await ShowPerson.getSaveAssessmentButton()).click()
-      await pwExpect
+      await expect
         .poll(async () => await ShowPerson.getValidationErrorMessages())
         .toEqual(ERROR_MESSAGES)
     })
@@ -323,8 +311,6 @@ test.describe("For the periodic person assessments", () => {
       )
     })
     test("Should allow the author of the assessment to successfully edit it", async () => {
-      await waitFor(await ShowPerson.getEditAssessmentButton(), "attached")
-      await waitFor(await ShowPerson.getEditAssessmentButton(), "visible")
       await (await ShowPerson.getEditAssessmentButton()).click()
       await ShowPerson.waitForAssessmentModalForm()
       await ShowPerson.fillAssessmentQuestion(
@@ -349,8 +335,6 @@ test.describe("For the periodic person assessments", () => {
   test.describe("As an admin", () => {
     test("Should first search, find and open the person's page", async () => {
       await Home.openAsAdminUser()
-      await waitFor(await Home.getSearchBar(), "attached")
-      await waitFor(await Home.getSearchBar(), "visible")
       await (await Home.getSearchBar()).fill(String(PERSON_SEARCH_STRING))
       await (await Home.getSubmitSearch()).click()
       await waitFor(await Search.getFoundPeopleTable(), "attached", {
@@ -360,7 +344,7 @@ test.describe("For the periodic person assessments", () => {
       await (await Search.linkOfPersonFound(PERSON_SEARCH_STRING)).click()
     })
     test("Should not show make assessment button when there is an assessment on that period", async () => {
-      await pwExpect(
+      await expect(
         await ShowPerson.getAddAssessmentButton(
           "interlocutorQuarterly",
           "quarterly"
@@ -368,8 +352,6 @@ test.describe("For the periodic person assessments", () => {
       ).toHaveCount(0)
     })
     test("Should allow admins to successfully edit existing assessment", async () => {
-      await waitFor(await ShowPerson.getEditAssessmentButton(), "attached")
-      await waitFor(await ShowPerson.getEditAssessmentButton(), "visible")
       await (await ShowPerson.getEditAssessmentButton()).click()
       await ShowPerson.waitForAssessmentModalForm()
       await ShowPerson.fillAssessmentQuestion(
@@ -416,7 +398,7 @@ const assertAssessmentDetails = async (
   await mapSequential(details, async (detail, index) => {
     const pre = `${index}-) `
     const det = (await detail.innerText()).trim()
-    expect(`${pre}${det}`).to.equal(
+    expect(`${pre}${det}`).toBe(
       `${pre}${valueToText?.[assessmentDetails[index]] || assessmentDetails[index]}`
     )
   })

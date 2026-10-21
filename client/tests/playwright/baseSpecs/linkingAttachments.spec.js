@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import ShowPerson from "../pages/showPerson.page.js"
 import { test, waitUntil } from "../support.js"
@@ -36,7 +36,7 @@ test.describe("Linking attachments", () => {
     })
     await ShowPerson.unlinkAttachmentByUuid(REGULAR_LINK_ATTACHMENT_UUID)
     await ShowPerson.waitForAttachmentToDisappear(REGULAR_LINK_ATTACHMENT_UUID)
-    await pwExpect
+    await expect
       .poll(
         async () =>
           await ShowPerson.attachmentCardExistsByUuid(

@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import CreatePerson from "../pages/createNewPerson.page.js"
 import CreateReport from "../pages/createReport.page.js"
 import { test, waitFor } from "../support.js"
@@ -17,32 +17,28 @@ test.describe("When working with custom fields for different anet objects", () =
   test.describe("For report's custom fields", () => {
     test("Should be able load a new report form", async () => {
       await CreateReport.openAsAdminUser()
-      await waitFor(await CreateReport.getForm(), "attached")
       await waitFor(await CreateReport.getForm(), "visible")
     })
     test("When the engagement type is not defined, it should not display fields only visible when a certain engagement type is selected", async () => {
       const toggleFields =
         await CreateReport.getFieldsToggledVisibilityByTrainButton()
       for (const invisField of toggleFields) {
-        await pwExpect(invisField).toHaveCount(0)
+        await expect(invisField).toHaveCount(0)
       }
       const notToggleFields =
         await CreateReport.getFieldsNotToggledVisibilityByTrainButton()
       for (const invisField of notToggleFields) {
-        await pwExpect(invisField).toHaveCount(0)
+        await expect(invisField).toHaveCount(0)
       }
     })
     test("Selecting the train engagement type should toggle the correct invisible fields", async () => {
       const trainButton = await CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
       )
-      await waitFor(trainButton, "attached")
-      await waitFor(trainButton, "visible")
       await trainButton.click()
       const toggleFields =
         await CreateReport.getFieldsToggledVisibilityByTrainButton()
       for (const nowVisibleField of toggleFields) {
-        await waitFor(nowVisibleField, "attached")
         await waitFor(nowVisibleField, "visible")
       }
       // train button active here so numberField will be visible
@@ -50,7 +46,7 @@ test.describe("When working with custom fields for different anet objects", () =
       const notToggleFields =
         await CreateReport.getFieldsNotToggledVisibilityByTrainButton()
       for (const stillInvisField of notToggleFields) {
-        await pwExpect(stillInvisField).toHaveCount(0)
+        await expect(stillInvisField).toHaveCount(0)
       }
     })
     test("Should persist previous valid data when toggling field's visibility", async () => {
@@ -72,7 +68,7 @@ test.describe("When working with custom fields for different anet objects", () =
       // turn on train option to make numberField visible
       await trainButton.click()
       await waitFor(await CreateReport.getNumberTrainedFormGroup(), "attached")
-      await pwExpect(await CreateReport.getNumberTrainedField()).toHaveValue(
+      await expect(await CreateReport.getNumberTrainedField()).toHaveValue(
         VALID_NUMBER_INPUT
       )
     })
@@ -81,9 +77,8 @@ test.describe("When working with custom fields for different anet objects", () =
       await (
         await CreateReport.getNumberTrainedField()
       ).fill(String(INVALID_NUMBER_INPUT))
-      await waitFor(await CreateReport.getNumberTrainedErrorText(), "attached")
       // Actually see the validation warning
-      await pwExpect(await CreateReport.getNumberTrainedErrorText()).toHaveText(
+      await expect(await CreateReport.getNumberTrainedErrorText()).toHaveText(
         "Number trained must be greater than or equal to 1",
         {
           useInnerText: true
@@ -104,7 +99,7 @@ test.describe("When working with custom fields for different anet objects", () =
       // turn on train option to make numberField visible
       await trainButton.click()
       await waitFor(await CreateReport.getNumberTrainedFormGroup(), "attached")
-      await pwExpect(await CreateReport.getNumberTrainedField()).toHaveValue(
+      await expect(await CreateReport.getNumberTrainedField()).toHaveValue(
         INVALID_NUMBER_INPUT
       )
     })
@@ -113,15 +108,14 @@ test.describe("When working with custom fields for different anet objects", () =
       await (
         await CreateReport.getNumberTrainedField()
       ).fill(String(INVALID_NUMBER_INPUT))
-      await waitFor(await CreateReport.getNumberTrainedErrorText(), "attached")
-      await pwExpect(
+      await expect(
         await CreateReport.getNumberTrainedErrorText()
       ).toContainText("Number trained must be greater than or equal to 1", {
         useInnerText: true
       })
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      await pwExpect(await CreateReport.getAlertDanger()).toContainText(
+      await expect(await CreateReport.getAlertDanger()).toContainText(
         "Number trained must be greater than or equal to 1",
         {
           useInnerText: true
@@ -130,7 +124,6 @@ test.describe("When working with custom fields for different anet objects", () =
     })
     test("Should not validate invisible field", async () => {
       await (await CreateReport.getEditButton()).click()
-      await waitFor(await CreateReport.getForm(), "attached")
       await waitFor(await CreateReport.getForm(), "visible")
       const trainButton = await CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
@@ -140,7 +133,7 @@ test.describe("When working with custom fields for different anet objects", () =
       await trainButton.click()
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      await pwExpect(await CreateReport.getAlertDanger()).not.toContainText(
+      await expect(await CreateReport.getAlertDanger()).not.toContainText(
         "Number trained must be greater than or equal to 1",
         {
           useInnerText: true
@@ -150,7 +143,6 @@ test.describe("When working with custom fields for different anet objects", () =
     test("Should show valid visible field after saving", async () => {
       // we are on show page after submitting
       await (await CreateReport.getEditButton()).click()
-      await waitFor(await CreateReport.getForm(), "attached")
       await waitFor(await CreateReport.getForm(), "visible")
       const trainButton = await CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
@@ -164,7 +156,7 @@ test.describe("When working with custom fields for different anet objects", () =
       ).fill(String(VALID_NUMBER_INPUT))
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      await pwExpect(
+      await expect(
         await CreateReport.getNumberTrainedFieldShowed()
       ).toContainText(VALID_NUMBER_INPUT.toString(), {
         useInnerText: true
@@ -178,7 +170,6 @@ test.describe("When working with custom fields for different anet objects", () =
   test.describe("For person's custom fields", () => {
     test("Should be able load a new person form and fill normal required fields", async () => {
       await CreatePerson.openAsAdmin()
-      await waitFor(await CreatePerson.getForm(), "attached")
       await waitFor(await CreatePerson.getForm(), "visible")
       // fill other required fields at the beginning
       await (
@@ -197,7 +188,7 @@ test.describe("When working with custom fields for different anet objects", () =
       await CreatePerson.waitForCountryAdvancedSelectToChange(
         REQUIRED_PERSON_FIELDS.country
       )
-      await pwExpect(
+      await expect(
         await CreatePerson.getCountryAdvancedSelectFirstItem()
       ).toContainText(REQUIRED_PERSON_FIELDS.country, {
         useInnerText: true
@@ -210,7 +201,7 @@ test.describe("When working with custom fields for different anet objects", () =
     test("Should not show default invisible fields", async () => {
       const fields = await CreatePerson.getDefaultInvisibleCustomFields()
       for (const field of fields) {
-        await pwExpect(field).toHaveCount(0)
+        await expect(field).toHaveCount(0)
       }
       // Date field is invisible by default
       await (await CreatePerson.getAddArrayObjectButton()).click()
@@ -247,7 +238,7 @@ test.describe("When working with custom fields for different anet objects", () =
         await CreatePerson.getNumberCustomFieldContainer(),
         "attached"
       )
-      await pwExpect(await CreatePerson.getNumberCustomField()).toHaveValue(
+      await expect(await CreatePerson.getNumberCustomField()).toHaveValue(
         VALID_NUMBER_INPUT
       )
     })
@@ -276,7 +267,7 @@ test.describe("When working with custom fields for different anet objects", () =
         await CreatePerson.getNumberCustomFieldContainer(),
         "attached"
       )
-      await pwExpect(await CreatePerson.getNumberCustomField()).toHaveValue(
+      await expect(await CreatePerson.getNumberCustomField()).toHaveValue(
         INVALID_NUMBER_INPUT
       )
     })
@@ -285,11 +276,7 @@ test.describe("When working with custom fields for different anet objects", () =
       await (
         await CreatePerson.getNumberCustomField()
       ).fill(String(INVALID_NUMBER_INPUT))
-      await waitFor(
-        await CreatePerson.getNumberCustomFieldHelpText(),
-        "attached"
-      )
-      await pwExpect(
+      await expect(
         await CreatePerson.getNumberCustomFieldHelpText()
       ).toContainText("greater than", {
         useInnerText: true

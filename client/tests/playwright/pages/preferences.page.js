@@ -8,24 +8,18 @@ class Preferences extends Page {
     await super.open(PAGE_URL)
   }
 
-  async hasSubscriptionsEmailsPreference() {
+  async getSubscriptionsEmailsPreference() {
     await waitFor(currentPage().locator("fieldset").first(), "visible")
-    return (
-      (await currentPage()
-        .locator('//label[text()="Email me about subscription updates"]')
-        .first()
-        .count()) > 0
-    )
+    return currentPage()
+      .locator('//label[text()="Email me about subscription updates"]')
+      .first()
   }
 
-  async hasReportsEmailsPreference() {
+  async getReportsEmailsPreference() {
     await waitFor(currentPage().locator("fieldset").first(), "visible")
-    return (
-      (await currentPage()
-        .locator('//label[text()="Email me about report approvals"]')
-        .first()
-        .count()) > 0
-    )
+    return currentPage()
+      .locator('//label[text()="Email me about report approvals"]')
+      .first()
   }
 }
 

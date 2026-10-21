@@ -1,4 +1,4 @@
-import { currentPage, waitFor } from "../support.js"
+import { currentPage } from "../support.js"
 import Home from "./home.page.js"
 import Page from "./page.js"
 
@@ -26,11 +26,7 @@ export const REPORT_STATES = {
 class MyReports extends Page {
   async open(credentials) {
     await super.open("/", credentials)
-    await waitFor(await Home.getLinksMenuButton(), "attached")
-    await waitFor(await Home.getLinksMenuButton(), "visible")
     await (await Home.getLinksMenuButton()).click()
-    await waitFor(await Home.getMyReportsLink(), "attached")
-    await waitFor(await Home.getMyReportsLink(), "visible")
     await (await Home.getMyReportsLink()).click()
   }
 
@@ -41,8 +37,6 @@ class MyReports extends Page {
         exact: true
       })
       .first()
-    await waitFor(await reportLink, "attached")
-    await waitFor(await reportLink, "visible")
     await (await reportLink).click()
     await super.waitUntilLoaded()
   }
@@ -54,8 +48,6 @@ class MyReports extends Page {
         `#${sectionId} .report-collection div header div button[value='table']`
       )
       .first()
-    await waitFor(await tableTab, "attached")
-    await waitFor(await tableTab, "visible")
     await (await tableTab).click()
     await super.waitUntilLoaded()
     // wait for table to load/render
@@ -88,8 +80,6 @@ class MyReports extends Page {
         `#${sectionId} .report-collection div header div button[value='summary']`
       )
       .first()
-    await waitFor(await summaryTab, "attached")
-    await waitFor(await summaryTab, "visible")
     await (await summaryTab).click()
     await super.waitUntilLoaded()
   }

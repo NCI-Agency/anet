@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
 import EditReport from "../pages/report/editReport.page.js"
 import ShowReport from "../pages/report/showReport.page.js"
@@ -89,7 +89,7 @@ test.describe("When reports have rich text content", () => {
       index,
       content
     } of RICH_TEXT_CONTENT) {
-      await pwExpect(
+      await expect(
         await getRichTextContent(
           await ShowReport.getReportText(),
           selector,
@@ -109,7 +109,7 @@ test.describe("When reports have rich text content", () => {
       index,
       content
     } of RICH_TEXT_CONTENT) {
-      await pwExpect(
+      await expect(
         await getRichTextContent(
           await EditReport.getReportText(),
           selector,

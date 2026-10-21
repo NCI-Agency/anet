@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import Search from "../pages/search.page.js"
 import ShowTask from "../pages/showTask.page.js"
@@ -258,7 +257,7 @@ test.describe("As an admin", () => {
       await (await Search.linkOfTaskFound(t.shortName)).click()
       await waitFor(await ShowTask.getForm(), "visible")
       for (const a of t.visibleAssessments) {
-        await pwExpect(
+        await expect(
           await ShowTask.getAssessmentResults(a.key, a.recurrence)
         ).not.toHaveCount(0)
         if (a.details) {
@@ -287,7 +286,7 @@ test.describe("As an admin", () => {
       await (await Search.linkOfTaskFound(t.shortName)).click()
       await waitFor(await ShowTask.getForm(), "visible")
       for (const a of t.invisibleAssessments) {
-        await pwExpect(
+        await expect(
           await ShowTask.getAssessmentResults(a.key, a.recurrence)
         ).toHaveCount(0)
       }
@@ -308,10 +307,6 @@ test.describe("For the periodic task assessments", () => {
       await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
     test("Should allow advisor to successfully add an assessment", async () => {
-      await waitFor(
-        await ShowTask.getAssessmentsTable("taskMonthly", "monthly"),
-        "attached"
-      )
       await waitFor(
         await ShowTask.getAssessmentsTable("taskMonthly", "monthly"),
         "visible"
@@ -337,14 +332,6 @@ test.describe("For the periodic task assessments", () => {
       )
     })
     test("Should allow the author of the assessment to successfully edit it", async () => {
-      await waitFor(
-        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly"),
-        "attached"
-      )
-      await waitFor(
-        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly"),
-        "visible"
-      )
       await (
         await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).click()
@@ -367,10 +354,6 @@ test.describe("For the periodic task assessments", () => {
       )
     })
     test("Should see an add button for taskMonthly assessments in the future", async () => {
-      await waitFor(
-        await ShowTask.getNextPeriodButton("taskMonthly", "monthly"),
-        "attached"
-      )
       await (
         await ShowTask.getNextPeriodButton("taskMonthly", "monthly")
       ).click()
@@ -380,12 +363,8 @@ test.describe("For the periodic task assessments", () => {
       )
     })
     test("Should not see an add button for taskWeekly assessments in the future", async () => {
-      await waitFor(
-        await ShowTask.getNextPeriodButton("taskWeekly", "weekly"),
-        "attached"
-      )
       await (await ShowTask.getNextPeriodButton("taskWeekly", "weekly")).click()
-      await pwExpect(
+      await expect(
         await ShowTask.getFutureAddAssessmentButton("taskWeekly", "weekly")
       ).toHaveCount(0)
       await ShowTask.logout()
@@ -403,15 +382,11 @@ test.describe("For the periodic task assessments", () => {
       await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
     test("Should not show make assessment button when there is an assessment on that period", async () => {
-      await pwExpect(
+      await expect(
         await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
       ).toHaveCount(0)
     })
     test("Should allow admins to successfully edit existing assessment", async () => {
-      await waitFor(
-        await ShowTask.getAssessmentsTable("taskMonthly", "monthly"),
-        "attached"
-      )
       await waitFor(
         await ShowTask.getAssessmentsTable("taskMonthly", "monthly"),
         "visible"
@@ -453,15 +428,11 @@ test.describe("For the periodic task assessments", () => {
       await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
     test("Should not show make assessment button when there is an assessment on that period", async () => {
-      await pwExpect(
+      await expect(
         await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
       ).toHaveCount(0)
     })
     test("Should allow the other advisor to successfully edit existing assessment", async () => {
-      await waitFor(
-        await ShowTask.getAssessmentsTable("taskMonthly", "monthly"),
-        "attached"
-      )
       await waitFor(
         await ShowTask.getAssessmentsTable("taskMonthly", "monthly"),
         "visible"
@@ -518,7 +489,7 @@ const assertAssessmentDetails = async (
   await mapSequential(details, async (detail, index) => {
     const pre = `${index}-) `
     const det = (await detail.innerText()).trim()
-    expect(`${pre}${det}`).to.equal(
+    expect(`${pre}${det}`).toBe(
       `${pre}${valueToText?.[assessmentDetails[index]] || assessmentDetails[index]}`
     )
   })

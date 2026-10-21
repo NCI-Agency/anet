@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import SavedSearch from "../../pages/searchFilters/savedSearch.page.js"
 import { currentPage, test } from "../../support.js"
 
@@ -12,14 +12,14 @@ test.describe("When trying to save a search", () => {
     // wait for modal to appear
     await SavedSearch.saveSearchModal()
     // wait for toast message
-    await pwExpect(
+    await expect(
       currentPage().getByRole("alert").filter({ hasText: "Search saved" })
     ).toBeVisible()
   })
   test("Should show an information toast when the search is a duplicate", async () => {
     await SavedSearch.saveSearch()
     // wait for toast message
-    await pwExpect(
+    await expect(
       currentPage()
         .getByRole("alert")
         .filter({ hasText: "There's already an identical saved search" })
@@ -32,7 +32,7 @@ test.describe("When trying to save a search", () => {
     await SavedSearch.confirmDelete()
     // wait for saved search to be deleted
     const noSavedSearches = await SavedSearch.getNoSavedSearches()
-    await pwExpect(noSavedSearches).toHaveText("No saved searches found.", {
+    await expect(noSavedSearches).toHaveText("No saved searches found.", {
       useInnerText: true
     })
   })

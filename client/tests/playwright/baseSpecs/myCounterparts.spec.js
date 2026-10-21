@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import MyCounterparts from "../pages/myCounterparts.page.js"
 import { test, waitFor } from "../support.js"
@@ -11,7 +10,7 @@ test.describe("Home page", () => {
       await (await Home.getLinksMenuButton()).click()
       await waitFor(await Home.getMyCounterpartsLink(), "visible")
 
-      await pwExpect(await Home.getMyCounterpartsLink()).not.toHaveCount(0)
+      await expect(await Home.getMyCounterpartsLink()).not.toHaveCount(0)
       await Home.logout()
     })
   })
@@ -19,7 +18,7 @@ test.describe("Home page", () => {
     test("Should NOT see a link to my counterparts page when the user does not have a position", async () => {
       await Home.openAsPositionlessUser()
 
-      await pwExpect(await Home.getMyCounterpartsLink()).toHaveCount(0)
+      await expect(await Home.getMyCounterpartsLink()).toHaveCount(0)
       await Home.logout()
     })
   })
@@ -34,11 +33,9 @@ test.describe("My counterparts page", () => {
       await waitFor(await MyCounterparts.getMyCounterparts(), "visible")
       const myCounterpartsItems = await (
         await MyCounterparts.getMyCounterparts()
-      )
-        .locator("tr")
-        .all()
+      ).locator("tr")
       // table has a header and 1 counterpart rows
-      expect(myCounterpartsItems).to.have.length(2)
+      await expect(myCounterpartsItems).toHaveCount(2)
     })
   })
   test.describe("When Rebecca is checking the content of the page", () => {
@@ -47,10 +44,8 @@ test.describe("My counterparts page", () => {
       await waitFor(await MyCounterparts.getMyCounterparts(), "visible")
       const myCounterpartsItems = await (
         await MyCounterparts.getMyCounterparts()
-      )
-        .locator("tr")
-        .all()
-      expect(myCounterpartsItems).to.have.length(0)
+      ).locator("tr")
+      await expect(myCounterpartsItems).toHaveCount(0)
     })
   })
 })

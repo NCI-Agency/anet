@@ -108,6 +108,24 @@ module.exports = defineConfig([
     }
   },
 
+  {
+    files: ["tests/playwright/**/*.js", "tests/e2e/**/*.js"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "chai",
+              message: "Use expect from @playwright/test for browser tests."
+            }
+          ],
+          patterns: ["chai/*"]
+        }
+      ]
+    }
+  },
+
   eslintConfigPrettier,
 
   globalIgnores(["**/build/", "**/node_modules/"])

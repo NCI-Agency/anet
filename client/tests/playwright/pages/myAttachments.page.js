@@ -13,9 +13,9 @@ class MyAttachments extends Page {
   }
 
   async getAttachmentRows() {
-    return (await this.getMyAttachments())
-      .locator("table.attachments_table > tbody > tr")
-      .all()
+    return (await this.getMyAttachments()).locator(
+      "table.attachments_table > tbody > tr"
+    )
   }
 
   async getAttachmentCaptionCell(attachment) {

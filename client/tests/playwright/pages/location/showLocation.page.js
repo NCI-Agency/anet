@@ -41,7 +41,7 @@ class ShowLocation extends Page {
   }
 
   async getTableRows(tableName) {
-    return (await this.getTable(tableName)).locator("tbody tr").all()
+    return (await this.getTable(tableName)).locator("tbody tr")
   }
 
   async getReportCollection() {
@@ -49,9 +49,7 @@ class ShowLocation extends Page {
   }
 
   async getReportSummaries() {
-    return (await this.getReportCollection())
-      .locator("div.report-summary")
-      .all()
+    return (await this.getReportCollection()).locator("div.report-summary")
   }
 
   async getEventsTable() {

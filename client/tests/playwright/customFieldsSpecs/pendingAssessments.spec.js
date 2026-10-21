@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import AssessmentsSection from "../pages/assessments.page.js"
 import MyCounterparts from "../pages/myCounterparts.page.js"
@@ -15,10 +14,8 @@ test.describe("In my counterparts page", () => {
       await waitFor(await MyCounterparts.getMyPendingCounterparts(), "visible")
       const myPendingCounterpartsItems = await (
         await MyCounterparts.getMyPendingCounterpartsBody()
-      )
-        .locator("tr")
-        .all()
-      expect(myPendingCounterpartsItems).to.have.length(1)
+      ).locator("tr")
+      await expect(myPendingCounterpartsItems).toHaveCount(1)
     })
     test("Should be able to add a quarterly assessment with 4 questions for the counterpart", async () => {
       await (
@@ -36,30 +33,28 @@ test.describe("In my counterparts page", () => {
           "interlocutorQuarterly",
           "quarterly"
         )
-      await waitFor(newAssessmentButton, "visible")
       await newAssessmentButton.click()
       // wait for the modal to slide in (transition is 300 ms)
       const modalContent = await AssessmentsSection.getModalContent()
       await waitFor(modalContent, "visible")
       await waitFor(await AssessmentsSection.getModalTitle(), "visible")
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("test1")
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("text")
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion(
           "questionSets.topLevelQs.questions.test2"
         )
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion(
           "questionSets.topLevelQs.questionSets.bottomLevelQs.questions.test3"
         )
       ).not.toHaveCount(0)
       const closeButton = await AssessmentsSection.getModalCloseButton()
-      await waitFor(closeButton, "visible")
       await closeButton.click()
       await waitFor(modalContent, "visible", {
         reverse: true,
@@ -72,7 +67,7 @@ test.describe("In my counterparts page", () => {
     test("Should see an empty table of my counterparts that have pending assessments", async () => {
       await MyCounterparts.openAs("jack")
       await waitFor(await MyCounterparts.getMyPendingCounterparts(), "visible")
-      await pwExpect(
+      await expect(
         await MyCounterparts.getMyPendingCounterpartsContent()
       ).toHaveText("No positions found", {
         useInnerText: true
@@ -94,30 +89,28 @@ test.describe("In my counterparts page", () => {
           "interlocutorQuarterly",
           "quarterly"
         )
-      await waitFor(newAssessmentButton, "visible")
       await newAssessmentButton.click()
       // wait for the modal to slide in (transition is 300 ms)
       const modalContent = await AssessmentsSection.getModalContent()
       await waitFor(modalContent, "visible")
       await waitFor(await AssessmentsSection.getModalTitle(), "visible")
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("test1")
       ).toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("text")
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion(
           "questionSets.topLevelQs.questions.test2"
         )
       ).toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion(
           "questionSets.topLevelQs.questionSets.bottomLevelQs.questions.test3"
         )
       ).toHaveCount(0)
       const closeButton = await AssessmentsSection.getModalCloseButton()
-      await waitFor(closeButton, "visible")
       await closeButton.click()
       await waitFor(modalContent, "visible", {
         reverse: true,
@@ -132,7 +125,7 @@ test.describe("In my tasks page", () => {
     test("Should see an empty table of my tasks that have pending assessments", async () => {
       await MyTasks.open()
       await waitFor(await MyTasks.getMyPendingTasks(), "visible")
-      await pwExpect(await MyTasks.getMyPendingTasksContent()).toHaveText(
+      await expect(await MyTasks.getMyPendingTasksContent()).toHaveText(
         "No Objectives found",
         {
           useInnerText: true
@@ -147,10 +140,8 @@ test.describe("In my tasks page", () => {
       await waitFor(await MyTasks.getMyPendingTasks(), "visible")
       const myPendingTasks = await (
         await MyTasks.getMyPendingTasksBody()
-      )
-        .locator("tr")
-        .all()
-      expect(myPendingTasks).to.have.length(2)
+      ).locator("tr")
+      await expect(myPendingTasks).toHaveCount(2)
     })
     test("Should be able to add a monthly assessment with 2 questions for the task", async () => {
       await (await MyTasks.getMyPendingTask("2.B")).click()
@@ -166,20 +157,18 @@ test.describe("In my tasks page", () => {
           "taskMonthly",
           "monthly"
         )
-      await waitFor(newAssessmentButton, "visible")
       await newAssessmentButton.click()
       // wait for the modal to slide in (transition is 300 ms)
       const modalContent = await AssessmentsSection.getModalContent()
       await waitFor(modalContent, "visible")
       await waitFor(await AssessmentsSection.getModalTitle(), "visible")
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("issues")
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("status")
       ).not.toHaveCount(0)
       const closeButton = await AssessmentsSection.getModalCloseButton()
-      await waitFor(closeButton, "visible")
       await closeButton.click()
       await waitFor(modalContent, "visible", {
         reverse: true,
@@ -193,20 +182,18 @@ test.describe("In my tasks page", () => {
       )
       const newAssessmentButton =
         await AssessmentsSection.getNewAssessmentButton("taskWeekly", "weekly")
-      await waitFor(newAssessmentButton, "visible")
       await newAssessmentButton.click()
       // wait for the modal to slide in (transition is 300 ms)
       const modalContent = await AssessmentsSection.getModalContent()
       await waitFor(modalContent, "visible")
       await waitFor(await AssessmentsSection.getModalTitle(), "visible")
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("issues")
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await AssessmentsSection.getModalAssessmentQuestion("status")
       ).toHaveCount(0)
       const closeButton = await AssessmentsSection.getModalCloseButton()
-      await waitFor(closeButton, "visible")
       await closeButton.click()
       await waitFor(modalContent, "visible", {
         reverse: true,
@@ -224,17 +211,13 @@ test.describe("In new report page", () => {
         engagementDate: moment().startOf("day")
       }
       await CreateReport.openAs("selena")
-      await pwExpect(await CreateReport.getAttendeesAssessments()).toHaveCount(
-        0
-      )
-      await pwExpect(await CreateReport.getTasksAssessments()).toHaveCount(0)
+      await expect(await CreateReport.getAttendeesAssessments()).toHaveCount(0)
+      await expect(await CreateReport.getTasksAssessments()).toHaveCount(0)
       await CreateReport.fillForm(report)
-      await pwExpect(
+      await expect(
         await CreateReport.getAttendeesAssessments()
       ).not.toHaveCount(0)
-      await pwExpect(await CreateReport.getTasksAssessments()).not.toHaveCount(
-        0
-      )
+      await expect(await CreateReport.getTasksAssessments()).not.toHaveCount(0)
     })
     test("Should be able to add instant assessments for tasks", async () => {
       const report = {
@@ -249,13 +232,13 @@ test.describe("In new report page", () => {
       // wait for assessment questions to be updated
       await (await CreateReport.getTasksAssessments()).scrollIntoViewIfNeeded()
       const taskAssessmentRows = await CreateReport.getTaskAssessmentRows()
-      expect(taskAssessmentRows).to.have.length(5) // a heading and two assessments
+      expect(taskAssessmentRows).toHaveLength(5) // a heading and two assessments
       const task = taskAssessmentRows[0]
       for (let i = 1; i < 5; i += 2) {
         const label = taskAssessmentRows[i]
         const assessment = taskAssessmentRows[i + 1]
         const questions = await assessment.locator("td > div").all()
-        await pwExpect(label).toHaveText(
+        await expect(label).toHaveText(
           i === 1
             ? "Restricted engagement assessment of objective"
             : "Engagement assessment of objective",
@@ -266,20 +249,13 @@ test.describe("In new report page", () => {
         const taskText = (await task.innerText()).trim()
         switch (taskText) {
           case "EF 1\n»\nEF 1.2\n»\n1.2.A":
-            expect(questions).to.have.length(3)
-            expect(await questions[0].getAttribute("id")).to.match(
-              /\.question1$/
-            )
-            expect(await questions[1].getAttribute("id")).to.match(
-              /\.question2$/
-            )
-            expect(await questions[2].getAttribute("id")).to.match(
-              /\.question3$/
-            )
+            expect(questions).toHaveLength(3)
+            await expect(questions[0]).toHaveAttribute("id", /\.question1$/)
+            await expect(questions[1]).toHaveAttribute("id", /\.question2$/)
+            await expect(questions[2]).toHaveAttribute("id", /\.question3$/)
             break
           default:
-            expect.fail(`unexpected task: ${taskText}`)
-            break
+            throw new Error(`unexpected task: ${taskText}`)
         }
       }
     })
@@ -298,12 +274,12 @@ test.describe("In new report page", () => {
       ).scrollIntoViewIfNeeded()
       const attendeeAssessmentRows =
         await CreateReport.getAttendeeAssessmentRows()
-      expect(attendeeAssessmentRows).to.have.length(9)
+      expect(attendeeAssessmentRows).toHaveLength(9)
       for (let i = 0; i < 9; i += 3) {
         const attendee = attendeeAssessmentRows[i]
         const label = attendeeAssessmentRows[i + 1]
         const assessment = attendeeAssessmentRows[i + 2]
-        await pwExpect(label).toHaveText(
+        await expect(label).toHaveText(
           "Engagement assessment of interlocutor",
           {
             useInnerText: true
@@ -312,25 +288,20 @@ test.describe("In new report page", () => {
         const questions = await assessment.locator("td > div").all()
         switch ((await attendee.innerText()).trim()) {
           case "OF-3 Roger Rogwell":
-            expect(questions).to.have.length(2)
-            expect(await questions[1].getAttribute("id")).to.match(
-              /\.question2$/
-            )
+            expect(questions).toHaveLength(2)
+            await expect(questions[1]).toHaveAttribute("id", /\.question2$/)
             break
           case "OF-4 Steve Steveson":
-            expect(questions).to.have.length(2)
-            expect(await questions[1].getAttribute("id")).to.match(
-              /\.question3$/
-            )
+            expect(questions).toHaveLength(2)
+            await expect(questions[1]).toHaveAttribute("id", /\.question3$/)
             break
           case "CIV Hunter Huntman":
-            expect(questions).to.have.length(1)
+            expect(questions).toHaveLength(1)
             break
           default:
-            expect.fail("unexpected attendee")
-            break
+            throw new Error("unexpected attendee")
         }
-        expect(await questions[0].getAttribute("id")).to.match(/\.question1$/)
+        await expect(questions[0]).toHaveAttribute("id", /\.question1$/)
       }
     })
     test("Should have an additional question for positive atmosphere", async () => {
@@ -341,12 +312,12 @@ test.describe("In new report page", () => {
       ).scrollIntoViewIfNeeded()
       const attendeeAssessmentRows =
         await CreateReport.getAttendeeAssessmentRows()
-      expect(attendeeAssessmentRows).to.have.length(9)
+      expect(attendeeAssessmentRows).toHaveLength(9)
       for (let i = 0; i < 9; i += 3) {
         const attendee = attendeeAssessmentRows[i]
         const label = attendeeAssessmentRows[i + 1]
         const assessment = attendeeAssessmentRows[i + 2]
-        await pwExpect(label).toHaveText(
+        await expect(label).toHaveText(
           "Engagement assessment of interlocutor",
           {
             useInnerText: true
@@ -355,21 +326,21 @@ test.describe("In new report page", () => {
         const questions = await assessment.locator("td > div").all()
         switch ((await attendee.innerText()).trim()) {
           case "OF-3 Roger Rogwell":
-            expect(questions).to.have.length(3)
+            expect(questions).toHaveLength(3)
             break
           case "OF-4 Steve Steveson":
-            expect(questions).to.have.length(3)
+            expect(questions).toHaveLength(3)
             break
           case "CIV Hunter Huntman":
-            expect(questions).to.have.length(2)
+            expect(questions).toHaveLength(2)
             break
           default:
-            expect.fail("unexpected attendee")
-            break
+            throw new Error("unexpected attendee")
         }
-        expect(
-          await questions[questions.length - 1].getAttribute("id")
-        ).to.match(/\.question4$/)
+        await expect(questions[questions.length - 1]).toHaveAttribute(
+          "id",
+          /\.question4$/
+        )
       }
     })
     test("Should be able to cancel/delete the report", async () => {
@@ -378,19 +349,15 @@ test.describe("In new report page", () => {
         await (await CreateReport.getCancelButton()).click()
       } else {
         // Delete it
-        await waitFor(await CreateReport.getDeleteButton(), "attached")
-        await waitFor(await CreateReport.getDeleteButton(), "visible")
         await (await CreateReport.getDeleteButton()).click()
         // Confirm delete
 
         // wait for the modal to slide in (transition is 300 ms)
-        await waitFor(await CreateReport.getConfirmButton(), "attached")
-        await waitFor(await CreateReport.getConfirmButton(), "visible")
         await (await CreateReport.getConfirmButton()).click()
         // wait for the modal to slide out (transition is 300 ms)
         // Report should be deleted
         await CreateReport.waitForAlertToLoad()
-        await pwExpect(await CreateReport.getAlertSuccess()).toContainText(
+        await expect(await CreateReport.getAlertSuccess()).toContainText(
           "Report deleted",
           {
             useInnerText: true

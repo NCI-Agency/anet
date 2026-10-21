@@ -42,6 +42,10 @@ test("checking superuser permissions", async ({ page }) => {
   await rebeccaLink.click()
   await expect(rebeccaLink).toBeHidden()
   await validateUserCanEditUserForCurrentPage(page, true)
+  const biography = page.locator(".biography .editable")
+  const savedBiography = await biography.innerText()
+  await page.reload()
+  await expect(biography).toHaveText(savedBiography)
 
   // User is superuser, they may edit position of type superuser for
   // the organization their position is administrating

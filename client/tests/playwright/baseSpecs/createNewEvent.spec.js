@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import CreateEvent from "../pages/createNewEvent.page.js"
 import { test, waitFor } from "../support.js"
 
@@ -14,30 +14,25 @@ test.describe("Create event page", () => {
   test.describe("When creating an event as admin", () => {
     test("Should show required data warnings when submitting empty form", async () => {
       await CreateEvent.openAsAdminUser()
-      await waitFor(await CreateEvent.getForm(), "attached")
       await waitFor(await CreateEvent.getForm(), "visible")
       await CreateEvent.submitForm()
-      await waitFor(await CreateEvent.getNameHelpBlock(), "attached")
       await waitFor(await CreateEvent.getNameHelpBlock(), "visible")
-      await waitFor(await CreateEvent.getTypeHelpBlock(), "attached")
       await waitFor(await CreateEvent.getTypeHelpBlock(), "visible")
-      await waitFor(await CreateEvent.getStartDateHelpBlock(), "attached")
       await waitFor(await CreateEvent.getStartDateHelpBlock(), "visible")
-      await waitFor(await CreateEvent.getEndDateHelpBlock(), "attached")
       await waitFor(await CreateEvent.getEndDateHelpBlock(), "visible")
-      await pwExpect(await CreateEvent.getNameHelpBlock()).toHaveText(
+      await expect(await CreateEvent.getNameHelpBlock()).toHaveText(
         "name is a required field",
         {
           useInnerText: true
         }
       )
-      await pwExpect(await CreateEvent.getStartDateHelpBlock()).toHaveText(
+      await expect(await CreateEvent.getStartDateHelpBlock()).toHaveText(
         "startDate is a required field",
         {
           useInnerText: true
         }
       )
-      await pwExpect(await CreateEvent.getEndDateHelpBlock()).toHaveText(
+      await expect(await CreateEvent.getEndDateHelpBlock()).toHaveText(
         "endDate is a required field",
         {
           useInnerText: true
@@ -45,21 +40,18 @@ test.describe("Create event page", () => {
       )
     })
     test("Should successfully create an event when required fields are filled", async () => {
-      await waitFor(await CreateEvent.getNameInput(), "visible")
       await (await CreateEvent.getNameInput()).fill("Test Event")
       await (
         await CreateEvent.getTypeInput()
       ).selectOption({
         label: "Conference"
       })
-      await waitFor(await CreateEvent.getStartDateInput(), "visible")
       await (await CreateEvent.getStartDateInput()).fill("01-01-2025 00:00")
-      await waitFor(await CreateEvent.getEndDateInput(), "visible")
       await (await CreateEvent.getEndDateInput()).fill("02-01-2025 23:59")
       await (await CreateEvent.getOwnerOrganizationInput()).click()
       await (await CreateEvent.getOwnerOrganizationInput()).fill(String(ORG))
       await CreateEvent.waitForOwnerOrgAdvancedSelectToChange(ORG_COMPLETE)
-      await pwExpect(
+      await expect(
         await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()
       ).toContainText(ORG_COMPLETE, {
         useInnerText: true
@@ -73,7 +65,7 @@ test.describe("Create event page", () => {
       await CreateEvent.waitForRelatedObjectsAdvancedSelectToChange(
         ORGANIZATION_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(ORGANIZATION_COMPLETE, {
         useInnerText: true
@@ -81,7 +73,7 @@ test.describe("Create event page", () => {
       await (
         await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateEvent.getRelatedObjectsTableEntry(ORGANIZATION_COMPLETE)
       ).not.toHaveCount(0)
       // Add a position
@@ -93,7 +85,7 @@ test.describe("Create event page", () => {
       await CreateEvent.waitForRelatedObjectsAdvancedSelectToChange(
         POSITION_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(POSITION_COMPLETE, {
         useInnerText: true
@@ -103,10 +95,10 @@ test.describe("Create event page", () => {
       ).click()
       // The position is added to a table underneath, so relatedObjects table exists now
 
-      await pwExpect(
-        await CreateEvent.getRelatedObjectsTable()
-      ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(await CreateEvent.getRelatedObjectsTable()).not.toHaveCount(
+        0
+      )
+      await expect(
         await CreateEvent.getRelatedObjectsTableEntry(POSITION_COMPLETE)
       ).not.toHaveCount(0)
 
@@ -119,7 +111,7 @@ test.describe("Create event page", () => {
       await CreateEvent.waitForRelatedObjectsAdvancedSelectToChange(
         PERSON_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(PERSON_COMPLETE, {
         useInnerText: true
@@ -127,13 +119,13 @@ test.describe("Create event page", () => {
       await (
         await CreateEvent.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateEvent.getRelatedObjectsTableEntry(PERSON_COMPLETE)
       ).not.toHaveCount(0)
       await (await CreateEvent.getAdminOrganizationInput()).click()
       await (await CreateEvent.getAdminOrganizationInput()).fill(String(ORG))
       await CreateEvent.waitForAdminOrgAdvancedSelectToChange(ORG_COMPLETE)
-      await pwExpect(
+      await expect(
         await CreateEvent.getAdminOrgAdvancedSelectFirstItem()
       ).toContainText(ORG_COMPLETE, {
         useInnerText: true
@@ -150,21 +142,17 @@ test.describe("Create event page", () => {
   test.describe("When creating an event as superuser", () => {
     test("Should warn when adminOrg is not correctly filled in", async () => {
       await CreateEvent.open()
-      await waitFor(await CreateEvent.getForm(), "attached")
       await waitFor(await CreateEvent.getForm(), "visible")
-      await waitFor(await CreateEvent.getNameInput(), "visible")
       await (await CreateEvent.getNameInput()).fill("Test Event 2")
       await (
         await CreateEvent.getTypeInput()
       ).selectOption({
         label: "Conference"
       })
-      await waitFor(await CreateEvent.getStartDateInput(), "visible")
       await (await CreateEvent.getStartDateInput()).fill("01-01-2025 00:00")
-      await waitFor(await CreateEvent.getEndDateInput(), "visible")
       await (await CreateEvent.getEndDateInput()).fill("02-01-2025 23:59")
       await CreateEvent.submitForm()
-      await pwExpect(await CreateEvent.getAlertDanger()).toHaveText(
+      await expect(await CreateEvent.getAlertDanger()).toHaveText(
         "You do not have permissions to do this",
         {
           useInnerText: true
@@ -176,7 +164,7 @@ test.describe("Create event page", () => {
         await CreateEvent.getAdminOrganizationInput()
       ).fill(String(adminOrg))
       await CreateEvent.waitForAdminOrgAdvancedSelectToChange(adminOrg)
-      await pwExpect(
+      await expect(
         await CreateEvent.getAdminOrgAdvancedSelectFirstItem()
       ).toContainText(adminOrg, {
         useInnerText: true

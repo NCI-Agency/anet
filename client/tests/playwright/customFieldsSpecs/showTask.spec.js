@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import MergeTasks from "../pages/mergeTasks.page.js"
 import ShowTask from "../pages/showTask.page.js"
 import { currentPage, test, waitFor } from "../support.js"
@@ -27,14 +26,14 @@ test.describe("Show task page", () => {
       )
         .locator("[id*=question1-assessment]")
         .first()
-      await pwExpect(question1AssessmentMonthly).not.toHaveCount(0)
+      await expect(question1AssessmentMonthly).not.toHaveCount(0)
     })
   })
   test.describe("When in the show page of a task with a parent task", () => {
     test("We should see a parent task that related to the current task", async () => {
       await waitFor(await ShowTask.getParentTaskField(), "visible")
-      await pwExpect(await ShowTask.getParentTaskField()).not.toHaveCount(0)
-      await pwExpect(await ShowTask.getParentTask()).toHaveText(
+      await expect(await ShowTask.getParentTaskField()).not.toHaveCount(0)
+      await expect(await ShowTask.getParentTask()).toHaveText(
         "EF 1\n»\nEF 1.2",
         {
           useInnerText: true
@@ -44,16 +43,15 @@ test.describe("Show task page", () => {
   })
   test.describe("When in the show page of a task without children tasks", () => {
     test("We should not see list of children tasks", async () => {
-      await pwExpect(await ShowTask.getChildrenTasksField()).toHaveCount(0)
+      await expect(await ShowTask.getChildrenTasksField()).toHaveCount(0)
     })
   })
   test.describe("When in the show page of a task with a matrix", () => {
     test("Should see sync matrix on the 1.2.B Show page", async () => {
       await ShowTask.openAsAdminUser(TASK_12B_UUID)
       const syncMatrix = await ShowTask.getSyncMatrix()
-      await waitFor(syncMatrix, "attached")
       await waitFor(syncMatrix, "visible")
-      await pwExpect(await syncMatrix.locator(".legend").first()).toContainText(
+      await expect(await syncMatrix.locator(".legend").first()).toContainText(
         "Sync Matrix for EF 1 » EF 1.2 » 1.2.B",
         {
           useInnerText: true
@@ -61,20 +59,20 @@ test.describe("Show task page", () => {
       )
       const eventSeries = await ShowTask.getEventMatrixEventSeries()
       // Additional eventSeries may have been created during the tests!
-      expect(eventSeries).to.have.lengthOf.at.least(1)
+      expect(eventSeries.length).toBeGreaterThanOrEqual(1)
       const eventSeriesText = (
         await Promise.all(
           eventSeries.map(async es => (await es.innerText()).trim())
         )
       ).join(" ; ")
-      expect(eventSeriesText).to.include("NMI PDT")
-      expect(eventSeriesText).to.include("My active NMI test event")
-      expect(eventSeriesText).to.include("My inactive NMI test event")
-      expect(eventSeriesText).to.include("Inactive event series")
-      expect(eventSeriesText).to.include("My active test event")
-      expect(eventSeriesText).to.include("My inactive test event")
+      expect(eventSeriesText).toContain("NMI PDT")
+      expect(eventSeriesText).toContain("My active NMI test event")
+      expect(eventSeriesText).toContain("My inactive NMI test event")
+      expect(eventSeriesText).toContain("Inactive event series")
+      expect(eventSeriesText).toContain("My active test event")
+      expect(eventSeriesText).toContain("My inactive test event")
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(1)
+      expect(tasks.length).toBe(1)
       const taskPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -82,7 +80,7 @@ test.describe("Show task page", () => {
           ).trim()
         )
       )
-      expect(taskPaths).to.deep.equal(TASK_12B_ASSIGNED_TASKS)
+      expect(taskPaths).toEqual(TASK_12B_ASSIGNED_TASKS)
 
       // Move to the previous period, the inactive eventSeries should no longer be shown
       await ShowTask.gotoPreviousPeriod()
@@ -93,14 +91,14 @@ test.describe("Show task page", () => {
           eventSeriesPrev.map(async es => (await es.innerText()).trim())
         )
       ).join(" ; ")
-      expect(eventSeriesPrevText).to.include("NMI PDT")
-      expect(eventSeriesPrevText).to.not.include("My active NMI test event")
-      expect(eventSeriesPrevText).to.not.include("My inactive NMI test event")
-      expect(eventSeriesPrevText).to.not.include("Inactive event series")
-      expect(eventSeriesPrevText).to.not.include("My active test event")
-      expect(eventSeriesPrevText).to.not.include("My inactive test event")
+      expect(eventSeriesPrevText).toContain("NMI PDT")
+      expect(eventSeriesPrevText).not.toContain("My active NMI test event")
+      expect(eventSeriesPrevText).not.toContain("My inactive NMI test event")
+      expect(eventSeriesPrevText).not.toContain("Inactive event series")
+      expect(eventSeriesPrevText).not.toContain("My active test event")
+      expect(eventSeriesPrevText).not.toContain("My inactive test event")
       const tasksPrev = await ShowTask.getEventMatrixTasks()
-      expect(tasksPrev.length).to.equal(1)
+      expect(tasksPrev.length).toBe(1)
       const tasksPrevPaths = await Promise.all(
         tasks.map(async task =>
           (
@@ -108,7 +106,7 @@ test.describe("Show task page", () => {
           ).trim()
         )
       )
-      expect(tasksPrevPaths).to.deep.equal(TASK_12B_ASSIGNED_TASKS)
+      expect(tasksPrevPaths).toEqual(TASK_12B_ASSIGNED_TASKS)
     })
   })
 })
@@ -118,14 +116,14 @@ test.describe("Show task page", () => {
   })
   test.describe("When in the show page of a task without a parent task", () => {
     test("We should not see a parent task", async () => {
-      await pwExpect(await ShowTask.getParentTaskField()).toHaveCount(0)
+      await expect(await ShowTask.getParentTaskField()).toHaveCount(0)
     })
   })
   test.describe("When in the show page of a task with children tasks", () => {
     test("We should see list of children tasks that related to the current task", async () => {
       await waitFor(await ShowTask.getChildrenTasks(), "visible")
-      await pwExpect(await ShowTask.getChildrenTasksField()).not.toHaveCount(0)
-      await pwExpect(await ShowTask.getFirstItemFromChildrenTasks()).toHaveText(
+      await expect(await ShowTask.getChildrenTasksField()).not.toHaveCount(0)
+      await expect(await ShowTask.getFirstItemFromChildrenTasks()).toHaveText(
         "1.1",
         {
           useInnerText: true
@@ -138,26 +136,18 @@ test.describe("Show task page", () => {
       await ShowTask.openAsAdminUser(TASK_12B_UUID)
       await (await ShowTask.getMergeButton()).click()
       // wait for the merge page to render and load data
-      // eslint-disable-next-line no-unused-expressions
-      expect(await MergeTasks.getTitle()).to.exist
-      await pwExpect
-        .poll(
-          async () => await (await MergeTasks.getLeftTaskField()).inputValue()
-        )
-        .toContain("1.2.B")
-      await pwExpect(await MergeTasks.getLeftTaskField()).not.toBeEnabled()
+      await expect(await MergeTasks.getTitle()).toBeVisible()
+      await expect(await MergeTasks.getLeftTaskField()).toHaveValue(/1\.2\.B/)
+      await expect(await MergeTasks.getLeftTaskField()).not.toBeEnabled()
     })
     test("Should open and close the Edit Engagement planning approvals modal correctly", async () => {
       const editButton =
         await ShowTask.getEditEngagementPlanningApprovalsButton()
-      await waitFor(editButton, "attached")
-      await waitFor(editButton, "visible")
       await editButton.click()
       const modal = await ShowTask.getEditApprovalsModal()
-      await waitFor(modal, "attached")
       await waitFor(modal, "visible")
       const modalTitle = await modal.locator(".modal-title").first()
-      await pwExpect(modalTitle).toHaveText(
+      await expect(modalTitle).toHaveText(
         "Edit Engagement planning approval process",
         {
           useInnerText: true
@@ -172,14 +162,11 @@ test.describe("Show task page", () => {
     test("Should open and close the Edit Report publication approvals modal correctly", async () => {
       const editButton =
         await ShowTask.getEditReportPublicationApprovalsButton()
-      await waitFor(editButton, "attached")
-      await waitFor(editButton, "visible")
       await editButton.click()
       const modal = await ShowTask.getEditApprovalsModal()
-      await waitFor(modal, "attached")
       await waitFor(modal, "visible")
       const modalTitle = await modal.locator(".modal-title").first()
-      await pwExpect(modalTitle).toHaveText(
+      await expect(modalTitle).toHaveText(
         "Edit Report publication approval process",
         {
           useInnerText: true
@@ -201,7 +188,7 @@ test.describe("Show task page", () => {
       const EF1_2_MATRIX_TASKS = ["EF 1.2", "»\n1.2.A", "»\n1.2.B", "»\n1.2.C"]
       await ShowTask.openAsAdminUser(TASK_EF1_2_UUID)
       const tasks = await ShowTask.getEventMatrixTasks()
-      expect(tasks.length).to.equal(EF1_2_MATRIX_TASKS.length)
+      expect(tasks.length).toBe(EF1_2_MATRIX_TASKS.length)
       const containsStarIcon = await Promise.all(
         tasks.map(
           async task =>
@@ -211,7 +198,7 @@ test.describe("Show task page", () => {
         )
       )
       // only first task (self) should contain the task icon
-      expect(containsStarIcon).to.deep.equal([true, false, false, false])
+      expect(containsStarIcon).toEqual([true, false, false, false])
       const taskPath = await Promise.all(
         tasks.map(async task =>
           (
@@ -219,7 +206,7 @@ test.describe("Show task page", () => {
           ).trim()
         )
       )
-      expect(taskPath).to.deep.equal(EF1_2_MATRIX_TASKS)
+      expect(taskPath).toEqual(EF1_2_MATRIX_TASKS)
     })
   })
   test.describe("When editing a task and setting it to inactive", () => {
@@ -228,36 +215,30 @@ test.describe("Show task page", () => {
       const inactiveButton = await currentPage()
         .locator('label[for="status_INACTIVE"]')
         .first()
-      await waitFor(inactiveButton, "attached")
       await inactiveButton.click()
       const confirmButton = await currentPage()
         .locator(".modal-footer .btn-primary")
         .first()
-      await waitFor(confirmButton, "attached")
       await confirmButton.click()
       const submitButton = await currentPage()
         .locator("#formBottomSubmit")
         .first()
-      await waitFor(submitButton, "attached")
       await submitButton.click()
 
       // check if child tasks are inactive
       await ShowTask.openAsAdminUser(TASK_TEST_1_1_UUID)
       let statusField = await currentPage().locator("#status").first()
-      await waitFor(statusField, "attached")
-      await pwExpect(statusField).toHaveText("Inactive", {
+      await expect(statusField).toHaveText("Inactive", {
         useInnerText: true
       })
       await ShowTask.openAsAdminUser(TASK_TEST_1_1_1_UUID)
       statusField = await currentPage().locator("#status").first()
-      await waitFor(statusField, "attached")
-      await pwExpect(statusField).toHaveText("Inactive", {
+      await expect(statusField).toHaveText("Inactive", {
         useInnerText: true
       })
       await ShowTask.openAsAdminUser(TASK_TEST_1_1_1_1_UUID)
       statusField = await currentPage().locator("#status").first()
-      await waitFor(statusField, "attached")
-      await pwExpect(statusField).toHaveText("Inactive", {
+      await expect(statusField).toHaveText("Inactive", {
         useInnerText: true
       })
     })
@@ -267,16 +248,13 @@ test.describe("Show task page", () => {
       const activeButton = await currentPage()
         .locator('label[for="status_ACTIVE"]')
         .first()
-      await waitFor(activeButton, "attached")
       await activeButton.click()
       let submitButton = await currentPage()
         .locator("#formBottomSubmit")
         .first()
-      await waitFor(submitButton, "attached")
       await submitButton.click()
       let statusField = await currentPage().locator("#status").first()
-      await waitFor(statusField, "attached")
-      await pwExpect(statusField).toHaveText("Active", {
+      await expect(statusField).toHaveText("Active", {
         useInnerText: true
       })
 
@@ -285,14 +263,11 @@ test.describe("Show task page", () => {
       const inactiveButton = await currentPage()
         .locator('label[for="status_INACTIVE"]')
         .first()
-      await waitFor(inactiveButton, "attached")
       await inactiveButton.click()
       submitButton = await currentPage().locator("#formBottomSubmit").first()
-      await waitFor(submitButton, "attached")
       await submitButton.click()
       statusField = await currentPage().locator("#status").first()
-      await waitFor(statusField, "attached")
-      await pwExpect(statusField).toHaveText("Inactive", {
+      await expect(statusField).toHaveText("Inactive", {
         useInnerText: true
       })
     })

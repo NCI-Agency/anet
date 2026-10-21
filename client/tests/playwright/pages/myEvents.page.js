@@ -15,7 +15,6 @@ class MyEvents extends Page {
   async getMyEventSeries() {
     const selector = "#my-event-series table tbody tr td:first-child"
     const firstEventSeries = await currentPage().locator(selector).first()
-    await waitFor(firstEventSeries, "attached")
     await waitFor(firstEventSeries, "visible")
     return currentPage().locator(selector).all()
   }
@@ -23,7 +22,6 @@ class MyEvents extends Page {
   async getMyEvents() {
     const selector = "#my-events table tbody tr td:first-child"
     const firstEvent = await currentPage().locator(selector).first()
-    await waitFor(firstEvent, "attached")
     await waitFor(firstEvent, "visible")
     return currentPage().locator(selector).all()
   }
@@ -34,8 +32,6 @@ class MyEvents extends Page {
         "#my-events .event-collection div header div button[value='summary']"
       )
       .first()
-    await waitFor(summaryTab, "attached")
-    await waitFor(summaryTab, "visible")
     await summaryTab.click()
     await super.waitUntilLoaded()
   }
@@ -66,8 +62,6 @@ class MyEvents extends Page {
         "#my-events .event-collection div header div button[value='calendar']"
       )
       .first()
-    await waitFor(calendarTab, "attached")
-    await waitFor(calendarTab, "visible")
     await calendarTab.click()
     await super.waitUntilLoaded()
   }
@@ -78,8 +72,6 @@ class MyEvents extends Page {
         "#my-events .event-collection div header div button[value='map']"
       )
       .first()
-    await waitFor(mapTab, "attached")
-    await waitFor(mapTab, "visible")
     await mapTab.click()
     await super.waitUntilLoaded()
   }

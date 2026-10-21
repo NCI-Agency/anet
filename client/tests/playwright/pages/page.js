@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import { currentPage, typeKeys, waitFor, waitUntil } from "../support.js"
 
 class Page {
@@ -51,13 +51,11 @@ class Page {
   }
 
   async getClassificationLine() {
-    return (
-      await currentPage().locator(".classification-line").first()
-    ).innerText()
+    return currentPage().locator(".classification-line").first()
   }
 
   async getCaptionLine() {
-    return (await currentPage().locator(".info-line").first()).innerText()
+    return currentPage().locator(".info-line").first()
   }
 
   async getImageClick() {
@@ -73,8 +71,7 @@ class Page {
   }
 
   async waitForLoginForm() {
-    await waitFor(await this.getLoginForm(), "attached")
-    await waitFor(await this.getLoginForm(), "visible")
+    await expect(await this.getLoginForm()).toBeVisible()
   }
 
   async login(credentials) {
@@ -92,8 +89,7 @@ class Page {
     }
     await currentPage().goto("/api/logout")
     await (await this.getLogoutFormSubmitButton()).click()
-    await waitFor(await this.getLoggedOutForm(), "attached")
-    await waitFor(await this.getLoggedOutForm(), "visible")
+    await expect(await this.getLoggedOutForm()).toBeVisible()
   }
 
   async waitUntilLoaded() {
@@ -154,10 +150,7 @@ class Page {
   }
 
   async waitForAlertSuccessToLoad() {
-    if (!(await (await this.getAlertSuccess()).isVisible())) {
-      await waitFor(await this.getAlertSuccess(), "attached")
-      await waitFor(await this.getAlertSuccess(), "visible")
-    }
+    await expect(await this.getAlertSuccess()).toBeVisible()
   }
 
   async getAlertInfo() {
@@ -165,10 +158,7 @@ class Page {
   }
 
   async waitForAlertInfoToLoad() {
-    if (!(await (await this.getAlertInfo()).isVisible())) {
-      await waitFor(await this.getAlertInfo(), "attached")
-      await waitFor(await this.getAlertInfo(), "visible")
-    }
+    await expect(await this.getAlertInfo()).toBeVisible()
   }
 
   async getAlertWarning() {
@@ -176,10 +166,7 @@ class Page {
   }
 
   async waitForAlertWarningToLoad() {
-    if (!(await (await this.getAlertWarning()).isVisible())) {
-      await waitFor(await this.getAlertWarning(), "attached")
-      await waitFor(await this.getAlertWarning(), "visible")
-    }
+    await expect(await this.getAlertWarning()).toBeVisible()
   }
 
   async getAlertDanger() {
@@ -187,10 +174,7 @@ class Page {
   }
 
   async waitForAlertDangerToLoad() {
-    if (!(await (await this.getAlertDanger()).isVisible())) {
-      await waitFor(await this.getAlertDanger(), "attached")
-      await waitFor(await this.getAlertDanger(), "visible")
-    }
+    await expect(await this.getAlertDanger()).toBeVisible()
   }
 
   async getRandomOption(select) {
@@ -266,14 +250,14 @@ class Page {
   }
 
   async waitForElementToChange(getElementCallback, value) {
-    await pwExpect(await getElementCallback()).toHaveText(value, {
+    await expect(await getElementCallback()).toHaveText(value, {
       useInnerText: true,
       timeout: 10000
     })
   }
 
   async waitForElementToContain(getElementCallback, value) {
-    await pwExpect(await getElementCallback()).toContainText(value, {
+    await expect(await getElementCallback()).toContainText(value, {
       useInnerText: true,
       timeout: 10000
     })

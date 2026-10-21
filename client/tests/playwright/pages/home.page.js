@@ -20,7 +20,6 @@ class Home extends Page {
     const banner = await currentPage()
       .locator("#topbar div:nth-child(1)")
       .first()
-    await waitFor(banner, "attached")
     await waitFor(banner, "visible")
     return banner
   }
@@ -128,13 +127,7 @@ class Home extends Page {
   }
 
   async getSavedSearchRows() {
-    return currentPage().locator("div.saved-search-row").all()
-  }
-
-  async getSavedSearchTitleText(savedSearch) {
-    return (
-      await (await savedSearch).locator(".asLink").first().innerText()
-    ).trim()
+    return currentPage().locator("div.saved-search-row")
   }
 }
 

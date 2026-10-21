@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
@@ -69,9 +69,7 @@ class MergeLocations extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "attached")
     await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getLocationHeaderFromPopover(), "attached")
     await waitFor(await this.getLocationHeaderFromPopover(), "visible")
     return this.waitForElementToChange(
       this.getFirstItemFromAdvancedSelect,
@@ -95,7 +93,7 @@ class MergeLocations extends Page {
   }
 
   async waitForColumnToStartWith(compareStr, side, text) {
-    await pwExpect(await this.getColumnContent(side, text)).toContainText(
+    await expect(await this.getColumnContent(side, text)).toContainText(
       compareStr,
       {
         useInnerText: true

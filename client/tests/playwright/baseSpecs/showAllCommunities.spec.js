@@ -1,4 +1,4 @@
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import ShowAllCommunities from "../pages/showAllCommunities.page.js"
 import { test } from "../support.js"
 
@@ -17,8 +17,9 @@ test.describe("Show All Communities Page", () => {
   })
   test("Should display all communities", async () => {
     const communities = await ShowAllCommunities.getCommunitiesList()
-    expect(communities.length).to.be.within(1, 7)
+    expect(communities.length).toBeGreaterThanOrEqual(1)
+    expect(communities.length).toBeLessThanOrEqual(7)
     const communitiesNames = await ShowAllCommunities.getCommunitiesNames()
-    expect(communitiesNames).to.include.members(COMMUNITIES_NAMES)
+    expect(communitiesNames).toEqual(expect.arrayContaining(COMMUNITIES_NAMES))
   })
 })

@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import CreateNewLocation from "../pages/location/createNewLocation.page.js"
 import EditLocation from "../pages/location/editLocation.page.js"
 import ShowLocation from "../pages/location/showLocation.page.js"
@@ -29,28 +29,23 @@ test.describe("When editing a location", () => {
     await (await CreateNewLocation.getNameField()).click()
     await (await CreateNewLocation.getCreateButton()).click()
     // We are sent to showLocation page
-    await waitFor(await ShowLocation.getSuccessMsg(), "attached")
     await waitFor(await ShowLocation.getSuccessMsg(), "visible")
-    await waitFor(await ShowLocation.getEditButton(), "attached")
-    await waitFor(await ShowLocation.getEditButton(), "visible")
     await (await ShowLocation.getEditButton()).click()
     // Now we are in the edit page
   })
   test.describe("When on the edit page of a location", () => {
     test("Should see the correct location type value of the created location", async () => {
-      await waitFor(await EditLocation.getLocationTypeLabel(), "attached")
       await waitFor(await EditLocation.getLocationTypeLabel(), "visible")
-      await pwExpect(await EditLocation.getLocationTypeField()).toHaveValue(
+      await expect(await EditLocation.getLocationTypeField()).toHaveValue(
         LOCATION_TYPE.type
       )
     })
     test("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", async () => {
-      await waitFor(await EditLocation.getLatLngLabel(), "attached")
       await waitFor(await EditLocation.getLatLngLabel(), "visible")
-      await pwExpect(await EditLocation.getLatInputField()).toHaveValue(
+      await expect(await EditLocation.getLatInputField()).toHaveValue(
         LOCATION_COORDS.lat
       )
-      await pwExpect(await EditLocation.getLngInputField()).toHaveValue(
+      await expect(await EditLocation.getLngInputField()).toHaveValue(
         LOCATION_COORDS.lng
       )
     })
@@ -59,34 +54,33 @@ test.describe("When editing a location", () => {
       await (await EditLocation.getAllFormatsPopover()).click()
       await waitFor(await EditLocation.getAllFormatsPopoverLat(), "attached")
       await waitFor(await EditLocation.getAllFormatsPopoverMGRS(), "attached")
-      await pwExpect(await EditLocation.getAllFormatsPopoverLat()).toHaveText(
+      await expect(await EditLocation.getAllFormatsPopoverLat()).toHaveText(
         NEW_COORDS.lat,
         {
           useInnerText: true
         }
       )
-      await pwExpect(await EditLocation.getAllFormatsPopoverLng()).toHaveText(
+      await expect(await EditLocation.getAllFormatsPopoverLng()).toHaveText(
         NEW_COORDS.lng,
         {
           useInnerText: true
         }
       )
-      await pwExpect(await EditLocation.getAllFormatsPopoverMGRS()).toHaveText(
+      await expect(await EditLocation.getAllFormatsPopoverMGRS()).toHaveText(
         NEW_COORDS.mgrs,
         {
           useInnerText: true
         }
       )
       await (await EditLocation.getSaveLocationButton()).click()
-      await waitFor(await ShowLocation.getSuccessMsg(), "attached")
       await waitFor(await ShowLocation.getSuccessMsg(), "visible")
-      await pwExpect(await ShowLocation.getLatField()).toHaveText(
+      await expect(await ShowLocation.getLatField()).toHaveText(
         NEW_COORDS.lat,
         {
           useInnerText: true
         }
       )
-      await pwExpect(await ShowLocation.getLngField()).toHaveText(
+      await expect(await ShowLocation.getLngField()).toHaveText(
         NEW_COORDS.lng,
         {
           useInnerText: true

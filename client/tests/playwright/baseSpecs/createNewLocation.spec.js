@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import CreateNewLocation from "../pages/location/createNewLocation.page.js"
 import { test, waitFor } from "../support.js"
 import {
@@ -16,9 +15,7 @@ test.describe("When creating a new Location", () => {
   test("Should not create a location without name & type input", async () => {
     await CreateNewLocation.open()
     await (await CreateNewLocation.getCreateButton()).click()
-    await waitFor(await CreateNewLocation.getNameRequiredError(), "attached")
     await waitFor(await CreateNewLocation.getNameRequiredError(), "visible")
-    await waitFor(await CreateNewLocation.getTypeRequiredError(), "attached")
     await waitFor(await CreateNewLocation.getTypeRequiredError(), "visible")
   })
   test("Should display possible duplicates with similar names", async () => {
@@ -30,20 +27,18 @@ test.describe("When creating a new Location", () => {
     ).selectOption({
       index: LOCATION_TYPE.index
     })
-    await waitFor(await CreateNewLocation.getDuplicatesButton(), "visible")
     await (await CreateNewLocation.getDuplicatesButton()).click()
     // wait for the modal to slide in (transition is 300 ms)
     await waitFor(await CreateNewLocation.getModalContent(), "visible")
-    const similar = (
-      await (await CreateNewLocation.getSimilarLocation()).innerText()
-    ).trim()
-    await waitFor(await CreateNewLocation.getModalCloseButton(), "visible")
+    await expect(await CreateNewLocation.getSimilarLocation()).toHaveText(
+      "Kabul Hospital",
+      { useInnerText: true }
+    )
     await (await CreateNewLocation.getModalCloseButton()).click()
     // wait for the modal to slide out (transition is 300 ms)
     await waitFor(await CreateNewLocation.getModalContent(), "visible", {
       reverse: true
     })
-    expect(similar).to.equal("Kabul Hospital")
   })
   test("Should not accept invalid latitude-longitude inputs", async () => {
     await (await CreateNewLocation.getNameField()).fill(String(LOCATION_NAME))
@@ -71,42 +66,43 @@ test.describe("When creating a new Location", () => {
       await CreateNewLocation.getAllFormatsPopoverMGRS(),
       "attached"
     )
-    await pwExpect(
-      await CreateNewLocation.getAllFormatsPopoverLat()
-    ).toHaveText(LOCATION_COORDS.lat, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await CreateNewLocation.getAllFormatsPopoverLng()
-    ).toHaveText(LOCATION_COORDS.lng, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await CreateNewLocation.getAllFormatsPopoverMGRS()
-    ).toHaveText(LOCATION_COORDS.mgrs, {
-      useInnerText: true
-    })
+    await expect(await CreateNewLocation.getAllFormatsPopoverLat()).toHaveText(
+      LOCATION_COORDS.lat,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await CreateNewLocation.getAllFormatsPopoverLng()).toHaveText(
+      LOCATION_COORDS.lng,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await CreateNewLocation.getAllFormatsPopoverMGRS()).toHaveText(
+      LOCATION_COORDS.mgrs,
+      {
+        useInnerText: true
+      }
+    )
   })
   test("Should create a location successfully", async () => {
     await (await CreateNewLocation.getCreateButton()).click()
-    await waitFor(await CreateNewLocation.getSuccessMsg(), "attached")
     await waitFor(await CreateNewLocation.getSuccessMsg(), "visible")
   })
   test("Should not display possible duplicates button", async () => {
     await CreateNewLocation.open()
-    await waitFor(await CreateNewLocation.getForm(), "attached")
     await waitFor(await CreateNewLocation.getForm(), "visible")
     await (
       await CreateNewLocation.getNameField()
     ).fill(String(NOT_SIMILAR_LOCATION.name))
-    await pwExpect(await CreateNewLocation.getDuplicatesButton()).toHaveCount(0)
+    await expect(await CreateNewLocation.getDuplicatesButton()).toHaveCount(0)
   })
   test("Should allow map maximisation", async () => {
-    await pwExpect(
+    await expect(
       await CreateNewLocation.getMaximiseLeafletButton()
     ).toHaveAttribute("title", "Full Screen")
     await (await CreateNewLocation.getMaximiseLeafletButton()).click()
-    await pwExpect(
+    await expect(
       await CreateNewLocation.getMinimiseLeafletButton()
     ).toHaveAttribute("title", "Exit Full Screen")
   })

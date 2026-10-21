@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import ShowReport from "../pages/report/showReport.page.js"
 import { test } from "../support.js"
 
@@ -11,13 +11,14 @@ test.describe("Submit report", () => {
     test("Should be able to open Draft report", async () => {
       await ShowReport.open(DRAFT_REPORT_UUID)
       await ShowReport.waitForShowReportToLoad()
-      await pwExpect
+      await expect
         .poll(async () => await ShowReport.getUuid())
         .toEqual(DRAFT_REPORT_UUID)
-      await pwExpect
-        .poll(async () => await ShowReport.getReportStatusText())
-        .toEqual(ShowReport.REPORT_IS_DRAFT)
-      await pwExpect(await ShowReport.getSubmitButton()).not.toHaveCount(0)
+      await expect(await ShowReport.getReportStatus()).toHaveText(
+        ShowReport.REPORT_IS_DRAFT,
+        { useInnerText: true }
+      )
+      await expect(await ShowReport.getSubmitButton()).not.toHaveCount(0)
     })
   })
   test.describe("As superuser", async () => {
@@ -30,33 +31,36 @@ test.describe("Submit report", () => {
     test("Should be able to submit Draft report", async () => {
       await ShowReport.openAsAdminUser(DRAFT_REPORT_UUID)
       await ShowReport.waitForShowReportToLoad()
-      await pwExpect(await ShowReport.getSubmitButton()).not.toHaveCount(0)
+      await expect(await ShowReport.getSubmitButton()).not.toHaveCount(0)
       // Submit the report
       await (await ShowReport.getSubmitButton()).click()
       // Should be successful
 
       // Wait for status text to be updated
-      await pwExpect
-        .poll(async () => await ShowReport.getReportStatusText())
-        .toEqual(ShowReport.REPORT_IS_PENDING_APPROVALS)
+      await expect(await ShowReport.getReportStatus()).toHaveText(
+        ShowReport.REPORT_IS_PENDING_APPROVALS,
+        { useInnerText: true }
+      )
     })
   })
   test.describe("As author", async () => {
     test("Should be able to set report back to Draft", async () => {
       await ShowReport.open(DRAFT_REPORT_UUID)
       await ShowReport.waitForShowReportToLoad()
-      await pwExpect
-        .poll(async () => await ShowReport.getReportStatusText())
-        .toEqual(ShowReport.REPORT_IS_PENDING_APPROVALS)
+      await expect(await ShowReport.getReportStatus()).toHaveText(
+        ShowReport.REPORT_IS_PENDING_APPROVALS,
+        { useInnerText: true }
+      )
       // Edit the report
       await (await ShowReport.getEditReportButton()).click()
       // Save the report
       await (await ShowReport.getPreviewAndSubmitButton()).click()
       // Should be successful
       await ShowReport.waitForShowReportToLoad()
-      await pwExpect
-        .poll(async () => await ShowReport.getReportStatusText())
-        .toEqual(ShowReport.REPORT_IS_DRAFT)
+      await expect(await ShowReport.getReportStatus()).toHaveText(
+        ShowReport.REPORT_IS_DRAFT,
+        { useInnerText: true }
+      )
     })
   })
 })

@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import Search from "../pages/search.page.js"
 import ShowOrganization from "../pages/showOrganization.page.js"
@@ -59,13 +58,6 @@ test.describe("For the annual organization assessments", () => {
           "organizationAnnually",
           "annually"
         ),
-        "attached"
-      )
-      await waitFor(
-        await ShowOrganization.getAssessmentsTable(
-          "organizationAnnually",
-          "annually"
-        ),
         "visible"
       )
       await (
@@ -93,11 +85,6 @@ test.describe("For the annual organization assessments", () => {
       )
     })
     test("Should allow the author of the assessment to successfully edit it", async () => {
-      await waitFor(
-        await ShowOrganization.getEditAssessmentButton(),
-        "attached"
-      )
-      await waitFor(await ShowOrganization.getEditAssessmentButton(), "visible")
       await (await ShowOrganization.getEditAssessmentButton()).click()
       await ShowOrganization.waitForAssessmentModalForm()
       await ShowOrganization.fillAssessmentQuestion(
@@ -136,7 +123,7 @@ test.describe("For the annual organization assessments", () => {
       ).click()
     })
     test("Should not show make assessment button when there is an assessment on that period", async () => {
-      await pwExpect(
+      await expect(
         await ShowOrganization.getAddAssessmentButton(
           "organizationAnnually",
           "annually"
@@ -144,11 +131,6 @@ test.describe("For the annual organization assessments", () => {
       ).toHaveCount(0)
     })
     test("Should allow admins to successfully edit existing assessment", async () => {
-      await waitFor(
-        await ShowOrganization.getEditAssessmentButton(),
-        "attached"
-      )
-      await waitFor(await ShowOrganization.getEditAssessmentButton(), "visible")
       await (await ShowOrganization.getEditAssessmentButton()).click()
       await ShowOrganization.waitForAssessmentModalForm()
       await ShowOrganization.fillAssessmentQuestion(
@@ -197,7 +179,7 @@ const assertAssessmentDetails = async (
   await mapSequential(details, async (detail, index) => {
     const pre = `${index}-) `
     const det = (await detail.innerText()).trim()
-    expect(`${pre}${det}`).to.equal(
+    expect(`${pre}${det}`).toBe(
       `${pre}${VALUE_TO_TEXT_FOR_PRIORITY[assessmentDetails[index]] || VALUE_TO_TEXT_FOR_INTERACTION[assessmentDetails[index]] || assessmentDetails[index]}`
     )
   })

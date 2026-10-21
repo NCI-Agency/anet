@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import CreateReport from "../pages/createReport.page.js"
 import { test, waitFor, waitUntil } from "../support.js"
 
@@ -37,7 +36,6 @@ test.describe("Create report form page", () => {
     test("Should be able to load the form", async () => {
       await CreateReport.open()
       // wait for the page transition and rendering of custom fields
-      await waitFor(await CreateReport.getForm(), "attached")
       await waitFor(await CreateReport.getForm(), "visible")
     })
     test("Should be able to set the grid location", async () => {
@@ -48,23 +46,16 @@ test.describe("Create report form page", () => {
         await CreateReport.getGridLocationLngField()
       ).fill(String(GRID_LOCATION.lng))
       await (await CreateReport.getGridLocationInfoButton()).click()
-      await waitFor(await CreateReport.getGridLocationMgrsButton(), "attached")
-      await waitFor(await CreateReport.getGridLocationMgrsButton(), "visible")
       await (await CreateReport.getGridLocationMgrsButton()).click()
-      await pwExpect(
+      await expect(
         await CreateReport.getGridLocationDisplayedCoordinateField()
       ).toHaveValue(GRID_LOCATION.displayedCoordinate)
       await (await CreateReport.getGridLocationInfoButton()).click()
-      await waitFor(
-        await CreateReport.getGridLocationLatLonButton(),
-        "attached"
-      )
-      await waitFor(await CreateReport.getGridLocationLatLonButton(), "visible")
       await (await CreateReport.getGridLocationLatLonButton()).click()
-      await pwExpect(await CreateReport.getGridLocationLatField()).toHaveValue(
+      await expect(await CreateReport.getGridLocationLatField()).toHaveValue(
         GRID_LOCATION.lat
       )
-      await pwExpect(await CreateReport.getGridLocationLngField()).toHaveValue(
+      await expect(await CreateReport.getGridLocationLngField()).toHaveValue(
         GRID_LOCATION.lng
       )
     })
@@ -101,32 +92,29 @@ test.describe("Create report form page", () => {
       )
     })
     test("Should be able to select an ANET object reference", async () => {
-      await waitFor(await CreateReport.getTestReferenceFieldLabel(), "attached")
       await waitFor(await CreateReport.getTestReferenceFieldLabel(), "visible")
-      await pwExpect(
-        await CreateReport.getTestReferenceFieldLabel()
-      ).toHaveText("Related report", {
-        useInnerText: true
-      })
-      await waitFor(
-        await CreateReport.getTestReferenceFieldHelpText(),
-        "attached"
+      await expect(await CreateReport.getTestReferenceFieldLabel()).toHaveText(
+        "Related report",
+        {
+          useInnerText: true
+        }
       )
       await waitFor(
         await CreateReport.getTestReferenceFieldHelpText(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestReferenceFieldHelpText()
       ).toHaveText("Here you can link to a related report", {
         useInnerText: true
       })
 
       // Only input type is Reports, so there should be no button to select a type
-      await pwExpect(
-        await CreateReport.getTestReferenceField()
-      ).toHaveAttribute("placeholder", "Find reports")
-      await pwExpect(
+      await expect(await CreateReport.getTestReferenceField()).toHaveAttribute(
+        "placeholder",
+        "Find reports"
+      )
+      await expect(
         await CreateReport.getTestReferenceFieldButton("Reports")
       ).toHaveCount(0)
       await (await CreateReport.getTestReferenceFieldLabel()).click()
@@ -135,7 +123,7 @@ test.describe("Create report form page", () => {
         CreateReport.getTestReferenceFieldAdvancedSelectFirstItem,
         REPORT_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestReferenceFieldAdvancedSelectFirstItem()
       ).toContainText(REPORT_COMPLETE, {
         useInnerText: true
@@ -145,10 +133,10 @@ test.describe("Create report form page", () => {
       ).click()
       // The selected element should be shown below the input
 
-      await pwExpect(
+      await expect(
         await CreateReport.getTestReferenceFieldValue()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateReport.getTestReferenceFieldValue()
       ).toContainText(REPORT_VALUE, {
         useInnerText: true
@@ -162,9 +150,9 @@ test.describe("Create report form page", () => {
           .locator("button")
           .first()
       ).click()
-      await pwExpect(
-        await CreateReport.getTestReferenceFieldValue()
-      ).toHaveCount(0)
+      await expect(await CreateReport.getTestReferenceFieldValue()).toHaveCount(
+        0
+      )
 
       // Select it again
       await (await CreateReport.getTestReferenceFieldLabel()).click()
@@ -181,26 +169,18 @@ test.describe("Create report form page", () => {
     test("Should be able to select multiple ANET object references", async () => {
       await waitFor(
         await CreateReport.getTestMultiReferenceFieldLabel(),
-        "attached"
-      )
-      await waitFor(
-        await CreateReport.getTestMultiReferenceFieldLabel(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldLabel()
       ).toHaveText("Additional engagement needed for", {
         useInnerText: true
       })
       await waitFor(
         await CreateReport.getTestMultiReferenceFieldHelpText(),
-        "attached"
-      )
-      await waitFor(
-        await CreateReport.getTestMultiReferenceFieldHelpText(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldHelpText()
       ).toHaveText(
         "Here you can link to people, positions and organizations that need an additional engagement",
@@ -214,7 +194,7 @@ test.describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldButton("People")
       ).scrollIntoViewIfNeeded()
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceField()
       ).toHaveAttribute("placeholder", "Find people")
       await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
@@ -225,7 +205,7 @@ test.describe("Create report form page", () => {
         () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_PEOPLE_COMPLETE_1
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1)
       ).toContainText(SEARCH_PEOPLE_COMPLETE_1, {
         useInnerText: true
@@ -241,18 +221,18 @@ test.describe("Create report form page", () => {
       ).click()
       // Wait for the filters to change
 
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceField()
       ).toHaveAttribute("placeholder", "Find organizations")
       await (await CreateReport.getTestMultiReferenceField()).click()
-      await pwExpect(
-        await CreateReport.getTestMultiReferenceField()
-      ).toHaveValue(SEARCH_KEY)
+      await expect(await CreateReport.getTestMultiReferenceField()).toHaveValue(
+        SEARCH_KEY
+      )
       await CreateReport.waitForElementToChange(
         () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_ORGANIZATION_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1)
       ).toContainText(SEARCH_ORGANIZATION_COMPLETE, {
         useInnerText: true
@@ -268,18 +248,18 @@ test.describe("Create report form page", () => {
       ).click()
       // Wait for the filters to change
 
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceField()
       ).toHaveAttribute("placeholder", "Find positions")
       await (await CreateReport.getTestMultiReferenceField()).click()
-      await pwExpect(
-        await CreateReport.getTestMultiReferenceField()
-      ).toHaveValue(SEARCH_KEY)
+      await expect(await CreateReport.getTestMultiReferenceField()).toHaveValue(
+        SEARCH_KEY
+      )
       await CreateReport.waitForElementToChange(
         () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_POSITION_COMPLETE_1
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1)
       ).toContainText(SEARCH_POSITION_COMPLETE_1, {
         useInnerText: true
@@ -287,9 +267,9 @@ test.describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input does not get empty
-      await pwExpect(
-        await CreateReport.getTestMultiReferenceField()
-      ).toHaveValue(SEARCH_KEY)
+      await expect(await CreateReport.getTestMultiReferenceField()).toHaveValue(
+        SEARCH_KEY
+      )
       // Change input type to People
       await (
         await CreateReport.getTestMultiReferenceFieldButton("People")
@@ -310,7 +290,7 @@ test.describe("Create report form page", () => {
       await (await CreateReport.getEngagementInformationTitle()).click()
 
       // Default input type is People
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceField()
       ).toHaveAttribute("placeholder", "Find people")
       await (await CreateReport.getTestMultiReferenceField()).click()
@@ -327,7 +307,7 @@ test.describe("Create report form page", () => {
         () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         PERSON_COMPLETE_1
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1)
       ).toContainText(PERSON_COMPLETE_1, {
         useInnerText: true
@@ -335,7 +315,7 @@ test.describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1)
       ).click()
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(2)
       ).toContainText(PERSON_COMPLETE_2, {
         useInnerText: true
@@ -346,20 +326,20 @@ test.describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input does not get empty, the selected element shown below the input
-      await pwExpect(
-        await CreateReport.getTestMultiReferenceField()
-      ).toHaveValue(PERSON)
+      await expect(await CreateReport.getTestMultiReferenceField()).toHaveValue(
+        PERSON
+      )
       // Value should exist now
 
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValue()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(1)
       ).toContainText(PERSON_VALUE_1, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(2)
       ).toContainText(PERSON_VALUE_2, {
         useInnerText: true
@@ -376,7 +356,7 @@ test.describe("Create report form page", () => {
       ).click()
       // Wait for the filters to change
 
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceField()
       ).toHaveAttribute("placeholder", "Find positions")
       await (await CreateReport.getTestMultiReferenceField()).click()
@@ -393,7 +373,7 @@ test.describe("Create report form page", () => {
         () => CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         POSITION_COMPLETE_1
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1)
       ).toContainText(POSITION_COMPLETE_1, {
         useInnerText: true
@@ -401,7 +381,7 @@ test.describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1)
       ).click()
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(2)
       ).toContainText(POSITION_COMPLETE_2, {
         useInnerText: true
@@ -409,7 +389,7 @@ test.describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2)
       ).click()
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(3)
       ).toContainText(POSITION_COMPLETE_3, {
         useInnerText: true
@@ -420,25 +400,25 @@ test.describe("Create report form page", () => {
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input does not get empty, the selected element shown below the input
-      await pwExpect(
-        await CreateReport.getTestMultiReferenceField()
-      ).toHaveValue(POSITION)
+      await expect(await CreateReport.getTestMultiReferenceField()).toHaveValue(
+        POSITION
+      )
       // Value should exist now
 
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValue()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(3)
       ).toContainText(POSITION_VALUE_1, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(4)
       ).toContainText(POSITION_VALUE_2, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(5)
       ).toContainText(POSITION_VALUE_3, {
         useInnerText: true
@@ -447,7 +427,7 @@ test.describe("Create report form page", () => {
       // Should have 5 values
       expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
-      ).to.have.lengthOf(5)
+      ).toHaveLength(5)
       // Delete one of the selected values
       await (
         await (
@@ -459,9 +439,9 @@ test.describe("Create report form page", () => {
       // Should have only 4 values left
       expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
-      ).to.have.lengthOf(4)
+      ).toHaveLength(4)
       // 3rd value should have changed
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(3)
       ).toContainText(POSITION_VALUE_2, {
         useInnerText: true
@@ -471,7 +451,7 @@ test.describe("Create report form page", () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      await pwExpect(await CreateReport.getAlertDanger()).toContainText(
+      await expect(await CreateReport.getAlertDanger()).toContainText(
         "The following errors must be fixed",
         {
           useInnerText: true
@@ -479,9 +459,8 @@ test.describe("Create report form page", () => {
       )
 
       // Check ANET object reference
-      await waitFor(await CreateReport.getTestReferenceFieldLabel(), "attached")
       await waitFor(await CreateReport.getTestReferenceFieldLabel(), "visible")
-      await pwExpect(
+      await expect(
         await CreateReport.getTestReferenceFieldValue()
       ).toContainText(REPORT_VALUE, {
         useInnerText: true
@@ -490,31 +469,27 @@ test.describe("Create report form page", () => {
       // Check ANET object multi-references
       await waitFor(
         await CreateReport.getTestMultiReferenceFieldLabel(),
-        "attached"
-      )
-      await waitFor(
-        await CreateReport.getTestMultiReferenceFieldLabel(),
         "visible"
       )
       expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
-      ).to.have.lengthOf(4)
-      await pwExpect(
+      ).toHaveLength(4)
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(1)
       ).toContainText(PERSON_VALUE_1, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(2)
       ).toContainText(PERSON_VALUE_2, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(3)
       ).toContainText(POSITION_VALUE_2, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(4)
       ).toContainText(POSITION_VALUE_3, {
         useInnerText: true
@@ -523,14 +498,14 @@ test.describe("Create report form page", () => {
     test("Should be able to edit a report with ANET object references", async () => {
       // Edit the report
       await (await CreateReport.getEditButton()).click()
-      await waitFor(await CreateReport.getTestReferenceFieldLabel(), "attached")
       await waitFor(await CreateReport.getTestReferenceFieldLabel(), "visible")
       // Default input type is People
-      await pwExpect(
-        await CreateReport.getTestReferenceField()
-      ).toHaveAttribute("placeholder", "Find reports")
+      await expect(await CreateReport.getTestReferenceField()).toHaveAttribute(
+        "placeholder",
+        "Find reports"
+      )
       // Check ANET object reference
-      await pwExpect(
+      await expect(
         await CreateReport.getTestReferenceFieldValue()
       ).toContainText(REPORT_VALUE, {
         useInnerText: true
@@ -548,39 +523,35 @@ test.describe("Create report form page", () => {
       ).click()
       await waitFor(
         await CreateReport.getTestMultiReferenceFieldLabel(),
-        "attached"
-      )
-      await waitFor(
-        await CreateReport.getTestMultiReferenceFieldLabel(),
         "visible"
       )
       await (
         await CreateReport.getTestMultiReferenceFieldLabel()
       ).scrollIntoViewIfNeeded()
       // Default input type is People
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceField()
       ).toHaveAttribute("placeholder", "Find people")
       // Check ANET object multi-references
       expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
-      ).to.have.lengthOf(4)
-      await pwExpect(
+      ).toHaveLength(4)
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(1)
       ).toContainText(PERSON_VALUE_1, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(2)
       ).toContainText(PERSON_VALUE_2, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(3)
       ).toContainText(POSITION_VALUE_2, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValueRow(4)
       ).toContainText(POSITION_VALUE_3, {
         useInnerText: true
@@ -597,50 +568,40 @@ test.describe("Create report form page", () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      const alertMessage = (
-        await (await CreateReport.getAlertDanger()).innerText()
-      ).trim()
-      expect(alertMessage).to.include("The following errors must be fixed")
+      await expect(await CreateReport.getAlertDanger()).toContainText(
+        "The following errors must be fixed",
+        { useInnerText: true }
+      )
 
       // Check ANET object reference
-      await waitFor(await CreateReport.getTestReferenceFieldLabel(), "attached")
       await waitFor(await CreateReport.getTestReferenceFieldLabel(), "visible")
-      await pwExpect(
-        await CreateReport.getTestReferenceFieldValue()
-      ).toHaveCount(0)
+      await expect(await CreateReport.getTestReferenceFieldValue()).toHaveCount(
+        0
+      )
 
       // Check ANET object multi-references
       await waitFor(
         await CreateReport.getTestMultiReferenceFieldLabel(),
-        "attached"
-      )
-      await waitFor(
-        await CreateReport.getTestMultiReferenceFieldLabel(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await CreateReport.getTestMultiReferenceFieldValue()
       ).toHaveCount(0)
     })
     test("Should be able to delete the report", async () => {
       // Edit the report
       await (await CreateReport.getEditButton()).click()
-      await waitFor(await CreateReport.getTestReferenceFieldLabel(), "attached")
       await waitFor(await CreateReport.getTestReferenceFieldLabel(), "visible")
       // Delete it
-      await waitFor(await CreateReport.getDeleteButton(), "attached")
-      await waitFor(await CreateReport.getDeleteButton(), "visible")
       await (await CreateReport.getDeleteButton()).click()
       // Confirm delete
 
       // wait for the modal to slide in (transition is 300 ms)
-      await waitFor(await CreateReport.getConfirmButton(), "attached")
-      await waitFor(await CreateReport.getConfirmButton(), "visible")
       await (await CreateReport.getConfirmButton()).click()
       // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       await CreateReport.waitForAlertToLoad()
-      await pwExpect(await CreateReport.getAlertSuccess()).toContainText(
+      await expect(await CreateReport.getAlertSuccess()).toContainText(
         "Report deleted",
         {
           useInnerText: true

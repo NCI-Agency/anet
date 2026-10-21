@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
 import EditReport from "../pages/report/editReport.page.js"
 import ShowReport from "../pages/report/showReport.page.js"
@@ -16,7 +16,7 @@ test.describe("When unpublishing a report", () => {
     test("Should unpublish the report successfully", async () => {
       const unpublishedReportUuid = await ShowReport.getUuid()
       await EditReport.unpublishReport(unpublishedReportUuid)
-      await pwExpect(await EditReport.getAlertSuccess()).toHaveText(
+      await expect(await EditReport.getAlertSuccess()).toHaveText(
         "Report unpublished",
         {
           useInnerText: true
