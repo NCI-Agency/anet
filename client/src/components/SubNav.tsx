@@ -1,5 +1,5 @@
 import React from "react"
-import ReactDOM from "react-dom"
+import { createPortal } from "react-dom"
 
 interface SubNavProps {
   subnavElemId: string
@@ -8,7 +8,7 @@ interface SubNavProps {
 
 const SubNav = ({ subnavElemId, children }: SubNavProps) => {
   const subnavElem = document.getElementById(subnavElemId)
-  return subnavElem && ReactDOM.createPortal(children, subnavElem)
+  return subnavElem && createPortal(children, subnavElem)
 }
 
 export default SubNav
