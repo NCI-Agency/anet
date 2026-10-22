@@ -37,5 +37,10 @@ public enum FkDataLoaderKey {
   REPORT_TASKS, // report.tasks
   TASK_RESPONSIBLE_POSITIONS, // task.responsiblePositions
   TASK_TASKED_ORGANIZATIONS, // task.taskedOrganizations
+  TENANT_ACCESS_REQUESTS_FOR_PERSON, // tenantAccessRequest.person
+  TENANT_ACCESS_REQUESTS_FOR_TENANT, // tenantAccessRequest.tenant
+  TENANT_ADMINISTRATIVE_POSITIONS, // tenant.administrativePositions
+  TENANT_MEMBERS, // tenant.members
+  TENANT_REPORT, // tenant.report
   USER_PERSON, // user.person
 }

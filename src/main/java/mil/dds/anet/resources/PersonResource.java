@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -28,6 +29,7 @@ import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.UserDao;
 import mil.dds.anet.emails.NewUserEmail;
+import mil.dds.anet.emails.TenantAccessRequestEmail;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -94,7 +96,7 @@ public class PersonResource {
     }
 
     // Only admins can set user/domainUsername
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       p.setUser(false);
       p.setUsers(null);
     }
@@ -107,8 +109,16 @@ public class PersonResource {
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final Person created = dao.insert(p);
 
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
+      if (AuthUtils.isAdmin(user)) {
+        // Only admin can set any tenant
+        dao.updateTenantForPerson(p.getTenantUuid(), p.getUuid(), Boolean.TRUE.equals(p.getUser()));
+      } else {
+        // Tenant admin can only create users in their own tenant
+        dao.updateTenantForPerson(user.getTenantUuid(), p.getUuid(),
+            Boolean.TRUE.equals(p.getUser()));
+      }
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
@@ -139,6 +149,11 @@ public class PersonResource {
     if (editorPos.getType() == PositionType.ADMINISTRATOR) {
       return true;
     }
+    if (editorPos.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      if (AuthUtils.isFromNoOrSameTenant(editor, subject)) {
+        return true;
+      }
+    }
     if (editorPos.getType() == PositionType.SUPERUSER) {
       if (create) {
         // Superusers can create new people.
@@ -167,7 +182,7 @@ public class PersonResource {
     DaoUtils.assertObjectIsFresh(p, existing, force);
 
     // Only admins can update user/domainUsername
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       p.setUser(existing.getUser());
       p.setUsers(existing.getUsers());
     }
@@ -224,8 +239,26 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
-    if (AuthUtils.isAdmin(user)) {
+    // Update Tenant access request:
+    if (Boolean.TRUE.equals(p.getUser()) && DaoUtils.getUuid(p.getTenantAccessRequest()) != null) {
+      final Instant now = Instant.now();
+      dao.upsertPersonTenantAccessRequest(p.getTenantAccessRequest(), p, now);
+      // Send email to the tenant administrators that a user requests access
+      sendTenantAccessRequestEmail(p.getTenantAccessRequest(), p);
+    } else {
+      dao.deletePersonTenantAccessRequest(p.getUuid());
+    }
+
+    if (AuthUtils.isTenantAdmin(user)) {
       userDao.updateUsers(p, p.getUsers());
+      if (AuthUtils.isAdmin(user)) {
+        // Only admin can update to any tenant
+        dao.updateTenantForPerson(p.getTenantUuid(), p.getUuid(), Boolean.TRUE.equals(p.getUser()));
+      } else {
+        // Tenant admin can only update users in their own tenant
+        dao.updateTenantForPerson(user.getTenantUuid(), p.getUuid(),
+            Boolean.TRUE.equals(p.getUser()));
+      }
     }
 
     emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(), p.getEmailAddresses());
@@ -246,6 +279,7 @@ public class PersonResource {
   public int updatePersonHistory(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
+    // TODO: tenant admins in the same tenant should also be allowed?
     AuthUtils.assertAdministrator(user);
 
     final String existingPositionUuid = DaoUtils.getUuid(p.getPosition());
@@ -300,23 +334,24 @@ public class PersonResource {
   public AnetBeanList<Person> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(Utils.getSubFields(env), query);
   }
 
   @GraphQLMutation(name = "approvePerson")
   public Integer approvePerson(@GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "uuid") String personUuid) {
-    return approveOrDeletePerson(context, personUuid, true);
+      @GraphQLArgument(name = "uuid") String personUuid,
+      @GraphQLArgument(name = "tenant") Tenant tenant) {
+    return approveOrDeletePerson(context, personUuid, tenant, true);
   }
 
   @GraphQLMutation(name = "deletePerson")
   public Integer deletePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String personUuid) {
-    return approveOrDeletePerson(context, personUuid, false);
+    return approveOrDeletePerson(context, personUuid, null, false);
   }
 
-  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid,
+  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid, Tenant tenant,
       boolean isApproved) {
     Person user = DaoUtils.getUserFromContext(context);
     final Person person = dao.getByUuid(personUuid);
@@ -333,6 +368,12 @@ public class PersonResource {
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't " + (isApproved ? "approve" : "delete") + " person");
+    }
+
+    if (isApproved && tenant != null) {
+      dao.updateTenantForPerson(tenant.getUuid(), person.getUuid(),
+          Boolean.TRUE.equals(person.getUser()));
+      dao.deletePersonTenantAccessRequest(personUuid);
     }
 
     // Log the change
@@ -381,7 +422,7 @@ public class PersonResource {
     }
 
     // Only admins can update user/domainUsername
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isTenantAdmin(user)) {
       p.setUser(existing.getUser());
       p.setUsers(existing.getUsers());
     }
@@ -420,13 +461,23 @@ public class PersonResource {
         sendNewUserEmail(p);
       }
 
-      // Log the change
-      auditTrailDao.logCreate(user, PersonDao.TABLE_NAME, p);
+      // Log the change; creator is `p` because it has the uuid
+      auditTrailDao.logCreate(p, PersonDao.TABLE_NAME, p);
     } else {
       // Log the change
       final String auditTrailUuid = auditTrailDao.logUpdate(user, PersonDao.TABLE_NAME, p);
       // Update any subscriptions
       dao.updateSubscriptions(p, auditTrailUuid, false);
+    }
+
+    // Update Tenant access request:
+    if (Boolean.TRUE.equals(p.getUser()) && DaoUtils.getUuid(p.getTenantAccessRequest()) != null) {
+      final Instant now = Instant.now();
+      dao.upsertPersonTenantAccessRequest(p.getTenantAccessRequest(), p, now);
+      // Send email to the tenant administrators that a user requests access
+      sendTenantAccessRequestEmail(p.getTenantAccessRequest(), p);
+    } else {
+      dao.deletePersonTenantAccessRequest(p.getUuid());
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -440,7 +491,7 @@ public class PersonResource {
       @GraphQLArgument(name = "useWinnerPositionHistory",
           defaultValue = "true") boolean useWinnerPositionHistory) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final String winnerUuid = DaoUtils.getUuid(winner);
     if (loserUuid.equals(winnerUuid)) {
@@ -456,6 +507,13 @@ public class PersonResource {
     final Person loser = dao.getByUuid(loserUuid);
     if (loser == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
+    }
+
+    if (!AuthUtils.isAdmin(user) && (!AuthUtils.isFromNoOrSameTenant(user, winner)
+        || !AuthUtils.isFromNoOrSameTenant(user, existingWinner)
+        || !AuthUtils.isFromNoOrSameTenant(user, loser))) {
+      // Tenant admins can't merge people from different tenants
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, AuthUtils.UNAUTH_MESSAGE);
     }
 
     int numRows = dao.mergePeople(winner, loser, useWinnerPositionHistory);
@@ -513,5 +571,12 @@ public class PersonResource {
     final NewUserEmail action = new NewUserEmail();
     action.setPersonUuid(DaoUtils.getUuid(p));
     dao.sendEmailToAdmins(action);
+  }
+
+  private void sendTenantAccessRequestEmail(Tenant t, Person p) {
+    final TenantAccessRequestEmail action = new TenantAccessRequestEmail();
+    action.setTenantUuid(DaoUtils.getUuid(t));
+    action.setPersonUuid(DaoUtils.getUuid(p));
+    dao.sendEmailToTenantAdministrators(t, action);
   }
 }

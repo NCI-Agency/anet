@@ -898,10 +898,10 @@ test.describe("Merge user with non-user", () => {
       useInnerText: true
     })
   })
-  test("Should autoMerge the user accounts field from both persons", async () => {
+  test("Should not autoMerge the user accounts field from both persons", async () => {
     await pwExpect(
       await MergePeople.getColumnContent("mid", "User accounts")
-    ).toHaveText("Domain username\nandrew", {
+    ).toHaveText("No user accounts available", {
       useInnerText: true
     })
   })
@@ -1066,7 +1066,7 @@ test.describe("Merge user with non-user", () => {
       useInnerText: true
     })
 
-    // It should still have the merged user accounts field from both persons!
+    // It should have the merged user accounts field from both persons!
     await pwExpect(
       await MergePeople.getColumnContent("mid", "User accounts")
     ).toHaveText("Domain username\nandrew", {
@@ -1165,7 +1165,7 @@ test.describe("Merge user with non-user", () => {
       useInnerText: true
     })
 
-    // It should still have the merged user accounts field from both persons!
+    // It should have the merged user accounts field from both persons!
     await pwExpect(
       await MergePeople.getColumnContent("mid", "User accounts")
     ).toHaveText("Domain username\nandrew", {
@@ -1192,7 +1192,7 @@ test.describe("Merge user with non-user", () => {
       )
       .toEqual(true)
   })
-  test("Should have the merged user accounts from both persons", async () => {
+  test("Should have merged the user accounts from both persons", async () => {
     await pwExpect(await MergePeople.getUserAccountsField()).toHaveText(
       "User accounts\nDomain username\nandrew",
       {

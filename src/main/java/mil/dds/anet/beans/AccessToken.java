@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -11,7 +12,10 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class AccessToken extends AbstractAnetBean implements RelatableObject {
 
@@ -41,6 +45,8 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
   @GraphQLQuery
   @GraphQLInputField
   private TokenScope scope;
+  // annotated below
+  private ForeignObjectHolder<Tenant> tenant = new ForeignObjectHolder<>();
   // annotated below
   private List<AccessTokenActivity> accessTokenActivities;
 
@@ -90,6 +96,38 @@ public class AccessToken extends AbstractAnetBean implements RelatableObject {
 
   public void setScope(TokenScope scope) {
     this.scope = scope;
+  }
+
+  @GraphQLQuery(name = "tenant")
+  @AllowUnverifiedUsers
+  public CompletableFuture<Tenant> loadTenant(@GraphQLRootContext GraphQLContext context) {
+    if (tenant.hasForeignObject()) {
+      return CompletableFuture.completedFuture(tenant.getForeignObject());
+    }
+    return new UuidFetcher<Tenant>().load(context, IdDataLoaderKey.TENANTS, tenant.getForeignUuid())
+        .thenApply(o -> {
+          tenant.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setTenantUuid(String tenantUuid) {
+    this.tenant = new ForeignObjectHolder<>(tenantUuid);
+  }
+
+  @JsonIgnore
+  public String getTenantUuid() {
+    return tenant.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "tenant")
+  public void setTenant(Tenant tenant) {
+    this.tenant = new ForeignObjectHolder<>(tenant);
+  }
+
+  public Tenant getTenant() {
+    return tenant.getForeignObject();
   }
 
   @GraphQLQuery(name = "accessTokenActivities")

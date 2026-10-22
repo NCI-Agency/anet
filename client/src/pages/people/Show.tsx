@@ -1,9 +1,6 @@
 import {
   gqlAllAttachmentFields,
-  gqlAssessmentsFields,
-  gqlCustomSensitiveInformationFields,
-  gqlEntityFieldsMap,
-  gqlNotesFields
+  gqlEntityFieldsMap
 } from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, IconSize } from "@blueprintjs/core"
@@ -33,6 +30,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
+import NoTenantWarning from "components/NoTenantWarning"
 import ObjectHistory from "components/ObjectHistory"
 import {
   jumpToTop,
@@ -76,18 +74,9 @@ const GQL_GET_PERSON = gql`
       authorizationGroups {
         ${gqlEntityFieldsMap.AuthorizationGroup}
       }
-      additionalPositions {
-        ${gqlEntityFieldsMap.Position}
-        organization {
-          ${gqlEntityFieldsMap.Organization}
-        }
-      }
       attachments {
         ${gqlAllAttachmentFields}
       }
-      ${gqlCustomSensitiveInformationFields}
-      ${gqlAssessmentsFields}
-      ${gqlNotesFields}
     }
   }
 `
@@ -157,20 +146,28 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const position = person.position
 
   // User can always edit themselves
+  const isSelf = Person.isEqual(currentUser, person)
   // Admins can always edit anybody
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
   const hasPosition = position?.uuid
-  const canEditPosition =
+  // When the person is not in a position, any superuser can assign them.
+  const canAssignPosition = !hasPosition && currentUser.isSuperuser()
+  const canAdmin =
+    // Admins can edit anybody
     isAdmin ||
+    // Tenant admins can edit people without tenant or in their own tenant
+    (isTenantAdmin && utils.isFromNoOrSameTenant(currentUser, person))
+  const canEdit =
+    canAdmin ||
     (hasPosition &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
     (!hasPosition && currentUser.isSuperuser())
-  const canEdit = canEditPosition || Person.isEqual(currentUser, person)
-  // When the person is not in a position, any superuser can assign them.
-  const canAssignPosition = currentUser.isSuperuser()
+  const canEditPosition = canEdit || canAssignPosition
+  const canEditOrSelf = canEdit || isSelf
   const canAddPeriodicAssessment =
     Position.isRegular(position) &&
     (isAdmin ||
@@ -186,7 +183,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   const action = (
     <>
-      {isAdmin && (
+      {canAdmin && (
         <Link
           id="mergeWithOther"
           to="/admin/merge/people"
@@ -199,7 +196,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       <Button value="compactView" variant="primary" onClick={onCompactClick}>
         Summary / Print
       </Button>
-      {canEdit && (
+      {canEditOrSelf && (
         <LinkTo
           modelType="Person"
           model={person}
@@ -267,6 +264,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             onEnd={() => (localStorage.hasSeenPersonTour = "true")}
           />
         </div>
+        {isAdmin && <NoTenantWarning person={person} />}
         <Messages error={stateError} success={stateSuccess} />
         <div className="form-horizontal">
           <Fieldset
@@ -302,6 +300,28 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                       defaultAvatar={Person.relatedObjectType}
                     />
                   </div>
+                  {person.user && (
+                    <>
+                      <DictionaryField
+                        wrappedComponent={FieldHelper.ReadonlyField}
+                        dictProps={Settings.fields.person.tenant}
+                        field={{ name: "tenant" }}
+                        humanValue={person.tenant?.name}
+                        extraColElem={null}
+                        labelColumnWidth={4}
+                      />
+                      {isSelf && person.tenantAccessRequest && (
+                        <DictionaryField
+                          wrappedComponent={FieldHelper.ReadonlyField}
+                          dictProps={Settings.fields.person.tenantAccessRequest}
+                          field={{ name: "tenantAccessRequest" }}
+                          humanValue={person.tenantAccessRequest?.name}
+                          extraColElem={null}
+                          labelColumnWidth={4}
+                        />
+                      )}
+                    </>
+                  )}
                   {leftColumnUnderAvatar}
                 </Col>
                 <Col md={6}>{rightColumn}</Col>
@@ -319,7 +339,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                           updateAttachments={setAttachments}
                           relatedObjectType={Person.relatedObjectType}
                           relatedObjectUuid={person.uuid}
-                          allowEdit={canEdit}
+                          allowEdit={canEditOrSelf}
                         />
                       }
                     />
@@ -344,7 +364,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             <Fieldset
               title="Assigned counterparts"
               action={
-                canEdit && (
+                canEditOrSelf && (
                   <Button
                     onClick={() => setShowAssociatedPositionsModal(true)}
                     variant="outline-secondary"
@@ -355,7 +375,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
               }
             >
               {renderCounterparts(position)}
-              {canEdit && (
+              {canEditOrSelf && (
                 <EditAssociatedPositionsModal
                   position={position}
                   showModal={showAssociatedPositionsModal}
@@ -426,10 +446,10 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       user: {
-        accessCond: isAdmin
+        accessCond: canAdmin
       },
       users: {
-        accessCond: isAdmin
+        accessCond: canAdmin
       }
     }
 
@@ -611,22 +631,21 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         </OverlayTrigger>
       ) : null
 
-    const assignPositionButton =
-      !hasPosition && canAssignPosition ? (
-        <OverlayTrigger
-          key="assign-position-overlay"
-          placement="top"
-          overlay={
-            <Tooltip id="assign-position-tooltip">
-              Assign a Primary Position
-            </Tooltip>
-          }
-        >
-          <Button onClick={() => setShowAssignPositionModal(true)}>
-            <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
-          </Button>
-        </OverlayTrigger>
-      ) : null
+    const assignPositionButton = canAssignPosition ? (
+      <OverlayTrigger
+        key="assign-position-overlay"
+        placement="top"
+        overlay={
+          <Tooltip id="assign-position-tooltip">
+            Assign a Primary Position
+          </Tooltip>
+        }
+      >
+        <Button onClick={() => setShowAssignPositionModal(true)}>
+          <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
+        </Button>
+      </OverlayTrigger>
+    ) : null
 
     // if current user has no access for position actions return null so extraColElem will disappear
     if (!(editPositionButton || changePositionButton || assignPositionButton)) {

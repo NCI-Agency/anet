@@ -5,13 +5,16 @@ import Help from "../pages/help.page.js"
 import { test } from "../support.js"
 
 const ERIN_SUPERUSERS = ["CTR Rebecca Beccabon", "CIV Jacob Jacobson"]
+const ERIN_TENANT_ADMINS = ["CIV Mads Madsen"]
 const ERIN_ADMINS = ["CIV Arthur Dmin", "CIV Michael Scott"]
 const HELP_TEXT = "This is a help text"
 test.describe("When checking the help page", () => {
-  test("Should see of the user superusers and administrators", async () => {
+  test("Should see the user superusers, tenant administrators and ANET administrators", async () => {
     await Help.open()
     const superusers = await Help.getSuperusers()
     expect(superusers).to.include.members(ERIN_SUPERUSERS)
+    const tenantAdministrators = await Help.getTenantAdministrators()
+    expect(tenantAdministrators).to.include.members(ERIN_TENANT_ADMINS)
     const administrators = await Help.getAdministrators()
     expect(administrators).to.include.members(ERIN_ADMINS)
   })

@@ -48,6 +48,7 @@ public class PersonMapper implements RowMapper<Person> {
     a.setRank(MapperUtils.getOptionalString(rs, "people_rank"));
     a.setBiography(MapperUtils.getOptionalString(rs, "people_biography"));
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
+    a.setTenantUuid(MapperUtils.getOptionalString(rs, "people_tenantUuid"));
 
     return a;
   }
