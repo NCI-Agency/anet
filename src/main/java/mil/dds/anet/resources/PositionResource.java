@@ -56,8 +56,9 @@ public class PositionResource {
       return AuthUtils.isAdmin(user);
     }
     if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
-      final boolean isTenantAdmin = AuthUtils.isTenantAdmin(user);
-      if (isTenantAdmin) {
+      if (AuthUtils.isAdmin(user)) {
+        return true;
+      } else if (AuthUtils.isTenantAdmin(user)) {
         if (position.getPersonUuid() == null) {
           return true;
         }
