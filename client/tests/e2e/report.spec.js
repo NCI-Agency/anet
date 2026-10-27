@@ -1,5 +1,8 @@
+import { expect, test } from "@playwright/test"
 import moment from "moment"
-import { expect, test } from "./support.js"
+import { AdvancedSelect } from "./components/AdvancedSelect.js"
+import { RichTextEditor } from "./components/RichTextEditor.js"
+import { LoginPage } from "./pages/LoginPage.js"
 
 // Report creation and approval must stay in the same worker.
 test.describe.configure({
@@ -7,521 +10,476 @@ test.describe.configure({
 })
 
 let testReportURL = null
-test("Draft and submit a report", async ({ app }) => {
-  const {
-    pageHelpers,
-    $,
-    $$,
-    assertElementText,
-    assertElementNotPresent,
-    shortWaitMs,
-    mediumWaitMs
-  } = app
-  await app.login("/", "erin")
-  const $createButton = await app.$("#createButton")
-  await $createButton.click()
-  await pageHelpers.writeInForm("#intent", "meeting goal")
-  const $engagementDate = await $("#engagementDate")
-  await $engagementDate.click()
 
-  await pageHelpers.clickTodayButton()
+test("Draft and submit a report", async ({ page }) => {
+  const login = new LoginPage(page)
+  await login.login("/", "erin")
+  const createButton = page.locator("#createButton").first()
+  await createButton.click()
+  await page.locator("#intent").fill("meeting goal")
+  await page.locator("#intent").blur()
+  const engagementDate = page.locator("#engagementDate").first()
+  await engagementDate.click()
+  await page
+    .getByRole("button", {
+      name: "Today",
+      exact: true
+    })
+    .click()
 
   // send escape key to make sure the date picker is being closed
-  await app.page.keyboard.press("Escape")
-  const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
-    "#location",
-    "ge",
-    2
-  )
+  await page.keyboard.press("Escape")
+  const locationAdvancedSelect = await new AdvancedSelect(
+    page,
+    "#location"
+  ).choose("ge", 2)
   await expect(
-    $locationAdvancedSelect,
+    locationAdvancedSelect,
     "Clicking a location advanced single select widget suggestion populates the input field."
   ).toHaveValue("General Hospital")
-  const $positiveAtmosphereButton = await $('label[for="atmosphere_POSITIVE"]')
-  await $positiveAtmosphereButton.click()
-  const $attendeesAdvancedSelect1 =
-    await pageHelpers.chooseAdvancedSelectOption(
-      "#reportPeople",
-      "topferness, christopf"
-    )
-  const $newReportTitle = await app.page
-    .locator("xpath=" + '//h4/span[text()="Create a new Report"]')
+  const positiveAtmosphereButton = page
+    .locator('label[for="atmosphere_POSITIVE"]')
     .first()
-  await $newReportTitle.click()
-
+  await positiveAtmosphereButton.click()
+  const attendeesAdvancedSelect1 = await new AdvancedSelect(
+    page,
+    "#reportPeople"
+  ).choose("topferness, christopf")
+  const newReportTitle = page
+    .locator("h4")
+    .getByText("Create a new Report", { exact: true })
+    .first()
+  await newReportTitle.click()
   await expect(
-    $attendeesAdvancedSelect1,
+    attendeesAdvancedSelect1,
     "Closing the attendees advanced multi select overlay empties the input field."
   ).toHaveValue("")
-  const [
-    $interlocutorControls1,
-    /* eslint-disable no-unused-vars */ $interlocutorConflictBtn /* eslint-enable no-unused-vars */,
-    $interlocutorName1,
-    $interlocutorPosition1,
-    /* eslint-disable no-unused-vars */ $interlocutorLocation1 /* eslint-enable no-unused-vars */,
-    $interlocutorOrg1
-  ] = await $$(".interlocutorAttendeesTable tbody tr:nth-child(2) td")
-  const $interlocutorPrimaryInput1 = await $interlocutorControls1
+  const interlocutorControls1 = page
+    .locator(".interlocutorAttendeesTable tbody tr:nth-child(2) td")
+    .nth(0)
+  const interlocutorName1 = page
+    .locator(".interlocutorAttendeesTable tbody tr:nth-child(2) td")
+    .nth(2)
+  const interlocutorPosition1 = page
+    .locator(".interlocutorAttendeesTable tbody tr:nth-child(2) td")
+    .nth(3)
+  const interlocutorOrg1 = page
+    .locator(".interlocutorAttendeesTable tbody tr:nth-child(2) td")
+    .nth(5)
+  const interlocutorPrimaryInput1 = interlocutorControls1
     .locator("[name = 'primaryAttendeeINTERLOCUTOR']")
     .first()
   await expect(
-    $interlocutorPrimaryInput1,
+    interlocutorPrimaryInput1,
     "Interlocutor primary attendee checkbox should be checked"
   ).toBeChecked()
-  await assertElementText($interlocutorName1, "CIV Christopf Topferness")
-  await assertElementText(
-    $interlocutorPosition1,
+  await expect(interlocutorName1).toHaveText("CIV Christopf Topferness")
+  await expect(interlocutorPosition1).toHaveText(
     "Planning Captain, MOD-FO-00004"
   )
-  await assertElementText($interlocutorOrg1, "MoD | Ministry of Defense")
-  const $attendeesAdvancedSelect2 =
-    await pageHelpers.chooseAdvancedSelectOption(
-      "#reportPeople",
-      "steveson, steve"
-    )
-  await $newReportTitle.click()
-
+  await expect(interlocutorOrg1).toHaveText("MoD | Ministry of Defense")
+  const attendeesAdvancedSelect2 = await new AdvancedSelect(
+    page,
+    "#reportPeople"
+  ).choose("steveson, steve")
+  await newReportTitle.click()
   await expect(
-    $attendeesAdvancedSelect2,
+    attendeesAdvancedSelect2,
     "Closing the attendees advanced multi select overlay empties the input field."
   ).toHaveValue("")
-  const [
-    $interlocutorControls2,
-    /* eslint-disable no-unused-vars */ $interlocutorAuthorConflictBtn /* eslint-enable no-unused-vars */,
-    $interlocutorName2 /* eslint-disable no-unused-vars */,
-    $interlocutorPosition2,
-    $interlocutorLocation2,
-    $interlocutorOrg2 /* eslint-enable no-unused-vars */
-  ] = await $$(".interlocutorAttendeesTable tbody tr:last-child td")
-  await assertElementText($interlocutorName2, "OF-4 Steve Steveson")
-  const $interlocutorPrimaryInput2 = await $interlocutorControls2
+  const interlocutorControls2 = page
+    .locator(".interlocutorAttendeesTable tbody tr:last-child td")
+    .nth(0)
+  const interlocutorName2 = page
+    .locator(".interlocutorAttendeesTable tbody tr:last-child td")
+    .nth(2)
+  await expect(interlocutorName2).toHaveText("OF-4 Steve Steveson")
+  const interlocutorPrimaryInput2 = interlocutorControls2
     .locator("[name = 'primaryAttendeeINTERLOCUTOR']")
     .first()
   await expect(
-    $interlocutorPrimaryInput2,
+    interlocutorPrimaryInput2,
     "Second interlocutor primary attendee checkbox should not be checked"
   ).not.toBeChecked()
-  await $interlocutorPrimaryInput2.click()
+  await interlocutorPrimaryInput2.click()
   await expect(
-    $interlocutorPrimaryInput2,
+    interlocutorPrimaryInput2,
     "Second interlocutor primary attendee checkbox should now be checked"
   ).toBeChecked()
   await expect(
-    $interlocutorPrimaryInput1,
+    interlocutorPrimaryInput1,
     "First interlocutor primary attendee checkbox should no longer be checked"
   ).not.toBeChecked()
-  const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
-    "#tasks",
+  const tasksAdvancedSelect = await new AdvancedSelect(page, "#tasks").choose(
     "2.B",
     2
   )
-  const $tasksTitle = await app.page
-    .locator("xpath=" + '//h4/span[text()="Objectives"]')
+  const tasksTitle = page
+    .locator("h4")
+    .getByText("Objectives", { exact: true })
     .first()
-  await $tasksTitle.click()
-
+  await tasksTitle.click()
   await expect(
-    $tasksAdvancedSelect,
+    tasksAdvancedSelect,
     "Closing the tasks advanced multi select overlay empties the input field."
   ).toHaveValue("")
-  const $newTaskRow = await $("#tasks-tasks table tbody tr td")
-  await assertElementText($newTaskRow, "EF 2\n»\n2.B")
-  await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
-  await pageHelpers.writeInForm("#nextSteps", "next steps")
-  await pageHelpers.writeInForm(
-    ".reportTextField .editable",
-    "engagement details",
-    shortWaitMs // wait for Slate to save the editor contents
+  const newTaskRow = page.locator("#tasks-tasks table tbody tr td").first()
+  await expect(newTaskRow).toHaveText("EF 2\n»\n2.B")
+  await page.locator("#keyOutcomes").fill("key outcomes")
+  await page.locator("#keyOutcomes").blur()
+  await page.locator("#nextSteps").fill("next steps")
+  await page.locator("#nextSteps").blur()
+  await new RichTextEditor(page, ".reportTextField .editable").fill(
+    "engagement details"
   )
   const editorCssPath = ".reportSensitiveInformationField .editable"
-  const $reportSensitiveInformationField = await $(editorCssPath)
+  const reportSensitiveInformationField = page.locator(editorCssPath).first()
   await expect(
-    $reportSensitiveInformationField,
+    reportSensitiveInformationField,
     'Report sensitive info should not be present before "add sensitive information" button is clicked"'
   ).not.toBeVisible()
-  const $addSensitiveInfoButton = await $("#toggleSensitiveInfo")
-  await $addSensitiveInfoButton.click()
-  await expect($reportSensitiveInformationField).toBeVisible()
-  await pageHelpers.writeInForm(
-    editorCssPath,
-    "sensitive info",
-    shortWaitMs // wait for Slate to save the editor contents
-  )
-  const $communitiesButton = await $('button[value="AuthorizationGroup"]')
-  await $communitiesButton.click()
+  const addSensitiveInfoButton = page.locator("#toggleSensitiveInfo").first()
+  await addSensitiveInfoButton.click()
+  await expect(reportSensitiveInformationField).toBeVisible()
+  await new RichTextEditor(page, editorCssPath).fill("sensitive info")
+  const communitiesButton = page
+    .locator('button[value="AuthorizationGroup"]')
+    .first()
+  await communitiesButton.click()
   // Wait for the filters to change
 
-  const $communitiesInput = await $("input#authorizedMembers")
-  await $communitiesInput.click()
+  const communitiesInput = page.locator("input#authorizedMembers").first()
+  await communitiesInput.click()
   // Wait for the pop-up to fill
 
   // Add all communities
-  const $allCommunities = await $$(
+  const allCommunities = page.locator(
     "#entitySelect-popover input[type='checkbox']"
   )
-  for (const $community of $allCommunities) {
-    await $community.click()
+  await expect(allCommunities.first()).toBeVisible()
+  const communityCount = await allCommunities.count()
+  for (let index = 0; index < communityCount; index++) {
+    await allCommunities.nth(index).check()
   }
-  const $formButtonSubmit = await $("#formBottomSubmit")
-  await expect($formButtonSubmit).toBeEnabled({
-    timeout: mediumWaitMs
-  })
-  await $formButtonSubmit.click()
-  await pageHelpers.assertReportShowStatusText(
+  const formButtonSubmit = page.locator("#formBottomSubmit").first()
+  await expect(formButtonSubmit).toBeEnabled()
+  await formButtonSubmit.click()
+  await expect(page.locator(".report-show h4").first()).toHaveText(
     "This is a DRAFT report and hasn't been submitted."
   )
-  await expect(app.page, "URL is updated to reports/show page").toHaveURL(
+  await expect(page, "URL is updated to reports/show page").toHaveURL(
     /\/reports\/[0-9a-f-]+/
   )
-  testReportURL = new URL(app.page.url()).pathname
-  const $submitReportButton = await $("#submitReportButton")
-  await $submitReportButton.click()
-  await expect($submitReportButton).toBeHidden({
-    timeout: mediumWaitMs
-  })
-  await assertElementNotPresent(
-    "#submitReportButton",
-    "Submit button should be gone",
-    shortWaitMs
-  )
-  await pageHelpers.assertReportShowStatusText(
+  testReportURL = new URL(page.url()).pathname
+  const submitReportButton = page.locator("#submitReportButton").first()
+  await submitReportButton.click()
+  await expect(submitReportButton).toBeHidden()
+  await expect(
+    page.locator("#submitReportButton"),
+    "Submit button should be gone"
+  ).toHaveCount(0)
+  await expect(page.locator(".report-show h4").first()).toHaveText(
     "This report is PENDING approvals."
   )
-  const $allertSuccess = await app.page.locator(".alert-success").first()
-  await expect($allertSuccess).toBeVisible({
-    timeout: mediumWaitMs
-  })
-  await assertElementText(
-    $allertSuccess,
-    "Report submitted",
+  const allertSuccess = page.locator(".alert-success").first()
+  await expect(allertSuccess).toBeVisible()
+  await expect(
+    allertSuccess,
     "Clicking the submit report button displays a message telling the user that the action was successful."
-  )
-  await app.logout()
+  ).toHaveText("Report submitted")
+  await login.logout()
 })
 
-test("Publish report chain", async ({ app }) => {
-  const { pageHelpers, $, $$, assertElementText, mediumWaitMs } = app
-
+test("Publish report chain", async ({ page }) => {
+  const login = new LoginPage(page)
   // First Jacob needs to approve the report, then Rebecca can approve the report
-  await approveReport(app, "jacob")
-  await approveReport(app, "rebecca")
+  await approveReport(page, "jacob")
+  await approveReport(page, "rebecca")
   // Then the task owner can approve the report
-  await approveReport(app, "henry")
+  await approveReport(page, "henry")
 
   // Admin user needs to publish the report
-  await app.login("/", "arthur")
-  const $homeTileArthur = await $$(".home-tile")
-  const [
-    /* eslint-disable no-unused-vars */ $draftReportsArthur,
-    $reportsPendingAll,
-    $reportsPendingArthur,
-    $plannedEngagementsArthur,
-    $reportsSensitiveInfo /* eslint-enable no-unused-vars */,
-    $approvedReports
-  ] = $homeTileArthur
-  await expect($approvedReports).toBeVisible({
-    timeout: mediumWaitMs
-  })
-  await $approvedReports.click()
-  await expect($approvedReports).toBeHidden({
-    timeout: mediumWaitMs
-  })
-  const $reportsApprovedSummaryTab = await $(
-    ".report-collection button[value='summary']"
+  await login.login("/", "arthur")
+  const approvedReports = page.locator(".home-tile").nth(5)
+  await expect(approvedReports).toBeVisible()
+  await approvedReports.click()
+  await expect(approvedReports).toBeHidden()
+  const reportsApprovedSummaryTab = page
+    .locator(".report-collection button[value='summary']")
+    .first()
+  await reportsApprovedSummaryTab.click()
+  const readApprovedReportButton = page
+    .locator(".read-report-button[href='" + testReportURL + "']")
+    .first()
+  await expect(readApprovedReportButton).toBeEnabled()
+  await readApprovedReportButton.click()
+  await expect(page.locator(".report-show h4").first()).toHaveText(
+    "This report is APPROVED."
   )
-  await $reportsApprovedSummaryTab.click()
-  const $readApprovedReportButton = await $(
-    ".read-report-button[href='" + testReportURL + "']"
-  )
-  await expect($readApprovedReportButton).toBeEnabled({
-    timeout: mediumWaitMs
-  })
-  await $readApprovedReportButton.click()
-  await pageHelpers.assertReportShowStatusText("This report is APPROVED.")
-  const $arthurPublishButton = await $(".publish-button")
-  await $arthurPublishButton.click()
-  await expect($arthurPublishButton).toBeHidden({
-    timeout: mediumWaitMs
-  })
+  const arthurPublishButton = page.locator(".publish-button").first()
+  await arthurPublishButton.click()
+  await expect(arthurPublishButton).toBeHidden()
 
   // check if page is redirected to search results
 
-  const $rollupLink = await app.page
+  const rollupLink = page
     .getByRole("link", {
       name: "Daily Rollup",
       exact: true
     })
     .first()
-  await expect($rollupLink).toBeEnabled({
-    timeout: mediumWaitMs
-  })
-  await $rollupLink.click()
+  await expect(rollupLink).toBeEnabled()
+  await rollupLink.click()
   await expect(
-    app.page,
+    page,
     'Clicking the "Daily Rollup" link takes the user to the rollup page'
   ).toHaveURL(/\/rollup$/)
-  await $("#daily-rollup")
-
-  const $rollupTableTab = await $(".report-collection button[value='table']")
-  await $rollupTableTab.click()
-  const $reportCollectionTable = await $(".report-collection table")
-  await expect($reportCollectionTable).toBeVisible({
-    timeout: mediumWaitMs
-  })
-  const $approvedIntent = await $reportCollectionTable
+  await expect(page.locator("#daily-rollup")).toBeVisible()
+  const rollupTableTab = page
+    .locator(".report-collection button[value='table']")
+    .first()
+  await rollupTableTab.click()
+  const reportCollectionTable = page.locator(".report-collection table").first()
+  await expect(reportCollectionTable).toBeVisible()
+  const approvedIntent = reportCollectionTable
     .getByRole("link", {
       name: "meeting goal",
       exact: true
     })
     .first()
-  await assertElementText(
-    $approvedIntent,
-    "meeting goal",
+  await expect(
+    approvedIntent,
     "Daily Rollup report list includes the recently approved report"
-  )
-  await app.logout()
+  ).toHaveText("meeting goal")
+  await login.logout()
 })
-
-async function approveReport(app, user) {
-  const { pageHelpers, $, $$, mediumWaitMs } = app
-  await app.login("/", user)
-  const $homeTile = await $$(".home-tile")
-  const [
-    /* eslint-disable no-unused-vars */ $draftReports /* eslint-enable no-unused-vars */,
-    $reportsPending /* eslint-disable no-unused-vars */,
-    $orgReports,
-    $plannedEngagements
-    /* eslint-enable no-unused-vars */
-  ] = $homeTile
-  await expect($reportsPending).toBeVisible({
-    timeout: mediumWaitMs
-  })
-  await $reportsPending.click()
-  await expect($reportsPending).toBeHidden({
-    timeout: mediumWaitMs
-  })
-  const $reportsPendingSummaryTab = await $(
-    ".report-collection button[value='summary']"
-  )
-  await expect($reportsPendingSummaryTab).toBeEnabled()
-  await $reportsPendingSummaryTab.click()
-  const $readReportButton = await $(
-    ".read-report-button[href='" + testReportURL + "']"
-  )
-  await expect($readReportButton).toBeEnabled({
-    timeout: mediumWaitMs
-  })
-  await $readReportButton.click()
-  await pageHelpers.assertReportShowStatusText(
+async function approveReport(page, user) {
+  const login = new LoginPage(page)
+  await login.login("/", user)
+  const reportsPending = page.locator(".home-tile").nth(1)
+  await expect(reportsPending).toBeVisible()
+  await reportsPending.click()
+  await expect(reportsPending).toBeHidden()
+  const reportsPendingSummaryTab = page
+    .locator(".report-collection button[value='summary']")
+    .first()
+  await expect(reportsPendingSummaryTab).toBeEnabled()
+  await reportsPendingSummaryTab.click()
+  const readReportButton = page
+    .locator(".read-report-button[href='" + testReportURL + "']")
+    .first()
+  await expect(readReportButton).toBeEnabled()
+  await readReportButton.click()
+  await expect(page.locator(".report-show h4").first()).toHaveText(
     "This report is PENDING approvals."
   )
-  const $ApproveButton = await $(".approve-button")
-  await expect($ApproveButton).toBeEnabled({
-    timeout: mediumWaitMs
-  })
-  await $ApproveButton.click()
-  await expect($ApproveButton).toBeHidden({
-    timeout: mediumWaitMs
-  })
-  await app.logout()
+  const ApproveButton = page.locator(".approve-button").first()
+  await expect(ApproveButton).toBeEnabled()
+  await ApproveButton.click()
+  await expect(ApproveButton).toBeHidden()
+  await login.logout()
 }
-
-test("Verify that validations work", async ({ app }) => {
-  const {
-    assertElementText,
-    $,
-    $$,
-    assertElementNotPresent,
-    pageHelpers,
-    shortWaitMs
-  } = app
-  await pageHelpers.goHomeAndThenToReportsPage()
-  await assertElementText(await $(".legend .title-text"), "Create a new Report")
-  async function verifyFieldIsRequired($input, id, type, fieldName) {
-    await $input.click()
-    await $input.clear()
-    const $searchBarInput = await $("#searchBarInput")
-    await $searchBarInput.click()
+test("Verify that validations work", async ({ page }) => {
+  const login = new LoginPage(page)
+  await login.login("/")
+  await page.locator("#createButton").click()
+  await expect(page.locator(".legend .title-text").first()).toHaveText(
+    "Create a new Report"
+  )
+  async function verifyFieldIsRequired(input, id, type, fieldName) {
+    await input.click()
+    await input.clear()
+    const searchBarInput = page.locator("#searchBarInput").first()
+    await searchBarInput.click()
     await expect(
-      app.page.locator(`${type}[id="${id}"] ~ div[class="invalid-feedback"]`)
+      page.locator(`${type}[id="${id}"] ~ div[class="invalid-feedback"]`)
     ).toBeVisible()
-    await $input.pressSequentially("user input")
-    await $input.press("Tab") // fire blur event
+    await input.pressSequentially("user input")
+    await input.press("Tab") // fire blur event
     // send escape key to make sure any pop-ups are being closed
-    await app.page.keyboard.press("Escape")
+    await page.keyboard.press("Escape")
     await expect(
-      app.page.locator(`textarea[id="${id}"] ~ div[class="invalid-feedback"]`),
+      page.locator(`textarea[id="${id}"] ~ div[class="invalid-feedback"]`),
       `After typing in ${fieldName} field, warning state goes away`
     ).toHaveCount(0)
   }
-  const $meetingGoalInput = await $("#intent")
+  const meetingGoalInput = page.locator("#intent").first()
   // check that parent div.form-group does not have class 'has-error'
   await expect(
-    app.page.locator('textarea[id="intent"] ~ div[class="invalid-feedback"]'),
+    page.locator('textarea[id="intent"] ~ div[class="invalid-feedback"]'),
     "Meeting goal does not start in an invalid state"
   ).toHaveCount(0)
-  await expect(
-    $meetingGoalInput,
-    "Meeting goal field starts blank"
-  ).toHaveValue("")
+  await expect(meetingGoalInput, "Meeting goal field starts blank").toHaveValue(
+    ""
+  )
 
   // check that parent div.form-group now has a class 'has-error'
   await verifyFieldIsRequired(
-    $meetingGoalInput,
+    meetingGoalInput,
     "intent",
     "textarea",
     "Meeting goal"
   )
-  const $engagementDate = await $("#engagementDate")
+  const engagementDate = page.locator("#engagementDate").first()
   await expect(
-    $engagementDate,
+    engagementDate,
     "Engagement date field starts blank"
   ).toHaveValue("")
-  await $engagementDate.click()
-
-  await pageHelpers.clickTodayButton()
+  await engagementDate.click()
+  await page
+    .getByRole("button", {
+      name: "Today",
+      exact: true
+    })
+    .click()
 
   // set time as well
-  const $hourInput = await $("input.bp6-timepicker-input.bp6-timepicker-hour")
+  const hourInput = page
+    .locator("input.bp6-timepicker-input.bp6-timepicker-hour")
+    .first()
   // clear field, enter data, fire blur event
-  await $hourInput.fill("23")
-  await $hourInput.press("Tab")
-  const $minuteInput = await $(
-    "input.bp6-timepicker-input.bp6-timepicker-minute"
-  )
+  await hourInput.fill("23")
+  await hourInput.press("Tab")
+  const minuteInput = page
+    .locator("input.bp6-timepicker-input.bp6-timepicker-minute")
+    .first()
   // clear field, enter data, fire blur event
-  await $minuteInput.fill("45")
-  await $minuteInput.press("Tab")
+  await minuteInput.fill("45")
+  await minuteInput.press("Tab")
 
   // send escape key to make sure the date picker is being closed
-  await app.page.keyboard.press("Escape")
+  await page.keyboard.press("Escape")
 
   // check date and time
   const dateTimeFormat = "DD-MM-YYYY HH:mm"
-  const dateTimeValue = await $engagementDate.inputValue()
+  const dateTimeValue = await engagementDate.inputValue()
   const expectedDateTime = moment().hour(23).minute(45).format(dateTimeFormat)
   expect(
     dateTimeValue,
     'Clicking the "today" button puts the current date in the engagement field'
   ).toBe(expectedDateTime)
-  const $locationInput = await $("#location")
-  await expect($locationInput, "Location field starts blank").toHaveValue("")
-  const $locationShortcutButton = await $("#location-shortcut-list button")
-  await $locationShortcutButton.click()
+  const locationInput = page.locator("#location").first()
+  await expect(locationInput, "Location field starts blank").toHaveValue("")
+  const locationShortcutButton = page
+    .locator("#location-shortcut-list button")
+    .first()
+  await locationShortcutButton.click()
   await expect(
-    $locationInput,
+    locationInput,
     "Clicking the shortcut adds a location"
   ).toHaveValue("General Hospital")
-  await assertElementNotPresent(
-    "#cancelledReason",
-    "Cancelled reason should not be present initially",
-    shortWaitMs
-  )
-  const $atmosphereFormGroup = await $(".atmosphere-form-group")
   await expect(
-    $atmosphereFormGroup,
+    page.locator("#cancelledReason"),
+    "Cancelled reason should not be present initially"
+  ).toHaveCount(0)
+  const atmosphereFormGroup = page.locator(".atmosphere-form-group").first()
+  await expect(
+    atmosphereFormGroup,
     "Atmospherics form group should be shown by default"
   ).toBeVisible()
-  await assertElementNotPresent(
-    "#atmosphere-details",
-    "Atmospherics details should not be displayed before choosing atmospherics",
-    shortWaitMs
-  )
-  const $positiveAtmosphereButton = await $('label[for="atmosphere_POSITIVE"]')
-  await $positiveAtmosphereButton.click()
-  const $atmosphereDetails = await $("#atmosphereDetails")
-  await expect($atmosphereDetails).toHaveAttribute(
+  await expect(
+    page.locator("#atmosphere-details"),
+    "Atmospherics details should not be displayed before choosing atmospherics"
+  ).toHaveCount(0)
+  const positiveAtmosphereButton = page
+    .locator('label[for="atmosphere_POSITIVE"]')
+    .first()
+  await positiveAtmosphereButton.click()
+  const atmosphereDetails = page.locator("#atmosphereDetails").first()
+  await expect(atmosphereDetails).toHaveAttribute(
     "placeholder",
     "Describe the atmosphere"
   )
-  const $neutralAtmosphereButton = await $('label[for="atmosphere_NEUTRAL"]')
-  await $neutralAtmosphereButton.click()
-  await expect($atmosphereDetails).toHaveAttribute(
+  const neutralAtmosphereButton = page
+    .locator('label[for="atmosphere_NEUTRAL"]')
+    .first()
+  await neutralAtmosphereButton.click()
+  await expect(atmosphereDetails).toHaveAttribute(
     "placeholder",
     "Describe the atmosphere"
   )
-  const $negativeAtmosphereButton = await $('label[for="atmosphere_NEGATIVE"]')
-  await $negativeAtmosphereButton.click()
-  await expect($atmosphereDetails).toHaveAttribute(
+  const negativeAtmosphereButton = page
+    .locator('label[for="atmosphere_NEGATIVE"]')
+    .first()
+  await negativeAtmosphereButton.click()
+  await expect(atmosphereDetails).toHaveAttribute(
     "placeholder",
     "Describe the atmosphere"
   )
-  const $reportPeopleFieldsetTitle = await $(
-    "#reportPeople-fieldset .title-text"
-  )
-  await assertElementText(
-    $reportPeopleFieldsetTitle,
-    "People involved in this engagement",
+  const reportPeopleFieldsetTitle = page
+    .locator("#reportPeople-fieldset .title-text")
+    .first()
+  await expect(
+    reportPeopleFieldsetTitle,
     "People fieldset should have correct title for an uncancelled enagement"
-  )
-  const $cancelledCheckbox = await $(".cancelled-checkbox input")
+  ).toHaveText("People involved in this engagement")
+  const cancelledCheckbox = page.locator(".cancelled-checkbox input").first()
   // Move element into view
 
-  await $cancelledCheckbox.scrollIntoViewIfNeeded()
-  await $cancelledCheckbox.click()
-  await assertElementNotPresent(
-    ".atmosphere-form-group",
-    "After cancelling the enagement, the atmospherics should be hidden",
-    shortWaitMs
-  )
-  const $cancelledReason = await $(".cancelled-reason-form-group")
+  await cancelledCheckbox.scrollIntoViewIfNeeded()
+  await cancelledCheckbox.click()
   await expect(
-    $cancelledReason,
+    page.locator(".atmosphere-form-group"),
+    "After cancelling the enagement, the atmospherics should be hidden"
+  ).toHaveCount(0)
+  const cancelledReason = page.locator(".cancelled-reason-form-group").first()
+  await expect(
+    cancelledReason,
     "After cancelling the engagement, the cancellation reason should appear"
   ).toBeVisible()
-  await assertElementText(
-    $reportPeopleFieldsetTitle,
-    "People who will be involved in this planned engagement",
+  await expect(
+    reportPeopleFieldsetTitle,
     "People fieldset should have correct title for a cancelled enagement"
-  )
-  let $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
-  expect(
-    $advisorAttendeesRows.length,
-    "Advisor attendees table starts with 1 body rows"
-  ).toBe(1)
-  let $interlocutorAttendeesRows = await $$(
+  ).toHaveText("People who will be involved in this planned engagement")
+  const advisorAttendeesRows = page.locator(".advisorAttendeesTable tbody tr")
+  await expect(
+    advisorAttendeesRows,
+    "Advisor attendees table starts with 1 body row"
+  ).toHaveCount(1)
+  const interlocutorAttendeesRows = page.locator(
     ".interlocutorAttendeesTable tbody tr"
   )
-  expect(
-    $interlocutorAttendeesRows.length,
-    "Interlocutor attendees table starts with 1 body rows"
-  ).toBe(1)
-  const [
-    $advisorControls,
-    /* eslint-disable no-unused-vars */ $advisorConflictBtn /* eslint-enable no-unused-vars */,
-    $advisorName,
-    $advisorPosition,
-    /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
-    $advisorOrg
-  ] = await $$(".advisorAttendeesTable tbody tr:first-child td")
   await expect(
-    $advisorControls.locator("[name = 'primaryAttendeeADVISOR']").first(),
+    interlocutorAttendeesRows,
+    "Interlocutor attendees table starts with 1 body row"
+  ).toHaveCount(1)
+  const advisorControls = page
+    .locator(".advisorAttendeesTable tbody tr:first-child td")
+    .nth(0)
+  const advisorName = page
+    .locator(".advisorAttendeesTable tbody tr:first-child td")
+    .nth(2)
+  const advisorPosition = page
+    .locator(".advisorAttendeesTable tbody tr:first-child td")
+    .nth(3)
+  const advisorOrg = page
+    .locator(".advisorAttendeesTable tbody tr:first-child td")
+    .nth(5)
+  await expect(
+    advisorControls.locator("[name = 'primaryAttendeeADVISOR']").first(),
     "Advisor primary attendee checkbox should be checked"
   ).toBeChecked()
-  await assertElementText($advisorName, "CIV Erin Erinson")
-  await assertElementText($advisorPosition, "EF 2.2 Advisor D")
-  await assertElementText($advisorOrg, "EF 2.2")
-  const $addAttendeeShortcutButtons = await $$(
+  await expect(advisorName).toHaveText("CIV Erin Erinson")
+  await expect(advisorPosition).toHaveText("EF 2.2 Advisor D")
+  await expect(advisorOrg).toHaveText("EF 2.2")
+  const addAttendeeShortcutButtons = page.locator(
     "#reportPeople-shortcut-list button"
   )
+  await expect(addAttendeeShortcutButtons.first()).toBeVisible()
   // Add all recent attendees
-  const nrAttendees = $addAttendeeShortcutButtons.length
+  const nrAttendees = await addAttendeeShortcutButtons.count()
   for (let i = 0; i < nrAttendees; i++) {
-    await (await $("#reportPeople-shortcut-list button")).click()
+    await page.locator("#reportPeople-shortcut-list button").first().click()
   }
-  $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
-  $interlocutorAttendeesRows = await $$(".interlocutorAttendeesTable tbody tr")
-  expect(
-    $advisorAttendeesRows.length + $interlocutorAttendeesRows.length,
+  // Match the shortcuts plus the initial advisor and interlocutor.
+  await expect(
+    advisorAttendeesRows.or(interlocutorAttendeesRows),
     "Clicking the shortcut buttons adds rows to the table"
-  ).toBe(
-    // should match the number of shortcut buttons plus the initial advisor and interlocutor
-    nrAttendees + 2
-  )
-  const $submitButton = await $("#formBottomSubmit")
-  await $submitButton.click()
-  await pageHelpers.assertReportShowStatusText(
+  ).toHaveCount(nrAttendees + 2)
+  const submitButton = page.locator("#formBottomSubmit").first()
+  await submitButton.click()
+  await expect(page.locator(".report-show h4").first()).toHaveText(
     "This is a DRAFT report and hasn't been submitted."
   )
-  await app.logout()
+  await login.logout()
 })
