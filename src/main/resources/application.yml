@@ -24,7 +24,10 @@ spring:
         registration:
           keycloak:
             authorization-grant-type: authorization_code
-            scope: openid
+            scope:
+              - openid
+              - profile
+              - email
 
   shell:
     history:
