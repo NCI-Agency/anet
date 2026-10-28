@@ -166,7 +166,7 @@ If you have updated the generated schema and need to update the generated Java c
 #### How the client-side tests work
 The browser regression suite uses Playwright Test with Chromium. Specs are multi-step scenarios: cases run sequentially and share a browser context within their spec; different specs have separate contexts and run in parallel. Do not enable `fullyParallel` without first making their browser and database state independent. Failed cases produce screenshots, traces, HTML reports, and JUnit results under `client/build`.
 
-The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data and use the worker count from the common Playwright configuration, with no retries. Permission, position and report workflows run serially within their respective specs.
+The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data; permission, position and report workflows run serially within their respective specs. Both browser suites use the worker settings in `client/config/playwright-common.config.js` (overridable with `PLAYWRIGHT_WORKERS`) and run without retries.
 
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
@@ -192,6 +192,12 @@ To reproduce the two regression browser CI jobs on Linux, run `./scripts/test-pl
 Install Chromium before the first E2E run: `./gradlew yarn_run_install-playwright` (includes Linux system dependencies), or `./gradlew yarn_run_install-playwright-browser` if system dependencies are already installed.
 
 The E2E configuration is `client/config/playwright-e2e.config.js`. Import `test` and `expect` directly from `@playwright/test` and use the built-in `page` fixture, locators and retrying assertions. Scenarios live in `client/tests/e2e/specs/`. Page objects in `client/tests/e2e/pages/` receive that page explicitly; reusable widget interactions live in `client/tests/e2e/components/`. `LoginPage` waits for ANET to render after the Keycloak redirects. Each E2E test gets a fresh browser context; the report approval scenarios run in a serial group because they depend on a report created by an earlier test.
+
+Use `expect` from `@playwright/test` in both browser suites and the built-in Jest `expect` in unit tests. Chai imports are prohibited in all client tests. Page objects should expose locators for assertions: prefer `await expect(locator).toHaveText(...)`, `toHaveValue(...)`, and `toHaveCount(...)` over asserting captured text or arrays. Use `toHaveURL` and `toHaveTitle` for navigation checks. Reserve `expect.poll` for computed conditions without a matching locator assertion, and keep its callbacks free of actions such as opening a filter.
+
+Playwright actions already wait for their required element state. Avoid extra attached/visible/clickable waits immediately before an action, but retain waits for application state such as completed searches and closed modals. Fill rich-text editors and blur them before saving: `RichTextEditor` flushes pending serialization on blur, so an additional fixed delay is unnecessary.
+
+When comparing browser-test runtime, use the same machine, dictionary, and worker count, with a freshly seeded test database for each run. Run complete spec files when repeating scenarios: dependent cases cannot safely be repeated in isolation. A faster run must preserve coverage and pass without additional skips or retries.
 
 To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn run test-e2e --grep "Home Page"`.
 

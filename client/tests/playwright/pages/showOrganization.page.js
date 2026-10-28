@@ -18,10 +18,6 @@ class ShowOrganization extends Page {
       .first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getLongName() {
     return currentPage().locator('div[id="longName"]').first()
   }
@@ -103,13 +99,6 @@ class ShowOrganization extends Page {
     return (await this.getEditableTasks())
       .locator("table tr td:first-child")
       .all()
-  }
-
-  async waitForAlertSuccessToLoad() {
-    if (!(await (await this.getAlertSuccess()).isVisible())) {
-      await waitFor(await this.getAlertSuccess(), "attached")
-      await waitFor(await this.getAlertSuccess(), "visible")
-    }
   }
 
   async waitForAssessmentModalForm(reverse = false) {
@@ -226,8 +215,6 @@ class ShowOrganization extends Page {
   }
 
   async confirmDelete() {
-    await waitFor(await this.getDeleteConfirmButton(), "attached")
-    await waitFor(await this.getDeleteConfirmButton(), "visible")
     await (await this.getDeleteConfirmButton()).click()
   }
 

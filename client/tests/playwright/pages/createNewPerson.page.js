@@ -16,10 +16,6 @@ export class CreatePerson extends Page {
     return currentPage().locator("form.form-horizontal").first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getFamilyName() {
     return (await this.getForm()).locator("#familyName").first()
   }

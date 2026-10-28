@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Admin from "../pages/admin.page.js"
 import Help from "../pages/help.page.js"
 import { test } from "../support.js"
@@ -11,15 +10,14 @@ test.describe("When checking the help page", () => {
   test("Should see of the user superusers and administrators", async () => {
     await Help.open()
     const superusers = await Help.getSuperusers()
-    expect(superusers).to.include.members(ERIN_SUPERUSERS)
+    expect(superusers).toEqual(expect.arrayContaining(ERIN_SUPERUSERS))
     const administrators = await Help.getAdministrators()
-    expect(administrators).to.include.members(ERIN_ADMINS)
+    expect(administrators).toEqual(expect.arrayContaining(ERIN_ADMINS))
   })
   test("Should have no help text", async () => {
     await Help.open()
 
-    // eslint-disable-next-line no-unused-expressions
-    expect(await Help.hasHelpText()).to.be.false
+    await expect(await Help.getHelpText()).toHaveCount(0)
     await Help.logout()
   })
   test("Should have text in the help text field", async () => {
@@ -27,8 +25,9 @@ test.describe("When checking the help page", () => {
     await Admin.updateHelpText(HELP_TEXT)
     await Admin.logout()
     await Help.open()
-    // eslint-disable-next-line no-unused-expressions
-    expect(await Help.hasHelpText()).to.be.true
-    await pwExpect.poll(async () => await Help.getHelpText()).toEqual(HELP_TEXT)
+    await expect(await Help.getHelpText()).toBeVisible()
+    await expect(await Help.getHelpText()).toHaveText(HELP_TEXT, {
+      useInnerText: true
+    })
   })
 })

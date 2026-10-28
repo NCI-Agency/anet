@@ -27,8 +27,9 @@ test("Draft and submit a report", async ({ page }) => {
     })
     .click()
 
-  // send escape key to make sure the date picker is being closed
-  await page.keyboard.press("Escape")
+  // Close from the input so focus restoration does not reopen the picker.
+  await engagementDate.press("Escape")
+  await expect(page.locator(".bp6-datepicker")).toHaveCount(0)
   const locationAdvancedSelect = await new AdvancedSelect(
     page,
     "#location"
@@ -171,6 +172,12 @@ test("Draft and submit a report", async ({ page }) => {
     /\/reports\/[0-9a-f-]+/
   )
   testReportURL = new URL(page.url()).pathname
+  await expect(page.locator("#report-text .editable")).toHaveText(
+    "engagement details"
+  )
+  await expect(
+    page.locator("#report-sensitive-information .editable")
+  ).toHaveText("sensitive info")
   const submitReportButton = page.locator("#submitReportButton").first()
   await submitReportButton.click()
   await expect(submitReportButton).toBeHidden()
@@ -347,8 +354,9 @@ test("Verify that validations work", async ({ page }) => {
   await minuteInput.fill("45")
   await minuteInput.press("Tab")
 
-  // send escape key to make sure the date picker is being closed
-  await page.keyboard.press("Escape")
+  // Close from the input so focus restoration does not reopen the picker.
+  await engagementDate.press("Escape")
+  await expect(page.locator(".bp6-datepicker")).toHaveCount(0)
 
   // check date and time
   const dateTimeFormat = "DD-MM-YYYY HH:mm"

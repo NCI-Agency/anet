@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import _isEmpty from "lodash/isEmpty.js"
 import AdvancedSearch from "../pages/advancedSearch.page.js"
 import Home from "../pages/home.page.js"
@@ -44,17 +44,12 @@ const ADD_FILTER_BUTTON_TEXT = "+ Add another filter"
 test.describe("When using advanced search", () => {
   test("Should show a link like button with correct text under search bar that opens a popover", async () => {
     await Home.open()
-    await waitFor(await AdvancedSearch.getAdvancedSearchForm(), "attached")
     await waitFor(await AdvancedSearch.getAdvancedSearchForm(), "visible")
-    await waitFor(
-      await AdvancedSearch.getAdvancedSearchPopoverTrigger(),
-      "attached"
-    )
     await waitFor(
       await AdvancedSearch.getAdvancedSearchPopoverTrigger(),
       "visible"
     )
-    await pwExpect(
+    await expect(
       await AdvancedSearch.getAdvancedSearchPopoverTrigger()
     ).toHaveText("Everything filtered on Status: Active", {
       useInnerText: true
@@ -62,7 +57,6 @@ test.describe("When using advanced search", () => {
   })
   test("Should open the popover when clicked to the text", async () => {
     await (await AdvancedSearch.getAdvancedSearchPopoverTrigger()).click()
-    await waitFor(await AdvancedSearch.getAdvancedSearchPopover(), "attached")
     await waitFor(await AdvancedSearch.getAdvancedSearchPopover(), "visible")
   })
   test("Should show a list of anet object types on toggle buttons in the popover", async () => {
@@ -72,13 +66,13 @@ test.describe("When using advanced search", () => {
         "EventSeries",
         "Event Series"
       )
-      await pwExpect(button).toHaveText(expectedText, {
+      await expect(button).toHaveText(expectedText, {
         useInnerText: true
       })
     })
   })
   test("Should show the common filter even when no object type selected", async () => {
-    await pwExpect(await AdvancedSearch.getCommonSearchFilter()).toHaveText(
+    await expect(await AdvancedSearch.getCommonSearchFilter()).toHaveText(
       COMMON_FILTER_TEXT,
       {
         useInnerText: true
@@ -86,16 +80,15 @@ test.describe("When using advanced search", () => {
     )
   })
   test("Should show the additional common filters when no object type selected", async () => {
-    await pwExpect(await AdvancedSearch.getAddFilterButtonText()).toHaveText(
+    await expect(await AdvancedSearch.getAddFilterButtonText()).toHaveText(
       ADD_FILTER_BUTTON_TEXT,
       {
         useInnerText: true
       }
     )
     await (await AdvancedSearch.getAddFilterButton()).click()
-    await waitFor(await AdvancedSearch.getAddFilterPopover(), "attached")
     await waitFor(await AdvancedSearch.getAddFilterPopover(), "visible")
-    await pwExpect(await AdvancedSearch.getAddFilterPopover()).toContainText(
+    await expect(await AdvancedSearch.getAddFilterPopover()).toContainText(
       new RegExp(ALL_COMMON_FILTERS.join("\n")),
       {
         useInnerText: true
@@ -112,19 +105,15 @@ test.describe("When using advanced search", () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     await mapSequential(buttons, async (button, i) => {
       await button.click()
-      await pwExpect(
+      await expect(
         await AdvancedSearch.getCommonSearchFilter()
       ).not.toHaveCount(0)
       if (i === PERSON_INDEX) {
         await waitFor(
           await AdvancedSearch.getPendingVerificationFilter(),
-          "attached"
-        )
-        await waitFor(
-          await AdvancedSearch.getPendingVerificationFilter(),
           "visible"
         )
-        await pwExpect(
+        await expect(
           await AdvancedSearch.getPendingVerificationFilter()
         ).toHaveText(PERSON_DEFAULT_FILTER, {
           useInnerText: true
@@ -139,13 +128,13 @@ test.describe("When using advanced search", () => {
       const sampleFilters =
         ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilters
       if (!_isEmpty(sampleFilters)) {
-        await waitFor(await AdvancedSearch.getAddFilterButtonText(), "attached")
         await waitFor(await AdvancedSearch.getAddFilterButtonText(), "visible")
-        await pwExpect(
-          await AdvancedSearch.getAddFilterButtonText()
-        ).toHaveText(ADD_FILTER_BUTTON_TEXT, {
-          useInnerText: true
-        })
+        await expect(await AdvancedSearch.getAddFilterButtonText()).toHaveText(
+          ADD_FILTER_BUTTON_TEXT,
+          {
+            useInnerText: true
+          }
+        )
       }
     })
   })
@@ -158,9 +147,8 @@ test.describe("When using advanced search", () => {
       if (!_isEmpty(sampleFilters)) {
         for (const sampleFilter of sampleFilters) {
           await (await AdvancedSearch.getAddFilterButton()).click()
-          await waitFor(await AdvancedSearch.getAddFilterPopover(), "attached")
           await waitFor(await AdvancedSearch.getAddFilterPopover(), "visible")
-          await pwExpect(
+          await expect(
             await AdvancedSearch.getAddFilterPopover()
           ).toContainText(new RegExp(sampleFilter), {
             useInnerText: true

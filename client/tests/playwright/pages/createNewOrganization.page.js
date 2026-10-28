@@ -1,4 +1,4 @@
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import { currentPage, typeKeys, waitFor } from "../support.js"
 import Page from "./page.js"
 
@@ -7,10 +7,6 @@ const PAGE_URL = "/organizations/new"
 class CreateOrganization extends Page {
   async getForm() {
     return currentPage().locator("form.form-horizontal").first()
-  }
-
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
   }
 
   async getSubmitButton() {
@@ -101,13 +97,13 @@ class CreateOrganization extends Page {
     })
   }
 
-  async getApp6DropdownValue(field) {
+  async getApp6DropdownSelection(field) {
     const inputButton = await currentPage()
       .locator(`#${field}-dropdown`)
       .first()
     const inputValue = await inputButton.locator("div:nth-child(2)").first()
     await waitFor(inputValue, "attached")
-    return inputValue.innerText()
+    return inputValue
   }
 
   async setApp6DropdownValue(field, value) {
@@ -147,9 +143,10 @@ class CreateOrganization extends Page {
     await (await this.getLocationInput()).click()
     await (await this.getLocationInput()).fill(String(org.location))
     await this.waitForLocationAdvancedSelectToChange(org.location)
-    expect(
-      (await (await this.getLocationAdvancedSelectItem()).innerText()).trim()
-    ).to.include(org.location)
+    await expect(await this.getLocationAdvancedSelectItem()).toContainText(
+      org.location,
+      { useInnerText: true }
+    )
     await (await this.getLocationAdvancedSelectItem()).click()
     await this.fillOrganizationProfile(org.profile)
     await this.openEditApp6Modal()

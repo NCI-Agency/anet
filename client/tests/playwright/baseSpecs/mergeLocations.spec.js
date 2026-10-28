@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import MergeLocations from "../pages/mergeLocations.page.js"
 import { currentPage, test, waitFor } from "../support.js"
 
@@ -61,7 +61,6 @@ const EXAMPLE_LOCATIONS = {
 test.describe("Merge locations error", () => {
   test("Should show an error when merging locations would create a loop", async () => {
     await MergeLocations.openPage()
-    await waitFor(await MergeLocations.getTitle(), "attached")
     await waitFor(await MergeLocations.getTitle(), "visible")
     await (await MergeLocations.getLeftLocationField()).click()
     await (
@@ -92,7 +91,7 @@ test.describe("Merge locations error", () => {
     await (await MergeLocations.getUseAllButton("left")).click()
     await (await MergeLocations.getMergeLocationsButton()).click()
     await MergeLocations.waitForAlertDangerToLoad()
-    await pwExpect(await MergeLocations.getAlertDanger()).toHaveText(
+    await expect(await MergeLocations.getAlertDanger()).toHaveText(
       "Location can not be its own (grand…)parent",
       {
         useInnerText: true
@@ -100,7 +99,7 @@ test.describe("Merge locations error", () => {
     )
     // attempt to leave when both locations are selected, should show warning
     await MergeLocations.clickLogo()
-    await pwExpect(await MergeLocations.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergeLocations.getModalDialog()).not.toHaveCount(0)
     await (await currentPage().locator(".btn-danger").first()).click()
     await MergeLocations.logout()
   })
@@ -108,7 +107,6 @@ test.describe("Merge locations error", () => {
 test.describe("Merge locations page", () => {
   test("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergeLocations.openPage()
-    await waitFor(await MergeLocations.getTitle(), "attached")
     await waitFor(await MergeLocations.getTitle(), "visible")
     await (
       await MergeLocations.getLeftLocationField()
@@ -119,9 +117,8 @@ test.describe("Merge locations page", () => {
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one location is selected, should allow to leave
     await MergeLocations.clickLogo()
-    await pwExpect(await MergeLocations.getModalDialog()).toHaveCount(0)
+    await expect(await MergeLocations.getModalDialog()).toHaveCount(0)
     await MergeLocations.openPage()
-    await waitFor(await MergeLocations.getTitle(), "attached")
     await waitFor(await MergeLocations.getTitle(), "visible")
     await (
       await MergeLocations.getLeftLocationField()
@@ -139,13 +136,12 @@ test.describe("Merge locations page", () => {
     await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when both locations are selected, should show warning
     await MergeLocations.clickLogo()
-    await pwExpect(await MergeLocations.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergeLocations.getModalDialog()).not.toHaveCount(0)
     await (await currentPage().locator(".btn-danger").first()).click()
     await MergeLocations.logout()
   })
   test("Should display fields values of the left location", async () => {
     await MergeLocations.openPage()
-    await waitFor(await MergeLocations.getTitle(), "attached")
     await waitFor(await MergeLocations.getTitle(), "visible")
     await (
       await MergeLocations.getLeftLocationField()
@@ -161,12 +157,12 @@ test.describe("Merge locations page", () => {
       "left",
       "Name"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Name")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.type, {
       useInnerText: true
@@ -179,7 +175,7 @@ test.describe("Merge locations page", () => {
     await MergeLocations.waitForAdvancedSelectLoading(
       EXAMPLE_LOCATIONS.leftCountry.fullName
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getFirstItemRadioButtonFromAdvancedSelect()
     ).toHaveCount(0)
   })
@@ -198,24 +194,24 @@ test.describe("Merge locations page", () => {
       "right",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "UUID")
     ).toHaveText(EXAMPLE_LOCATIONS.right.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "Name")
     ).toHaveText(EXAMPLE_LOCATIONS.right.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.right.type, {
       useInnerText: true
     })
     // should show an alert
     await MergeLocations.waitForAlertWarningToLoad()
-    await pwExpect(await MergeLocations.getAlertWarning()).toHaveText(
+    await expect(await MergeLocations.getAlertWarning()).toHaveText(
       "Locations you are about to merge have different types. " +
         "Before continuing, please be aware that this merge operation might cause problems in the future!",
       {
@@ -224,22 +220,22 @@ test.describe("Merge locations page", () => {
     )
   })
   test("Should autoMerge some identical fields from both locations", async () => {
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_LOCATIONS.right.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Shape (GeoJSON)")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.geoJson, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Shape (GeoJSON)")
     ).toHaveText(EXAMPLE_LOCATIONS.right.geoJson, {
       useInnerText: true
@@ -254,24 +250,24 @@ test.describe("Merge locations page", () => {
       "mid",
       "Name"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.type, {
       useInnerText: true
     })
 
     // the digram and trigram fields should now be visible
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Alpha-2 code")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.digram, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Alpha-3 code")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.trigram, {
       useInnerText: true
@@ -284,7 +280,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "Alpha-2 code"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Alpha-2 code")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.digram, {
       useInnerText: true
@@ -295,19 +291,19 @@ test.describe("Merge locations page", () => {
       "mid",
       "Alpha-3 code"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Alpha-3 code")
     ).toHaveText(EXAMPLE_LOCATIONS.leftCountry.trigram, {
       useInnerText: true
     })
 
     // on the right side they should be empty
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "Alpha-2 code")
     ).toHaveText("", {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "Alpha-3 code")
     ).toHaveText("", {
       useInnerText: true
@@ -322,39 +318,39 @@ test.describe("Merge locations page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_LOCATIONS.right.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_LOCATIONS.right.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.right.type, {
       useInnerText: true
     })
     // the digram and trigram fields should now no longer be visible
 
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Alpha-2 code")
     ).toHaveCount(0)
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Alpha-3 code")
     ).toHaveCount(0)
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Alpha-2 code")
     ).toHaveCount(0)
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Alpha-3 code")
     ).toHaveCount(0)
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "Alpha-2 code")
     ).toHaveCount(0)
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("right", "Alpha-3 code")
     ).toHaveCount(0)
   })
@@ -373,42 +369,42 @@ test.describe("Merge locations page", () => {
       "left",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "UUID")
     ).toHaveText(EXAMPLE_LOCATIONS.left.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Name")
     ).toHaveText(EXAMPLE_LOCATIONS.left.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("left", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.left.type, {
       useInnerText: true
     })
     // alert should be gone now
 
-    await pwExpect(await MergeLocations.getAlertWarning()).toHaveCount(0)
+    await expect(await MergeLocations.getAlertWarning()).toHaveCount(0)
   })
   test("Should autoMerge identical fields after replacing the left location", async () => {
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.left.type, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Type")
     ).toHaveText(EXAMPLE_LOCATIONS.right.type, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_LOCATIONS.left.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_LOCATIONS.right.status, {
       useInnerText: true
@@ -421,7 +417,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_LOCATIONS.left.uuid, {
       useInnerText: true
@@ -432,7 +428,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "Name"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Name")
     ).toHaveText(EXAMPLE_LOCATIONS.left.name, {
       useInnerText: true
@@ -445,7 +441,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "Latitude, Longitude"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Latitude, Longitude")
     ).toContainText(EXAMPLE_LOCATIONS.left.latLon, {
       useInnerText: true
@@ -458,7 +454,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "Parent locations"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Parent locations")
     ).toHaveText(EXAMPLE_LOCATIONS.left.parentLocations, {
       useInnerText: true
@@ -471,7 +467,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "Planning Approval Steps"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Planning Approval Steps")
     ).toHaveText(EXAMPLE_LOCATIONS.right.planningApprovalSteps, {
       useInnerText: true
@@ -484,7 +480,7 @@ test.describe("Merge locations page", () => {
       "mid",
       "Approval Steps"
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getColumnContent("mid", "Approval Steps")
     ).toHaveText(EXAMPLE_LOCATIONS.left.approvalSteps, {
       useInnerText: true
@@ -510,30 +506,30 @@ test.describe("Merge locations page", () => {
     await MergeLocations.waitForSuccessAlert()
 
     // Check the results of the merge
-    await pwExpect(await MergeLocations.getField("name")).toHaveText(
+    await expect(await MergeLocations.getField("name")).toHaveText(
       EXAMPLE_LOCATIONS.left.name,
       {
         useInnerText: true
       }
     )
-    await pwExpect(await MergeLocations.getField("location")).toHaveText(
+    await expect(await MergeLocations.getField("location")).toHaveText(
       EXAMPLE_LOCATIONS.left.latLon,
       {
         useInnerText: true
       }
     )
-    await pwExpect(await MergeLocations.getField("parentLocations")).toHaveText(
+    await expect(await MergeLocations.getField("parentLocations")).toHaveText(
       EXAMPLE_LOCATIONS.left.parentLocations,
       {
         useInnerText: true
       }
     )
-    await pwExpect(
+    await expect(
       await MergeLocations.getFieldset("planningApprovals")
     ).toHaveText(EXAMPLE_LOCATIONS.right.planningApprovalSteps, {
       useInnerText: true
     })
-    await pwExpect(await MergeLocations.getFieldset("approvals")).toHaveText(
+    await expect(await MergeLocations.getFieldset("approvals")).toHaveText(
       EXAMPLE_LOCATIONS.left.approvalSteps,
       {
         useInnerText: true

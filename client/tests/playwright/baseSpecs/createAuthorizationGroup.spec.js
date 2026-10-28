@@ -1,8 +1,7 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import { v4 as uuidv4 } from "uuid"
 import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page.js"
-import { isClickable, test, waitFor } from "../support.js"
+import { currentPage, test, waitFor } from "../support.js"
 
 const AUTHORIZATION_GROUP_NAME_PREFIX = "test community"
 const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"
@@ -24,52 +23,47 @@ test.describe("When creating/editing a community", () => {
   test.describe("When creating a community as admin", () => {
     test("Should navigate to the create community page", async () => {
       await CreateAuthorizationGroup.open()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
     })
     test("Should save a community with only a name and description", async () => {
       authorizationGroupName = `${AUTHORIZATION_GROUP_NAME_PREFIX} ${uuidv4()}`
       authorizationGroupDescription = `${AUTHORIZATION_GROUP_DESCRIPTION_PREFIX} ${authorizationGroupName}`
-      await waitFor(await CreateAuthorizationGroup.getName(), "visible")
       await (
         await CreateAuthorizationGroup.getName()
       ).fill(String(authorizationGroupName))
       await (
         await CreateAuthorizationGroup.getDescription()
       ).fill(String(authorizationGroupDescription))
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTable()
       ).toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsTable()
       ).toHaveCount(0)
       await waitFor(
         await CreateAuthorizationGroup.getStatusActiveButton(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getStatusActiveInput()
       ).toHaveValue("ACTIVE")
       await waitFor(
         await CreateAuthorizationGroup.getStatusInactiveButton(),
         "visible"
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getStatusInactiveInput()
       ).not.toHaveValue("ACTIVE")
       await (await CreateAuthorizationGroup.getStatusInactiveButton()).click()
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
     })
     test("Should save the community with distributionList and forSensitiveInformation", async () => {
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "attached")
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "visible")
       await (await CreateAuthorizationGroup.getEditButton()).click()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
       await (await CreateAuthorizationGroup.getDistributionList()).click()
       await (
@@ -77,26 +71,23 @@ test.describe("When creating/editing a community", () => {
       ).click()
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
-      await pwExpect(
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
+      await expect(
         await CreateAuthorizationGroup.getDistributionList()
       ).toHaveText("Yes", {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getForSensitiveInformation()
       ).toHaveText("Yes", {
         useInnerText: true
       })
     })
     test("Should save the community with some members", async () => {
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "attached")
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "visible")
       await (await CreateAuthorizationGroup.getEditButton()).click()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
       await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
 
@@ -107,7 +98,7 @@ test.describe("When creating/editing a community", () => {
       await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
         POSITION_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(POSITION_COMPLETE, {
         useInnerText: true
@@ -117,10 +108,10 @@ test.describe("When creating/editing a community", () => {
       ).click()
       // The position is added to a table underneath, so relatedObjects table exists now
 
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTable()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION_COMPLETE
         )
@@ -130,16 +121,16 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getMemberTypeButton("Organizations")
       ).click()
-      await CreateAuthorizationGroup.deleteInput(
-        CreateAuthorizationGroup.getRelatedObjectsInput()
-      )
+      // Switching member types closes the overlay; fill alone does not reopen it.
+      await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
+      await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).fill(String(ORGANIZATION))
       await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
         ORGANIZATION_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(ORGANIZATION_COMPLETE, {
         useInnerText: true
@@ -147,7 +138,7 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           ORGANIZATION_COMPLETE
         )
@@ -157,16 +148,16 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getMemberTypeButton("People")
       ).click()
-      await CreateAuthorizationGroup.deleteInput(
-        CreateAuthorizationGroup.getRelatedObjectsInput()
-      )
+      // Switching member types closes the overlay; fill alone does not reopen it.
+      await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
+      await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).fill(String(PERSON))
       await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
         PERSON_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(PERSON_COMPLETE, {
         useInnerText: true
@@ -174,7 +165,7 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           PERSON_COMPLETE
         )
@@ -184,31 +175,28 @@ test.describe("When creating/editing a community", () => {
       await (await CreateAuthorizationGroup.getName()).click()
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
-      await pwExpect(
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION_COMPLETE
         )
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           ORGANIZATION_COMPLETE
         )
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           PERSON_COMPLETE
         )
       ).not.toHaveCount(0)
     })
     test("Should save the community with assigned superusers", async () => {
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "attached")
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "visible")
       await (await CreateAuthorizationGroup.getEditButton()).click()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
       await (
         await CreateAuthorizationGroup.getAdministrativePositionsInput()
@@ -221,7 +209,7 @@ test.describe("When creating/editing a community", () => {
       await CreateAuthorizationGroup.waitForAdministrativePositionsAdvancedSelectToContain(
         ADMINISTRATIVE_POSITION_1_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
       ).toContainText(ADMINISTRATIVE_POSITION_1_COMPLETE, {
         useInnerText: true
@@ -231,10 +219,10 @@ test.describe("When creating/editing a community", () => {
       ).click()
       // The position is added to a table underneath, so administrativePositions table exists now
 
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsTable()
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
           ADMINISTRATIVE_POSITION_1_COMPLETE
         )
@@ -247,7 +235,7 @@ test.describe("When creating/editing a community", () => {
       await CreateAuthorizationGroup.waitForAdministrativePositionsAdvancedSelectToContain(
         ADMINISTRATIVE_POSITION_2_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
       ).toContainText(ADMINISTRATIVE_POSITION_2_COMPLETE, {
         useInnerText: true
@@ -255,7 +243,7 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
           ADMINISTRATIVE_POSITION_2_COMPLETE
         )
@@ -265,16 +253,16 @@ test.describe("When creating/editing a community", () => {
       await (await CreateAuthorizationGroup.getName()).click()
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
-      await pwExpect(
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
           ADMINISTRATIVE_POSITION_1_COMPLETE
         )
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
           ADMINISTRATIVE_POSITION_2_COMPLETE
         )
@@ -289,10 +277,6 @@ test.describe("When creating/editing a community", () => {
       await CreateAuthorizationGroup.openAsSuperuser("/communities/mine")
       await waitFor(
         await CreateAuthorizationGroup.getMyAuthorizationGroups(),
-        "attached"
-      )
-      await waitFor(
-        await CreateAuthorizationGroup.getMyAuthorizationGroups(),
         "visible"
       )
       await (
@@ -302,10 +286,7 @@ test.describe("When creating/editing a community", () => {
       ).click()
     })
     test("Should be able to save the community with a changed name and description", async () => {
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "attached")
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "visible")
       await (await CreateAuthorizationGroup.getEditButton()).click()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
       await (
         await CreateAuthorizationGroup.getName()
@@ -315,62 +296,55 @@ test.describe("When creating/editing a community", () => {
       ).fill(`${authorizationGroupDescription}-edited`)
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
-      await pwExpect(
-        await CreateAuthorizationGroup.getNameDisplay()
-      ).toHaveText(`Community ${authorizationGroupName}-edited`, {
-        useInnerText: true
-      })
-      await pwExpect(
-        await CreateAuthorizationGroup.getDescription()
-      ).toHaveText(`${authorizationGroupDescription}-edited`, {
-        useInnerText: true
-      })
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
+      await expect(await CreateAuthorizationGroup.getNameDisplay()).toHaveText(
+        `Community ${authorizationGroupName}-edited`,
+        {
+          useInnerText: true
+        }
+      )
+      await expect(await CreateAuthorizationGroup.getDescription()).toHaveText(
+        `${authorizationGroupDescription}-edited`,
+        {
+          useInnerText: true
+        }
+      )
     })
     test("Should be able to change the community's distributionList", async () => {
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "attached")
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "visible")
       await (await CreateAuthorizationGroup.getEditButton()).click()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
       await (await CreateAuthorizationGroup.getDistributionList()).click()
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
-      await pwExpect(
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
+      await expect(
         await CreateAuthorizationGroup.getDistributionList()
       ).toHaveText("No", {
         useInnerText: true
       })
     })
     test("Should not be able to change the community's forSensitiveInformation", async () => {
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "attached")
-      await waitFor(await CreateAuthorizationGroup.getEditButton(), "visible")
       await (await CreateAuthorizationGroup.getEditButton()).click()
-      await waitFor(await CreateAuthorizationGroup.getForm(), "attached")
       await waitFor(await CreateAuthorizationGroup.getForm(), "visible")
-      // eslint-disable-next-line no-unused-expressions
-      expect(
-        await isClickable(
-          await CreateAuthorizationGroup.getForSensitiveInformation()
-        )
-      ).to.be.false
+      await expect(
+        await CreateAuthorizationGroup.getForSensitiveInformation()
+      ).toBeDisabled()
     })
     test("Should not be able to change the community's assigned superusers", async () => {
       // Should not be able to add administrative positions
 
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getAdministrativePositionsInput()
       ).toHaveCount(0)
       // Should not be able to remove administrative positions
 
-      await pwExpect(
+      await expect(
         await (
           await CreateAuthorizationGroup.getAdministrativePositionsTable()
         )
@@ -386,7 +360,7 @@ test.describe("When creating/editing a community", () => {
       await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToContain(
         POSITION2_COMPLETE
       )
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).toContainText(POSITION2_COMPLETE, {
         useInnerText: true
@@ -394,7 +368,7 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION2_COMPLETE
         )
@@ -414,23 +388,23 @@ test.describe("When creating/editing a community", () => {
           .locator("xpath=./td/button")
           .first()
       ).click()
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION_COMPLETE
         )
       ).toHaveCount(0)
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = (
-        await (await CreateAuthorizationGroup.getAlertSuccess()).innerText()
-      ).trim()
-      expect(alertMessage).to.equal("Community saved")
-      await pwExpect(
+      await expect(await CreateAuthorizationGroup.getAlertSuccess()).toHaveText(
+        "Community saved",
+        { useInnerText: true }
+      )
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION2_COMPLETE
         )
       ).not.toHaveCount(0)
-      await pwExpect(
+      await expect(
         await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
           POSITION_COMPLETE
         )

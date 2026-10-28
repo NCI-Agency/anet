@@ -146,9 +146,7 @@ class MergePeople extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "attached")
     await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getPersonHeaderFromPopover(), "attached")
     await waitFor(await this.getPersonHeaderFromPopover(), "visible")
     return this.waitForElementToChange(
       this.getFirstItemFromAdvancedSelect,

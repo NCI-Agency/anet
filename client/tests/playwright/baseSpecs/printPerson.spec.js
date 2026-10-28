@@ -1,4 +1,4 @@
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import Search from "../pages/search.page.js"
 import ShowPerson from "../pages/showPerson.page.js"
@@ -47,8 +47,6 @@ const PRESET_WITHOUT_SENSITIVE_LABELS = [
 test.describe("Show person page", () => {
   test.beforeEach("Should have print button", async () => {
     await Home.openAsAdminUser()
-    await waitFor(await Home.getSearchBar(), "attached")
-    await waitFor(await Home.getSearchBar(), "visible")
     await (await Home.getSearchBar()).fill("Roger Rogwell")
     await (await Home.getSubmitSearch()).click()
     await waitFor(await Search.getFoundPeopleTable(), "attached", {
@@ -56,16 +54,12 @@ test.describe("Show person page", () => {
     })
     await waitFor(await Search.getFoundPeopleTable(), "visible")
     await (await Search.linkOfPersonFound("Roger")).click()
-    await waitFor(await ShowPerson.getCompactViewButton(), "attached")
-    await waitFor(await ShowPerson.getCompactViewButton(), "visible")
     await (await ShowPerson.getCompactViewButton()).click()
-    await waitFor(await ShowPerson.getCompactView(), "attached")
     await waitFor(await ShowPerson.getCompactView(), "visible")
   })
   test.describe("When on the print person page", () => {
     test("All fields can be selected using the optional fields dropdown", async () => {
       await (await ShowPerson.getOptionalFieldsButton()).click()
-      await waitFor(await ShowPerson.getSelectAllButton(), "visible")
       await (await ShowPerson.getSelectAllButton()).click()
       await ShowPerson.waitForCompactField(
         false,
@@ -74,7 +68,6 @@ test.describe("Show person page", () => {
     })
     test("All fields can be cleared using the optional fields dropdown", async () => {
       await (await ShowPerson.getOptionalFieldsButton()).click()
-      await waitFor(await ShowPerson.getClearAllButton(), "visible")
       await (await ShowPerson.getClearAllButton()).click()
       await ShowPerson.waitForCompactField(
         true,
@@ -83,7 +76,6 @@ test.describe("Show person page", () => {
     })
     test("Individual fields can be selected using optional fields dropdown", async () => {
       await (await ShowPerson.getOptionalFieldsButton()).click()
-      await waitFor(await ShowPerson.getClearAllButton(), "visible")
       await (await ShowPerson.getClearAllButton()).click()
       await ShowPerson.pickACompactField(SOME_FIELDS.currentPosition.id)
       await ShowPerson.waitForCompactField(
@@ -98,7 +90,6 @@ test.describe("Show person page", () => {
     })
     test("Default preset should select correct fields and display sensitive information warning", async () => {
       await (await ShowPerson.getPresetsButton()).click()
-      await waitFor(await ShowPerson.getDefaultPreset(), "visible")
       await (await ShowPerson.getDefaultPreset()).click()
       await ShowPerson.waitForCompactField(false, ...PRESET_DEFAULT_LABELS)
       await waitFor(
@@ -108,7 +99,6 @@ test.describe("Show person page", () => {
     })
     test("Exclude sensitive fields preset should select correct fields", async () => {
       await (await ShowPerson.getPresetsButton()).click()
-      await waitFor(await ShowPerson.getWithoutSensitivePreset(), "visible")
       await (await ShowPerson.getWithoutSensitivePreset()).click()
       await ShowPerson.waitForCompactField(
         false,
@@ -124,15 +114,13 @@ test.describe("Show person page", () => {
     })
     test("Should select the number of fields on the left", async () => {
       await (await ShowPerson.getOptionalFieldsButton()).click()
-      await waitFor(await ShowPerson.getSelectAllButton(), "visible")
       await (await ShowPerson.getSelectAllButton()).click()
       await (await ShowPerson.getLeftColumnNumber()).fill(String(4))
       // Left column contains 2 additional fields name and avatar
-      expect((await ShowPerson.getLeftTableFields()).length).to.equal(4)
+      expect((await ShowPerson.getLeftTableFields()).length).toBe(4)
     })
     test("Should return to the show person page when detailed view button clicked", async () => {
       await (await ShowPerson.getDetailedViewButton()).click()
-      await waitFor(await ShowPerson.getCompactViewButton(), "attached")
       await waitFor(await ShowPerson.getCompactViewButton(), "visible")
     })
   })

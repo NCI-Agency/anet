@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import MyTasks from "../pages/myTasks.page.js"
 import { test, waitFor } from "../support.js"
@@ -11,7 +10,7 @@ test.describe("Home page", () => {
       await (await Home.getLinksMenuButton()).click()
       await waitFor(await Home.getMyTasksLink(), "visible")
 
-      await pwExpect(await Home.getMyTasksLink()).not.toHaveCount(0)
+      await expect(await Home.getMyTasksLink()).not.toHaveCount(0)
       await Home.logout()
     })
   })
@@ -19,7 +18,7 @@ test.describe("Home page", () => {
     test("Should NOT see a link to my tasks page when the user does not have a position", async () => {
       await Home.openAsPositionlessUser()
 
-      await pwExpect(await Home.getMyTasksLink()).toHaveCount(0)
+      await expect(await Home.getMyTasksLink()).toHaveCount(0)
       await Home.logout()
     })
   })
@@ -36,20 +35,16 @@ test.describe("My tasks page", () => {
       await waitFor(await MyTasks.getMyOrgAssignedTasks(), "visible")
       const myOrgAssignedTasksItems = await (
         await MyTasks.getMyOrgAssignedTasks()
-      )
-        .locator("tr")
-        .all()
+      ).locator("tr")
       // table has a header and 4 task rows
-      expect(myOrgAssignedTasksItems).to.have.length(5)
+      await expect(myOrgAssignedTasksItems).toHaveCount(5)
     })
     test("Should see a table of the tasks being the responsibility of the current user", async () => {
       await waitFor(await MyTasks.getMyResponsibleTasks(), "visible")
       const myResponsibleTasksItems = await (
         await MyTasks.getMyResponsibleTasks()
-      )
-        .locator("tr")
-        .all()
-      expect(myResponsibleTasksItems).to.have.length(0)
+      ).locator("tr")
+      await expect(myResponsibleTasksItems).toHaveCount(0)
     })
   })
 })

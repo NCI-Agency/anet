@@ -12,7 +12,6 @@ class Help extends Page {
     const superusersDiv = await currentPage()
       .locator(".superusers-list")
       .first()
-    await waitFor(superusersDiv, "attached")
     await waitFor(superusersDiv, "visible")
     const superusers = await superusersDiv.locator("span").all()
     return Promise.all(
@@ -22,7 +21,6 @@ class Help extends Page {
 
   async getAdministrators() {
     const adminsDiv = await currentPage().locator(".admins-list").first()
-    await waitFor(adminsDiv, "attached")
     await waitFor(adminsDiv, "visible")
     const admins = await adminsDiv.locator("span").all()
     return Promise.all(
@@ -30,15 +28,9 @@ class Help extends Page {
     )
   }
 
-  async hasHelpText() {
-    await waitFor(currentPage().locator("fieldset").first(), "visible")
-    return (await currentPage().locator(".editable").first().count()) > 0
-  }
-
   async getHelpText() {
-    const editable = await currentPage().locator("fieldset .editable").first()
-    const spans = await editable.locator("span").all()
-    return (await spans[spans.length - 1].innerText()).trim()
+    await waitFor(currentPage().locator("fieldset").first(), "visible")
+    return currentPage().locator("fieldset .editable").first()
   }
 }
 

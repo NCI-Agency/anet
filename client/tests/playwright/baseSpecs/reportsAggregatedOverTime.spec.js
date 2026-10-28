@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import Settings from "../../../platform/node/settings.js"
 import AdvancedSearch from "../pages/advancedSearch.page.js"
@@ -26,7 +25,7 @@ test.describe("Aggregated reports over time insight", () => {
     await openPublishedReportsInsight()
     const rangeLabel = await currentPage().locator(RANGE_LABEL_SELECTOR).first()
     const expectedRangeLabelText = `${moment().startOf("year").format("D MMMM YYYY")} — ${moment().format("D MMMM YYYY")}`
-    await pwExpect(rangeLabel).toHaveText(expectedRangeLabelText, {
+    await expect(rangeLabel).toHaveText(expectedRangeLabelText, {
       useInnerText: true
     })
     const totalReportsLabel = await currentPage()
@@ -34,7 +33,7 @@ test.describe("Aggregated reports over time insight", () => {
       .first()
     await waitFor(totalReportsLabel, "attached")
     const searchSummary = await AdvancedSearch.getAdvancedSearchPopoverTrigger()
-    await pwExpect(searchSummary).toContainText(RELEASE_DATE_LABEL, {
+    await expect(searchSummary).toContainText(RELEASE_DATE_LABEL, {
       useInnerText: true
     })
     await expectTotalReportsWithinRange(
@@ -71,18 +70,12 @@ test.describe("Aggregated reports over time insight", () => {
       totalReportsLabel,
       EXPECTED_PUBLISHED_RANGE
     )
-    await pwExpect
-      .poll(async () => await monthlyButton.getAttribute("class"))
-      .toContain("active")
+    await expect(monthlyButton).toHaveAttribute("class", /active/)
     await expectBarCountToEqual(getExpectedPeriodCount("month"))
     await expectLastTableCountWithinRange(EXPECTED_PUBLISHED_RANGE)
     await weeklyButton.click()
-    await pwExpect
-      .poll(async () => await weeklyButton.getAttribute("class"))
-      .toContain("active")
-    await pwExpect
-      .poll(async () => await monthlyButton.getAttribute("class"))
-      .not.toContain("active")
+    await expect(weeklyButton).toHaveAttribute("class", /active/)
+    await expect(monthlyButton).not.toHaveAttribute("class", /active/)
     await expectBarCountToEqual(getExpectedPeriodCount("week"))
     await expectLastTableCountWithinRange(EXPECTED_PUBLISHED_RANGE)
     await expectTotalReportsWithinRange(
@@ -90,9 +83,7 @@ test.describe("Aggregated reports over time insight", () => {
       EXPECTED_PUBLISHED_RANGE
     )
     await monthlyButton.click()
-    await pwExpect
-      .poll(async () => await monthlyButton.getAttribute("class"))
-      .toContain("active")
+    await expect(monthlyButton).toHaveAttribute("class", /active/)
     await expectBarCountToEqual(getExpectedPeriodCount("month"))
     await expectTotalReportsWithinRange(
       totalReportsLabel,
@@ -102,10 +93,6 @@ test.describe("Aggregated reports over time insight", () => {
   })
   test("Should clear the insight when the release date filter is removed", async () => {
     await openPublishedReportsInsight()
-    await waitFor(
-      await AdvancedSearch.getAdvancedSearchPopoverTrigger(),
-      "attached"
-    )
     await (await AdvancedSearch.getAdvancedSearchPopoverTrigger()).click()
     await waitFor(await AdvancedSearch.getAdvancedSearchPopover(), "visible")
     await AdvancedSearch.selectObjectType("REPORTS")
@@ -121,26 +108,24 @@ test.describe("Aggregated reports over time insight", () => {
     await waitFor(releaseDateRow, "attached")
     const removeButton =
       await AdvancedSearch.getRemoveButtonForFilter(RELEASE_DATE_LABEL)
-    await waitFor(removeButton, "clickable")
     await removeButton.click()
-    await pwExpect(
+    await expect(
       await AdvancedSearch.getFilterRowByLabel(RELEASE_DATE_LABEL)
     ).toHaveCount(0)
     const searchButton = await AdvancedSearch.getSearchButton()
-    await waitFor(searchButton, "clickable")
     await searchButton.click()
     const searchSummary = await AdvancedSearch.getAdvancedSearchPopoverTrigger()
-    await pwExpect(searchSummary).not.toContainText(RELEASE_DATE_LABEL, {
+    await expect(searchSummary).not.toContainText(RELEASE_DATE_LABEL, {
       useInnerText: true
     })
     const rangeLabel = await currentPage().locator(RANGE_LABEL_SELECTOR).first()
-    await pwExpect(rangeLabel).toHaveText(NO_RANGE_MESSAGE, {
+    await expect(rangeLabel).toHaveText(NO_RANGE_MESSAGE, {
       useInnerText: true
     })
     const noRangeMessage = await currentPage()
       .locator(`#${AGGREGATED_REPORTS_OVER_TIME} em`)
       .first()
-    await pwExpect(noRangeMessage).toHaveText(NO_RANGE_MESSAGE, {
+    await expect(noRangeMessage).toHaveText(NO_RANGE_MESSAGE, {
       useInnerText: true
     })
     await Insights.logout()
@@ -172,7 +157,7 @@ function getExpectedPeriodCount(granularity) {
 async function expectBarCountToEqual(expectedCount) {
   await waitFor(await currentPage().locator(`#${CHART_ID}`).first(), "attached")
   const bars = await currentPage().locator(BAR_SELECTOR).all()
-  expect(bars.length).to.equal(expectedCount)
+  expect(bars.length).toBe(expectedCount)
 }
 async function expectLastTableCountWithinRange(range) {
   const rows = await currentPage()
@@ -188,14 +173,16 @@ async function expectLastTableCountWithinRange(range) {
   }
   const countText = (await cells[1].innerText()).trim()
   const count = Number(countText.replace(/,/g, ""))
-  expect(Number.isNaN(count)).to.equal(false)
-  expect(count).to.be.within(range.min, range.max)
+  expect(Number.isNaN(count)).toBe(false)
+  expect(count).toBeGreaterThanOrEqual(range.min)
+  expect(count).toBeLessThanOrEqual(range.max)
 }
 async function expectTotalReportsWithinRange(totalReportsLabel, range) {
   const count = parseTotalReportsCount(
     (await totalReportsLabel.innerText()).trim()
   )
-  expect(count).to.be.within(range.min, range.max)
+  expect(count).toBeGreaterThanOrEqual(range.min)
+  expect(count).toBeLessThanOrEqual(range.max)
 }
 function parseTotalReportsCount(labelText) {
   // Label format: "Total reports: <number>"

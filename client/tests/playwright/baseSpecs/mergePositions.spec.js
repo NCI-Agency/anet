@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import MergePositions from "../pages/mergePositions.page.js"
 import { currentPage, test, waitFor } from "../support.js"
@@ -68,7 +68,6 @@ const EXAMPLE_POSITIONS = {
 test.describe("Merge positions page", () => {
   test("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergePositions.openPage()
-    await waitFor(await MergePositions.getTitle(), "attached")
     await waitFor(await MergePositions.getTitle(), "visible")
     await (
       await MergePositions.getLeftPositionField()
@@ -79,9 +78,8 @@ test.describe("Merge positions page", () => {
     await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one position is selected, should allow to leave
     await MergePositions.clickLogo()
-    await pwExpect(await MergePositions.getModalDialog()).toHaveCount(0)
+    await expect(await MergePositions.getModalDialog()).toHaveCount(0)
     await MergePositions.openPage()
-    await waitFor(await MergePositions.getTitle(), "attached")
     await waitFor(await MergePositions.getTitle(), "visible")
     await (
       await MergePositions.getLeftPositionField()
@@ -99,13 +97,12 @@ test.describe("Merge positions page", () => {
     await (await MergePositions.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when both positions are selected, should show warning
     await MergePositions.clickLogo()
-    await pwExpect(await MergePositions.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergePositions.getModalDialog()).not.toHaveCount(0)
     await (await currentPage().locator(".btn-danger").first()).click()
   })
   test("Should display fields values of the left position", async () => {
     // Open merge positions page.
     await MergePositions.openPage()
-    await waitFor(await MergePositions.getTitle(), "attached")
     await waitFor(await MergePositions.getTitle(), "visible")
 
     // Search and select a position from left position field.
@@ -123,50 +120,50 @@ test.describe("Merge positions page", () => {
       "left",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "UUID")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Position Name")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Organization")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.organization, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Type")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.type, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Position Role")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.role, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Status")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Email addresses")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.email, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("left", "Person")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.person, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getAssociatedPositions("left"))
       .toEqual(EXAMPLE_POSITIONS.validLeft.associatedPositions)
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getPreviousPeople("left"))
       .toEqual(EXAMPLE_POSITIONS.validLeft.previousPeople)
   })
@@ -177,7 +174,7 @@ test.describe("Merge positions page", () => {
     await MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.validLeft.fullName
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getFirstItemRadioButtonFromAdvancedSelect()
     ).toHaveCount(0)
   })
@@ -207,70 +204,70 @@ test.describe("Merge positions page", () => {
       "right",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "UUID")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Position Name")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Organization")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.organization, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Type")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.type, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Position Role")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.role, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Status")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Email addresses")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.email, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("right", "Person")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.person, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getAssociatedPositions("right"))
       .toEqual(EXAMPLE_POSITIONS.validRight.associatedPositions)
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getPreviousPeople("right"))
       .toEqual(EXAMPLE_POSITIONS.validRight.previousPeople)
   })
   test("Should autoMerge some identical fields from both positions", async () => {
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Location")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.location, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Location")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.location, {
       useInnerText: true
@@ -285,53 +282,53 @@ test.describe("Merge positions page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Position Name")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Organization")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.organization, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Type")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.type, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Position Role")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.role, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.email, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Person")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.person, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getAssociatedPositions("mid"))
       .toEqual(EXAMPLE_POSITIONS.validLeft.associatedPositions)
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getPreviousPeople("mid"))
       .toEqual(EXAMPLE_POSITIONS.validLeft.previousPeople)
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Location")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.location, {
       useInnerText: true
@@ -346,53 +343,53 @@ test.describe("Merge positions page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Position Name")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.name, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Organization")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.organization, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Type")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.type, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Position Role")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.role, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.email, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Person")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.person, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getAssociatedPositions("mid"))
       .toEqual(EXAMPLE_POSITIONS.validRight.associatedPositions)
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getPreviousPeople("mid"))
       .toEqual(EXAMPLE_POSITIONS.validRight.previousPeople)
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Location")
     ).toHaveText(EXAMPLE_POSITIONS.validRight.location, {
       useInnerText: true
@@ -405,7 +402,7 @@ test.describe("Merge positions page", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "UUID")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.uuid, {
       useInnerText: true
@@ -418,7 +415,7 @@ test.describe("Merge positions page", () => {
       "mid",
       "Position Name"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Position Name")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.name, {
       useInnerText: true
@@ -431,7 +428,7 @@ test.describe("Merge positions page", () => {
       "mid",
       "Position Role"
     )
-    await pwExpect(
+    await expect(
       await MergePositions.getColumnContent("mid", "Position Role")
     ).toHaveText(EXAMPLE_POSITIONS.validLeft.role, {
       useInnerText: true
@@ -439,13 +436,13 @@ test.describe("Merge positions page", () => {
     await (
       await MergePositions.getSelectButton("left", "Associated Positions")
     ).click()
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getAssociatedPositions("mid"))
       .toEqual(EXAMPLE_POSITIONS.validLeft.associatedPositions)
     await (
       await MergePositions.getSelectButton("left", "Previous People")
     ).click()
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getPreviousPeople("mid"))
       .toEqual(EXAMPLE_POSITIONS.validLeft.previousPeople)
   })
@@ -462,21 +459,21 @@ test.describe("Merge positions page", () => {
       await MergePositions.getEditAssociatedPositionsModal(),
       "visible"
     )
-    await pwExpect
+    await expect
       .poll(
         async () => await MergePositions.getAssociatedPositionsInModal("left")
       )
       .toEqual(EXAMPLE_POSITIONS.validLeft.associatedPositions)
   })
   test("Should display correct values on the right column", async () => {
-    await pwExpect
+    await expect
       .poll(
         async () => await MergePositions.getAssociatedPositionsInModal("right")
       )
       .toEqual(EXAMPLE_POSITIONS.validRight.associatedPositions)
   })
   test("Should display left column values on the middle column", async () => {
-    await pwExpect
+    await expect
       .poll(
         async () => await MergePositions.getAssociatedPositionsInModal("mid")
       )
@@ -501,7 +498,7 @@ test.describe("Merge positions page", () => {
     await (
       await MergePositions.getAssociatedPositionActionButton("mid", index)
     ).click()
-    await pwExpect
+    await expect
       .poll(
         async () => await MergePositions.getAssociatedPositionsInModal("mid")
       )
@@ -509,7 +506,7 @@ test.describe("Merge positions page", () => {
     await (
       await MergePositions.getAssociatedPositionActionButton("mid", index)
     ).click()
-    await pwExpect
+    await expect
       .poll(
         async () => await MergePositions.getAssociatedPositionsInModal("mid")
       )
@@ -540,13 +537,13 @@ test.describe("Merge positions page", () => {
         rightItemIndex
       )
     ).click()
-    await pwExpect
+    await expect
       .poll(
         async () => await MergePositions.getAssociatedPositionsInModal("mid")
       )
       .toEqual(afterPicked)
     await (await MergePositions.getSaveAssociatedPositionsButton()).click()
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getAssociatedPositions("mid"))
       .toEqual(afterPicked)
   })
@@ -565,7 +562,7 @@ test.describe("Merge positions page", () => {
         position: "EF 1.1 Advisor D"
       }
     ]
-    await pwExpect
+    await expect
       .poll(async () => await MergePositions.getWinnerAssociatedPositions())
       .toEqual(winnerApsAfterMerge)
   })
@@ -573,7 +570,7 @@ test.describe("Merge positions page", () => {
     await (await MergePositions.getShowNotesButton()).click()
     // Wait for offcanvas to open
 
-    await pwExpect
+    await expect
       .poll(
         async () =>
           await MergePositions.areNotesExist([
@@ -587,8 +584,7 @@ test.describe("Merge positions page", () => {
     await MergePositions.openPage(
       `/positions/${EXAMPLE_POSITIONS.validRight.posUuid}`
     )
-    await waitFor(await MergePositions.getErrorTitle(), "attached")
-    await pwExpect(await MergePositions.getErrorTitle()).toHaveText(
+    await expect(await MergePositions.getErrorTitle()).toHaveText(
       `Position #${EXAMPLE_POSITIONS.validRight.posUuid} not found.`,
       {
         useInnerText: true

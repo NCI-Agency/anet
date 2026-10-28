@@ -3,7 +3,6 @@ const neostandard = require("neostandard")
 
 const globals = require("globals")
 const babelParser = require("@babel/eslint-parser")
-const chaiExpect = require("eslint-plugin-chai-expect")
 const _import = require("eslint-plugin-import")
 const jest = require("eslint-plugin-jest")
 const jsxA11Y = require("eslint-plugin-jsx-a11y")
@@ -36,7 +35,6 @@ module.exports = defineConfig([
       parser: babelParser
     },
     plugins: {
-      "chai-expect": chaiExpect,
       import: _import,
       jest,
       "jsx-a11y": jsxA11Y,
@@ -44,7 +42,6 @@ module.exports = defineConfig([
       "react-hooks": reactHooks
     },
     rules: {
-      ...chaiExpect.configs.recommended.rules,
       ...react.configs.recommended.rules,
 
       eqeqeq: [
@@ -105,6 +102,24 @@ module.exports = defineConfig([
       "@typescript-eslint/no-unused-expressions": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
       "prefer-spread": "warn"
+    }
+  },
+
+  {
+    files: ["tests/**/*.[jt]s"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "chai",
+              message:
+                "Use expect from @playwright/test for browser tests, or from the Jest globals for Jest tests."
+            }
+          ]
+        }
+      ]
     }
   },
 

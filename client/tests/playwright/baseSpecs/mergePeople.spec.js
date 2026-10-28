@@ -1,4 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import Settings from "../../../platform/node/settings.js"
 import MergePeople from "../pages/mergePeople.page.js"
@@ -142,7 +142,6 @@ const EXAMPLE_PEOPLE = {
 test.describe("Merge people who are both non-users", () => {
   test("Should display a warning when leaving the page with unsaved changes", async () => {
     await MergePeople.openPage()
-    await waitFor(await MergePeople.getTitle(), "attached")
     await waitFor(await MergePeople.getTitle(), "visible")
     await (
       await MergePeople.getLeftPersonField()
@@ -153,9 +152,8 @@ test.describe("Merge people who are both non-users", () => {
     await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when only one person is selected, should allow to leave
     await MergePeople.clickLogo()
-    await pwExpect(await MergePeople.getModalDialog()).toHaveCount(0)
+    await expect(await MergePeople.getModalDialog()).toHaveCount(0)
     await MergePeople.openPage()
-    await waitFor(await MergePeople.getTitle(), "attached")
     await waitFor(await MergePeople.getTitle(), "visible")
     await (
       await MergePeople.getLeftPersonField()
@@ -173,14 +171,13 @@ test.describe("Merge people who are both non-users", () => {
     await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     // attempt to leave when both people are selected, should show warning
     await MergePeople.clickLogo()
-    await pwExpect(await MergePeople.getModalDialog()).not.toHaveCount(0)
+    await expect(await MergePeople.getModalDialog()).not.toHaveCount(0)
     await (await currentPage().locator(".btn-danger").first()).click()
     await MergePeople.logout()
   })
   test("Should display fields values of the left person", async () => {
     // Open merge people page.
     await MergePeople.openPage()
-    await waitFor(await MergePeople.getTitle(), "attached")
     await waitFor(await MergePeople.getTitle(), "visible")
 
     // Search and select a person from left person field.
@@ -198,65 +195,67 @@ test.describe("Merge people who are both non-users", () => {
       "left",
       "UUID"
     )
-    await pwExpect(
-      await MergePeople.getColumnContent("left", "UUID")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.uuid, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("left", "UUID")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.uuid,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("left", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.familyName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.givenName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("left"))
       .toEqual(EXAMPLE_PEOPLE.validLeft.previousPositions)
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.email, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Phone")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.phone, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergePeople.getColumnContent("left", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("left", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("left", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.biography, {
       useInnerText: true
@@ -269,7 +268,7 @@ test.describe("Merge people who are both non-users", () => {
     await MergePeople.waitForAdvancedSelectLoading(
       EXAMPLE_PEOPLE.validLeft.fullName
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getFirstItemRadioButtonFromAdvancedSelect()
     ).toHaveCount(0)
   })
@@ -289,114 +288,114 @@ test.describe("Merge people who are both non-users", () => {
       "right",
       "UUID"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "UUID")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.uuid, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.familyName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.givenName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("right"))
       .toEqual(EXAMPLE_PEOPLE.validRight.previousPositions)
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.email, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Phone")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.phone, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Rank")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.rank, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("right", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("left", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.biography, {
       useInnerText: true
     })
   })
   test("Should autoMerge some identical fields from both persons", async () => {
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.nationality, {
       useInnerText: true
     })
     if (hasCustomFields) {
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Choose one of the colours")
       ).toHaveText(EXAMPLE_PEOPLE.validLeft.colourOptions, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Choose one of the colours")
       ).toHaveText(EXAMPLE_PEOPLE.validRight.colourOptions, {
         useInnerText: true
       })
     }
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent(
         "mid",
         "Position on the political spectrum"
@@ -404,7 +403,7 @@ test.describe("Merge people who are both non-users", () => {
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.politicalPosition, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent(
         "mid",
         "Position on the political spectrum"
@@ -414,7 +413,7 @@ test.describe("Merge people who are both non-users", () => {
     })
   })
   test("Should autoMerge the user accounts field from both persons", async () => {
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "User accounts")
     ).toHaveText("No user accounts available", {
       useInnerText: true
@@ -429,77 +428,80 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "UUID")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.uuid, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "UUID")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.uuid,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.familyName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.givenName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("mid"))
       .toEqual(EXAMPLE_PEOPLE.validLeft.previousPositions)
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.email, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Phone")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.phone, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "Phone")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.phone,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.biography, {
       useInnerText: true
     })
     if (hasCustomFields) {
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Number field")
       ).toHaveText(EXAMPLE_PEOPLE.validLeft.numberField, {
         useInnerText: true
       })
     }
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Date of birth")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.birthday, {
       useInnerText: true
@@ -514,77 +516,80 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "UUID")
-    ).toHaveText(EXAMPLE_PEOPLE.validRight.uuid, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "UUID")).toHaveText(
+      EXAMPLE_PEOPLE.validRight.uuid,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.familyName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.givenName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("mid"))
       .toEqual(EXAMPLE_PEOPLE.validRight.previousPositions)
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.email, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Phone")
-    ).toHaveText(EXAMPLE_PEOPLE.validRight.phone, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.validRight.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "Phone")).toHaveText(
+      EXAMPLE_PEOPLE.validRight.phone,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.validRight.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.biography, {
       useInnerText: true
     })
     if (hasCustomFields) {
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Number field")
       ).toHaveText(EXAMPLE_PEOPLE.validRight.numberField, {
         useInnerText: true
       })
     }
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Date of birth")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.birthday, {
       useInnerText: true
@@ -597,18 +602,19 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "UUID"
     )
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "UUID")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.uuid, {
-      useInnerText: true
-    })
+    await expect(await MergePeople.getColumnContent("mid", "UUID")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.uuid,
+      {
+        useInnerText: true
+      }
+    )
     await (await MergePeople.getSelectButton("left", "Family name")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.familyName,
       "mid",
       "Family name"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.familyName, {
       useInnerText: true
@@ -619,7 +625,7 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "Given name"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.givenName, {
       useInnerText: true
@@ -634,12 +640,12 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "Primary Position"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("mid"))
       .toEqual(EXAMPLE_PEOPLE.validRight.previousPositions)
     await (await MergePeople.getSelectButton("left", "Email addresses")).click()
@@ -648,7 +654,7 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "Email addresses"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.email, {
       useInnerText: true
@@ -659,29 +665,31 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "Phone"
     )
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Phone")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.phone, {
-      useInnerText: true
-    })
+    await expect(await MergePeople.getColumnContent("mid", "Phone")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.phone,
+      {
+        useInnerText: true
+      }
+    )
     await (await MergePeople.getSelectButton("left", "Rank")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.rank,
       "mid",
       "Rank"
     )
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.rank, {
-      useInnerText: true
-    })
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.rank,
+      {
+        useInnerText: true
+      }
+    )
     await (await MergePeople.getSelectButton("left", "Gender")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.gender,
       "mid",
       "Gender"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.gender, {
       useInnerText: true
@@ -692,7 +700,7 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "Biography"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.biography, {
       useInnerText: true
@@ -704,7 +712,7 @@ test.describe("Merge people who are both non-users", () => {
         "mid",
         "Number field"
       )
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Number field")
       ).toHaveText(EXAMPLE_PEOPLE.validLeft.numberField, {
         useInnerText: true
@@ -716,7 +724,7 @@ test.describe("Merge people who are both non-users", () => {
       "mid",
       "Date of birth"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Date of birth")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.birthday, {
       useInnerText: true
@@ -730,7 +738,7 @@ test.describe("Merge people who are both non-users", () => {
     await (await MergePeople.getShowNotesButton()).click()
     // Wait for offcanvas to open
 
-    await pwExpect
+    await expect
       .poll(
         async () =>
           await MergePeople.areNotesExist([
@@ -741,9 +749,8 @@ test.describe("Merge people who are both non-users", () => {
       .toEqual(true)
   })
   test("Should have correctly set the primary position of the merged person from the right", async () => {
-    await waitFor(await MergePeople.getPrimaryPosition(), "attached")
     await waitFor(await MergePeople.getPrimaryPosition(), "visible")
-    await pwExpect(await MergePeople.getPrimaryPosition()).toHaveText(
+    await expect(await MergePeople.getPrimaryPosition()).toHaveText(
       EXAMPLE_PEOPLE.validRight.position,
       {
         useInnerText: true
@@ -751,15 +758,15 @@ test.describe("Merge people who are both non-users", () => {
     )
   })
   test("Should have correctly set the additional positions of the merged person from the right", async () => {
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getAdditionalPositions())
       .toEqual(EXAMPLE_PEOPLE.validRight.additionalPositions)
   })
   test("Should have correctly set the position history of the merged person from the right", async () => {
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositionsElements(true))
       .toEqual(EXAMPLE_PEOPLE.validRight.previousPrimaryPositions)
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositionsElements(false))
       .toEqual(EXAMPLE_PEOPLE.validRight.previousAdditionalPositions)
   })
@@ -767,10 +774,10 @@ test.describe("Merge people who are both non-users", () => {
     await MergePeople.openPage(
       `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getUnoccupiedPositionPersonMessage()
     ).toHaveCount(0)
-    await pwExpect(await MergePeople.getPositionCurrentPersonName()).toHaveText(
+    await expect(await MergePeople.getPositionCurrentPersonName()).toHaveText(
       EXAMPLE_PEOPLE.validLeft.fullName,
       {
         useInnerText: true
@@ -780,20 +787,20 @@ test.describe("Merge people who are both non-users", () => {
   test("Should have correctly set the current assigned person of the additional positions of the merged person from the right", async () => {
     for (const addPosUuid of EXAMPLE_PEOPLE.validRight.addPosUuids) {
       await MergePeople.openPage(`/positions/${addPosUuid}`)
-      await pwExpect(
+      await expect(
         await MergePeople.getUnoccupiedPositionPersonMessage()
       ).toHaveCount(0)
-      await pwExpect(
-        await MergePeople.getPositionCurrentPersonName()
-      ).toHaveText(EXAMPLE_PEOPLE.validLeft.fullName, {
-        useInnerText: true
-      })
+      await expect(await MergePeople.getPositionCurrentPersonName()).toHaveText(
+        EXAMPLE_PEOPLE.validLeft.fullName,
+        {
+          useInnerText: true
+        }
+      )
     }
   })
   test("Should have deleted the loser person", async () => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
-    await waitFor(await MergePeople.getErrorTitle(), "attached")
-    await pwExpect(await MergePeople.getErrorTitle()).toHaveText(
+    await expect(await MergePeople.getErrorTitle()).toHaveText(
       `User #${EXAMPLE_PEOPLE.validRight.perUuid} not found.`,
       {
         useInnerText: true
@@ -802,10 +809,10 @@ test.describe("Merge people who are both non-users", () => {
   })
   test("Should have removed the loser from their primary position and history", async () => {
     await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validLeft.posUuid}`)
-    await pwExpect(
-      await MergePeople.getPositionCurrentPersonName()
-    ).toHaveCount(0)
-    await pwExpect(
+    await expect(await MergePeople.getPositionCurrentPersonName()).toHaveCount(
+      0
+    )
+    await expect(
       await MergePeople.getUnoccupiedPositionPersonMessage()
     ).toHaveText(`${EXAMPLE_PEOPLE.validLeft.position} is currently empty.`, {
       useInnerText: true
@@ -816,10 +823,10 @@ test.describe("Merge people who are both non-users", () => {
       await MergePeople.openPage(
         `/positions/${EXAMPLE_PEOPLE.validLeft.addPosUuids[i]}`
       )
-      await pwExpect(
+      await expect(
         await MergePeople.getPositionCurrentPersonName()
       ).toHaveCount(0)
-      await pwExpect(
+      await expect(
         await MergePeople.getUnoccupiedPositionPersonMessage()
       ).toHaveText(
         `${EXAMPLE_PEOPLE.validLeft.additionalPositions[i]} is currently empty.`,
@@ -834,7 +841,6 @@ test.describe("Merge user with non-user", () => {
   test("Should select a non-user for the left side", async () => {
     // Open merge people page.
     await MergePeople.openPage()
-    await waitFor(await MergePeople.getTitle(), "attached")
     await waitFor(await MergePeople.getTitle(), "visible")
     // Search and select a person from left person field.
     await (
@@ -867,39 +873,41 @@ test.describe("Merge user with non-user", () => {
     )
   })
   test("Should autoMerge some identical fields from both persons", async () => {
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.status, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.userRight.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.userRight.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.gender, {
       useInnerText: true
     })
   })
   test("Should autoMerge the user accounts field from both persons", async () => {
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "User accounts")
     ).toHaveText("Domain username\nandrew", {
       useInnerText: true
@@ -912,7 +920,7 @@ test.describe("Merge user with non-user", () => {
       "Email addresses"
     )
     await selectAllEmailsLeftButton.click()
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.email, {
       useInnerText: true
@@ -924,7 +932,7 @@ test.describe("Merge user with non-user", () => {
       "Email addresses"
     )
     await selectAllEmailsRightButton.click()
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.email, {
       useInnerText: true
@@ -941,7 +949,7 @@ test.describe("Merge user with non-user", () => {
       EXAMPLE_PEOPLE.validLeft.email +
       "\n" +
       EXAMPLE_PEOPLE.userRight.email.split("\n")[2]
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(expectedEmail, {
       useInnerText: true
@@ -955,7 +963,7 @@ test.describe("Merge user with non-user", () => {
       .first()
     await removeFirstEmailButton.click()
     const emailsRight = EXAMPLE_PEOPLE.userRight.email.split("\n")
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(`${emailsRight[0]}\n${emailsRight[2]}`, {
       useInnerText: true
@@ -968,7 +976,7 @@ test.describe("Merge user with non-user", () => {
       .locator("button")
       .first()
     await removeSecondEmailButton.click()
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText("No email addresses available", {
       useInnerText: true
@@ -982,82 +990,84 @@ test.describe("Merge user with non-user", () => {
       "mid",
       "Family name"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.familyName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.givenName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.validRight.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("mid"))
       .toEqual(EXAMPLE_PEOPLE.validRight.previousPositions)
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.email, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Phone")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.phone, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.validLeft.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "Phone")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.phone,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.validLeft.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.biography, {
       useInnerText: true
     })
     if (hasCustomFields) {
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Choose one of the colours")
       ).toHaveText(EXAMPLE_PEOPLE.validLeft.colourOptions, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Number field")
       ).toHaveText(EXAMPLE_PEOPLE.validLeft.numberField, {
         useInnerText: true
       })
     }
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Date of birth")
     ).toHaveText(EXAMPLE_PEOPLE.validLeft.birthday, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent(
         "mid",
         "Position on the political spectrum"
@@ -1067,7 +1077,7 @@ test.describe("Merge user with non-user", () => {
     })
 
     // It should still have the merged user accounts field from both persons!
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "User accounts")
     ).toHaveText("Domain username\nandrew", {
       useInnerText: true
@@ -1081,82 +1091,84 @@ test.describe("Merge user with non-user", () => {
       "mid",
       "Family name"
     )
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Family name")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.familyName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Given name")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.givenName, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "ANET user")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.user, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Primary Position")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.position, {
       useInnerText: true
     })
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositions("mid"))
       .toEqual(EXAMPLE_PEOPLE.userRight.previousPositions)
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Status")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.status, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Email addresses")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.email, {
       useInnerText: true
     })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Phone")
-    ).toHaveText(EXAMPLE_PEOPLE.userRight.phone, {
-      useInnerText: true
-    })
-    await pwExpect(
-      await MergePeople.getColumnContent("mid", "Rank")
-    ).toHaveText(EXAMPLE_PEOPLE.userRight.rank, {
-      useInnerText: true
-    })
-    await pwExpect(
+    await expect(await MergePeople.getColumnContent("mid", "Phone")).toHaveText(
+      EXAMPLE_PEOPLE.userRight.phone,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(await MergePeople.getColumnContent("mid", "Rank")).toHaveText(
+      EXAMPLE_PEOPLE.userRight.rank,
+      {
+        useInnerText: true
+      }
+    )
+    await expect(
       await MergePeople.getColumnContent("mid", "Gender")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.gender, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Nationality")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.nationality, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Biography")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.biography, {
       useInnerText: true
     })
     if (hasCustomFields) {
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Choose one of the colours")
       ).toHaveText(EXAMPLE_PEOPLE.userRight.colourOptions, {
         useInnerText: true
       })
-      await pwExpect(
+      await expect(
         await MergePeople.getColumnContent("mid", "Number field")
       ).toHaveText(EXAMPLE_PEOPLE.userRight.numberField, {
         useInnerText: true
       })
     }
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "Date of birth")
     ).toHaveText(EXAMPLE_PEOPLE.userRight.birthday, {
       useInnerText: true
     })
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent(
         "mid",
         "Position on the political spectrum"
@@ -1166,7 +1178,7 @@ test.describe("Merge user with non-user", () => {
     })
 
     // It should still have the merged user accounts field from both persons!
-    await pwExpect(
+    await expect(
       await MergePeople.getColumnContent("mid", "User accounts")
     ).toHaveText("Domain username\nandrew", {
       useInnerText: true
@@ -1181,7 +1193,7 @@ test.describe("Merge user with non-user", () => {
     // Wait for offcanvas to open
 
     // As validRight and validLeft merged before, notes should include notes from three people
-    await pwExpect
+    await expect
       .poll(
         async () =>
           await MergePeople.areNotesExist([
@@ -1193,7 +1205,7 @@ test.describe("Merge user with non-user", () => {
       .toEqual(true)
   })
   test("Should have the merged user accounts from both persons", async () => {
-    await pwExpect(await MergePeople.getUserAccountsField()).toHaveText(
+    await expect(await MergePeople.getUserAccountsField()).toHaveText(
       "User accounts\nDomain username\nandrew",
       {
         useInnerText: true
@@ -1201,9 +1213,8 @@ test.describe("Merge user with non-user", () => {
     )
   })
   test("Should have correctly set the primary position of the merged person from the right", async () => {
-    await waitFor(await MergePeople.getPrimaryPosition(), "attached")
     await waitFor(await MergePeople.getPrimaryPosition(), "visible")
-    await pwExpect(await MergePeople.getPrimaryPosition()).toHaveText(
+    await expect(await MergePeople.getPrimaryPosition()).toHaveText(
       EXAMPLE_PEOPLE.userRight.position,
       {
         useInnerText: true
@@ -1211,24 +1222,24 @@ test.describe("Merge user with non-user", () => {
     )
   })
   test("Should have correctly set the additional positions of the merged person from the right", async () => {
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getAdditionalPositions())
       .toEqual(EXAMPLE_PEOPLE.userRight.additionalPositions)
   })
   test("Should have correctly set the position history of the merged person from the right", async () => {
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositionsElements(true))
       .toEqual(EXAMPLE_PEOPLE.userRight.previousPrimaryPositions)
-    await pwExpect
+    await expect
       .poll(async () => await MergePeople.getPreviousPositionsElements(false))
       .toEqual(EXAMPLE_PEOPLE.userRight.previousAdditionalPositions)
   })
   test("Should have correctly set the current assigned person of the primary position of the merged person from the right", async () => {
     await MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.userRight.posUuid}`)
-    await pwExpect(
+    await expect(
       await MergePeople.getUnoccupiedPositionPersonMessage()
     ).toHaveCount(0)
-    await pwExpect(await MergePeople.getPositionCurrentPersonName()).toHaveText(
+    await expect(await MergePeople.getPositionCurrentPersonName()).toHaveText(
       EXAMPLE_PEOPLE.userRight.fullName,
       {
         useInnerText: true
@@ -1238,20 +1249,20 @@ test.describe("Merge user with non-user", () => {
   test("Should have correctly set the current assigned person of the additional positions of the merged person from the right", async () => {
     for (const addPosUuid of EXAMPLE_PEOPLE.userRight.addPosUuids) {
       await MergePeople.openPage(`/positions/${addPosUuid}`)
-      await pwExpect(
+      await expect(
         await MergePeople.getUnoccupiedPositionPersonMessage()
       ).toHaveCount(0)
-      await pwExpect(
-        await MergePeople.getPositionCurrentPersonName()
-      ).toHaveText(EXAMPLE_PEOPLE.userRight.fullName, {
-        useInnerText: true
-      })
+      await expect(await MergePeople.getPositionCurrentPersonName()).toHaveText(
+        EXAMPLE_PEOPLE.userRight.fullName,
+        {
+          useInnerText: true
+        }
+      )
     }
   })
   test("Should have deleted the loser person", async () => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
-    await waitFor(await MergePeople.getErrorTitle(), "attached")
-    await pwExpect(await MergePeople.getErrorTitle()).toHaveText(
+    await expect(await MergePeople.getErrorTitle()).toHaveText(
       `User #${EXAMPLE_PEOPLE.validLeft.perUuid} not found.`,
       {
         useInnerText: true
@@ -1262,10 +1273,10 @@ test.describe("Merge user with non-user", () => {
     await MergePeople.openPage(
       `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
     )
-    await pwExpect(
-      await MergePeople.getPositionCurrentPersonName()
-    ).toHaveCount(0)
-    await pwExpect(
+    await expect(await MergePeople.getPositionCurrentPersonName()).toHaveCount(
+      0
+    )
+    await expect(
       await MergePeople.getUnoccupiedPositionPersonMessage()
     ).toHaveText(`${EXAMPLE_PEOPLE.validRight.position} is currently empty.`, {
       useInnerText: true
@@ -1276,10 +1287,10 @@ test.describe("Merge user with non-user", () => {
       await MergePeople.openPage(
         `/positions/${EXAMPLE_PEOPLE.validRight.addPosUuids[i]}`
       )
-      await pwExpect(
+      await expect(
         await MergePeople.getPositionCurrentPersonName()
       ).toHaveCount(0)
-      await pwExpect(
+      await expect(
         await MergePeople.getUnoccupiedPositionPersonMessage()
       ).toHaveText(
         `${EXAMPLE_PEOPLE.validRight.additionalPositions[i]} is currently empty.`,

@@ -1,5 +1,4 @@
-import { expect as pwExpect } from "@playwright/test"
-import { expect } from "chai"
+import { expect } from "@playwright/test"
 import moment from "moment"
 import CreateReport from "../pages/report/createReport.page.js"
 import ShowReport from "../pages/report/showReport.page.js"
@@ -88,19 +87,19 @@ const EXPECTED_DATA = {
 }
 async function validateAttendee(name, expectedData, attendeeType) {
   const cols = await CreateReport.getAttendeeColumns(name)
-  await pwExpect((await cols)[3]).toHaveText(
+  await expect((await cols)[3]).toHaveText(
     expectedData.positions[attendeeType],
     {
       useInnerText: true
     }
   )
-  await pwExpect((await cols)[4]).toHaveText(
+  await expect((await cols)[4]).toHaveText(
     expectedData.locations[attendeeType],
     {
       useInnerText: true
     }
   )
-  await pwExpect((await cols)[5]).toHaveText(
+  await expect((await cols)[5]).toHaveText(
     expectedData.organizations[attendeeType],
     {
       useInnerText: true
@@ -121,30 +120,30 @@ test.describe("When creating a report", () => {
   test("Should switch an attendee between an advisor and interlocutor", async () => {
     const person1 = await CreateReport.getPersonByName(ADVISOR)
     // change attendee to interlocutor
-    await pwExpect(person1.advisorCheckbox).not.toHaveCount(0)
-    await pwExpect(person1.advisorCheckbox).not.toBeChecked()
+    await expect(person1.advisorCheckbox).not.toHaveCount(0)
+    await expect(person1.advisorCheckbox).not.toBeChecked()
     await person1.advisorCheckbox.click()
     // wait for the attendee to be moved to the other section
 
     const person2 = await CreateReport.getPersonByName(ADVISOR)
     // change attendee to advisor
-    await pwExpect(person2.advisorCheckbox).toHaveCount(0)
-    await pwExpect(person2.interlocutorCheckbox).not.toHaveCount(0)
-    await pwExpect(person2.interlocutorCheckbox).toBeChecked()
+    await expect(person2.advisorCheckbox).toHaveCount(0)
+    await expect(person2.interlocutorCheckbox).not.toHaveCount(0)
+    await expect(person2.interlocutorCheckbox).toBeChecked()
     await person2.interlocutorCheckbox.click()
     // wait for the attendee to be moved to the other section
 
     const person3 = await CreateReport.getPersonByName(ADVISOR)
-    await pwExpect(person3.interlocutorCheckbox).toHaveCount(0)
-    await pwExpect(person3.advisorCheckbox).not.toHaveCount(0)
-    await pwExpect(person3.advisorCheckbox).not.toBeChecked()
+    await expect(person3.interlocutorCheckbox).toHaveCount(0)
+    await expect(person3.advisorCheckbox).not.toHaveCount(0)
+    await expect(person3.advisorCheckbox).not.toBeChecked()
   })
   test("Should show report with advisor and interlocutor organizations at engagement date = now", async () => {
     await CreateReport.submitForm()
     reportUuid = await ShowReport.getUuid()
-    expect(reportUuid.length).to.equal(36)
+    expect(reportUuid.length).toBe(36)
     // Validate the reportCommunities
-    await pwExpect(
+    await expect(
       currentPage().locator("div[name='reportCommunities']")
     ).toHaveText(
       "Name Description\nEF 1.1\nThe complete EF 1.1 organisation\nEF 5\nThe complete EF 5 organization",
@@ -155,12 +154,14 @@ test.describe("When creating a report", () => {
     await validateAttendee(ADVISOR, EXPECTED_DATA.now, "advisor")
     await validateAttendee(INTERLOCUTOR, EXPECTED_DATA.now, "interlocutor")
     // Validate the organizations
-    await pwExpect
-      .poll(async () => await ShowReport.getAdvisorOrg())
-      .toEqual(EXPECTED_DATA.now.organizations.author)
-    await pwExpect
-      .poll(async () => await ShowReport.getInterlocutorOrg())
-      .toEqual(EXPECTED_DATA.now.organizations.interlocutor)
+    await expect(await ShowReport.getAdvisorOrg()).toHaveText(
+      EXPECTED_DATA.now.organizations.author,
+      { useInnerText: true }
+    )
+    await expect(await ShowReport.getInterlocutorOrg()).toHaveText(
+      EXPECTED_DATA.now.organizations.interlocutor,
+      { useInnerText: true }
+    )
   })
   test("Should show attendee positions at engagement date in 2020", async () => {
     // Edit the report
@@ -179,12 +180,14 @@ test.describe("When creating a report", () => {
     await validateAttendee(ADVISOR, EXPECTED_DATA.in_2020, "advisor")
     await validateAttendee(INTERLOCUTOR, EXPECTED_DATA.in_2020, "interlocutor")
     // Validate the organizations
-    await pwExpect
-      .poll(async () => await ShowReport.getAdvisorOrg())
-      .toEqual(EXPECTED_DATA.in_2020.organizations.author)
-    await pwExpect
-      .poll(async () => await ShowReport.getInterlocutorOrg())
-      .toEqual(EXPECTED_DATA.in_2020.organizations.interlocutor)
+    await expect(await ShowReport.getAdvisorOrg()).toHaveText(
+      EXPECTED_DATA.in_2020.organizations.author,
+      { useInnerText: true }
+    )
+    await expect(await ShowReport.getInterlocutorOrg()).toHaveText(
+      EXPECTED_DATA.in_2020.organizations.interlocutor,
+      { useInnerText: true }
+    )
   })
   test("Should show attendee positions at engagement date in 2019", async () => {
     // Edit the report
@@ -203,11 +206,12 @@ test.describe("When creating a report", () => {
     await validateAttendee(ADVISOR, EXPECTED_DATA.in_2019, "advisor")
     await validateAttendee(INTERLOCUTOR, EXPECTED_DATA.in_2019, "interlocutor")
     // Validate the organizations
-    await pwExpect
-      .poll(async () => await ShowReport.getAdvisorOrg())
-      .toEqual("Unspecified")
-    await pwExpect
-      .poll(async () => await ShowReport.getInterlocutorOrg())
-      .toEqual("Unspecified")
+    await expect(await ShowReport.getAdvisorOrg()).toHaveText("Unspecified", {
+      useInnerText: true
+    })
+    await expect(await ShowReport.getInterlocutorOrg()).toHaveText(
+      "Unspecified",
+      { useInnerText: true }
+    )
   })
 })

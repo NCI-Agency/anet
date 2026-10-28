@@ -17,25 +17,11 @@ class ShowAllTasks extends Page {
   }
 
   async getAllTasks() {
-    return (await this.getTree())
-      .locator(".bp6-tree-node-list .bp6-tree-node")
-      .all()
+    return (await this.getTree()).locator(".bp6-tree-node-list .bp6-tree-node")
   }
 
-  async getAllDescendants(task, filterVisible = false) {
-    const descendants = await task
-      .locator(".bp6-tree-node-list .bp6-tree-node")
-      .all()
-    if (!filterVisible) {
-      return descendants
-    }
-    const visibleDescendants = []
-    for (const descendant of descendants) {
-      if (await descendant.isVisible()) {
-        visibleDescendants.push(descendant)
-      }
-    }
-    return visibleDescendants
+  async getAllDescendants(task) {
+    return task.locator(".bp6-tree-node-list .bp6-tree-node")
   }
 
   async getTasksTableHeader() {
