@@ -166,7 +166,7 @@ If you have updated the generated schema and need to update the generated Java c
 #### How the client-side tests work
 The browser regression suite uses Playwright Test with Chromium. Specs are multi-step scenarios: cases run sequentially and share a browser context within their spec; different specs have separate contexts and run in parallel. Do not enable `fullyParallel` without first making their browser and database state independent. Failed cases produce screenshots, traces, HTML reports, and JUnit results under `client/build`.
 
-The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data and run with one worker and no retries.
+The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data and use the worker count from the common Playwright configuration, with no retries. Permission, position and report workflows run serially within their respective specs.
 
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
@@ -191,9 +191,9 @@ To reproduce the two regression browser CI jobs on Linux, run `./scripts/test-pl
 
 Install Chromium before the first E2E run: `./gradlew yarn_run_install-playwright` (includes Linux system dependencies), or `./gradlew yarn_run_install-playwright-browser` if system dependencies are already installed.
 
-The E2E configuration is `client/config/playwright-e2e.config.js`. Use Playwright locators and retrying assertions when writing tests. Each E2E test gets a fresh browser context; the report approval scenarios run in a serial group because they depend on a report created by an earlier test.
+The E2E configuration is `client/config/playwright-e2e.config.js`. Import `test` and `expect` directly from `@playwright/test` and use the built-in `page` fixture, locators and retrying assertions. Scenarios live in `client/tests/e2e/specs/`. Page objects in `client/tests/e2e/pages/` receive that page explicitly; reusable widget interactions live in `client/tests/e2e/components/`. `LoginPage` waits for ANET to render after the Keycloak redirects. Each E2E test gets a fresh browser context; the report approval scenarios run in a serial group because they depend on a report created by an earlier test.
 
-To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn test-e2e --grep "Home Page"`.
+To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn run test-e2e --grep "Home Page"`.
 
 JUnit results are written to `client/build/test-results/e2e-test-results.xml`. HTML reports are in `client/build/e2e-report`, with traces and screenshots for failed tests in `client/build/test-results/e2e-artifacts`. CI uploads these with the server and client logs.
 

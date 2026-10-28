@@ -6,7 +6,7 @@ const commonConfig = getCommonConfig(testName)
 
 export default defineConfig({
   ...commonConfig,
-  testDir: "../tests/e2e",
+  testDir: "../tests/e2e/specs",
   // Scenarios declare serial when needed.
   fullyParallel: true
 })
