@@ -327,8 +327,10 @@ const Leaflet = ({
       })
 
       if (newMarkers.length > 0) {
-        if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
-          map.fitBounds(markerLayer.getBounds(), { maxZoom })
+        if (markerLayer.getBounds()?.isValid()) {
+          map.whenReady(() =>
+            map.fitBounds(markerLayer.getBounds(), { maxZoom })
+          )
         }
       }
 
@@ -653,12 +655,8 @@ const Leaflet = ({
       markerLayer &&
       prevMarkersRef.current !== markers
     ) {
-      // setTimeout is a workaround for "Uncaught DOMException: Failed to execute 'removeChild' on 'Node':
-      // The node to be removed is no longer a child of this node." error
-      setTimeout(() => {
-        markerLayer.clearLayers()
-        updateMarkerLayer(markers, map.getZoom())
-      })
+      markerLayer.clearLayers()
+      updateMarkerLayer(markers, map.getZoom())
     }
   }, [doInitializeMarkerLayer, markerLayer, updateMarkerLayer, map, markers])
 
@@ -717,10 +715,12 @@ const Leaflet = ({
       const unwrappedMarkerLayerBounds = getUnwrappedLayerBounds(
         markerLayer.getBounds()
       )
-      map.fitBounds(
-        unwrappedMarkerLayerBounds?.isValid()
-          ? groupLayerBounds.extend(unwrappedMarkerLayerBounds)
-          : groupLayerBounds
+      map.whenReady(() =>
+        map.fitBounds(
+          unwrappedMarkerLayerBounds?.isValid()
+            ? groupLayerBounds.extend(unwrappedMarkerLayerBounds)
+            : groupLayerBounds
+        )
       )
     }
   }, [shapes, map, markerLayer])

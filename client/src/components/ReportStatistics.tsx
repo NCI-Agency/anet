@@ -18,12 +18,13 @@ import { Report } from "models"
 import {
   formatPeriodBoundary,
   getPeriodsConfig,
-  PeriodsDetailsPropType,
   PeriodsPropType,
-  PeriodsTableHeader
+  PeriodsTableHeader,
+  RECURRENCE_TYPE,
+  useResponsiveNumberOfPeriods
 } from "periodUtils"
 import pluralize from "pluralize"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
@@ -169,7 +170,7 @@ const NoStatisticsRow = ({ periods }: NoStatisticsRowProps) => (
 interface ReportStatisticsProps {
   idSuffix: string
   pageDispatchers?: PageDispatchersPropType
-  periodsDetails: PeriodsDetailsPropType
+  recurrence?: string
   setTotalCount?: (...args: unknown[]) => unknown
   queryParams?: any
 }
@@ -177,35 +178,42 @@ interface ReportStatisticsProps {
 const ReportStatistics = ({
   idSuffix,
   pageDispatchers,
-  periodsDetails,
+  recurrence = RECURRENCE_TYPE.MONTHLY,
   setTotalCount,
   queryParams
 }: ReportStatisticsProps) => {
   const [offset, setOffset] = useState(0)
-  const { recurrence, numberOfPeriods } = periodsDetails
-  const periodsConfig = getPeriodsConfig(recurrence, numberOfPeriods, offset)
+  const [numberOfPeriods, setNumberOfPeriods] = useState(3)
+  const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
+  const periodsConfig = useMemo(
+    () => getPeriodsConfig(recurrence, numberOfPeriods, offset),
+    [recurrence, numberOfPeriods, offset]
+  )
   const { periods } = periodsConfig
-  const dateSortAsc = datesArray => datesArray.sort((a, b) => a - b)
-  const statisticsStartDate =
-    !_isEmpty(periods) && dateSortAsc(periods.map(p => p.start))[0]
-  const statisticsEndDate =
-    !_isEmpty(periods) &&
-    dateSortAsc(periods.map(p => p.end))[periods.length - 1]
-  const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
-  if (
-    statisticsStartDate &&
-    (!queryParams.engagementDateStart ||
-      queryParams.engagementDateStart < statisticsStartDate)
-  ) {
-    reportQuery.engagementDateStart = statisticsStartDate
-  }
-  if (
-    statisticsEndDate &&
-    (!queryParams.engagementDateEnd ||
-      queryParams.engagementDateEnd > statisticsEndDate)
-  ) {
-    reportQuery.engagementDateEnd = statisticsEndDate
-  }
+  const reportQuery = useMemo(() => {
+    const dateSortAsc = datesArray => datesArray.sort((a, b) => a - b)
+    const statisticsStartDate =
+      !_isEmpty(periods) && dateSortAsc(periods.map(p => p.start))[0]
+    const statisticsEndDate =
+      !_isEmpty(periods) &&
+      dateSortAsc(periods.map(p => p.end))[periods.length - 1]
+    const rq = { ...queryParams, pageSize: 0 }
+    if (
+      statisticsStartDate &&
+      (!queryParams.engagementDateStart ||
+        queryParams.engagementDateStart < statisticsStartDate)
+    ) {
+      rq.engagementDateStart = statisticsStartDate
+    }
+    if (
+      statisticsEndDate &&
+      (!queryParams.engagementDateEnd ||
+        queryParams.engagementDateEnd > statisticsEndDate)
+    ) {
+      rq.engagementDateEnd = statisticsEndDate
+    }
+    return rq
+  }, [periods, queryParams])
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
   })
@@ -216,10 +224,7 @@ const ReportStatistics = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
   if (done) {
     return result
   }
@@ -253,42 +258,41 @@ const ReportStatistics = ({
         responsive
         className="assessments-table"
         style={{ tableLayout: "fixed" }}
+        ref={contRef}
       >
         <PeriodsTableHeader periodsConfig={periodsConfig} />
         <tbody>
-          <>
-            {!hasStatistics && <NoStatisticsRow periods={periods} />}
-            {hasStatistics &&
-              Object.entries(REPORT_FIELDS_FOR_STATISTICS).map(
-                ([key, field], index) => (
-                  <FieldStatisticsRow
-                    key={key}
-                    idSuffix={`${key}-${idSuffix}`}
-                    fieldName={key}
-                    fieldConfig={field}
-                    periods={periods}
-                    periodsData={dataPerPeriod}
-                    isFirstRow={index === 0}
-                  />
-                )
-              )}
-            {hasStatistics &&
-              Object.entries(customFieldsConfig || {}).map(
-                ([key, field], index) => (
-                  <FieldStatisticsRow
-                    key={key}
-                    idSuffix={`${key}-${idSuffix}`}
-                    fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
-                    fieldConfig={field}
-                    periods={periods}
-                    periodsData={dataPerPeriod}
-                    isFirstRow={
-                      _isEmpty(REPORT_FIELDS_FOR_STATISTICS) && index === 0
-                    }
-                  />
-                )
-              )}
-          </>
+          {!hasStatistics && <NoStatisticsRow periods={periods} />}
+          {hasStatistics &&
+            Object.entries(REPORT_FIELDS_FOR_STATISTICS).map(
+              ([key, field], index) => (
+                <FieldStatisticsRow
+                  key={key}
+                  idSuffix={`${key}-${idSuffix}`}
+                  fieldName={key}
+                  fieldConfig={field}
+                  periods={periods}
+                  periodsData={dataPerPeriod}
+                  isFirstRow={index === 0}
+                />
+              )
+            )}
+          {hasStatistics &&
+            Object.entries(customFieldsConfig || {}).map(
+              ([key, field], index) => (
+                <FieldStatisticsRow
+                  key={key}
+                  idSuffix={`${key}-${idSuffix}`}
+                  fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
+                  fieldConfig={field}
+                  periods={periods}
+                  periodsData={dataPerPeriod}
+                  isFirstRow={
+                    _isEmpty(REPORT_FIELDS_FOR_STATISTICS) && index === 0
+                  }
+                />
+              )
+            )}
         </tbody>
       </Table>
     </>
