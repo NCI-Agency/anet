@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
-import { AdvancedSelect } from "./components/AdvancedSelect.js"
-import { LoginPage } from "./pages/LoginPage.js"
-import { OrganizationPage } from "./pages/OrganizationPage.js"
+import { AdvancedSelect } from "../components/AdvancedSelect.js"
+import { LoginPage } from "../pages/LoginPage.js"
+import { OrganizationPage } from "../pages/OrganizationPage.js"
 
 // Position updates must stay in the same worker.
 test.describe.configure({

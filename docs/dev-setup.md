@@ -191,9 +191,9 @@ To reproduce the two regression browser CI jobs on Linux, run `./scripts/test-pl
 
 Install Chromium before the first E2E run: `./gradlew yarn_run_install-playwright` (includes Linux system dependencies), or `./gradlew yarn_run_install-playwright-browser` if system dependencies are already installed.
 
-The E2E configuration is `client/config/playwright-e2e.config.js`. Import `test` and `expect` directly from `@playwright/test` and use the built-in `page` fixture, locators and retrying assertions. Page objects in `client/tests/e2e/pages/` receive that page explicitly; reusable widget interactions live in `client/tests/e2e/components/`. `LoginPage` waits for ANET to render after the Keycloak redirects. Each E2E test gets a fresh browser context; the report approval scenarios run in a serial group because they depend on a report created by an earlier test.
+The E2E configuration is `client/config/playwright-e2e.config.js`. Import `test` and `expect` directly from `@playwright/test` and use the built-in `page` fixture, locators and retrying assertions. Scenarios live in `client/tests/e2e/specs/`. Page objects in `client/tests/e2e/pages/` receive that page explicitly; reusable widget interactions live in `client/tests/e2e/components/`. `LoginPage` waits for ANET to render after the Keycloak redirects. Each E2E test gets a fresh browser context; the report approval scenarios run in a serial group because they depend on a report created by an earlier test.
 
-To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn test-e2e --grep "Home Page"`.
+To debug interactively, run `PWDEBUG=1 ./gradlew yarn_run_test-e2e`. To select a scenario, run from `client/`: `yarn run test-e2e --grep "Home Page"`.
 
 JUnit results are written to `client/build/test-results/e2e-test-results.xml`. HTML reports are in `client/build/e2e-report`, with traces and screenshots for failed tests in `client/build/test-results/e2e-artifacts`. CI uploads these with the server and client logs.
 

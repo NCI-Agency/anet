@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test"
 import moment from "moment"
-import { AdvancedSelect } from "./components/AdvancedSelect.js"
-import { RichTextEditor } from "./components/RichTextEditor.js"
-import { LoginPage } from "./pages/LoginPage.js"
+import { AdvancedSelect } from "../components/AdvancedSelect.js"
+import { RichTextEditor } from "../components/RichTextEditor.js"
+import { LoginPage } from "../pages/LoginPage.js"
 
 // Report creation and approval must stay in the same worker.
 test.describe.configure({

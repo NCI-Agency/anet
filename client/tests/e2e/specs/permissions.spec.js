@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test"
 import { v4 as uuidv4 } from "uuid"
-import { RichTextEditor } from "./components/RichTextEditor.js"
-import { LoginPage } from "./pages/LoginPage.js"
-import { OrganizationPage } from "./pages/OrganizationPage.js"
+import { RichTextEditor } from "../components/RichTextEditor.js"
+import { LoginPage } from "../pages/LoginPage.js"
+import { OrganizationPage } from "../pages/OrganizationPage.js"
 
 // Permission updates must stay in the same worker.
 test.describe.configure({
