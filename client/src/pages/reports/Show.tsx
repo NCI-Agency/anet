@@ -713,7 +713,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   </Fieldset>
                 )}
                 {report.reportSensitiveInformation?.text && (
-                  <Fieldset title="Sensitive information">
+                  <Fieldset
+                    title="Sensitive information"
+                    id="report-sensitive-information"
+                  >
                     <RichTextEditor
                       readOnly
                       value={report.reportSensitiveInformation.text}

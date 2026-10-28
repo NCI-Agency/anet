@@ -7104,7 +7104,6 @@ __metadata:
     babel-jest: "npm:30.5.2"
     babel-loader: "npm:10.1.1"
     bootstrap: "npm:5.3.8"
-    chai: "npm:6.3.0"
     change-case: "npm:5.4.4"
     classnames: "npm:2.5.1"
     config: "npm:5.0.1"
@@ -7121,7 +7120,6 @@ __metadata:
     escape-html: "npm:1.0.3"
     eslint: "npm:10.13.0"
     eslint-config-prettier: "npm:10.1.8"
-    eslint-plugin-chai-expect: "npm:4.1.1"
     eslint-plugin-import: "npm:2.32.0"
     eslint-plugin-jest: "npm:29.17.0"
     eslint-plugin-jsx-a11y: "npm:6.10.2"
@@ -7993,13 +7991,6 @@ __metadata:
     tslib: "npm:^2.0.3"
     upper-case-first: "npm:^2.0.2"
   checksum: 10c0/6a034af73401f6e55d91ea35c190bbf8bda21714d4ea8bb8f1799311d123410a80f0875db4e3236dc3f97d74231ff4bf1c8783f2be13d7733c7d990c57387281
-  languageName: node
-  linkType: hard
-
-"chai@npm:6.3.0":
-  version: 6.3.0
-  resolution: "chai@npm:6.3.0"
-  checksum: 10c0/fd1bf7fc41295ba1eba18a44d68e204b3cb11b79c9ad51fd071de3ee85323c20d94afc07a386f1f5ff44a5da4a116614d419fc44a2d459e4b5b574aef9af4431
   languageName: node
   linkType: hard
 
@@ -9788,15 +9779,6 @@ __metadata:
     eslint:
       optional: true
   checksum: 10c0/6f4efbe7a91ae49bf67b4ab3644cb60bc5bd7db4cb5521de1b65be0847ffd3fb6bce0dd68f0995e1b312d137f768e2a1f842ee26fe73621afa05f850628fdc40
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-chai-expect@npm:4.1.1":
-  version: 4.1.1
-  resolution: "eslint-plugin-chai-expect@npm:4.1.1"
-  peerDependencies:
-    eslint: ">=2.0.0 <=10.x"
-  checksum: 10c0/0df21927d7a6382410bd4ef4eb26bffff886f6c9cc122799614800faa752c01951096611df40c01943a760f5cc08d56192bfa83babad1d0fb071899b71dba1c5
   languageName: node
   linkType: hard
 

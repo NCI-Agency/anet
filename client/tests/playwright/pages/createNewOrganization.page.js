@@ -9,10 +9,6 @@ class CreateOrganization extends Page {
     return currentPage().locator("form.form-horizontal").first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getSubmitButton() {
     return currentPage().locator("#formBottomSubmit").first()
   }

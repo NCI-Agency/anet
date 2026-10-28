@@ -88,10 +88,6 @@ class CreatePosition extends Page {
       .first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getSubmitButton() {
     return currentPage().locator("#formBottomSubmit").first()
   }

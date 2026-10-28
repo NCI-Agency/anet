@@ -8,10 +8,6 @@ class CreateAuthorizationGroup extends Page {
     return currentPage().locator("form").first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getName() {
     return currentPage().locator("#name").first()
   }

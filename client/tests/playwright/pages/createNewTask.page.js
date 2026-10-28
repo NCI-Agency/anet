@@ -8,10 +8,6 @@ class CreateTask extends Page {
     return currentPage().locator("form").first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getSubmitButton() {
     return currentPage().locator("#formBottomSubmit").first()
   }

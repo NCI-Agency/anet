@@ -16,10 +16,6 @@ class CreateEventSeries extends Page {
     return currentPage().locator("#fg-name div.invalid-feedback").first()
   }
 
-  async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
-  }
-
   async getSubmitButton() {
     return currentPage().locator("#formBottomSubmit").first()
   }

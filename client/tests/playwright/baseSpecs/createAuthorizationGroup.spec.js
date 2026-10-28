@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test"
 import { v4 as uuidv4 } from "uuid"
 import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page.js"
-import { test, waitFor } from "../support.js"
+import { currentPage, test, waitFor } from "../support.js"
 
 const AUTHORIZATION_GROUP_NAME_PREFIX = "test community"
 const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"
@@ -121,9 +121,9 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getMemberTypeButton("Organizations")
       ).click()
-      await CreateAuthorizationGroup.deleteInput(
-        CreateAuthorizationGroup.getRelatedObjectsInput()
-      )
+      // Switching member types closes the overlay; fill alone does not reopen it.
+      await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
+      await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).fill(String(ORGANIZATION))
@@ -148,9 +148,9 @@ test.describe("When creating/editing a community", () => {
       await (
         await CreateAuthorizationGroup.getMemberTypeButton("People")
       ).click()
-      await CreateAuthorizationGroup.deleteInput(
-        CreateAuthorizationGroup.getRelatedObjectsInput()
-      )
+      // Switching member types closes the overlay; fill alone does not reopen it.
+      await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
+      await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).fill(String(PERSON))
