@@ -160,20 +160,6 @@
       ]
     },
     {
-      "groupName": "NPM, dev-dependencies, Playwright",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "matchPackageNames": [
-        "@playwright/test",
-        "playwright{/,}**",
-        "playwright-core{/,}**"
-      ]
-    },
-    {
       "groupName": "NPM, dependencies, Blueprint",
       "matchManagers": [
         "npm"
