@@ -34,7 +34,7 @@ java {
 boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.2.4"
 String jdbi3Version = "3.55.0"
-String poiVersion = "5.5.1"
+String poiVersion = "6.0.0"
 String simplejavamailVersion = "9.3.8"
 String springShellVersion = "4.0.3"
 String psqlPushDataPath = "/var/tmp"
