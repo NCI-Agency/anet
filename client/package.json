@@ -5,7 +5,7 @@
   "private": true,
   "homepage": "/assets/client",
   "devDependencies": {
-    "@babel/core": "8.0.7",
+    "@babel/core": "8.0.9",
     "@babel/eslint-parser": "8.0.7",
     "@babel/plugin-proposal-decorators": "8.0.2",
     "@babel/plugin-proposal-do-expressions": "8.0.1",
@@ -27,7 +27,7 @@
     "@babel/plugin-transform-runtime": "8.0.6",
     "@babel/preset-env": "8.0.7",
     "@babel/preset-react": "8.0.1",
-    "@babel/runtime": "8.0.7",
+    "@babel/runtime": "8.0.8",
     "@colors/colors": "1.6.1",
     "@cyclonedx/yarn-plugin-cyclonedx": "3.4.0",
     "@faker-js/faker": "10.6.0",
