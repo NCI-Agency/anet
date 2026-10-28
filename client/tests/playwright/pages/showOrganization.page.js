@@ -144,9 +144,10 @@ class ShowOrganization extends Page {
   }
 
   async getSaveAssessmentButton() {
-    return (await this.getAssessmentModalForm())
-      .locator('xpath=.//button[text()="Save"]')
-      .first()
+    return (await this.getAssessmentModalForm()).getByRole("button", {
+      name: "Save",
+      exact: true
+    })
   }
 
   async getShownAssessmentPanel(assessmentKey, recurrence) {
