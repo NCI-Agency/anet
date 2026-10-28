@@ -63,10 +63,7 @@ test.describe("Create event series page", () => {
         )
       ).not.toHaveCount(0)
       // Add a position
-      await (await CreateEventSeries.getMemberTypeButton("Positions")).click()
-      await CreateEventSeries.deleteInput(
-        CreateEventSeries.getHostRelatedObjectsInput()
-      )
+      await CreateEventSeries.selectHostType("Positions")
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).fill(String(POSITION))
@@ -91,10 +88,7 @@ test.describe("Create event series page", () => {
       ).not.toHaveCount(0)
 
       // Add a person
-      await (await CreateEventSeries.getMemberTypeButton("People")).click()
-      await CreateEventSeries.deleteInput(
-        CreateEventSeries.getHostRelatedObjectsInput()
-      )
+      await CreateEventSeries.selectHostType("People")
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).fill(String(PERSON))
