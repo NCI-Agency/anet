@@ -69,22 +69,24 @@ class AdvancedSearch {
   }
 
   async getSearchFilter(filter) {
-    return (await this.getAddFilterPopover())
-      .locator(`xpath=.//a[text()="${filter}"]`)
-      .first()
+    return (await this.getAddFilterPopover()).getByRole("button", {
+      name: filter,
+      exact: true
+    })
   }
 
   async getFilterRowByLabel(labelText) {
+    const label = currentPage()
+      .getByText(labelText, { exact: true })
+      .and(currentPage().locator("label"))
     return (await this.getAdvancedSearchPopover())
-      .locator(
-        `xpath=.//label[normalize-space()="${labelText}"]/ancestor::div[contains(@class,"form-group")]`
-      )
-      .first()
+      .locator(".advanced-search-content > .form-group")
+      .filter({ has: label })
   }
 
   async getRemoveButtonForFilter(labelText) {
     const row = await this.getFilterRowByLabel(labelText)
-    return row.locator(".remove-button").first()
+    return row.locator(".remove-button")
   }
 
   async getSearchButton() {

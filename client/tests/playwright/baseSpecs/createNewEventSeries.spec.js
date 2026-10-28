@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test"
 import CreateEventSeries from "../pages/createNewEventSeries.page.js"
-import { test, waitFor } from "../support.js"
+import { currentPage, test, waitFor } from "../support.js"
 
 const ORG = "ANET Admin"
 const ORG_COMPLETE = "ANET Administrators"
@@ -64,9 +64,9 @@ test.describe("Create event series page", () => {
       ).not.toHaveCount(0)
       // Add a position
       await (await CreateEventSeries.getMemberTypeButton("Positions")).click()
-      await CreateEventSeries.deleteInput(
-        CreateEventSeries.getHostRelatedObjectsInput()
-      )
+      // Switching host types closes the overlay; reopen it before searching.
+      await (await CreateEventSeries.getHostRelatedObjectsInput()).click()
+      await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).fill(String(POSITION))
@@ -92,9 +92,9 @@ test.describe("Create event series page", () => {
 
       // Add a person
       await (await CreateEventSeries.getMemberTypeButton("People")).click()
-      await CreateEventSeries.deleteInput(
-        CreateEventSeries.getHostRelatedObjectsInput()
-      )
+      // Switching host types closes the overlay; reopen it before searching.
+      await (await CreateEventSeries.getHostRelatedObjectsInput()).click()
+      await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
       await (
         await CreateEventSeries.getHostRelatedObjectsInput()
       ).fill(String(PERSON))
