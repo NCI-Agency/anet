@@ -124,12 +124,21 @@ public class TenantResource {
       final List<Person> existingPeople =
           tenantDao.getMembersForTenant(engine.getContext(), t.getUuid()).join();
       Utils.addRemoveElementsByUuid(existingPeople, t.getMembers(), newPerson -> {
-        // Tenant admins can only add tenant-less people
-        if (!AuthUtils.isAdmin(user)) {
-          final Person existingNewPerson = personDao.getByUuid(newPerson.getUuid());
-          if (existingNewPerson.getTenantUuid() != null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
-          }
+        final Person existingNewPerson = personDao.getByUuid(newPerson.getUuid());
+        final Tenant existingTenantAccessRequest =
+            existingNewPerson.loadTenantAccessRequest(engine.getContext()).join();
+        // Tenant admins can only add people without tenant or with access request to their tenant
+        if (!AuthUtils.isAdmin(user) && existingNewPerson.getTenantUuid() != null
+            && !t.getUuid().equals(DaoUtils.getUuid(existingTenantAccessRequest))) {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+        }
+
+        // If person was added directly, and they have a pending access request, remove it
+        if (DaoUtils.getUuid(existingNewPerson.getTenantAccessRequest()) != null) {
+          tenantDao.removeAccessRequestFromTenant(newPerson, t);
+          auditTrailDao.logUpdate(user, TenantDao.TABLE_NAME, t,
+              "access request for person has been removed from this tenant",
+              Utils.getLinkedToDetails(PersonDao.TABLE_NAME, newPerson.getUuid()));
         }
 
         tenantDao.addMemberToTenant(newPerson, t);
