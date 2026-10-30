@@ -105,13 +105,13 @@ jobs:
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
-      if: always()
+      if: success() || failure()
     - name: Upload test results
       uses: actions/upload-artifact@v7
       with:
         name: server-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/server-test-results.xml
-      if: always()
+      if: success() || failure()
 
   test-client:
     needs: build
@@ -160,9 +160,9 @@ jobs:
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
-      if: always()
+      if: success() || failure()
     - name: Upload Playwright diagnostics
-      if: always() && matrix.client-tests != 'jest'
+      if: (success() || failure()) && matrix.client-tests != 'jest'
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.client-tests }}-diagnostics for ${{ steps.strip-slashes.outputs.dictionary }}
@@ -176,13 +176,13 @@ jobs:
         name: ${{ matrix.client-tests }}-client-log for ${{ steps.strip-slashes.outputs.dictionary }}
         path: logs/clientLog.log
         if-no-files-found: ignore
-      if: always()
+      if: success() || failure()
     - name: Upload test results
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
-      if: always()
+      if: success() || failure()
 
   test-sim:
     needs: build
@@ -207,4 +207,4 @@ jobs:
         TEST_RUN: true
     - name: Show Keycloak logs
       run: docker logs anet-keycloak-server
-      if: always()
+      if: success() || failure()
