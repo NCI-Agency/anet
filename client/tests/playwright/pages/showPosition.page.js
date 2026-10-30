@@ -1,8 +1,6 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/positions/:uuid"
-
 class ShowPosition extends Page {
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
@@ -13,7 +11,7 @@ class ShowPosition extends Page {
   }
 
   async getAuthorizationGroupsTable() {
-    return currentPage().locator("#authorizationGroups table").first()
+    return this.page.locator("#authorizationGroups table").first()
   }
 
   async getAuthorizationGroup(i) {
@@ -22,18 +20,15 @@ class ShowPosition extends Page {
   }
 
   async getEditHistoryButton() {
-    return currentPage().locator("button.edit-history").first()
+    return this.page.locator("button.edit-history").first()
   }
 
   async getEditAttachmentsButton() {
-    return await currentPage().locator("#edit-attachments").first()
+    return await this.page.locator("#edit-attachments").first()
   }
 
   async getEntityAvatar() {
-    return currentPage()
-      .locator("fieldset div.row div.text-center canvas")
-      .first()
+    return this.page.locator("fieldset div.row div.text-center canvas").first()
   }
 }
-
-export default new ShowPosition()
+export default ShowPosition

@@ -1,22 +1,21 @@
 import { expect } from "@playwright/test"
-import { currentPage, typeKeys } from "../../support.js"
 import Page from "../page.js"
 
 class TaskFilter extends Page {
   async addTaskFilter() {
-    const searchLink = currentPage()
+    const searchLink = this.page
       .locator(".search-popover-target.bp6-popover-target")
       .first()
     await (await searchLink).click()
     // wait for filters to be shown
 
-    const reportsButton = currentPage()
+    const reportsButton = this.page
       .locator('.btn-group > button[value="REPORTS"]')
       .first()
     await (await reportsButton).click()
     // wait for filters to be updated
 
-    const removeFilterButtons = currentPage().locator(
+    const removeFilterButtons = this.page.locator(
       '.form-group button[title="Remove this filter"]'
     )
     while (await removeFilterButtons.count()) {
@@ -24,11 +23,11 @@ class TaskFilter extends Page {
     }
     // wait for filters to be updated
 
-    const addFilterButton = currentPage().locator("#addFilterDropdown").first()
+    const addFilterButton = this.page.locator("#addFilterDropdown").first()
     await (await addFilterButton).click()
     // wait for filters to be shown
 
-    const withinObjectiveButton = currentPage()
+    const withinObjectiveButton = this.page
       .getByRole("button", {
         name: "Within Objective",
         exact: false
@@ -38,27 +37,25 @@ class TaskFilter extends Page {
   }
 
   async getTaskRows() {
-    return currentPage().locator("#taskUuid-popover tbody > tr")
+    return this.page.locator("#taskUuid-popover tbody > tr")
   }
 
   async openTaskFilter() {
-    const openFilterButton = currentPage()
-      .locator("input[name='taskUuid']")
-      .first()
+    const openFilterButton = this.page.locator("input[name='taskUuid']").first()
     await (await openFilterButton).click()
   }
 
   async openAllCollapsedTasks() {
     await expect(
-      currentPage().locator("#taskUuid-popover tbody").first()
+      this.page.locator("#taskUuid-popover tbody").first()
     ).toBeVisible()
-    let expandibleTasks = await currentPage()
+    let expandibleTasks = await this.page
       .locator("#taskUuid-popover .bp6-icon-chevron-right")
       .all()
     while (expandibleTasks.length > 0) {
       const task = expandibleTasks[0]
       await (await task).click()
-      expandibleTasks = await currentPage()
+      expandibleTasks = await this.page
         .locator("#taskUuid-popover .bp6-icon-chevron-right")
         .all()
     }
@@ -66,9 +63,9 @@ class TaskFilter extends Page {
 
   async openFirstLevelCollapsedTasks() {
     await expect(
-      currentPage().locator("#taskUuid-popover tbody").first()
+      this.page.locator("#taskUuid-popover tbody").first()
     ).toBeVisible()
-    const expandibleTasks = await currentPage()
+    const expandibleTasks = await this.page
       .locator("#taskUuid-popover .bp6-icon-chevron-right")
       .all()
     for (const task of expandibleTasks) {
@@ -77,26 +74,26 @@ class TaskFilter extends Page {
   }
 
   async searchTasks(searchText) {
-    await typeKeys(searchText)
-    // wait for the searchText to be processed
+    await this.page.keyboard.insertText(String(searchText))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    } // wait for the searchText to be processed
     await expect(
-      currentPage().locator("#taskUuid-popover tbody").first()
+      this.page.locator("#taskUuid-popover tbody").first()
     ).toBeVisible()
   }
 
   async closeTaskFilter() {
-    const closeButton = currentPage()
-      .locator(".bp6-icon.bp6-icon-cross")
-      .first()
+    const closeButton = this.page.locator(".bp6-icon.bp6-icon-cross").first()
     await (await closeButton).click()
   }
 
   async clickInclInactiveCheckbox() {
-    const inclInactiveCheckbox = currentPage()
+    const inclInactiveCheckbox = this.page
       .locator("#taskUuid-inclInactive")
       .first()
     await (await inclInactiveCheckbox).click()
   }
 }
-
-export default new TaskFilter()
+export default TaskFilter

@@ -1,8 +1,6 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/admin"
-
 class Admin extends Page {
   async open() {
     await super.open(PAGE_URL)
@@ -14,7 +12,7 @@ class Admin extends Page {
 
   async updateHelpText(helpText) {
     await this.fillRichTextInput(
-      await currentPage().locator("fieldset").first(),
+      await this.page.locator("fieldset").first(),
       "div[id='fg-HELP_TEXT'] .editor-container > .editable",
       helpText,
       ""
@@ -23,11 +21,10 @@ class Admin extends Page {
   }
 
   async submitChanges() {
-    const submitButton = await currentPage()
+    const submitButton = await this.page
       .locator(".submit-buttons button")
       .first()
     await submitButton.click()
   }
 }
-
-export default new Admin()
+export default Admin

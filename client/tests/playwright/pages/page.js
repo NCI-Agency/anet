@@ -1,7 +1,11 @@
 import { expect } from "@playwright/test"
-import { currentPage, typeKeys, waitFor, waitUntil } from "../support.js"
 
 class Page {
+  /** @param {import("@playwright/test").Page} page */
+  constructor(page) {
+    this.page = page
+  }
+
   static DEFAULT_CREDENTIALS = {
     user: "erin",
     superuser: "rebecca",
@@ -11,31 +15,31 @@ class Page {
   }
 
   async getLoginForm() {
-    return currentPage().locator("#kc-form-login").first()
+    return this.page.locator("#kc-form-login").first()
   }
 
   async getLoginFormUsername() {
-    return currentPage().locator("#username").first()
+    return this.page.locator("#username").first()
   }
 
   async getLoginFormPassword() {
-    return currentPage().locator("#password").first()
+    return this.page.locator("#password").first()
   }
 
   async getLoginFormSubmitButton() {
-    return currentPage().locator("#kc-login").first()
+    return this.page.locator("#kc-login").first()
   }
 
   async getLogoutFormSubmitButton() {
-    return currentPage().locator("#kc-logout").first()
+    return this.page.locator("#kc-logout").first()
   }
 
   async getLoggedOutForm() {
-    return currentPage().locator(".logout-container").first()
+    return this.page.locator(".logout-container").first()
   }
 
   async getLogo() {
-    return currentPage().locator("#anet-logo .logo").first()
+    return this.page.locator("#anet-logo .logo").first()
   }
 
   async clickLogo() {
@@ -43,27 +47,27 @@ class Page {
   }
 
   async getAttachments() {
-    return currentPage().locator("#attachments").first()
+    return this.page.locator("#attachments").first()
   }
 
   async getCard() {
-    return currentPage().locator(".card").first()
+    return this.page.locator(".card").first()
   }
 
   async getClassificationLine() {
-    return currentPage().locator(".classification-line").first()
+    return this.page.locator(".classification-line").first()
   }
 
   async getCaptionLine() {
-    return currentPage().locator(".info-line").first()
+    return this.page.locator(".info-line").first()
   }
 
   async getImageClick() {
-    return currentPage().locator(".image-preview").first()
+    return this.page.locator(".image-preview").first()
   }
 
   async getModalDialog() {
-    return currentPage().locator(".modal-dialog").first()
+    return this.page.locator(".modal-dialog").first()
   }
 
   async loginFormSubmit() {
@@ -79,7 +83,7 @@ class Page {
     await (await this.getLoginFormUsername()).fill(String(credentials))
     await (await this.getLoginFormPassword()).fill(String(credentials))
     await this.loginFormSubmit()
-    await currentPage().waitForURL(url => !url.pathname.includes("/realms/"))
+    await this.page.waitForURL(url => !url.pathname.includes("/realms/"))
   }
 
   async logout(resetRedux = false) {
@@ -87,32 +91,30 @@ class Page {
     if (resetRedux) {
       await this.clickLogo()
     }
-    await currentPage().goto("/api/logout")
+    await this.page.goto("/api/logout")
     await (await this.getLogoutFormSubmitButton()).click()
     await expect(await this.getLoggedOutForm()).toBeVisible()
   }
 
   async waitUntilLoaded() {
-    await waitFor(
-      await currentPage().locator("div.loader").first(),
-      "attached",
-      {
-        timeout: 30000,
-        reverse: true,
-        timeoutMsg: "Expected everything to be loaded by now"
-      }
-    )
+    await (
+      await this.page.locator("div.loader").first()
+    ).waitFor({
+      state: "detached",
+      timeout: 30000
+    })
   }
 
   async _open(pathName, credentials) {
-    await currentPage().goto(pathName)
+    await this.page.goto(pathName)
     // Wait for page load or login redirect
 
     if ((await (await this.getLoginForm()).count()) > 0) {
       await this.login(credentials)
       // Wait for login redirect
     }
-    await waitFor(currentPage().locator("#topbar"), "visible", {
+    await this.page.locator("#topbar").waitFor({
+      state: "visible",
       timeout: 30000
     })
     await this.waitUntilLoaded()
@@ -142,11 +144,11 @@ class Page {
   }
 
   async getNotFound() {
-    return currentPage().locator(".not-found-text").first()
+    return this.page.locator(".not-found-text").first()
   }
 
   async getAlertSuccess() {
-    return currentPage().locator(".alert-success").first()
+    return this.page.locator(".alert-success").first()
   }
 
   async waitForAlertSuccessToLoad() {
@@ -154,7 +156,7 @@ class Page {
   }
 
   async getAlertInfo() {
-    return currentPage().locator(".alert-info").first()
+    return this.page.locator(".alert-info").first()
   }
 
   async waitForAlertInfoToLoad() {
@@ -162,7 +164,7 @@ class Page {
   }
 
   async getAlertWarning() {
-    return currentPage().locator(".alert-warning").first()
+    return this.page.locator(".alert-warning").first()
   }
 
   async waitForAlertWarningToLoad() {
@@ -170,7 +172,7 @@ class Page {
   }
 
   async getAlertDanger() {
-    return currentPage().locator(".alert-danger").first()
+    return this.page.locator(".alert-danger").first()
   }
 
   async waitForAlertDangerToLoad() {
@@ -194,26 +196,30 @@ class Page {
     await saveButton.click()
     // wait for modal animation to finish
 
-    await waitFor(await getModalForm(), "attached", {
-      reverse: true,
+    await (
+      await getModalForm()
+    ).waitFor({
+      state: "detached",
       timeout: 20000
     })
     // wait until details to change, can take some time to update show page
-    await waitUntil(
-      async () => {
-        const details = await getAssessmentDetails()
-        if (!details[detailIndex]) {
-          return false
+    await expect
+      .poll(
+        async () => {
+          const details = await getAssessmentDetails()
+          if (!details[detailIndex]) {
+            return false
+          }
+          return (
+            (await details[detailIndex].innerText()).trim() === detailToWaitFor
+          )
+        },
+        {
+          timeout: 5000,
+          message: "Expected change after save"
         }
-        return (
-          (await details[detailIndex].innerText()).trim() === detailToWaitFor
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Expected change after save"
-      }
-    )
+      )
+      .toBeTruthy()
   }
 
   async clickButton(buttonContainer, buttonSelector) {
@@ -235,7 +241,9 @@ class Page {
 
   async deleteText(text = "") {
     // Clumsy way to clear text…
-    await typeKeys(["End"].concat(Array(text.length).fill("Backspace")))
+    for (const key of ["End"].concat(Array(text.length).fill("Backspace"))) {
+      await this.page.keyboard.press(key)
+    }
   }
 
   async deleteInput(inputField) {
@@ -246,7 +254,7 @@ class Page {
   }
 
   async getMergeButton() {
-    return currentPage().locator('a[id="mergeWithOther"]').first()
+    return this.page.locator('a[id="mergeWithOther"]').first()
   }
 
   async waitForElementToChange(getElementCallback, value) {
@@ -264,41 +272,41 @@ class Page {
   }
 
   async getOwnerOrganizationInput() {
-    return currentPage().locator("#ownerOrg").first()
+    return this.page.locator("#ownerOrg").first()
   }
 
   async getOwnerOrgAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator("#ownerOrg-popover tbody tr:first-child td:nth-child(2) span")
       .first()
   }
 
   async getAdminOrganizationInput() {
-    return currentPage().locator("#adminOrg").first()
+    return this.page.locator("#adminOrg").first()
   }
 
   async getAdminOrgAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator("#adminOrg-popover tbody tr:first-child td:nth-child(2) span")
       .first()
   }
 
   async waitForOwnerOrgAdvancedSelectToChange(value) {
     return this.waitForElementToChange(
-      this.getOwnerOrgAdvancedSelectFirstItem,
+      this.getOwnerOrgAdvancedSelectFirstItem.bind(this),
       value
     )
   }
 
   async waitForAdminOrgAdvancedSelectToChange(value) {
     return this.waitForElementToChange(
-      this.getAdminOrgAdvancedSelectFirstItem,
+      this.getAdminOrgAdvancedSelectFirstItem.bind(this),
       value
     )
   }
 
   async getRelatedObjectsAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator(
         "#entitySelect-popover tbody tr:first-child td:nth-child(2) span"
       )
@@ -307,13 +315,13 @@ class Page {
 
   async waitForRelatedObjectsAdvancedSelectToChange(value) {
     return this.waitForElementToChange(
-      this.getRelatedObjectsAdvancedSelectFirstItem,
+      this.getRelatedObjectsAdvancedSelectFirstItem.bind(this),
       value
     )
   }
 
   async getMemberTypeButton(memberType) {
-    return currentPage()
+    return this.page
       .getByRole("button", {
         name: `${memberType}`,
         exact: true
@@ -325,15 +333,15 @@ class Page {
     await (await this.getMemberTypeButton(memberType)).click()
     // Switching host types closes the overlay; reopen it before searching.
     await (await this.getHostRelatedObjectsInput()).click()
-    await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
+    await expect(this.page.locator("#entitySelect-popover")).toBeVisible()
   }
 
   async getHostRelatedObjectsInput() {
-    return currentPage().locator("#hostRelatedObjects").first()
+    return this.page.locator("#hostRelatedObjects").first()
   }
 
   async getRelatedObjectsTable() {
-    return currentPage().locator(".related_objects_table").first()
+    return this.page.locator(".related_objects_table").first()
   }
 
   async getRelatedObjectsTableEntry(relatedObjectText) {
@@ -342,5 +350,4 @@ class Page {
       .first()
   }
 }
-
 export default Page

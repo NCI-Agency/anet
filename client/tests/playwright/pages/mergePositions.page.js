@@ -1,43 +1,39 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/positions"
-
 class MergePositions extends Page {
   async openPage(path = PATH) {
     await super.openAsAdminUser(path)
   }
 
   async getErrorTitle() {
-    return currentPage().locator("//h1").first()
+    return this.page.locator("//h1").first()
   }
 
   async getTitle() {
-    return currentPage()
-      .locator('//h4[contains(text(),"Merge Positions")]')
-      .first()
+    return this.page.locator('//h4[contains(text(),"Merge Positions")]').first()
   }
 
   async getLeftPositionField() {
-    return currentPage().locator("#Position1").first()
+    return this.page.locator("#Position1").first()
   }
 
   async getRightPositionField() {
-    return currentPage().locator("#Position2").first()
+    return this.page.locator("#Position2").first()
   }
 
   async getAdvancedSelectPopover() {
-    return currentPage().locator(".bp6-popover-content").first()
+    return this.page.locator(".bp6-popover-content").first()
   }
 
   async getPositionHeaderFromPopover() {
-    return currentPage()
+    return this.page
       .locator('//table//th[contains(text(), "Position")]')
       .first()
   }
 
   async getFirstItemFromAdvancedSelect() {
-    return currentPage()
+    return this.page
       .locator(
         ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
       )
@@ -45,7 +41,7 @@ class MergePositions extends Page {
   }
 
   async getFirstItemRadioButtonFromAdvancedSelect() {
-    return currentPage()
+    return this.page
       .locator(
         "table > tbody > tr:first-child > td:first-child > input.form-check-input"
       )
@@ -53,13 +49,13 @@ class MergePositions extends Page {
   }
 
   async getEditAssociatedPositionsButton() {
-    return currentPage()
+    return this.page
       .locator('//button[text()="Edit Associated Positions"]')
       .first()
   }
 
   async getEditAssociatedPositionsModal() {
-    return currentPage()
+    return this.page
       .locator("//div[contains(@class, 'edit-associated-positions-dialog')]")
       .first()
   }
@@ -71,17 +67,17 @@ class MergePositions extends Page {
   }
 
   async getMergePositionsButton() {
-    return currentPage().locator('//button[text()="Merge Positions"]').first()
+    return this.page.locator('//button[text()="Merge Positions"]').first()
   }
 
   async getOccupiedPositionsToast() {
-    return currentPage()
+    return this.page
       .locator('//div[text()="Please select at least one unoccupied position"]')
       .first()
   }
 
   async getWinnerAssociatedPositions() {
-    const associatedPositionRows = await currentPage()
+    const associatedPositionRows = await this.page
       .locator("#assigned-counterpart tbody tr")
       .all()
     return await Promise.all(
@@ -99,22 +95,20 @@ class MergePositions extends Page {
   }
 
   async getShowNotesButton() {
-    return currentPage().locator('button[title="Show notes"]').first()
+    return this.page.locator('button[title="Show notes"]').first()
   }
 
   async getNoteCards() {
-    return currentPage().locator(".offcanvas .card").all()
+    return this.page.locator(".offcanvas .card").all()
   }
 
   async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
-    return currentPage()
-      .locator(`#mid-merge-pos-col ${button} > button`)
-      .first()
+    return this.page.locator(`#mid-merge-pos-col ${button} > button`).first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await currentPage()
+    const buttonDiv = await this.page
       .locator(`//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]`)
       .first()
     const button = await buttonDiv.locator("..").locator("..")
@@ -122,7 +116,7 @@ class MergePositions extends Page {
   }
 
   async getColumnContent(side, text) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]/following-sibling::div`
       )
@@ -130,7 +124,7 @@ class MergePositions extends Page {
   }
 
   async getAssociatedPositions(side) {
-    const associatedPositionElements = await currentPage()
+    const associatedPositionElements = await this.page
       .locator(
         `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]//following-sibling::div//table//tbody//tr`
       )
@@ -150,7 +144,7 @@ class MergePositions extends Page {
   }
 
   async getPreviousPeople(side) {
-    const previousPeopleElements = await currentPage()
+    const previousPeopleElements = await this.page
       .locator(
         `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div//table//tbody//tr`
       )
@@ -166,10 +160,20 @@ class MergePositions extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getPositionHeaderFromPopover(), "visible")
+    await (
+      await this.getAdvancedSelectPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await (
+      await this.getPositionHeaderFromPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     return this.waitForElementToChange(
-      this.getFirstItemFromAdvancedSelect,
+      this.getFirstItemFromAdvancedSelect.bind(this),
       compareStr
     )
   }
@@ -183,13 +187,13 @@ class MergePositions extends Page {
 
   async waitForSuccessAlert() {
     return this.waitForElementToChange(
-      this.getAlertSuccess,
+      this.getAlertSuccess.bind(this),
       "Positions merged. Displaying merged Position below."
     )
   }
 
   async getAssociatedPositionsInModal(side) {
-    const selectedSide = await currentPage()
+    const selectedSide = await this.page
       .locator(`#edit-ap-${side} tbody tr`)
       .all()
     return await Promise.all(
@@ -213,7 +217,7 @@ class MergePositions extends Page {
 
   async getAssociatedPositionActionButton(side, index) {
     const selectedRow = (
-      await currentPage().locator(`#edit-ap-${side} tbody tr`).all()
+      await this.page.locator(`#edit-ap-${side} tbody tr`).all()
     )[index]
     return (await selectedRow.locator("td").all())[side === "right" ? 0 : 2]
       .locator("button")
@@ -238,5 +242,4 @@ class MergePositions extends Page {
     return areExist
   }
 }
-
-export default new MergePositions()
+export default MergePositions

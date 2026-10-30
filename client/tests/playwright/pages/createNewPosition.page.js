@@ -1,25 +1,21 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/positions/new"
-
 class CreatePosition extends Page {
   async getForm() {
-    return currentPage().locator("form").first()
+    return this.page.locator("form").first()
   }
 
   async getPositionNameInput() {
-    return currentPage().locator("#name").first()
+    return this.page.locator("#name").first()
   }
 
   async getDuplicatesButton() {
-    return currentPage()
-      .locator('//button[text()="Possible Duplicates"]')
-      .first()
+    return this.page.locator('//button[text()="Possible Duplicates"]').first()
   }
 
   async getModalContent() {
-    return currentPage().locator("div.modal-content").first()
+    return this.page.locator("div.modal-content").first()
   }
 
   async getModalCloseButton() {
@@ -33,45 +29,43 @@ class CreatePosition extends Page {
   }
 
   async getPositionNameHelpBlock() {
-    return currentPage().locator("#fg-name div.invalid-feedback").first()
+    return this.page.locator("#fg-name div.invalid-feedback").first()
   }
 
   async getRoleMemberButton() {
-    return currentPage().locator('label[for="role_MEMBER"]').first()
+    return this.page.locator('label[for="role_MEMBER"]').first()
   }
 
   async getRoleMemberInput() {
-    return currentPage().locator('input[id="role_MEMBER"]').first()
+    return this.page.locator('input[id="role_MEMBER"]').first()
   }
 
   async getRoleDeputyButton() {
-    return currentPage().locator('label[for="role_DEPUTY"]').first()
+    return this.page.locator('label[for="role_DEPUTY"]').first()
   }
 
   async getRoleDeputyInput() {
-    return currentPage().locator('input[id="role_DEPUTY"]').first()
+    return this.page.locator('input[id="role_DEPUTY"]').first()
   }
 
   async getRoleLeaderButton() {
-    return currentPage().locator('label[for="role_LEADER"]').first()
+    return this.page.locator('label[for="role_LEADER"]').first()
   }
 
   async getRoleLeaderInput() {
-    return currentPage().locator('input[id="role_LEADER"]').first()
+    return this.page.locator('input[id="role_LEADER"]').first()
   }
 
   async getOrganizationInput() {
-    return currentPage().locator("#organization").first()
+    return this.page.locator("#organization").first()
   }
 
   async getOrganizationHelpBlock() {
-    return currentPage()
-      .locator("#fg-organization div.invalid-feedback")
-      .first()
+    return this.page.locator("#fg-organization div.invalid-feedback").first()
   }
 
   async getOrgAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator(
         "#organization-popover tbody tr:first-child td:nth-child(2) span"
       )
@@ -79,17 +73,17 @@ class CreatePosition extends Page {
   }
 
   async getLocationInput() {
-    return currentPage().locator("#location").first()
+    return this.page.locator("#location").first()
   }
 
   async getLocAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator("#location-popover tbody tr:first-child td:nth-child(2) span")
       .first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async open() {
@@ -102,7 +96,7 @@ class CreatePosition extends Page {
 
   async waitForOrgAdvancedSelectToChange(value) {
     return this.waitForElementToChange(
-      this.getOrgAdvancedSelectFirstItem,
+      this.getOrgAdvancedSelectFirstItem.bind(this),
       value
     )
   }
@@ -111,5 +105,4 @@ class CreatePosition extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
-
-export default new CreatePosition()
+export default CreatePosition

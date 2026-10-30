@@ -1,61 +1,58 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 class Search extends Page {
   async getMain() {
-    return currentPage().locator("div#main-viewport").first()
+    return this.page.locator("div#main-viewport").first()
   }
 
   async getNoResultsFound() {
-    return currentPage()
+    return this.page
       .locator('//div/b[text()="No search results found!"]')
       .first()
   }
 
   async getFoundCounter(entity) {
-    return currentPage().locator(`div#${entity} span span`).first()
+    return this.page.locator(`div#${entity} span span`).first()
   }
 
   async getFoundPeopleTable() {
-    return currentPage().locator("div#people #people-search-results").first()
+    return this.page.locator("div#people #people-search-results").first()
   }
 
   async getFoundTaskTable() {
-    return currentPage().locator("div#tasks #tasks-search-results").first()
+    return this.page.locator("div#tasks #tasks-search-results").first()
   }
 
   async getFoundOrganizationTable() {
-    return currentPage()
+    return this.page
       .locator("div#organizations #organizations-search-results")
       .first()
   }
 
   async getFoundReportTable() {
-    return currentPage().locator("div#reports .report-collection").first()
+    return this.page.locator("div#reports .report-collection").first()
   }
 
   async getFoundPositionTable() {
-    return currentPage()
-      .locator("div#positions #positions-search-results")
-      .first()
+    return this.page.locator("div#positions #positions-search-results").first()
   }
 
   async getFoundLocationTable() {
-    return currentPage().locator("div#locations .location-collection").first()
+    return this.page.locator("div#locations .location-collection").first()
   }
 
   async getFoundAuthorizationGroupTable() {
-    return currentPage()
+    return this.page
       .locator("div#authorizationGroups #authorizationGroups-search-results")
       .first()
   }
 
   async getFoundEventTable() {
-    return currentPage().locator("div#events .event-collection").first()
+    return this.page.locator("div#events .event-collection").first()
   }
 
   async getFoundEventSeriesTable() {
-    return currentPage()
+    return this.page
       .locator("div#eventSeries #eventSeries-search-results")
       .first()
   }
@@ -85,13 +82,13 @@ class Search extends Page {
   }
 
   async getReportTableButton() {
-    return currentPage()
+    return this.page
       .locator(".report-collection div header div button[value='table']")
       .first()
   }
 
   async linkOfReportFound(linkText) {
-    return currentPage()
+    return this.page
       .getByText(`${linkText}`, {
         exact: true
       })
@@ -112,5 +109,4 @@ class Search extends Page {
     await super.waitUntilLoaded()
   }
 }
-
-export default new Search()
+export default Search

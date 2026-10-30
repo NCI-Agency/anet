@@ -1,4 +1,3 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 // Copied from src/pages/insights/Show.js
@@ -20,23 +19,21 @@ export const INSIGHTS = [
   CADENCE_DASHBOARD,
   AGGREGATED_REPORTS_OVER_TIME
 ]
-
 class Insights extends Page {
   async getInsightsMenu() {
-    return currentPage().locator("#insights").first()
+    return this.page.locator("#insights").first()
   }
 
   async getInsightLink(insight) {
-    return currentPage().locator(`a[href="/insights/${insight}"]`).first()
+    return this.page.locator(`a[href="/insights/${insight}"]`).first()
   }
 
   async getAlert() {
-    return currentPage().locator(".alert").first()
+    return this.page.locator(".alert").first()
   }
 
   async getInsightDiv(insight) {
-    return currentPage().locator(`div[id="${insight}"]`).first()
+    return this.page.locator(`div[id="${insight}"]`).first()
   }
 }
-
-export default new Insights()
+export default Insights

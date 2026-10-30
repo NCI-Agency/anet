@@ -1,11 +1,9 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/events/new"
-
 class CreateEvent extends Page {
   async getForm() {
-    return currentPage().locator("form.form-horizontal").first()
+    return this.page.locator("form.form-horizontal").first()
   }
 
   async getNameInput() {
@@ -13,7 +11,7 @@ class CreateEvent extends Page {
   }
 
   async getNameHelpBlock() {
-    return currentPage().locator("#fg-name div.invalid-feedback").first()
+    return this.page.locator("#fg-name div.invalid-feedback").first()
   }
 
   async getTypeInput() {
@@ -21,11 +19,11 @@ class CreateEvent extends Page {
   }
 
   async getTypeHelpBlock() {
-    return currentPage().locator("#fg-eventType div.invalid-feedback").first()
+    return this.page.locator("#fg-eventType div.invalid-feedback").first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async open() {
@@ -41,20 +39,19 @@ class CreateEvent extends Page {
   }
 
   async getStartDateInput() {
-    return currentPage().locator("#startDate").first()
+    return this.page.locator("#startDate").first()
   }
 
   async getStartDateHelpBlock() {
-    return currentPage().locator("#fg-startDate div.invalid-feedback").first()
+    return this.page.locator("#fg-startDate div.invalid-feedback").first()
   }
 
   async getEndDateInput() {
-    return currentPage().locator("#endDate").first()
+    return this.page.locator("#endDate").first()
   }
 
   async getEndDateHelpBlock() {
-    return currentPage().locator("#fg-endDate div.invalid-feedback").first()
+    return this.page.locator("#fg-endDate div.invalid-feedback").first()
   }
 }
-
-export default new CreateEvent()
+export default CreateEvent

@@ -1,49 +1,43 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/people"
-
 class MergePeople extends Page {
   async openPage(path = PATH) {
     await super.openAsAdminUser(path)
   }
 
   async getErrorTitle() {
-    return currentPage().locator("//h1").first()
+    return this.page.locator("//h1").first()
   }
 
   async getTitle() {
-    return currentPage()
-      .locator('//h4[contains(text(),"Merge People")]')
-      .first()
+    return this.page.locator('//h4[contains(text(),"Merge People")]').first()
   }
 
   async getLeftPersonField() {
-    return currentPage().locator("#Person1").first()
+    return this.page.locator("#Person1").first()
   }
 
   async getRightPersonField() {
-    return currentPage().locator("#Person2").first()
+    return this.page.locator("#Person2").first()
   }
 
   async getAdvancedSelectPopover() {
-    return currentPage().locator(".bp6-popover-content").first()
+    return this.page.locator(".bp6-popover-content").first()
   }
 
   async getPersonHeaderFromPopover() {
-    return currentPage()
-      .locator('//table//th[contains(text(), "Name")]')
-      .first()
+    return this.page.locator('//table//th[contains(text(), "Name")]').first()
   }
 
   async getFirstItemFromAdvancedSelect() {
-    return currentPage()
+    return this.page
       .locator("table > tbody > tr:first-child > td:nth-child(2) > span")
       .first()
   }
 
   async getFirstItemRadioButtonFromAdvancedSelect() {
-    return currentPage()
+    return this.page
       .locator(
         "table > tbody > tr:first-child > td:first-child > input.form-check-input"
       )
@@ -51,19 +45,19 @@ class MergePeople extends Page {
   }
 
   async getMergePeopleButton() {
-    return currentPage().locator('//button[text()="Merge People"]').first()
+    return this.page.locator('//button[text()="Merge People"]').first()
   }
 
   async getShowNotesButton() {
-    return currentPage().locator('button[title="Show notes"]').first()
+    return this.page.locator('button[title="Show notes"]').first()
   }
 
   async getPrimaryPosition() {
-    return currentPage().locator("#position a.position-name").first()
+    return this.page.locator("#position a.position-name").first()
   }
 
   async getAdditionalPositions() {
-    const additionalPositions = await currentPage()
+    const additionalPositions = await this.page
       .locator("#additionalPositions a.position-name")
       .all()
     return Promise.all(
@@ -74,26 +68,24 @@ class MergePeople extends Page {
   }
 
   async getPositionCurrentPersonName() {
-    return currentPage().locator("h4.assigned-person-name").first()
+    return this.page.locator("h4.assigned-person-name").first()
   }
 
   async getUnoccupiedPositionPersonMessage() {
-    return currentPage().locator("p.position-empty-message").first()
+    return this.page.locator("p.position-empty-message").first()
   }
 
   async getNoteCards() {
-    return currentPage().locator(".offcanvas .card").all()
+    return this.page.locator(".offcanvas .card").all()
   }
 
   async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
-    return currentPage()
-      .locator(`#mid-merge-per-col ${button} > button`)
-      .first()
+    return this.page.locator(`#mid-merge-per-col ${button} > button`).first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await currentPage()
+    const buttonDiv = await this.page
       .locator(`//div[@id="${side}-merge-per-col"]//div[text()="${text}"]`)
       .first()
     const button = await buttonDiv.locator("..").locator("..")
@@ -101,7 +93,7 @@ class MergePeople extends Page {
   }
 
   async getColumnContent(side, text) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]/following-sibling::div`
       )
@@ -109,7 +101,7 @@ class MergePeople extends Page {
   }
 
   async getSingleSelectButton(side, text) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]` +
           "/parent::div/following-sibling::small[1]/button"
@@ -118,7 +110,7 @@ class MergePeople extends Page {
   }
 
   async getPreviousPositions(side) {
-    const previousPositionsElements = await currentPage()
+    const previousPositionsElements = await this.page
       .locator(
         `//div[@id="${side}-merge-per-col"]//div[text()="Previous Positions"]/following-sibling::div//table//tbody//tr`
       )
@@ -132,7 +124,7 @@ class MergePeople extends Page {
   }
 
   async getPreviousPositionsElements(primary) {
-    const previousPrimaryPositionsElements = await currentPage()
+    const previousPrimaryPositionsElements = await this.page
       .locator(
         `${primary ? "#fg-prevPositions" : "#fg-prevAdditionalPositions"} table#previous-positions tbody tr`
       )
@@ -146,10 +138,20 @@ class MergePeople extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getPersonHeaderFromPopover(), "visible")
+    await (
+      await this.getAdvancedSelectPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await (
+      await this.getPersonHeaderFromPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     return this.waitForElementToChange(
-      this.getFirstItemFromAdvancedSelect,
+      this.getFirstItemFromAdvancedSelect.bind(this),
       compareStr
     )
   }
@@ -163,7 +165,7 @@ class MergePeople extends Page {
 
   async waitForSuccessAlert() {
     return this.waitForElementToChange(
-      this.getAlertSuccess,
+      this.getAlertSuccess.bind(this),
       "People merged. Displaying merged Person below."
     )
   }
@@ -187,8 +189,7 @@ class MergePeople extends Page {
   }
 
   async getUserAccountsField() {
-    return currentPage().locator("#fg-users").first()
+    return this.page.locator("#fg-users").first()
   }
 }
-
-export default new MergePeople()
+export default MergePeople
