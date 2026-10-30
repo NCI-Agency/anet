@@ -128,7 +128,7 @@
     "keycloak-js": "26.2.4",
     "leaflet": "1.9.4",
     "leaflet-defaulticon-compatibility": "0.1.2",
-    "leaflet-geosearch": "4.4.0",
+    "leaflet-geosearch": "5.2.0",
     "leaflet-gesture-handling": "1.2.2",
     "leaflet.fullscreen": "5.3.3",
     "leaflet.markercluster": "1.5.3",
