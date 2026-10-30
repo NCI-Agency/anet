@@ -1,4 +1,3 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/positions/counterparts"
@@ -21,11 +20,11 @@ class MyTasks extends Page {
   }
 
   async getMyCounterparts() {
-    return currentPage().locator("#my-counterparts").first()
+    return this.page.locator("#my-counterparts").first()
   }
 
   async getMyPendingCounterparts() {
-    return currentPage()
+    return this.page
       .locator("#my-counterparts-with-pending-assessments")
       .first()
   }
@@ -53,4 +52,4 @@ class MyTasks extends Page {
   }
 }
 
-export default new MyTasks()
+export default MyTasks
