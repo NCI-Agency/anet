@@ -1,16 +1,19 @@
-import { currentPage } from "../support.js"
-
 class AdvancedSearch {
+  /** @param {import("@playwright/test").Page} page */
+  constructor(page) {
+    this.page = page
+  }
+
   async getAdvancedSearchForm() {
-    return currentPage().locator(".advanced-search-form").first()
+    return this.page.locator(".advanced-search-form").first()
   }
 
   async getAdvancedSearchPopoverTrigger() {
-    return currentPage().locator(".advanced-search-form ~ span .asLink").first()
+    return this.page.locator(".advanced-search-form ~ span .asLink").first()
   }
 
   async getAdvancedSearchPopover() {
-    return currentPage().locator(".advanced-search").first()
+    return this.page.locator(".advanced-search").first()
   }
 
   async getAnetObjectSearchToggleButtons() {
@@ -76,12 +79,16 @@ class AdvancedSearch {
   }
 
   async getFilterRowByLabel(labelText) {
-    const label = currentPage()
-      .getByText(labelText, { exact: true })
-      .and(currentPage().locator("label"))
+    const label = this.page
+      .getByText(labelText, {
+        exact: true
+      })
+      .and(this.page.locator("label"))
     return (await this.getAdvancedSearchPopover())
       .locator(".advanced-search-content > .form-group")
-      .filter({ has: label })
+      .filter({
+        has: label
+      })
   }
 
   async getRemoveButtonForFilter(labelText) {
@@ -96,4 +103,4 @@ class AdvancedSearch {
   }
 }
 
-export default new AdvancedSearch()
+export default AdvancedSearch

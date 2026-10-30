@@ -1,6 +1,6 @@
-import { expect } from "@playwright/test"
+import { expect, test } from "@playwright/test"
+import { LoginPage } from "../../e2e/pages/LoginPage.js"
 import ShowAllCommunities from "../pages/showAllCommunities.page.js"
-import { test } from "../support.js"
 
 const COMMUNITIES_NAMES = [
   "EF 1.1",
@@ -12,14 +12,16 @@ const COMMUNITIES_NAMES = [
   "Unlimited exporters"
 ]
 test.describe("Show All Communities Page", () => {
-  test.beforeEach(async () => {
-    await ShowAllCommunities.open()
+  test.beforeEach(async ({ page }) => {
+    await new LoginPage(page).login("/", "erin")
   })
-  test("Should display all communities", async () => {
-    const communities = await ShowAllCommunities.getCommunitiesList()
-    expect(communities.length).toBeGreaterThanOrEqual(1)
-    expect(communities.length).toBeLessThanOrEqual(7)
-    const communitiesNames = await ShowAllCommunities.getCommunitiesNames()
-    expect(communitiesNames).toEqual(expect.arrayContaining(COMMUNITIES_NAMES))
+  test("Should display all communities", async ({ page }) => {
+    const communities = new ShowAllCommunities(page)
+    await communities.open()
+    // Seven expected names and the original seven-row upper bound imply exactly seven rows.
+    await expect(communities.communities).toHaveCount(COMMUNITIES_NAMES.length)
+    await expect
+      .poll(() => communities.communityNames.allInnerTexts())
+      .toEqual(expect.arrayContaining(COMMUNITIES_NAMES))
   })
 })

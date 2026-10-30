@@ -1,27 +1,35 @@
-import { expect } from "@playwright/test"
-import MyReports, { REPORT_STATES } from "../pages/myReports.page.js"
-import EditReport from "../pages/report/editReport.page.js"
-import ShowReport from "../pages/report/showReport.page.js"
-import { test } from "../support.js"
+import { expect, test } from "@playwright/test"
+import MyReportsPageObject, { REPORT_STATES } from "../pages/myReports.page.js"
+import EditReportPageObject from "../pages/report/editReport.page.js"
+import ShowReportPageObject from "../pages/report/showReport.page.js"
 
-test.describe("When unpublishing a report", () => {
-  test.beforeEach("Open the show report page", async () => {
-    await MyReports.open("arthur")
-    await MyReports.selectReport(
-      "A test report to be unpublished from Arthur",
-      REPORT_STATES.PUBLISHED
-    )
+test.describe(() => {
+  let page, MyReports, EditReport, ShowReport
+  test.beforeEach(async ({ page: testPage }) => {
+    page = testPage
+    MyReports = new MyReportsPageObject(page)
+    EditReport = new EditReportPageObject(page)
+    ShowReport = new ShowReportPageObject(page)
   })
-  test.describe("When on the show page of a report", () => {
-    test("Should unpublish the report successfully", async () => {
-      const unpublishedReportUuid = await ShowReport.getUuid()
-      await EditReport.unpublishReport(unpublishedReportUuid)
-      await expect(await EditReport.getAlertSuccess()).toHaveText(
-        "Report unpublished",
-        {
-          useInnerText: true
-        }
+  test.describe("When unpublishing a report", () => {
+    test.beforeEach("Open the show report page", async () => {
+      await MyReports.open("arthur")
+      await MyReports.selectReport(
+        "A test report to be unpublished from Arthur",
+        REPORT_STATES.PUBLISHED
       )
+    })
+    test.describe("When on the show page of a report", () => {
+      test("Should unpublish the report successfully", async () => {
+        const unpublishedReportUuid = await ShowReport.getUuid()
+        await EditReport.unpublishReport(unpublishedReportUuid)
+        await expect(await EditReport.getAlertSuccess()).toHaveText(
+          "Report unpublished",
+          {
+            useInnerText: true
+          }
+        )
+      })
     })
   })
 })

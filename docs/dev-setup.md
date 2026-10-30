@@ -164,7 +164,11 @@ If you have updated the generated schema and need to update the generated Java c
 
 ### Client-side tests
 #### How the client-side tests work
-The browser regression suite uses Playwright Test with Chromium. Specs are multi-step scenarios: cases run sequentially and share a browser context within their spec; different specs have separate contexts and run in parallel. Do not enable `fullyParallel` without first making their browser and database state independent. Failed cases produce screenshots, traces, HTML reports, and JUnit results under `client/build`.
+The browser regression suite uses Playwright Test with Chromium. All regression specs use the built-in `page` fixture, which provides an isolated context and page for each test and handles cleanup, tracing and screenshots. Page objects are initialized from that fixture in `test.beforeEach`. Independent cases remain separate tests. Dependent cases are named `test.step`s within a scenario test so they retain page state and stop on failure; their per-step timeout and total scenario budget preserve the original case timeouts. Do not enable `fullyParallel` without first making their browser and database state independent. Failed cases produce screenshots, traces, HTML reports, and JUnit results under `client/build`.
+
+Regression page modules export classes constructed with a Playwright page, for example `new Home(page)`. They do not use a global current-page binding or singleton instances. Use native locator actions and waits, retrying `expect` assertions, and explicit loops rather than compatibility helpers. When passing an instance method as a callback, retain its receiver with an arrow function or `.bind(instance)`.
+
+The `./gradlew yarn_run_*` commands use the Node.js version configured in `build.gradle`. When invoking Yarn directly, use that same runtime rather than an older shell default; some existing E2E tests require newer JavaScript APIs such as `RegExp.escape`.
 
 The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data; permission, position and report workflows run serially within their respective specs. Both browser suites use the worker settings in `client/config/playwright-common.config.js` (overridable with `PLAYWRIGHT_WORKERS`) and run without retries.
 
