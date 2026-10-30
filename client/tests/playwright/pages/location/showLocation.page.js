@@ -1,4 +1,3 @@
-import { currentPage } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/locations/:uuid"
@@ -13,31 +12,27 @@ class ShowLocation extends Page {
   }
 
   async getEditButton() {
-    return currentPage().locator('//a[text()="Edit"]').first()
+    return this.page.locator('//a[text()="Edit"]').first()
   }
 
   async getEditAttachmentsButton() {
-    return await currentPage().locator("#edit-attachments").first()
+    return await this.page.locator("#edit-attachments").first()
   }
 
   async getSuccessMsg() {
-    return currentPage().locator('//div[text()="Location saved"]').first()
+    return this.page.locator('//div[text()="Location saved"]').first()
   }
 
   async getLatField() {
-    return currentPage()
-      .locator('div[name="location"] span:first-child')
-      .first()
+    return this.page.locator('div[name="location"] span:first-child').first()
   }
 
   async getLngField() {
-    return currentPage()
-      .locator('div[name="location"] span:nth-child(3)')
-      .first()
+    return this.page.locator('div[name="location"] span:nth-child(3)').first()
   }
 
   async getTable(tableName) {
-    return currentPage().locator(`table.${tableName}`).first()
+    return this.page.locator(`table.${tableName}`).first()
   }
 
   async getTableRows(tableName) {
@@ -45,7 +40,7 @@ class ShowLocation extends Page {
   }
 
   async getReportCollection() {
-    return currentPage().locator("div.report-collection").first()
+    return this.page.locator("div.report-collection").first()
   }
 
   async getReportSummaries() {
@@ -53,7 +48,7 @@ class ShowLocation extends Page {
   }
 
   async getEventsTable() {
-    return currentPage().locator(".event-collection").first()
+    return this.page.locator(".event-collection").first()
   }
 
   async getEvent(i) {
@@ -64,7 +59,7 @@ class ShowLocation extends Page {
   }
 
   async getEditEngagementPlanningApprovalsButton() {
-    return currentPage()
+    return this.page
       .locator(
         '//button[contains(text(), "Edit Engagement planning approvals")]'
       )
@@ -72,7 +67,7 @@ class ShowLocation extends Page {
   }
 
   async getEditReportPublicationApprovalsButton() {
-    return currentPage()
+    return this.page
       .locator(
         '//button[contains(text(), "Edit Report publication approvals")]'
       )
@@ -80,11 +75,11 @@ class ShowLocation extends Page {
   }
 
   async getEditApprovalsModal() {
-    return currentPage().locator(".modal").first()
+    return this.page.locator(".modal").first()
   }
 
   async getModalContent() {
-    return currentPage().locator("div.modal-content").first()
+    return this.page.locator("div.modal-content").first()
   }
 
   async getModalCloseButton() {
@@ -92,10 +87,8 @@ class ShowLocation extends Page {
   }
 
   async getEntityAvatar() {
-    return currentPage()
-      .locator("fieldset div.row div.text-center canvas")
-      .first()
+    return this.page.locator("fieldset div.row div.text-center canvas").first()
   }
 }
 
-export default new ShowLocation()
+export default ShowLocation
