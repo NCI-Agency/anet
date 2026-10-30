@@ -23,7 +23,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
   private static final Set<String> ALL_FIELDS = Sets.newHashSet(PersonDao.allFields);
   private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(PersonDao.minimalFields);
-  private static final Map<String, String> FIELD_MAPPING = Map.of("country", "countryUuid");
+  private static final Map<String, String> FIELD_MAPPING =
+      Map.of("country", "countryUuid", "tenant", "tenantUuid");
 
   protected AbstractPersonSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Person, PersonSearchQuery> qb) {
@@ -139,6 +140,23 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
           + " AND \"pplEmail\".\"relatedObjectUuid\" = people.uuid");
       qb.addStringEqualsClause("emailNetwork", "\"pplEmail\".network", query.getEmailNetwork());
       qb.addIsNotNullOrEmptyClause("\"pplEmail\".address");
+    }
+
+    if (Boolean.FALSE.equals(query.getHasTenant()) && !Utils.isEmptyOrNull(query.getTenantUuid())) {
+      qb.addWhereClause("(people.\"tenantUuid\" IS NULL OR people.\"tenantUuid\" = :tenantUuid)");
+      qb.addSqlArg("tenantUuid", query.getTenantUuid());
+    } else {
+      if (query.getHasTenant() != null) {
+        if (query.getHasTenant()) {
+          qb.addWhereClause("people.\"tenantUuid\" IS NOT NULL");
+        } else {
+          qb.addWhereClause("people.\"tenantUuid\" IS NULL");
+        }
+      }
+
+      if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+        qb.addStringEqualsClause("tenantUuid", "people.\"tenantUuid\"", query.getTenantUuid());
+      }
     }
 
     addOrderByClauses(qb, query);

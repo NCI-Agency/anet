@@ -4,5 +4,6 @@ import java.time.Instant;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 
 public interface IMartTransmissionLogImporterService {
-  void processTransmissionLog(FileAttachment attachment, Instant emailReceivedDate);
+  void processTransmissionLog(String tenantName, FileAttachment attachment,
+      Instant emailReceivedDate);
 }

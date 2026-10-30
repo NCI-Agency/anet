@@ -99,6 +99,24 @@ export class CreatePerson extends Page {
     return currentPage().locator("#fg-country div.invalid-feedback").first()
   }
 
+  async getTenantAccessRequestInput() {
+    return currentPage().locator("#tenantAccessRequest").first()
+  }
+
+  async getTenantAccessRequestAdvancedSelectFirstItem() {
+    return currentPage()
+      .locator(
+        "#tenantAccessRequest-popover tbody tr:first-child td:nth-child(2)"
+      )
+      .first()
+  }
+
+  async getTenantAccessRequestHelpBlock() {
+    return currentPage()
+      .locator("#fg-tenantAccessRequest div.invalid-feedback")
+      .first()
+  }
+
   async getEndOfTourDate() {
     return currentPage().locator("#endOfTourDate").first()
   }
@@ -115,6 +133,24 @@ export class CreatePerson extends Page {
     return currentPage()
       .locator(".bp6-datepicker-footer button.bp6-button:first-child")
       .first()
+  }
+
+  async getNoTenantWarning() {
+    return currentPage().locator("#no-tenant-warning").first()
+  }
+
+  async getTenantInput() {
+    return currentPage().locator("#tenant").first()
+  }
+
+  async getTenantAdvancedSelectFirstItem() {
+    return currentPage()
+      .locator("#tenant-popover tbody tr:first-child td:nth-child(2)")
+      .first()
+  }
+
+  async getTenantError() {
+    return currentPage().locator("#fg-tenant div.invalid-feedback").first()
   }
 
   async getCustomFieldsContainer() {

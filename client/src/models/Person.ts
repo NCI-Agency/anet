@@ -49,7 +49,7 @@ export default class Person extends Model {
   static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
   static regularShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
 
-  static yupSchema = yup
+  static yupBaseSchema = yup
     .object()
     .shape({
       uuid: yup.string().nullable().default(null),
@@ -169,6 +169,52 @@ export default class Person extends Model {
     .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
 
+  static yupSchema = yup
+    .object()
+    .shape({
+      tenantAccessRequest: yup.object().nullable().default(null),
+      tenant: yup.object().nullable().default(null)
+    })
+    .concat(Person.yupBaseSchema)
+
+  static yupOnboardingSchema = yup
+    .object()
+    .shape({
+      tenantAccessRequest: yup
+        .object()
+        .nullable()
+        .required("You must request access to a tenant")
+        .default(null),
+      tenant: yup.object().nullable().default(null)
+    })
+    .concat(Person.yupBaseSchema)
+
+  static yupAdminSchema = yup
+    .object()
+    .shape({
+      tenant: yup
+        .object()
+        .nullable()
+        .when(["status", "user"], ([status, user], schema) =>
+          status !== Model.STATUS.ACTIVE || !user
+            ? schema
+            : schema.test(
+                "no-tenant",
+                "no tenant error",
+                (tenant, testContext) => {
+                  return tenant?.status !== Model.STATUS.ACTIVE
+                    ? testContext.createError({
+                        message:
+                          "An active user must be a member of an active Tenant"
+                      })
+                    : true
+                }
+              )
+        )
+        .default(null)
+    })
+    .concat(Person.yupBaseSchema)
+
   static autocompleteQuery = `
     ${gqlEntityFieldsMap.Person}
     position {
@@ -179,6 +225,9 @@ export default class Person extends Model {
       location {
         ${gqlEntityFieldsMap.Location}
       }
+    }
+    tenant {
+      ${gqlEntityFieldsMap.Tenant}
     }
   `
 
@@ -226,6 +275,12 @@ export default class Person extends Model {
         }
       }
     }
+    tenantAccessRequest {
+      ${gqlEntityFieldsMap.Tenant}
+    }
+    tenant {
+      ${gqlEntityFieldsMap.Tenant}
+    }
     ${gqlCustomSensitiveInformationFields}
     ${gqlAssessmentsFields}
     ${gqlNotesFields}
@@ -244,23 +299,32 @@ export default class Person extends Model {
   }
 
   isAdmin() {
-    return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
+    return this.position?.type === Position.TYPE.ADMINISTRATOR
+  }
+
+  isTenantAdmin() {
+    return [
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.ADMINISTRATOR
+    ].includes(this.position?.type)
   }
 
   isSuperuser() {
-    return (
-      this.position &&
-      (this.position.type === Position.TYPE.SUPERUSER ||
-        this.position.type === Position.TYPE.ADMINISTRATOR)
-    )
+    return [
+      Position.TYPE.SUPERUSER,
+      Position.TYPE.TENANT_ADMINISTRATOR,
+      Position.TYPE.ADMINISTRATOR
+    ].includes(this.position?.type)
   }
 
   isEnhancedSuperuser() {
     return (
-      this.position &&
-      ((this.position.type === Position.TYPE.SUPERUSER &&
-        this.position.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
-        this.position.type === Position.TYPE.ADMINISTRATOR)
+      (this.position?.type === Position.TYPE.SUPERUSER &&
+        this.position?.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
+      [
+        Position.TYPE.TENANT_ADMINISTRATOR,
+        Position.TYPE.ADMINISTRATOR
+      ].includes(this.position?.type)
     )
   }
 
@@ -277,16 +341,12 @@ export default class Person extends Model {
 
   // Checks if this user is a valid superuser for a particular organization
   // Must be either
-  // - an administrator
   // - a superuser of CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK type
   // - a superuser administrating this organization
   // - a superuser administrating this organization's (transitive) parent
   hasAdministrativePermissionsForOrganization(org) {
     if (!org) {
       return false
-    }
-    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
-      return true
     }
     if (
       this.position?.type === Position.TYPE.SUPERUSER &&
@@ -325,7 +385,7 @@ export default class Person extends Model {
     if (!task) {
       return false
     }
-    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
+    if (this.isTenantAdmin()) {
       return true
     }
     if (
@@ -489,6 +549,14 @@ export default class Person extends Model {
 
   getAssessmentDictionaryPath() {
     return Person.assessmentDictionaryPath
+  }
+
+  isAuthorizedForAssessment(user, assessmentKey, forReading) {
+    if (user.isTenantAdmin()) {
+      // Tenant admin is authorized for assessments of tenant-less person or person in same tenant
+      return utils.isFromNoOrSameTenant(user, this)
+    }
+    return super.isAuthorizedForAssessment(user, assessmentKey, forReading)
   }
 
   getAssessmentsConfig() {

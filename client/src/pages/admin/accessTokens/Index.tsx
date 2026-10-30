@@ -1,9 +1,15 @@
-import { gqlAllAccessTokenFields } from "constants/GraphQLDefinitions"
+import {
+  gqlAllAccessTokenFields,
+  gqlEntityFieldsMap
+} from "constants/GraphQLDefinitions"
 import { gql } from "@apollo/client"
 import { Icon, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { TenantOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
@@ -17,10 +23,11 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _get from "lodash/get"
+import { Tenant } from "models"
 import moment from "moment"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import {
   Button,
   Col,
@@ -35,9 +42,12 @@ import Settings from "settings"
 import * as yup from "yup"
 
 const GQL_GET_ACCESS_TOKEN_LIST = gql`
-  query {
-    accessTokenList {
+  query ($tenantUuid: String) {
+    accessTokenList(tenantUuid: $tenantUuid) {
       ${gqlAllAccessTokenFields}
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
       accessTokenActivities {
         visitedAt
         remoteAddress
@@ -80,7 +90,12 @@ const yupSchema = yup.object().shape({
   scope: yup
     .string()
     .required("You must give a web service access token a scope")
-    .default("")
+    .default(""),
+  tenant: yup
+    .object()
+    .nullable()
+    .required("A web service access token must be a member of a tenant")
+    .default(null)
 })
 
 const tokenScopeButtons = [
@@ -163,12 +178,16 @@ function createExpirationShortcuts(withTime: boolean) {
 
 interface AccessTokensTableProps {
   accessTokens?: any[]
+  selectedTenant?: any
+  selectTenant: (tenant: any) => void
   onDelete: (...args: unknown[]) => unknown
   onUpdate: (...args: unknown[]) => Promise<unknown>
 }
 
 const AccessTokensTable = ({
   accessTokens,
+  selectedTenant,
+  selectTenant,
   onDelete,
   onUpdate
 }: AccessTokensTableProps) => {
@@ -189,6 +208,7 @@ const AccessTokensTable = ({
             <th>Scope</th>
             <th>Created</th>
             <th>Expires</th>
+            <th>Tenant</th>
             <th>Last used</th>
             <th>From</th>
             <th />
@@ -221,6 +241,23 @@ const AccessTokensTable = ({
                 )}
                 {moment(at.expiresAt).format(
                   Settings.dateFormats.forms.displayShort.withTime
+                )}
+              </td>
+              <td>
+                {at.tenant?.name}
+                {!selectedTenant && at.tenant && (
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip>Filter all entries by this tenant</Tooltip>
+                    }
+                  >
+                    <Icon
+                      icon={IconNames.SEARCH}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => selectTenant(at.tenant)}
+                    />
+                  </OverlayTrigger>
                 )}
               </td>
               <td>
@@ -357,7 +394,10 @@ const AccessTokenModal = ({
   setShow,
   onConfirm
 }: AccessTokenModalProps) => {
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const [error, setError] = useState(null)
+  const defaultTenant = isAdmin ? null : currentUser?.tenant
   if (isNew) {
     accessToken = {
       name: "",
@@ -365,7 +405,14 @@ const AccessTokenModal = ({
       pointOfContact: null,
       description: null,
       expiresAt: null,
-      tokenValue: b64(getRandomBytes(24))
+      tokenValue: b64(getRandomBytes(24)),
+      tenant: defaultTenant
+    }
+  }
+  const tenantsFilters = {
+    allTenants: {
+      label: "All Tenants",
+      list: allTenants
     }
   }
 
@@ -495,6 +542,31 @@ const AccessTokenModal = ({
                       }
                     />
                   )}
+                  <Field
+                    name="tenant"
+                    label="Tenant"
+                    component={FieldHelper.SpecialField}
+                    extraColElem={null}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("tenant", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("tenant", value, true)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="tenant"
+                        placeholder="Search for tenants…"
+                        value={values.tenant}
+                        overlayColumns={["Name", "Status"]}
+                        overlayRenderRow={TenantOverlayRow}
+                        filterDefs={tenantsFilters}
+                        objectType={Tenant}
+                        fields={Tenant.autocompleteQuery}
+                        valueKey="name"
+                        disabled={!isAdmin}
+                      />
+                    }
+                  />
                 </Fieldset>
               </Form>
             </div>
@@ -556,12 +628,20 @@ interface AccessTokensListProps {
 }
 
 const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
+  const { currentUser, allTenants } = useContext(AppContext)
+  const isAdmin = currentUser?.isAdmin()
   const [stateSuccess, setStateSuccess] = useState(null)
   const [stateError, setStateError] = useState(null)
+  const [selectedTenant, setSelectedTenant] = useState(
+    isAdmin ? null : currentUser?.tenant
+  )
   const [showCreateAccessTokenDialog, setShowCreateAccessTokenDialog] =
     useState(false)
   const { loading, error, data, refetch } = API.useApiQuery(
-    GQL_GET_ACCESS_TOKEN_LIST
+    GQL_GET_ACCESS_TOKEN_LIST,
+    {
+      tenantUuid: selectedTenant?.uuid
+    }
   )
   const { done, result } = useBoilerplate({
     loading,
@@ -574,23 +654,53 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
   if (done) {
     return result
   }
+
+  const tenantsFilters = {
+    allTenants: {
+      label: "All tenants",
+      list: allTenants
+    }
+  }
+
   return (
     <>
       <Fieldset
         id="accessTokens"
         title="Web Service Access Tokens"
         action={
-          <Button
-            variant="primary"
-            onClick={() => setShowCreateAccessTokenDialog(true)}
-          >
-            New web service access token
-          </Button>
+          <div className="float-end d-flex flex-column align-items-start gap-3 flex-md-row flex-md-wrap align-items-md-center">
+            <div className="d-flex flex-column">
+              Filter by tenant:
+              <AdvancedSingleSelect
+                fieldName="tenant"
+                placeholder="Select a tenant to filter on"
+                value={selectedTenant}
+                overlayColumns={["Name", "Status"]}
+                overlayRenderRow={TenantOverlayRow}
+                filterDefs={tenantsFilters}
+                onChange={setSelectedTenant}
+                valueFunc={tenant => tenant?.name}
+                objectType={Tenant}
+                fields={Tenant.autocompleteQuery}
+                disabled={!isAdmin}
+              />
+            </div>
+            <span className="align-self-end">
+              <Button
+                variant="primary"
+                onClick={() => setShowCreateAccessTokenDialog(true)}
+              >
+                New web service access token
+              </Button>
+            </span>
+          </div>
         }
       >
         <Messages success={stateSuccess} error={stateError} />
         <AccessTokensTable
           accessTokens={data?.accessTokenList}
+          selectedTenant={selectedTenant}
+          selectTenant={setSelectedTenant}
           onDelete={deleteAccessToken}
           onUpdate={updateAccessToken}
         />
@@ -621,6 +731,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
       .then(async digest => {
         delete accessToken.tokenValue
         accessToken.tokenHash = b64(digest)
+        accessToken.tenant = Tenant.filterClientSideFields(accessToken.tenant)
         return API.mutation(GQL_CREATE_ACCESS_TOKEN, { accessToken })
           .then(() => {
             setSuccess("Web service access token successfully created")
@@ -651,6 +762,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
   }
 
   async function updateAccessToken(accessToken, force) {
+    accessToken.tenant = Tenant.filterClientSideFields(accessToken.tenant)
     return API.mutation(GQL_UPDATE_ACCESS_TOKEN, {
       accessToken: Object.without(accessToken, "accessTokenActivities"),
       force

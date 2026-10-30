@@ -35,6 +35,9 @@ import SelectFilter, {
 import TaskFilter, {
   deserialize as deserializeTaskFilter
 } from "components/advancedSearch/TaskFilter"
+import TenantFilter, {
+  deserialize as deserializeTenantFilter
+} from "components/advancedSearch/TenantFilter"
 import {
   CountryOverlayRow,
   EventSeriesOverlayRow,
@@ -303,6 +306,14 @@ export const searchFilters = function (
         props: {
           queryKey: "state"
         }
+      },
+      "Shared with Tenant": {
+        component: TenantFilter,
+        deserializer: deserializeTenantFilter,
+        isDefault: true,
+        props: {
+          queryKey: "tenantUuid"
+        }
       }
     }
   }
@@ -437,11 +448,13 @@ export const searchFilters = function (
           options: [
             Position.TYPE.REGULAR,
             Position.TYPE.SUPERUSER,
+            Position.TYPE.TENANT_ADMINISTRATOR,
             Position.TYPE.ADMINISTRATOR
           ],
           labels: [
             Settings.fields.regular.position.name,
             Settings.fields.superuser.position.name,
+            Settings.fields.tenantAdministrator.position.name,
             Settings.fields.administrator.position.name
           ]
         }
@@ -521,11 +534,13 @@ export const searchFilters = function (
           options: [
             Position.TYPE.REGULAR,
             Position.TYPE.SUPERUSER,
+            Position.TYPE.TENANT_ADMINISTRATOR,
             Position.TYPE.ADMINISTRATOR
           ],
           labels: [
             Settings.fields.regular.position.name,
             Settings.fields.superuser.position.name,
+            Settings.fields.tenantAdministrator.position.name,
             Settings.fields.administrator.position.name
           ]
         }

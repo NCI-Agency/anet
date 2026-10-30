@@ -3,11 +3,14 @@ package mil.dds.anet.utils;
 import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Objects;
+import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -35,6 +38,14 @@ public class AuthUtils {
     throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
   }
 
+  public static void assertTenantAdministrator(Person user) {
+    logger.debug("Asserting tenant admin status for {}", user);
+    if (isTenantAdmin(user)) {
+      return;
+    }
+    throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
+  }
+
   public static boolean canAdministrateOrg(final Person user, final String organizationUuid) {
     if (organizationUuid == null) {
       logger.debug("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
@@ -48,6 +59,10 @@ public class AuthUtils {
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
       logger.debug("User {} is an administrator, can automatically administrate org", user);
+      return true;
+    }
+    if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      logger.debug("User {} is a tenant administrator, can automatically administrate org", user);
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
@@ -93,7 +108,7 @@ public class AuthUtils {
 
   public static boolean canCreateSubOrg(final Person user, final String parentOrganizationUuid) {
     // Admins can create any organization
-    if (AuthUtils.isAdmin(user)) {
+    if (AuthUtils.isTenantAdmin(user)) {
       return true;
     }
 
@@ -119,6 +134,11 @@ public class AuthUtils {
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
       logger.debug("User {} is an administrator, is automatically responsible for task", user);
+      return true;
+    }
+    if (position.getType() == PositionType.TENANT_ADMINISTRATOR) {
+      logger.debug("User {} is a tenant administrator, is automatically responsible for task",
+          user);
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
@@ -153,8 +173,8 @@ public class AuthUtils {
   }
 
   public static boolean canCreateSubTask(final Person user, final String parentTaskUuid) {
-    // Admins can create any organization
-    if (AuthUtils.isAdmin(user)) {
+    // Admins can create any task
+    if (AuthUtils.isTenantAdmin(user)) {
       return true;
     }
 
@@ -177,6 +197,7 @@ public class AuthUtils {
   public static boolean isSuperuser(Person user) {
     Position position = DaoUtils.getPosition(user);
     return position != null && (position.getType() == PositionType.SUPERUSER
+        || position.getType() == PositionType.TENANT_ADMINISTRATOR
         || position.getType() == PositionType.ADMINISTRATOR);
   }
 
@@ -184,6 +205,12 @@ public class AuthUtils {
     Position position = DaoUtils.getPosition(user);
     return position != null && (position.getType() == PositionType.SUPERUSER
         && position.getSuperuserType() != Position.SuperuserType.REGULAR);
+  }
+
+  public static boolean isTenantAdmin(Person user) {
+    Position position = DaoUtils.getPosition(user);
+    return (position != null) && (position.getType() == PositionType.TENANT_ADMINISTRATOR
+        || position.getType() == PositionType.ADMINISTRATOR);
   }
 
   public static boolean isAdmin(Person user) {
@@ -197,4 +224,19 @@ public class AuthUtils {
         .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION_OR_TASK);
   }
 
+  public static boolean isFromSameTenant(Person user, Tenant t) {
+    return Objects.equals(user.getTenantUuid(), t.getUuid());
+  }
+
+  public static boolean isFromSameTenant(Person user, Person p) {
+    return Objects.equals(user.getTenantUuid(), p.getTenantUuid());
+  }
+
+  public static boolean isFromNoOrSameTenant(Person user, Person p) {
+    return p.getTenantUuid() == null || isFromSameTenant(user, p);
+  }
+
+  public static boolean isFromSameTenant(Person user, AccessToken at) {
+    return Objects.equals(user.getTenantUuid(), at.getTenantUuid());
+  }
 }

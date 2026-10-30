@@ -26,8 +26,11 @@ public class MartImportedReportsResource {
   public AnetBeanList<MartImportedReport> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") MartImportedReportSearchQuery query) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
-    query.setUser(user);
+    AuthUtils.assertTenantAdministrator(user);
+    query.setPrincipal(user);
+    if (!AuthUtils.isAdmin(user)) {
+      query.setTenantUuid(user.getTenantUuid());
+    }
     return martImportedReportDao.search(query);
   }
 
