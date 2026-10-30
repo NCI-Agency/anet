@@ -1,11 +1,9 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/eventSeries/new"
-
 class CreateEventSeries extends Page {
   async getForm() {
-    return currentPage().locator("form.form-horizontal").first()
+    return this.page.locator("form.form-horizontal").first()
   }
 
   async getNameInput() {
@@ -13,11 +11,11 @@ class CreateEventSeries extends Page {
   }
 
   async getNameHelpBlock() {
-    return currentPage().locator("#fg-name div.invalid-feedback").first()
+    return this.page.locator("#fg-name div.invalid-feedback").first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async open() {
@@ -32,5 +30,4 @@ class CreateEventSeries extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
-
-export default new CreateEventSeries()
+export default CreateEventSeries

@@ -1,8 +1,7 @@
-import { currentPage, waitFor, waitUntil } from "../../support.js"
+import { expect } from "@playwright/test"
 import Page from "../page.js"
 
 const PAGE_URL = "/reports/:uuid"
-
 class ShowReport extends Page {
   REPORT_IS_DRAFT = "This is a DRAFT report and hasn't been submitted."
   REPORT_IS_PLANNED_DRAFT =
@@ -11,15 +10,15 @@ class ShowReport extends Page {
   REPORT_IS_PENDING_APPROVALS = "This report is PENDING approvals."
   REPORT_IS_APPROVED = "This report is APPROVED."
   async getClassification() {
-    return currentPage().locator("#report-classification").first()
+    return this.page.locator("#report-classification").first()
   }
 
   async getEditReportButton() {
-    return currentPage().locator("//a[text()='Edit']").first()
+    return this.page.locator("//a[text()='Edit']").first()
   }
 
   async getAttendeesAssessments(id) {
-    return currentPage().locator(`#${id}`).first()
+    return this.page.locator(`#${id}`).first()
   }
 
   async getAttendeeAssessment(id, name) {
@@ -39,7 +38,7 @@ class ShowReport extends Page {
   }
 
   async getTasksEngagementAssessments(id) {
-    return currentPage().locator(`#${id}`).first()
+    return this.page.locator(`#${id}`).first()
   }
 
   async getTaskEngagementAssessment(id, shortName) {
@@ -60,126 +59,123 @@ class ShowReport extends Page {
   }
 
   async getDefaultReportView() {
-    return currentPage().locator(".report-show").first()
+    return this.page.locator(".report-show").first()
   }
 
   async getCompactView() {
-    return currentPage().locator(".compact-view").first()
+    return this.page.locator(".compact-view").first()
   }
 
   async getCompactViewButton() {
-    return currentPage().locator("button[value='compactView']").first()
+    return this.page.locator("button[value='compactView']").first()
   }
 
   async getCompactBanner() {
-    return currentPage().locator(".compact-view .banner").first()
+    return this.page.locator(".compact-view .banner").first()
   }
 
   async getCompactTitle() {
-    return currentPage().locator("header *[value='title']").first()
+    return this.page.locator("header *[value='title']").first()
   }
 
   async getPrintButton() {
-    return currentPage().locator("button[value='print']").first()
+    return this.page.locator("button[value='print']").first()
   }
 
   async getCompactReportFields() {
-    return currentPage().locator(".compact-view .reportField > th").all()
+    return this.page.locator(".compact-view .reportField > th").all()
   }
 
   async getDetailedViewButton() {
-    return currentPage().locator("button[value='detailedView']").first()
+    return this.page.locator("button[value='detailedView']").first()
   }
 
   async getReportText() {
-    return currentPage().locator("#report-text").first()
+    return this.page.locator("#report-text").first()
   }
 
   async getReportStatus() {
-    return currentPage().locator("h4.text-danger").first()
+    return this.page.locator("h4.text-danger").first()
   }
 
   async getUuid() {
-    const url = new URL(await currentPage().url())
+    const url = new URL(await this.page.url())
     return url.pathname.slice(url.pathname.lastIndexOf("/") + 1)
   }
 
   async getIntent() {
-    return currentPage().locator("#intent").first()
+    return this.page.locator("#intent").first()
   }
 
   async getEngagementDate() {
-    return currentPage().locator("div[name='engagementDate']").first()
+    return this.page.locator("div[name='engagementDate']").first()
   }
 
   async getReportConflictIcon() {
     // wait for conflict loader to disappear
-    await waitFor(
-      await currentPage()
+    await (
+      await this.page
         .locator("div[name='engagementDate'] > span.reportConflictLoadingIcon")
-        .first(),
-      "attached",
-      {
-        reverse: true
-      }
-    )
-    return currentPage()
+        .first()
+    ).waitFor({
+      state: "detached",
+      timeout: 10000
+    })
+    return this.page
       .locator("div[name='engagementDate'] > span.reportConflictIcon")
       .first()
   }
 
   async getReportConflictTooltipTitle() {
-    return currentPage()
-      .locator(".reportConflictTooltipContainer > div")
-      .first()
+    return this.page.locator(".reportConflictTooltipContainer > div").first()
   }
 
   async getDuration() {
-    return currentPage().locator("div[name='duration']").first()
+    return this.page.locator("div[name='duration']").first()
   }
 
   async getCurrentUrl() {
-    return currentPage().url()
+    return this.page.url()
   }
 
   async getLocation() {
-    return currentPage().locator("div[name='location']").first()
+    return this.page.locator("div[name='location']").first()
   }
 
   async getAuthors() {
-    return currentPage().locator("div[name='authors']").first()
+    return this.page.locator("div[name='authors']").first()
   }
 
   async getReportCommunities() {
     return (
-      await currentPage().locator("div[name='reportCommunities']").first()
+      await this.page.locator("div[name='reportCommunities']").first()
     ).innerText()
   }
 
   async getCompactReportCommunities() {
     return (
-      await currentPage().locator("table#reportCommunities").first()
+      await this.page.locator("table#reportCommunities").first()
     ).innerText()
   }
 
   async getAdvisorOrg() {
-    return currentPage().locator("div[name='advisorOrg']").first()
+    return this.page.locator("div[name='advisorOrg']").first()
   }
 
   async getInterlocutorOrg() {
-    return currentPage().locator("div[name='interlocutorOrg']").first()
+    return this.page.locator("div[name='interlocutorOrg']").first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator('//button[text()="Submit report"]').first()
+    return this.page.locator('//button[text()="Submit report"]').first()
   }
 
   async getPreviewAndSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async getReportModal() {
-    return currentPage().locator(".modal-dialog").first()
+    return this.page.locator(".modal-dialog").first()
   }
 
   async getConfirmSubmitButton() {
@@ -193,7 +189,7 @@ class ShowReport extends Page {
   }
 
   async getApproveButton() {
-    return currentPage().locator('//button[text()="Approve"]').first()
+    return this.page.locator('//button[text()="Approve"]').first()
   }
 
   async getConfirmApproveButton() {
@@ -203,18 +199,18 @@ class ShowReport extends Page {
   }
 
   async getEditAttachmentsButton() {
-    return currentPage().locator("#edit-attachments").first()
+    return this.page.locator("#edit-attachments").first()
   }
 
   async getSuccessfullApprovalToast() {
-    return currentPage()
+    return this.page
       .locator('//div[text()="Successfully approved report."]')
       .first()
   }
 
   async getAttendeeByName(name) {
     const td = await (
-      await currentPage().locator("#reportPeopleContainer").first()
+      await this.page.locator("#reportPeopleContainer").first()
     )
       .locator("td.reportPeopleName")
       .filter({
@@ -226,13 +222,12 @@ class ShowReport extends Page {
     }
     const row = await td.locator("..")
     // wait for conflict loader to disappear
-    await waitFor(
-      await row.locator("td.conflictButton div.bp6-spinner").first(),
-      "attached",
-      {
-        reverse: true
-      }
-    )
+    await (
+      await row.locator("td.conflictButton div.bp6-spinner").first()
+    ).waitFor({
+      state: "detached",
+      timeout: 10000
+    })
     return {
       name: (await td.innerText()).trim(),
       conflictButton: await row.locator("td.conflictButton > span").first()
@@ -252,75 +247,91 @@ class ShowReport extends Page {
   }
 
   async waitForReportUrl() {
-    await waitUntil(async () =>
-      /^.*\/reports\/[a-z0-9-]{36}/.test(await currentPage().url())
-    )
+    await expect(this.page).toHaveURL(/^.*\/reports\/[a-z0-9-]{36}/, {
+      timeout: 10000
+    })
   }
 
   async waitForShowReportToLoad() {
     await this.waitForReportUrl()
-    await waitFor(await this.getReportStatus(), "visible")
+    await (
+      await this.getReportStatus()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async waitForShowReportToFail() {
     await this.waitForReportUrl()
-    await waitFor(await this.getNotFound(), "visible")
+    await (
+      await this.getNotFound()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async getCompactViewElements(type, withAssessments) {
     const elements = await (withAssessments
-      ? currentPage().locator(`#${type} > tbody > tr > th > span`).all()
-      : currentPage().locator(`#${type} > td > span`).all())
+      ? this.page.locator(`#${type} > tbody > tr > th > span`).all()
+      : this.page.locator(`#${type} > td > span`).all())
     return await Promise.all(
       elements.map(async element => (await element).innerText())
     )
   }
 
   async getCompactFieldValue(label) {
-    const element = await currentPage()
+    const element = await this.page
       .locator(
         `//div[contains(@class,'compact-view')]//tr[./th[normalize-space()="${label}"]]//td`
       )
       .first()
-    await waitFor(element, "attached")
+    await element.waitFor({
+      state: "attached",
+      timeout: 10000
+    })
     return element.innerText()
   }
 
   async selectOptionalField(field) {
-    const optionalFieldsButton = await currentPage()
+    const optionalFieldsButton = await this.page
       .locator('//button[text()="Optional Fields"]')
       .first()
-    const optionalFields = await currentPage()
+    const optionalFields = await this.page
       .locator("#optionalFields-menu")
       .first()
-    const fieldCheckbox = await currentPage()
+    const fieldCheckbox = await this.page
       .locator(`input[id="${field}"]`)
       .first()
     await optionalFieldsButton.click()
-    await waitFor(optionalFields, "visible")
+    await optionalFields.waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     if (!(await fieldCheckbox.isChecked())) {
       await fieldCheckbox.click()
     }
   }
 
   async getClassificationHeader() {
-    return currentPage().locator("#header-banner").first()
+    return this.page.locator("#header-banner").first()
   }
 
   async getClassificationFooter() {
-    return currentPage().locator("#footer-banner").first()
+    return this.page.locator("#footer-banner").first()
   }
 
   async getKeyOutcomesList() {
-    return currentPage().locator("#keyOutcomes > ul > li")
+    return this.page.locator("#keyOutcomes > ul > li")
   }
 
   async getNextStepsList() {
-    return currentPage().locator("#nextSteps > ul > li")
+    return this.page.locator("#nextSteps > ul > li")
   }
 
   async getAttachmentsSection() {
-    return currentPage().locator("tr#imageAttachments").first()
+    return this.page.locator("tr#imageAttachments").first()
   }
 
   async getAttachmentFigures() {
@@ -335,5 +346,4 @@ class ShowReport extends Page {
     return attachment.locator("figcaption").first()
   }
 }
-
-export default new ShowReport()
+export default ShowReport

@@ -1,4 +1,3 @@
-import { currentPage } from "../support.js"
 import Home from "./home.page.js"
 import Page from "./page.js"
 
@@ -22,17 +21,16 @@ export const REPORT_STATES = {
     id: "cancelled-reports"
   }
 }
-
 class MyReports extends Page {
   async open(credentials) {
     await super.open("/", credentials)
-    await (await Home.getLinksMenuButton()).click()
-    await (await Home.getMyReportsLink()).click()
+    await (await new Home(this.page).getLinksMenuButton()).click()
+    await (await new Home(this.page).getMyReportsLink()).click()
   }
 
   async selectReport(linkText, reportState) {
     await this.selectReportsTable(reportState)
-    const reportLink = currentPage()
+    const reportLink = this.page
       .getByText(`${linkText}`, {
         exact: true
       })
@@ -43,7 +41,7 @@ class MyReports extends Page {
 
   async selectReportsTable(reportState) {
     const sectionId = reportState.id
-    const tableTab = currentPage()
+    const tableTab = this.page
       .locator(
         `#${sectionId} .report-collection div header div button[value='table']`
       )
@@ -54,7 +52,7 @@ class MyReports extends Page {
   }
 
   async getReportsTableRow(reportRow) {
-    return currentPage()
+    return this.page
       .locator(
         `#published-reports .report-collection table tbody tr:nth-child(${reportRow})`
       )
@@ -75,7 +73,7 @@ class MyReports extends Page {
 
   async selectReportsSummary(reportState) {
     const sectionId = reportState.id
-    const summaryTab = currentPage()
+    const summaryTab = this.page
       .locator(
         `#${sectionId} .report-collection div header div button[value='summary']`
       )
@@ -85,7 +83,7 @@ class MyReports extends Page {
   }
 
   async getReportsSummaryItem(summaryItem) {
-    return currentPage()
+    return this.page
       .locator(
         `#published-reports .report-collection .report-summary:nth-child(${summaryItem})`
       )
@@ -104,5 +102,4 @@ class MyReports extends Page {
       .first()
   }
 }
-
-export default new MyReports()
+export default MyReports

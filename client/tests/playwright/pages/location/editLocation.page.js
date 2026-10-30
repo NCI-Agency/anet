@@ -1,15 +1,13 @@
-import { currentPage, waitFor } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/locations/:uuid/edit"
-
 class EditLocation extends Page {
   async getSaveLocationButton() {
-    return currentPage().locator('//button[text()="Save Location"]').first()
+    return this.page.locator('//button[text()="Save Location"]').first()
   }
 
   async getLocationTypeLabel() {
-    return currentPage()
+    return this.page
       .getByText("Type", {
         exact: false
       })
@@ -17,7 +15,7 @@ class EditLocation extends Page {
   }
 
   async getLatLngLabel() {
-    return currentPage()
+    return this.page
       .getByText("Latitude", {
         exact: false
       })
@@ -26,7 +24,7 @@ class EditLocation extends Page {
 
   // Can't edit dictionary to change location format, so can't test this for now
   async getMgrsLabel() {
-    return currentPage()
+    return this.page
       .getByText("MGRS", {
         exact: false
       })
@@ -34,12 +32,12 @@ class EditLocation extends Page {
   }
 
   async getAllFormatsPopover() {
-    return currentPage().locator("button#gloc-info-btn").first()
+    return this.page.locator("button#gloc-info-btn").first()
   }
 
   // parent of MGRS table data => tr
   async getAllFormatsPopoverLat() {
-    return currentPage()
+    return this.page
       .locator(".bp6-popover-content table")
       .first()
       .getByRole("button", {
@@ -54,7 +52,7 @@ class EditLocation extends Page {
   }
 
   async getAllFormatsPopoverLng() {
-    return currentPage()
+    return this.page
       .locator(".bp6-popover-content table")
       .first()
       .getByRole("button", {
@@ -70,7 +68,7 @@ class EditLocation extends Page {
 
   async getAllFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
-    return currentPage()
+    return this.page
       .locator(".bp6-popover-content table")
       .first()
       .getByRole("button", {
@@ -85,15 +83,15 @@ class EditLocation extends Page {
   }
 
   async getLocationTypeField() {
-    return currentPage().locator("select.location-type-form-group").first()
+    return this.page.locator("select.location-type-form-group").first()
   }
 
   async getLatInputField() {
-    return currentPage().locator("input#lat").first()
+    return this.page.locator("input#lat").first()
   }
 
   async getLngInputField() {
-    return currentPage().locator("input#lng").first()
+    return this.page.locator("input#lng").first()
   }
 
   async open(locationId) {
@@ -103,9 +101,13 @@ class EditLocation extends Page {
 
   async waitForEditLocationPageToLoad() {
     if (!(await (await this.getSaveLocationButton()).isVisible())) {
-      await waitFor(await this.getSaveLocationButton(), "visible")
+      await (
+        await this.getSaveLocationButton()
+      ).waitFor({
+        state: "visible",
+        timeout: 10000
+      })
     }
   }
 }
-
-export default new EditLocation()
+export default EditLocation

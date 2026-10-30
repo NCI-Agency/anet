@@ -1,4 +1,3 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/people/new"
@@ -10,10 +9,9 @@ const SENSITIVE_CUSTOM_FIELDS = {
   birthday: "formSensitiveFields.birthday",
   politicalPosition: "formSensitiveFields.politicalPosition"
 }
-
 export class CreatePerson extends Page {
   async getForm() {
-    return currentPage().locator("form.form-horizontal").first()
+    return this.page.locator("form.form-horizontal").first()
   }
 
   async getFamilyName() {
@@ -21,17 +19,15 @@ export class CreatePerson extends Page {
   }
 
   async getGivenName() {
-    return currentPage().locator("#givenName").first()
+    return this.page.locator("#givenName").first()
   }
 
   async getDuplicatesButton() {
-    return currentPage()
-      .locator('//button[text()="Possible Duplicates"]')
-      .first()
+    return this.page.locator('//button[text()="Possible Duplicates"]').first()
   }
 
   async getModalContent() {
-    return currentPage().locator("div.modal-content").first()
+    return this.page.locator("div.modal-content").first()
   }
 
   async getModalCloseButton() {
@@ -45,21 +41,21 @@ export class CreatePerson extends Page {
   }
 
   async getUserTrueButton() {
-    return currentPage().locator('label[for="user_true"]').first()
+    return this.page.locator('label[for="user_true"]').first()
   }
 
   async getUserFalseButton() {
-    return currentPage().locator('label[for="user_false"]').first()
+    return this.page.locator('label[for="user_false"]').first()
   }
 
   async getEmailAddress(index) {
-    return currentPage()
+    return this.page
       .locator(`input[name="emailAddresses.${index}.address"]`)
       .first()
   }
 
   async getEmailAddressMessage(index) {
-    return currentPage()
+    return this.page
       .locator(
         `input[name="emailAddresses.${index}.address"] ~ div.invalid-feedback`
       )
@@ -67,58 +63,58 @@ export class CreatePerson extends Page {
   }
 
   async getPhoneNumber() {
-    return currentPage().locator("#phoneNumber").first()
+    return this.page.locator("#phoneNumber").first()
   }
 
   async getRank() {
-    return currentPage().locator('select[name="rank"]').first()
+    return this.page.locator('select[name="rank"]').first()
   }
 
   async getGender() {
-    return currentPage().locator('select[name="gender"]').first()
+    return this.page.locator('select[name="gender"]').first()
   }
 
   async getCountryInput() {
-    return currentPage().locator("#country").first()
+    return this.page.locator("#country").first()
   }
 
   async getCountryAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator("#country-popover tbody tr:first-child td:nth-child(2)")
       .first()
   }
 
   async waitForCountryAdvancedSelectToChange(value) {
     return this.waitForElementToChange(
-      this.getCountryAdvancedSelectFirstItem,
+      this.getCountryAdvancedSelectFirstItem.bind(this),
       value
     )
   }
 
   async getCountryHelpBlock() {
-    return currentPage().locator("#fg-country div.invalid-feedback").first()
+    return this.page.locator("#fg-country div.invalid-feedback").first()
   }
 
   async getEndOfTourDate() {
-    return currentPage().locator("#endOfTourDate").first()
+    return this.page.locator("#endOfTourDate").first()
   }
 
   async getBiography() {
-    return currentPage().locator(".biography .editable").first()
+    return this.page.locator(".biography .editable").first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async getEndOfTourToday() {
-    return currentPage()
+    return this.page
       .locator(".bp6-datepicker-footer button.bp6-button:first-child")
       .first()
   }
 
   async getCustomFieldsContainer() {
-    return currentPage().locator("#custom-fields").first()
+    return this.page.locator("#custom-fields").first()
   }
 
   async getNumberCustomFieldContainer() {
@@ -173,7 +169,7 @@ export class CreatePerson extends Page {
   }
 
   async getSensitiveFieldsContainer() {
-    return currentPage().locator("#sensitive-fields").first()
+    return this.page.locator("#sensitive-fields").first()
   }
 
   async getBirthdaySensitiveFieldContainer() {
@@ -231,5 +227,4 @@ export class CreatePerson extends Page {
     await (await this.getSubmitButton()).click()
   }
 }
-
-export default new CreatePerson()
+export default CreatePerson

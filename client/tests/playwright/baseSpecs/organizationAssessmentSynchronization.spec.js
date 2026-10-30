@@ -1,12 +1,12 @@
-import { expect } from "@playwright/test"
-import ShowOrganization from "../pages/showOrganization.page.js"
-import { test } from "../support.js"
+import { expect, test } from "@playwright/test"
+import ShowOrganizationPageObject from "../pages/showOrganization.page.js"
 
 test.describe("Organization assessment save synchronization", () => {
   for (const existingAssessment of [false, true]) {
     test(`Should wait for all answers after ${existingAssessment ? "editing with an unchanged priority" : "creating an assessment"}`, async ({
       page
     }) => {
+      const ShowOrganization = new ShowOrganizationPageObject(page)
       const expectedDetails = [
         "T2",
         "Improve",
@@ -48,9 +48,11 @@ test.describe("Organization assessment save synchronization", () => {
             setTimeout(() => render(expectedDetails), 800)
           })
         },
-        { existingAssessment, expectedDetails }
+        {
+          existingAssessment,
+          expectedDetails
+        }
       )
-
       await ShowOrganization.saveAssessmentAndWaitForModalClose(
         "organizationAnnually",
         "annually",

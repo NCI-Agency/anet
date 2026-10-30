@@ -1,9 +1,8 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 class AssessmentsSection extends Page {
   async getAssessmentsSection(assessmentKey, recurrence) {
-    return currentPage()
+    return this.page
       .locator(`#entity-assessments-results-${assessmentKey}-${recurrence}`)
       .first()
   }
@@ -15,7 +14,7 @@ class AssessmentsSection extends Page {
   }
 
   async getModalContent() {
-    return currentPage().locator("div.modal-content").first()
+    return this.page.locator("div.modal-content").first()
   }
 
   async getModalTitle() {
@@ -32,5 +31,4 @@ class AssessmentsSection extends Page {
       .first()
   }
 }
-
-export default new AssessmentsSection()
+export default AssessmentsSection

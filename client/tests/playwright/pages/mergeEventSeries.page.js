@@ -1,29 +1,27 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/eventSeries"
-
 class MergeEventSeries extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
   }
 
   async getTitle() {
-    return currentPage()
+    return this.page
       .locator('//h4[contains(text(),"Merge Event Series")]')
       .first()
   }
 
   async getLeftEventSeriesField() {
-    return currentPage().locator("#EventSeries1").first()
+    return this.page.locator("#EventSeries1").first()
   }
 
   async getRightEventSeriesField() {
-    return currentPage().locator("#EventSeries2").first()
+    return this.page.locator("#EventSeries2").first()
   }
 
   async getItemFromAdvancedSelect(rowNumber = 1) {
-    return currentPage()
+    return this.page
       .locator(
         `.advanced-select-popover table > tbody > tr:nth-child(${rowNumber}) > td:nth-child(2) span`
       )
@@ -31,7 +29,7 @@ class MergeEventSeries extends Page {
   }
 
   async getItemRadioButtonFromAdvancedSelect(rowNumber = 1) {
-    return currentPage()
+    return this.page
       .locator(
         `table > tbody > tr:nth-child(${rowNumber}) > td:first-child > input.form-check-input`
       )
@@ -39,11 +37,11 @@ class MergeEventSeries extends Page {
   }
 
   async getAdvancedSelectPopover() {
-    return currentPage().locator(".bp6-popover-content").first()
+    return this.page.locator(".bp6-popover-content").first()
   }
 
   async getColumnContent(side, text) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@id="${side}-merge-eventSeries-col"]//div[text()="${text}"]/following-sibling::div`
       )
@@ -51,19 +49,15 @@ class MergeEventSeries extends Page {
   }
 
   async getMergeEventSeriesButton() {
-    return currentPage()
-      .locator('//button[text()="Merge Event Series"]')
-      .first()
+    return this.page.locator('//button[text()="Merge Event Series"]').first()
   }
 
   async getEventSeriesHeaderFromPopover() {
-    return currentPage()
-      .locator('//table//th[contains(text(), "Name")]')
-      .first()
+    return this.page.locator('//table//th[contains(text(), "Name")]').first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await currentPage()
+    const buttonDiv = await this.page
       .locator(
         `//div[@id="${side}-merge-eventSeries-col"]//div[text()="${text}"]`
       )
@@ -74,14 +68,24 @@ class MergeEventSeries extends Page {
 
   async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
-    return currentPage()
+    return this.page
       .locator(`#mid-merge-eventSeries-col ${button} > button`)
       .first()
   }
 
   async waitForAdvancedSelectLoading(compareStr, rowNumber = 1) {
-    await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getEventSeriesHeaderFromPopover(), "visible")
+    await (
+      await this.getAdvancedSelectPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await (
+      await this.getEventSeriesHeaderFromPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     return this.waitForElementToChange(
       () => this.getItemFromAdvancedSelect(rowNumber),
       compareStr
@@ -97,29 +101,29 @@ class MergeEventSeries extends Page {
 
   async waitForSuccessAlert() {
     return this.waitForElementToChange(
-      this.getAlertSuccess,
+      this.getAlertSuccess.bind(this),
       "Event series merged. Displaying merged event series below."
     )
   }
 
   async getName() {
-    return currentPage().locator("#fg-name #name").first()
+    return this.page.locator("#fg-name #name").first()
   }
 
   async getDescription() {
-    return currentPage().locator("#description .editable p").first()
+    return this.page.locator("#description .editable p").first()
   }
 
   async getOwnerOrganization() {
-    return currentPage().locator("#ownerOrg").first()
+    return this.page.locator("#ownerOrg").first()
   }
 
   async getAdminOrganization() {
-    return currentPage().locator("#adminOrg").first()
+    return this.page.locator("#adminOrg").first()
   }
 
   async getHosts() {
-    return currentPage().locator("#hostRelatedObjects tbody tr").all()
+    return this.page.locator("#hostRelatedObjects tbody tr").all()
   }
 
   async getHostNames() {
@@ -131,5 +135,4 @@ class MergeEventSeries extends Page {
     return hostNames
   }
 }
-
-export default new MergeEventSeries()
+export default MergeEventSeries

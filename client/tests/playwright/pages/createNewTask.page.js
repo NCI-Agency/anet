@@ -1,41 +1,37 @@
-import { currentPage, typeKeys, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/tasks/new"
-
 class CreateTask extends Page {
   async getForm() {
-    return currentPage().locator("form").first()
+    return this.page.locator("form").first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async getShortName() {
-    return currentPage().locator('input[id="shortName"]').first()
+    return this.page.locator('input[id="shortName"]').first()
   }
 
   async getShortNameInput() {
-    return currentPage().locator("#shortName").first()
+    return this.page.locator("#shortName").first()
   }
 
   async getLongNameInput() {
-    return currentPage().locator("#longName").first()
+    return this.page.locator("#longName").first()
   }
 
   async getParentTaskInput() {
-    return currentPage().locator("#parentTask").first()
+    return this.page.locator("#parentTask").first()
   }
 
   async getClearParentTaskButton() {
-    return currentPage()
-      .locator("#fg-parentTask div.input-group button")
-      .first()
+    return this.page.locator("#fg-parentTask div.input-group button").first()
   }
 
   async getParentTaskSearchPopover() {
-    return currentPage().locator("#parentTask-popover").first()
+    return this.page.locator("#parentTask-popover").first()
   }
 
   async getParentTasksTable() {
@@ -47,9 +43,23 @@ class CreateTask extends Page {
   async selectParentTaskByText(name, rowNumber = 2) {
     await (await this.getParentTaskInput()).click()
     // wait for parentTask table loader to disappear
-    await waitFor(await this.getParentTasksTable(), "visible")
-    await typeKeys(name)
-    await waitFor(await this.getParentTasksTable(), "visible")
+    await (
+      await this.getParentTasksTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await this.page.keyboard.insertText(String(name))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
+    await (
+      await this.getParentTasksTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const radioButton = await (
       await this.getParentTasksTable()
     )
@@ -61,18 +71,20 @@ class CreateTask extends Page {
       await radioButton.click()
     }
     await (await this.getShortNameInput()).click()
-    await waitFor(await this.getParentTaskSearchPopover(), "attached", {
-      reverse: true,
+    await (
+      await this.getParentTaskSearchPopover()
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
 
   async getDescriptionInput() {
-    return currentPage().locator("#fg-description .editable").first()
+    return this.page.locator("#fg-description .editable").first()
   }
 
   async getCustomFieldsContainer() {
-    return currentPage().locator("#custom-fields").first()
+    return this.page.locator("#custom-fields").first()
   }
 
   async getAssessmentFields() {
@@ -101,7 +113,7 @@ class CreateTask extends Page {
   }
 
   async getAddAssessmentButton() {
-    return currentPage()
+    return this.page
       .locator('button[id="add-formCustomFields.assessments"]')
       .first()
   }
@@ -120,8 +132,11 @@ class CreateTask extends Page {
 
   async fillTaskDescription(description) {
     await (await this.getDescriptionInput()).click()
-    await typeKeys(description)
+    await this.page.keyboard.insertText(String(description))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
   }
 }
-
-export default new CreateTask()
+export default CreateTask

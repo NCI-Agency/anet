@@ -1,13 +1,12 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 class Home extends Page {
   async getTopbar() {
-    return currentPage().locator("#topbar").first()
+    return this.page.locator("#topbar").first()
   }
 
   async getIeBanner() {
-    return currentPage().locator("#ieBanner").first()
+    return this.page.locator("#ieBanner").first()
   }
 
   async getIeBannerText() {
@@ -17,10 +16,11 @@ class Home extends Page {
   }
 
   async getSecurityBanner() {
-    const banner = await currentPage()
-      .locator("#topbar div:nth-child(1)")
-      .first()
-    await waitFor(banner, "visible")
+    const banner = await this.page.locator("#topbar div:nth-child(1)").first()
+    await banner.waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     return banner
   }
 
@@ -47,51 +47,51 @@ class Home extends Page {
   }
 
   async getLoginButton() {
-    return currentPage().locator('//a[text()="Sign In"]').first()
+    return this.page.locator('//a[text()="Sign In"]').first()
   }
 
   async getSearchBar() {
-    return currentPage().locator("#searchBarInput").first()
+    return this.page.locator("#searchBarInput").first()
   }
 
   async getHomeTilesContainer() {
-    return currentPage().locator("fieldset.home-tile-row").first()
+    return this.page.locator("fieldset.home-tile-row").first()
   }
 
   async getSubmitSearch() {
-    return currentPage().locator("#topbar #searchBarSubmit").first()
+    return this.page.locator("#topbar #searchBarSubmit").first()
   }
 
   async getLinksMenuButton() {
-    return currentPage().locator('//a[text()="My Work"]').first()
+    return this.page.locator('//a[text()="My Work"]').first()
   }
 
   async getMyReportsLink() {
-    return currentPage()
+    return this.page
       .locator('//a//span[contains(text(), "My Reports")]')
       .first()
   }
 
   async getMyOrgLink() {
-    return currentPage()
+    return this.page
       .locator('//a//span[contains(text(), "My Organization")]')
       .first()
   }
 
   async getMyTasksLink() {
-    return currentPage().locator('//a//span[text()="My Objectives"]').first()
+    return this.page.locator('//a//span[text()="My Objectives"]').first()
   }
 
   async getMyCounterpartsLink() {
-    return currentPage().locator('//a//span[text()="My Counterparts"]').first()
+    return this.page.locator('//a//span[text()="My Counterparts"]').first()
   }
 
   async getMyAttachmentsLink() {
-    return currentPage().locator('//a//span[text()="My Attachments"]').first()
+    return this.page.locator('//a//span[text()="My Attachments"]').first()
   }
 
   async getMyEventsLink() {
-    return currentPage().locator('//a//span[text()="My Events"]').first()
+    return this.page.locator('//a//span[text()="My Events"]').first()
   }
 
   async getMyCounterpartsNotifications() {
@@ -103,7 +103,7 @@ class Home extends Page {
   }
 
   async getMyDraftReports() {
-    return currentPage()
+    return this.page
       .locator('//button[contains(text(), "My draft reports")]')
       .first()
   }
@@ -113,7 +113,7 @@ class Home extends Page {
   }
 
   async getReportsPendingMyApproval() {
-    return currentPage()
+    return this.page
       .locator('//button[text()="Reports pending my approval"]')
       .first()
   }
@@ -123,12 +123,11 @@ class Home extends Page {
   }
 
   async getSavedSearches() {
-    return currentPage().locator("fieldset.saved-searches").first()
+    return this.page.locator("fieldset.saved-searches").first()
   }
 
   async getSavedSearchRows() {
-    return currentPage().locator("div.saved-search-row")
+    return this.page.locator("div.saved-search-row")
   }
 }
-
-export default new Home()
+export default Home

@@ -1,27 +1,26 @@
 import { expect } from "@playwright/test"
 import moment from "moment"
-import { currentPage, typeKeys, waitFor } from "../../support.js"
 import * as cr from "../createReport.page.js"
 
 class CreateReport extends cr.CreateReport {
   async getTitle() {
-    return currentPage().locator("h4.legend").first()
+    return this.page.locator("h4.legend").first()
   }
 
   async getIntent() {
-    return currentPage().locator("#intent").first()
+    return this.page.locator("#intent").first()
   }
 
   async getIntentHelpBlock() {
-    return currentPage().locator("#fg-intent div.invalid-feedback").first()
+    return this.page.locator("#fg-intent div.invalid-feedback").first()
   }
 
   async getEngagementDate() {
-    return currentPage().locator("#engagementDate").first()
+    return this.page.locator("#engagementDate").first()
   }
 
   async getDatepicker() {
-    return currentPage().locator("#fg-engagementDate .bp6-datepicker").first()
+    return this.page.locator("#fg-engagementDate .bp6-datepicker").first()
   }
 
   async getTodayButton() {
@@ -31,37 +30,37 @@ class CreateReport extends cr.CreateReport {
   }
 
   async getReportCommunities() {
-    return currentPage().locator("#reportCommunities").first()
+    return this.page.locator("#reportCommunities").first()
   }
 
   async getReportCommunitiesTable() {
-    return currentPage()
+    return this.page
       .locator("#reportCommunities-popover .table-responsive table")
       .first()
   }
 
   async getReportPeople() {
-    return currentPage().locator("#reportPeople").first()
+    return this.page.locator("#reportPeople").first()
   }
 
   async getReportPeopleTable() {
-    return currentPage()
+    return this.page
       .locator("#reportPeople-popover .table-responsive table")
       .first()
   }
 
   async getLocation() {
-    return currentPage().locator('#fg-location input[id="location"]').first()
+    return this.page.locator('#fg-location input[id="location"]').first()
   }
 
   async getLocationTable() {
-    return currentPage()
+    return this.page
       .locator("#location-popover .table-responsive table")
       .first()
   }
 
   async getAtmosphere() {
-    return currentPage().locator("#fg-atmosphere").first()
+    return this.page.locator("#fg-atmosphere").first()
   }
 
   async getAtmospherePositive() {
@@ -83,37 +82,47 @@ class CreateReport extends cr.CreateReport {
   }
 
   async getKeyOutcomes() {
-    return currentPage()
+    return this.page
       .locator('#fg-keyOutcomes textarea[id="keyOutcomes"]')
       .first()
   }
 
   async getNextSteps() {
-    return currentPage()
-      .locator('#fg-nextSteps textarea[id="nextSteps"]')
-      .first()
+    return this.page.locator('#fg-nextSteps textarea[id="nextSteps"]').first()
   }
 
   async getReportText() {
-    return currentPage().locator("#fg-reportText .editable").first()
+    return this.page.locator("#fg-reportText .editable").first()
   }
 
   async getEvent() {
-    return currentPage().locator('#fg-event input[id="event"]').first()
+    return this.page.locator('#fg-event input[id="event"]').first()
   }
 
   async getEventTable() {
-    return currentPage()
-      .locator("#event-popover .table-responsive table")
-      .first()
+    return this.page.locator("#event-popover .table-responsive table").first()
   }
 
   async selectReportCommunityByName(name) {
     await (await this.getReportCommunities()).click()
     // wait for table loader to disappear
-    await waitFor(await this.getReportCommunitiesTable(), "visible")
-    await typeKeys(name)
-    await waitFor(await this.getReportCommunitiesTable(), "visible")
+    await (
+      await this.getReportCommunitiesTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await this.page.keyboard.insertText(String(name))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
+    await (
+      await this.getReportCommunitiesTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const checkBox = await (
       await this.getReportCommunitiesTable()
     )
@@ -123,14 +132,16 @@ class CreateReport extends cr.CreateReport {
       await checkBox.click()
     }
     await (await this.getTitle()).click()
-    await waitFor(await this.getReportCommunitiesTable(), "attached", {
-      reverse: true,
+    await (
+      await this.getReportCommunitiesTable()
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
 
   async getAttendeeColumns(name) {
-    const columns = currentPage().locator(
+    const columns = this.page.locator(
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td`
     )
     await expect(columns.nth(5)).toBeAttached()
@@ -138,18 +149,17 @@ class CreateReport extends cr.CreateReport {
   }
 
   async getPersonByName(name) {
-    const personRow = await currentPage()
+    const personRow = await this.page
       .locator(
         `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="primary-attendee" or @class="conflictButton" or @class="reportPeopleName"]`
       )
       .all()
-    await waitFor(
-      await personRow[0].locator("div.bp6-spinner").first(),
-      "attached",
-      {
-        reverse: true
-      }
-    )
+    await (
+      await personRow[0].locator("div.bp6-spinner").first()
+    ).waitFor({
+      state: "detached",
+      timeout: 10000
+    })
     return {
       name: (await personRow[2].innerText()).trim(),
       conflictButton: await personRow[1].locator("xpath=./span").first(),
@@ -165,7 +175,12 @@ class CreateReport extends cr.CreateReport {
   async selectAttendeeByName(name) {
     await (await this.getReportPeople()).click()
     // wait for reportPeople table loader to disappear
-    await waitFor(await this.getReportPeopleTable(), "visible")
+    await (
+      await this.getReportPeopleTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     let searchTerm = name
     if (
       (await searchTerm.startsWith("CIV")) ||
@@ -175,8 +190,17 @@ class CreateReport extends cr.CreateReport {
     ) {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
-    await typeKeys(searchTerm)
-    await waitFor(await this.getReportPeopleTable(), "visible")
+    await this.page.keyboard.insertText(String(searchTerm))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
+    await (
+      await this.getReportPeopleTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const checkBox = await (
       await this.getReportPeopleTable()
     )
@@ -186,18 +210,20 @@ class CreateReport extends cr.CreateReport {
       await checkBox.click()
     }
     await (await this.getTitle()).click()
-    await waitFor(await this.getReportPeopleTable(), "attached", {
-      reverse: true,
+    await (
+      await this.getReportPeopleTable()
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
 
   async getTasks() {
-    return currentPage().locator("#tasks").first()
+    return this.page.locator("#tasks").first()
   }
 
   async getTaskSearchPopover() {
-    return currentPage().locator("#tasks-popover").first()
+    return this.page.locator("#tasks-popover").first()
   }
 
   async getTaskSearchFilters() {
@@ -224,9 +250,23 @@ class CreateReport extends cr.CreateReport {
   async selectTaskByName(name, rowNumber = 2) {
     await (await this.getTasks()).click()
     // wait for tasks table loader to disappear
-    await waitFor(await this.getTasksTable(), "visible")
-    await typeKeys(name)
-    await waitFor(await this.getTasksTable(), "visible")
+    await (
+      await this.getTasksTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await this.page.keyboard.insertText(String(name))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
+    await (
+      await this.getTasksTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const checkBox = await (
       await this.getTasksTable()
     )
@@ -236,16 +276,27 @@ class CreateReport extends cr.CreateReport {
       await checkBox.click()
     }
     await (await this.getTitle()).click()
-    await waitFor(await this.getTaskSearchPopover(), "attached", {
-      reverse: true,
+    await (
+      await this.getTaskSearchPopover()
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
 
   async selectLocation(location, rowNumber = 2) {
     await (await this.getLocation()).click()
-    await typeKeys(location)
-    await waitFor(await this.getLocationTable(), "visible")
+    await this.page.keyboard.insertText(String(location))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
+    await (
+      await this.getLocationTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const checkBox = await (
       await this.getLocationTable()
     )
@@ -260,8 +311,17 @@ class CreateReport extends cr.CreateReport {
 
   async selectEvent(event, rowNumber = 1) {
     await (await this.getEvent()).click()
-    await typeKeys(event)
-    await waitFor(await this.getEventTable(), "visible")
+    await this.page.keyboard.insertText(String(event))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
+    await (
+      await this.getEventTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const checkBox = await (
       await this.getEventTable()
     )
@@ -292,24 +352,45 @@ class CreateReport extends cr.CreateReport {
 
   async setEngagementDate(engagementDate) {
     await (await this.getEngagementDate()).click()
-    await waitFor(await this.getTodayButton(), "visible")
+    await (
+      await this.getTodayButton()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     await this.deleteInput(this.getEngagementDate())
-    await typeKeys(engagementDate.format("DD-MM-YYYY HH:mm"))
+    await this.page.keyboard.insertText(
+      String(engagementDate.format("DD-MM-YYYY HH:mm"))
+    )
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
   }
 
   async fillForm(fields) {
-    await waitFor(await this.getForm(), "clickable")
+    await expect(await this.getForm()).toBeVisible({
+      timeout: 10000
+    })
+    await expect(await this.getForm()).toBeEnabled({
+      timeout: 10000
+    })
     if (fields.intent !== undefined) {
       await (await this.getIntent()).fill(String(fields.intent))
-      await waitFor(await this.getIntentHelpBlock(), "attached", {
-        reverse: true
+      await (
+        await this.getIntentHelpBlock()
+      ).waitFor({
+        state: "detached",
+        timeout: 10000
       })
     }
     if (moment.isMoment(fields.engagementDate)) {
       await this.setEngagementDate(fields.engagementDate)
       await (await this.getTitle()).click()
-      await waitFor(await this.getDatepicker(), "attached", {
-        reverse: true,
+      await (
+        await this.getDatepicker()
+      ).waitFor({
+        state: "detached",
         timeout: 3000
       })
     }
@@ -356,12 +437,15 @@ class CreateReport extends cr.CreateReport {
     if (fields.reportText) {
       await (await this.getReportText()).scrollIntoViewIfNeeded()
       await (await this.getReportText()).click()
-      await typeKeys(fields.reportText)
+      await this.page.keyboard.insertText(String(fields.reportText))
+      const focused = this.page.locator(":focus")
+      if ((await focused.getAttribute("contenteditable")) === "true") {
+        await focused.blur()
+      }
     }
     if (fields.event) {
       await this.selectEvent(fields.event)
     }
   }
 }
-
-export default new CreateReport()
+export default CreateReport

@@ -1,8 +1,7 @@
-import { currentPage, waitFor, waitUntil } from "../support.js"
+import { expect } from "@playwright/test"
 import Page from "./page.js"
 
 const PAGE_URL = "/people/:uuid"
-
 class ShowPerson extends Page {
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
@@ -13,65 +12,73 @@ class ShowPerson extends Page {
   }
 
   async getForm() {
-    return currentPage().locator("div.form-horizontal").first()
+    return this.page.locator("div.form-horizontal").first()
   }
 
   async getEditButton() {
-    return currentPage().locator("div a.edit-person").first()
+    return this.page.locator("div a.edit-person").first()
   }
 
   async getCompactView() {
-    return currentPage().locator(".compact-view").first()
+    return this.page.locator(".compact-view").first()
   }
 
   async getCompactViewButton() {
-    return currentPage().locator("button[value='compactView']").first()
+    return this.page.locator("button[value='compactView']").first()
   }
 
   async getPrintButton() {
-    return currentPage().locator("button[value='print']").first()
+    return this.page.locator("button[value='print']").first()
   }
 
   async getDetailedViewButton() {
-    return currentPage().locator("button[value='detailedView']").first()
+    return this.page.locator("button[value='detailedView']").first()
   }
 
   async getOptionalFieldsButton() {
-    return currentPage().locator('//button[text()="Optional Fields"]').first()
+    return this.page.locator('//button[text()="Optional Fields"]').first()
   }
 
   async getClearAllButton() {
-    return currentPage().locator('//button[text()="Clear All"]').first()
+    return this.page.locator('//button[text()="Clear All"]').first()
   }
 
   async getSelectAllButton() {
-    return currentPage().locator('//button[text()="Select All"]').first()
+    return this.page.locator('//button[text()="Select All"]').first()
   }
 
   async getPresetsButton() {
-    return currentPage().locator("#presetsButton").first()
+    return this.page.locator("#presetsButton").first()
   }
 
   async getEditAttachmentsButton() {
-    return await currentPage().locator("#edit-attachments").first()
+    return await this.page.locator("#edit-attachments").first()
   }
 
   async openAttachmentsEdit() {
     const edit = await this.getEditAttachmentsButton()
     await edit.click()
-    await waitFor(await this.getAttachments(), "attached")
+    await (
+      await this.getAttachments()
+    ).waitFor({
+      state: "attached",
+      timeout: 10000
+    })
   }
 
   async selectAttachmentToLink(caption) {
-    const input = await currentPage()
+    const input = await this.page
       .locator('input[name="linkExistingAttachments"]')
       .first()
     await input.click()
-    const popover = await currentPage()
+    const popover = await this.page
       .locator("#linkExistingAttachments-popover")
       .first()
-    await waitFor(popover, "attached")
-    const allAttachmentsFilter = await currentPage()
+    await popover.waitFor({
+      state: "attached",
+      timeout: 10000
+    })
+    const allAttachmentsFilter = await this.page
       .locator(
         '//div[@id="linkExistingAttachments-popover"]//button[text()="All attachments"]'
       )
@@ -79,7 +86,7 @@ class ShowPerson extends Page {
     if ((await allAttachmentsFilter.count()) > 0) {
       await allAttachmentsFilter.click()
     } else {
-      const filterSelect = await currentPage()
+      const filterSelect = await this.page
         .locator("#linkExistingAttachments-popover select")
         .first()
       if ((await filterSelect.count()) > 0) {
@@ -89,7 +96,7 @@ class ShowPerson extends Page {
       }
     }
     await input.fill(String(caption))
-    const row = await currentPage()
+    const row = await this.page
       .locator(
         `//div[@id="linkExistingAttachments-popover"]//tbody//tr[.//td[contains(normalize-space(.), "${caption}")]]`
       )
@@ -98,38 +105,45 @@ class ShowPerson extends Page {
   }
 
   async linkSelectedAttachments() {
-    const button = await currentPage()
+    const button = await this.page
       .locator('//button[text()="Link selected attachments"]')
       .first()
-    await waitUntil(() => button.isEnabled())
+    await expect
+      .poll(() => button.isEnabled(), {
+        timeout: 10000
+      })
+      .toBeTruthy()
     await button.click()
   }
 
   async waitForLinkToComplete() {
-    const button = await currentPage()
+    const button = await this.page
       .locator('//button[text()="Link selected attachments"]')
       .first()
-    await waitUntil(
-      async () => {
-        const text = (await button.innerText()).trim()
-        const countExists =
-          (await currentPage()
-            .locator(".attachment-link-count")
-            .first()
-            .count()) > 0
-        return text === "Link selected attachments" && !countExists
-      },
-      {
-        timeout: 15000,
-        timeoutMsg: "Expected link action to complete"
-      }
-    )
+    await expect
+      .poll(
+        async () => {
+          const text = (await button.innerText()).trim()
+          const countExists =
+            (await this.page
+              .locator(".attachment-link-count")
+              .first()
+              .count()) > 0
+          return text === "Link selected attachments" && !countExists
+        },
+        {
+          timeout: 15000,
+          message: "Expected link action to complete"
+        }
+      )
+      .toBeTruthy()
   }
 
   async getAttachmentCardByUuid(uuid) {
     const selector = `//div[contains(@class,"attachment-card")]//a[contains(@href,"/attachments/${uuid}/edit")]/ancestor::div[contains(@class,"attachment-card")]`
-    const card = await currentPage().locator(selector).first()
-    await waitFor(card, "attached", {
+    const card = await this.page.locator(selector).first()
+    await card.waitFor({
+      state: "attached",
       timeout: 10000
     })
     return card
@@ -137,7 +151,7 @@ class ShowPerson extends Page {
 
   async attachmentCardExistsByUuid(uuid) {
     const selector = `//div[contains(@class,"attachment-card")]//a[contains(@href,"/attachments/${uuid}/edit")]/ancestor::div[contains(@class,"attachment-card")]`
-    return (await (await currentPage().locator(selector).first()).count()) > 0
+    return (await (await this.page.locator(selector).first()).count()) > 0
   }
 
   async unlinkAttachmentByUuid(uuid) {
@@ -149,13 +163,12 @@ class ShowPerson extends Page {
   }
 
   async waitForAttachmentToDisappear(uuid) {
-    await waitUntil(
-      async () => !(await this.attachmentCardExistsByUuid(uuid)),
-      {
+    await expect
+      .poll(async () => !(await this.attachmentCardExistsByUuid(uuid)), {
         timeout: 15000,
-        timeoutMsg: `Expected attachment ${uuid} to be unlinked`
-      }
-    )
+        message: `Expected attachment ${uuid} to be unlinked`
+      })
+      .toBeTruthy()
   }
 
   async ensureAttachmentUnlinked(uuid) {
@@ -174,13 +187,11 @@ class ShowPerson extends Page {
   }
 
   async getDefaultPreset() {
-    return currentPage().locator('//a[text()="Default"]').first()
+    return this.page.locator('//a[text()="Default"]').first()
   }
 
   async getWithoutSensitivePreset() {
-    return currentPage()
-      .locator('//a[text()="Exclude sensitive fields"]')
-      .first()
+    return this.page.locator('//a[text()="Exclude sensitive fields"]').first()
   }
 
   async getSensitiveInformationWarning() {
@@ -190,7 +201,7 @@ class ShowPerson extends Page {
   }
 
   async getLeftColumnNumber() {
-    return currentPage().locator("#leftColumnNumber").first()
+    return this.page.locator("#leftColumnNumber").first()
   }
 
   async getLeftTableFields() {
@@ -198,27 +209,27 @@ class ShowPerson extends Page {
   }
 
   async getEditHistoryButton() {
-    return currentPage().locator("button.edit-history").first()
+    return this.page.locator("button.edit-history").first()
   }
 
   async getEditHistoryDialog() {
-    return currentPage().locator("div.edit-history-dialog").first()
+    return this.page.locator("div.edit-history-dialog").first()
   }
 
   async getEditHistoryStartDate(i) {
-    return currentPage().locator(`input[id="history[${i}].startTime"]`).first()
+    return this.page.locator(`input[id="history[${i}].startTime"]`).first()
   }
 
   async getEditHistoryEndDate(i) {
-    return currentPage().locator(`input[id="history[${i}].endTime"]`).first()
+    return this.page.locator(`input[id="history[${i}].endTime"]`).first()
   }
 
   async getEditHistorySubmitButton() {
-    return currentPage().locator("button#editHistoryModalSubmitButton").first()
+    return this.page.locator("button#editHistoryModalSubmitButton").first()
   }
 
   async getPreviousPositionLink(i) {
-    return currentPage().locator(`tr#previousPosition_${i} a`).first()
+    return this.page.locator(`tr#previousPosition_${i} a`).first()
   }
 
   async getAssessmentsTable(assessmentKey, recurrence) {
@@ -235,23 +246,21 @@ class ShowPerson extends Page {
   }
 
   async getEditAssessmentButton() {
-    return currentPage()
-      .locator('div.card button[title="Edit assessment"]')
-      .first()
+    return this.page.locator('div.card button[title="Edit assessment"]').first()
   }
 
   async getDeleteAssessmentButton() {
-    return currentPage()
+    return this.page
       .locator("div.card button.btn.btn-outline-danger.btn-xs")
       .first()
   }
 
   async getDeleteConfirmButton() {
-    return currentPage().locator('//button[text()="Yes, I am sure"]').first()
+    return this.page.locator('//button[text()="Yes, I am sure"]').first()
   }
 
   async getAssessmentModalForm() {
-    return currentPage().locator(".modal-content form").first()
+    return this.page.locator(".modal-content form").first()
   }
 
   async getSaveAssessmentButton() {
@@ -274,63 +283,67 @@ class ShowPerson extends Page {
   }
 
   async getAssessmentContainer(assessmentKey, recurrence) {
-    return currentPage()
+    return this.page
       .locator(`#entity-assessments-results-${assessmentKey}-${recurrence}`)
       .first()
   }
 
   async getPoliticalPosition() {
-    return currentPage()
+    return this.page
       .locator('div[name="formSensitiveFields.politicalPosition"]')
       .first()
   }
 
   async getBirthday() {
-    return currentPage()
-      .locator('div[name="formSensitiveFields.birthday"]')
-      .first()
+    return this.page.locator('div[name="formSensitiveFields.birthday"]').first()
   }
 
   async getInvalidFeedback() {
-    return currentPage().locator('//div[@class="invalid-feedback"]').all()
+    return this.page.locator('//div[@class="invalid-feedback"]').all()
   }
 
   async getTopLevelQuestionSetTitle() {
-    return currentPage()
+    return this.page
       .locator('//h4/span[contains(text(),"Top Level Question Set")]')
       .first()
   }
 
   async getBottomLevelQuestionSetTitle() {
-    return currentPage()
+    return this.page
       .locator('//h4/span[contains(text(),"Bottom Level Question Set")]')
       .first()
   }
 
   async pickACompactField(field) {
-    await (await currentPage().locator(`#${field}`).first()).click()
+    await (await this.page.locator(`#${field}`).first()).click()
   }
 
   async waitForCompactField(reverse, ...fields) {
     const compactView = await this.getCompactView()
     for (const field of fields) {
-      await waitFor(
-        await compactView.locator(`xpath=.//th[text()="${field}"]`).first(),
-        "visible",
-        {
-          reverse
-        }
-      )
+      await (
+        await compactView.locator(`xpath=.//th[text()="${field}"]`).first()
+      ).waitFor({
+        state: reverse ? "hidden" : "visible",
+        timeout: 10000
+      })
     }
   }
 
   async waitForAssessmentModalForm(reverse = false) {
     // wait for modal animation to finish
-    await waitFor(await this.getAssessmentModalForm(), "attached", {
-      reverse,
+    await (
+      await this.getAssessmentModalForm()
+    ).waitFor({
+      state: reverse ? "detached" : "attached",
       timeout: 20000
     })
-    await waitFor(await this.getAssessmentModalForm(), "visible")
+    await (
+      await this.getAssessmentModalForm()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async fillAssessmentQuestion(valuesArr, prevTextToClear) {
@@ -383,14 +396,12 @@ class ShowPerson extends Page {
   }
 
   async waitForDeletedAssessmentToDisappear(assessmentKey, recurrence, i = 2) {
-    await waitFor(
-      await this.getShownAssessmentPanel(assessmentKey, recurrence, i),
-      "attached",
-      {
-        reverse: true,
-        timeout: 20000
-      }
-    )
+    await (
+      await this.getShownAssessmentPanel(assessmentKey, recurrence, i)
+    ).waitFor({
+      state: "detached",
+      timeout: 20000
+    })
   }
 
   async getValidationErrorMessages() {
@@ -402,7 +413,7 @@ class ShowPerson extends Page {
   }
 
   async getAuthorizationGroupsTable() {
-    return currentPage().locator("#authorizationGroups table").first()
+    return this.page.locator("#authorizationGroups table").first()
   }
 
   async getAuthorizationGroup(i) {
@@ -411,20 +422,19 @@ class ShowPerson extends Page {
   }
 
   async getCurrentPosition() {
-    return currentPage().locator("#fg-position").first()
+    return this.page.locator("#fg-position").first()
   }
 
   async getEditPositionButton() {
-    return currentPage().locator("span.edit-position a.btn").first()
+    return this.page.locator("span.edit-position a.btn").first()
   }
 
   async getChangeAssignedPositionButton() {
-    return currentPage().locator("button.change-assigned-position").first()
+    return this.page.locator("button.change-assigned-position").first()
   }
 
   async getAdditionalPositionsTable() {
-    return currentPage().locator("#additionalPositions table").first()
+    return this.page.locator("#additionalPositions table").first()
   }
 }
-
-export default new ShowPerson()
+export default ShowPerson

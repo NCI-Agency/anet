@@ -1,40 +1,34 @@
 import { expect } from "@playwright/test"
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/locations"
-
 class MergeLocations extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
   }
 
   async getTitle() {
-    return currentPage()
-      .locator('//h4[contains(text(),"Merge Locations")]')
-      .first()
+    return this.page.locator('//h4[contains(text(),"Merge Locations")]').first()
   }
 
   async getLeftLocationField() {
-    return currentPage().locator("#Location1").first()
+    return this.page.locator("#Location1").first()
   }
 
   async getRightLocationField() {
-    return currentPage().locator("#Location2").first()
+    return this.page.locator("#Location2").first()
   }
 
   async getAdvancedSelectPopover() {
-    return currentPage().locator(".bp6-popover-content").first()
+    return this.page.locator(".bp6-popover-content").first()
   }
 
   async getLocationHeaderFromPopover() {
-    return currentPage()
-      .locator('//table//th[contains(text(), "Name")]')
-      .first()
+    return this.page.locator('//table//th[contains(text(), "Name")]').first()
   }
 
   async getFirstItemFromAdvancedSelect() {
-    return currentPage()
+    return this.page
       .locator(
         ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) span"
       )
@@ -42,7 +36,7 @@ class MergeLocations extends Page {
   }
 
   async getFirstItemRadioButtonFromAdvancedSelect() {
-    return currentPage()
+    return this.page
       .locator(
         "table > tbody > tr:first-child > td:first-child > input.form-check-input"
       )
@@ -50,18 +44,16 @@ class MergeLocations extends Page {
   }
 
   async getMergeLocationsButton() {
-    return currentPage().locator('//button[text()="Merge Locations"]').first()
+    return this.page.locator('//button[text()="Merge Locations"]').first()
   }
 
   async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
-    return currentPage()
-      .locator(`#mid-merge-loc-col ${button} > button`)
-      .first()
+    return this.page.locator(`#mid-merge-loc-col ${button} > button`).first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await currentPage()
+    const buttonDiv = await this.page
       .locator(`//div[@id="${side}-merge-loc-col"]//div[text()="${text}"]`)
       .first()
     const button = await buttonDiv.locator("..").locator("..")
@@ -69,16 +61,26 @@ class MergeLocations extends Page {
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
-    await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getLocationHeaderFromPopover(), "visible")
+    await (
+      await this.getAdvancedSelectPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await (
+      await this.getLocationHeaderFromPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     return this.waitForElementToChange(
-      this.getFirstItemFromAdvancedSelect,
+      this.getFirstItemFromAdvancedSelect.bind(this),
       compareStr
     )
   }
 
   async getColumnContent(side, text) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@id="${side}-merge-loc-col"]//div[text()="${text}"]/following-sibling::div`
       )
@@ -103,18 +105,17 @@ class MergeLocations extends Page {
 
   async waitForSuccessAlert() {
     return this.waitForElementToChange(
-      this.getAlertSuccess,
+      this.getAlertSuccess.bind(this),
       "Locations merged. Displaying merged Location below."
     )
   }
 
   async getField(fieldName) {
-    return currentPage().locator(`div[id="${fieldName}"]`).first()
+    return this.page.locator(`div[id="${fieldName}"]`).first()
   }
 
   async getFieldset(fieldName) {
     return (await this.getField(fieldName)).locator("fieldset").first()
   }
 }
-
-export default new MergeLocations()
+export default MergeLocations

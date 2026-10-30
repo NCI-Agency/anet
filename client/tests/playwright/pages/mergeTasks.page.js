@@ -1,29 +1,27 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PATH = "/admin/merge/tasks"
-
 class MergeTasks extends Page {
   async openPage() {
     await super.openAsAdminUser(PATH)
   }
 
   async getTitle() {
-    return currentPage()
+    return this.page
       .locator('//h4[contains(text(),"Merge Objectives")]')
       .first()
   }
 
   async getLeftTaskField() {
-    return currentPage().locator("#Objective1").first()
+    return this.page.locator("#Objective1").first()
   }
 
   async getRightTaskField() {
-    return currentPage().locator("#Objective2").first()
+    return this.page.locator("#Objective2").first()
   }
 
   async getItemFromAdvancedSelect(rowNumber = 1) {
-    return currentPage()
+    return this.page
       .locator(
         `.advanced-select-popover table > tbody > tr:nth-child(${rowNumber}) > td:nth-child(2) span`
       )
@@ -31,7 +29,7 @@ class MergeTasks extends Page {
   }
 
   async getItemRadioButtonFromAdvancedSelect(rowNumber = 1) {
-    return currentPage()
+    return this.page
       .locator(
         `table > tbody > tr:nth-child(${rowNumber}) > td:first-child > input.form-check-input`
       )
@@ -39,11 +37,11 @@ class MergeTasks extends Page {
   }
 
   async getAdvancedSelectPopover() {
-    return currentPage().locator(".bp6-popover-content").first()
+    return this.page.locator(".bp6-popover-content").first()
   }
 
   async getColumnContent(side, text) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@id="${side}-merge-task-col"]//div[text()="${text}"]/following-sibling::div`
       )
@@ -51,17 +49,17 @@ class MergeTasks extends Page {
   }
 
   async getMergeTasksButton() {
-    return currentPage().locator('//button[text()="Merge Objectives"]').first()
+    return this.page.locator('//button[text()="Merge Objectives"]').first()
   }
 
   async getTaskHeaderFromPopover() {
-    return currentPage()
+    return this.page
       .locator('//table//th[contains(text(), "Objective")]')
       .first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await currentPage()
+    const buttonDiv = await this.page
       .locator(`//div[@id="${side}-merge-task-col"]//div[text()="${text}"]`)
       .first()
     const button = await buttonDiv.locator("..").locator("..")
@@ -70,14 +68,22 @@ class MergeTasks extends Page {
 
   async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
-    return currentPage()
-      .locator(`#mid-merge-task-col ${button} > button`)
-      .first()
+    return this.page.locator(`#mid-merge-task-col ${button} > button`).first()
   }
 
   async waitForAdvancedSelectLoading(compareStr, rowNumber = 1) {
-    await waitFor(await this.getAdvancedSelectPopover(), "visible")
-    await waitFor(await this.getTaskHeaderFromPopover(), "visible")
+    await (
+      await this.getAdvancedSelectPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await (
+      await this.getTaskHeaderFromPopover()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     return this.waitForElementToChange(
       async () => this.getItemFromAdvancedSelect(rowNumber),
       compareStr
@@ -93,10 +99,9 @@ class MergeTasks extends Page {
 
   async waitForSuccessAlert() {
     return this.waitForElementToChange(
-      this.getAlertSuccess,
+      this.getAlertSuccess.bind(this),
       "Objectives merged. Displaying merged Objective below."
     )
   }
 }
-
-export default new MergeTasks()
+export default MergeTasks

@@ -1,26 +1,25 @@
 import { expect } from "@playwright/test"
-import { currentPage, typeKeys, waitUntil } from "../../support.js"
 import Page from "../page.js"
 
 class SavedSearch extends Page {
   async openOrganizationsFilter() {
-    const searchLink = currentPage()
+    const searchLink = this.page
       .locator(".search-popover-target.bp6-popover-target")
       .first()
     await (await searchLink).click()
     // wait for filters to be shown
 
-    const tasksButton = currentPage()
+    const tasksButton = this.page
       .locator('.btn-group > button[value="TASKS"]')
       .first()
     await (await tasksButton).click()
     // wait for filters to be updated
 
-    const addFilterButton = currentPage().locator("#addFilterDropdown").first()
+    const addFilterButton = this.page.locator("#addFilterDropdown").first()
     await (await addFilterButton).click()
     // wait for filters to be shown
 
-    const withinOrganizationButton = currentPage()
+    const withinOrganizationButton = this.page
       .getByRole("button", {
         name: "Within Organization",
         exact: false
@@ -30,22 +29,33 @@ class SavedSearch extends Page {
   }
 
   async addOrganizationToFilter(searchText) {
-    const openFilterButton = currentPage()
+    const openFilterButton = this.page
       .locator("input[name='taskedOrgUuid']")
       .first()
     await (await openFilterButton).click()
-    await typeKeys(searchText)
+    await this.page.keyboard.insertText(String(searchText))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
     await expect(
-      currentPage().locator("#taskedOrgUuid-popover tbody tr").first()
-    ).toContainText(searchText, { useInnerText: true })
+      this.page.locator("#taskedOrgUuid-popover tbody tr").first()
+    ).toContainText(searchText, {
+      useInnerText: true
+    })
     // wait for the searchText to be processed
-    await waitUntil(
-      async () =>
-        await (
-          await currentPage().locator("#taskedOrgUuid-popover tbody").first()
-        ).isVisible()
-    )
-    const orgCheckbox = currentPage()
+    await expect
+      .poll(
+        async () =>
+          await (
+            await this.page.locator("#taskedOrgUuid-popover tbody").first()
+          ).isVisible(),
+        {
+          timeout: 10000
+        }
+      )
+      .toBeTruthy()
+    const orgCheckbox = this.page
       .locator("#taskedOrgUuid-popover tr .orgShortName")
       .first()
     await (await orgCheckbox).click()
@@ -53,33 +63,27 @@ class SavedSearch extends Page {
   }
 
   async closeOrganizationsFilter() {
-    const closeButton = currentPage()
-      .locator(".bp6-icon.bp6-icon-cross")
-      .first()
+    const closeButton = this.page.locator(".bp6-icon.bp6-icon-cross").first()
     await (await closeButton).click()
   }
 
   async submitSearch() {
-    const searchButton = currentPage().locator("button[type='submit']").first()
+    const searchButton = this.page.locator("button[type='submit']").first()
     await (await searchButton).click()
   }
 
   async saveSearch() {
-    const saveButton = currentPage().locator("#saveSearchButton").first()
+    const saveButton = this.page.locator("#saveSearchButton").first()
     await (await saveButton).click()
   }
 
   async saveSearchModal() {
-    const saveButton = currentPage()
-      .locator("#saveSearchModalSubmitButton")
-      .first()
+    const saveButton = this.page.locator("#saveSearchModalSubmitButton").first()
     await (await saveButton).click()
   }
 
   async getToastMessages() {
-    const toastMessages = await currentPage()
-      .locator(".Toastify > div > div")
-      .all()
+    const toastMessages = await this.page.locator(".Toastify > div > div").all()
     if (toastMessages.length === 0) {
       return []
     }
@@ -91,11 +95,11 @@ class SavedSearch extends Page {
   }
 
   async getDeleteSavedSearchButton() {
-    return currentPage().locator(".btn-danger").first()
+    return this.page.locator(".btn-danger").first()
   }
 
   async getDeleteConfirmButton() {
-    return currentPage().locator('//button[text()="Yes, I am sure"]').first()
+    return this.page.locator('//button[text()="Yes, I am sure"]').first()
   }
 
   async confirmDelete() {
@@ -103,8 +107,7 @@ class SavedSearch extends Page {
   }
 
   async getNoSavedSearches() {
-    return currentPage().locator("fieldset p.mb-0").first()
+    return this.page.locator("fieldset p.mb-0").first()
   }
 }
-
-export default new SavedSearch()
+export default SavedSearch

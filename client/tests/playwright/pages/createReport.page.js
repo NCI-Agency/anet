@@ -1,4 +1,3 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/reports/new"
@@ -20,56 +19,53 @@ const ADVISE_FIELDS = {
 const OTHER_FIELDS = {
   assetsUsed: "formCustomFields.assetsUsed"
 }
-
 export class CreateReport extends Page {
   async getForm() {
-    return currentPage().locator("form").first()
+    return this.page.locator("form").first()
   }
 
   async getAlert() {
-    return currentPage().locator(".alert").first()
+    return this.page.locator(".alert").first()
   }
 
   async getDuration() {
-    return currentPage().locator("#duration").first()
+    return this.page.locator("#duration").first()
   }
 
   async getPositiveAtmosphere() {
-    return currentPage().locator('label[for="atmosphere_POSITIVE"]').first()
+    return this.page.locator('label[for="atmosphere_POSITIVE"]').first()
   }
 
   async getCustomFieldFormGroup(id) {
-    return currentPage().locator(`div[id="fg-${id}"]`).first()
+    return this.page.locator(`div[id="fg-${id}"]`).first()
   }
 
   async getCustomFieldButtonFromText(id, text) {
-    return currentPage()
+    return this.page
       .locator(`//div[@id="fg-${id}"]//button[text()="${text}"]`)
       .first()
   }
 
   async getEngagementInformationTitle() {
-    return currentPage()
-      .locator('//span[text()="Engagement information"]')
-      .first()
+    return this.page.locator('//span[text()="Engagement information"]').first()
   }
 
   async getGridLocationLatField() {
-    return currentPage().locator(`input[id="${GRID_LOCATION_ID}.lat"]`).first()
+    return this.page.locator(`input[id="${GRID_LOCATION_ID}.lat"]`).first()
   }
 
   async getGridLocationLngField() {
-    return currentPage().locator(`input[id="${GRID_LOCATION_ID}.lng"]`).first()
+    return this.page.locator(`input[id="${GRID_LOCATION_ID}.lng"]`).first()
   }
 
   async getGridLocationDisplayedCoordinateField() {
-    return currentPage()
+    return this.page
       .locator(`input[id="${GRID_LOCATION_ID}.displayedCoordinate"]`)
       .first()
   }
 
   async getGridLocationInfoButton() {
-    return currentPage()
+    return this.page
       .locator(`div[id="fg-${GRID_LOCATION_ID}"]`)
       .first()
       .locator('button[data-testid="info-button"]')
@@ -77,15 +73,13 @@ export class CreateReport extends Page {
   }
 
   async getGridLocationLatLonButton() {
-    return currentPage()
+    return this.page
       .locator(`button[name="${GRID_LOCATION_ID}.LAT_LON"]`)
       .first()
   }
 
   async getGridLocationMgrsButton() {
-    return currentPage()
-      .locator(`button[name="${GRID_LOCATION_ID}.MGRS"]`)
-      .first()
+    return this.page.locator(`button[name="${GRID_LOCATION_ID}.MGRS"]`).first()
   }
 
   async getTestReferenceFieldFormGroup() {
@@ -115,7 +109,7 @@ export class CreateReport extends Page {
   }
 
   async getTestReferenceFieldAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator(
         `div[id="${RELATED_REPORT_ID}-popover"] tbody tr:first-child td:nth-child(2)`
       )
@@ -164,13 +158,14 @@ export class CreateReport extends Page {
   }
 
   async getTestMultiReferenceFieldAdvancedSelect() {
-    await waitFor(
-      currentPage()
-        .locator(`div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`)
-        .first(),
-      "attached"
-    )
-    return currentPage()
+    await this.page
+      .locator(`div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`)
+      .first()
+      .waitFor({
+        state: "attached",
+        timeout: 10000
+      })
+    return this.page
       .locator(`div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`)
       .first()
   }
@@ -209,7 +204,7 @@ export class CreateReport extends Page {
     ).concat(
       await Promise.all(
         Object.keys(OTHER_FIELDS).map(async fieldsetId => {
-          return currentPage()
+          return this.page
             .locator(`div[id="${OTHER_FIELDS[fieldsetId]}"]`)
             .first()
         })
@@ -270,7 +265,7 @@ export class CreateReport extends Page {
   }
 
   async getAttendeesAssessments() {
-    return currentPage().locator("#attendees-engagement-assessments").first()
+    return this.page.locator("#attendees-engagement-assessments").first()
   }
 
   async getAttendeeAssessmentRows() {
@@ -294,7 +289,7 @@ export class CreateReport extends Page {
   }
 
   async getTasksAssessments() {
-    return currentPage().locator("#tasks-engagement-assessments").first()
+    return this.page.locator("#tasks-engagement-assessments").first()
   }
 
   async getTaskAssessmentRows() {
@@ -319,25 +314,23 @@ export class CreateReport extends Page {
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async getEditButton() {
-    return currentPage().locator('//a[text()="Edit"]').first()
+    return this.page.locator('//a[text()="Edit"]').first()
   }
 
   async getCancelButton() {
-    return currentPage().locator('//button[text()="Cancel"]').first()
+    return this.page.locator('//button[text()="Cancel"]').first()
   }
 
   async getDeleteButton() {
-    return currentPage()
-      .locator('//button[text()="Delete this report"]')
-      .first()
+    return this.page.locator('//button[text()="Delete this report"]').first()
   }
 
   async getConfirmButton() {
-    return currentPage().locator('//button[text()="Yes, I am sure"]').first()
+    return this.page.locator('//button[text()="Yes, I am sure"]').first()
   }
 
   async open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
@@ -353,15 +346,22 @@ export class CreateReport extends Page {
   }
 
   async waitForAlertToLoad() {
-    await waitFor(await this.getAlert(), "visible")
+    await (
+      await this.getAlert()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async submitForm() {
     await (await this.getSubmitButton()).click()
-    await waitFor(await this.getSubmitButton(), "attached", {
-      reverse: true
+    await (
+      await this.getSubmitButton()
+    ).waitFor({
+      state: "detached",
+      timeout: 10000
     })
   }
 }
-
-export default new CreateReport()
+export default CreateReport
