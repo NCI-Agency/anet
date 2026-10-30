@@ -77,8 +77,7 @@ test.describe("Create event page", () => {
         await CreateEvent.getRelatedObjectsTableEntry(ORGANIZATION_COMPLETE)
       ).not.toHaveCount(0)
       // Add a position
-      await (await CreateEvent.getMemberTypeButton("Positions")).click()
-      await CreateEvent.deleteInput(CreateEvent.getHostRelatedObjectsInput())
+      await CreateEvent.selectHostType("Positions")
       await (
         await CreateEvent.getHostRelatedObjectsInput()
       ).fill(String(POSITION))
@@ -103,8 +102,7 @@ test.describe("Create event page", () => {
       ).not.toHaveCount(0)
 
       // Add a person
-      await (await CreateEvent.getMemberTypeButton("People")).click()
-      await CreateEvent.deleteInput(CreateEvent.getHostRelatedObjectsInput())
+      await CreateEvent.selectHostType("People")
       await (
         await CreateEvent.getHostRelatedObjectsInput()
       ).fill(String(PERSON))

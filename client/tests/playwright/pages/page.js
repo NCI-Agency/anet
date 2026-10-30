@@ -321,6 +321,13 @@ class Page {
       .first()
   }
 
+  async selectHostType(memberType) {
+    await (await this.getMemberTypeButton(memberType)).click()
+    // Switching host types closes the overlay; reopen it before searching.
+    await (await this.getHostRelatedObjectsInput()).click()
+    await expect(currentPage().locator("#entitySelect-popover")).toBeVisible()
+  }
+
   async getHostRelatedObjectsInput() {
     return currentPage().locator("#hostRelatedObjects").first()
   }
