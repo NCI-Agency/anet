@@ -42,6 +42,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PhoneNumberTable from "components/PhoneNumberTable"
 import PositionsTable from "components/PositionsTable"
 import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
@@ -500,10 +501,11 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
           users={person.users}
         />
       ),
-      phoneNumber: person.phoneNumber || (
-        <em>
-          No {Settings.fields.person.phoneNumber.label.toLowerCase()} available
-        </em>
+      phoneNumber: (
+        <PhoneNumberTable
+          label={Settings.fields.person.phoneNumber.label}
+          phoneNumber={person.phoneNumber}
+        />
       ),
       emailAddresses: (
         <EmailAddressTable

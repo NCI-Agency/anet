@@ -16,6 +16,7 @@ import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import PhoneNumberTable from "components/PhoneNumberTable"
 import PositionsTable from "components/PositionsTable"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import PreviousPositions from "components/PreviousPositions"
@@ -153,12 +154,10 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.phoneNumber}
               value={
-                person.phoneNumber || (
-                  <em>
-                    No {Settings.fields.person.phoneNumber.label.toLowerCase()}{" "}
-                    available
-                  </em>
-                )
+                <PhoneNumberTable
+                  label={Settings.fields.person.phoneNumber.label}
+                  phoneNumber={person.phoneNumber}
+                />
               }
             />
 

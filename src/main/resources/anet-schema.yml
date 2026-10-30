@@ -94,6 +94,24 @@ $defs:
       - "$ref": "#/$defs/labeledField"
       - "$ref": "#/$defs/restrictableFieldProperties"
 
+# restrictable labeled field with a list of types (phone numbers)
+  restrictablePhoneNumberField:
+    unevaluatedProperties: false
+    allOf:
+      - "$ref": "#/$defs/labeledField"
+      - "$ref": "#/$defs/restrictableFieldProperties"
+      - properties:
+          types:
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
+              title: Phone number type
+              description: Shown in the UI and stored as the type value; e.g. Work, Mobile.
+                The UI always also offers Other so users can enter a custom type.
+        required: [types]
+
 # non-extensible definition for fields that allow free-form entry
   inputField:
     unevaluatedProperties: false
@@ -971,7 +989,7 @@ properties:
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           phoneNumber:
-            "$ref": "#/$defs/restrictableInputField"
+            "$ref": "#/$defs/restrictablePhoneNumberField"
           country:
             "$ref": "#/$defs/optionableInputField"
           code:
