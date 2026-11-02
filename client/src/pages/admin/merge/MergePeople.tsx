@@ -38,7 +38,6 @@ import useMergeObjects, {
   getActionButton,
   getOtherSide,
   isMergeFieldEmpty,
-  isMergeFieldSelected,
   isMergeFieldSelectedOrEmpty,
   MERGE_SIDES,
   mergedPersonIsValid,

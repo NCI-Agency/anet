@@ -49,15 +49,20 @@ const PhoneNumberTable = ({
   mergeState,
   dispatchMergeActions
 }: PhoneNumberTableProps) => {
-  const rows = (phoneNumber ?? []).filter(pn => pn?.details)
+  const getPhoneNumbersWithDetails = list =>
+    list?.filter(pn => pn?.details) ?? []
+  const rows = getPhoneNumbersWithDetails(phoneNumber)
   if (rows.length === 0) {
     return <em>No {label.toLowerCase()} available</em>
   }
-
   const getMerged = () => mergeState?.merged?.phoneNumber ?? []
+  const isSamePhoneNumber = (pn1, pn2) =>
+    isSamePhoneType(pn1, pn2) && isSamePhoneNumberDetails(pn1, pn2)
+  const isSamePhoneType = (pn1, pn2) => pn1?.type === pn2?.type
+  const isSamePhoneNumberDetails = (pn1, pn2) => pn1?.details === pn2?.details
 
-  const upsertByType = (list, item) => {
-    const idx = list.findIndex(p => p?.type === item?.type)
+  const upsertByDetails = (list, item) => {
+    const idx = list.findIndex(p => isSamePhoneNumberDetails(p, item))
     if (idx === -1) {
       return [...list, item]
     }
@@ -77,7 +82,7 @@ const PhoneNumberTable = ({
       }
     }
     const current = getMerged()
-    const next = upsertByType(current, item)
+    const next = upsertByDetails(current, item)
     dispatchMergeActions(
       setAMergedField(
         "phoneNumber",
@@ -87,34 +92,30 @@ const PhoneNumberTable = ({
     )
   }
 
-  const removeFromMerged = type => {
+  const removeFromMerged = pn => {
     if (!dispatchMergeActions) {
       return
     }
     const current = getMerged()
-    const next = current.filter(p => p?.type !== type)
+    const next = current.filter(p => !isSamePhoneNumber(p, pn))
     dispatchMergeActions(
       setAMergedField("phoneNumber", next, getSelectedSide(next))
     )
   }
 
-  const isSelectedForType = type => {
-    const currentState = getMerged().find(p => p?.type === type)
-    const typeValue = phoneNumber?.find(p => p?.type === type)
-    return (
-      currentState && typeValue && currentState.details === typeValue.details
-    )
+  const isSelected = pn => {
+    const currentState = getMerged().find(p => isSamePhoneNumber(p, pn))
+    const typeValue = phoneNumber?.find(p => isSamePhoneNumber(p, pn))
+    return currentState && typeValue
   }
 
   const isFullySelected = (current, values) => {
-    const rowsWithDetails = (values ?? []).filter(p => p?.details)
+    const rowsWithDetails = getPhoneNumbersWithDetails(values)
     if (current.length !== rowsWithDetails.length) {
       return false
     }
     for (const pn of rowsWithDetails) {
-      const match = current.find(
-        p => p?.type === pn?.type && p?.details === pn?.details
-      )
+      const match = current.some(p => isSamePhoneNumber(p, pn))
       if (!match) {
         return false
       }
@@ -130,9 +131,7 @@ const PhoneNumberTable = ({
     const right = mergeState?.[MERGE_SIDES.RIGHT] ?? {}
     const leftMatch = current.every(pn => {
       const leftPns = left.phoneNumber ?? []
-      const match = leftPns.find(
-        lp => lp?.type === pn?.type && lp?.details === pn?.details
-      )
+      const match = leftPns.some(lp => isSamePhoneNumber(lp, pn))
       return !!match
     })
     if (leftMatch && isFullySelected(current, left.phoneNumber ?? [])) {
@@ -163,7 +162,7 @@ const PhoneNumberTable = ({
                 <PickPhoneNumberButton
                   phoneNumber={pn}
                   align={align}
-                  isSelected={isSelectedForType(pn.type)}
+                  isSelected={isSelected(pn)}
                   onClick={() => pickFromSide(pn)}
                 />
               </td>
@@ -177,7 +176,7 @@ const PhoneNumberTable = ({
                 <PickPhoneNumberButton
                   phoneNumber={pn}
                   align={align}
-                  isSelected={isSelectedForType(pn.type)}
+                  isSelected={isSelected(pn)}
                   onClick={() => pickFromSide(pn)}
                 />
               </td>
@@ -187,7 +186,7 @@ const PhoneNumberTable = ({
               <td>
                 <RemoveButton
                   title="Remove phone number"
-                  onClick={() => removeFromMerged(pn.type)}
+                  onClick={() => removeFromMerged(pn)}
                 />
               </td>
             )}
