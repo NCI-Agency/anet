@@ -11,6 +11,32 @@ import {
 } from "mergeUtils"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 
+function arraysEqualUnordered<T>(
+  left: readonly T[],
+  right: readonly T[]
+): boolean {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  const remaining = [...right]
+  for (const element of left) {
+    const index = remaining.findIndex(candidate => _isEqual(element, candidate))
+    if (index === -1) {
+      return false
+    }
+    remaining.splice(index, 1)
+  }
+
+  return true
+}
+
+function mergeValuesEqual(left: unknown, right: unknown): boolean {
+  return Array.isArray(left) && Array.isArray(right)
+    ? arraysEqualUnordered(left, right)
+    : _isEqual(left, right)
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type
 const alignOptions: string[] = Object.values(ALIGN_OPTIONS)
 interface MergeFieldProps {
@@ -68,7 +94,7 @@ const MergeField = ({
       autoMerge &&
       _has(mergeState[MERGE_SIDES.LEFT], fieldName) &&
       _has(mergeState[MERGE_SIDES.RIGHT], fieldName) &&
-      _isEqual(
+      mergeValuesEqual(
         _get(mergeState[MERGE_SIDES.LEFT], fieldName),
         _get(mergeState[MERGE_SIDES.RIGHT], fieldName)
       ),
