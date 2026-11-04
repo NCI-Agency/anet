@@ -18,12 +18,10 @@ class MyAttachments extends Page {
     )
   }
 
-  async getAttachmentCaptionCell(attachment) {
-    return attachment.locator("td:nth-child(2)").first()
-  }
-
-  async getAttachmentClassification(attachmentCaptionCell) {
-    return attachmentCaptionCell.locator(".attachment-classification").first()
+  async getAttachmentClassifications() {
+    return (await this.getAttachmentRows()).locator(
+      "td:nth-child(2) .attachment-classification"
+    )
   }
 }
 
