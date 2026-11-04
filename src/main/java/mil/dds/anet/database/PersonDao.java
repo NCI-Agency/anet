@@ -3,7 +3,6 @@ package mil.dds.anet.database;
 import com.google.common.collect.ObjectArrays;
 import graphql.GraphQLContext;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -346,12 +345,14 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
       if (useWinnerPositionHistory) {
         // Clear out loser's positions and history
-        updatePosition(handle, null, loserUuid, loserUuid);
+        updatePosition(null, loserUuid);
+        deleteForMerge("peoplePositions", "personUuid", loserUuid);
       } else {
         // Clear out winner's positions and history
-        updatePosition(handle, null, winnerUuid, winnerUuid);
+        updatePosition(null, winnerUuid);
+        deleteForMerge("peoplePositions", "personUuid", winnerUuid);
         // Move loser's positions to the winner
-        updatePosition(handle, winnerUuid, loserUuid, winnerUuid);
+        updatePosition(winnerUuid, loserUuid);
         // Move loser's position history to winner
         updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
       }
@@ -442,18 +443,19 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
   }
 
-  private void updatePosition(Handle handle, String newPersonUuidForPosition,
-      String oldPersonUuidForPosition, String personUuidForHistoryRemoval) {
-    // Update position
-    final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
-    handle
-        .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
-            + "SET \"currentPersonUuid\" = :newPersonUuid, \"updatedAt\" = :updatedAt "
-            + "WHERE \"currentPersonUuid\" = :oldPersonUuid")
-        .bind("newPersonUuid", newPersonUuidForPosition)
-        .bind("oldPersonUuid", oldPersonUuidForPosition).bind("updatedAt", now).execute();
-    // Clear obsolete position history
-    deleteForMerge("peoplePositions", "personUuid", personUuidForHistoryRemoval);
+  private void updatePosition(String newPersonUuidForPosition, String oldPersonUuidForPosition) {
+    final Handle handle = getDbHandle();
+    try {
+      handle
+          .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
+              + "SET \"currentPersonUuid\" = :newPersonUuid, \"updatedAt\" = :updatedAt "
+              + "WHERE \"currentPersonUuid\" = :oldPersonUuid")
+          .bind("newPersonUuid", newPersonUuidForPosition)
+          .bind("oldPersonUuid", oldPersonUuidForPosition)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   public CompletableFuture<List<Position>> getAdditionalPositionsForPerson(GraphQLContext context,
