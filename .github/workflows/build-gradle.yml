@@ -53,28 +53,30 @@ jobs:
         run: |
           ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerConfigureKeycloak dockerStartKeycloak
           sleep 30
-      # This step should fail:
-      - name: Run ANET init on empty database
-        id: init-on-empty-db
-        run: ./gradlew -PtestEnv dbInit
+      # Initialization must fail when migrations are disabled.
+      - name: Verify ANET init fails on empty database
+        run: |
+          if ./gradlew -PtestEnv dbInit; then
+            echo "::error::ANET init unexpectedly succeeded on an empty database without migrations"
+            exit 1
+          fi
+          echo "ANET init failed as expected on an empty database without migrations"
         env:
           ANET_DB_MIGRATE: false
-        continue-on-error: true
-      - run: exit 1
-        if: ${{ steps.init-on-empty-db.outcome != 'failure' }}
       # This step should succeed:
       - name: Run ANET init on clean database
         id: init-on-clean-db
         run: ./gradlew -PtestEnv dbInit
         env:
           SPRING_PROFILES_ACTIVE: prod
-      # This step should fail:
-      - name: Run ANET init on filled database
-        id: init-on-filled-db
-        run: ./gradlew -PtestEnv dbInit
-        continue-on-error: true
-      - run: exit 1
-        if: ${{ steps.init-on-filled-db.outcome != 'failure' }}
+      # Initialization must reject an already initialized database.
+      - name: Verify ANET init fails on filled database
+        run: |
+          if ./gradlew -PtestEnv dbInit; then
+            echo "::error::ANET init unexpectedly succeeded on an already initialized database"
+            exit 1
+          fi
+          echo "ANET init failed as expected on an already initialized database"
 
   test-server:
     needs: build
