@@ -87,9 +87,6 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
     return new SelfIdBatcher().getByIds(uuids);
   }
 
-  /*
-   * @return: number of rows updated.
-   */
   @Override
   public int updateInternal(Preference p) {
     final Handle handle = getDbHandle();
@@ -97,7 +94,7 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
       return handle.createUpdate(
           "/* preferencesUpdate */ UPDATE preferences SET name = :name, type = :type, "
               + "category = :category, description = :description, \"defaultValue\" = :defaultValue, "
-              + "\"allowedValues\" = :allowedValues \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+              + "\"allowedValues\" = :allowedValues, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("name", p.getName()).bind("type", p.getType()).bind("category", p.getCategory())
           .bind("description", p.getDescription()).bind("defaultValue", p.getDefaultValue())
