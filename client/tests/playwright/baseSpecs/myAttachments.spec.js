@@ -22,27 +22,23 @@ test.describe("My Attachments page", () => {
       const attachmentRows = await MyAttachments.getAttachmentRows()
       // table has 10 attachment rows
       await expect(attachmentRows).toHaveCount(10)
-      // check the classifications
-      const attachmentClassifications = {}
-      for (const attachmentRow of await attachmentRows.all()) {
-        const attachmentCaptionCell =
-          await MyAttachments.getAttachmentCaptionCell(attachmentRow)
-        const classification = (
-          await (
-            await MyAttachments.getAttachmentClassification(
-              attachmentCaptionCell
-            )
-          ).innerText()
-        ).trim()
-        attachmentClassifications[classification] =
-          (attachmentClassifications[classification] ?? 0) + 1
-      }
-      expect(Object.keys(attachmentClassifications)).toHaveLength(3)
-      expect(attachmentClassifications["[Public]"]).toBe(8)
-      expect(attachmentClassifications["[NATO UNCLASSIFIED]"]).toBe(1)
-      expect(
-        attachmentClassifications["[NATO UNCLASSIFIED Releasable to EU]"]
-      ).toBe(1)
+      // Check the whole distribution in one retrying snapshot. Separate counts
+      // could pass against different intermediate renders of the table.
+      const classifications = await MyAttachments.getAttachmentClassifications()
+      await expect
+        .poll(async () => {
+          const classificationCounts = {}
+          for (const classification of await classifications.allTextContents()) {
+            const label = classification.trim()
+            classificationCounts[label] = (classificationCounts[label] ?? 0) + 1
+          }
+          return classificationCounts
+        })
+        .toEqual({
+          "[Public]": 8,
+          "[NATO UNCLASSIFIED]": 1,
+          "[NATO UNCLASSIFIED Releasable to EU]": 1
+        })
       await MyAttachments.logout()
     })
   })

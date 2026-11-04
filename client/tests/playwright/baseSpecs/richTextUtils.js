@@ -8,7 +8,7 @@ export const getRichTextContent = async (
   const convertedTag = tags.map(tag => convertTagForEditor(tag)).join(" ")
   const convertedSelector = await richTextEditor.locator(convertedTag).first()
   if (multipleElements) {
-    return (await convertedSelector.locator(multipleElements).all())[index]
+    return convertedSelector.locator(multipleElements).nth(index)
   }
   return convertedSelector
   function convertTagForEditor(tag) {

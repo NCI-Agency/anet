@@ -7,12 +7,22 @@ const ERIN_SUPERUSERS = ["CTR Rebecca Beccabon", "CIV Jacob Jacobson"]
 const ERIN_ADMINS = ["CIV Arthur Dmin", "CIV Michael Scott"]
 const HELP_TEXT = "This is a help text"
 test.describe("When checking the help page", () => {
-  test("Should see of the user superusers and administrators", async () => {
+  test("Should see links to the user's superusers and administrators", async () => {
     await Help.open()
-    const superusers = await Help.getSuperusers()
-    expect(superusers).toEqual(expect.arrayContaining(ERIN_SUPERUSERS))
-    const administrators = await Help.getAdministrators()
-    expect(administrators).toEqual(expect.arrayContaining(ERIN_ADMINS))
+    const superusers = await Help.getSuperuserLinks()
+    for (const name of ERIN_SUPERUSERS) {
+      // Match visible text rather than the accessible name, which may include
+      // the avatar's alt text.
+      const link = superusers.filter({ hasText: name })
+      await expect(link).toBeVisible()
+      await expect(link).toHaveText(name)
+    }
+    const administrators = await Help.getAdministratorLinks()
+    for (const name of ERIN_ADMINS) {
+      const link = administrators.filter({ hasText: name })
+      await expect(link).toBeVisible()
+      await expect(link).toHaveText(name)
+    }
   })
   test("Should have no help text", async () => {
     await Help.open()
