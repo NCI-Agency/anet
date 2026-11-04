@@ -2,7 +2,7 @@ import { expect } from "@playwright/test"
 import Home from "../pages/home.page.js"
 import Search from "../pages/search.page.js"
 import ShowOrganization from "../pages/showOrganization.page.js"
-import { mapSequential, test, waitFor } from "../support.js"
+import { test, waitFor } from "../support.js"
 
 const ORGANIZATION_SEARCH_STRING = "EF 2.2"
 const SUPERUSER_ASSESSMENT_CREATE_DETAILS = [
@@ -74,7 +74,7 @@ test.describe("For the annual organization assessments", () => {
       await ShowOrganization.saveAssessmentAndWaitForModalClose(
         "organizationAnnually",
         "annually",
-        VALUE_TO_TEXT_FOR_PRIORITY[SUPERUSER_ASSESSMENT_CREATE_DETAILS[0]]
+        getExpectedAssessmentDetails(SUPERUSER_ASSESSMENT_CREATE_DETAILS)
       )
     })
     test("Should show the same assessment details with the details just created", async () => {
@@ -97,7 +97,7 @@ test.describe("For the annual organization assessments", () => {
       await ShowOrganization.saveAssessmentAndWaitForModalClose(
         "organizationAnnually",
         "annually",
-        VALUE_TO_TEXT_FOR_PRIORITY[SUPERUSER_ASSESSMENT_EDIT_DETAILS[0]]
+        getExpectedAssessmentDetails(SUPERUSER_ASSESSMENT_EDIT_DETAILS)
       )
     })
     test("Should show the same assessment details with the details just edited", async () => {
@@ -143,7 +143,7 @@ test.describe("For the annual organization assessments", () => {
       await ShowOrganization.saveAssessmentAndWaitForModalClose(
         "organizationAnnually",
         "annually",
-        VALUE_TO_TEXT_FOR_PRIORITY[ADMIN_ASSESSMENT_EDIT_DETAILS[0]]
+        getExpectedAssessmentDetails(ADMIN_ASSESSMENT_EDIT_DETAILS)
       )
     })
     test("Should show the same assessment details with the details just edited", async () => {
@@ -175,12 +175,15 @@ const assertAssessmentDetails = async (
     assessmentKey,
     recurrence
   )
-  // first wait for assessment modal to be fully rendered
-  await mapSequential(details, async (detail, index) => {
-    const pre = `${index}-) `
-    const det = (await detail.innerText()).trim()
-    expect(`${pre}${det}`).toBe(
-      `${pre}${VALUE_TO_TEXT_FOR_PRIORITY[assessmentDetails[index]] || VALUE_TO_TEXT_FOR_INTERACTION[assessmentDetails[index]] || assessmentDetails[index]}`
-    )
-  })
+  await expect(details).toHaveText(
+    getExpectedAssessmentDetails(assessmentDetails)
+  )
 }
+
+const getExpectedAssessmentDetails = assessmentDetails =>
+  assessmentDetails.map(
+    value =>
+      VALUE_TO_TEXT_FOR_PRIORITY[value] ||
+      VALUE_TO_TEXT_FOR_INTERACTION[value] ||
+      value
+  )

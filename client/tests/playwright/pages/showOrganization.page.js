@@ -1,3 +1,4 @@
+import { expect } from "@playwright/test"
 import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
@@ -157,9 +158,9 @@ class ShowOrganization extends Page {
   }
 
   async getShownAssessmentDetails(assessmentKey, recurrence) {
-    return (await this.getShownAssessmentPanel(assessmentKey, recurrence))
-      .locator("div.card-body .form-control-plaintext")
-      .all()
+    return (
+      await this.getShownAssessmentPanel(assessmentKey, recurrence)
+    ).locator("div.card-body .form-control-plaintext")
   }
 
   async getAssessmentContainer(assessmentKey, recurrence) {
@@ -204,15 +205,17 @@ class ShowOrganization extends Page {
   async saveAssessmentAndWaitForModalClose(
     assessmentKey,
     recurrence,
-    detail0ToWaitFor
+    expectedDetails
   ) {
-    return super.saveAssessmentAndWaitForModalClose(
-      await this.getSaveAssessmentButton(),
-      () => this.getAssessmentModalForm(),
-      () => this.getShownAssessmentDetails(assessmentKey, recurrence),
-      0,
-      detail0ToWaitFor
-    )
+    await (await this.getSaveAssessmentButton()).click()
+    await expect(await this.getAssessmentModalForm()).toHaveCount(0, {
+      timeout: 20000
+    })
+    // Closing the modal starts a refetch. An unchanged first answer does not
+    // prove that the edited assessment has rendered; wait for every answer.
+    await expect(
+      await this.getShownAssessmentDetails(assessmentKey, recurrence)
+    ).toHaveText(expectedDetails)
   }
 
   async confirmDelete() {
