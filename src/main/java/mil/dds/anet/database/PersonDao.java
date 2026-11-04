@@ -257,8 +257,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     try {
       DaoUtils.setUpdateFields(person);
       final int nr = handle
-          .createUpdate("UPDATE people SET \"pendingVerification\" = :pendingVerification"
-              + " WHERE uuid = :uuid")
+          .createUpdate("UPDATE people SET \"pendingVerification\" = :pendingVerification,"
+              + " \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(person).bind("updatedAt", DaoUtils.asLocalDateTime(person.getUpdatedAt()))
           .bind("pendingVerification", false).execute();
       // Evict the person from the domain users cache
