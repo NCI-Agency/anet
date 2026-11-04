@@ -117,14 +117,13 @@ public class PreferenceDao extends AnetBaseDao<Preference, PreferenceSearchQuery
     }
   }
 
-  /*
-   * @return: number of rows updated.
-   */
   public int updatePreferenceValue(Preference p) {
     final Handle handle = getDbHandle();
     try {
+      DaoUtils.setUpdateFields(p);
       return handle.createUpdate(
-          "/* preferencesUpdateValue */ UPDATE preferences SET  \"defaultValue\" = :defaultValue WHERE uuid = :uuid")
+          "/* preferencesUpdateValue */ UPDATE preferences SET  \"defaultValue\" = :defaultValue,"
+              + " \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("defaultValue", p.getDefaultValue()).execute();
     } finally {
