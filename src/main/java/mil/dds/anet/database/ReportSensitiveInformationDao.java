@@ -110,7 +110,7 @@ public class ReportSensitiveInformationDao
             Utils.getUnlinkedFromDetails(TABLE_NAME, report.getUuid())));
       } else {
         // Update relevant fields, but do not allow the reportUuid to be updated by the query!
-        rsi.setUpdatedAt(Instant.now());
+        DaoUtils.setUpdateFields(rsi);
         numRows = handle
             .createUpdate("/* updateReportsSensitiveInformation */ UPDATE \"" + TABLE_NAME + "\""
                 + " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")

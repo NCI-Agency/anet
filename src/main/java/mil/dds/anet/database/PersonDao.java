@@ -452,7 +452,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               + "WHERE \"currentPersonUuid\" = :oldPersonUuid")
           .bind("newPersonUuid", newPersonUuidForPosition)
           .bind("oldPersonUuid", oldPersonUuidForPosition)
-          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+          .bind("updatedAt", DaoUtils.asLocalDateTime(DaoUtils.truncateForUpdatedAt(Instant.now())))
+          .execute();
     } finally {
       closeDbHandle(handle);
     }

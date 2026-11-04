@@ -239,6 +239,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       removePersonFromPosition(newPos);
       // Get timestamp *after* remove to preserve correct order
       final Instant now = Instant.now();
+      final Instant updatedAt = DaoUtils.truncateForUpdatedAt(now);
 
       if (currPos != null) {
         // If this person is in a position already, we need to remove them.
@@ -259,7 +260,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           handle.createUpdate("/* positionSetPerson.remove1a */ UPDATE positions "
               + "SET \"currentPersonUuid\" = NULL, type = :regularType, \"updatedAt\" = :updatedAt "
               + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
-              .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+              .bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt)).bind("personUuid", personUuid)
               .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
               .bind("positionUuid", currPos.getUuid()).execute();
         } else {
@@ -267,7 +268,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
               .createUpdate("/* positionSetPerson.remove1b */ UPDATE positions "
                   + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
                   + "WHERE \"currentPersonUuid\" = :personUuid AND uuid = :positionUuid")
-              .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+              .bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt)).bind("personUuid", personUuid)
               .bind("positionUuid", currPos.getUuid()).execute();
         }
       }
@@ -279,15 +280,15 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             + "SET \"currentPersonUuid\" = :personUuid, type = :type, \"updatedAt\" = :updatedAt "
             + "WHERE uuid = :positionUuid").bind("personUuid", personUuid)
             .bind("type", DaoUtils.getEnumId(keepPrivilege(newPos, currPos)))
-            .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
-            .execute();
+            .bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt))
+            .bind("positionUuid", positionUuid).execute();
       } else {
         // Just assign person to position ignoring the privileges (it is an additional position)
         handle
             .createUpdate("/* positionSetPerson.set1b */ UPDATE positions "
                 + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
                 + "WHERE uuid = :positionUuid")
-            .bind("personUuid", personUuid).bind("updatedAt", DaoUtils.asLocalDateTime(now))
+            .bind("personUuid", personUuid).bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt))
             .bind("positionUuid", positionUuid).execute();
       }
 
@@ -384,7 +385,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
                 + "SET \"currentPersonUuid\" = NULL, "
                 + "type = CASE WHEN uuid = :positionUuid THEN :regularType ELSE type END, "
                 + "\"updatedAt\" = :updatedAt WHERE \"currentPersonUuid\" = :personUuid")
-            .bind("updatedAt", DaoUtils.asLocalDateTime(timestamp)).bind("personUuid", personUuid)
+            .bind("updatedAt", DaoUtils.asLocalDateTime(DaoUtils.truncateForUpdatedAt(timestamp)))
+            .bind("personUuid", personUuid)
             .bind("regularType", DaoUtils.getEnumId(PositionType.REGULAR))
             .bind("positionUuid", primaryPosition.getUuid()).execute();
       } else {
@@ -392,8 +394,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             .createUpdate("/* positionsRemovePerson.update */ UPDATE positions "
                 + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
                 + "WHERE \"currentPersonUuid\" = :personUuid")
-            .bind("updatedAt", DaoUtils.asLocalDateTime(timestamp)).bind("personUuid", personUuid)
-            .execute();
+            .bind("updatedAt", DaoUtils.asLocalDateTime(DaoUtils.truncateForUpdatedAt(timestamp)))
+            .bind("personUuid", personUuid).execute();
       }
       final String updateSql = "/* positionsRemovePerson.end */ UPDATE \"peoplePositions\" "
           + "SET \"endedAt\" = :endedAt WHERE \"personUuid\" = :personUuid "

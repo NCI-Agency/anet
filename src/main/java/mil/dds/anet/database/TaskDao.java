@@ -250,7 +250,8 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
               + "WHERE uuid IN (SELECT uuid FROM descendants WHERE status = :activeStatus)")
           .bind("taskUuid", taskUuid).bind("activeStatus", DaoUtils.getEnumId(Status.ACTIVE))
           .bind("inactiveStatus", DaoUtils.getEnumId(Status.INACTIVE))
-          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+          .bind("updatedAt", DaoUtils.asLocalDateTime(DaoUtils.truncateForUpdatedAt(Instant.now())))
+          .execute();
     } finally {
       closeDbHandle(handle);
     }
