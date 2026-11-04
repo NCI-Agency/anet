@@ -8,7 +8,6 @@ import com.google.common.base.Joiner;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
@@ -377,9 +376,7 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
   }
 
   protected static List<AssessmentInput> getAssessmentsInput(final List<Assessment> assessments) {
-    // List should be mutable, as it gets reversed during the tests!
-    return assessments.stream().map(AbstractResourceTest::getAssessmentInput)
-        .collect(Collectors.toList());
+    return assessments.stream().map(AbstractResourceTest::getAssessmentInput).toList();
   }
 
   protected static AuthorizationGroupInput getAuthorizationGroupInput(
@@ -396,8 +393,7 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
   }
 
   protected static List<NoteInput> getNotesInput(final List<Note> notes) {
-    // List should be mutable, as it gets reversed during the tests!
-    return notes.stream().map(AbstractResourceTest::getNoteInput).collect(Collectors.toList());
+    return notes.stream().map(AbstractResourceTest::getNoteInput).toList();
   }
 
   protected static OrganizationInput getOrganizationInput(final Organization organization) {

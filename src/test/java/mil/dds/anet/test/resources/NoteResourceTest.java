@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.Lists;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import mil.dds.anet.database.PersonDao;
@@ -73,7 +74,7 @@ class NoteResourceTest extends AbstractResourceTest {
     final Report updatedReport =
         withCredentials(adminUser, t -> queryExecutor.report(REPORT_FIELDS, testReport.getUuid()));
     assertThat(updatedReport.getNotes()).hasSize(1);
-    final Note reportNote = updatedReport.getNotes().get(0);
+    final Note reportNote = updatedReport.getNotes().getFirst();
     assertThat(reportNote.getText()).isEqualTo(testNoteInput.getText());
     assertThat(reportNote.getNoteRelatedObjects()).hasSize(1);
 
@@ -119,7 +120,7 @@ class NoteResourceTest extends AbstractResourceTest {
     final Position updatedPosition = withCredentials(adminUser,
         t -> queryExecutor.position(POSITION_FIELDS, testPosition.getUuid()));
     assertThat(updatedPosition.getNotes()).hasSize(1);
-    final Note positionNote = updatedPosition.getNotes().get(0);
+    final Note positionNote = updatedPosition.getNotes().getFirst();
     assertThat(positionNote.getText()).isEqualTo(testNoteInput.getText());
     assertThat(positionNote.getNoteRelatedObjects()).hasSize(1);
 
@@ -158,7 +159,7 @@ class NoteResourceTest extends AbstractResourceTest {
 
     final Note freeTextNote = succeedNoteCreate(jackUser, freeTextNoteInput);
     final List<Note> interlocutorNotes = Lists.newArrayList(freeTextNote);
-    final List<NoteInput> testNoteInputs = Lists.newArrayList(freeTextNoteInput);
+    final List<Note> createdNotes = Lists.newArrayList(freeTextNote);
 
     // - S: create as admin
     final NoteInput freeTextNoteInputAdmin =
@@ -168,27 +169,26 @@ class NoteResourceTest extends AbstractResourceTest {
     final Note freeTextNoteAdmin = succeedNoteCreate(adminUser, freeTextNoteInputAdmin);
     interlocutorNotes.add(freeTextNoteAdmin);
     interlocutorPerson.setNotes(interlocutorNotes);
-    testNoteInputs.add(freeTextNoteInputAdmin);
+    createdNotes.add(freeTextNoteAdmin);
 
     // - S: read it
-    Collections.reverse(interlocutorPerson.getNotes());
-    assertFreeTextNotes(interlocutorPerson.getNotes(), testNoteInputs, 1);
+    assertFreeTextNotes(interlocutorPerson.getNotes(), createdNotes, 1);
 
     // - S: read it as someone else
     final Person bobPerson = withCredentials(getDomainUsername(getBobBobtown()),
         t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid));
-    assertFreeTextNotes(bobPerson.getNotes(), testNoteInputs, 1);
+    assertFreeTextNotes(bobPerson.getNotes(), createdNotes, 1);
 
     // - S: read it as admin
     final Person adminPerson = withCredentials(adminUser,
         t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid));
-    assertFreeTextNotes(adminPerson.getNotes(), testNoteInputs, 1);
+    assertFreeTextNotes(adminPerson.getNotes(), createdNotes, 1);
 
     // - S: update it
     final NoteInput updatedNoteInputJack = getNoteInput(freeTextNote);
     updatedNoteInputJack.setText("Updated by jack");
-    final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInputJack);
     final Note updatedNoteJack = succeedNoteUpdate(jackUser, updatedNoteInputJack);
+    final List<Note> updatedNotes = Lists.newArrayList(updatedNoteJack);
 
     // - F: update it as someone else
     final NoteInput failedUpdateNoteInput = getNoteInput(freeTextNote);
@@ -203,34 +203,27 @@ class NoteResourceTest extends AbstractResourceTest {
     // - S: update it as admin
     final NoteInput updatedNoteInputAdmin = getNoteInput(freeTextNoteAdmin);
     updatedNoteInputAdmin.setText("Updated by admin");
-    updatedNotesInput.add(updatedNoteInputAdmin);
     final Note updatedNoteAdmin = succeedNoteUpdate(adminUser, updatedNoteInputAdmin);
+    updatedNotes.add(updatedNoteAdmin);
 
     // - F: delete it as someone else
     failNoteDelete("erin", updatedNoteJack);
 
     // - S: delete it
     succeedNoteDelete(jackUser, updatedNoteJack);
-    assertThat(updatedNotesInput.remove(updatedNoteInputJack)).isTrue();
-    Collections.reverse(
-        withCredentials(jackUser, t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid))
-            .getNotes());
+    assertThat(updatedNotes.remove(updatedNoteJack)).isTrue();
     assertFreeTextNotes(
         withCredentials(jackUser, t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid))
             .getNotes(),
-        updatedNotesInput, 1);
+        updatedNotes, 1);
 
     // - S: delete it as admin
     succeedNoteDelete(adminUser, updatedNoteAdmin);
-    assertThat(updatedNotesInput.remove(updatedNoteInputAdmin)).isTrue();
-    // FIXME: what does this actually do?
-    Collections.reverse(
-        withCredentials(adminUser, t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid))
-            .getNotes());
+    assertThat(updatedNotes.remove(updatedNoteAdmin)).isTrue();
     assertFreeTextNotes(
         withCredentials(adminUser, t -> queryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid))
             .getNotes(),
-        updatedNotesInput, 1);
+        updatedNotes, 1);
   }
 
   @Test
@@ -239,7 +232,7 @@ class NoteResourceTest extends AbstractResourceTest {
     final Report testReport =
         withCredentials(adminUser, t -> queryExecutor.report(REPORT_FIELDS, testReportUuid));
     assertThat(testReport.getNotes()).isNotEmpty();
-    final Note test = testReport.getNotes().get(0);
+    final Note test = testReport.getNotes().getFirst();
 
     // Update it
     final NoteInput updatedInput = getNoteInput(test);
@@ -326,18 +319,26 @@ class NoteResourceTest extends AbstractResourceTest {
     return nrDeleted;
   }
 
-  private void assertFreeTextNotes(final List<Note> testNotes, final List<NoteInput> testNoteInputs,
+  private void assertFreeTextNotes(final List<Note> testNotes, final List<Note> createdNotes,
       final int nrRelatedObjects) {
     assertThat(testNotes).isNotNull();
-    assertThat(testNotes).hasSameSizeAs(testNoteInputs);
-    Collections.reverse(testNotes);
-    for (int i = 0; i < testNotes.size(); i++) {
-      final NoteInput ni = testNoteInputs.get(i);
-      assertThat(testNotes.get(i))
-          .matches(n -> n.getText().equals(ni.getText()), "has correct text")
-          .matches(n -> n.getNoteRelatedObjects().size() == nrRelatedObjects,
-              "has correct related objects");
-    }
+    assertThat(testNotes).hasSameSizeAs(createdNotes);
+    // Each note should appear in the inputs
+    final Comparator<Note> comparator =
+        Comparator.comparing(Note::getUuid).thenComparing(Note::getText).thenComparing((n1, n2) -> {
+          int r =
+              Integer.compare(n1.getNoteRelatedObjects().size(), n2.getNoteRelatedObjects().size());
+          if (r != 0) {
+            return r;
+          }
+          r = Integer.compare(n1.getNoteRelatedObjects().size(), nrRelatedObjects);
+          if (r != 0) {
+            return r;
+          }
+          return Integer.compare(n2.getNoteRelatedObjects().size(), nrRelatedObjects);
+        });
+    assertThat(testNotes).usingElementComparator(comparator)
+        .containsExactlyInAnyOrderElementsOf(createdNotes);
   }
 
   private int countNotes() {
