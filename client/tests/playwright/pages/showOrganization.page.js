@@ -1,9 +1,7 @@
 import { expect } from "@playwright/test"
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/organizations/:uuid"
-
 class ShowOrganization extends Page {
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
@@ -14,70 +12,71 @@ class ShowOrganization extends Page {
   }
 
   async getCreateSubOrganizationButton() {
-    return currentPage()
-      .locator('//a[text()="Create sub-organization"]')
-      .first()
+    return this.page.locator('//a[text()="Create sub-organization"]').first()
   }
 
   async getLongName() {
-    return currentPage().locator('div[id="longName"]').first()
+    return this.page.locator('div[id="longName"]').first()
   }
 
   async getLocation() {
-    return currentPage().locator('div[id="location"]').first()
+    return this.page.locator('div[id="location"]').first()
   }
 
   async getProfile() {
-    return currentPage().locator('div[id="profile"]').first()
+    return this.page.locator('div[id="profile"]').first()
   }
 
   async hoverOverApp6Symbol() {
-    const previewElement = await currentPage()
+    const previewElement = await this.page
       .locator("#app6-symbol-preview")
       .first()
     await previewElement.hover()
-    const popover = await currentPage().locator(".bp6-popover-content").first()
-    await waitFor(popover, "visible")
+    const popover = await this.page.locator(".bp6-popover-content").first()
+    await popover.waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async getApp6Value(field) {
-    return currentPage().locator(`td[id="${field}"]`).first()
+    return this.page.locator(`td[id="${field}"]`).first()
   }
 
   async getLeaders() {
-    return currentPage().locator('div[id="fg-Leaders"]').first()
+    return this.page.locator('div[id="fg-Leaders"]').first()
   }
 
   async getLeaderPosition() {
-    return currentPage()
+    return this.page
       .locator("div#Leaders div.list-group-item > span:first-child")
       .first()
   }
 
   async getLeaderPositionPerson() {
-    return currentPage()
+    return this.page
       .locator("div#Leaders div.list-group-item > span:nth-child(2)")
       .first()
   }
 
   async getDeputies() {
-    return currentPage().locator('div[id="fg-Deputies"]').first()
+    return this.page.locator('div[id="fg-Deputies"]').first()
   }
 
   async getDeputyPosition() {
-    return currentPage()
+    return this.page
       .locator("div#Deputies div.list-group-item > span:first-child")
       .first()
   }
 
   async getDeputyPositionPerson() {
-    return currentPage()
+    return this.page
       .locator("div#Deputies div.list-group-item > span:nth-child(2)")
       .first()
   }
 
   async getTasks() {
-    return currentPage().locator('div[id="tasks"]').first()
+    return this.page.locator('div[id="tasks"]').first()
   }
 
   async getAssignedTasks() {
@@ -85,15 +84,15 @@ class ShowOrganization extends Page {
   }
 
   async getEditOrganizationButton() {
-    return currentPage().locator("//a[text()='Edit']").first()
+    return this.page.locator("//a[text()='Edit']").first()
   }
 
   async getEditAttachmentsButton() {
-    return await currentPage().locator("#edit-attachments").first()
+    return await this.page.locator("#edit-attachments").first()
   }
 
   async getEditableTasks() {
-    return currentPage().locator('div[id="fg-tasks"]').first()
+    return this.page.locator('div[id="fg-tasks"]').first()
   }
 
   async getEditableAssignedTasks() {
@@ -104,11 +103,18 @@ class ShowOrganization extends Page {
 
   async waitForAssessmentModalForm(reverse = false) {
     // wait for modal animation to finish
-    await waitFor(await this.getAssessmentModalForm(), "attached", {
-      reverse,
+    await (
+      await this.getAssessmentModalForm()
+    ).waitFor({
+      state: reverse ? "detached" : "attached",
       timeout: 20000
     })
-    await waitFor(await this.getAssessmentModalForm(), "visible")
+    await (
+      await this.getAssessmentModalForm()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async getAddAssessmentButton(assessmentKey, recurrence) {
@@ -119,13 +125,11 @@ class ShowOrganization extends Page {
   }
 
   async getEditAssessmentButton() {
-    return currentPage()
-      .locator('div.card button[title="Edit assessment"]')
-      .first()
+    return this.page.locator('div.card button[title="Edit assessment"]').first()
   }
 
   async getDeleteAssessmentButton() {
-    return currentPage()
+    return this.page
       .locator("div.card button.btn.btn-outline-danger.btn-xs")
       .first()
   }
@@ -137,11 +141,11 @@ class ShowOrganization extends Page {
   }
 
   async getAssessmentModalForm() {
-    return currentPage().locator(".modal-content form").first()
+    return this.page.locator(".modal-content form").first()
   }
 
   async getDeleteConfirmButton() {
-    return currentPage().locator('//button[text()="Yes, I am sure"]').first()
+    return this.page.locator('//button[text()="Yes, I am sure"]').first()
   }
 
   async getSaveAssessmentButton() {
@@ -164,7 +168,7 @@ class ShowOrganization extends Page {
   }
 
   async getAssessmentContainer(assessmentKey, recurrence) {
-    return currentPage()
+    return this.page
       .locator(`#entity-assessments-results-${assessmentKey}-${recurrence}`)
       .first()
   }
@@ -223,18 +227,16 @@ class ShowOrganization extends Page {
   }
 
   async waitForDeletedAssessmentToDisappear(assessmentKey, recurrence) {
-    await waitFor(
-      await this.getShownAssessmentPanel(assessmentKey, recurrence),
-      "attached",
-      {
-        reverse: true,
-        timeout: 20000
-      }
-    )
+    await (
+      await this.getShownAssessmentPanel(assessmentKey, recurrence)
+    ).waitFor({
+      state: "detached",
+      timeout: 20000
+    })
   }
 
   async getAuthorizationGroupsTable() {
-    return currentPage().locator("#authorizationGroups table").first()
+    return this.page.locator("#authorizationGroups table").first()
   }
 
   async getAuthorizationGroup(i) {
@@ -243,13 +245,11 @@ class ShowOrganization extends Page {
   }
 
   async getEntityAvatar() {
-    return currentPage()
-      .locator("fieldset div.row div.text-center canvas")
-      .first()
+    return this.page.locator("fieldset div.row div.text-center canvas").first()
   }
 
   async getEventsTable() {
-    return currentPage().locator(".event-collection").first()
+    return this.page.locator(".event-collection").first()
   }
 
   async getEvent(i) {
@@ -260,7 +260,7 @@ class ShowOrganization extends Page {
   }
 
   async getEditEngagementPlanningApprovalsButton() {
-    return currentPage()
+    return this.page
       .locator(
         '//button[contains(text(), "Edit Engagement planning approvals")]'
       )
@@ -268,7 +268,7 @@ class ShowOrganization extends Page {
   }
 
   async getEditReportPublicationApprovalsButton() {
-    return currentPage()
+    return this.page
       .locator(
         '//button[contains(text(), "Edit Report publication approvals")]'
       )
@@ -276,16 +276,15 @@ class ShowOrganization extends Page {
   }
 
   async getEditApprovalsModal() {
-    return currentPage().locator(".modal").first()
+    return this.page.locator(".modal").first()
   }
 
   async getModalContent() {
-    return currentPage().locator("div.modal-content").first()
+    return this.page.locator("div.modal-content").first()
   }
 
   async getModalCloseButton() {
     return (await this.getModalContent()).locator(".btn-close").first()
   }
 }
-
-export default new ShowOrganization()
+export default ShowOrganization

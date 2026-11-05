@@ -1,40 +1,38 @@
 import { expect } from "@playwright/test"
-import { currentPage, typeKeys, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/organizations/new"
-
 class CreateOrganization extends Page {
   async getForm() {
-    return currentPage().locator("form.form-horizontal").first()
+    return this.page.locator("form.form-horizontal").first()
   }
 
   async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
+    return this.page.locator("#formBottomSubmit").first()
   }
 
   async getOrganizationShortNameHelpBlock() {
-    return currentPage().locator("#fg-shortName div.invalid-feedback").first()
+    return this.page.locator("#fg-shortName div.invalid-feedback").first()
   }
 
   async getShortNameInput() {
-    return currentPage().locator("#shortName").first()
+    return this.page.locator("#shortName").first()
   }
 
   async getLongNameInput() {
-    return currentPage().locator("#longName").first()
+    return this.page.locator("#longName").first()
   }
 
   async getParentOrganizationInput() {
-    return currentPage().locator("#parentOrg").first()
+    return this.page.locator("#parentOrg").first()
   }
 
   async getClearParentOrganizationButton() {
-    return currentPage().locator("#fg-parentOrg div.input-group button").first()
+    return this.page.locator("#fg-parentOrg div.input-group button").first()
   }
 
   async getParentOrganizationSearchPopover() {
-    return currentPage().locator("#parentOrg-popover").first()
+    return this.page.locator("#parentOrg-popover").first()
   }
 
   async getParentOrganizationsTable() {
@@ -46,7 +44,12 @@ class CreateOrganization extends Page {
   async selectParentOrganizationByText(name, expectedName = name) {
     await (await this.getParentOrganizationInput()).click()
     // wait for parentOrg table loader to disappear
-    await waitFor(await this.getParentOrganizationsTable(), "visible")
+    await (
+      await this.getParentOrganizationsTable()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     await (await this.getParentOrganizationInput()).fill(String(name))
     const table = await this.getParentOrganizationsTable()
     const rows = table.locator("tbody tr")
@@ -58,18 +61,20 @@ class CreateOrganization extends Page {
       await radioButton.click()
     }
     await (await this.getShortNameInput()).click()
-    await waitFor(await this.getParentOrganizationSearchPopover(), "attached", {
-      reverse: true,
+    await (
+      await this.getParentOrganizationSearchPopover()
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
 
   async getLocationInput() {
-    return currentPage().locator("#location").first()
+    return this.page.locator("#location").first()
   }
 
   async getLocationAdvancedSelectItem(rowNumber = 2) {
-    return currentPage()
+    return this.page
       .locator(
         `#location-popover tbody tr:nth-child(${rowNumber}) td:nth-child(2) span`
       )
@@ -77,50 +82,54 @@ class CreateOrganization extends Page {
   }
 
   async getProfileInput() {
-    return currentPage().locator("#fg-profile .editable").first()
+    return this.page.locator("#fg-profile .editable").first()
   }
 
   async openEditApp6Modal() {
-    const editApp6Button = currentPage().locator("#edit-app6-button").first()
+    const editApp6Button = this.page.locator("#edit-app6-button").first()
     await editApp6Button.click()
     // wait for the modal to render
   }
 
   async closeEditApp6Modal() {
-    const applyButton = await currentPage()
+    const applyButton = await this.page
       .locator('//button[text()="Apply"]')
       .first()
     await applyButton.click()
-    await waitFor(await applyButton, "attached", {
-      reverse: true,
+    await (
+      await applyButton
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
 
   async getApp6DropdownSelection(field) {
-    const inputButton = await currentPage()
-      .locator(`#${field}-dropdown`)
-      .first()
+    const inputButton = await this.page.locator(`#${field}-dropdown`).first()
     const inputValue = await inputButton.locator("div:nth-child(2)").first()
-    await waitFor(inputValue, "attached")
+    await inputValue.waitFor({
+      state: "attached",
+      timeout: 10000
+    })
     return inputValue
   }
 
   async setApp6DropdownValue(field, value) {
-    const inputButton = await currentPage()
-      .locator(`#${field}-dropdown`)
-      .first()
+    const inputButton = await this.page.locator(`#${field}-dropdown`).first()
     await inputButton.click()
-    const dropdownMenu = await currentPage()
-      .locator(".dropdown-menu.show")
-      .first()
-    await waitFor(dropdownMenu, "visible")
+    const dropdownMenu = await this.page.locator(".dropdown-menu.show").first()
+    await dropdownMenu.waitFor({
+      state: "visible",
+      timeout: 10000
+    })
     const matchingItem = await dropdownMenu
       .locator(`[data-key="${value}"]`)
       .first()
     await matchingItem.click()
-    await waitFor(await dropdownMenu, "attached", {
-      reverse: true,
+    await (
+      await dropdownMenu
+    ).waitFor({
+      state: "detached",
       timeout: 3000
     })
   }
@@ -145,7 +154,9 @@ class CreateOrganization extends Page {
     await this.waitForLocationAdvancedSelectToChange(org.location)
     await expect(await this.getLocationAdvancedSelectItem()).toContainText(
       org.location,
-      { useInnerText: true }
+      {
+        useInnerText: true
+      }
     )
     await (await this.getLocationAdvancedSelectItem()).click()
     await this.fillOrganizationProfile(org.profile)
@@ -197,15 +208,18 @@ class CreateOrganization extends Page {
 
   async waitForLocationAdvancedSelectToChange(value) {
     return this.waitForElementToChange(
-      this.getLocationAdvancedSelectItem,
+      this.getLocationAdvancedSelectItem.bind(this),
       value
     )
   }
 
   async fillOrganizationProfile(profile) {
     await (await this.getProfileInput()).click()
-    await typeKeys(profile)
+    await this.page.keyboard.insertText(String(profile))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
   }
 }
-
-export default new CreateOrganization()
+export default CreateOrganization

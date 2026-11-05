@@ -1,27 +1,25 @@
-import { currentPage, typeKeys, waitFor } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/locations/new"
-
 class CreateNewLocation extends Page {
   async getForm() {
-    return currentPage().locator(".form-horizontal").first()
+    return this.page.locator(".form-horizontal").first()
   }
 
   async getCreateButton() {
-    return currentPage()
+    return this.page
       .locator('//button[contains(text(),"Save Location")]')
       .first()
   }
 
   async getNameRequiredError() {
-    return currentPage()
+    return this.page
       .locator('//div[contains(text(),"name is a required field")]')
       .first()
   }
 
   async getDescriptionInput() {
-    return currentPage().locator("#fg-description .editable").first()
+    return this.page.locator("#fg-description .editable").first()
   }
 
   async getNameField() {
@@ -29,7 +27,7 @@ class CreateNewLocation extends Page {
   }
 
   async getTypeRequiredError() {
-    return currentPage()
+    return this.page
       .locator('//div[contains(text(),"type is a required field")]')
       .first()
   }
@@ -41,23 +39,21 @@ class CreateNewLocation extends Page {
   }
 
   async getDuplicatesButton() {
-    return currentPage()
-      .locator('//button[text()="Possible Duplicates"]')
-      .first()
+    return this.page.locator('//button[text()="Possible Duplicates"]').first()
   }
 
   async getModalContent() {
-    return currentPage().locator("div.modal-content").first()
+    return this.page.locator("div.modal-content").first()
   }
 
   async getMaximiseLeafletButton() {
-    return currentPage()
+    return this.page
       .locator('//a[@role="button"][@aria-label="Full Screen"]')
       .first()
   }
 
   async getMinimiseLeafletButton() {
-    return currentPage()
+    return this.page
       .locator('//a[@role="button"][@aria-label="Exit Full Screen"]')
       .first()
   }
@@ -132,20 +128,32 @@ class CreateNewLocation extends Page {
   }
 
   async getSuccessMsg() {
-    return currentPage().locator('//div[text()="Location saved"]').first()
+    return this.page.locator('//div[text()="Location saved"]').first()
   }
 
   async latLngErrorsDisplayed() {
-    const latError = await currentPage()
+    const latError = await this.page
       .locator('//div[contains(text(), "Latitude must be")]')
       .first()
-    const lngError = await currentPage()
+    const lngError = await this.page
       .locator('//div[contains(text(), "Longitude must be")]')
       .first()
-    await waitFor(latError, "attached")
-    await waitFor(lngError, "attached")
-    await waitFor(latError, "visible")
-    await waitFor(lngError, "visible")
+    await latError.waitFor({
+      state: "attached",
+      timeout: 10000
+    })
+    await lngError.waitFor({
+      state: "attached",
+      timeout: 10000
+    })
+    await latError.waitFor({
+      state: "visible",
+      timeout: 10000
+    })
+    await lngError.waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async open() {
@@ -154,13 +162,21 @@ class CreateNewLocation extends Page {
   }
 
   async waitForPageToLoad() {
-    await waitFor(await this.getForm(), "visible")
+    await (
+      await this.getForm()
+    ).waitFor({
+      state: "visible",
+      timeout: 10000
+    })
   }
 
   async fillLocationDescription(description) {
     await (await this.getDescriptionInput()).click()
-    await typeKeys(description)
+    await this.page.keyboard.insertText(String(description))
+    const focused = this.page.locator(":focus")
+    if ((await focused.getAttribute("contenteditable")) === "true") {
+      await focused.blur()
+    }
   }
 }
-
-export default new CreateNewLocation()
+export default CreateNewLocation

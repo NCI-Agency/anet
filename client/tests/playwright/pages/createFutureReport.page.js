@@ -1,17 +1,15 @@
-import { currentPage } from "../support.js"
 import { CreateReport } from "./createReport.page.js"
 
 const PAGE_URL = "/reports/new"
 const attId = "reportPeople"
 const tskId = "tasks"
-
 class CreateFutureReport extends CreateReport {
   async getEngagementDate() {
-    return currentPage().locator('input[id="engagementDate"]').first()
+    return this.page.locator('input[id="engagementDate"]').first()
   }
 
   async getAttendeesFieldFormGroup() {
-    return currentPage().locator(`div[id="fg-${attId}"]`).first()
+    return this.page.locator(`div[id="fg-${attId}"]`).first()
   }
 
   async getAttendeesFieldLabel() {
@@ -27,7 +25,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   async getAttendeesFieldAdvancedSelectFirstItem() {
-    return currentPage()
+    return this.page
       .locator(
         `div[id="${attId}-popover"] tbody tr:first-child td:nth-child(2)`
       )
@@ -47,7 +45,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   async getTasksFieldFormGroup() {
-    return currentPage().locator(`div[id="fg-${tskId}"]`).first()
+    return this.page.locator(`div[id="fg-${tskId}"]`).first()
   }
 
   async getTasksFieldLabel() {
@@ -63,7 +61,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   async getTasksFieldAdvancedSelectItem(rowNumber = 2) {
-    return currentPage()
+    return this.page
       .locator(
         `div[id="${tskId}-popover"] tbody tr:nth-child(${rowNumber}) td:nth-child(2)`
       )
@@ -83,7 +81,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   async getDeleteButton() {
-    return currentPage()
+    return this.page
       .locator('//button[text()="Delete this planned engagement"]')
       .first()
   }
@@ -92,5 +90,4 @@ class CreateFutureReport extends CreateReport {
     await super.open(PAGE_URL, "selena")
   }
 }
-
-export default new CreateFutureReport()
+export default CreateFutureReport

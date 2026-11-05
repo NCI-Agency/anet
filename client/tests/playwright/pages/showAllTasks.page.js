@@ -1,19 +1,17 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/top-tasks"
-
 class ShowAllTasks extends Page {
   async open() {
     await super.open(PAGE_URL)
   }
 
   async getTitle() {
-    return currentPage().locator("h4.legend").first()
+    return this.page.locator("h4.legend").first()
   }
 
   async getTree() {
-    return currentPage().locator(".bp6-tree").first()
+    return this.page.locator(".bp6-tree").first()
   }
 
   async getAllTasks() {
@@ -25,12 +23,11 @@ class ShowAllTasks extends Page {
   }
 
   async getTasksTableHeader() {
-    return currentPage().locator("#tasks-table-header").first()
+    return this.page.locator("#tasks-table-header").first()
   }
 
   async getTasksTableRows() {
-    return currentPage().locator("#tasks-table-header ~ tr").all()
+    return this.page.locator("#tasks-table-header ~ tr").all()
   }
 }
-
-export default new ShowAllTasks()
+export default ShowAllTasks
