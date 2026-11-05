@@ -132,9 +132,43 @@ export default class Person extends Model {
         .default("")
         .label(Settings.fields.person.gender?.label),
       phoneNumber: yup
-        .string()
+        .array()
+        .of(
+          yup.object().shape({
+            type: yup
+              .string()
+              .required(
+                `You must provide the ${Settings.fields.person.phoneNumber?.label} type`
+              )
+              .default(""),
+            details: yup
+              .string()
+              .required(
+                `You must provide the ${Settings.fields.person.phoneNumber?.label} number`
+              )
+              .test(
+                "phoneNumber",
+                "unique phoneNumber",
+                function (details, testContext) {
+                  const { from } = this
+                  const allPhoneNumbers = from[1].value.phoneNumber
+                  const allDetails = new Set()
+                  for (const pn of allPhoneNumbers) {
+                    if (details === pn.details && allDetails.has(pn.details)) {
+                      return testContext.createError({
+                        message: `You must provide a unique ${Settings.fields.person.phoneNumber?.label} number`
+                      })
+                    }
+                    allDetails.add(pn.details)
+                  }
+                  return true
+                }
+              )
+              .default("")
+          })
+        )
         .nullable()
-        .default("")
+        .default([])
         .label(Settings.fields.person.phoneNumber?.label),
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate

@@ -38,6 +38,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PhoneNumberTable from "components/PhoneNumberTable"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import UserTable from "components/UserTable"
@@ -395,6 +396,12 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
         <EmailAddressTable
           label={Settings.fields.person.emailAddresses.label}
           emailAddresses={person.emailAddresses}
+        />
+      ),
+      phoneNumber: (
+        <PhoneNumberTable
+          label={Settings.fields.person.phoneNumber.label}
+          phoneNumber={person.phoneNumber}
         />
       ),
       country: (

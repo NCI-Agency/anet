@@ -55,7 +55,7 @@ export const getHelpBlock = (fieldName, form) => {
   )
   return (
     validationState && (
-      <FormControl.Feedback type="invalid">{fieldError}</FormControl.Feedback>
+      <FormControl.Feedback type="invalid">{`${fieldError}`}</FormControl.Feedback>
     )
   )
 }

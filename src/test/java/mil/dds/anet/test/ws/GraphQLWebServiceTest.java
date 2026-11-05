@@ -62,7 +62,7 @@ class GraphQLWebServiceTest extends AbstractResourceTest {
     final String personQuery = // -
         "query ($uuid: String!) {" // -
             + " person(uuid: $uuid) {" // -
-            + " uuid phoneNumber emailAddresses { network address }" // -
+            + " uuid phoneNumber { type details } emailAddresses { network address }" // -
             + " customSensitiveInformation { uuid customFieldName customFieldValue }" // -
             + " assessments { uuid assessmentKey assessmentValues }" // -
             + " } }";
