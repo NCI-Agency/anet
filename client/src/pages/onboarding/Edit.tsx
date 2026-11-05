@@ -29,6 +29,12 @@ const GQL_GET_SELF = gql`
       country {
         ${gqlEntityFieldsMap.Location}
       }
+      tenantAccessRequest {
+        ${gqlEntityFieldsMap.Tenant}
+      }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
   }
 `

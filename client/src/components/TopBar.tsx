@@ -9,6 +9,7 @@ import GeneralBanner, {
 } from "components/GeneralBanner"
 import Header from "components/Header"
 import NoPositionBanner from "components/NoPositionBanner"
+import NoTenantBanner from "components/NoTenantBanner"
 import PollingContext from "components/PollingContext"
 import SecurityBanner from "components/SecurityBanner"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
@@ -130,6 +131,7 @@ const TopBar = ({
             onLogout={resetPages}
             handleSecurityBannerBottom={handleSecurityBannerBottom}
           />
+          <NoTenantBanner person={currentUser} />
           {currentUser &&
             !currentUser.hasActivePosition() &&
             !currentUser.isPendingVerification() && <NoPositionBanner />}

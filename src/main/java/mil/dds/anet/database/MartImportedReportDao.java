@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class MartImportedReportDao extends AbstractDao {
 
-  private static final String[] fields =
-      {"sequence", "personUuid", "reportUuid", "state", "submittedAt", "receivedAt", "errors"};
+  private static final String[] fields = {"sequence", "tenantUuid", "personUuid", "reportUuid",
+      "state", "submittedAt", "receivedAt", "errors"};
   public static final String TABLE_NAME = "martImportedReports";
   public static final String MART_IMPORTED_REPORTS_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
@@ -28,8 +28,8 @@ public class MartImportedReportDao extends AbstractDao {
     try {
       return handle
           .createUpdate("/* insertMartImportedReport */ INSERT INTO \"martImportedReports\" "
-              + "(sequence, \"personUuid\", \"reportUuid\", state, \"submittedAt\", \"receivedAt\", errors) "
-              + "VALUES (:sequence, :personUuid, :reportUuid, :state, :submittedAt, :receivedAt, :errors) ")
+              + "(sequence, \"tenantUuid\", \"personUuid\", \"reportUuid\", state, \"submittedAt\", \"receivedAt\", errors) "
+              + "VALUES (:sequence, :tenantUuid, :personUuid, :reportUuid, :state, :submittedAt, :receivedAt, :errors) ")
           .bindBean(martImportedReport)
           .bind("submittedAt", DaoUtils.asLocalDateTime(martImportedReport.getSubmittedAt()))
           .bind("receivedAt", DaoUtils.asLocalDateTime(martImportedReport.getReceivedAt()))

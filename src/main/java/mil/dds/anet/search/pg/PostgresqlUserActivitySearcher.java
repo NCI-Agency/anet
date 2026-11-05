@@ -5,6 +5,7 @@ import mil.dds.anet.beans.search.UserActivitySearchQuery;
 import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.search.AbstractUserActivitySearcher;
+import mil.dds.anet.utils.Utils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,6 +55,9 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
     if (!query.getShowDeleted()) {
       withQb.addWhereClause("EXISTS (SELECT uuid FROM people WHERE uuid = u.\"personUuid\")");
     }
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      withQb.addStringEqualsClause("tenantUuid", "u.\"tenantUuid\"", query.getTenantUuid());
+    }
   }
 
   private void queryByOrganization(final UserActivitySearchQuery query,
@@ -76,6 +80,9 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
     if (!query.getShowDeleted()) {
       withQb.addWhereClause(
           "EXISTS (SELECT uuid FROM organizations WHERE uuid = u.\"organizationUuid\")");
+    }
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      withQb.addStringEqualsClause("tenantUuid", "u.\"tenantUuid\"", query.getTenantUuid());
     }
   }
 
@@ -104,5 +111,8 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
         "(%s parent_orgs.parent_uuid IN (SELECT uuid FROM organizations WHERE \"parentOrgUuid\" IS NULL))";
     withQb.addWhereClause(String.format(parentQueryFmt,
         !query.getShowDeleted() ? "" : "parent_orgs.uuid IS NULL OR"));
+    if (!Utils.isEmptyOrNull(query.getTenantUuid())) {
+      withQb.addStringEqualsClause("tenantUuid", "u.\"tenantUuid\"", query.getTenantUuid());
+    }
   }
 }

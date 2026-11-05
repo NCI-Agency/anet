@@ -76,7 +76,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
   }
 
   const canAdministrateOrg =
-    currentUser?.isAdmin() ||
+    currentUser?.isTenantAdmin() ||
     currentUser?.hasAdministrativePermissionsForOrganization(event.adminOrg)
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const avatar =

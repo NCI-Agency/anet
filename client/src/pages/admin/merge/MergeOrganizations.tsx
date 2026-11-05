@@ -595,7 +595,6 @@ const OrganizationColumn = ({
           fields={ALL_ORG_FIELDS}
           addon={ORGANIZATIONS_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(organization) && (

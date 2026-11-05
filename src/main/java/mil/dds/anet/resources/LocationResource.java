@@ -76,7 +76,7 @@ public class LocationResource {
       @GraphQLArgument(name = "query") LocationSearchQuery query) {
     final Principal principal = DaoUtils.getPrincipalFromContext(context);
     if (principal instanceof Person user) {
-      query.setUser(user);
+      query.setPrincipal(user);
       if (Boolean.TRUE.equals(user.getPendingVerification())) {
         // Unverified users can only search for countries
         query.setType(Location.LocationType.COUNTRY);
@@ -201,7 +201,7 @@ public class LocationResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Location loserLocation = dao.getByUuid(loserUuid);
 
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
     // Check that given two locations can be merged
     areLocationsMergeable(winnerLocation, loserLocation);
     validateLocation(winnerLocation);

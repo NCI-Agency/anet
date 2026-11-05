@@ -10,7 +10,6 @@ import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSeriesSearchQuery;
-import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.EventSeriesDao;
@@ -38,7 +37,7 @@ public class EventSeriesResource {
   }
 
   public static boolean hasPermission(final Person user, final EventSeries eventSeries) {
-    return AuthUtils.isAdmin(user)
+    return AuthUtils.isTenantAdmin(user)
         || AuthUtils.canAdministrateOrg(user, eventSeries.getAdminOrgUuid());
   }
 
@@ -60,7 +59,7 @@ public class EventSeriesResource {
   @GraphQLQuery(name = "eventSeriesList")
   public AnetBeanList<EventSeries> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") EventSeriesSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    query.setPrincipal(DaoUtils.getPrincipalFromContext(context));
     return dao.search(query);
   }
 
@@ -127,7 +126,7 @@ public class EventSeriesResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerEventSeries") EventSeries winnerEventSeries) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    AuthUtils.assertTenantAdministrator(user);
 
     final var loserEventSeries = dao.getByUuid(loserUuid);
     checkWhetherEventSeriesAreMergeable(winnerEventSeries, loserEventSeries);

@@ -56,6 +56,12 @@ const GQL_GET_PERSON = gql`
           ${gqlEntityFieldsMap.Organization}
         }
       }
+      tenantAccessRequest {
+        ${gqlEntityFieldsMap.Tenant}
+      }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
       attachments {
         ${gqlAllAttachmentFields}
       }

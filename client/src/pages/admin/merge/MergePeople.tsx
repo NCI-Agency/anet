@@ -5,6 +5,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
 import {
@@ -47,7 +48,7 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Person } from "models"
 import moment from "moment"
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
@@ -297,6 +298,26 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="users"
+                showAction={false}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.tenant}
+                value={mergedPerson.tenant?.name}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="tenant"
+                showAction={false}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.tenantAccessRequest}
+                value={mergedPerson.tenantAccessRequest?.name}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="tenantAccessRequest"
                 showAction={false}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -568,12 +589,6 @@ const ColTitle = styled(Form.Group)`
   height: 39px;
 `
 
-const peopleFilters = {
-  allPersons: {
-    label: "All"
-  }
-}
-
 interface PersonColumnProps {
   align: "left" | "right"
   label: string
@@ -591,9 +606,23 @@ const PersonColumn = ({
   dispatchMergeActions,
   setSideUsedForHistory
 }: PersonColumnProps) => {
+  const { currentUser } = useContext(AppContext)
   const person = mergeState[align]
   const otherSide = mergeState[getOtherSide(align)]
   const idForPerson = label.replace(/\s+/g, "")
+
+  const queryVars = currentUser?.isAdmin()
+    ? undefined
+    : {
+        hasTenant: false,
+        tenantUuid: currentUser?.tenant?.uuid
+      }
+  const peopleFilters = {
+    allPersons: {
+      label: "All",
+      queryVars
+    }
+  }
 
   return (
     <PersonCol>
@@ -612,22 +641,12 @@ const PersonColumn = ({
           onChange={(value: any) => {
             value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))
-            if (value && otherSide) {
-              dispatchMergeActions(
-                setAMergedField(
-                  "users",
-                  getMergedUsers(value, otherSide),
-                  align
-                )
-              )
-            }
           }}
           objectType={Person}
           valueFunc={Person.fullName}
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(person) && (
@@ -724,11 +743,31 @@ const PersonColumn = ({
                   align
                 )
               )
+              dispatchMergeActions(
+                setAMergedField(
+                  "users",
+                  person.user ? getMergedUsers(person, otherSide) : [],
+                  align
+                )
+              )
+              dispatchMergeActions(
+                setAMergedField("tenant", person.tenant, align)
+              )
+              dispatchMergeActions(
+                setAMergedField(
+                  "tenantAccessRequest",
+                  person.tenantAccessRequest,
+                  align
+                )
+              )
             }}
             mergeState={mergeState}
             autoMerge={
               person.user === otherSide?.user &&
-              person.pendingVerification === otherSide?.pendingVerification
+              person.pendingVerification === otherSide?.pendingVerification &&
+              utils.isFromSameTenant(person, otherSide) &&
+              person.tenantAccessRequest?.uuid ===
+                otherSide.tenantAccessRequest?.uuid
             }
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -745,6 +784,26 @@ const PersonColumn = ({
             align={align}
             showAction={false}
             mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.tenant}
+            fieldName="tenant"
+            value={person.tenant?.name}
+            align={align}
+            mergeState={mergeState}
+            showAction={false}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.tenantAccessRequest}
+            fieldName="tenantAccessRequest"
+            value={person.tenantAccessRequest?.name}
+            align={align}
+            mergeState={mergeState}
+            showAction={false}
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
