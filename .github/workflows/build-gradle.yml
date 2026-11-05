@@ -115,8 +115,41 @@ jobs:
         path: client/build/test-results/server-test-results.xml
       if: success() || failure()
 
+  test-page-objects:
+    name: Playwright page-object contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Run alongside the build, without application or backend-service setup.
+    # Client integration jobs must pass this lightweight locator gate first.
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - uses: ./.github/actions/build-cache
+    - name: Install Playwright Chromium
+      run: ./gradlew yarn_run_install-playwright
+    - name: Run browser-only page-object contracts
+      run: ./gradlew yarn_run_test-playwright-page-objects
+    - name: Upload page-object test results
+      if: success() || failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: playwright-page-objects-test-results
+        path: client/build/test-results/playwright-page-objects-test-results.xml
+        if-no-files-found: ignore
+    - name: Upload page-object diagnostics
+      if: success() || failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: playwright-page-objects-diagnostics
+        path: |
+          client/build/playwright-page-objects-report
+          client/build/test-results/playwright-page-objects-artifacts
+        if-no-files-found: ignore
+
   test-client:
-    needs: build
+    needs: [build, test-page-objects]
     name: Client tests; ${{ matrix.client-tests }}, ${{ matrix.dictionary }}
     runs-on: ubuntu-latest
     strategy:
