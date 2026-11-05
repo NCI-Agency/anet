@@ -25,7 +25,7 @@ class CreateReport extends cr.CreateReport {
 
   async getTodayButton() {
     return (await this.getDatepicker())
-      .locator('xpath=.//button/span[text()="Today"]')
+      .getByRole("button", { name: "Today", exact: true })
       .first()
   }
 
@@ -141,17 +141,33 @@ class CreateReport extends cr.CreateReport {
   }
 
   async getAttendeeColumns(name) {
-    const columns = this.page.locator(
-      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td`
-    )
+    // Category rows contain nested attendee tables; match only their leaf rows.
+    const columns = this.page
+      .locator("#reportPeopleContainer")
+      .getByRole("row")
+      .filter({
+        has: this.page
+          .locator(":scope > td.reportPeopleName")
+          .getByRole("link")
+          .and(this.page.getByText(name, { exact: true }))
+      })
+      .locator(":scope > td")
     await expect(columns.nth(5)).toBeAttached()
     return columns.all()
   }
 
   async getPersonByName(name) {
     const personRow = await this.page
+      .locator("#reportPeopleContainer")
+      .getByRole("row")
+      .filter({
+        has: this.page
+          .locator(":scope > td.reportPeopleName")
+          .getByRole("link")
+          .and(this.page.getByText(name, { exact: true }))
+      })
       .locator(
-        `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="primary-attendee" or @class="conflictButton" or @class="reportPeopleName"]`
+        ":scope > td.primary-attendee, :scope > td.conflictButton, :scope > td.reportPeopleName"
       )
       .all()
     await (
@@ -162,7 +178,7 @@ class CreateReport extends cr.CreateReport {
     })
     return {
       name: (await personRow[2].innerText()).trim(),
-      conflictButton: await personRow[1].locator("xpath=./span").first(),
+      conflictButton: await personRow[1].locator(":scope > span").first(),
       advisorCheckbox: await personRow[0]
         .locator("input[name='reportInterlocutorADVISOR']")
         .first(),

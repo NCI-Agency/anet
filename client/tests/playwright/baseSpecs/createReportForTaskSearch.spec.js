@@ -58,7 +58,7 @@ test.describe(() => {
       })
       await (await CreateReport.getAllUnassignedTasksFilterButton()).click()
       const task13C = (await CreateReport.getTasksTable())
-        .locator(`//span[contains(text(),"${testTask}")]`)
+        .getByText(`${testTask}`, { exact: false })
         .first()
       await expect(task13C).not.toHaveCount(0)
     })

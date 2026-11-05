@@ -30,7 +30,6 @@ test.describe(() => {
     "Select a Release Date range in search filters to view results."
   const RANGE_LABEL_SELECTOR = '[data-testid="range-label"]'
   const GRANULARITY_SELECTOR = `#${AGGREGATED_REPORTS_OVER_TIME} .btn-group`
-  const TOTAL_REPORTS_SELECTOR = `//div[@id="${AGGREGATED_REPORTS_OVER_TIME}"]//div[contains(text(),"Total reports:")]`
   const CHART_ID = "reports_published_over_time"
   const BAR_SELECTOR = `#${CHART_ID} g.bars-group`
   const EXPECTED_PUBLISHED_RANGE = {
@@ -47,7 +46,8 @@ test.describe(() => {
         useInnerText: true
       })
       const totalReportsLabel = await page
-        .locator(TOTAL_REPORTS_SELECTOR)
+        .locator(`#${AGGREGATED_REPORTS_OVER_TIME}`)
+        .getByText("Total reports:")
         .first()
       await totalReportsLabel.waitFor({
         state: "attached",
@@ -92,7 +92,8 @@ test.describe(() => {
         timeout: 10000
       })
       const totalReportsLabel = await page
-        .locator(TOTAL_REPORTS_SELECTOR)
+        .locator(`#${AGGREGATED_REPORTS_OVER_TIME}`)
+        .getByText("Total reports:")
         .first()
       await totalReportsLabel.waitFor({
         state: "attached",

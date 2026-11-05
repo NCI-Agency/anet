@@ -7,11 +7,13 @@ class MergePositions extends Page {
   }
 
   async getErrorTitle() {
-    return this.page.locator("//h1").first()
+    return this.page.getByRole("heading", { level: 1 }).first()
   }
 
   async getTitle() {
-    return this.page.locator('//h4[contains(text(),"Merge Positions")]').first()
+    return this.page
+      .getByRole("heading", { name: "Merge Positions", level: 4, exact: false })
+      .first()
   }
 
   async getLeftPositionField() {
@@ -27,9 +29,7 @@ class MergePositions extends Page {
   }
 
   async getPositionHeaderFromPopover() {
-    return this.page
-      .locator('//table//th[contains(text(), "Position")]')
-      .first()
+    return this.page.getByRole("columnheader", { name: "Position" }).first()
   }
 
   async getFirstItemFromAdvancedSelect() {
@@ -50,29 +50,31 @@ class MergePositions extends Page {
 
   async getEditAssociatedPositionsButton() {
     return this.page
-      .locator('//button[text()="Edit Associated Positions"]')
+      .getByRole("button", { name: "Edit Associated Positions", exact: true })
       .first()
   }
 
   async getEditAssociatedPositionsModal() {
-    return this.page
-      .locator("//div[contains(@class, 'edit-associated-positions-dialog')]")
-      .first()
+    return this.page.locator(".edit-associated-positions-dialog").first()
   }
 
   async getSaveAssociatedPositionsButton() {
     return (await this.getEditAssociatedPositionsModal())
-      .locator('xpath=.//button[text()="Save"]')
+      .getByRole("button", { name: "Save", exact: true })
       .first()
   }
 
   async getMergePositionsButton() {
-    return this.page.locator('//button[text()="Merge Positions"]').first()
+    return this.page
+      .getByRole("button", { name: "Merge Positions", exact: true })
+      .first()
   }
 
   async getOccupiedPositionsToast() {
     return this.page
-      .locator('//div[text()="Please select at least one unoccupied position"]')
+      .getByText("Please select at least one unoccupied position", {
+        exact: true
+      })
       .first()
   }
 
@@ -108,26 +110,24 @@ class MergePositions extends Page {
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await this.page
-      .locator(`//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]`)
+    return this.getMergeField(`${side}-merge-pos-col`, text)
+      .locator(":scope > small")
+      .getByRole("button")
       .first()
-    const button = await buttonDiv.locator("..").locator("..")
-    return button.locator("small > button").first()
   }
 
   async getColumnContent(side, text) {
-    return this.page
-      .locator(
-        `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]/following-sibling::div`
-      )
+    return this.getMergeField(`${side}-merge-pos-col`, text)
+      .locator(":scope > div > div:nth-child(2)")
       .first()
   }
 
   async getAssociatedPositions(side) {
-    const associatedPositionElements = await this.page
-      .locator(
-        `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]//following-sibling::div//table//tbody//tr`
-      )
+    const associatedPositionElements = await this.getMergeField(
+      `${side}-merge-pos-col`,
+      "Associated Positions"
+    )
+      .locator("table > tbody > tr")
       .all()
     return await Promise.all(
       associatedPositionElements.map(async elem => {
@@ -144,10 +144,11 @@ class MergePositions extends Page {
   }
 
   async getPreviousPeople(side) {
-    const previousPeopleElements = await this.page
-      .locator(
-        `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div//table//tbody//tr`
-      )
+    const previousPeopleElements = await this.getMergeField(
+      `${side}-merge-pos-col`,
+      "Previous People"
+    )
+      .locator("table > tbody > tr")
       .all()
     return await Promise.all(
       previousPeopleElements.map(async elem => {

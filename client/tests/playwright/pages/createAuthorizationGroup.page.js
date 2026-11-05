@@ -54,12 +54,6 @@ class CreateAuthorizationGroup extends Page {
     return this.page.locator(".related_objects_table").first()
   }
 
-  async getRelatedObjectsTableEntry(relatedObjectText) {
-    return (await this.getRelatedObjectsTable())
-      .locator(`xpath=.//tr/td/span//a[text()="${relatedObjectText}"]`)
-      .first()
-  }
-
   async getRelatedObjectsAdvancedSelectFirstItem() {
     return this.page
       .locator("#entitySelect-popover tbody tr:first-child")
@@ -89,8 +83,10 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getAdministrativePositionsTableEntry(administrativePositionText) {
+    // LinkTo avatars affect the accessible name, not the visible entity label.
     return (await this.getAdministrativePositionsTable())
-      .locator(`xpath=.//tr/td/span//a[text()="${administrativePositionText}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(administrativePositionText, { exact: true }))
       .first()
   }
 
@@ -105,7 +101,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getEditButton() {
-    return this.page.locator("//a[text()='Edit']").first()
+    return this.page.getByRole("link", { name: "Edit", exact: true }).first()
   }
 
   async getMyAuthorizationGroups() {
@@ -114,7 +110,8 @@ class CreateAuthorizationGroup extends Page {
 
   async getAuthorizationGroupLink(authorizationGroupName) {
     return (await this.getMyAuthorizationGroups())
-      .locator(`xpath=.//tr/td/span//a[text()="${authorizationGroupName}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(authorizationGroupName, { exact: true }))
       .first()
   }
 

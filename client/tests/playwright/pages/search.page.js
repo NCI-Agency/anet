@@ -7,7 +7,7 @@ class Search extends Page {
 
   async getNoResultsFound() {
     return this.page
-      .locator('//div/b[text()="No search results found!"]')
+      .getByText("No search results found!", { exact: true })
       .first()
   }
 
@@ -59,25 +59,29 @@ class Search extends Page {
 
   async linkOfPersonFound(name) {
     return (await this.getFoundPeopleTable())
-      .locator(`xpath=.//tbody/tr//a[contains(text(), "${name}")]`)
+      .locator("tbody")
+      .getByRole("link", { name, exact: false })
       .first()
   }
 
   async linkOfTaskFound(name) {
     return (await this.getFoundTaskTable())
-      .locator(`xpath=.//tbody/tr//a[contains(text(), "${name}")]`)
+      .locator("tbody")
+      .getByRole("link", { name, exact: false })
       .first()
   }
 
   async linkOfOrganizationFound(name) {
     return (await this.getFoundOrganizationTable())
-      .locator(`xpath=.//tbody/tr//a[contains(text(), "${name}")]`)
+      .locator("tbody")
+      .getByRole("link", { name, exact: false })
       .first()
   }
 
   async linkOfEventFound(name) {
     return (await this.getFoundEventTable())
-      .locator(`//tbody/tr//a[contains(text(), "${name}")]`)
+      .locator("tbody")
+      .getByRole("link", { name, exact: false })
       .first()
   }
 

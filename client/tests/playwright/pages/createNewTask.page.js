@@ -90,7 +90,7 @@ class CreateTask extends Page {
   async getAssessmentFields() {
     // since only custom field is assessments
     return (await this.getCustomFieldsContainer())
-      .locator('xpath=.//div[starts-with(@id,"fg-formCustomFields")]')
+      .locator('div[id^="fg-formCustomFields"]')
       .all()
   }
 
@@ -108,7 +108,7 @@ class CreateTask extends Page {
 
   async getQuestionsFieldWarningText() {
     return (await this.getFirstQuestionsFieldContainer())
-      .locator('xpath=.//div[contains(text(), "Invalid")]')
+      .getByText("Invalid", { exact: false })
       .first()
   }
 

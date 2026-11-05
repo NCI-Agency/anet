@@ -31,9 +31,7 @@ test.describe(() => {
         state: "attached",
         timeout: 10000
       })
-      const myOrgUrl = await (
-        await (await Home.getMyOrgLink()).locator("..")
-      ).getAttribute("href")
+      const myOrgUrl = await (await Home.getMyOrgLink()).getAttribute("href")
       await MyOrg.openAsAdminUser(myOrgUrl)
     })
     test.afterEach("On the My Organization page…", async () => {

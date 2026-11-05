@@ -36,15 +36,21 @@ class ShowPerson extends Page {
   }
 
   async getOptionalFieldsButton() {
-    return this.page.locator('//button[text()="Optional Fields"]').first()
+    return this.page
+      .getByRole("button", { name: /^Optional Fields(?:\s*▾)?$/ })
+      .first()
   }
 
   async getClearAllButton() {
-    return this.page.locator('//button[text()="Clear All"]').first()
+    return this.page
+      .getByRole("button", { name: "Clear All", exact: true })
+      .first()
   }
 
   async getSelectAllButton() {
-    return this.page.locator('//button[text()="Select All"]').first()
+    return this.page
+      .getByRole("button", { name: "Select All", exact: true })
+      .first()
   }
 
   async getPresetsButton() {
@@ -79,9 +85,8 @@ class ShowPerson extends Page {
       timeout: 10000
     })
     const allAttachmentsFilter = await this.page
-      .locator(
-        '//div[@id="linkExistingAttachments-popover"]//button[text()="All attachments"]'
-      )
+      .locator("#linkExistingAttachments-popover")
+      .getByRole("button", { name: "All attachments", exact: true })
       .first()
     if ((await allAttachmentsFilter.count()) > 0) {
       await allAttachmentsFilter.click()
@@ -97,16 +102,18 @@ class ShowPerson extends Page {
     }
     await input.fill(String(caption))
     const row = await this.page
-      .locator(
-        `//div[@id="linkExistingAttachments-popover"]//tbody//tr[.//td[contains(normalize-space(.), "${caption}")]]`
-      )
+      .locator("#linkExistingAttachments-popover tbody")
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("cell").filter({ hasText: caption })
+      })
       .first()
     await row.click()
   }
 
   async linkSelectedAttachments() {
     const button = await this.page
-      .locator('//button[text()="Link selected attachments"]')
+      .getByRole("button", { name: "Link selected attachments", exact: true })
       .first()
     await expect
       .poll(() => button.isEnabled(), {
@@ -118,7 +125,7 @@ class ShowPerson extends Page {
 
   async waitForLinkToComplete() {
     const button = await this.page
-      .locator('//button[text()="Link selected attachments"]')
+      .getByRole("button", { name: "Link selected attachments", exact: true })
       .first()
     await expect
       .poll(
@@ -140,8 +147,12 @@ class ShowPerson extends Page {
   }
 
   async getAttachmentCardByUuid(uuid) {
-    const selector = `//div[contains(@class,"attachment-card")]//a[contains(@href,"/attachments/${uuid}/edit")]/ancestor::div[contains(@class,"attachment-card")]`
-    const card = await this.page.locator(selector).first()
+    const card = this.page
+      .locator(".attachment-card")
+      .filter({
+        has: this.page.locator(`a[href*="/attachments/${uuid}/edit"]`)
+      })
+      .first()
     await card.waitFor({
       state: "attached",
       timeout: 10000
@@ -150,8 +161,13 @@ class ShowPerson extends Page {
   }
 
   async attachmentCardExistsByUuid(uuid) {
-    const selector = `//div[contains(@class,"attachment-card")]//a[contains(@href,"/attachments/${uuid}/edit")]/ancestor::div[contains(@class,"attachment-card")]`
-    return (await (await this.page.locator(selector).first()).count()) > 0
+    const card = this.page
+      .locator(".attachment-card")
+      .filter({
+        has: this.page.locator(`a[href*="/attachments/${uuid}/edit"]`)
+      })
+      .first()
+    return (await card.count()) > 0
   }
 
   async unlinkAttachmentByUuid(uuid) {
@@ -187,16 +203,20 @@ class ShowPerson extends Page {
   }
 
   async getDefaultPreset() {
-    return this.page.locator('//a[text()="Default"]').first()
+    return this.page
+      .getByRole("button", { name: "Default", exact: true })
+      .first()
   }
 
   async getWithoutSensitivePreset() {
-    return this.page.locator('//a[text()="Exclude sensitive fields"]').first()
+    return this.page
+      .getByRole("button", { name: "Exclude sensitive fields", exact: true })
+      .first()
   }
 
   async getSensitiveInformationWarning() {
     return (await this.getCompactView())
-      .locator('xpath=.//span[text()="Sensitive Information"]')
+      .getByText("Sensitive Information", { exact: true })
       .first()
   }
 
@@ -256,7 +276,9 @@ class ShowPerson extends Page {
   }
 
   async getDeleteConfirmButton() {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async getAssessmentModalForm() {
@@ -299,18 +321,18 @@ class ShowPerson extends Page {
   }
 
   async getInvalidFeedback() {
-    return this.page.locator('//div[@class="invalid-feedback"]').all()
+    return this.page.locator("div.invalid-feedback").all()
   }
 
   async getTopLevelQuestionSetTitle() {
     return this.page
-      .locator('//h4/span[contains(text(),"Top Level Question Set")]')
+      .getByRole("heading", { name: "Top Level Question Set", level: 4 })
       .first()
   }
 
   async getBottomLevelQuestionSetTitle() {
     return this.page
-      .locator('//h4/span[contains(text(),"Bottom Level Question Set")]')
+      .getByRole("heading", { name: "Bottom Level Question Set", level: 4 })
       .first()
   }
 
@@ -322,7 +344,9 @@ class ShowPerson extends Page {
     const compactView = await this.getCompactView()
     for (const field of fields) {
       await (
-        await compactView.locator(`xpath=.//th[text()="${field}"]`).first()
+        await compactView
+          .getByRole("rowheader", { name: field, exact: true })
+          .first()
       ).waitFor({
         state: reverse ? "hidden" : "visible",
         timeout: 10000

@@ -1,6 +1,29 @@
 import { expect } from "@playwright/test"
 
 class Page {
+  getMergeField(columnId, label) {
+    // Column components wrap fields in a div/fieldset. Match each field's own
+    // label, without assuming that the field is a direct child of the column.
+    return this.page
+      .locator(`[id="${columnId}"] div`)
+      .filter({
+        has: this.page
+          .locator(":scope > div > div:first-child")
+          .and(this.page.getByText(label, { exact: true }))
+      })
+      .first()
+  }
+
+  getAssessmentLabel(container, name, index) {
+    // Assessment labels are in rows following an entity's header row.
+    // Keep this structural fallback live; do not walk a fixed number of parents.
+    return container
+      .locator(`tbody > tr:has(> th a:text-is(${JSON.stringify(name)})) ~ tr`)
+      .nth(index - 1)
+      .locator(":scope > td")
+      .first()
+  }
+
   /** @param {import("@playwright/test").Page} page */
   constructor(page) {
     this.page = page
@@ -345,8 +368,21 @@ class Page {
   }
 
   async getRelatedObjectsTableEntry(relatedObjectText) {
+    // Entity avatars contribute to accessible names, but not the entity label.
     return (await this.getRelatedObjectsTable())
-      .locator(`xpath=.//tr/td/span//a[text()="${relatedObjectText}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(relatedObjectText, { exact: true }))
+      .first()
+  }
+
+  async getRelatedObjectsTableRow(relatedObjectText) {
+    return (await this.getRelatedObjectsTable())
+      .getByRole("row")
+      .filter({
+        has: this.page
+          .getByRole("link")
+          .and(this.page.getByText(relatedObjectText, { exact: true }))
+      })
       .first()
   }
 }

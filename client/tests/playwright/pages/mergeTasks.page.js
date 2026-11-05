@@ -8,7 +8,11 @@ class MergeTasks extends Page {
 
   async getTitle() {
     return this.page
-      .locator('//h4[contains(text(),"Merge Objectives")]')
+      .getByRole("heading", {
+        name: "Merge Objectives",
+        level: 4,
+        exact: false
+      })
       .first()
   }
 
@@ -41,29 +45,26 @@ class MergeTasks extends Page {
   }
 
   async getColumnContent(side, text) {
-    return this.page
-      .locator(
-        `//div[@id="${side}-merge-task-col"]//div[text()="${text}"]/following-sibling::div`
-      )
+    return this.getMergeField(`${side}-merge-task-col`, text)
+      .locator(":scope > div > div:nth-child(2)")
       .first()
   }
 
   async getMergeTasksButton() {
-    return this.page.locator('//button[text()="Merge Objectives"]').first()
+    return this.page
+      .getByRole("button", { name: "Merge Objectives", exact: true })
+      .first()
   }
 
   async getTaskHeaderFromPopover() {
-    return this.page
-      .locator('//table//th[contains(text(), "Objective")]')
-      .first()
+    return this.page.getByRole("columnheader", { name: "Objective" }).first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await this.page
-      .locator(`//div[@id="${side}-merge-task-col"]//div[text()="${text}"]`)
+    return this.getMergeField(`${side}-merge-task-col`, text)
+      .locator(":scope > small")
+      .getByRole("button")
       .first()
-    const button = await buttonDiv.locator("..").locator("..")
-    return button.locator("small > button").first()
   }
 
   async getUseAllButton(side) {

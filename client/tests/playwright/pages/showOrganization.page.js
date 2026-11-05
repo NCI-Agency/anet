@@ -12,7 +12,9 @@ class ShowOrganization extends Page {
   }
 
   async getCreateSubOrganizationButton() {
-    return this.page.locator('//a[text()="Create sub-organization"]').first()
+    return this.page
+      .getByRole("link", { name: "Create sub-organization", exact: true })
+      .first()
   }
 
   async getLongName() {
@@ -84,7 +86,7 @@ class ShowOrganization extends Page {
   }
 
   async getEditOrganizationButton() {
-    return this.page.locator("//a[text()='Edit']").first()
+    return this.page.getByRole("link", { name: "Edit", exact: true }).first()
   }
 
   async getEditAttachmentsButton() {
@@ -145,7 +147,9 @@ class ShowOrganization extends Page {
   }
 
   async getDeleteConfirmButton() {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async getSaveAssessmentButton() {
@@ -261,17 +265,19 @@ class ShowOrganization extends Page {
 
   async getEditEngagementPlanningApprovalsButton() {
     return this.page
-      .locator(
-        '//button[contains(text(), "Edit Engagement planning approvals")]'
-      )
+      .getByRole("button", {
+        name: "Edit Engagement planning approvals",
+        exact: false
+      })
       .first()
   }
 
   async getEditReportPublicationApprovalsButton() {
     return this.page
-      .locator(
-        '//button[contains(text(), "Edit Report publication approvals")]'
-      )
+      .getByRole("button", {
+        name: "Edit Report publication approvals",
+        exact: false
+      })
       .first()
   }
 

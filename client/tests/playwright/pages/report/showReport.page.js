@@ -14,7 +14,7 @@ class ShowReport extends Page {
   }
 
   async getEditReportButton() {
-    return this.page.locator("//a[text()='Edit']").first()
+    return this.page.getByRole("link", { name: "Edit", exact: true }).first()
   }
 
   async getAttendeesAssessments(id) {
@@ -23,18 +23,17 @@ class ShowReport extends Page {
 
   async getAttendeeAssessment(id, name) {
     return (await this.getAttendeesAssessments(id))
-      .locator(`xpath=.//th//a[text()="${name}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(name, { exact: true }))
       .first()
   }
 
   async getAttendeeAssessmentLabel(id, name, i) {
-    return (await this.getAttendeeAssessment(id, name))
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator(`xpath=./following-sibling::tr[${i}]/td`)
-      .first()
+    return this.getAssessmentLabel(
+      await this.getAttendeesAssessments(id),
+      name,
+      i
+    )
   }
 
   async getTasksEngagementAssessments(id) {
@@ -43,19 +42,17 @@ class ShowReport extends Page {
 
   async getTaskEngagementAssessment(id, shortName) {
     return (await this.getTasksEngagementAssessments(id))
-      .locator(`xpath=.//th//a[text()="${shortName}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(shortName, { exact: true }))
       .first()
   }
 
   async getTaskEngagementAssessmentLabel(id, shortName, i) {
-    return (await this.getTaskEngagementAssessment(id, shortName))
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator(`xpath=./following-sibling::tr[${i}]/td`)
-      .first()
+    return this.getAssessmentLabel(
+      await this.getTasksEngagementAssessments(id),
+      shortName,
+      i
+    )
   }
 
   async getDefaultReportView() {
@@ -167,7 +164,9 @@ class ShowReport extends Page {
   }
 
   async getSubmitButton() {
-    return this.page.locator('//button[text()="Submit report"]').first()
+    return this.page
+      .getByRole("button", { name: "Submit report", exact: true })
+      .first()
   }
 
   async getPreviewAndSubmitButton() {
@@ -180,7 +179,7 @@ class ShowReport extends Page {
 
   async getConfirmSubmitButton() {
     return (await this.getReportModal())
-      .locator('xpath=.//button[text()="Submit anyway"]')
+      .getByRole("button", { name: "Submit anyway", exact: true })
       .first()
   }
 
@@ -189,12 +188,14 @@ class ShowReport extends Page {
   }
 
   async getApproveButton() {
-    return this.page.locator('//button[text()="Approve"]').first()
+    return this.page
+      .getByRole("button", { name: "Approve", exact: true })
+      .first()
   }
 
   async getConfirmApproveButton() {
     return (await this.getReportModal())
-      .locator('xpath=.//button[text()="Approve anyway"]')
+      .getByRole("button", { name: "Approve anyway", exact: true })
       .first()
   }
 
@@ -204,33 +205,36 @@ class ShowReport extends Page {
 
   async getSuccessfullApprovalToast() {
     return this.page
-      .locator('//div[text()="Successfully approved report."]')
+      .getByText("Successfully approved report.", { exact: true })
       .first()
   }
 
   async getAttendeeByName(name) {
-    const td = await (
-      await this.page.locator("#reportPeopleContainer").first()
-    )
-      .locator("td.reportPeopleName")
+    const row = this.page
+      .locator("#reportPeopleContainer")
+      .getByRole("row")
       .filter({
-        hasText: `${name}`
+        has: this.page
+          .locator(":scope > td.reportPeopleName")
+          .filter({ hasText: name })
       })
       .first()
+    const td = row.locator(":scope > td.reportPeopleName").first()
     if (!((await td.count()) > 0)) {
       return null
     }
-    const row = await td.locator("..")
     // wait for conflict loader to disappear
     await (
-      await row.locator("td.conflictButton div.bp6-spinner").first()
+      await row.locator(":scope > td.conflictButton div.bp6-spinner").first()
     ).waitFor({
       state: "detached",
       timeout: 10000
     })
     return {
       name: (await td.innerText()).trim(),
-      conflictButton: await row.locator("td.conflictButton > span").first()
+      conflictButton: await row
+        .locator(":scope > td.conflictButton > span")
+        .first()
     }
   }
 
@@ -283,9 +287,14 @@ class ShowReport extends Page {
 
   async getCompactFieldValue(label) {
     const element = await this.page
-      .locator(
-        `//div[contains(@class,'compact-view')]//tr[./th[normalize-space()="${label}"]]//td`
-      )
+      .locator(".compact-view")
+      .getByRole("row")
+      .filter({
+        has: this.page
+          .locator(":scope > th")
+          .and(this.page.getByText(label, { exact: true }))
+      })
+      .locator(":scope > td")
       .first()
     await element.waitFor({
       state: "attached",
@@ -296,7 +305,7 @@ class ShowReport extends Page {
 
   async selectOptionalField(field) {
     const optionalFieldsButton = await this.page
-      .locator('//button[text()="Optional Fields"]')
+      .getByRole("button", { name: /^Optional Fields(?:\s*▾)?$/ })
       .first()
     const optionalFields = await this.page
       .locator("#optionalFields-menu")

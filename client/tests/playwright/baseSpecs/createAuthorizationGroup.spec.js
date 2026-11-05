@@ -437,19 +437,14 @@ test.describe(() => {
         ).not.toHaveCount(0)
 
         // Remove a position
-        const adminPosition =
-          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableRow(
             POSITION_COMPLETE
           )
-        await (
-          await adminPosition
-            .locator("..")
-            .locator("..")
-            .locator("..")
-            .locator("..")
-            .locator("xpath=./td/button")
-            .first()
-        ).click()
+        )
+          .getByRole("button")
+          .first()
+          .click()
         await expect(
           await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
             POSITION_COMPLETE

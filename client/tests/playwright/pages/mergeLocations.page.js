@@ -8,7 +8,9 @@ class MergeLocations extends Page {
   }
 
   async getTitle() {
-    return this.page.locator('//h4[contains(text(),"Merge Locations")]').first()
+    return this.page
+      .getByRole("heading", { name: "Merge Locations", level: 4, exact: false })
+      .first()
   }
 
   async getLeftLocationField() {
@@ -24,7 +26,7 @@ class MergeLocations extends Page {
   }
 
   async getLocationHeaderFromPopover() {
-    return this.page.locator('//table//th[contains(text(), "Name")]').first()
+    return this.page.getByRole("columnheader", { name: "Name" }).first()
   }
 
   async getFirstItemFromAdvancedSelect() {
@@ -44,7 +46,9 @@ class MergeLocations extends Page {
   }
 
   async getMergeLocationsButton() {
-    return this.page.locator('//button[text()="Merge Locations"]').first()
+    return this.page
+      .getByRole("button", { name: "Merge Locations", exact: true })
+      .first()
   }
 
   async getUseAllButton(side) {
@@ -53,11 +57,11 @@ class MergeLocations extends Page {
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await this.page
-      .locator(`//div[@id="${side}-merge-loc-col"]//div[text()="${text}"]`)
+    // MergeField's action is outside its value, which can contain info/map buttons.
+    return this.getMergeField(`${side}-merge-loc-col`, text)
+      .locator(":scope > small")
+      .getByRole("button")
       .first()
-    const button = await buttonDiv.locator("..").locator("..")
-    return button.locator("small > button").first()
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
@@ -80,10 +84,8 @@ class MergeLocations extends Page {
   }
 
   async getColumnContent(side, text) {
-    return this.page
-      .locator(
-        `//div[@id="${side}-merge-loc-col"]//div[text()="${text}"]/following-sibling::div`
-      )
+    return this.getMergeField(`${side}-merge-loc-col`, text)
+      .locator(":scope > div > div:nth-child(2)")
       .first()
   }
 
