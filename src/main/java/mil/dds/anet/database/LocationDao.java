@@ -88,14 +88,13 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     }
   }
 
-  public int updateGeoJson(String uuid, String geoJson, Instant updatedAt) {
+  public int updateGeoJson(String uuid, String geoJson) {
     final Handle handle = getDbHandle();
     try {
       return handle
           .createUpdate("/* updateLocationGeoJsonOnly */ UPDATE locations "
-              + "SET \"geoJson\" = :geoJson, \"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
-          .bind("uuid", uuid).bind("geoJson", geoJson)
-          .bind("updatedAt", DaoUtils.asLocalDateTime(updatedAt)).execute();
+              + "SET \"geoJson\" = :geoJson WHERE uuid = :uuid")
+          .bind("uuid", uuid).bind("geoJson", geoJson).execute();
     } finally {
       closeDbHandle(handle);
     }
@@ -123,7 +122,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     update(winnerLocation);
 
     if (mergedGeoJson != null) {
-      updateGeoJson(winnerLocationUuid, mergedGeoJson, Instant.now());
+      updateGeoJson(winnerLocationUuid, mergedGeoJson);
     }
 
     // Update approvalSteps (note that this may fail if reports are currently pending at one of the

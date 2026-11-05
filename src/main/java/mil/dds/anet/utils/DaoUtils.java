@@ -35,6 +35,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class DaoUtils {
 
+  // Field updatedAt is truncated to millisecond precision (before being stored in the database),
+  // so {@link #assertObjectIsFresh} does not depend on database precision (e.g. microsecond for
+  // PostgreSQL)
+  private static final ChronoUnit UPDATED_AT_PRECISION = ChronoUnit.MILLIS;
+
   public static String getUuid(AbstractAnetBean obj) {
     if (obj == null) {
       return null;
@@ -60,16 +65,20 @@ public class DaoUtils {
     return UUID.randomUUID().toString();
   }
 
+  public static Instant truncateForUpdatedAt(Instant instant) {
+    return instant.truncatedTo(UPDATED_AT_PRECISION);
+  }
+
   public static void setInsertFields(AbstractAnetBean bean) {
     bean.setUuid(getNewUuid());
     final Instant now = Instant.now();
     bean.setCreatedAt(now);
-    bean.setUpdatedAt(now);
+    bean.setUpdatedAt(truncateForUpdatedAt(now));
   }
 
   public static void setUpdateFields(AbstractAnetBean bean) {
     final Instant now = Instant.now();
-    bean.setUpdatedAt(now);
+    bean.setUpdatedAt(truncateForUpdatedAt(now));
   }
 
   public static void assertObjectIsFresh(AbstractAnetBean objectToBeUpdated,
@@ -77,7 +86,7 @@ public class DaoUtils {
     if (force) {
       return;
     }
-    if (!hasSameUpdatedAtInMillis(objectToBeUpdated, existingObject)) {
+    if (!hasSameUpdatedAt(objectToBeUpdated, existingObject)) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
           "Saving these changes (timestamped at %s) would overwrite later updates (timestamped at %s)",
           formatUpdateDate(objectToBeUpdated.getUpdatedAt()),
@@ -85,14 +94,14 @@ public class DaoUtils {
     }
   }
 
-  private static boolean hasSameUpdatedAtInMillis(AbstractAnetBean objectToBeUpdated,
+  private static boolean hasSameUpdatedAt(AbstractAnetBean objectToBeUpdated,
       AbstractAnetBean existingObject) {
     if (objectToBeUpdated.getUpdatedAt() == null || existingObject.getUpdatedAt() == null) {
       // If either of them is null, we can't compare them, so return false
       return false;
     }
-    return objectToBeUpdated.getUpdatedAt().truncatedTo(ChronoUnit.MILLIS)
-        .equals(existingObject.getUpdatedAt().truncatedTo(ChronoUnit.MILLIS));
+    return truncateForUpdatedAt(objectToBeUpdated.getUpdatedAt())
+        .equals(truncateForUpdatedAt(existingObject.getUpdatedAt()));
   }
 
   private static String formatUpdateDate(Instant updatedAt) {
