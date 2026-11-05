@@ -21,8 +21,7 @@ class SavedSearch extends Page {
 
     const withinOrganizationButton = this.page
       .getByRole("button", {
-        name: "Within Organization",
-        exact: false
+        name: "Within Organization"
       })
       .first()
     await (await withinOrganizationButton).click()
@@ -99,7 +98,9 @@ class SavedSearch extends Page {
   }
 
   async getDeleteConfirmButton() {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async confirmDelete() {

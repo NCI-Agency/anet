@@ -29,8 +29,7 @@ class TaskFilter extends Page {
 
     const withinObjectiveButton = this.page
       .getByRole("button", {
-        name: "Within Objective",
-        exact: false
+        name: "Within Objective"
       })
       .first()
     await (await withinObjectiveButton).click()
