@@ -99,7 +99,9 @@ class SavedSearch extends Page {
   }
 
   async getDeleteConfirmButton() {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async confirmDelete() {

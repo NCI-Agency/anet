@@ -37,7 +37,8 @@ class MyTasks extends Page {
 
   async getMyPendingTask(name) {
     return (await this.getMyPendingTasksBody())
-      .locator(`xpath=.//a[text()="${name}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(name, { exact: true }))
       .first()
   }
 }

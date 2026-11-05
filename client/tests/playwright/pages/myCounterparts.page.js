@@ -41,13 +41,15 @@ class MyTasks extends Page {
 
   async getMyPendingCounterpart(name) {
     return (await this.getMyPendingCounterpartsBody())
-      .locator(`xpath=.//a[text()="${name}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(name, { exact: true }))
       .first()
   }
 
   async getMyCounterpart(name) {
     return (await this.getMyCounterparts())
-      .locator(`xpath=.//a[text()="${name}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(name, { exact: true }))
       .first()
   }
 }
