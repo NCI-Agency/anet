@@ -8,11 +8,13 @@ class MergePeople extends Page {
   }
 
   async getErrorTitle() {
-    return this.page.locator("//h1").first()
+    return this.page.getByRole("heading", { level: 1 }).first()
   }
 
   async getTitle() {
-    return this.page.locator('//h4[contains(text(),"Merge People")]').first()
+    return this.page
+      .getByRole("heading", { name: "Merge People", level: 4, exact: false })
+      .first()
   }
 
   async getLeftPersonField() {
@@ -28,7 +30,7 @@ class MergePeople extends Page {
   }
 
   async getPersonHeaderFromPopover() {
-    return this.page.locator('//table//th[contains(text(), "Name")]').first()
+    return this.page.getByRole("columnheader", { name: "Name" }).first()
   }
 
   async getFirstItemFromAdvancedSelect() {
@@ -46,7 +48,9 @@ class MergePeople extends Page {
   }
 
   async getMergePeopleButton() {
-    return this.page.locator('//button[text()="Merge People"]').first()
+    return this.page
+      .getByRole("button", { name: "Merge People", exact: true })
+      .first()
   }
 
   async getShowNotesButton() {
@@ -86,35 +90,28 @@ class MergePeople extends Page {
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await this.page
-      .locator(`//div[@id="${side}-merge-per-col"]//div[text()="${text}"]`)
+    return this.getMergeField(`${side}-merge-per-col`, text)
+      .locator(":scope > small")
+      .getByRole("button")
       .first()
-    const button = await buttonDiv.locator("..").locator("..")
-    return button.locator("small > button").first()
   }
 
   async getColumnContent(side, text) {
-    return this.page
-      .locator(
-        `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]/following-sibling::div`
-      )
+    return this.getMergeField(`${side}-merge-per-col`, text)
+      .locator(":scope > div > div:nth-child(2)")
       .first()
   }
 
   async getSingleSelectButton(side, text) {
-    return this.page
-      .locator(
-        `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]` +
-          "/parent::div/following-sibling::small[1]/button"
-      )
-      .first()
+    return this.getSelectButton(side, text)
   }
 
   async getPreviousPositions(side) {
-    const previousPositionsElements = await this.page
-      .locator(
-        `//div[@id="${side}-merge-per-col"]//div[text()="Previous Positions"]/following-sibling::div//table//tbody//tr`
-      )
+    const previousPositionsElements = await this.getMergeField(
+      `${side}-merge-per-col`,
+      "Previous Positions"
+    )
+      .locator("table > tbody > tr")
       .all()
     return await Promise.all(
       previousPositionsElements.map(async elem => ({

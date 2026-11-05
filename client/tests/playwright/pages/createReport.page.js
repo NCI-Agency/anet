@@ -42,12 +42,15 @@ export class CreateReport extends Page {
 
   async getCustomFieldButtonFromText(id, text) {
     return this.page
-      .locator(`//div[@id="fg-${id}"]//button[text()="${text}"]`)
+      .locator(`[id="fg-${id}"]`)
+      .getByRole("button", { name: text, exact: true })
       .first()
   }
 
   async getEngagementInformationTitle() {
-    return this.page.locator('//span[text()="Engagement information"]').first()
+    return this.page
+      .getByText("Engagement information", { exact: true })
+      .first()
   }
 
   async getGridLocationLatField() {
@@ -274,18 +277,17 @@ export class CreateReport extends Page {
 
   async getAttendeeAssessment(name) {
     return (await this.getAttendeesAssessments())
-      .locator(`xpath=.//th//a[text()="${name}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(name, { exact: true }))
       .first()
   }
 
   async getAttendeeAssessmentLabel(name, i) {
-    return (await this.getAttendeeAssessment(name))
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator(`xpath=./following-sibling::tr[${i}]/td`)
-      .first()
+    return this.getAssessmentLabel(
+      await this.getAttendeesAssessments(),
+      name,
+      i
+    )
   }
 
   async getTasksAssessments() {
@@ -298,19 +300,17 @@ export class CreateReport extends Page {
 
   async getTaskAssessment(shortName) {
     return (await this.getTasksAssessments())
-      .locator(`xpath=.//th//a[text()="${shortName}"]`)
+      .getByRole("link")
+      .and(this.page.getByText(shortName, { exact: true }))
       .first()
   }
 
   async getTaskAssessmentLabel(shortName, i) {
-    return (await this.getTaskAssessment(shortName))
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator("..")
-      .locator(`xpath=./following-sibling::tr[${i}]/td`)
-      .first()
+    return this.getAssessmentLabel(
+      await this.getTasksAssessments(),
+      shortName,
+      i
+    )
   }
 
   async getSubmitButton() {
@@ -318,19 +318,25 @@ export class CreateReport extends Page {
   }
 
   async getEditButton() {
-    return this.page.locator('//a[text()="Edit"]').first()
+    return this.page.getByRole("link", { name: "Edit", exact: true }).first()
   }
 
   async getCancelButton() {
-    return this.page.locator('//button[text()="Cancel"]').first()
+    return this.page
+      .getByRole("button", { name: "Cancel", exact: true })
+      .first()
   }
 
   async getDeleteButton() {
-    return this.page.locator('//button[text()="Delete this report"]').first()
+    return this.page
+      .getByRole("button", { name: "Delete this report", exact: true })
+      .first()
   }
 
   async getConfirmButton() {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {

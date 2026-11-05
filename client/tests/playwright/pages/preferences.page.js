@@ -13,7 +13,7 @@ class Preferences extends Page {
       timeout: 10000
     })
     return this.page
-      .locator('//label[text()="Email me about subscription updates"]')
+      .getByText("Email me about subscription updates", { exact: true })
       .first()
   }
 
@@ -23,7 +23,7 @@ class Preferences extends Page {
       timeout: 10000
     })
     return this.page
-      .locator('//label[text()="Email me about report approvals"]')
+      .getByText("Email me about report approvals", { exact: true })
       .first()
   }
 }

@@ -94,7 +94,7 @@ class CreateOrganization extends Page {
 
   async closeEditApp6Modal() {
     const applyButton = await this.page
-      .locator('//button[text()="Apply"]')
+      .getByRole("button", { name: "Apply", exact: true })
       .first()
     await applyButton.click()
     await (

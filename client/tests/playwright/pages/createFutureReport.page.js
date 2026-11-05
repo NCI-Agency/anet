@@ -82,7 +82,10 @@ class CreateFutureReport extends CreateReport {
 
   async getDeleteButton() {
     return this.page
-      .locator('//button[text()="Delete this planned engagement"]')
+      .getByRole("button", {
+        name: "Delete this planned engagement",
+        exact: true
+      })
       .first()
   }
 

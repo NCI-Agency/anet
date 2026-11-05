@@ -105,13 +105,8 @@ test.describe(() => {
         await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())
         await (await OnboardPage.getEndOfTourDate()).fill(String(yesterday))
         await (await OnboardPage.getFamilyName()).click()
-        const errorMessage = await (
-          await OnboardPage.getEndOfTourDate()
-        )
-          .locator("..")
-          .locator("..")
-          .locator("..")
-          .locator("..")
+        const errorMessage = page
+          .locator("#fg-endOfTourDate")
           .locator("div.invalid-feedback")
           .first()
         await errorMessage.waitFor({

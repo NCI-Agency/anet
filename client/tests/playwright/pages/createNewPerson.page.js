@@ -23,7 +23,9 @@ export class CreatePerson extends Page {
   }
 
   async getDuplicatesButton() {
-    return this.page.locator('//button[text()="Possible Duplicates"]').first()
+    return this.page
+      .getByRole("button", { name: "Possible Duplicates", exact: true })
+      .first()
   }
 
   async getModalContent() {
@@ -135,7 +137,7 @@ export class CreatePerson extends Page {
 
   async getNumberCustomFieldHelpText() {
     return (await this.getNumberCustomFieldContainer())
-      .locator('xpath=.//div[contains(text(), "greater than")]')
+      .getByText("greater than", { exact: false })
       .first()
   }
 

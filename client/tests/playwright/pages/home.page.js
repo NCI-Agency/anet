@@ -42,12 +42,12 @@ class Home extends Page {
 
   async getLogoutButton() {
     return (await this.getBannerUser())
-      .locator('xpath=.//a[text()="Sign out"]')
+      .getByRole("link", { name: "Sign out", exact: true })
       .first()
   }
 
   async getLoginButton() {
-    return this.page.locator('//a[text()="Sign In"]').first()
+    return this.page.getByRole("link", { name: "Sign In", exact: true }).first()
   }
 
   async getSearchBar() {
@@ -63,35 +63,45 @@ class Home extends Page {
   }
 
   async getLinksMenuButton() {
-    return this.page.locator('//a[text()="My Work"]').first()
+    return this.page
+      .getByRole("button", { name: "My Work", exact: true })
+      .first()
   }
 
   async getMyReportsLink() {
     return this.page
-      .locator('//a//span[contains(text(), "My Reports")]')
+      .getByRole("link", { name: "My Reports", exact: false })
       .first()
   }
 
   async getMyOrgLink() {
     return this.page
-      .locator('//a//span[contains(text(), "My Organization")]')
+      .getByRole("link", { name: "My Organization", exact: false })
       .first()
   }
 
   async getMyTasksLink() {
-    return this.page.locator('//a//span[text()="My Objectives"]').first()
+    return this.page
+      .getByRole("link", { name: "My Objectives", exact: false })
+      .first()
   }
 
   async getMyCounterpartsLink() {
-    return this.page.locator('//a//span[text()="My Counterparts"]').first()
+    return this.page
+      .getByRole("link", { name: "My Counterparts", exact: false })
+      .first()
   }
 
   async getMyAttachmentsLink() {
-    return this.page.locator('//a//span[text()="My Attachments"]').first()
+    return this.page
+      .getByRole("link", { name: "My Attachments", exact: true })
+      .first()
   }
 
   async getMyEventsLink() {
-    return this.page.locator('//a//span[text()="My Events"]').first()
+    return this.page
+      .getByRole("link", { name: "My Events", exact: true })
+      .first()
   }
 
   async getMyCounterpartsNotifications() {
@@ -104,7 +114,7 @@ class Home extends Page {
 
   async getMyDraftReports() {
     return this.page
-      .locator('//button[contains(text(), "My draft reports")]')
+      .getByRole("button", { name: "My draft reports", exact: false })
       .first()
   }
 
@@ -113,9 +123,10 @@ class Home extends Page {
   }
 
   async getReportsPendingMyApproval() {
-    return this.page
-      .locator('//button[text()="Reports pending my approval"]')
-      .first()
+    // HomeTile includes the live report count in the button's accessible name.
+    return (await this.getHomeTilesContainer()).getByRole("button", {
+      name: /^(?:\d+\s*)?Reports pending my approval$/
+    })
   }
 
   async getReportsPendingMyApprovalCount() {

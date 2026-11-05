@@ -9,13 +9,13 @@ class CreateNewLocation extends Page {
 
   async getCreateButton() {
     return this.page
-      .locator('//button[contains(text(),"Save Location")]')
+      .getByRole("button", { name: "Save Location", exact: false })
       .first()
   }
 
   async getNameRequiredError() {
     return this.page
-      .locator('//div[contains(text(),"name is a required field")]')
+      .getByText("name is a required field", { exact: false })
       .first()
   }
 
@@ -29,7 +29,7 @@ class CreateNewLocation extends Page {
 
   async getTypeRequiredError() {
     return this.page
-      .locator('//div[contains(text(),"type is a required field")]')
+      .getByText("type is a required field", { exact: false })
       .first()
   }
 
@@ -40,7 +40,9 @@ class CreateNewLocation extends Page {
   }
 
   async getDuplicatesButton() {
-    return this.page.locator('//button[text()="Possible Duplicates"]').first()
+    return this.page
+      .getByRole("button", { name: "Possible Duplicates", exact: true })
+      .first()
   }
 
   async getModalContent() {
@@ -49,13 +51,13 @@ class CreateNewLocation extends Page {
 
   async getMaximiseLeafletButton() {
     return this.page
-      .locator('//a[@role="button"][@aria-label="Full Screen"]')
+      .getByRole("button", { name: "Full Screen", exact: true })
       .first()
   }
 
   async getMinimiseLeafletButton() {
     return this.page
-      .locator('//a[@role="button"][@aria-label="Exit Full Screen"]')
+      .getByRole("button", { name: "Exit Full Screen", exact: true })
       .first()
   }
 
@@ -81,18 +83,16 @@ class CreateNewLocation extends Page {
     return (await this.getForm()).locator("button#gloc-info-btn").first()
   }
 
-  // parent of MGRS table data => tr
+  // Scope format values to the row containing its copy button.
   async getAllFormatsPopoverLat() {
     return (await this.getForm())
       .locator(".bp6-popover-content table")
       .first()
-      .getByRole("button", {
-        name: "Latitude",
-        exact: false
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("button", { name: "Latitude" })
       })
       .first()
-      .locator("..")
-      .locator("..")
       .locator("span:first-child")
       .first()
   }
@@ -101,43 +101,39 @@ class CreateNewLocation extends Page {
     return (await this.getForm())
       .locator(".bp6-popover-content table")
       .first()
-      .getByRole("button", {
-        name: "Latitude",
-        exact: false
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("button", { name: "Latitude" })
       })
       .first()
-      .locator("..")
-      .locator("..")
       .locator("span:nth-child(3)")
       .first()
   }
 
   async getAllFormatsPopoverMGRS() {
-    // parent of MGRS table data => tr
+    // Scope format values to the row containing its copy button.
     return (await this.getForm())
       .locator(".bp6-popover-content table")
       .first()
-      .getByRole("button", {
-        name: "MGRS",
-        exact: false
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("button", { name: "MGRS" })
       })
       .first()
-      .locator("..")
-      .locator("..")
       .locator("span:first-child")
       .first()
   }
 
   async getSuccessMsg() {
-    return this.page.locator('//div[text()="Location saved"]').first()
+    return this.page.getByText("Location saved", { exact: true }).first()
   }
 
   async latLngErrorsDisplayed() {
     const latError = await this.page
-      .locator('//div[contains(text(), "Latitude must be")]')
+      .getByText("Latitude must be", { exact: false })
       .first()
     const lngError = await this.page
-      .locator('//div[contains(text(), "Longitude must be")]')
+      .getByText("Longitude must be", { exact: false })
       .first()
     await latError.waitFor({
       state: "attached",

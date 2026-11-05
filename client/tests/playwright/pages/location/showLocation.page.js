@@ -12,7 +12,7 @@ class ShowLocation extends Page {
   }
 
   async getEditButton() {
-    return this.page.locator('//a[text()="Edit"]').first()
+    return this.page.getByRole("link", { name: "Edit", exact: true }).first()
   }
 
   async getEditAttachmentsButton() {
@@ -20,7 +20,7 @@ class ShowLocation extends Page {
   }
 
   async getSuccessMsg() {
-    return this.page.locator('//div[text()="Location saved"]').first()
+    return this.page.getByText("Location saved", { exact: true }).first()
   }
 
   async getLatField() {
@@ -60,17 +60,19 @@ class ShowLocation extends Page {
 
   async getEditEngagementPlanningApprovalsButton() {
     return this.page
-      .locator(
-        '//button[contains(text(), "Edit Engagement planning approvals")]'
-      )
+      .getByRole("button", {
+        name: "Edit Engagement planning approvals",
+        exact: false
+      })
       .first()
   }
 
   async getEditReportPublicationApprovalsButton() {
     return this.page
-      .locator(
-        '//button[contains(text(), "Edit Report publication approvals")]'
-      )
+      .getByRole("button", {
+        name: "Edit Report publication approvals",
+        exact: false
+      })
       .first()
   }
 

@@ -9,7 +9,11 @@ class MergeEventSeries extends Page {
 
   async getTitle() {
     return this.page
-      .locator('//h4[contains(text(),"Merge Event Series")]')
+      .getByRole("heading", {
+        name: "Merge Event Series",
+        level: 4,
+        exact: false
+      })
       .first()
   }
 
@@ -42,29 +46,26 @@ class MergeEventSeries extends Page {
   }
 
   async getColumnContent(side, text) {
-    return this.page
-      .locator(
-        `//div[@id="${side}-merge-eventSeries-col"]//div[text()="${text}"]/following-sibling::div`
-      )
+    return this.getMergeField(`${side}-merge-eventSeries-col`, text)
+      .locator(":scope > div > div:nth-child(2)")
       .first()
   }
 
   async getMergeEventSeriesButton() {
-    return this.page.locator('//button[text()="Merge Event Series"]').first()
+    return this.page
+      .getByRole("button", { name: "Merge Event Series", exact: true })
+      .first()
   }
 
   async getEventSeriesHeaderFromPopover() {
-    return this.page.locator('//table//th[contains(text(), "Name")]').first()
+    return this.page.getByRole("columnheader", { name: "Name" }).first()
   }
 
   async getSelectButton(side, text) {
-    const buttonDiv = await this.page
-      .locator(
-        `//div[@id="${side}-merge-eventSeries-col"]//div[text()="${text}"]`
-      )
+    return this.getMergeField(`${side}-merge-eventSeries-col`, text)
+      .locator(":scope > small")
+      .getByRole("button")
       .first()
-    const button = await buttonDiv.locator("..").locator("..")
-    return button.locator("small > button").first()
   }
 
   async getUseAllButton(side) {
