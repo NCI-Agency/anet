@@ -170,6 +170,8 @@ Regression page modules export classes constructed with a Playwright page, for e
 
 Run the browser-only page-object contracts from `client/` with `yarn run test-playwright-page-objects`. These tests cover page injection, inherited callbacks, live locators, keyboard operations and navigation without requiring ANET, Keycloak or a database. They are separate from the application-backed regression suites.
 
+CI runs these contracts once in the dedicated **Playwright page-object contracts** job, alongside the application build and without starting backend services. The client-test matrix waits for both jobs to pass before provisioning its services. A contract failure therefore prevents the client integration jobs from starting; it does not replace their application or dictionary coverage. The gate uploads JUnit results, an HTML report and failure traces/screenshots as `playwright-page-objects-test-results` and `playwright-page-objects-diagnostics` artifacts. The existing Playwright configuration controls worker counts, retries and failure limits.
+
 The `./gradlew yarn_run_*` commands use the Node.js version configured in `build.gradle`. When invoking Yarn directly, use that same runtime rather than an older shell default; some existing E2E tests require newer JavaScript APIs such as `RegExp.escape`.
 
 The E2E suite (`test-e2e`) also uses Playwright, in a dedicated CI job with a separate database and server. Its scenarios share seed data; permission, position and report workflows run serially within their respective specs. Both browser suites use the worker settings in `client/config/playwright-common.config.js` (overridable with `PLAYWRIGHT_WORKERS`) and run without retries.
