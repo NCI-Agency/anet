@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.beans.EntityAvatar;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.database.mappers.EntityAvatarMapper;
 import org.jdbi.v3.core.Handle;
 import org.springframework.stereotype.Component;
@@ -73,6 +74,26 @@ public class EntityAvatarDao extends AbstractDao {
           + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
           .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
           .execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public boolean isAttachmentUsedAsEntityAvatar(String attachmentUuid,
+      GenericRelatedObject oldRelatedObject) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery("/* checkAttachmentAsEntityAvatar */ SELECT EXISTS ("
+              + "SELECT \"attachmentUuid\" FROM \"entityAvatars\" "
+              + "WHERE \"attachmentUuid\" = :attachmentUuid "
+              + "AND \"relatedObjectType\" = :relatedObjectType "
+              + "AND \"relatedObjectUuid\" = :relatedObjectUuid)")
+          .bind("attachmentUuid", attachmentUuid)
+          .bind("relatedObjectType", oldRelatedObject.getRelatedObjectType())
+          .bind("relatedObjectUuid", oldRelatedObject.getRelatedObjectUuid()).mapTo(Boolean.class)
+          .one();
     } finally {
       closeDbHandle(handle);
     }
