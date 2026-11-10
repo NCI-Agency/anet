@@ -442,7 +442,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
         EntityAvatarInput.builder().withApplyCrop(false).withAttachmentUuid(createdAttachmentUuid)
             .withRelatedObjectType(PersonDao.TABLE_NAME).withRelatedObjectUuid(ENTITY_UUID).build();
 
-    // Admin can do this
+    // Set the attachment as the entity avatar
     Integer numRows = withCredentials(adminUser,
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(numRows).isOne();

@@ -24,6 +24,7 @@ import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.AuditTrailDao;
+import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
@@ -72,12 +73,14 @@ public class AttachmentResource {
   private final AnetObjectEngine engine;
   private final AuditTrailDao auditTrailDao;
   private final AttachmentDao dao;
+  private final EntityAvatarDao entityAvatarDao;
 
   public AttachmentResource(AnetObjectEngine anetObjectEngine, AuditTrailDao auditTrailDao,
-      AttachmentDao dao) {
+      AttachmentDao dao, EntityAvatarDao entityAvatarDao) {
     this.engine = anetObjectEngine;
     this.auditTrailDao = auditTrailDao;
     this.dao = dao;
+    this.entityAvatarDao = entityAvatarDao;
   }
 
   @GraphQLQuery(name = "attachment")
@@ -227,6 +230,12 @@ public class AttachmentResource {
           }, oldRelatedObject -> {
             final List<GenericRelatedObject> oldRelatedObjects = List.of(oldRelatedObject);
             assertAllowedRelatedObjects(user, oldRelatedObjects, true);
+            // Also check whether oldRelatedObject is using this attachment as entityAvatar
+            if (entityAvatarDao.isAttachmentUsedAsEntityAvatar(DaoUtils.getUuid(attachment),
+                oldRelatedObject)) {
+              throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                  "Cannot unlink attachment used as avatar");
+            }
             dao.deleteAttachmentRelatedObjects(DaoUtils.getUuid(attachment), oldRelatedObjects);
           }, null);
     }
