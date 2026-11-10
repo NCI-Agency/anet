@@ -1,56 +1,59 @@
 import { expect, test } from "@playwright/test"
 import { LoginPage } from "../pages/LoginPage.js"
 
+// A missing record must still use an identifier accepted by PostgreSQL UUID columns.
+const missingUuid = "00000000-0000-4000-8000-000000000555"
+
 const testCases = [
   {
     resource: "Reports",
-    path: "/reports/555",
-    expectedText: "Report #555 not found."
+    path: `/reports/${missingUuid}`,
+    expectedText: `Report #${missingUuid} not found.`
   },
   {
     resource: "Organizations",
-    path: "/organizations/555",
-    expectedText: "Organization #555 not found."
+    path: `/organizations/${missingUuid}`,
+    expectedText: `Organization #${missingUuid} not found.`
   },
   {
     resource: "People",
-    path: "/people/555",
-    expectedText: "User #555 not found."
+    path: `/people/${missingUuid}`,
+    expectedText: `User #${missingUuid} not found.`
   },
   {
     resource: "Tasks",
-    path: "/tasks/555",
-    expectedText: "Task #555 not found."
+    path: `/tasks/${missingUuid}`,
+    expectedText: `Task #${missingUuid} not found.`
   },
   {
     resource: "Positions",
-    path: "/positions/555",
-    expectedText: "Position #555 not found."
+    path: `/positions/${missingUuid}`,
+    expectedText: `Position #${missingUuid} not found.`
   },
   {
     resource: "Attachments",
-    path: "/attachments/555",
-    expectedText: "Attachment #555 not found."
+    path: `/attachments/${missingUuid}`,
+    expectedText: `Attachment #${missingUuid} not found.`
   },
   {
     resource: "Communities",
-    path: "/communities/555",
-    expectedText: "AuthorizationGroup #555 not found."
+    path: `/communities/${missingUuid}`,
+    expectedText: `AuthorizationGroup #${missingUuid} not found.`
   },
   {
     resource: "Locations",
-    path: "/locations/555",
-    expectedText: "Location #555 not found."
+    path: `/locations/${missingUuid}`,
+    expectedText: `Location #${missingUuid} not found.`
   },
   {
     resource: "Events",
-    path: "/events/555",
-    expectedText: "Event #555 not found."
+    path: `/events/${missingUuid}`,
+    expectedText: `Event #${missingUuid} not found.`
   },
   {
     resource: "EventSeries",
-    path: "/eventSeries/555",
-    expectedText: "EventSeries #555 not found."
+    path: `/eventSeries/${missingUuid}`,
+    expectedText: `EventSeries #${missingUuid} not found.`
   }
 ]
 

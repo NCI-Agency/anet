@@ -1698,8 +1698,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Reports with any task
     final ReportSearchQueryInput anyTaskQuery = ReportSearchQueryInput.builder().build();
     // Reports without a non-existing task
-    final ReportSearchQueryInput nonExistingTaskQuery =
-        ReportSearchQueryInput.builder().withNotTaskUuid(List.of("nonexisting")).build();
+    final ReportSearchQueryInput nonExistingTaskQuery = ReportSearchQueryInput.builder()
+        .withNotTaskUuid(List.of(TestData.NON_EXISTENT_UUID)).build();
 
     final AnetBeanList_Report anyTaskResults = withCredentials(adminUser,
         t -> queryExecutor.reportList(getListFields(FIELDS), anyTaskQuery));
