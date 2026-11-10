@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -271,11 +270,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getAuthorizationGroupUuid() != null) {
-      if (query.getAuthorizationGroupUuid().isEmpty()) {
-        qb.addListArg("authorizationGroupUuids", Arrays.asList("-1"));
-      } else {
-        qb.addListArg("authorizationGroupUuids", query.getAuthorizationGroupUuid());
-      }
+      qb.addListArg("authorizationGroupUuids", query.getAuthorizationGroupUuid());
       qb.addWhereClause(
           "reports.uuid IN (SELECT ram.\"reportUuid\" FROM \"reportAuthorizedMembers\" ram"
               + " WHERE ram.\"relatedObjectType\" = '" + AuthorizationGroupDao.TABLE_NAME + "'"

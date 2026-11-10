@@ -8157,4 +8157,10 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="postgresql-native-uuid" author="midmarch" dbms="postgresql">
+		<comment>Convert UUID identifiers and references, preserving constraints and full-text search.</comment>
+		<sqlFile path="migrate-postgresql-uuid.sql" relativeToChangelogFile="true"
+			splitStatements="false" stripComments="false" />
+	</changeSet>
+
 </databaseChangeLog>

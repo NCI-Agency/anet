@@ -61,7 +61,7 @@ class MartTransmissionLogImporterWorkerTest extends AbstractResourceTest {
 
   private MartImporterWorker martReportImporterWorker = null;
 
-  private static final String TEST_REPORT_UUID = "transmissionLogTestReportUuid";
+  private static final String TEST_REPORT_UUID = "00000000-0000-4000-8000-000000000004";
   private static final long SEQUENCE_ERROR = 2137;
   private static final long SEQUENCE_OK = 2138;
 

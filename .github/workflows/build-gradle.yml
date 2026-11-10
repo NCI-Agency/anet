@@ -89,6 +89,10 @@ jobs:
 
     env:
       ANET_DICTIONARY_NAME: ${{ matrix.dictionary }}
+      # Opt in to UUID upgrade/fresh-install tests on the disposable CI PostgreSQL server.
+      ANET_UUID_MIGRATION_TEST_URL: jdbc:postgresql://localhost:5433/postgres
+      ANET_UUID_MIGRATION_TEST_USER: anetTestUser
+      ANET_UUID_MIGRATION_TEST_PASSWORD: Test-P@ssw0rd
 
     steps:
     - uses: actions/checkout@v7

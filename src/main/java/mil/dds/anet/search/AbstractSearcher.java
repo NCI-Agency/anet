@@ -70,10 +70,10 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     final List<String> selectClauses = new ArrayList<>();
 
     if (text.trim().length() >= MIN_UUID_PREFIX) {
-      whereClauses
-          .add(String.format("SELECT uuid FROM \"%1$s\" WHERE uuid ILIKE :likeQuery", tableName));
-      selectClauses.add(
-          String.format("CASE WHEN \"%1$s\".uuid ILIKE :likeQuery THEN 1 ELSE 0 END", tableName));
+      whereClauses.add(
+          String.format("SELECT uuid FROM \"%1$s\" WHERE uuid::text ILIKE :likeQuery", tableName));
+      selectClauses.add(String
+          .format("CASE WHEN \"%1$s\".uuid::text ILIKE :likeQuery THEN 1 ELSE 0 END", tableName));
       qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
     }
 

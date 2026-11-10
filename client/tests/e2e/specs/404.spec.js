@@ -1,64 +1,72 @@
 import { expect, test } from "@playwright/test"
 import { LoginPage } from "../pages/LoginPage.js"
 
-const testCases = [
+const uuid = "00000000-0000-4000-8000-000000000555"
+
+const testCases = uuid => [
   {
     resource: "Reports",
-    path: "/reports/555",
-    expectedText: "Report #555 not found."
+    path: `/reports/${uuid}`,
+    expectedText: `Report #${uuid} not found.`
   },
   {
     resource: "Organizations",
-    path: "/organizations/555",
-    expectedText: "Organization #555 not found."
+    path: `/organizations/${uuid}`,
+    expectedText: `Organization #${uuid} not found.`
   },
   {
     resource: "People",
-    path: "/people/555",
-    expectedText: "User #555 not found."
+    path: `/people/${uuid}`,
+    expectedText: `User #${uuid} not found.`
   },
   {
     resource: "Tasks",
-    path: "/tasks/555",
-    expectedText: "Task #555 not found."
+    path: `/tasks/${uuid}`,
+    expectedText: `Task #${uuid} not found.`
   },
   {
     resource: "Positions",
-    path: "/positions/555",
-    expectedText: "Position #555 not found."
+    path: `/positions/${uuid}`,
+    expectedText: `Position #${uuid} not found.`
   },
   {
     resource: "Attachments",
-    path: "/attachments/555",
-    expectedText: "Attachment #555 not found."
+    path: `/attachments/${uuid}`,
+    expectedText: `Attachment #${uuid} not found.`
   },
   {
     resource: "Communities",
-    path: "/communities/555",
-    expectedText: "AuthorizationGroup #555 not found."
+    path: `/communities/${uuid}`,
+    expectedText: `AuthorizationGroup #${uuid} not found.`
   },
   {
     resource: "Locations",
-    path: "/locations/555",
-    expectedText: "Location #555 not found."
+    path: `/locations/${uuid}`,
+    expectedText: `Location #${uuid} not found.`
   },
   {
     resource: "Events",
-    path: "/events/555",
-    expectedText: "Event #555 not found."
+    path: `/events/${uuid}`,
+    expectedText: `Event #${uuid} not found.`
   },
   {
     resource: "EventSeries",
-    path: "/eventSeries/555",
-    expectedText: "EventSeries #555 not found."
+    path: `/eventSeries/${uuid}`,
+    expectedText: `EventSeries #${uuid} not found.`
   }
 ]
 
 test.describe("404 Not Found pages", () => {
-  for (const { resource, path, expectedText } of testCases) {
-    test(`${resource} 404`, async ({ page }) => {
+  for (const { resource, path, expectedText } of testCases(uuid)) {
+    test(`${resource} 404 (missing UUID)`, async ({ page }) => {
+      const responsePromise = page.waitForResponse(
+        response =>
+          new URL(response.url()).pathname === "/graphql" &&
+          response.request().postDataJSON()?.variables?.uuid === uuid
+      )
       const login = new LoginPage(page)
       await login.login(path)
+      expect((await responsePromise).status()).toBe(404)
       await expect(page.locator(".not-found-text").first()).toHaveText(
         expectedText
       )
