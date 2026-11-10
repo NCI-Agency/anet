@@ -1,10 +1,12 @@
 package mil.dds.anet.config;
 
+import java.sql.Types;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.jdbi.v3.core.ConnectionFactory;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.argument.ObjectArgumentFactory;
 import org.jdbi.v3.core.mapper.CaseStrategy;
 import org.jdbi.v3.core.mapper.MapMappers;
 import org.jdbi.v3.postgres.PostgresPlugin;
@@ -27,6 +29,8 @@ public class JdbiConfig {
     // Register our plugins
     jdbi.installPlugin(new PostgresPlugin());
     jdbi.installPlugin(new SqlObjectPlugin());
+    // Let PostgreSQL infer uuid or text from the SQL context. UUIDs remain strings in our beans.
+    jdbi.registerArgument(ObjectArgumentFactory.create(String.class, Types.OTHER));
     // Don't map column names to lowercase
     jdbi.getConfig(MapMappers.class).setCaseChange(CaseStrategy.NOP);
     return jdbi;

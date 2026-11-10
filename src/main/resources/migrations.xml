@@ -7364,6 +7364,12 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="postgresql-native-uuid" author="midmarch" dbms="postgresql">
+		<comment>Convert UUID identifiers and references, preserving constraints and full-text search.</comment>
+		<sqlFile path="migrate-postgresql-uuid.sql" relativeToChangelogFile="true"
+			splitStatements="false" stripComments="false" />
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -7519,15 +7525,18 @@
 					object_table
 				)
 				INTO result
-				USING object_uuid;
+				USING object_uuid::uuid;
 				RETURN result;
+			EXCEPTION
+				WHEN OTHERS THEN
+				RETURN NULL;
 			END;
 			'
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
 			CREATE OR REPLACE FUNCTION get_rt_referenced_objects(table_name text, column_name text)
-				RETURNS table(uuid varchar(36), object_table text, object_uuid text)
+				RETURNS table(uuid uuid, object_table text, object_uuid text)
 			AS
 			'
 			BEGIN
@@ -7544,7 +7553,7 @@
 			IMMUTABLE;
 
 			CREATE OR REPLACE FUNCTION get_cf_referenced_objects(table_name text, column_name text)
-				RETURNS table(uuid varchar(36), object_table text, object_uuid text)
+				RETURNS table(uuid uuid, object_table text, object_uuid text)
 			AS
 			'
 			BEGIN
@@ -7975,7 +7984,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_attachments_uuid" ON mv_fts_attachments(uuid);
 			CREATE INDEX "FT_mv_fts_attachments" ON mv_fts_attachments USING gin(full_text);
-			CREATE INDEX "TR_attachments_uuid" ON mv_fts_attachments USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_attachments_uuid" ON mv_fts_attachments USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_authorizationGroups"(uuid, full_text) AS
 			SELECT
@@ -7990,7 +7999,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_authorizationGroups_uuid" ON "mv_fts_authorizationGroups"(uuid);
 			CREATE INDEX "FT_mv_fts_authorizationGroups" ON "mv_fts_authorizationGroups" USING gin(full_text);
-			CREATE INDEX "TR_authorizationGroups_uuid" ON "mv_fts_authorizationGroups" USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_authorizationGroups_uuid" ON "mv_fts_authorizationGroups" USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_events(uuid, full_text) AS
 			SELECT
@@ -8003,7 +8012,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_events_uuid" ON mv_fts_events(uuid);
 			CREATE INDEX "FT_mv_fts_events" ON mv_fts_events USING gin(full_text);
-			CREATE INDEX "TR_events_uuid" ON mv_fts_events USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_events_uuid" ON mv_fts_events USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_eventSeries"(uuid, full_text) AS
 			SELECT
@@ -8016,7 +8025,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_eventSeries_uuid" ON "mv_fts_eventSeries"(uuid);
 			CREATE INDEX "FT_mv_fts_eventSeries" ON "mv_fts_eventSeries" USING gin(full_text);
-			CREATE INDEX "TR_eventSeries_uuid" ON "mv_fts_eventSeries" USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_eventSeries_uuid" ON "mv_fts_eventSeries" USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
 			SELECT
@@ -8033,7 +8042,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
 			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
-			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
 			SELECT
@@ -8057,7 +8066,7 @@
 				WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
 			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
-			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
 			SELECT
@@ -8087,7 +8096,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
 			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
-			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
 			SELECT
@@ -8111,7 +8120,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
 			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
-			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
 			SELECT
@@ -8132,7 +8141,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_reports_uuid" ON mv_fts_reports(uuid);
 			CREATE INDEX "FT_mv_fts_reports" ON mv_fts_reports USING gin(full_text);
-			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin((uuid::text) gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
 			SELECT
@@ -8153,7 +8162,7 @@
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
 			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
-			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin((uuid::text) gin_trgm_ops);
 		</sql>
 	</changeSet>
 
