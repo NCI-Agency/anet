@@ -1,8 +1,10 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.List;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
@@ -421,6 +423,51 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     assertThat(numRows).isOne();
     event = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, ENTITY_UUID));
     entityAvatar = event.getEntityAvatar();
+    assertThat(entityAvatar).isNull();
+  }
+
+  @Test
+  void testUnlinkAttachmentUsedAsAvatar() {
+    final String ENTITY_UUID = getJackJackson().getUuid();
+
+    // First upload an attachment to the person
+    final AttachmentInput testAttachmentInput = buildAttachment(PersonDao.TABLE_NAME, ENTITY_UUID);
+    final String createdAttachmentUuid =
+        withCredentials(adminUser, t -> mutationExecutor.createAttachment("", testAttachmentInput));
+    assertThat(createdAttachmentUuid).isNotNull();
+
+    final Attachment createdAttachment = withCredentials(adminUser, t -> queryExecutor
+        .attachment(AttachmentResourceTest.ATTACHMENT_FIELDS, createdAttachmentUuid));
+    final EntityAvatarInput newEntityAvatarInput =
+        EntityAvatarInput.builder().withApplyCrop(false).withAttachmentUuid(createdAttachmentUuid)
+            .withRelatedObjectType(PersonDao.TABLE_NAME).withRelatedObjectUuid(ENTITY_UUID).build();
+
+    // Admin can do this
+    Integer numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Get the entity avatar via the person
+    Person person = withCredentials(adminUser, t -> queryExecutor.person(FIELDS, ENTITY_UUID));
+    EntityAvatar entityAvatar = person.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getRelatedObjectUuid()).isEqualTo(ENTITY_UUID);
+    assertThat(entityAvatar.getAttachmentUuid()).isEqualTo(createdAttachmentUuid);
+    assertThat(entityAvatar.getApplyCrop()).isFalse();
+
+    // Try to unlink the attachment
+    createdAttachment.setAttachmentRelatedObjects(List.of());
+    assertThatCode(() -> withCredentials(adminUser,
+        t -> mutationExecutor.updateAttachment("",
+            getInput(createdAttachment, AttachmentInput.class), true)))
+        .withFailMessage("Expected an Exception").isInstanceOf(Exception.class);
+
+    // Delete the entity avatar
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.deleteEntityAvatar("", PersonDao.TABLE_NAME, ENTITY_UUID));
+    assertThat(numRows).isOne();
+    person = withCredentials(adminUser, t -> queryExecutor.person(FIELDS, ENTITY_UUID));
+    entityAvatar = person.getEntityAvatar();
     assertThat(entityAvatar).isNull();
   }
 }
