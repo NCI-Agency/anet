@@ -1,7 +1,6 @@
 package mil.dds.anet.database;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +12,6 @@ import mil.dds.anet.views.AbstractAnetBean;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public abstract class SearchQueryBatcher<T extends AbstractAnetBean, Q extends AbstractSearchQuery<?>> {
-
-  private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
   private final AnetBaseDao<T, Q> dao;
 
@@ -34,8 +31,7 @@ public abstract class SearchQueryBatcher<T extends AbstractAnetBean, Q extends A
         @SuppressWarnings("unchecked")
         final Q searchQuery = (Q) gqlQuery.getKey().clone();
         final List<String> foreignKeysForQuery = gqlQuery.getValue();
-        searchQuery.getBatchParams()
-            .setBatchUuids(foreignKeysForQuery.isEmpty() ? defaultIfEmpty : foreignKeysForQuery);
+        searchQuery.getBatchParams().setBatchUuids(foreignKeysForQuery);
         final AnetBeanList<T> results = dao.search(searchQuery);
         final Map<ImmutablePair<String, Q>, List<T>> map = results.getList().stream()
             .collect(Collectors.toMap(
