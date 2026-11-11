@@ -157,7 +157,9 @@ jobs:
         exit 1
     - name: Install Playwright Chromium
       if: matrix.client-tests != 'jest'
-      run: ./gradlew yarn_run_install-playwright
+      # Hosted runners already provide Chromium's runtime libraries. Avoid an apt
+      # dependency installation, which can fail when Ubuntu mirrors are unavailable.
+      run: ./gradlew yarn_run_install-playwright-browser
     - run: ./gradlew yarn_run_test-${CLIENT_TESTS}
     - name: Strip slashes from dictionary name
       id: strip-slashes
