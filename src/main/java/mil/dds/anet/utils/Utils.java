@@ -856,7 +856,9 @@ public class Utils {
     richTextAttachmentUuids.removeAll(directAttachmentUuids);
     final List<Attachment> richTextAttachments =
         engine.getAttachmentDao().getByIds(new ArrayList<>(richTextAttachmentUuids));
-    return Stream.concat(directAttachments.stream(), richTextAttachments.stream()).toList();
+    return Stream
+        .concat(directAttachments.stream(), richTextAttachments.stream().filter(Objects::nonNull))
+        .toList();
   }
 
   private static Set<String> getAttachmentUuids(String htmlString) {
@@ -887,8 +889,12 @@ public class Utils {
       final Elements anetLinks =
           anchor.getElementsByAttributeValueStarting(HREF_ATTRIBUTE, ANET_LINK_PREFIX);
       anetLinks.forEach(anetLink -> {
-        final TypeUuidTuple typeUuidTuple = replaceHref(anetLink, anetServerUrl);
-        replaceInnerHtml(anetLink, dict, anetServerUrl, useCids, typeUuidTuple.type());
+        final TypeUuidTuple tut = getTypeUuidTuple(anetLink);
+        final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(tut.type());
+        if (daoEntityNameTuple.dao() != null) {
+          replaceHref(anetLink, anetServerUrl, tut);
+          replaceInnerHtml(anetLink, dict, anetServerUrl, useCids, daoEntityNameTuple, tut.uuid());
+        }
       });
     });
     return reportDoc.body().html();
@@ -903,10 +909,8 @@ public class Utils {
     return new TypeUuidTuple(tableName, objectUuid);
   }
 
-  private static TypeUuidTuple replaceHref(Element anetLink, String anetServerUrl) {
-    final TypeUuidTuple tut = getTypeUuidTuple(anetLink);
+  private static void replaceHref(Element anetLink, String anetServerUrl, TypeUuidTuple tut) {
     anetLink.attr(HREF_ATTRIBUTE, String.format("%s/%s/%s", anetServerUrl, tut.type(), tut.uuid()));
-    return tut;
   }
 
   private static TypeUuidTuple getTypeUuidTuple(Element anetLink) {
@@ -916,12 +920,10 @@ public class Utils {
   }
 
   private static void replaceInnerHtml(Element anetLink, AnetDictionary dict, String anetServerUrl,
-      boolean useCids, String tableName) {
-    final DaoEntityNameTuple daoEntityNameTuple = getDaoEntityNameTuple(tableName);
-    final TypeUuidTuple tut = getTypeUuidTuple(anetLink.html().split(":", 2));
+      boolean useCids, DaoEntityNameTuple daoEntityNameTuple, String uuid) {
     anetLink.empty();
     anetLink.appendChildren(getInnerNodes(daoEntityNameTuple.dao(), dict, anetServerUrl, useCids,
-        tut.type(), tut.uuid()));
+        daoEntityNameTuple.entityName(), uuid));
   }
 
   private record DaoEntityNameTuple(AnetBaseDao<? extends AbstractAnetBean, ?> dao,
@@ -953,18 +955,14 @@ public class Utils {
   private static Collection<? extends Node> getInnerNodes(
       AnetBaseDao<? extends AbstractAnetBean, ?> dao, AnetDictionary dict, String anetServerUrl,
       boolean useCids, String objectType, String objectUuid) {
-    if (dao != null) {
-      final AbstractAnetBean obj =
-          dao instanceof ReportDao reportDao ? reportDao.getByUuid(objectUuid, null)
-              : dao.getByUuid(objectUuid);
-      if (obj == null) {
-        return List
-            .of(new TextNode(String.format("[%s with uuid %s not found]", objectType, objectUuid)));
-      }
-      if (obj instanceof SubscribableObject subscribableObject) {
+    final AbstractAnetBean obj =
+        dao instanceof ReportDao reportDao ? reportDao.getByUuid(objectUuid, null)
+            : dao.getByUuid(objectUuid);
+    switch (obj) {
+      case SubscribableObject subscribableObject -> {
         return List.of(new TextNode(subscribableObject.getObjectLabel()));
       }
-      if (obj instanceof Attachment attachment) {
+      case Attachment attachment -> {
         final var classification = getAttachmentConfidentialityLabel(dict, attachment);
         final String label = attachment.getObjectLabel();
         if (isImage(attachment) && hasContent(attachment)) {
@@ -990,8 +988,14 @@ public class Utils {
           return List.of(innerNode1, innerNode2);
         }
       }
+      case null -> {
+        return List
+            .of(new TextNode("[%s with uuid %s not found]".formatted(objectType, objectUuid)));
+      }
+      default -> {
+        return List.of(new TextNode("entity %s::%s".formatted(objectType, objectUuid)));
+      }
     }
-    return List.of(new TextNode(String.format("entity %s::%s", objectType, objectUuid)));
   }
 
   public static String getAttachmentUrl(String anetServerUrl, boolean useCids, String objectUuid) {
