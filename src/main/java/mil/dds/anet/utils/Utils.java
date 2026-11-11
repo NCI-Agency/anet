@@ -856,7 +856,9 @@ public class Utils {
     richTextAttachmentUuids.removeAll(directAttachmentUuids);
     final List<Attachment> richTextAttachments =
         engine.getAttachmentDao().getByIds(new ArrayList<>(richTextAttachmentUuids));
-    return Stream.concat(directAttachments.stream(), richTextAttachments.stream()).toList();
+    return Stream
+        .concat(directAttachments.stream(), richTextAttachments.stream().filter(Objects::nonNull))
+        .toList();
   }
 
   private static Set<String> getAttachmentUuids(String htmlString) {
