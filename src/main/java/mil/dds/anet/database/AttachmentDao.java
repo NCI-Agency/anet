@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery> {
 
   public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
-      "description", "classification", "caption", "createdAt", "updatedAt"};
+      "description", "classification", "caption", "createdAt", "updatedAt", "ldapUuid"};
   public static final String TABLE_NAME = "attachments";
   public static final String ATTACHMENT_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true) + String.format(
@@ -334,6 +334,30 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
           .bindList(NULL_KEYWORD, "attachmentUuids", attachmentUuids)
           .bind(relatedObjectTypeParam, relatedObjectType)
           .bind(relatedObjectUuidParam, relatedObjectUuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public List<Attachment> getAttachmentsByLdapUuid(String ldapUuid) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery("/* getAttachmentsByLdapUuid */ SELECT " + ATTACHMENT_FIELDS + " FROM "
+              + TABLE_NAME + " WHERE \"ldapUuid\" = :ldapUuid")
+          .bind("ldapUuid", ldapUuid).map(new AttachmentMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int updateLdapFields(Attachment a) {
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate("/* attachmentUpdateLdapFields */ UPDATE " + TABLE_NAME
+          + " SET \"ldapUuid\" = :ldapUuid WHERE uuid = :uuid").bindBean(a).execute();
     } finally {
       closeDbHandle(handle);
     }

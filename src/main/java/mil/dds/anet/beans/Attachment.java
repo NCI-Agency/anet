@@ -38,6 +38,9 @@ public class Attachment extends AbstractAnetBean implements RelatableObject {
   @GraphQLInputField
   private String caption;
 
+  // For linking entities to LDAP
+  private String ldapUuid;
+
   // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
 
@@ -142,6 +145,14 @@ public class Attachment extends AbstractAnetBean implements RelatableObject {
   @GraphQLInputField(name = "attachmentRelatedObjects")
   public void setAttachmentRelatedObjects(List<GenericRelatedObject> attachmentRelatedObjects) {
     this.attachmentRelatedObjects = attachmentRelatedObjects;
+  }
+
+  public String getLdapUuid() {
+    return ldapUuid;
+  }
+
+  public void setLdapUuid(String ldapUuid) {
+    this.ldapUuid = ldapUuid;
   }
 
   @Override

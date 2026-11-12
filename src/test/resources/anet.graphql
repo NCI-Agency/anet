@@ -764,6 +764,12 @@ input GenericRelatedObjectInput {
 scalar Instant
 
 """"""
+type LdapPersonRecord {
+  attributes: Map_String_ObjectScalar
+  person: Person
+}
+
+""""""
 type Location {
   approvalSteps: [ApprovalStep]
   ascendantLocations(
@@ -1054,6 +1060,10 @@ type Mutation {
     """"""
     uuid: String
   ): Int
+  importLdapPeople(
+    """"""
+    ldapUuids: [String]
+  ): [LdapPersonRecord]
   mergeEventSeries(
     """"""
     loserUuid: String
@@ -1445,6 +1455,7 @@ type Person {
   gender: String
   givenName: String
   isSubscribed: Boolean
+  ldapUpdatedAt: Instant
   notes: [Note]
   obsoleteCountry: String
   pendingVerification: Boolean
@@ -1785,6 +1796,10 @@ type Query {
     uuid: String
   ): EventType
   eventTypes: [EventType]
+  getLdapPeople(
+    """"""
+    name: String
+  ): [LdapPersonRecord]
   location(
     """"""
     uuid: String
@@ -2039,6 +2054,7 @@ type ReportPerson {
   givenName: String
   interlocutor: Boolean!
   isSubscribed: Boolean
+  ldapUpdatedAt: Instant
   notes: [Note]
   obsoleteCountry: String
   pendingVerification: Boolean

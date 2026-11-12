@@ -46,14 +46,13 @@ const EntityAvatarEditModal = ({
       )
       setChosenImageUuid(chosenImage?.uuid)
       setCroppeable(isCroppeable(chosenImage))
-      setCropperCoordinates(
-        selectedAvatar && {
-          left: selectedAvatar.cropLeft,
-          top: selectedAvatar.cropTop,
-          width: selectedAvatar.cropWidth,
-          height: selectedAvatar.cropHeight
-        }
-      )
+      const dimensions = selectedAvatar?.applyCrop && {
+        left: selectedAvatar.cropLeft,
+        top: selectedAvatar.cropTop,
+        width: selectedAvatar.cropWidth,
+        height: selectedAvatar.cropHeight
+      }
+      setCropperCoordinates(dimensions)
     },
     [images]
   )

@@ -99,6 +99,11 @@ public class Person extends AbstractEmailableAnetBean
   private String code;
   // annotated below
   private EntityAvatar entityAvatar;
+  // For linking entities to LDAP
+  @GraphQLQuery
+  private String ldapUuid;
+  @GraphQLQuery
+  private Instant ldapUpdatedAt;
 
   // non-GraphQL
   private Deque<Activity> recentActivities;
@@ -494,6 +499,22 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   public String customSensitiveInformationKey() {
     return "fields.person.customSensitiveInformation";
+  }
+
+  public String getLdapUuid() {
+    return ldapUuid;
+  }
+
+  public void setLdapUuid(String ldapUuid) {
+    this.ldapUuid = ldapUuid;
+  }
+
+  public Instant getLdapUpdatedAt() {
+    return ldapUpdatedAt;
+  }
+
+  public void setLdapUpdatedAt(Instant ldapUpdatedAt) {
+    this.ldapUpdatedAt = ldapUpdatedAt;
   }
 
   @Override

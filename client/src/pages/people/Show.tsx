@@ -67,6 +67,7 @@ import {
 } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { Link, useLocation, useNavigate, useParams } from "react-router"
+import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
 
@@ -74,6 +75,7 @@ const GQL_GET_PERSON = gql`
   query($uuid: String!) {
     person(uuid: $uuid) {
       ${Person.allFieldsQuery}
+      ldapUuid
       authorizationGroups {
         ${gqlEntityFieldsMap.AuthorizationGroup}
       }
@@ -96,6 +98,16 @@ const GQL_GET_PERSON = gql`
 const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
   mutation ($person: PersonInput!) {
     updatePersonHistory(person: $person)
+  }
+`
+
+const GQL_IMPORT_LDAP_PEOPLE = gql`
+  mutation ($ldapUuids: [String]) {
+    importLdapPeople(ldapUuids: $ldapUuids) {
+      person {
+        uuid
+      }
+    }
   }
 `
 
@@ -187,6 +199,15 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
 
   const action = (
     <>
+      {Settings.enableLdapImport && person?.ldapUuid && (
+        <Button
+          value="importFromLdap"
+          variant="outline-secondary"
+          onClick={importFromLdap}
+        >
+          Update from LDAP
+        </Button>
+      )}
       {isAdmin && (
         <Link
           id="mergeWithOther"
@@ -412,6 +433,25 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
       </div>
     </AttachmentContext.Provider>
   )
+
+  async function importFromLdap() {
+    try {
+      pageDispatchers?.showLoading()
+      const result = await API.mutation(GQL_IMPORT_LDAP_PEOPLE, {
+        ldapUuids: [person?.ldapUuid]
+      })
+      if (result?.importLdapPeople?.length === 1) {
+        toast.info("Person updated from LDAP")
+      } else {
+        toast.error("Failed to update person from LDAP")
+      }
+      refetch()
+      pageDispatchers?.hideLoading()
+    } catch (err) {
+      toast.error(err.message)
+      pageDispatchers?.hideLoading()
+    }
+  }
 
   function orderPersonFields() {
     const mappedCustomFields = mapReadonlyCustomFieldsToComps({

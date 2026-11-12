@@ -529,7 +529,11 @@ export default class Person extends Model {
     return Person.assessmentConfig || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["authorizationGroups"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    "authorizationGroups",
+    "ldapUuid",
+    "ldapUpdatedAt"
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

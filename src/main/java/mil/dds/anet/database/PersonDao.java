@@ -46,9 +46,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields =
       {"uuid", "familyName", "givenName", "rank", "createdAt"};
-  public static final String[] additionalFields =
-      {"status", "user", "phoneNumber", "biography", "obsoleteCountry", "countryUuid", "gender",
-          "endOfTourDate", "pendingVerification", "code", "updatedAt", "customFields"};
+  public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
+      "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "pendingVerification", "code",
+      "updatedAt", "customFields", "ldapUuid", "ldapUpdatedAt"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -177,6 +177,35 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       // Evict original person as well as current person
       personCache.evictFromCache(personCache.findInCache(p));
       personCache.evictFromCache(p);
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public List<Person> getPeopleByLdapUuid() {
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createQuery("/* getPeopleByLdapUuid */ SELECT " + PERSON_FIELDS + " FROM " + TABLE_NAME
+              + " WHERE \"ldapUuid\" IS NOT NULL"
+              + " ORDER BY \"people_familyName\", \"people_givenName\"")
+          .map(new PersonMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public int updateLdapFields(Person p) {
+    final Handle handle = getDbHandle();
+    try {
+      final int nr = handle.createUpdate("/* personUpdateLdapFields */ UPDATE " + TABLE_NAME
+          + " SET \"ldapUuid\" = :ldapUuid, \"ldapUpdatedAt\" = :ldapUpdatedAt WHERE uuid = :uuid")
+          .bindBean(p).bind("ldapUpdatedAt", DaoUtils.asLocalDateTime(p.getLdapUpdatedAt()))
+          .execute();
+      // No need to update subscriptions, this is an internal change
       return nr;
     } finally {
       closeDbHandle(handle);
