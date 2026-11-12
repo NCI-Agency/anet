@@ -4,7 +4,6 @@ import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +18,6 @@ import org.jdbi.v3.core.statement.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ForeignKeyByDateBatcher<T extends AbstractAnetBean> extends AbstractDao {
-
-  private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
   private final String sql;
   private final String paramName;
@@ -55,8 +52,8 @@ public class ForeignKeyByDateBatcher<T extends AbstractAnetBean> extends Abstrac
               Collectors.mapping(ImmutablePair::getLeft, Collectors.toList())));
       for (Map.Entry<Instant, List<String>> gqlQuery : dateToForeignKeyListMap.entrySet()) {
         final Instant when = gqlQuery.getKey();
-        final List<String> args = foreignKeys.isEmpty() ? defaultIfEmpty : gqlQuery.getValue();
-        final Query query = handle.createQuery(sql).bindList(NULL_KEYWORD, paramName, args);
+        final Query query =
+            handle.createQuery(sql).bindList(NULL_KEYWORD, paramName, gqlQuery.getValue());
         query.bind("when", DaoUtils.asLocalDateTime(when));
         if (additionalParams != null && !additionalParams.isEmpty()) {
           query.bindMap(additionalParams);

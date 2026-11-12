@@ -339,7 +339,7 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 4.1 Advisor E', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1 Advisor old - dont use', 0, NULL, 0, 1, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5 Admin', 3, NULL, 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'05c42ce0-34a0-4391-8b2f-c4cd85ee6b47', 'EF 5.1 Advisor Quality Assurance', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('05c42ce0-34a0-4391-8b2f-c4cd85ee6b47', 'EF 5.1 Advisor Quality Assurance', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Advisor Accounting', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Superuser Sales 1', 2, 1, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 2, 0, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -528,7 +528,7 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "creat
   (uuid_generate_v4(), 'EF 4.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf', 'EF 5.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf', 'EF 5.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -610,50 +610,50 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
 
 -- Create some tasks
 INSERT INTO tasks (uuid, "shortName", "longName", status, selectable, category, "createdAt", "updatedAt", "parentTaskUuid") VALUES
-  (N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'fdf107e7-a88a-4dc4-b744-748e9aaffabc', '1.1', 'Budgeting in the MoD', 0, TRUE, 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
-  (N'7b2ad5c3-018b-48f5-b679-61fbbda21693', '1.1.A', 'Milestone the First in EF 1.1', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
-  (N'1b5eb36b-456c-46b7-ae9e-1c89e9075292', '1.1.B', 'Milestone the Second in EF 1.1', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
-  (N'7fdef880-1bf3-4e56-8476-79166324023f', '1.1.C', 'Milestone the Third in EF 1.1', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
-  (N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 0, TRUE, 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
-  (N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 0, TRUE, 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
-  (N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
-  (N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
-  (N'6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
-  (N'076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
-  (N'30bc5708-c12d-4a21-916c-5acd7f6f11da', '1.3.B', 'Tracking your expenses', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
-  (N'df920c99-10ea-44e8-940f-cb1d1cbd22da', '1.3.C', 'Knowing when you run out of money', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
-  (N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7', 'EF 2', 'Transparency, Accountability, O (TAO)', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'75d4009d-7c79-42e0-aa2f-d79d158ec8d6', '2.A', 'This is the first Milestone in EF 2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
-  (N'2200a820-c4c7-4c9c-946c-f0c9c9e045c5', '2.B', 'This is the second Milestone in EF 2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
-  (N'0701a964-5d79-4090-8f35-a40856556675', '2.C', 'This is the third Milestone in EF 2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
-  (N'42afd501-1a2c-4758-9da5-f996b2c97156', '2.D', 'Keep track of the petty cash drawer', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
-  (N'44089923-7367-4e97-82c3-dfe6b270d493', 'EF 3', 'Rule of Law', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'39d0c437-720c-4d78-8768-7f3dee5b3cd0', '3.a', 'Get some Lawyers to read a book', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'44089923-7367-4e97-82c3-dfe6b270d493'),
-  (N'a710a076-be5c-4982-b870-50dd5d340eb3', '3.b', 'Get some Lawyers to wear a suit to court', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'44089923-7367-4e97-82c3-dfe6b270d493'),
-  (N'c00633c5-5479-41b2-b188-89d2a9922924', '3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'44089923-7367-4e97-82c3-dfe6b270d493'),
-  (N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9', 'EF 4', 'Force Gen (Training)', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'c098a5b3-8d80-429d-ada2-fd57dc331e2a', '4.a', 'Get a website for people to apply on', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'eddf19f6-f6e1-44f5-9093-f3e2ade59428', '4.b', 'Hire People', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'0cb03167-2772-4d3e-8382-5870da58022a', '4.b.1', 'Get an HR team', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
-  (N'df8fd269-b382-486e-9bc6-f3f4b77a03b0', '4.b.2', 'Review resumes for hiring', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
-  (N'17f35bc6-a0f3-4f79-8813-2176a7d7ca2f', '4.b.3', 'Invite people to come interview', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
-  (N'32788f96-b72c-4314-8286-7f59b683cba2', '4.b.4', 'Interview candidates', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
-  (N'cca1678a-58d7-4213-9c67-f894879df776', '4.b.5', 'Extend Job Offers to successful candidates', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
-  (N'98342fa0-9106-4ef1-bc47-e4af2f5da330', '4.c', 'Onboard new Employees', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'242efaa3-d5de-4970-996d-50ca90ef6480', 'EF 5', 'Force Sustainment (Logistics)', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'19364d81-3203-483d-a6bf-461d58888c76', 'EF7', 'Intelligence', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'4831e09b-2bbb-4717-9bfa-91071e62260a', 'EF9', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 0, TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'4831e09b-2bbb-4717-9bfa-91071e62260a'),
-  (N'073da176-8129-4d9b-afa3-416edde6846a', 'TAAC', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (uuid_generate_v4(), 'TAAC-N', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  (uuid_generate_v4(), 'TAAC-S', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  (uuid_generate_v4(), 'TAAC-E', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  (uuid_generate_v4(), 'TAAC-W', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  (uuid_generate_v4(), 'TAAC-C', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  ('d5383bff-abfe-4e2f-89b1-f937e9eface9', 'TAAC Air', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  ('1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('fdf107e7-a88a-4dc4-b744-748e9aaffabc', '1.1', 'Budgeting in the MoD', 0, TRUE, 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
+  ('7b2ad5c3-018b-48f5-b679-61fbbda21693', '1.1.A', 'Milestone the First in EF 1.1', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
+  ('1b5eb36b-456c-46b7-ae9e-1c89e9075292', '1.1.B', 'Milestone the Second in EF 1.1', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
+  ('7fdef880-1bf3-4e56-8476-79166324023f', '1.1.C', 'Milestone the Third in EF 1.1', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
+  ('fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 0, TRUE, 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
+  ('ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 0, TRUE, 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
+  ('953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+  ('9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+  ('6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+  ('076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ac466253-1456-4fc8-9b14-a3643746e5a6'),
+  ('30bc5708-c12d-4a21-916c-5acd7f6f11da', '1.3.B', 'Tracking your expenses', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ac466253-1456-4fc8-9b14-a3643746e5a6'),
+  ('df920c99-10ea-44e8-940f-cb1d1cbd22da', '1.3.C', 'Knowing when you run out of money', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ac466253-1456-4fc8-9b14-a3643746e5a6'),
+  ('cd35abe7-a5c9-4b3e-885b-4c72bf564ed7', 'EF 2', 'Transparency, Accountability, O (TAO)', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('75d4009d-7c79-42e0-aa2f-d79d158ec8d6', '2.A', 'This is the first Milestone in EF 2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+  ('2200a820-c4c7-4c9c-946c-f0c9c9e045c5', '2.B', 'This is the second Milestone in EF 2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+  ('0701a964-5d79-4090-8f35-a40856556675', '2.C', 'This is the third Milestone in EF 2', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+  ('42afd501-1a2c-4758-9da5-f996b2c97156', '2.D', 'Keep track of the petty cash drawer', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+  ('44089923-7367-4e97-82c3-dfe6b270d493', 'EF 3', 'Rule of Law', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('39d0c437-720c-4d78-8768-7f3dee5b3cd0', '3.a', 'Get some Lawyers to read a book', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '44089923-7367-4e97-82c3-dfe6b270d493'),
+  ('a710a076-be5c-4982-b870-50dd5d340eb3', '3.b', 'Get some Lawyers to wear a suit to court', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '44089923-7367-4e97-82c3-dfe6b270d493'),
+  ('c00633c5-5479-41b2-b188-89d2a9922924', '3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '44089923-7367-4e97-82c3-dfe6b270d493'),
+  ('dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9', 'EF 4', 'Force Gen (Training)', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('c098a5b3-8d80-429d-ada2-fd57dc331e2a', '4.a', 'Get a website for people to apply on', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+  ('eddf19f6-f6e1-44f5-9093-f3e2ade59428', '4.b', 'Hire People', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+  ('0cb03167-2772-4d3e-8382-5870da58022a', '4.b.1', 'Get an HR team', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  ('df8fd269-b382-486e-9bc6-f3f4b77a03b0', '4.b.2', 'Review resumes for hiring', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  ('17f35bc6-a0f3-4f79-8813-2176a7d7ca2f', '4.b.3', 'Invite people to come interview', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  ('32788f96-b72c-4314-8286-7f59b683cba2', '4.b.4', 'Interview candidates', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  ('cca1678a-58d7-4213-9c67-f894879df776', '4.b.5', 'Extend Job Offers to successful candidates', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  ('98342fa0-9106-4ef1-bc47-e4af2f5da330', '4.c', 'Onboard new Employees', 0, TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+  ('242efaa3-d5de-4970-996d-50ca90ef6480', 'EF 5', 'Force Sustainment (Logistics)', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('19364d81-3203-483d-a6bf-461d58888c76', 'EF7', 'Intelligence', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('4831e09b-2bbb-4717-9bfa-91071e62260a', 'EF9', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 0, TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '4831e09b-2bbb-4717-9bfa-91071e62260a'),
+  ('073da176-8129-4d9b-afa3-416edde6846a', 'TAAC', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (uuid_generate_v4(), 'TAAC-N', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-S', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-E', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-W', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-C', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '073da176-8129-4d9b-afa3-416edde6846a'),
+  ('d5383bff-abfe-4e2f-89b1-f937e9eface9', 'TAAC Air', '', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '073da176-8129-4d9b-afa3-416edde6846a'),
   ('826f43ea-9f0a-40c4-87cb-70aba83bf044', 'Factors', 'Factors', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   ('ec49de46-dd69-48c9-bde1-ecc69fa3befe', 'Factor1', 'Factor1', 0, TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '826f43ea-9f0a-40c4-87cb-70aba83bf044'),
   ('f07beca6-153e-49da-8aaa-3e29c2a1f4bc', 'Domains', 'Domains', 0, FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -817,20 +817,20 @@ INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "position
 
 -- Create interlocutor positions
 INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt") VALUES
-  (N'879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d', 'Chief of Staff - MoD', 'MOD-FO-00002', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'4be6baa5-c611-4c70-a2a8-c01bf9b7d2bc', 'Executive Assistant to the MoD', 'MOD-FO-00003', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'a9ab507e-cda9-469b-8d9e-b47445852af4', 'Planning Captain', 'MOD-FO-00004', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'61371573-eefc-4b85-81a0-27d6c0b78c58', 'Director of Budgeting - MoD', 'MOD-Bud-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c2e3fdff-2b36-4ef9-9790-afbca0c53f57', 'Writer of Expenses - MoD', 'MOD-Bud-00002', 0, 0, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c065c2b6-a04a-4ead-a3a2-5aabf921446d', 'Cost Adder - MoD', 'MOD-Bud-00003', 0, 0, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'18f42d92-ada7-11eb-8529-0242ac130003', 'Chief of Tests', 'MOI-TST-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'338e4d54-ada7-11eb-8529-0242ac130003', 'Director of Tests', 'MOD-TST-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'25fe500c-3503-4ba8-a9a4-09b29b50c1f1', 'Merge One', 'MOD-M1-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d', 'Chief of Staff - MoD', 'MOD-FO-00002', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('4be6baa5-c611-4c70-a2a8-c01bf9b7d2bc', 'Executive Assistant to the MoD', 'MOD-FO-00003', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('a9ab507e-cda9-469b-8d9e-b47445852af4', 'Planning Captain', 'MOD-FO-00004', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('61371573-eefc-4b85-81a0-27d6c0b78c58', 'Director of Budgeting - MoD', 'MOD-Bud-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c2e3fdff-2b36-4ef9-9790-afbca0c53f57', 'Writer of Expenses - MoD', 'MOD-Bud-00002', 0, 0, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c065c2b6-a04a-4ead-a3a2-5aabf921446d', 'Cost Adder - MoD', 'MOD-Bud-00003', 0, 0, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('18f42d92-ada7-11eb-8529-0242ac130003', 'Chief of Tests', 'MOI-TST-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('338e4d54-ada7-11eb-8529-0242ac130003', 'Director of Tests', 'MOD-TST-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('25fe500c-3503-4ba8-a9a4-09b29b50c1f1', 'Merge One', 'MOD-M1-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Email addresses for interlocutor positions
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
@@ -1190,7 +1190,7 @@ INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'reports', r.uuid
   FROM reports r
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e')
+  WHERE SUBSTRING(r.uuid::text, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e')
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
@@ -1200,7 +1200,7 @@ INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '7adbc0d1-780d-4aeb-810e-6439d55373b3', 'reports', r.uuid
   FROM reports r
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f')
+  WHERE SUBSTRING(r.uuid::text, 1, 1) IN ('0', '3', '6', '9', 'c', 'f')
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
@@ -1210,7 +1210,7 @@ INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '01463629-8670-475f-9e0a-a1bf594f9eda', 'reports', r.uuid
   FROM reports r
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f')
+  WHERE SUBSTRING(r.uuid::text, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f')
   AND r.state != 0;
 
 INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
@@ -1220,7 +1220,7 @@ INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'reports', r.uuid
   FROM reports r
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd')
+  WHERE SUBSTRING(r.uuid::text, 1, 1) IN ('1', '4', '7', 'a', 'd')
   AND r.state != 0;
 
 -- Insert report with created at, updated at and released at date for two days before current timestamp
