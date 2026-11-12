@@ -212,7 +212,6 @@ const EventTypeTable = ({
                         objectType="event type"
                         objectDisplay={eventType.name}
                         variant="outline-danger"
-                        buttonSize="xs"
                         buttonTitle="Delete event type"
                         buttonDisabled={eventType.relatedEventsCount > 0}
                       >

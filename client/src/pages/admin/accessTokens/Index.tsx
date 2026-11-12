@@ -292,7 +292,6 @@ const AccessTokensTable = ({
                   objectType="web service access token"
                   objectDisplay={at.name}
                   variant="outline-danger"
-                  buttonSize="xs"
                   buttonTitle="Delete web service access token"
                 >
                   <Icon icon={IconNames.TRASH} />

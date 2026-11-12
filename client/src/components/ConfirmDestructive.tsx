@@ -3,7 +3,7 @@ import React from "react"
 
 interface ConfirmDestructiveProps {
   onConfirm: (...args: unknown[]) => unknown
-  operation: string
+  operation?: string
   objectType: string
   objectDisplay: string
   variant?: string
