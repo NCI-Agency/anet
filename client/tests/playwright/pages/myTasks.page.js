@@ -1,4 +1,3 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/tasks/mine"
@@ -17,15 +16,15 @@ class MyTasks extends Page {
   }
 
   async getMyOrgAssignedTasks() {
-    return currentPage().locator("#my-org-assigned-tasks").first()
+    return this.page.locator("#my-org-assigned-tasks").first()
   }
 
   async getMyResponsibleTasks() {
-    return currentPage().locator("#my-responsible-tasks").first()
+    return this.page.locator("#my-responsible-tasks").first()
   }
 
   async getMyPendingTasks() {
-    return currentPage().locator("#my-tasks-with-pending-assessments").first()
+    return this.page.locator("#my-tasks-with-pending-assessments").first()
   }
 
   async getMyPendingTasksContent() {
@@ -43,4 +42,4 @@ class MyTasks extends Page {
   }
 }
 
-export default new MyTasks()
+export default MyTasks

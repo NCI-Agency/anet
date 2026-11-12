@@ -1,189 +1,258 @@
-import { expect } from "@playwright/test"
-import Home from "../pages/home.page.js"
-import Search from "../pages/search.page.js"
-import ShowOrganization from "../pages/showOrganization.page.js"
-import { test, waitFor } from "../support.js"
+import { expect, test } from "@playwright/test"
+import HomePageObject from "../pages/home.page.js"
+import SearchPageObject from "../pages/search.page.js"
+import ShowOrganizationPageObject from "../pages/showOrganization.page.js"
 
-const ORGANIZATION_SEARCH_STRING = "EF 2.2"
-const SUPERUSER_ASSESSMENT_CREATE_DETAILS = [
-  "t2",
-  "noStatement",
-  "Develop relationship",
-  "TRJU-1"
-]
-const SUPERUSER_ASSESSMENT_EDIT_DETAILS = [
-  "t2",
-  "improve",
-  "Improve relationship",
-  "TRJU-1 TRJU-2"
-]
-const ADMIN_ASSESSMENT_EDIT_DETAILS = [
-  "t3",
-  "maintain",
-  "Maintain the connection network",
-  "TRJU-1 TRJU-2 JUJA"
-]
-const VALUE_TO_TEXT_FOR_PRIORITY = {
-  t1: "T1",
-  t2: "T2",
-  t3: "T3",
-  t4: "T4",
-  t5: "T5"
-}
-const VALUE_TO_TEXT_FOR_INTERACTION = {
-  noStatement: "No statement",
-  dormant: "Dormant",
-  initiate: "Initiate",
-  develop: "Develop",
-  improve: "Improve",
-  maintain: "Maintain"
-}
-test.describe("For the annual organization assessments", () => {
-  test.describe("As a superuser assigned to the organization", () => {
-    test("Should first search, find and open the organization's page", async () => {
-      await Home.openAsSuperuser()
-      await (await Home.getSearchBar()).fill(String(ORGANIZATION_SEARCH_STRING))
-      await (await Home.getSubmitSearch()).click()
-      await waitFor(await Search.getFoundOrganizationTable(), "attached", {
-        timeout: 20000
-      })
-      await waitFor(await Search.getFoundOrganizationTable(), "visible")
-      await (
-        await Search.linkOfOrganizationFound(ORGANIZATION_SEARCH_STRING)
-      ).click()
-    })
-    test("Should allow superuser to successfully add an assessment", async () => {
-      await waitFor(
-        await ShowOrganization.getAssessmentsTable(
-          "organizationAnnually",
-          "annually"
-        ),
-        "visible"
-      )
-      await (
-        await ShowOrganization.getAddAssessmentButton(
-          "organizationAnnually",
-          "annually"
-        )
-      ).click()
+test.describe(() => {
+  let Home, Search, ShowOrganization
+  test.beforeEach(async ({ page }) => {
+    Home = new HomePageObject(page)
+    Search = new SearchPageObject(page)
+    ShowOrganization = new ShowOrganizationPageObject(page)
+  })
+  const ORGANIZATION_SEARCH_STRING = "EF 2.2"
+  const SUPERUSER_ASSESSMENT_CREATE_DETAILS = [
+    "t2",
+    "noStatement",
+    "Develop relationship",
+    "TRJU-1"
+  ]
+  const SUPERUSER_ASSESSMENT_EDIT_DETAILS = [
+    "t2",
+    "improve",
+    "Improve relationship",
+    "TRJU-1 TRJU-2"
+  ]
+  const ADMIN_ASSESSMENT_EDIT_DETAILS = [
+    "t3",
+    "maintain",
+    "Maintain the connection network",
+    "TRJU-1 TRJU-2 JUJA"
+  ]
+  const VALUE_TO_TEXT_FOR_PRIORITY = {
+    t1: "T1",
+    t2: "T2",
+    t3: "T3",
+    t4: "T4",
+    t5: "T5"
+  }
+  const VALUE_TO_TEXT_FOR_INTERACTION = {
+    noStatement: "No statement",
+    dormant: "Dormant",
+    initiate: "Initiate",
+    develop: "Develop",
+    improve: "Improve",
+    maintain: "Maintain"
+  }
+  test("For the annual organization assessments", async () => {
+    // Dependent cases are steps in one scenario using the built-in page fixture.
+    const stepTimeout = test.info().timeout
+    test.setTimeout(stepTimeout * 10)
 
-      // NOTE: assuming assessment question content here, may change in future
-      await ShowOrganization.fillAssessmentQuestion(
-        SUPERUSER_ASSESSMENT_CREATE_DETAILS
+    await test.step("As a superuser assigned to the organization", async () => {
+      await test.step(
+        "Should first search, find and open the organization's page",
+        async () => {
+          await Home.openAsSuperuser()
+          await (
+            await Home.getSearchBar()
+          ).fill(String(ORGANIZATION_SEARCH_STRING))
+          await (await Home.getSubmitSearch()).click()
+          await (
+            await Search.getFoundOrganizationTable()
+          ).waitFor({
+            state: "attached",
+            timeout: 20000
+          })
+          await (
+            await Search.getFoundOrganizationTable()
+          ).waitFor({
+            state: "visible"
+          })
+          await (
+            await Search.linkOfOrganizationFound(ORGANIZATION_SEARCH_STRING)
+          ).click()
+        },
+        { timeout: stepTimeout }
       )
-      await ShowOrganization.saveAssessmentAndWaitForModalClose(
-        "organizationAnnually",
-        "annually",
-        getExpectedAssessmentDetails(SUPERUSER_ASSESSMENT_CREATE_DETAILS)
+      await test.step(
+        "Should allow superuser to successfully add an assessment",
+        async () => {
+          await (
+            await ShowOrganization.getAssessmentsTable(
+              "organizationAnnually",
+              "annually"
+            )
+          ).waitFor({
+            state: "visible"
+          })
+          await (
+            await ShowOrganization.getAddAssessmentButton(
+              "organizationAnnually",
+              "annually"
+            )
+          ).click()
+
+          // NOTE: assuming assessment question content here, may change in future
+          await ShowOrganization.fillAssessmentQuestion(
+            SUPERUSER_ASSESSMENT_CREATE_DETAILS
+          )
+          await ShowOrganization.saveAssessmentAndWaitForModalClose(
+            "organizationAnnually",
+            "annually",
+            getExpectedAssessmentDetails(SUPERUSER_ASSESSMENT_CREATE_DETAILS)
+          )
+        },
+        { timeout: stepTimeout }
+      )
+      await test.step(
+        "Should show the same assessment details with the details just created",
+        async () => {
+          await assertAssessmentDetails(
+            "organizationAnnually",
+            "annually",
+            SUPERUSER_ASSESSMENT_CREATE_DETAILS
+          )
+        },
+        { timeout: stepTimeout }
+      )
+      await test.step(
+        "Should allow the author of the assessment to successfully edit it",
+        async () => {
+          await (await ShowOrganization.getEditAssessmentButton()).click()
+          await ShowOrganization.waitForAssessmentModalForm()
+          await ShowOrganization.fillAssessmentQuestion(
+            SUPERUSER_ASSESSMENT_EDIT_DETAILS,
+            [
+              SUPERUSER_ASSESSMENT_CREATE_DETAILS[2],
+              SUPERUSER_ASSESSMENT_CREATE_DETAILS[3]
+            ]
+          )
+          await ShowOrganization.saveAssessmentAndWaitForModalClose(
+            "organizationAnnually",
+            "annually",
+            getExpectedAssessmentDetails(SUPERUSER_ASSESSMENT_EDIT_DETAILS)
+          )
+        },
+        { timeout: stepTimeout }
+      )
+      await test.step(
+        "Should show the same assessment details with the details just edited",
+        async () => {
+          await assertAssessmentDetails(
+            "organizationAnnually",
+            "annually",
+            SUPERUSER_ASSESSMENT_EDIT_DETAILS
+          )
+          await ShowOrganization.logout()
+        },
+        { timeout: stepTimeout }
       )
     })
-    test("Should show the same assessment details with the details just created", async () => {
-      await assertAssessmentDetails(
-        "organizationAnnually",
-        "annually",
-        SUPERUSER_ASSESSMENT_CREATE_DETAILS
+    await test.step("As an admin", async () => {
+      await test.step(
+        "Should first search, find and open the organization's page",
+        async () => {
+          await Home.openAsAdminUser()
+          await (
+            await Home.getSearchBar()
+          ).fill(String(ORGANIZATION_SEARCH_STRING))
+          await (await Home.getSubmitSearch()).click()
+          await (
+            await Search.getFoundOrganizationTable()
+          ).waitFor({
+            state: "attached",
+            timeout: 20000
+          })
+          await (
+            await Search.getFoundOrganizationTable()
+          ).waitFor({
+            state: "visible"
+          })
+          await (
+            await Search.linkOfOrganizationFound(ORGANIZATION_SEARCH_STRING)
+          ).click()
+        },
+        { timeout: stepTimeout }
       )
-    })
-    test("Should allow the author of the assessment to successfully edit it", async () => {
-      await (await ShowOrganization.getEditAssessmentButton()).click()
-      await ShowOrganization.waitForAssessmentModalForm()
-      await ShowOrganization.fillAssessmentQuestion(
-        SUPERUSER_ASSESSMENT_EDIT_DETAILS,
-        [
-          SUPERUSER_ASSESSMENT_CREATE_DETAILS[2],
-          SUPERUSER_ASSESSMENT_CREATE_DETAILS[3]
-        ]
+      await test.step(
+        "Should not show make assessment button when there is an assessment on that period",
+        async () => {
+          await expect(
+            await ShowOrganization.getAddAssessmentButton(
+              "organizationAnnually",
+              "annually"
+            )
+          ).toHaveCount(0)
+        },
+        { timeout: stepTimeout }
       )
-      await ShowOrganization.saveAssessmentAndWaitForModalClose(
-        "organizationAnnually",
-        "annually",
-        getExpectedAssessmentDetails(SUPERUSER_ASSESSMENT_EDIT_DETAILS)
+      await test.step(
+        "Should allow admins to successfully edit existing assessment",
+        async () => {
+          await (await ShowOrganization.getEditAssessmentButton()).click()
+          await ShowOrganization.waitForAssessmentModalForm()
+          await ShowOrganization.fillAssessmentQuestion(
+            ADMIN_ASSESSMENT_EDIT_DETAILS,
+            [
+              SUPERUSER_ASSESSMENT_EDIT_DETAILS[2],
+              SUPERUSER_ASSESSMENT_EDIT_DETAILS[3]
+            ]
+          )
+          await ShowOrganization.saveAssessmentAndWaitForModalClose(
+            "organizationAnnually",
+            "annually",
+            getExpectedAssessmentDetails(ADMIN_ASSESSMENT_EDIT_DETAILS)
+          )
+        },
+        { timeout: stepTimeout }
       )
-    })
-    test("Should show the same assessment details with the details just edited", async () => {
-      await assertAssessmentDetails(
-        "organizationAnnually",
-        "annually",
-        SUPERUSER_ASSESSMENT_EDIT_DETAILS
+      await test.step(
+        "Should show the same assessment details with the details just edited",
+        async () => {
+          await assertAssessmentDetails(
+            "organizationAnnually",
+            "annually",
+            ADMIN_ASSESSMENT_EDIT_DETAILS
+          )
+        },
+        { timeout: stepTimeout }
       )
-      await ShowOrganization.logout()
+      await test.step(
+        "Should allow an admin to delete the assessment",
+        async () => {
+          await (await ShowOrganization.getDeleteAssessmentButton()).click()
+          await ShowOrganization.confirmDelete()
+          await ShowOrganization.waitForDeletedAssessmentToDisappear(
+            "organizationAnnually",
+            "annually"
+          )
+          await ShowOrganization.logout()
+        },
+        { timeout: stepTimeout }
+      )
     })
   })
-  test.describe("As an admin", () => {
-    test("Should first search, find and open the organization's page", async () => {
-      await Home.openAsAdminUser()
-      await (await Home.getSearchBar()).fill(String(ORGANIZATION_SEARCH_STRING))
-      await (await Home.getSubmitSearch()).click()
-      await waitFor(await Search.getFoundOrganizationTable(), "attached", {
-        timeout: 20000
-      })
-      await waitFor(await Search.getFoundOrganizationTable(), "visible")
-      await (
-        await Search.linkOfOrganizationFound(ORGANIZATION_SEARCH_STRING)
-      ).click()
-    })
-    test("Should not show make assessment button when there is an assessment on that period", async () => {
-      await expect(
-        await ShowOrganization.getAddAssessmentButton(
-          "organizationAnnually",
-          "annually"
-        )
-      ).toHaveCount(0)
-    })
-    test("Should allow admins to successfully edit existing assessment", async () => {
-      await (await ShowOrganization.getEditAssessmentButton()).click()
-      await ShowOrganization.waitForAssessmentModalForm()
-      await ShowOrganization.fillAssessmentQuestion(
-        ADMIN_ASSESSMENT_EDIT_DETAILS,
-        [
-          SUPERUSER_ASSESSMENT_EDIT_DETAILS[2],
-          SUPERUSER_ASSESSMENT_EDIT_DETAILS[3]
-        ]
-      )
-      await ShowOrganization.saveAssessmentAndWaitForModalClose(
-        "organizationAnnually",
-        "annually",
-        getExpectedAssessmentDetails(ADMIN_ASSESSMENT_EDIT_DETAILS)
-      )
-    })
-    test("Should show the same assessment details with the details just edited", async () => {
-      await assertAssessmentDetails(
-        "organizationAnnually",
-        "annually",
-        ADMIN_ASSESSMENT_EDIT_DETAILS
-      )
-    })
-    test("Should allow an admin to delete the assessment", async () => {
-      await (await ShowOrganization.getDeleteAssessmentButton()).click()
-      await ShowOrganization.confirmDelete()
-      await ShowOrganization.waitForDeletedAssessmentToDisappear(
-        "organizationAnnually",
-        "annually"
-      )
-      await ShowOrganization.logout()
-    })
-  })
-})
 
-// @assertionMethod
-const assertAssessmentDetails = async (
-  assessmentKey,
-  recurrence,
-  assessmentDetails
-) => {
-  const details = await ShowOrganization.getShownAssessmentDetails(
+  // @assertionMethod
+  const assertAssessmentDetails = async (
     assessmentKey,
-    recurrence
-  )
-  await expect(details).toHaveText(
-    getExpectedAssessmentDetails(assessmentDetails)
-  )
-}
-
-const getExpectedAssessmentDetails = assessmentDetails =>
-  assessmentDetails.map(
-    value =>
-      VALUE_TO_TEXT_FOR_PRIORITY[value] ||
-      VALUE_TO_TEXT_FOR_INTERACTION[value] ||
-      value
-  )
+    recurrence,
+    assessmentDetails
+  ) => {
+    const details = await ShowOrganization.getShownAssessmentDetails(
+      assessmentKey,
+      recurrence
+    )
+    await expect(details).toHaveText(
+      getExpectedAssessmentDetails(assessmentDetails)
+    )
+  }
+  const getExpectedAssessmentDetails = assessmentDetails =>
+    assessmentDetails.map(
+      value =>
+        VALUE_TO_TEXT_FOR_PRIORITY[value] ||
+        VALUE_TO_TEXT_FOR_INTERACTION[value] ||
+        value
+    )
+})

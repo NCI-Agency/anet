@@ -1,4 +1,3 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/events/mine"
@@ -14,20 +13,24 @@ class MyEvents extends Page {
 
   async getMyEventSeries() {
     const selector = "#my-event-series table tbody tr td:first-child"
-    const firstEventSeries = await currentPage().locator(selector).first()
-    await waitFor(firstEventSeries, "visible")
-    return currentPage().locator(selector).all()
+    const firstEventSeries = await this.page.locator(selector).first()
+    await firstEventSeries.waitFor({
+      state: "visible"
+    })
+    return this.page.locator(selector).all()
   }
 
   async getMyEvents() {
     const selector = "#my-events table tbody tr td:first-child"
-    const firstEvent = await currentPage().locator(selector).first()
-    await waitFor(firstEvent, "visible")
-    return currentPage().locator(selector).all()
+    const firstEvent = await this.page.locator(selector).first()
+    await firstEvent.waitFor({
+      state: "visible"
+    })
+    return this.page.locator(selector).all()
   }
 
   async selectEventsSummary() {
-    const summaryTab = await currentPage()
+    const summaryTab = await this.page
       .locator(
         "#my-events .event-collection div header div button[value='summary']"
       )
@@ -37,7 +40,7 @@ class MyEvents extends Page {
   }
 
   async getEventsSummaryItem(summaryItem) {
-    return currentPage()
+    return this.page
       .locator(
         `#my-events .event-collection .event-summary:nth-child(${summaryItem})`
       )
@@ -57,7 +60,7 @@ class MyEvents extends Page {
   }
 
   async selectEventsCalendar() {
-    const calendarTab = await currentPage()
+    const calendarTab = await this.page
       .locator(
         "#my-events .event-collection div header div button[value='calendar']"
       )
@@ -67,7 +70,7 @@ class MyEvents extends Page {
   }
 
   async selectEventsMap() {
-    const mapTab = await currentPage()
+    const mapTab = await this.page
       .locator(
         "#my-events .event-collection div header div button[value='map']"
       )
@@ -77,4 +80,4 @@ class MyEvents extends Page {
   }
 }
 
-export default new MyEvents()
+export default MyEvents
