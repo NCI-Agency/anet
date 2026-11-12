@@ -90,7 +90,7 @@ class ShowTask extends Page {
 
   async getDeleteAssessmentButton() {
     return currentPage()
-      .locator("div.card button.btn.btn-outline-danger.btn-xs")
+      .locator("div.card button.btn.btn-outline-danger")
       .first()
   }
 

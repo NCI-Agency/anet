@@ -91,7 +91,7 @@ class SavedSearch extends Page {
   }
 
   async getDeleteSavedSearchButton() {
-    return currentPage().locator(".btn-danger").first()
+    return currentPage().locator(".btn-outline-danger").first()
   }
 
   async getDeleteConfirmButton() {

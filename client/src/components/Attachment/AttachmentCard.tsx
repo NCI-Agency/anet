@@ -112,9 +112,8 @@ const AttachmentCard = ({
                 onConfirm={() => deleteAttachment(attachment)}
                 objectType="attachment"
                 objectDisplay={"#" + attachment.uuid}
-                title="Delete attachment"
+                buttonTitle="Delete attachment"
                 variant="outline-danger"
-                buttonSize="xs"
               >
                 <Icon icon={IconNames.TRASH} />
               </ConfirmDestructive>

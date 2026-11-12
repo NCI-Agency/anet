@@ -3,6 +3,10 @@
   --anet-blue-dark: rgb(0, 92, 153);
 }
 
+.tooltip {
+  --bs-tooltip-zindex: 20000;
+}
+
 .btn {
   font-size: 0.9rem;
 }

@@ -194,9 +194,8 @@ const RelatedObjectNotes = ({
                                 onConfirm={() => deleteNote(note.uuid)}
                                 objectType="note"
                                 objectDisplay={"#" + note.uuid}
-                                title="Delete note"
+                                buttonTitle="Delete note"
                                 variant="outline-danger"
-                                buttonSize="xs"
                               >
                                 <Icon icon={IconNames.TRASH} />
                               </ConfirmDestructive>
