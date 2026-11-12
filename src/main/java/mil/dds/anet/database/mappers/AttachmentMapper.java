@@ -18,6 +18,7 @@ public class AttachmentMapper implements RowMapper<Attachment> {
     a.setDescription(MapperUtils.getOptionalString(rs, "attachments_description"));
     a.setClassification(MapperUtils.getOptionalString(rs, "attachments_classification"));
     a.setCaption(MapperUtils.getOptionalString(rs, "attachments_caption"));
+    a.setLdapUuid(MapperUtils.getOptionalString(rs, "attachments_ldapUuid"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

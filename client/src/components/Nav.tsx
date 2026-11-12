@@ -25,6 +25,24 @@ import utils from "utils"
 
 const tasksShortLabel = pluralize(Settings.fields.task.shortLabel)
 
+const LDAP_IMPORT_OPTIONS = [
+  {
+    key: "people",
+    label: "Import people",
+    enabled: Settings.fields.person.ldapImport?.enabled
+  },
+  {
+    key: "positions",
+    label: "Import positions",
+    enabled: Settings.fields.position.ldapImport?.enabled
+  },
+  {
+    key: "organizations",
+    label: "Import organizations",
+    enabled: Settings.fields.organization.ldapImport?.enabled
+  }
+]
+
 const MERGE_OPTIONS = [
   { key: "people", label: "Merge people" },
   { key: "positions", label: "Merge positions" },
@@ -227,6 +245,7 @@ const Navigation = ({
   const routerLocation = useLocation()
   const path = routerLocation.pathname
   const inAdmin = path.startsWith("/admin")
+  const inLdapImport = path.startsWith("/admin/ldapImport")
   const inMerge = path.startsWith("/admin/merge")
   const inUserActivities = path.startsWith("/admin/userActivities")
 
@@ -505,6 +524,26 @@ const Navigation = ({
                   >
                     Users pending verification
                   </SidebarLink>
+                )}
+                {Settings.enableLdapImport && (
+                  <NavDropdown
+                    title="LDAP import"
+                    id="merge"
+                    active={inLdapImport}
+                  >
+                    {LDAP_IMPORT_OPTIONS.map(
+                      ldapImportOption =>
+                        ldapImportOption.enabled && (
+                          <SidebarContainer
+                            key={ldapImportOption.key}
+                            linkTo={`/admin/ldapImport/${ldapImportOption.key}`}
+                            handleOnClick={resetPages}
+                          >
+                            {ldapImportOption.label}
+                          </SidebarContainer>
+                        )
+                    )}
+                  </NavDropdown>
                 )}
                 <NavDropdown title="Merge" id="merge" active={inMerge}>
                   {MERGE_OPTIONS.map(mergeOption => (
