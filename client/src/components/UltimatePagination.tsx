@@ -1,6 +1,48 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Pagination } from "react-bootstrap"
 import { createUltimatePagination, ITEM_TYPES } from "react-ultimate-pagination"
+
+const DEFAULT_PAGESIZE = 10
+
+interface PaginatedStaticObjectsTableProps {
+  tableComponent: React.ComponentType<unknown>
+  objectsProp: string
+  pageNum?: number
+  pageSize?: number
+  goToPage?: (...args: unknown[]) => unknown
+}
+
+export const PaginatedStaticObjectsTable = ({
+  tableComponent: TableComponent,
+  objectsProp,
+  pageNum = 0,
+  pageSize = DEFAULT_PAGESIZE,
+  goToPage,
+  ...otherProps
+}: PaginatedStaticObjectsTableProps) => {
+  const objects = otherProps[objectsProp]
+  delete otherProps[objectsProp]
+  const totalCount = objects?.length ?? 0
+  const tableObjects = useMemo(() => {
+    const start = pageNum * pageSize
+    const end = start + pageSize
+    const paginatedObjects = objects?.slice(start, end)
+    return {
+      [objectsProp]: paginatedObjects
+    }
+  }, [objectsProp, objects, pageNum, pageSize])
+
+  return (
+    <TableComponent
+      {...tableObjects}
+      pageNum={pageNum}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      goToPage={goToPage}
+      {...otherProps}
+    />
+  )
+}
 
 interface PaginationLinkPropType {
   isActive?: boolean

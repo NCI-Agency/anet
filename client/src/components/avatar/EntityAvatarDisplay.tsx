@@ -64,32 +64,46 @@ export const EntityAvatarDisplay = ({
   height = 256,
   style
 }: EntityAvatarDisplayProps) => {
-  const canvasRef = useRef()
+  const canvasRef = useRef<HTMLCanvasElement>()
   const avatarSettings = AVATAR_SETTINGS[defaultAvatar]
   const attachmentUrl = avatar?.attachmentUuid
     ? `/api/attachment/view/${avatar.attachmentUuid}`
     : avatarSettings?.default
   useEffect(() => {
-    if (avatar?.applyCrop) {
-      const canvas = canvasRef.current
-      const context = canvas.getContext("2d", { desynchronized: true })
-      context.clearRect(0, 0, canvas.width, canvas.height)
-      const image = new Image()
-      image.onload = function () {
-        context.drawImage(
-          image,
-          avatar.cropLeft,
-          avatar.cropTop,
-          avatar.cropWidth,
-          avatar.cropHeight,
-          0,
-          0,
-          width,
-          height
-        )
-      }
-      image.src = attachmentUrl
+    const canvas = canvasRef.current
+    if (!canvas) {
+      return
     }
+    const context = canvas.getContext("2d", { desynchronized: true })
+    context.clearRect(0, 0, canvas.width, canvas.height)
+    const dimensions = avatar?.applyCrop
+      ? {
+          left: avatar.cropLeft,
+          top: avatar.cropTop,
+          width: avatar.cropWidth,
+          height: avatar.cropHeight
+        }
+      : {
+          left: 0,
+          top: 0,
+          width: canvas.width,
+          height: canvas.height
+        }
+    const image = new Image()
+    image.onload = function () {
+      context?.drawImage(
+        image,
+        dimensions.left,
+        dimensions.top,
+        dimensions.width,
+        dimensions.height,
+        0,
+        0,
+        width,
+        height
+      )
+    }
+    image.src = attachmentUrl
   }, [avatar, width, height, attachmentUrl])
 
   if (!attachmentUrl) {

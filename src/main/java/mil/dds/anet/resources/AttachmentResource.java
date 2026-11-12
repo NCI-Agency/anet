@@ -19,6 +19,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.RelatableObject;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -236,6 +237,17 @@ public class AttachmentResource {
               throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                   "Cannot unlink attachment used as avatar");
             }
+            // If attachment and oldRelatedObject had the same ldapUuid, erase it on the attachment
+            if (existing.getLdapUuid() != null) {
+              final RelatableObject relatedObject =
+                  oldRelatedObject.loadRelatedObject(engine.getContext()).join();
+              if (relatedObject instanceof Person p
+                  && existing.getLdapUuid().equals(p.getLdapUuid())) {
+                attachment.setLdapUuid(null);
+                dao.updateLdapFields(attachment);
+              }
+            }
+            // Delete the oldRelatedObject
             dao.deleteAttachmentRelatedObjects(DaoUtils.getUuid(attachment), oldRelatedObjects);
           }, null);
     }
