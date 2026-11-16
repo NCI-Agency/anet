@@ -60,6 +60,9 @@ public abstract class AbstractPositionSearcher
           .loadAll(context, now, null, false)
           .thenApply(otaMap -> otaMap.keySet().stream().map(AbstractAnetBean::getUuid).toList())
           .thenApply(positionUuids -> {
+            if (positionUuids.isEmpty()) {
+              return new AnetBeanList<>();
+            }
             qb.addInListClause("positionUuids", "positions.uuid", positionUuids);
             return qb.buildAndRun(handle, query, mapper);
           });
