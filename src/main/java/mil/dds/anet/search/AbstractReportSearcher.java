@@ -28,7 +28,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.DatabaseHandler;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
@@ -343,11 +342,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   protected void addTaskUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
       ReportSearchQuery query) {
-    qb.addFromClause("INNER JOIN \"reportTasks\" rt ON rt.\"reportUuid\" = reports.uuid");
     if (query.getTaskUuid().size() == 1
         && Task.DUMMY_TASK_UUID.equals(query.getTaskUuid().get(0))) {
+      qb.addFromClause("LEFT JOIN \"reportTasks\" rt ON rt.\"reportUuid\" = reports.uuid");
       qb.addWhereClause("rt.\"taskUuid\" IS NULL");
     } else {
+      qb.addFromClause("INNER JOIN \"reportTasks\" rt ON rt.\"reportUuid\" = reports.uuid");
       qb.addRecursiveClause(outerQb, "rt", "\"taskUuid\"", "parent_tasks", "tasks",
           "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true, null);
     }
