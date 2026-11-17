@@ -7370,6 +7370,12 @@
 			splitStatements="false" stripComments="false" />
 	</changeSet>
 
+	<changeSet id="postgresql-native-jsonb" author="midmarch" dbms="postgresql">
+		<comment>Convert serialized JSON to jsonb, preserving data and rebuilding full-text search.</comment>
+		<sqlFile path="migrate-postgresql-jsonb.sql" relativeToChangelogFile="true"
+			splitStatements="false" stripComments="false" />
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -7552,32 +7558,48 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
+			<!-- Traverse JSON structurally: jsonb formatting and key order are not significant. -->
 			CREATE OR REPLACE FUNCTION get_cf_referenced_objects(table_name text, column_name text)
 				RETURNS table(uuid uuid, object_table text, object_uuid text)
 			AS
 			'
 			BEGIN
 				RETURN QUERY EXECUTE format(
-					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:(attachments|authorizationGroups|events|eventSeries|locations|organizations|people|positions|reports|tasks):([^\\]*)\\"|{"type":"(Attachment|AuthorizationGroup|Event|EventSeries|Location|Organization|Person|Position|Report|Task)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
-					'')'' ||
-					''  SELECT uuid,'' ||
-					''  CASE WHEN arr[1] IS NOT NULL THEN arr[1] ELSE'' ||
-					''    CASE'' ||
-					''      WHEN arr[3] = ''''Attachment'''' THEN ''''attachments'''' '' ||
-					''      WHEN arr[3] = ''''AuthorizationGroup'''' THEN ''''authorizationGroups'''' '' ||
-					''      WHEN arr[3] = ''''Event'''' THEN ''''events'''' '' ||
-					''      WHEN arr[3] = ''''EventSeries'''' THEN ''''eventSeries'''' '' ||
-					''      WHEN arr[3] = ''''Location'''' THEN ''''locations'''' '' ||
-					''      WHEN arr[3] = ''''Organization'''' THEN ''''organizations'''' '' ||
-					''      WHEN arr[3] = ''''Person'''' THEN ''''people'''' '' ||
-					''      WHEN arr[3] = ''''Position'''' THEN ''''positions'''' '' ||
-					''      WHEN arr[3] = ''''Report'''' THEN ''''reports'''' '' ||
-					''      WHEN arr[3] = ''''Task'''' THEN ''''tasks'''' '' ||
-					''    END'' ||
-					''  END,'' ||
-					''  CASE WHEN arr[2] IS NOT NULL THEN arr[2] ELSE arr[4] END'' ||
-					''  FROM links'',
+					''
+					WITH json_values AS (
+						SELECT uuid, jsonb_path_query(%I::jsonb, ''''strict $.**'''') AS value FROM public.%I
+					), links AS (
+						SELECT uuid, value->>''''type'''' AS object_type, value->>''''uuid'''' AS object_uuid
+						FROM json_values WHERE jsonb_typeof(value) = ''''object''''
+						UNION ALL
+						SELECT uuid, arr[1], arr[2] FROM json_values
+						CROSS JOIN LATERAL regexp_matches(value #>> ''''{}'''',
+							''''"urn:anet:(attachments|authorizationGroups|events|eventSeries|locations|organizations|people|positions|reports|tasks):([^"]*)"'''', ''''g'''') AS arr
+						WHERE jsonb_typeof(value) = ''''string''''
+					)
+					SELECT uuid,
+						CASE object_type
+							WHEN ''''Attachment'''' THEN ''''attachments''''
+							WHEN ''''AuthorizationGroup'''' THEN ''''authorizationGroups''''
+							WHEN ''''Event'''' THEN ''''events''''
+							WHEN ''''EventSeries'''' THEN ''''eventSeries''''
+							WHEN ''''Location'''' THEN ''''locations''''
+							WHEN ''''Organization'''' THEN ''''organizations''''
+							WHEN ''''Person'''' THEN ''''people''''
+							WHEN ''''Position'''' THEN ''''positions''''
+							WHEN ''''Report'''' THEN ''''reports''''
+							WHEN ''''Task'''' THEN ''''tasks''''
+							ELSE object_type
+						END,
+						object_uuid
+					FROM links
+					WHERE object_type IN (
+						''''Attachment'''', ''''AuthorizationGroup'''', ''''Event'''', ''''EventSeries'''', ''''Location'''',
+						''''Organization'''', ''''Person'''', ''''Position'''', ''''Report'''', ''''Task'''',
+						''''attachments'''', ''''authorizationGroups'''', ''''events'''', ''''eventSeries'''', ''''locations'''',
+						''''organizations'''', ''''people'''', ''''positions'''', ''''reports'''', ''''tasks'''')
+						AND object_uuid IS NOT NULL
+					'',
 					column_name, table_name
 				);
 			END;

@@ -307,8 +307,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(check.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     if (dict.getDictionaryEntry("fields.report.customFields") != null) {
       // check that JSON of customFields is sanitized after create
-      assertThat(check.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(), check.getCustomFields());
     }
     assertThat(check.getReportPeople()).hasSameSizeAs(reportPeople);
     assertThat(check.getReportPeople())
@@ -723,8 +722,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     if (dict.getDictionaryEntry("fields.report.customFields") != null) {
       // check that JSON of customFields is sanitized after create
-      assertThat(created.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(), created.getCustomFields());
     }
 
     // Have another regular user try to submit the report
@@ -1179,8 +1177,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     if (dict.getDictionaryEntry("fields.report.customFields") != null) {
       // check that JSON of customFields is sanitized after update
-      assertThat(returned2.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(),
+          returned2.getCustomFields());
     }
 
     // Elizabeth submits the report

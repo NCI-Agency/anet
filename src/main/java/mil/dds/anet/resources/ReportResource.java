@@ -55,6 +55,7 @@ import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.JsonUtils;
 import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
@@ -794,8 +795,8 @@ public class ReportResource {
               Utils.getByUuid(existingAssessments, DaoUtils.getUuid(updatedAssessment));
           checkAssessmentPermission(assessmentDao, user, authorizationGroupUuids, updatedAssessment,
               UpdateType.UPDATE);
-          if (!updatedAssessment.getAssessmentValues()
-              .equals(existingAssessment.getAssessmentValues())) {
+          if (!JsonUtils.equals(updatedAssessment.getAssessmentValues(),
+              existingAssessment.getAssessmentValues())) {
             updatedAssessment.setAuthorUuid(authorUuid);
             assessmentDao.update(updatedAssessment);
           }

@@ -44,8 +44,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(taskA.getUuid()).isNotNull();
     if (dict.getDictionaryEntry("fields.task.customFields") != null) {
       // check that JSON of customFields is sanitized after create
-      assertThat(taskA.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(), taskA.getCustomFields());
     }
 
     final TaskInput taskAInput = getTaskInput(taskA);
@@ -87,8 +86,8 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(returnedA.getLongName()).isEqualTo(taskAInput.getLongName());
     if (dict.getDictionaryEntry("fields.task.customFields") != null) {
       // check that JSON of customFields is sanitized after update
-      assertThat(returnedA.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(),
+          returnedA.getCustomFields());
     }
 
     // update description

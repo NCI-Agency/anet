@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
+import mil.dds.anet.utils.JsonUtils;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,12 +122,12 @@ public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableA
       return false;
     }
     final AbstractCustomizableAnetBean other = (AbstractCustomizableAnetBean) o;
-    return super.equals(o) && Objects.equals(customFields, other.getCustomFields());
+    return super.equals(o) && JsonUtils.equals(customFields, other.getCustomFields());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), customFields);
+    return Objects.hash(super.hashCode(), JsonUtils.hashCode(customFields));
   }
 
 }
