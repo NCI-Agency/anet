@@ -1,42 +1,56 @@
-import { expect, test } from "@playwright/test"
-import { useSerialScenario } from "../../pages/page.js"
+import { test as base, expect } from "@playwright/test"
 import LocationFilterPageObject from "../../pages/searchFilters/locationFilter.page.js"
+import {
+  getLocationInventory,
+  isLocationInventoryResponse
+} from "./locationInventory.js"
+
+const test = base.extend({
+  locationFilterSession: async ({ page }, runTest) => {
+    const locationFilter = new LocationFilterPageObject(page)
+    await locationFilter.open()
+    // Start observing before opening the widget; never query a later DB snapshot.
+    const [response] = await Promise.all([
+      page.waitForResponse(isLocationInventoryResponse, { timeout: 10000 }),
+      (async () => {
+        await locationFilter.openLocationFilter()
+        await locationFilter.openLocationPopover()
+      })()
+    ])
+    expect(response.ok()).toBe(true)
+    const payload = await response.json()
+    expect(payload.errors).toBeUndefined()
+    const locations = payload.data.locationList
+    expect(locations.list).not.toHaveLength(0)
+    expect(locations.list).toHaveLength(locations.totalCount)
+    await runTest({
+      filter: locationFilter,
+      inventory: getLocationInventory(locations.list)
+    })
+  }
+})
 
 test.describe(() => {
-  let LocationFilter
-  useSerialScenario(page => {
-    LocationFilter = new LocationFilterPageObject(page)
-  })
   test.describe("When using the location filter on the reports search", () => {
-    test("Should show all the locations", async () => {
-      await LocationFilter.open()
-      await LocationFilter.openLocationFilter()
-      await LocationFilter.openLocationPopover()
-
-      // depending on the test run sequence, one more locations may have been created
+    test("Should show all the locations", async ({
+      locationFilterSession: { filter: LocationFilter, inventory }
+    }) => {
+      // Assert the complete returned hierarchy, not records left by other specs.
       await expect
-        .poll(async () => (await LocationFilter.getLocationRows()).count(), {
-          message: "Number of locations, searching for any location"
+        .poll(() => LocationFilter.getLocationRowPresentation(), {
+          message: "Complete initial location hierarchy"
         })
-        .toBeGreaterThanOrEqual(256)
-      await expect
-        .poll(async () => (await LocationFilter.getLocationRows()).count(), {
-          message: "Number of locations, searching for any location"
-        })
-        .toBeLessThanOrEqual(260)
+        .toEqual(inventory.initial)
       await LocationFilter.openAllCollapsedLocations()
       await expect
-        .poll(async () => (await LocationFilter.getLocationRows()).count(), {
-          message: "Number of uncollapsed locations, searching for any location"
+        .poll(() => LocationFilter.getLocationRowPresentation(), {
+          message: "Complete expanded location hierarchy"
         })
-        .toBeGreaterThanOrEqual(288)
-      await expect
-        .poll(async () => (await LocationFilter.getLocationRows()).count(), {
-          message: "Number of uncollapsed locations, searching for any location"
-        })
-        .toBeLessThanOrEqual(291)
+        .toEqual(inventory.expanded)
     })
-    test("Should show only the filtered locations", async () => {
+    test("Should show only the filtered locations", async ({
+      locationFilterSession: { filter: LocationFilter }
+    }) => {
       await LocationFilter.searchLocations("Mart")
       await expect(await LocationFilter.getLocationRows()).toHaveCount(2)
       // the locations should already load expanded, so it should yield the same result

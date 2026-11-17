@@ -43,6 +43,26 @@ class LocationFilter extends Page {
     return this.page.locator("#locationUuid-popover tbody > tr")
   }
 
+  async getLocationRowPresentation() {
+    const rows = await this.getLocationRows()
+    return rows.evaluateAll(elements =>
+      elements.map(row => {
+        const cell = row.querySelector(".locationName")
+        const label = cell.firstElementChild
+        const closed = !!cell.querySelector(".bp6-icon-chevron-right")
+        const open = !!cell.querySelector(".bp6-icon-chevron-down")
+        return {
+          name: cell.textContent.trim(),
+          level:
+            (Number.parseFloat(label.style.paddingLeft) -
+              (closed || open ? 0 : 26)) /
+            20,
+          expanded: closed ? false : open ? true : null
+        }
+      })
+    )
+  }
+
   async openAllCollapsedLocations() {
     await expect(
       this.page.locator("#locationUuid-popover tbody").first()
