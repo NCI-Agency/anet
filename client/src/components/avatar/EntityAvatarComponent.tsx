@@ -90,12 +90,9 @@ export const EntityAvatarComponent = ({
                   operation="clear"
                   objectType="the avatar"
                   objectDisplay={`for ${relatedObjectName}`}
-                  title="Clear avatar"
+                  buttonLabel="Clear avatar"
                   variant="outline-danger"
-                  buttonSize="xs"
-                >
-                  Clear avatar
-                </ConfirmDestructive>
+                />
               )}
               <EntityAvatarEditModal
                 title={currentAvatar ? "Set a new avatar" : "Set an avatar"}

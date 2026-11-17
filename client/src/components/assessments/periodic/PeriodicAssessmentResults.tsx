@@ -99,9 +99,8 @@ const PeriodicAssessment = ({
                     onConfirm={() => deleteAssessment(assessment.uuid)}
                     objectType="assessment"
                     objectDisplay={"#" + assessment.uuid}
-                    title="Delete assessment"
+                    buttonTitle="Delete assessment"
                     variant="outline-danger"
-                    buttonSize="xs"
                   >
                     <Icon icon={IconNames.TRASH} />
                   </ConfirmDestructive>

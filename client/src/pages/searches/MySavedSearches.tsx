@@ -220,8 +220,8 @@ const MySavedSearches = ({
                           onConfirm={() => onConfirmDelete(search.uuid)}
                           objectType="search"
                           objectDisplay={search.name}
-                          variant="danger"
-                          operation="delete"
+                          variant="outline-danger"
+                          buttonTitle="Delete saved search"
                         >
                           <Icon icon={IconNames.TRASH} />
                         </ConfirmDestructive>
