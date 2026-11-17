@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
+import mil.dds.anet.utils.JsonUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -101,12 +102,12 @@ public class Assessment extends AbstractAnetBean implements RelatableObject {
     }
     return Objects.equals(a.getUuid(), uuid) && Objects.equals(a.getAuthorUuid(), getAuthorUuid())
         && Objects.equals(a.getAssessmentKey(), assessmentKey)
-        && Objects.equals(a.getAssessmentValues(), assessmentValues);
+        && JsonUtils.equals(a.getAssessmentValues(), assessmentValues);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, assessmentKey, assessmentValues);
+    return Objects.hash(uuid, assessmentKey, JsonUtils.hashCode(assessmentValues));
   }
 
   @Override
