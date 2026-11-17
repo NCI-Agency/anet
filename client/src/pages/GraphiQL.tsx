@@ -1,7 +1,5 @@
-import { gql } from "@apollo/client"
-import { isMutationOperation } from "@apollo/client/utilities"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
-import API from "api"
+import API, { GRAPHQL_ENDPOINT } from "api"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -10,20 +8,9 @@ import {
 } from "components/Page"
 import { GraphiQL } from "graphiql"
 import "graphiql/setup-workers/webpack"
+import { createTransport } from "@graphiql/toolkit"
 import React from "react"
 import { legacy_connect as connect } from "react-redux"
-
-async function fetch(params) {
-  const { variables, query } = params
-  const operation = gql`
-    ${query}
-  `
-  if (isMutationOperation(operation)) {
-    return API.client.mutate({ mutation: operation, variables })
-  } else {
-    return API.client.query({ query: operation, variables })
-  }
-}
 
 interface GraphiQLContainerProps {
   pageDispatchers?: PageDispatchersPropType
@@ -36,9 +23,17 @@ const GraphiQLContainer = ({ pageDispatchers }: GraphiQLContainerProps) => {
     pageDispatchers
   })
   usePageTitle("GraphQL")
+  const [authHeaderName, authHeaderValue] = API._getAuthHeader()
+  const transport = createTransport({
+    url: GRAPHQL_ENDPOINT,
+    supportedMethods: ["POST"],
+    headers: {
+      [authHeaderName]: authHeaderValue
+    }
+  })
   return (
     <div className="h-100">
-      <GraphiQL fetcher={fetch} />
+      <GraphiQL transport={transport} />
     </div>
   )
 }

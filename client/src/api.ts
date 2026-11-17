@@ -13,7 +13,7 @@ import { useQuery } from "@apollo/client/react"
 import { keycloak } from "keycloak"
 import { toast } from "react-toastify"
 
-const GRAPHQL_ENDPOINT = "/graphql"
+export const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
 
 const removeTypenameLink = new RemoveTypenameFromVariablesLink()
