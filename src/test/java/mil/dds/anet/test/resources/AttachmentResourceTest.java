@@ -21,7 +21,6 @@ import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AttachmentSearchQueryInput;
 import mil.dds.anet.test.client.Event;
 import mil.dds.anet.test.client.EventSeries;
-import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationType;
@@ -34,6 +33,9 @@ import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -113,8 +115,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   @Test
   void testAttachment() {
-    final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
-
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testAttachment.jpg")
             .withDescription("a test attachment created by testCreateAttachment")
@@ -127,15 +127,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     testAttachmentInput.setMimeType(getFirstMimeType());
     testAttachmentInput.setClassification("NATO_UNCLASSIFIED");
     failAttachmentCreate(jackUser, testAttachmentInput);
-
-    // FIXME: change this setting in the dictionary, then test it!
-    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("restrictToAdmins");
-    if (userUploadDisabled) {
-      // Fail attachment create with any user other than admin
-      failAttachmentCreate(jackUser, testAttachmentInput);
-      // Succeed attachment create as admin
-      succeedAttachmentCreate(adminUser, testAttachmentInput);
-    }
 
     // Succeed attachment create with right classification and mimetype
     final AttachmentInput testAttachmentInput2 = AttachmentInput.builder()
@@ -154,6 +145,40 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(createdAttachment.getAttachmentRelatedObjects())
         .hasSameSizeAs(testAttachmentInput2.getAttachmentRelatedObjects());
     assertThat(createdAttachment.getContentLength()).isNull();
+  }
+
+  @Nested
+  class RestrictedAttachmentsTest {
+    private static final String RESTRICT_TO_ADMINS = "restrictToAdmins";
+
+    private Object restrictToAdmins;
+
+    @BeforeEach
+    void setUp() {
+      // Set restrictToAdmins to true in dictionary
+      final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
+      restrictToAdmins = attachmentSettings.get(RESTRICT_TO_ADMINS);
+      attachmentSettings.put(RESTRICT_TO_ADMINS, true);
+    }
+
+    @AfterEach
+    void tearDown() {
+      // Restore value of restrictToAdmins in dictionary
+      final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
+      attachmentSettings.put(RESTRICT_TO_ADMINS, restrictToAdmins);
+    }
+
+    @Test
+    void testRestrictToAdmins() {
+      final AttachmentInput testAttachmentInput = AttachmentInput.builder()
+          .withFileName("testAttachment.jpg").withMimeType(getFirstMimeType())
+          .withDescription("a test attachment created by testCreateAttachment")
+          .withAttachmentRelatedObjects(List.of()).build();
+      // Fail attachment create with any user other than admin
+      failAttachmentCreate(jackUser, testAttachmentInput);
+      // Succeed attachment create as admin
+      succeedAttachmentCreate(adminUser, testAttachmentInput);
+    }
   }
 
   @Test
