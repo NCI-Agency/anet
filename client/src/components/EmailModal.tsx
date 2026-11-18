@@ -45,6 +45,8 @@ export const EmailModal = ({
   const canPickPersonEmail =
     // admins can see all emailAddresses
     currentUser.isAdmin() ||
+    // tenant admins can see all emailAddresses in their tenant
+    currentUser.isTenantAdmin() ||
     // superusers can see at least some emailAddresses
     currentUser.isSuperuser() ||
     // authorized users can see all emailAddresses

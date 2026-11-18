@@ -38,6 +38,12 @@ const GQL_GET_SELF = gql`
       country {
         ${gqlEntityFieldsMap.Location}
       }
+      tenantAccessRequest {
+        ${gqlEntityFieldsMap.Tenant}
+      }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
   }
 `
@@ -99,7 +105,7 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
     <div>
       <Alert variant="warning">
         Your access to ANET has been requested. Your account is pending approval
-        by an administrator.
+        by a Tenant administrator.
       </Alert>
       <Messages error={stateError} success={stateSuccess} />
       <div className="form-horizontal">
@@ -117,6 +123,13 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
               <Col md={6}>{rightColumn}</Col>
             </Row>
             <Row>
+              <Col md={12}>
+                <FieldHelper.ReadonlyField
+                  field={{ name: "tenantAccessRequest" }}
+                  label={Settings.fields.person.tenantAccessRequest?.label}
+                  humanValue={person.tenantAccessRequest?.name}
+                />
+              </Col>
               <Col md={12}>{fullWidthFields}</Col>
             </Row>
           </Container>

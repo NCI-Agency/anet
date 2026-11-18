@@ -97,7 +97,7 @@ public class GraphQLExecutor {
     } else {
       final Person user = SecurityUtils.getPersonFromPrincipal(principal);
       context.put("principal", Objects.requireNonNullElse(user, new Person()));
-      context.put(Introspection.INTROSPECTION_DISABLED, !AuthUtils.isAdmin(user));
+      context.put(Introspection.INTROSPECTION_DISABLED, !AuthUtils.isTenantAdmin(user));
     }
 
     context.put("dataLoaderRegistry", dataLoaderRegistry);

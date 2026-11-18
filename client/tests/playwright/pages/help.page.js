@@ -12,6 +12,10 @@ class Help extends Page {
     return currentPage().locator(".superusers-list").getByRole("link")
   }
 
+  async getTenantAdministratorLinks() {
+    return currentPage().locator(".tenant-admins-list").getByRole("link")
+  }
+
   async getAdministratorLinks() {
     return currentPage().locator(".admins-list").getByRole("link")
   }

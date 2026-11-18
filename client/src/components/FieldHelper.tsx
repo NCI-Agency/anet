@@ -525,7 +525,7 @@ const ButtonToggleGroupField = ({
             )
           })}
         </ToggleButtonGroup>
-        {!_isEmpty(buttons) && enableClear && (
+        {!disabled && enableClear && !_isEmpty(buttons) && (
           <RemoveButton
             title="Clear choice"
             onClick={() => form.setFieldValue(field.name, null, true)}

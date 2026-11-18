@@ -26,7 +26,7 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.createAccessToken(FIELDS, input));
     assertThat(created).isNotNull();
     List<AccessToken> accessTokens =
-        withCredentials(adminUser, t -> queryExecutor.accessTokenList(FIELDS));
+        withCredentials(adminUser, t -> queryExecutor.accessTokenList(FIELDS, null));
     Optional<AccessToken> accessTokenOptional = accessTokens.stream()
         .filter(token -> token.getName().equals("New GRAPHQL Token")).findFirst();
     assertThat(accessTokenOptional).isPresent();
@@ -67,7 +67,7 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
     final Integer nrDeleted = withCredentials(adminUser,
         t -> mutationExecutor.deleteAccessToken("", outdatedInput.getUuid()));
     assertThat(nrDeleted).isOne();
-    accessTokens = withCredentials(adminUser, t -> queryExecutor.accessTokenList(FIELDS));
+    accessTokens = withCredentials(adminUser, t -> queryExecutor.accessTokenList(FIELDS, null));
     assertThat(
         accessTokens.stream().anyMatch(token -> token.getName().equals("New GRAPHQL Token v2")))
         .isFalse();

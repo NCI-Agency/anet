@@ -102,10 +102,10 @@ const EventSeriesForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const isAdmin = currentUser?.isAdmin()
+        const isTenantAdmin = currentUser?.isTenantAdmin()
         const adminOrgSearchQuery = {}
         // Superusers can select parent organizations among the ones their position is administrating
-        if (!isAdmin) {
+        if (!isTenantAdmin) {
           const orgsAdministratedUuids =
             currentUser.position.organizationsAdministrated.map(org => org.uuid)
           adminOrgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]

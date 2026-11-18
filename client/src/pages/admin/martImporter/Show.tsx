@@ -1,20 +1,24 @@
+import AppContext from "components/AppContext"
 import { usePageTitle } from "components/Page"
 import MartImportedReportTable from "pages/admin/martImporter/MartImportedReportTable"
 import ReportHistoryModal from "pages/admin/martImporter/ReportHistoryModal"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 
 const MartImporterShow = () => {
   usePageTitle("MART reports imported")
+  const { currentUser } = useContext(AppContext)
   const [selectedMartImportedReport, setSelectedMartImportedReport] =
     useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   return (
     <>
-      <Button variant="primary" onClick={handleExport}>
-        Export Dictionary for MART
-      </Button>
+      {currentUser?.isAdmin() && (
+        <Button variant="primary" onClick={handleExport}>
+          Export Dictionary for MART
+        </Button>
+      )}
       <MartImportedReportTable onSelectReport={renderHistoryModal} />
       {showHistoryModal && (
         <ReportHistoryModal
@@ -31,6 +35,7 @@ const MartImporterShow = () => {
     setSelectedMartImportedReport(martImportedReport)
     setShowHistoryModal(true)
   }
+
   async function handleExport() {
     try {
       const response = await fetch("/api/admin/martDictionary", {

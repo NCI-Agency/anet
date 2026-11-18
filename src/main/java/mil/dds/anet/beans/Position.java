@@ -25,11 +25,8 @@ import mil.dds.anet.views.UuidFetcher;
 public class Position extends AbstractEmailableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
-  public static enum PositionType {
-    REGULAR, // -
-    @Deprecated
-    _PLACEHOLDER_1_, // Should no longer be used but remain in place to keep the correct values
-    SUPERUSER, ADMINISTRATOR
+  public enum PositionType {
+    REGULAR, SUPERUSER, TENANT_ADMINISTRATOR, ADMINISTRATOR
   }
 
   public static enum SuperuserType {
@@ -83,6 +80,8 @@ public class Position extends AbstractEmailableAnetBean
   private List<Organization> organizationsAdministrated;
   // annotated below
   private List<AuthorizationGroup> authorizationGroupsAdministrated;
+  // annotated below
+  private List<Tenant> tenantsAdministrated;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
 
@@ -352,6 +351,14 @@ public class Position extends AbstractEmailableAnetBean
           engine().getAuthorizationGroupDao().getAuthorizationGroupsAdministratedByPosition(uuid);
     }
     return authorizationGroupsAdministrated;
+  }
+
+  @GraphQLQuery(name = "tenantsAdministrated")
+  public List<Tenant> getTenantsAdministrated() {
+    if (tenantsAdministrated == null) {
+      tenantsAdministrated = engine().getTenantDao().getTenantsAdministratedByPosition(uuid);
+    }
+    return tenantsAdministrated;
   }
 
   @GraphQLQuery(name = "authorizationGroups")

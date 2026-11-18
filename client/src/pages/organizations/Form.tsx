@@ -129,20 +129,20 @@ const OrganizationForm = ({
         setSubmitting,
         submitForm
       }) => {
-        const isAdmin = currentUser && currentUser.isAdmin()
+        const isTenantAdmin = currentUser?.isTenantAdmin()
         const canAdministrateParentOrg =
+          isTenantAdmin ||
           _isEmpty(values.parentOrg) ||
-          (currentUser &&
-            currentUser.hasAdministrativePermissionsForOrganization(
-              values.parentOrg
-            ))
+          currentUser?.hasAdministrativePermissionsForOrganization(
+            values.parentOrg
+          )
         const canAdministrateOrg = edit
-          ? currentUser &&
-            currentUser.hasAdministrativePermissionsForOrganization(values)
+          ? isTenantAdmin ||
+            currentUser?.hasAdministrativePermissionsForOrganization(values)
           : canAdministrateParentOrg
         const orgSearchQuery = {}
         // Superusers can select parent organizations among the ones their position is administrating
-        if (!isAdmin) {
+        if (!isTenantAdmin) {
           const orgsAdministratedUuids =
             currentUser.position.organizationsAdministrated.map(org => org.uuid)
           orgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]
@@ -593,7 +593,7 @@ const OrganizationForm = ({
                       title={Settings.fields.task.longLabel}
                       className="tasks-selector"
                     >
-                      {!isAdmin ? (
+                      {!isTenantAdmin ? (
                         <NoPaginationTaskTable tasks={values.tasks} />
                       ) : (
                         <FastField

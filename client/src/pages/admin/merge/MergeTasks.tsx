@@ -470,7 +470,6 @@ const TaskColumn = ({
           fields={ALL_TASK_FIELDS}
           addon={TASKS_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(task) && (

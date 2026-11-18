@@ -5,6 +5,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import AssociatedPositions from "components/AssociatedPositions"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import {
@@ -46,12 +47,14 @@ import useMergeObjects, {
 import { Location, Position } from "models"
 import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"
+import { toast } from "react-toastify"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
+import utils from "utils"
 import MergeEmailAddresses from "./MergeEmailAddresses"
 
 const GQL_GET_POSITION = gql`
@@ -229,9 +232,20 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.position.type}
-                value={mergedPosition.type}
+                value={Position.humanNameOfType(mergedPosition.type)}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="type"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.position.superuserType}
+                value={Position.humanNameOfSuperuserType(
+                  mergedPosition.superuserType
+                )}
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="superuserType"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -477,13 +491,27 @@ const ColTitle = styled(Form.Group)`
   height: 39px;
 `
 
-function getPositionFilters(mergeState, align) {
+function getPositionFilters(currentUser, mergeState, align) {
+  const organizationUuid = mergeState[getOtherSide(align)]?.organization?.uuid
+  const type =
+    mergeState[getOtherSide(align)]?.type ??
+    (currentUser?.isAdmin()
+      ? undefined
+      : [
+          Position.TYPE.TENANT_ADMINISTRATOR,
+          Position.TYPE.SUPERUSER,
+          Position.TYPE.REGULAR
+        ])
+  const isFilled = mergeState[getOtherSide(align)]?.person?.uuid
+    ? false
+    : undefined
   return {
     allPositions: {
       label: "All",
       queryVars: {
-        organizationUuid: mergeState[getOtherSide(align)]?.organization?.uuid,
-        type: mergeState[getOtherSide(align)]?.type
+        organizationUuid,
+        type,
+        isFilled
       }
     }
   }
@@ -506,6 +534,7 @@ const PositionColumn = ({
   dispatchMergeActions,
   setSideUsedForHistory
 }: PositionColumnProps) => {
+  const { currentUser } = useContext(AppContext)
   const position = mergeState[align]
   const otherSide = mergeState[getOtherSide(align)]
   const hideWhenEmpty =
@@ -525,17 +554,25 @@ const PositionColumn = ({
           disabledValue={otherSide}
           overlayColumns={["Position", "Organization", "Current Occupant"]}
           overlayRenderRow={PositionOverlayRow}
-          filterDefs={getPositionFilters(mergeState, align)}
+          filterDefs={getPositionFilters(currentUser, mergeState, align)}
           onChange={value => {
             value?.fixupFields()
-            dispatchMergeActions(setMergeable(value, align))
+            if (
+              !currentUser?.isAdmin() &&
+              !utils.isFromNoOrSameTenant(currentUser, value?.person)
+            ) {
+              toast.warning(
+                "Primary position is occupied by a user from another tenant"
+              )
+            } else {
+              dispatchMergeActions(setMergeable(value, align))
+            }
           }}
           objectType={Position}
           valueKey="name"
           fields={Position.allFieldsQuery}
           addon={POSITIONS_ICON}
           disabled={disabled}
-          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(position) && (
@@ -600,6 +637,9 @@ const PositionColumn = ({
               dispatchMergeActions(
                 setAMergedField("type", position.type, align)
               )
+              dispatchMergeActions(
+                setAMergedField("superuserType", position.superuserType, align)
+              )
             }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
@@ -619,7 +659,16 @@ const PositionColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.position.type}
             fieldName="type"
-            value={position.type}
+            value={Position.humanNameOfType(position.type)}
+            align={align}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.position.superuserType}
+            fieldName="superuserType"
+            value={Position.humanNameOfSuperuserType(position.superuserType)}
             align={align}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

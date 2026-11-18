@@ -223,11 +223,15 @@ const Navigation = ({
   const externalDocumentationUrlText =
     appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
+  const isAdmin = currentUser?.isAdmin()
+  const isTenantAdmin = currentUser?.isTenantAdmin()
+
   const routerLocation = useLocation()
   const path = routerLocation.pathname
   const inAdmin = path.startsWith("/admin")
   const inMerge = path.startsWith("/admin/merge")
   const inUserActivities = path.startsWith("/admin/userActivities")
+  const inTenants = path.startsWith("/admin/tenants")
 
   const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
     const inOrg = path.startsWith("/organizations")
@@ -251,6 +255,10 @@ const Navigation = ({
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
   const allOrgsSorted = allOrganizations.toSorted(compareByApp6StandardIdentity)
+  const nrTenantAccessRequests =
+    currentUser?.position?.tenantsAdministrated
+      ?.map(t => t.accessRequests?.length ?? 0)
+      ?.reduce((acc, v) => acc + v, 0) ?? 0
 
   useEffect(() => {
     if (
@@ -404,7 +412,7 @@ const Navigation = ({
               My Communities
             </SidebarLink>
           )}
-          {(currentUser.isAdmin() ||
+          {(isAdmin ||
             !_isEmpty(currentUser?.position?.organizationsAdministrated)) && (
             <SidebarLink
               id="my-events-nav"
@@ -479,7 +487,7 @@ const Navigation = ({
         Daily Rollup
       </SidebarLink>
 
-      {currentUser.isAdmin() && (
+      {isTenantAdmin && (
         <Nav.Item>
           <SidebarLink
             id="admin-pages"
@@ -496,7 +504,7 @@ const Navigation = ({
           {inAdmin && (
             <Nav className="flex-column">
               <span id="style-nav" style={{ lineHeight: "10pt" }}>
-                {!Settings.automaticallyAllowAllNewUsers && (
+                {isAdmin && !Settings.automaticallyAllowAllNewUsers && (
                   <SidebarLink
                     id="users-pending-verification"
                     linkTo="/admin/usersPendingVerification"
@@ -530,20 +538,24 @@ const Navigation = ({
                     </SidebarContainer>
                   ))}
                 </NavDropdown>
-                <SidebarLink
-                  id="audit-trail"
-                  linkTo="/admin/auditTrail"
-                  handleOnClick={resetPages}
-                >
-                  Audit trail
-                </SidebarLink>
-                <SidebarLink
-                  id="email-queue"
-                  linkTo="/admin/pendingEmails"
-                  handleOnClick={resetPages}
-                >
-                  Pending emails
-                </SidebarLink>
+                {isAdmin && (
+                  <>
+                    <SidebarLink
+                      id="audit-trail"
+                      linkTo="/admin/auditTrail"
+                      handleOnClick={resetPages}
+                    >
+                      Audit trail
+                    </SidebarLink>
+                    <SidebarLink
+                      id="email-queue"
+                      linkTo="/admin/pendingEmails"
+                      handleOnClick={resetPages}
+                    >
+                      Pending emails
+                    </SidebarLink>
+                  </>
+                )}
                 <SidebarLink
                   id="access-tokens"
                   linkTo="/admin/accessTokens"
@@ -558,6 +570,25 @@ const Navigation = ({
                 >
                   Configure event types
                 </SidebarLink>
+                <SidebarLink
+                  id="tenants"
+                  linkTo="/admin/tenants"
+                  handleOnClick={resetPages}
+                  isActive={inTenants}
+                >
+                  {isAdmin ? (
+                    "Tenants"
+                  ) : (
+                    <>
+                      My Tenant
+                      {!!nrTenantAccessRequests && (
+                        <NotificationBadge>
+                          {nrTenantAccessRequests}
+                        </NotificationBadge>
+                      )}
+                    </>
+                  )}
+                </SidebarLink>
                 {Settings.featureMartGuiEnabled && (
                   <SidebarLink
                     id="mart-imported-reports"
@@ -568,18 +599,18 @@ const Navigation = ({
                   </SidebarLink>
                 )}
                 <SidebarLink
-                  id="graphQL-nav"
-                  linkTo="/admin/graphiql"
-                  handleOnClick={resetPages}
-                >
-                  GraphQL
-                </SidebarLink>
-                <SidebarLink
                   id="preferences"
                   linkTo="/admin/preferences"
                   handleOnClick={resetPages}
                 >
                   Default application preferences
+                </SidebarLink>
+                <SidebarLink
+                  id="graphQL-nav"
+                  linkTo="/admin/graphiql"
+                  handleOnClick={resetPages}
+                >
+                  GraphQL
                 </SidebarLink>
               </span>
             </Nav>
