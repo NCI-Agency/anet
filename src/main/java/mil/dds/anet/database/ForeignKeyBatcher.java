@@ -3,7 +3,6 @@ package mil.dds.anet.database;
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +16,6 @@ import org.jdbi.v3.core.statement.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ForeignKeyBatcher<T extends AbstractAnetBean> extends AbstractDao {
-
-  private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
   private final String sql;
   private final String paramName;
@@ -45,8 +42,7 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> extends AbstractDao {
   public List<List<T>> getByForeignKeys(List<String> foreignKeys) {
     final Handle handle = getDbHandle();
     try {
-      final List<String> args = foreignKeys.isEmpty() ? defaultIfEmpty : foreignKeys;
-      final Query query = handle.createQuery(sql).bindList(NULL_KEYWORD, paramName, args);
+      final Query query = handle.createQuery(sql).bindList(NULL_KEYWORD, paramName, foreignKeys);
       if (additionalParams != null && !additionalParams.isEmpty()) {
         query.bindMap(additionalParams);
       }

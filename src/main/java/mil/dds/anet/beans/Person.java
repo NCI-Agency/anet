@@ -385,6 +385,10 @@ public class Person extends AbstractEmailableAnetBean
 
   @JsonIgnore
   public Set<String> getAuthorizationGroupUuids() {
+    if (isSystemUser(this)) {
+      // The worker principal is not a persisted person; its sentinel is not a database UUID.
+      return Set.of();
+    }
     if (authorizationGroupUuids == null) {
       authorizationGroupUuids = engine().getAuthorizationGroupDao()
           .getAuthorizationGroupUuidsForRelatedObject(PersonDao.TABLE_NAME, uuid);
@@ -394,6 +398,9 @@ public class Person extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "authorizationGroups")
   public List<AuthorizationGroup> loadAuthorizationGroups() {
+    if (isSystemUser(this)) {
+      return List.of();
+    }
     if (authorizationGroups == null) {
       final Set<String> agUuids = getAuthorizationGroupUuids();
       if (agUuids != null) {

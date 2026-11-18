@@ -1,6 +1,7 @@
 package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Event;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -125,6 +126,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
+    if (query.getTaskedOrgUuid().size() == 1
+        && Organization.DUMMY_ORG_UUID.equals(query.getTaskedOrgUuid().get(0))) {
+      // The My Tasks page uses this sentinel when the user has no organization.
+      qb.addWhereClause("FALSE");
+      return;
+    }
     qb.addFromClause(
         "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
 
@@ -147,7 +154,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           RecurseStrategy.CHILDREN.equals(query.getParentTaskRecurseStrategy()), null);
     } else if (query.getParentTaskUuid().size() == 1
         && Task.DUMMY_TASK_UUID.equals(query.getParentTaskUuid().get(0))) {
-      qb.addIsNullOrEmptyClause("tasks.\"parentTaskUuid\"");
+      qb.addWhereClause("tasks.\"parentTaskUuid\" IS NULL");
     } else {
       qb.addInListClause("parentTaskUuid", "tasks.\"parentTaskUuid\"", query.getParentTaskUuid());
     }

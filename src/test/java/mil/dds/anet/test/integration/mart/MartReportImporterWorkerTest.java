@@ -78,8 +78,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
   private MartImporterWorker martReportImporterWorker = null;
   private Set<Long> existingSequences = Set.of();
 
-  private final String missingReportUuid1 = "missingReportUuid1";
-  private final String missingReportUuid2 = "missingReportUuid2";
+  private final String missingReportUuid1 = "00000000-0000-4000-8000-000000000002";
+  private final String missingReportUuid2 = "00000000-0000-4000-8000-000000000003";
 
   @BeforeAll
   void setUp() throws Exception {
@@ -263,7 +263,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         t -> queryExecutor.report(ReportResourceTest.FIELDS, reportWithWarnings.getUuid()));
     assertThat(createdReportWithWarnings.getComments().size()).isOne();
     assertThat(createdReportWithWarnings.getComments().getFirst().getText()).isEqualTo(
-        "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:<ul><li>Security marking is missing</li><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>");
+        "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:<ul><li>Security marking is missing</li><li>Can not find task: 'does not exist' with uuid: "
+            + TestData.NON_EXISTENT_UUID + "</li></ul>");
     assertReportType(createdReportWithWarnings);
 
     // New records in MartImportedReports, verify them
@@ -290,22 +291,27 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
     assertReportSubmittedWithWarnings(martImportedReports, ++sequence,
         "While importing report fb875171-2501-46c9-9246-60dafabb656d:"
-            + "<ul><li>Can not find submitter organization coming from MART: 'does not exist' with uuid: does not exist</li>"
+            + "<ul><li>Can not find submitter organization coming from MART: 'does not exist' with uuid: "
+            + TestData.NON_EXISTENT_UUID + "</li>"
             + "<li>Organization for this person in ANET is different than in MART: 'mart-user@kfor.nato.int'</li></ul>");
 
     assertReportSubmittedWithWarnings(martImportedReports, ++sequence,
         "While importing report 2d6c7a19-d878-4792-bdaf-7a73dc3bfc83:"
-            + "<ul><li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>");
+            + "<ul><li>Can not find report location: 'does not exist' with uuid: "
+            + TestData.NON_EXISTENT_UUID + "</li></ul>");
 
     assertReportNotSubmitted(martImportedReports, ++sequence,
         "While importing report 68077002-b766-4a79-bcf2-40b7dbffe6e6:"
-            + "<ul><li>Can not find submitter organization coming from MART: 'does not exist' with uuid: does not exist</li>"
-            + "<li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>");
+            + "<ul><li>Can not find submitter organization coming from MART: 'does not exist' with uuid: "
+            + TestData.NON_EXISTENT_UUID + "</li>"
+            + "<li>Can not find report location: 'does not exist' with uuid: "
+            + TestData.NON_EXISTENT_UUID + "</li></ul>");
 
     assertReportSubmittedWithWarnings(martImportedReports, ++sequence,
         "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:"
             + "<ul><li>Security marking is missing</li>"
-            + "<li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>");
+            + "<li>Can not find task: 'does not exist' with uuid: " + TestData.NON_EXISTENT_UUID
+            + "</li></ul>");
 
     assertReportSubmittedWithWarnings(martImportedReports, ++sequence,
         "While importing report 58e0ff9b-4908-4f2d-8cab-8d64aefff929:"
