@@ -534,7 +534,6 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "creat
   (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('01336642-c566-4551-8342-3caea173ad71', 'RC-E-RLMT', 'RC-E-RLMT', '790a79f4-27f0-4289-9756-b39adce92ca7', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('91c6767d-1518-403f-af44-84d91e8ea3e0', 'RC-W-RLMT', 'RC-W-RLMT', '911db213-4c01-4fa1-a781-bb1c877064f0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
