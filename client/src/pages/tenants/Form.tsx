@@ -3,10 +3,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import {
-  PersonSimpleOverlayRow,
-  PositionOverlayRow
-} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
@@ -21,15 +18,13 @@ import NavigationWarning from "components/NavigationWarning"
 import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import ObjectHistory from "components/ObjectHistory"
 import { jumpToTop } from "components/Page"
-import PositionTable from "components/PositionTable"
 import RemoveButton from "components/RemoveButton"
 import { FastField, Field, FieldArray, Form, Formik } from "formik"
-import { Person, Position, Tenant } from "models"
+import { Person, Tenant } from "models"
 import React, { useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useNavigate } from "react-router"
 import PEOPLE_ICON from "resources/people.png"
-import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 
 const GQL_CREATE_TENANT = gql`
@@ -98,20 +93,9 @@ const TenantForm = ({
   title = "",
   initialValues
 }: TenantFormProps) => {
-  const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const { loadAppData } = useContext(AppContext)
   const [error, setError] = useState(null)
-  const isAdmin = currentUser?.isAdmin()
-  const positionsFilters = {
-    allSuperusers: {
-      label: "All superusers",
-      queryVars: {
-        type: [Position.TYPE.SUPERUSER],
-        matchPersonName: true
-      }
-    }
-  }
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -209,45 +193,6 @@ const TenantForm = ({
                   widget={
                     <EmailAddressInputTable
                       emailAddresses={values.emailAddresses}
-                    />
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.tenant.administrativePositions}
-                  name="administrativePositions"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    value = value.map(position =>
-                      Position.filterClientSideFields(position)
-                    )
-                    setFieldTouched("administrativePositions", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("administrativePositions", value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="administrativePositions"
-                      value={values.administrativePositions}
-                      renderSelected={
-                        <PositionTable
-                          positions={values.administrativePositions}
-                          showLocation
-                          showDelete={isAdmin}
-                        />
-                      }
-                      overlayColumns={[
-                        "Position",
-                        "Organization",
-                        "Current Occupant"
-                      ]}
-                      overlayRenderRow={PositionOverlayRow}
-                      filterDefs={positionsFilters}
-                      objectType={Position}
-                      fields={Position.autocompleteQuery}
-                      addon={POSITIONS_ICON}
-                      disabled={!isAdmin}
                     />
                   }
                 />

@@ -52,7 +52,8 @@ public class PositionResource {
   }
 
   public static boolean hasPermission(final Person user, final Position position) {
-    if (position.getType() == PositionType.ADMINISTRATOR) {
+    if (position.getType() == PositionType.ADMINISTRATOR
+        || position.getType() == PositionType.TENANT_ADMINISTRATOR) {
       return AuthUtils.isAdmin(user);
     }
     return AuthUtils.canAdministrateOrg(user, position.getOrganizationUuid());

@@ -32,6 +32,18 @@ const GQL_GET_SUPERUSERS_AND_ADMINS = gql`
       }
     }
 
+    me {
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+        administrativePositions {
+          ${gqlEntityFieldsMap.Position}
+          person {
+            ${gqlEntityFieldsMap.Person}
+          }
+        }
+      }
+    }
+
     personList(query: $personQuery) {
       list {
         ${gqlEntityFieldsMap.Person}
@@ -62,11 +74,7 @@ const Help = ({ pageDispatchers }: HelpProps) => {
   const { currentUser } = useContext(AppContext)
   const { appSettings } = useContext(PollingContext)
   usePageTitle("Help")
-  if (
-    currentUser.uuid &&
-    currentUser.position &&
-    currentUser.position.organization
-  ) {
+  if (currentUser?.uuid && currentUser?.position?.organization?.uuid) {
     return (
       <HelpFetchSuperusers
         orgUuid={currentUser.position.organization.uuid}
@@ -156,11 +164,16 @@ const HelpConditional = ({
   }
 
   let superusers = []
+  let tenantAdmins = []
   let admins = []
   if (data) {
     superusers = getAllSuperusers(data.organization)
       .filter(p => p.person)
       .map(p => p.person)
+    tenantAdmins =
+      data.me.tenant?.administrativePositions
+        ?.map(ap => ap.person)
+        .filter(p => p?.status === Model.STATUS.ACTIVE) ?? []
     admins = data.personList?.list
   }
 
@@ -187,11 +200,13 @@ const HelpConditional = ({
           style={screenshotCss}
         />
 
-        <h2>Contact your superuser or administrator</h2>
+        <h2>
+          Contact your superuser, tenant administrator or ANET administrator
+        </h2>
         <p>
-          Your organization's superusers and administrators are able to modify a
-          lot of data in the system regarding how your organization, position
-          and profile are set up.
+          Your organization's superusers, tenant administrators and ANET
+          administrators are able to modify a lot of data in the system
+          regarding how your organization, position and profile are set up.
         </p>
         <div className="d-flex flex-column mt-3 gap-4">
           <div>
@@ -208,9 +223,22 @@ const HelpConditional = ({
             {superusers.length === 0 && <em>No superusers found</em>}
           </div>
           <div>
+            {tenantAdmins.length > 0 && (
+              <>
+                <b>Your tenant admins:</b>
+                <div className="tenant-admins-list d-flex flex-column gap-2 p-2">
+                  {tenantAdmins.map(user => (
+                    <LinkTo modelType="Person" model={user} key={user.uuid} />
+                  ))}
+                </div>
+              </>
+            )}
+            {tenantAdmins.length === 0 && <em>No tenant admins found</em>}
+          </div>
+          <div>
             {admins.length > 0 && (
               <>
-                <b>Your admins:</b>
+                <b>Your ANET admins:</b>
                 <div className="admins-list d-flex flex-column gap-2 p-2">
                   {admins.map(user => (
                     <LinkTo modelType="Person" model={user} key={user.uuid} />
