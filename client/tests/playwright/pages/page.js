@@ -1,16 +1,26 @@
-import { expect } from "@playwright/test"
+import { expect, test } from "@playwright/test"
 
 /**
- * Create a caller-owned scenario context with the common project options.
- * The caller remains responsible for closing it; no global page is retained.
- * @param {import("@playwright/test").Browser} browser
- * @param {import("@playwright/test").TestInfo} testInfo
+ * Call inside the describe block that owns the scenario.
+ * Setup runs in beforeAll and can create any required page objects.
  */
-export async function newContext(browser, testInfo) {
-  return browser.newContext({
-    baseURL: testInfo.project.use.baseURL,
-    viewport: testInfo.project.use.viewport,
-    ignoreHTTPSErrors: true
+export function useSerialScenario(setup) {
+  test.describe.configure({ mode: "serial" })
+
+  let context
+
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+      viewport: testInfo.project.use.viewport,
+      ignoreHTTPSErrors: true
+    })
+    const page = await context.newPage()
+    await setup(page, context, testInfo)
+  })
+
+  test.afterAll(async () => {
+    await context?.close()
   })
 }
 

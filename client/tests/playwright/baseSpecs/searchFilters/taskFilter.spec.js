@@ -1,20 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { newContext } from "../../pages/page.js"
+import { useSerialScenario } from "../../pages/page.js"
 import TaskFilterPageObject from "../../pages/searchFilters/taskFilter.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, TaskFilter
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let TaskFilter
+  useSerialScenario(page => {
     TaskFilter = new TaskFilterPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const NR_OF_ACTIVE_TOP_LEVEL_TASKS = 14
   const NR_OF_TOP_LEVEL_TASKS = NR_OF_ACTIVE_TOP_LEVEL_TASKS + 1

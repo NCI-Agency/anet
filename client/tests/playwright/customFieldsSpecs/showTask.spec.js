@@ -1,22 +1,14 @@
 import { expect, test } from "@playwright/test"
 import MergeTasksPageObject from "../pages/mergeTasks.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowTaskPageObject from "../pages/showTask.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, MergeTasks, ShowTask
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, MergeTasks, ShowTask
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     MergeTasks = new MergeTasksPageObject(page)
     ShowTask = new ShowTaskPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const TASK_12B_UUID = "9d3da7f4-8266-47af-b518-995f587250c9"
   const TASK_EF1_UUID = "1145e584-4485-4ce0-89c4-2fa2e1fe846a"

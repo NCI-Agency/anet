@@ -1,23 +1,14 @@
 import { expect, test } from "@playwright/test"
 import moment from "moment"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowPersonPageObject from "../pages/showPerson.page.js"
 import ShowPositionPageObject from "../pages/showPosition.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, ShowPerson, ShowPosition
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let ShowPerson, ShowPosition
+  useSerialScenario(page => {
     ShowPerson = new ShowPersonPageObject(page)
     ShowPosition = new ShowPositionPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const PERSON_UUID = "39d02d26-49eb-43b5-9cec-344777213a67"
   const DATE_FORMAT = "DD-MM-YYYY"

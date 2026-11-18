@@ -3,21 +3,12 @@ import InsightsPageObject, {
   INSIGHTS,
   PENDING_ASSESSMENTS_BY_POSITION
 } from "../pages/insights.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, Insights
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let Insights
+  useSerialScenario(page => {
     Insights = new InsightsPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   test.describe("Insights pages", () => {
     test("Should open each insights page for admin user", async () => {

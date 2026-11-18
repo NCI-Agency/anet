@@ -1,21 +1,13 @@
 import { expect, test } from "@playwright/test"
 import moment from "moment"
 import OnboardPagePageObject from "../pages/onboard.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, OnboardPage
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, OnboardPage
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     OnboardPage = new OnboardPagePageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const REPORT_URL = "/reports/59be259b-30b9-4d04-9e21-e8ceb58cbe9c"
   const ONBOARD_USER = {

@@ -1,22 +1,14 @@
 import { expect, test } from "@playwright/test"
 import MergePositionsPageObject from "../pages/mergePositions.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowPositionPageObject from "../pages/showPosition.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, MergePositions, ShowPosition
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, MergePositions, ShowPosition
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     MergePositions = new MergePositionsPageObject(page)
     ShowPosition = new ShowPositionPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const POSITION_WITH_AG_UUID = "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47" // EF 5.1 Advisor Quality Assurance
   const POSITION_WITH_ATTACHMENTS_UUID = "888d6c4b-deaa-4218-b8fd-abfb7c81a4c6" // EF 1.1 Advisor G

@@ -1,20 +1,12 @@
 import { expect, test } from "@playwright/test"
-import { newContext } from "../../pages/page.js"
+import { useSerialScenario } from "../../pages/page.js"
 import SavedSearchPageObject from "../../pages/searchFilters/savedSearch.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, SavedSearch
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, SavedSearch
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     SavedSearch = new SavedSearchPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   test.describe("When trying to save a search", () => {
     test("Should show a successful toast message when the search is unique", async () => {

@@ -1,21 +1,13 @@
 import { expect, test } from "@playwright/test"
 import moment from "moment"
 import CreatePersonPageObject from "../pages/createNewPerson.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, CreatePerson
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, CreatePerson
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     CreatePerson = new CreatePersonPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const VALID_PERSON_INTERLOCUTOR = {
     familyName: "Doe",

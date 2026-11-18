@@ -1,20 +1,12 @@
 import { expect, test } from "@playwright/test"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowEventSeriesPageObject from "../pages/showEventSeries.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, ShowEventSeries
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, ShowEventSeries
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     ShowEventSeries = new ShowEventSeriesPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const EVENT_SERIES_UUID = "b7b70191-54e4-462f-8e40-679dd2e71ec4" // NMI PDT event series
 

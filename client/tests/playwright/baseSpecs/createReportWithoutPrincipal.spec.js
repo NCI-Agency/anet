@@ -2,28 +2,19 @@ import { expect, test } from "@playwright/test"
 import moment from "moment"
 import HomePageObject from "../pages/home.page.js"
 import MyReportsPageObject, { REPORT_STATES } from "../pages/myReports.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import CreateReportPageObject from "../pages/report/createReport.page.js"
 import ShowReportPageObject from "../pages/report/showReport.page.js"
 import SearchPageObject from "../pages/search.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, Home, MyReports, CreateReport, ShowReport, Search
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let Home, MyReports, CreateReport, ShowReport, Search
+  useSerialScenario(page => {
     Home = new HomePageObject(page)
     MyReports = new MyReportsPageObject(page)
     CreateReport = new CreateReportPageObject(page)
     ShowReport = new ShowReportPageObject(page)
     Search = new SearchPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const REPORT_FIELDS = {
     intent: "An engagement report without primary interlocutor",

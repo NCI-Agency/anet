@@ -1,25 +1,16 @@
 import { expect, test } from "@playwright/test"
 import MyReportsPageObject, { REPORT_STATES } from "../pages/myReports.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import EditReportPageObject from "../pages/report/editReport.page.js"
 import ShowReportPageObject from "../pages/report/showReport.page.js"
 import { getRichTextContent } from "./richTextUtils.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, MyReports, EditReport, ShowReport
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let MyReports, EditReport, ShowReport
+  useSerialScenario(page => {
     MyReports = new MyReportsPageObject(page)
     EditReport = new EditReportPageObject(page)
     ShowReport = new ShowReportPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const RICH_TEXT_CONTENT = [
     {

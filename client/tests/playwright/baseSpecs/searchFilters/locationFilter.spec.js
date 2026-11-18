@@ -1,20 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { newContext } from "../../pages/page.js"
+import { useSerialScenario } from "../../pages/page.js"
 import LocationFilterPageObject from "../../pages/searchFilters/locationFilter.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, LocationFilter
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let LocationFilter
+  useSerialScenario(page => {
     LocationFilter = new LocationFilterPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   test.describe("When using the location filter on the reports search", () => {
     test("Should show all the locations", async () => {

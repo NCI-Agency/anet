@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 import CreateNewLocationPageObject from "../pages/location/createNewLocation.page.js"
 import EditLocationPageObject from "../pages/location/editLocation.page.js"
 import ShowLocationPageObject from "../pages/location/showLocation.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import {
   LOCATION_COORDS,
   LOCATION_NAME,
@@ -11,20 +11,11 @@ import {
 } from "./locationUtils.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, CreateNewLocation, EditLocation, ShowLocation
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let CreateNewLocation, EditLocation, ShowLocation
+  useSerialScenario(page => {
     CreateNewLocation = new CreateNewLocationPageObject(page)
     EditLocation = new EditLocationPageObject(page)
     ShowLocation = new ShowLocationPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   test.describe("When editing a location", () => {
     test.beforeEach("Should create a new location first", async () => {

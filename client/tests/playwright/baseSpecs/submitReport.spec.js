@@ -1,20 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowReportPageObject from "../pages/report/showReport.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, ShowReport
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let ShowReport
+  useSerialScenario(page => {
     ShowReport = new ShowReportPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const DRAFT_REPORT_UUID = "530b735e-1134-4daa-9e87-4491c888a4f7"
   test.describe("Submit report", () => {

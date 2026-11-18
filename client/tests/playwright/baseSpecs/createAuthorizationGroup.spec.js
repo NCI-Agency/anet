@@ -1,21 +1,13 @@
 import { expect, test } from "@playwright/test"
 import { v4 as uuidv4 } from "uuid"
 import CreateAuthorizationGroupPageObject from "../pages/createAuthorizationGroup.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, CreateAuthorizationGroup
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, CreateAuthorizationGroup
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     CreateAuthorizationGroup = new CreateAuthorizationGroupPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const AUTHORIZATION_GROUP_NAME_PREFIX = "test community"
   const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"

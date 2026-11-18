@@ -1,24 +1,15 @@
 import { expect, test } from "@playwright/test"
 import HomePageObject from "../pages/home.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import SearchPageObject from "../pages/search.page.js"
 import ShowTaskPageObject from "../pages/showTask.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, Home, Search, ShowTask
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let Home, Search, ShowTask
+  useSerialScenario(page => {
     Home = new HomePageObject(page)
     Search = new SearchPageObject(page)
     ShowTask = new ShowTaskPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const TASK_SEARCH_STRING = "1.1.A"
   // both are responsible from '1.1.A Milestone' task

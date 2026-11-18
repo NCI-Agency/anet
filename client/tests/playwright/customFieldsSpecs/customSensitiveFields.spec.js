@@ -1,26 +1,17 @@
 import { expect, test } from "@playwright/test"
 import CreatePersonPageObject from "../pages/createNewPerson.page.js"
 import HomePageObject from "../pages/home.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import SearchPageObject from "../pages/search.page.js"
 import ShowPersonPageObject from "../pages/showPerson.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, CreatePerson, Home, Search, ShowPerson
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let CreatePerson, Home, Search, ShowPerson
+  useSerialScenario(page => {
     CreatePerson = new CreatePersonPageObject(page)
     Home = new HomePageObject(page)
     Search = new SearchPageObject(page)
     ShowPerson = new ShowPersonPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const DEFAULT_USERNAME = "jack"
   const NON_COUNTERPART_INTERLOCUTOR = {

@@ -1,21 +1,12 @@
 import { expect, test } from "@playwright/test"
 import moment from "moment"
 import CreateFutureReportPageObject from "../pages/createFutureReport.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, CreateFutureReport
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let CreateFutureReport
+  useSerialScenario(page => {
     CreateFutureReport = new CreateFutureReportPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const INTERLOCUTOR = "Christopf"
   const INTERLOCUTOR_VALUE = `CIV ${INTERLOCUTOR} Topferness`

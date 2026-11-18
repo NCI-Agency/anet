@@ -2,22 +2,13 @@ import { expect, test } from "@playwright/test"
 import _isEmpty from "lodash/isEmpty.js"
 import AdvancedSearchPageObject from "../pages/advancedSearch.page.js"
 import HomePageObject from "../pages/home.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, AdvancedSearch, Home
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let AdvancedSearch, Home
+  useSerialScenario(page => {
     AdvancedSearch = new AdvancedSearchPageObject(page)
     Home = new HomePageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const ANET_OBJECT_TYPES = {
     Reports: {

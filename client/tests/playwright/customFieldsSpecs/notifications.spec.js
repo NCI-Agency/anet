@@ -2,21 +2,12 @@ import { expect, test } from "@playwright/test"
 // Note: number of assessments are based on the base data, if that changes, change this test as well
 
 import HomePageObject from "../pages/home.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, Home
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let Home
+  useSerialScenario(page => {
     Home = new HomePageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   test.describe("Home page", () => {
     test.describe("When checking the notification numbers", () => {

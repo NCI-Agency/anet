@@ -6,24 +6,17 @@ import CreatePositionPageObject from "../pages/createNewPosition.page.js"
 import CreateTaskPageObject from "../pages/createNewTask.page.js"
 import CreateReportPageObject from "../pages/createReport.page.js"
 import CreateNewLocationPageObject from "../pages/location/createNewLocation.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context,
-    CreateAuthorizationGroup,
+  let CreateAuthorizationGroup,
     CreateOrganization,
     CreatePerson,
     CreatePosition,
     CreateTask,
     CreateReport,
     CreateNewLocation
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  useSerialScenario(page => {
     CreateAuthorizationGroup = new CreateAuthorizationGroupPageObject(page)
     CreateOrganization = new CreateOrganizationPageObject(page)
     CreatePerson = new CreatePersonPageObject(page)
@@ -31,9 +24,6 @@ test.describe(() => {
     CreateTask = new CreateTaskPageObject(page)
     CreateReport = new CreateReportPageObject(page)
     CreateNewLocation = new CreateNewLocationPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   // Forms should work just fine without custom fields
 

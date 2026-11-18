@@ -5,22 +5,14 @@ import AdvancedSearchPageObject from "../pages/advancedSearch.page.js"
 import InsightsPageObject, {
   AGGREGATED_REPORTS_OVER_TIME
 } from "../pages/insights.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, AdvancedSearch, Insights
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, AdvancedSearch, Insights
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     AdvancedSearch = new AdvancedSearchPageObject(page)
     Insights = new InsightsPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const RELEASE_DATE_LABEL = "Release Date"
   const NO_RANGE_MESSAGE =

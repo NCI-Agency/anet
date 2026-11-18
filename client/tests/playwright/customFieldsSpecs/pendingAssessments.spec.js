@@ -3,25 +3,16 @@ import moment from "moment"
 import AssessmentsSectionPageObject from "../pages/assessments.page.js"
 import MyCounterpartsPageObject from "../pages/myCounterparts.page.js"
 import MyTasksPageObject from "../pages/myTasks.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import CreateReportPageObject from "../pages/report/createReport.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, AssessmentsSection, MyCounterparts, MyTasks, CreateReport
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let AssessmentsSection, MyCounterparts, MyTasks, CreateReport
+  useSerialScenario(page => {
     AssessmentsSection = new AssessmentsSectionPageObject(page)
     MyCounterparts = new MyCounterpartsPageObject(page)
     MyTasks = new MyTasksPageObject(page)
     CreateReport = new CreateReportPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   // Note: number of assessments are based on the base data, if that changes, change this test as well
   test.describe("In my counterparts page", () => {

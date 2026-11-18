@@ -1,22 +1,14 @@
 import { expect, test } from "@playwright/test"
 import MergePeoplePageObject from "../pages/mergePeople.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowPersonPageObject from "../pages/showPerson.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, MergePeople, ShowPerson
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, MergePeople, ShowPerson
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     MergePeople = new MergePeoplePageObject(page)
     ShowPerson = new ShowPersonPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const PERSON_UUID = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"
   const PERSON_WITH_AG_UUID = "31cba227-f6c6-49e9-9483-fce441bea624" // CIV Creed Bratton

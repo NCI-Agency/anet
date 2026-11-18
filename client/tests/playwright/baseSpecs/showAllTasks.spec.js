@@ -1,20 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowAllTasksPageObject from "../pages/showAllTasks.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, ShowAllTasks
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let ShowAllTasks
+  useSerialScenario(page => {
     ShowAllTasks = new ShowAllTasksPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const FIRST_TASK_NAME = "EF 1 | Budget and Planning"
   const FIRST_TASK_DESCENDANT_NAME = "1.1 | Budgeting in the MoD"

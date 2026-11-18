@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import CreateNewLocationPageObject from "../pages/location/createNewLocation.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import {
   BAD_LAT_LNG_VAL,
   DESCRIPTION,
@@ -12,18 +12,9 @@ import {
 } from "./locationUtils.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, CreateNewLocation
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    const page = await context.newPage()
+  let CreateNewLocation
+  useSerialScenario(page => {
     CreateNewLocation = new CreateNewLocationPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   test.describe("When creating a new Location", () => {
     test("Should not create a location without name & type input", async () => {

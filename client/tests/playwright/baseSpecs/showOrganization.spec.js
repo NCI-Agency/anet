@@ -1,34 +1,20 @@
 import { expect, test } from "@playwright/test"
 import HomePageObject from "../pages/home.page.js"
 import MergeOrganizationsPageObject from "../pages/mergeOrganizations.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import SearchPageObject from "../pages/search.page.js"
 import ShowOrganizationPageObject from "../pages/showOrganization.page.js"
 import ShowTaskPageObject from "../pages/showTask.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context,
-    page,
-    Home,
-    MergeOrganizations,
-    Search,
-    ShowOrganization,
-    ShowTask
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, Home, MergeOrganizations, Search, ShowOrganization, ShowTask
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     Home = new HomePageObject(page)
     MergeOrganizations = new MergeOrganizationsPageObject(page)
     Search = new SearchPageObject(page)
     ShowOrganization = new ShowOrganizationPageObject(page)
     ShowTask = new ShowTaskPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const EF1_ORGANIZATION_UUID = "9a35caa7-a095-4963-ac7b-b784fde4d583" // EF 1
   const EF1_1_ORGANIZATION_UUID = "04614b0f-7e8e-4bf1-8bc5-13abaffeab8a" // EF 1.1

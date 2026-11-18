@@ -1,21 +1,13 @@
 import { expect, test } from "@playwright/test"
 import moment from "moment"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 import ShowEventPageObject from "../pages/showEvent.page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, ShowEvent
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, ShowEvent
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     ShowEvent = new ShowEventPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const EVENT_UUID = "e850846e-9741-40e8-bc51-4dccc30cf47f" // NMI PDT 2024-01 event
   const DATE_FORMAT = "dddd, D MMMM YYYY @ HH:mm"

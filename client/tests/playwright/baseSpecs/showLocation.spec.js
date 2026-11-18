@@ -1,22 +1,14 @@
 import { expect, test } from "@playwright/test"
 import ShowLocationPageObject from "../pages/location/showLocation.page.js"
 import MergeLocationsPageObject from "../pages/mergeLocations.page.js"
-import { newContext } from "../pages/page.js"
+import { useSerialScenario } from "../pages/page.js"
 
 test.describe(() => {
-  // These cases are ordered scenario steps and explicitly share one file-owned context.
-  test.describe.configure({
-    mode: "serial"
-  })
-  let context, page, ShowLocation, MergeLocations
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await newContext(browser, testInfo)
-    page = await context.newPage()
+  let page, ShowLocation, MergeLocations
+  useSerialScenario(scenarioPage => {
+    page = scenarioPage
     ShowLocation = new ShowLocationPageObject(page)
     MergeLocations = new MergeLocationsPageObject(page)
-  })
-  test.afterAll(async () => {
-    await context?.close()
   })
   const LOCATION_WITH_ATTACHMENTS_UUID = "e5b3a4b9-acf7-4c79-8224-f248b9a7215d" // Antarctica
   const LOCATION_WITH_ORGANIZATIONS_UUID =
