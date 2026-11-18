@@ -124,7 +124,9 @@ function getPositionType() {
     ? Position.TYPE.REGULAR
     : fuzzy.withProbability(0.9)
       ? Position.TYPE.SUPERUSER
-      : Position.TYPE.ADMINISTRATOR
+      : fuzzy.withProbability(0.9)
+        ? Position.TYPE.TENANT_ADMINISTRATOR
+        : Position.TYPE.ADMINISTRATOR
 }
 
 function getPositionRole() {

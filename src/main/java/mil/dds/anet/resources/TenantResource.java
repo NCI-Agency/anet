@@ -15,7 +15,6 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Tenant;
 import mil.dds.anet.database.AuditTrailDao;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.TenantDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AuthUtils;
@@ -62,9 +61,6 @@ public class TenantResource {
     AuthUtils.assertAdministrator(user);
     final Tenant created = tenantDao.insert(t);
 
-    // Add administrative positions
-    tenantDao.addAdministrativePositions(t.getUuid(), t.getAdministrativePositions());
-
     // Log the change
     auditTrailDao.logCreate(user, TenantDao.TABLE_NAME, created);
     return created;
@@ -96,23 +92,6 @@ public class TenantResource {
     final int numRows = tenantDao.update(t);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process tenant update");
-    }
-
-    // Update administrative positions
-    if (AuthUtils.isAdmin(user) && t.getAdministrativePositions() != null) {
-      Utils.addRemoveElementsByUuid(existingAdministrativePositions, t.getAdministrativePositions(),
-          newPosition -> {
-            tenantDao.addAdministrativePositions(t.getUuid(), List.of(newPosition));
-            auditTrailDao.logUpdate(user, TenantDao.TABLE_NAME, t,
-                "administrative position has been added to this tenant",
-                Utils.getLinkedToDetails(PositionDao.TABLE_NAME, newPosition.getUuid()));
-          }, oldPosition -> {
-            tenantDao.removeAdministrativePositions(t.getUuid(),
-                List.of(DaoUtils.getUuid(oldPosition)));
-            auditTrailDao.logUpdate(user, TenantDao.TABLE_NAME, t,
-                "administrative position has been removed from this tenant",
-                Utils.getUnlinkedFromDetails(PositionDao.TABLE_NAME, oldPosition.getUuid()));
-          });
     }
 
     final Map<String, Person> accessRequestsPendingVerification = new HashMap<>();
