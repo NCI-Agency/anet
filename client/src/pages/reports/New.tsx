@@ -12,7 +12,7 @@ import {
 } from "components/Page"
 import { Event, Person, Report } from "models"
 import { reportTour } from "pages/GuidedTour"
-import React, { useContext } from "react"
+import { useContext } from "react"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation } from "react-router"
 import Settings from "settings"

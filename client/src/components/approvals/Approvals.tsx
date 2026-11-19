@@ -1,7 +1,7 @@
 import AppContext from "components/AppContext"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import Fieldset from "components/Fieldset"
-import React, { useContext, useState } from "react"
+import { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import EditApprovalsModal from "./EditApprovalsModal"
 

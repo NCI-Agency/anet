@@ -1,5 +1,4 @@
 import { usePageTitle } from "components/Page"
-import React from "react"
 import EventTypeTable from "./EventTypeTable"
 
 const ConfigureEventTypesShow = () => {

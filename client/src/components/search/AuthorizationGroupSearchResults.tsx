@@ -9,7 +9,6 @@ import {
   CommonSearchResults,
   GenericSearchResultsWithEmailProps
 } from "components/search/CommonSearchResults"
-import React from "react"
 
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   query (

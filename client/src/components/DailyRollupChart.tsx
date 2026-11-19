@@ -1,5 +1,5 @@
 import * as d3 from "d3"
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import utils from "utils"
 import "./BarChart.css"
 import { addD3Tooltip } from "./D3Tooltip"

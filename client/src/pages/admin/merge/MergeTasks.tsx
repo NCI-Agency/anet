@@ -50,7 +50,7 @@ import useMergeObjects, {
 import { Task } from "models"
 import moment from "moment/moment"
 import pluralize from "pluralize"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"

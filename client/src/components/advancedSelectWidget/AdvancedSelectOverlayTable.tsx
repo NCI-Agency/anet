@@ -3,7 +3,7 @@ import Model from "components/Model"
 import RadioButton from "components/RadioButton"
 import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
+import * as React from "react"
 import { Table } from "react-bootstrap"
 
 interface AdvancedSelectOverlayTableProps {

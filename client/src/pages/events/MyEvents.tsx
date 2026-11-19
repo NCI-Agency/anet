@@ -10,7 +10,7 @@ import {
   usePageTitle
 } from "components/Page"
 import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
-import React, { useContext, useMemo } from "react"
+import { useContext, useMemo } from "react"
 import { legacy_connect as connect } from "react-redux"
 
 interface MyEventsProps {

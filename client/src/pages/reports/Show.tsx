@@ -61,7 +61,7 @@ import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useContext, useEffect, useState } from "react"
+import { Fragment, useContext, useEffect, useState } from "react"
 import { Alert, Button, Col } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useNavigate, useParams } from "react-router"
@@ -579,10 +579,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                   <FieldHelper.ReadonlyField
                     field={{ name: "authors" }}
                     humanValue={report.authors?.map(a => (
-                      <React.Fragment key={a.uuid}>
+                      <Fragment key={a.uuid}>
                         <LinkTo modelType="Person" model={a} />
                         <br />
-                      </React.Fragment>
+                      </Fragment>
                     ))}
                   />
 

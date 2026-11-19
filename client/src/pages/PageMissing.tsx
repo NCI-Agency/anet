@@ -6,7 +6,6 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import React from "react"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useParams } from "react-router"
 

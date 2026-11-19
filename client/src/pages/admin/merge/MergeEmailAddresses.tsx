@@ -2,7 +2,6 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import RemoveButton from "components/RemoveButton"
 import { ALIGN_OPTIONS, MERGE_SIDES, setAMergedField } from "mergeUtils"
-import React from "react"
 import { Button, Table } from "react-bootstrap"
 import utils from "utils"
 

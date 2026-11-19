@@ -13,7 +13,7 @@ import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
 import { formatPeriodBoundary, RECURRENCE_TYPE } from "periodUtils"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 import QuestionSet from "./QuestionSet"
 

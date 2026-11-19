@@ -49,7 +49,7 @@ import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
 import { Event } from "models"
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Badge,

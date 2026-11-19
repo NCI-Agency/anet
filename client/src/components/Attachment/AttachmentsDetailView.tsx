@@ -1,6 +1,6 @@
 import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
-import React, { useContext, useState } from "react"
+import { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import Settings from "settings"
 import AttachmentCard from "./AttachmentCard"

@@ -4,7 +4,7 @@ import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import { MessagesWithConflict } from "components/Messages"
 import { Form, Formik } from "formik"
 import { Location, Organization, Task } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const GQL_UPDATE_LOCATION = gql`

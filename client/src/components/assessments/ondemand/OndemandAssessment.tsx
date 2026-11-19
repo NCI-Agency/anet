@@ -15,13 +15,7 @@ import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState
-} from "react"
+import { useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"

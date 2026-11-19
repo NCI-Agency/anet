@@ -1,7 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import classNames from "classnames"
-import React from "react"
 import { Button } from "react-bootstrap"
 
 interface RemoveButtonProps {

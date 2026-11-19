@@ -46,7 +46,7 @@ import useMergeObjects, {
 import { Location, Position } from "models"
 import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router"

@@ -6,7 +6,7 @@ import {
 } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import moment from "moment"
-import React, { useRef, useState } from "react"
+import { useRef, useState } from "react"
 import CALENDAR_ICON from "resources/calendar.png"
 import Settings from "settings"
 

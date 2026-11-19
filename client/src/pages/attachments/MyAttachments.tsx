@@ -15,7 +15,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import React, { useContext, useState } from "react"
+import { useContext, useState } from "react"
 import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_ATTACHMENT_LIST = gql`

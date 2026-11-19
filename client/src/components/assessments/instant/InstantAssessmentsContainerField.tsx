@@ -8,7 +8,7 @@ import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
-import React, { useContext, useMemo } from "react"
+import { Fragment, useContext, useMemo } from "react"
 import { Table } from "react-bootstrap"
 import QuestionSet from "../QuestionSet"
 
@@ -170,7 +170,7 @@ const InstantAssessmentsContainerField = ({
           const modelType = entityType.resourceName
 
           return (
-            <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
+            <Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
               <tr>
                 <th>
                   {modelType === Task.resourceName ? (
@@ -204,7 +204,7 @@ const InstantAssessmentsContainerField = ({
                   readonly={readonly}
                 />
               ))}
-            </React.Fragment>
+            </Fragment>
           )
         })}
       </tbody>

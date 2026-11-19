@@ -4,7 +4,7 @@ import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 
 const getIcon = event => {

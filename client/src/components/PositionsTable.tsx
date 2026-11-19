@@ -5,7 +5,7 @@ import AssignPositionModal from "components/AssignPositionModal"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Col, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 
 interface PositionsTableProps {

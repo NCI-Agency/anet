@@ -4,7 +4,6 @@ import {
 } from "components/FieldHelper"
 import RemoveButton from "components/RemoveButton"
 import { Field, FieldArray } from "formik"
-import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 

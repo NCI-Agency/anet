@@ -17,7 +17,7 @@ import {
   usePageTitle
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 

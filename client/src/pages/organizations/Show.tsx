@@ -51,7 +51,7 @@ import { Location, Organization, PositionRole, Report } from "models"
 import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
 import { getPositionsForRole } from "positionUtil"
-import React, { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import {
   Badge,
   Button,

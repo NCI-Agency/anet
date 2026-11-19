@@ -14,7 +14,7 @@ import {
   AssessmentPeriodsConfigPropType,
   periodToString
 } from "periodUtils"
-import React, { useContext, useMemo, useState } from "react"
+import { useContext, useMemo, useState } from "react"
 import { Button, Card, Col, Row } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"

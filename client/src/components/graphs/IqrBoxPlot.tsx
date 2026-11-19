@@ -1,7 +1,7 @@
 import { TRAFFIC_LIGHTS_LEVELS } from "components/graphs/utils"
 import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { useResizeDetector } from "react-resize-detector"
 
 interface IqrBoxPlotProps {

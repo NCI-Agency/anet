@@ -1,6 +1,6 @@
 import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import React from "react"
+import * as React from "react"
 
 interface LinkExternalHrefProps {
   url?: string

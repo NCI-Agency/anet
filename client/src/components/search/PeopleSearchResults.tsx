@@ -9,7 +9,6 @@ import {
   CommonSearchResults,
   GenericSearchResultsWithEmailProps
 } from "components/search/CommonSearchResults"
-import React from "react"
 
 const GQL_GET_PERSON_LIST = gql`
   query ($personQuery: PersonSearchQueryInput, $emailNetwork: String) {

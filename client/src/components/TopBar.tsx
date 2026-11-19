@@ -11,7 +11,8 @@ import Header from "components/Header"
 import NoPositionBanner from "components/NoPositionBanner"
 import PollingContext from "components/PollingContext"
 import SecurityBanner from "components/SecurityBanner"
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import * as React from "react"
 import { legacy_connect as connect } from "react-redux"
 
 function getRefHeight(ref: React.MutableRefObject<undefined>) {

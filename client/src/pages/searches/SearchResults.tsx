@@ -10,7 +10,7 @@ import OrganizationSearchResults from "components/search/OrganizationSearchResul
 import PeopleSearchResults from "components/search/PeopleSearchResults"
 import PositionSearchResults from "components/search/PositionSearchResults"
 import TaskSearchResults from "components/search/TaskSearchResults"
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Badge } from "react-bootstrap"
 
 const DEFAULT_PAGESIZE = 10

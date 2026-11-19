@@ -1,5 +1,5 @@
 import ConfirmDestructive from "components/ConfirmDestructive"
-import React from "react"
+import * as React from "react"
 import { Alert, Button } from "react-bootstrap"
 import utils from "utils"
 

@@ -8,7 +8,6 @@ import LinkTo from "components/LinkTo"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import { Event } from "models"
 import moment from "moment"
-import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
 

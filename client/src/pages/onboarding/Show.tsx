@@ -23,7 +23,7 @@ import {
 } from "components/Page"
 import { Person } from "models"
 import moment from "moment"
-import React, { useContext } from "react"
+import { cloneElement, useContext } from "react"
 import { Alert, Col, Container, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { Link, useLocation } from "react-router"
@@ -156,7 +156,7 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
   }
 
   function cloneField([el, key], columnWidth) {
-    return React.cloneElement(el, {
+    return cloneElement(el, {
       key,
       labelColumnWidth: columnWidth
     })

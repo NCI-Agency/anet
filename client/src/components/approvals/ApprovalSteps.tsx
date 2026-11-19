@@ -1,6 +1,5 @@
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
 import { FormCheck, Table } from "react-bootstrap"
 
 interface ApprovalStepsProps {

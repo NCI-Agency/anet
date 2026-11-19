@@ -1,7 +1,6 @@
 import EmailAddressList from "components/EmailAddressList"
 import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import pluralize from "pluralize"
-import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 

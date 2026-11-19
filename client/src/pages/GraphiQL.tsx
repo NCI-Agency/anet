@@ -9,7 +9,6 @@ import {
 import { GraphiQL } from "graphiql"
 import "graphiql/setup-workers/webpack"
 import { createTransport } from "@graphiql/toolkit"
-import React from "react"
 import { legacy_connect as connect } from "react-redux"
 
 interface GraphiQLContainerProps {

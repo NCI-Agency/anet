@@ -1,5 +1,4 @@
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
-import React from "react"
 import "./ModelPreview.css"
 import PreviewComponentFactory from "./PreviewComponentFactory"
 

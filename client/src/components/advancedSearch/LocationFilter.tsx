@@ -9,7 +9,6 @@ import {
 import { handleChangeEvent } from "components/advancedSelectWidget/utils"
 import LocationTable from "components/LocationTable"
 import { Location } from "models"
-import React from "react"
 import LOCATIONS_ICON from "resources/locations.png"
 
 const GQL_GET_LOCATIONS = gql`

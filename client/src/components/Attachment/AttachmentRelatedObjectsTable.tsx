@@ -1,6 +1,5 @@
 import { ModelNS } from "components/Model"
 import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
-import React from "react"
 import { Table } from "react-bootstrap"
 
 interface AttachmentRelatedObjectsTableProps {

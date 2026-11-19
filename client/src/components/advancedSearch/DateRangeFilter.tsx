@@ -21,7 +21,6 @@ import {
 } from "dateUtils"
 import moment from "moment"
 import pluralize from "pluralize"
-import React from "react"
 import { Form } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"

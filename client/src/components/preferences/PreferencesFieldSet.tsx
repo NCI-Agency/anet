@@ -5,7 +5,7 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
-import React, { useContext, useMemo } from "react"
+import { Fragment, useContext, useMemo } from "react"
 import { Button } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
@@ -178,7 +178,7 @@ const PreferencesFieldset = ({
               {otherPrefs.length > 0 && (
                 <Fieldset title={exportPrefs.length > 0 ? "General" : ""}>
                   {otherPrefs.map(preference => (
-                    <React.Fragment key={preference.uuid}>
+                    <Fragment key={preference.uuid}>
                       {preference.type === "boolean" && (
                         <FastField
                           name={preference.uuid}
@@ -289,7 +289,7 @@ const PreferencesFieldset = ({
                           }}
                         </FastField>
                       )}
-                    </React.Fragment>
+                    </Fragment>
                   ))}
                 </Fieldset>
               )}

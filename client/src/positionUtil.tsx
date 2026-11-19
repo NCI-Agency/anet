@@ -1,6 +1,5 @@
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 
 export function getPositionsForRole(positions, role) {

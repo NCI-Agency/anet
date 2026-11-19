@@ -24,7 +24,7 @@ import {
   useResponsiveNumberOfPeriods
 } from "periodUtils"
 import pluralize from "pluralize"
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"

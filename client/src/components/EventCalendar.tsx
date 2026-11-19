@@ -20,7 +20,7 @@ import {
 import { ATTENDEE_TYPE_INTERLOCUTOR } from "components/ReportCalendar"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
-import React, { useRef } from "react"
+import { useRef } from "react"
 import { legacy_connect as connect } from "react-redux"
 import { useNavigate } from "react-router"
 

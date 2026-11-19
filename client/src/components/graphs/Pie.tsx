@@ -1,6 +1,6 @@
 import SVGCanvas from "components/graphs/SVGCanvas"
 import * as d3 from "d3"
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import utils from "utils"
 
 interface PieProps {

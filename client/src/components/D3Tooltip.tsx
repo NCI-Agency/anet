@@ -1,5 +1,5 @@
 import * as d3 from "d3"
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 
 const TOOLTIP_ID = "tooltip-top"
 const MOUSE_OFFSET_X = 25

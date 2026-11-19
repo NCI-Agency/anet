@@ -1,6 +1,6 @@
 import MySubscriptions from "components/MySubscriptions"
 import MySubscriptionUpdates from "components/MySubscriptionUpdates"
-import React, { useState } from "react"
+import { useState } from "react"
 
 const Mine = () => {
   const [forceRefetchSubscriptionUpdates, setForceRefetchSubscriptionUpdates] =

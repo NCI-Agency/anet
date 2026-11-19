@@ -7,7 +7,6 @@ import {
   usePageTitle
 } from "components/Page"
 import { Location } from "models"
-import React from "react"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 import LocationForm from "./Form"

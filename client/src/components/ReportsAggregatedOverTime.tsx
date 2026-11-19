@@ -12,7 +12,7 @@ import {
 import _escape from "lodash/escape"
 import moment from "moment"
 import { WEEK_PERIOD_FORMAT, WEEK_PERIOD_KEY } from "periodUtils"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { useResizeDetector } from "react-resize-detector"
 import Settings from "settings"

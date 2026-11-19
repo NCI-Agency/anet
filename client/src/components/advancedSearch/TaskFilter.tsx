@@ -11,7 +11,6 @@ import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import TaskTable from "components/TaskTable"
 import { Task } from "models"
 import pluralize from "pluralize"
-import React from "react"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 

@@ -1,7 +1,8 @@
 import { gqlEntityFieldsMap } from "constants/GraphQLDefinitions"
 import LinkTo from "components/LinkTo"
 import * as Models from "models"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import * as React from "react"
 
 interface LinkAnetEntityProps {
   type: string

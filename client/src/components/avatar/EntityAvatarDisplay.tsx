@@ -7,7 +7,7 @@ import {
   Person,
   Position
 } from "models"
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { CircleStencil, RectangleStencil } from "react-advanced-cropper"
 import DEFAULT_EVENT_AVATAR from "resources/default-event-avatar.svg"
 import DEFAULT_EVENT_SERIES_AVATAR from "resources/default-eventSeries-avatar.svg"

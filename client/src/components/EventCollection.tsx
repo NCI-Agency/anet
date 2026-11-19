@@ -13,7 +13,7 @@ import {
   ATTENDEE_TYPE_INTERLOCUTOR
 } from "components/ReportCalendar"
 import pluralize from "pluralize"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"

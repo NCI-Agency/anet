@@ -1,6 +1,6 @@
 import { App6Choices } from "components/App6"
 import ms from "milsymbol"
-import React, { useEffect, useRef } from "react"
+import { memo, useEffect, useRef } from "react"
 
 const VERSION = 10 // APP-6D
 
@@ -172,4 +172,4 @@ const App6Symbol = ({ values, size = 30, maxHeight }: App6SymbolProps) => {
   return <div ref={svg} style={{ maxWidth: size, maxHeight }} />
 }
 
-export default React.memo(App6Symbol)
+export default memo(App6Symbol)

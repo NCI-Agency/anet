@@ -7,7 +7,7 @@ import App6Symbol, {
 } from "components/App6Symbol"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap"
 import Settings from "settings"
 

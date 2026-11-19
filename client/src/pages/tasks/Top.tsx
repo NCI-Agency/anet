@@ -13,7 +13,6 @@ import {
   usePageTitle
 } from "components/Page"
 import TaskTree from "components/TaskTree"
-import React from "react"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
 

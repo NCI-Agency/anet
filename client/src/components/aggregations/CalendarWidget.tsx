@@ -6,7 +6,7 @@ import {
   GET_CALENDAR_EVENTS_FROM
 } from "components/aggregations/utils"
 import _isEmpty from "lodash/isEmpty"
-import React, { useRef } from "react"
+import { useRef } from "react"
 import { useNavigate } from "react-router"
 import Settings from "settings"
 import "../Calendar.css"

@@ -9,7 +9,7 @@ import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import { FastField, FieldArray } from "formik"
 import { Position } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, FormCheck, Modal, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 

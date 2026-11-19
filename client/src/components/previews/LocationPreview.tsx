@@ -15,7 +15,7 @@ import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
-import React, { useMemo } from "react"
+import { useMemo } from "react"
 import Settings from "settings"
 
 const GQL_GET_LOCATION = gql`

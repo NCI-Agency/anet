@@ -1,7 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import LinkTo from "components/LinkTo"
-import React from "react"
 
 interface CountryDisplayProps {
   country?: any

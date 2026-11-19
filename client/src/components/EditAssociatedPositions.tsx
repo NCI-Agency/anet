@@ -2,7 +2,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import AssociatedPositions from "components/AssociatedPositions"
 import RemoveButton from "components/RemoveButton"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Col, Container, Modal, Row } from "react-bootstrap"
 
 interface EditAssociatedPositionsProps {

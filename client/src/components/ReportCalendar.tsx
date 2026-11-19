@@ -15,7 +15,7 @@ import Calendar from "components/Calendar"
 import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
-import React, { useRef } from "react"
+import { useRef } from "react"
 import { useNavigate } from "react-router"
 
 export const ATTENDEE_TYPE_ADVISOR = "advisor"

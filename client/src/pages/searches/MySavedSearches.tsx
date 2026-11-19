@@ -22,7 +22,7 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
 import { Event } from "models"
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"

@@ -26,7 +26,7 @@ import {
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment/moment"
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"

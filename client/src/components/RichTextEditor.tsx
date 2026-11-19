@@ -8,7 +8,7 @@ import escapeHtml from "escape-html"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
-import React, {
+import {
   useCallback,
   useContext,
   useEffect,
@@ -16,6 +16,7 @@ import React, {
   useRef,
   useState
 } from "react"
+import * as React from "react"
 import scrollIntoView from "scroll-into-view-if-needed"
 import Settings from "settings"
 import { createEditor, Range, Text, Transforms } from "slate"

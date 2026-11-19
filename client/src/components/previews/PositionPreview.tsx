@@ -16,7 +16,6 @@ import { PreviewTitle } from "components/previews/PreviewTitle"
 import RichTextEditor from "components/RichTextEditor"
 import { Location, Position } from "models"
 import PreviousPeople from "pages/positions/PreviousPeople"
-import React from "react"
 import { Badge, Table } from "react-bootstrap"
 import Settings from "settings"
 

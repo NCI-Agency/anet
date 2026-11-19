@@ -5,7 +5,7 @@ import {
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import React, { useMemo } from "react"
+import { useMemo } from "react"
 
 interface QuestionSetProps {
   entity?: any

@@ -3,7 +3,6 @@ import {
   PageDispatchersPropType
 } from "components/Page"
 import MartImportedReportTable from "pages/admin/martImporter/MartImportedReportTable"
-import React from "react"
 import { Button, Modal } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 

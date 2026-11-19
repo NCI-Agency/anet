@@ -1,6 +1,5 @@
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
 import { Table } from "react-bootstrap"
 
 const ACTION_SIDES = {

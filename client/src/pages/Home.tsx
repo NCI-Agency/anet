@@ -31,7 +31,7 @@ import { LAST_WEEK } from "dateUtils"
 import { Event, Report } from "models"
 import { superuserTour, userTour } from "pages/GuidedTour"
 import SearchResults from "pages/searches/SearchResults"
-import React, { useContext, useEffect, useState } from "react"
+import { memo, useContext, useEffect, useState } from "react"
 import { Badge, Button, Col, Container, Row } from "react-bootstrap"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
@@ -356,37 +356,35 @@ interface HiddenSearchResultsCountersProps {
   setSearchCount: (...args: unknown[]) => unknown
 }
 
-const HiddenSearchResultsCounters = React.memo(
-  function HiddenSearchResultsCounters({
-    searches,
-    savedQueries,
-    pageDispatchers,
-    setSearchCount
-  }: HiddenSearchResultsCountersProps) {
-    return (
-      <div style={{ display: "none" }}>
-        {searches.map(search => {
-          const savedQuery = savedQueries[search.uuid]
-          return (
-            <SearchResults
-              key={search.uuid}
-              pageDispatchers={pageDispatchers}
-              searchQuery={getSearchQuery(savedQuery)}
-              objectType={search.objectType}
-              setSearchCount={count =>
-                setSearchCount(prev => ({
-                  ...prev,
-                  [search.uuid]: count
-                }))
-              }
-              pageSize={1}
-            />
-          )
-        })}
-      </div>
-    )
-  }
-)
+const HiddenSearchResultsCounters = memo(function HiddenSearchResultsCounters({
+  searches,
+  savedQueries,
+  pageDispatchers,
+  setSearchCount
+}: HiddenSearchResultsCountersProps) {
+  return (
+    <div style={{ display: "none" }}>
+      {searches.map(search => {
+        const savedQuery = savedQueries[search.uuid]
+        return (
+          <SearchResults
+            key={search.uuid}
+            pageDispatchers={pageDispatchers}
+            searchQuery={getSearchQuery(savedQuery)}
+            objectType={search.objectType}
+            setSearchCount={count =>
+              setSearchCount(prev => ({
+                ...prev,
+                [search.uuid]: count
+              }))
+            }
+            pageSize={1}
+          />
+        )
+      })}
+    </div>
+  )
+})
 
 interface MySavedSearchesProps {
   pageDispatchers?: PageDispatchersPropType

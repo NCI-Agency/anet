@@ -13,7 +13,7 @@ import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
 import { Report } from "models"
 import moment from "moment"
-import React, { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 
@@ -152,10 +152,10 @@ const ReportTable = ({
               <tr key={report.uuid}>
                 <td>
                   {report.authors?.map(a => (
-                    <React.Fragment key={a.uuid}>
+                    <Fragment key={a.uuid}>
                       <LinkTo modelType="Person" model={a} />
                       <br />
-                    </React.Fragment>
+                    </Fragment>
                   ))}
                 </td>
                 <td>

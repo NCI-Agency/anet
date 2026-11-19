@@ -7,7 +7,6 @@ import { OrganizationOverlayRow } from "components/advancedSelectWidget/Advanced
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import OrganizationTable from "components/OrganizationTable"
 import { Organization } from "models"
-import React from "react"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 
 const GQL_GET_ORGANIZATION = gql`

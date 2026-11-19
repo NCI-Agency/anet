@@ -1,6 +1,5 @@
 import LinkTo from "components/LinkTo"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
-import React from "react"
 
 interface RelatedObjectDisplayProps {
   relatedObjectType?: string

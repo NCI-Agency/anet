@@ -1,5 +1,4 @@
 import _get from "lodash/get"
-import React from "react"
 import utils from "utils"
 
 interface EmailAddressListProps {

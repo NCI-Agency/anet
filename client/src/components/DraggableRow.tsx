@@ -1,6 +1,7 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import React, { useRef } from "react"
+import { useRef } from "react"
+import * as React from "react"
 import { useDrag, useDrop } from "react-dnd"
 
 interface DraggableRowProps {

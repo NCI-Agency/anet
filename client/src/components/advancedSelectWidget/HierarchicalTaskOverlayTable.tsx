@@ -12,7 +12,7 @@ import {
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
-import React, { useCallback, useEffect, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 
 export const taskFields = `
   ${Task.autocompleteQuery}
@@ -178,11 +178,11 @@ export const HierarchicalTaskOverlayTable = ({
       )
 
       return (
-        <React.Fragment key={task.uuid}>
+        <Fragment key={task.uuid}>
           <td className="taskName" onClick={handleToggleSelection}>
             {indentedLabel}
           </td>
-        </React.Fragment>
+        </Fragment>
       )
     },
     [
@@ -229,7 +229,7 @@ export const HierarchicalTaskOverlayTable = ({
     setRootTasks(newRootTasks)
   }, [items])
 
-  const flattenedItems = React.useMemo(() => {
+  const flattenedItems = useMemo(() => {
     sortTasks(rootTasks)
     return buildFlattenedList(
       rootTasks,

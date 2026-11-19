@@ -9,7 +9,8 @@ import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
-import React, { useCallback, useMemo } from "react"
+import { useCallback, useMemo } from "react"
+import * as React from "react"
 import {
   Button,
   Col,

@@ -1,7 +1,6 @@
 import LocationTable from "components/LocationTable"
 import PersonTable from "components/PersonTable"
 import PositionTable from "components/PositionTable"
-import React from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const DEFAULT_PAGESIZE = 10

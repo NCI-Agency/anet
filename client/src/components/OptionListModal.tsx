@@ -1,5 +1,6 @@
 import Messages from "components/Messages"
-import React, { useState } from "react"
+import { useState } from "react"
+import * as React from "react"
 import { Button, Container, FormGroup, Modal } from "react-bootstrap"
 
 interface OptionListModalProps {

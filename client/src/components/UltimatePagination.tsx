@@ -1,4 +1,3 @@
-import React from "react"
 import { Pagination } from "react-bootstrap"
 import { createUltimatePagination, ITEM_TYPES } from "react-ultimate-pagination"
 

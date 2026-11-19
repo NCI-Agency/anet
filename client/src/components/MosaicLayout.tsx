@@ -5,7 +5,8 @@ import "@blueprintjs/icons/lib/css/blueprint-icons.css"
 import classNames from "classnames"
 import _cloneDeep from "lodash/cloneDeep"
 import _dropRight from "lodash/dropRight"
-import React, { useState } from "react"
+import { useState } from "react"
+import * as React from "react"
 import { Button } from "react-bootstrap"
 import {
   Corner,
