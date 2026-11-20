@@ -9,11 +9,15 @@ class ShowAttachment extends Page {
   }
 
   async getDownloadAttachmentButton() {
-    return this.page.locator("//a[text()='Download']").first()
+    return this.page
+      .getByRole("link", { name: "Download", exact: true })
+      .first()
   }
 
   async getNoContentButton() {
-    return this.page.locator("//a[text()='Attachment has no content']").first()
+    return this.page
+      .getByRole("link", { name: "Attachment has no content", exact: true })
+      .first()
   }
 
   async getImage() {
@@ -33,7 +37,10 @@ class ShowAttachment extends Page {
   }
 
   async getOwner() {
-    return this.page.locator("//a[text()='CIV Arthur Dmin']").first()
+    return this.page
+      .getByRole("link")
+      .and(this.page.getByText("CIV Arthur Dmin", { exact: true }))
+      .first()
   }
 
   async getDescription() {
@@ -55,7 +62,10 @@ class ShowAttachment extends Page {
   }
 
   async getUsedin() {
-    return this.page.locator("//a[text()='A test report from Arthur']").first()
+    return this.page
+      .getByRole("link")
+      .and(this.page.getByText("A test report from Arthur", { exact: true }))
+      .first()
   }
 
   async open(uuid) {

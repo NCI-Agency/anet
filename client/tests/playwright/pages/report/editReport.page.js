@@ -5,14 +5,18 @@ const PAGE_URL = "/reports/:uuid/edit"
 class EditReport extends Page {
   async getDeleteButton(planned) {
     return this.page
-      .locator(
-        `//div[@class='submit-buttons']//button[text()='Delete this ${planned ? "planned engagement" : "report"}']`
-      )
+      .locator(".submit-buttons")
+      .getByRole("button", {
+        name: `Delete this ${planned ? "planned engagement" : "report"}`,
+        exact: true
+      })
       .first()
   }
 
   async getUnpublishButton() {
-    return this.page.locator('//button[text()="Unpublish report"]').first()
+    return this.page
+      .getByRole("button", { name: "Unpublish report", exact: true })
+      .first()
   }
 
   async getConfirmModal() {
@@ -24,11 +28,15 @@ class EditReport extends Page {
   }
 
   async confirmDeleteButton(uuid) {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async confirmUnpublishButton(uuid) {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async deleteReport(uuid, planned) {
