@@ -108,8 +108,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     if (dict.getDictionaryEntry("fields.person.customFields") != null) {
       // check that JSON of customFields is sanitized after create
-      assertThat(newPerson.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(),
+          newPerson.getCustomFields());
     }
 
     final PersonInput updatedNewPersonInput = getPersonInput(newPerson);
@@ -139,8 +139,8 @@ public class PersonResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     if (dict.getDictionaryEntry("fields.person.customFields") != null) {
       // check that JSON of customFields is sanitized after update
-      assertThat(updatedNewPerson.getCustomFields())
-          .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+      assertJsonEquals(UtilsTest.getCombinedJsonTestCase().getOutput(),
+          updatedNewPerson.getCustomFields());
     }
 
     // Test creating a person
@@ -922,7 +922,7 @@ public class PersonResourceTest extends AbstractResourceTest {
       } else {
         assertThat(csiUpdated.getUpdatedAt()).isAfter(csiInput.getUpdatedAt());
       }
-      assertThat(csiUpdated.getCustomFieldValue()).isEqualTo(csiInput.getCustomFieldValue());
+      assertJsonEquals(csiInput.getCustomFieldValue(), csiUpdated.getCustomFieldValue());
     }
 
     if (doInsert) {
@@ -1057,7 +1057,7 @@ public class PersonResourceTest extends AbstractResourceTest {
       final CustomSensitiveInformation csi2 = csiList2.get(i);
       assertThat(csi1.getUuid()).isEqualTo(csi2.getUuid());
       assertThat(csi1.getCustomFieldName()).isEqualTo(csi2.getCustomFieldName());
-      assertThat(csi1.getCustomFieldValue()).isEqualTo(csi2.getCustomFieldValue());
+      assertJsonEquals(csi2.getCustomFieldValue(), csi1.getCustomFieldValue());
       assertThat(csi1.getRelatedObjectType()).isEqualTo(csi2.getRelatedObjectType());
       assertThat(csi1.getRelatedObjectUuid()).isEqualTo(csi2.getRelatedObjectUuid());
       assertThat(csi1.getCreatedAt()).isEqualTo(csi2.getCreatedAt());

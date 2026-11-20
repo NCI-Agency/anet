@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Location;
@@ -17,6 +19,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.AssessmentDao;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.database.JobHistoryDao;
@@ -27,6 +30,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
@@ -48,6 +52,9 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
 
   @Autowired
   private AttachmentDao attachmentDao;
+
+  @Autowired
+  private AssessmentDao assessmentDao;
 
   @Autowired
   private CustomSensitiveInformationDao customSensitiveInformationDao;
@@ -78,6 +85,32 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
 
     // Flush all merged entities from previous tests
     mergedEntityWorker.run();
+  }
+
+  @Test
+  void testAssessment() {
+    final String testOldUuid = UUID.randomUUID().toString();
+    final String testNewUuid = UUID.randomUUID().toString();
+    final var mapper = MapperUtils.getDefaultMapper();
+    final String assessmentValues = mapper.writeValueAsString(Map.of("references",
+        List.of(Map.of("uuid", testOldUuid), getRichText(PersonDao.TABLE_NAME, testOldUuid)),
+        "unchanged", List.of(true, 42, "prefix" + testOldUuid + "suffix")));
+
+    final Assessment input = new Assessment();
+    input.setAuthor(getRegularUserBean());
+    input.setAssessmentKey("testAssessment");
+    input.setAssessmentValues(assessmentValues);
+    input.setAssessmentRelatedObjects(List.of());
+    final Assessment created = assessmentDao.insert(input);
+    try {
+      runMergedEntityWorker(testOldUuid, testNewUuid);
+
+      final Assessment updated = assessmentDao.getByUuid(created.getUuid());
+      assertJsonEquals(assessmentValues.replaceAll(getPattern(testOldUuid), testNewUuid),
+          updated.getAssessmentValues());
+    } finally {
+      assessmentDao.delete(created.getUuid());
+    }
   }
 
   @Test
@@ -115,7 +148,8 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     final String relatedObjectUuid = getRegularUserBean().getUuid();
     input.setRelatedObjectUuid(relatedObjectUuid);
     input.setCustomFieldName("testCustomField");
-    input.setCustomFieldValue(getRichText(PersonDao.TABLE_NAME, testOldUuid));
+    input.setCustomFieldValue(MapperUtils.getDefaultMapper()
+        .writeValueAsString(getRichText(PersonDao.TABLE_NAME, testOldUuid)));
     final CustomSensitiveInformation created = customSensitiveInformationDao.insert(input);
     assertContains(created.getCustomFieldValue(), testOldUuid);
 
@@ -127,6 +161,8 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
         customSensitiveInformationDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getCustomFieldValue(), testOldUuid);
     assertContains(updated.getCustomFieldValue(), testNewUuid);
+    assertJsonEquals(MapperUtils.getDefaultMapper().writeValueAsString(
+        getRichText(PersonDao.TABLE_NAME, testNewUuid)), updated.getCustomFieldValue());
 
     // clean up
     customSensitiveInformationDao.deleteFor(relatedObjectUuid);

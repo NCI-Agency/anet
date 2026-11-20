@@ -120,12 +120,16 @@ public class AdminDao extends AbstractDao implements InitializingBean {
 
   @Transactional
   public int updateMergedEntity(final String tableName, final String columnName,
-      final MergedEntity mergedEntity) {
+      final boolean jsonb, final MergedEntity mergedEntity) {
     final Handle handle = getDbHandle();
     try {
-      final String sql = String.format("/* updateMergedEntity */ UPDATE \"%1$s\" "
-          + "SET \"%2$s\" = regexp_replace(\"%2$s\", %3$s, :newUuid, 'g') WHERE \"%2$s\" ~ %3$s",
-          tableName, columnName, "('\\m' || :oldUuid || '\\M')");
+      // References can occur in both structured JSON and embedded rich text. Apply the same
+      // replacement to either representation, then restore the native type for JSON columns.
+      final String sql = String.format(
+          "/* updateMergedEntity */ UPDATE \"%1$s\" "
+              + "SET \"%2$s\" = regexp_replace(\"%2$s\"::text, %3$s, :newUuid, 'g')%4$s "
+              + "WHERE \"%2$s\"::text ~ %3$s",
+          tableName, columnName, "('\\m' || :oldUuid || '\\M')", jsonb ? "::jsonb" : "");
       return handle.createUpdate(sql).bind("oldUuid", mergedEntity.oldUuid())
           .bind("newUuid", mergedEntity.newUuid()).execute();
     } finally {

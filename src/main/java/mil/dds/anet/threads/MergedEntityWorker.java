@@ -16,29 +16,32 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false}")
 public class MergedEntityWorker extends AbstractWorker {
 
-  private record FieldWithEntityReference(String tableName, String columnName) {
+  private record FieldWithEntityReference(String tableName, String columnName, boolean jsonb) {
+    private FieldWithEntityReference(String tableName, String columnName) {
+      this(tableName, columnName, false);
+    }
   }
 
   private static final List<FieldWithEntityReference> fieldsWithEntityReference = List.of(// -
-      new FieldWithEntityReference("assessments", "assessmentValues"), // -
+      new FieldWithEntityReference("assessments", "assessmentValues", true), // -
       new FieldWithEntityReference("attachments", "description"), // -
       new FieldWithEntityReference("events", "description"), // -
       new FieldWithEntityReference("eventSeries", "description"), // -
-      new FieldWithEntityReference("customSensitiveInformation", "customFieldValue"), // -
+      new FieldWithEntityReference("customSensitiveInformation", "customFieldValue", true), // -
       new FieldWithEntityReference("locations", "description"),
-      new FieldWithEntityReference("locations", "customFields"), // -
+      new FieldWithEntityReference("locations", "customFields", true), // -
       new FieldWithEntityReference("notes", "text"), // -
       new FieldWithEntityReference("organizations", "profile"), // -
-      new FieldWithEntityReference("organizations", "customFields"), // -
+      new FieldWithEntityReference("organizations", "customFields", true), // -
       new FieldWithEntityReference("people", "biography"), // -
-      new FieldWithEntityReference("people", "customFields"), // -
+      new FieldWithEntityReference("people", "customFields", true), // -
       new FieldWithEntityReference("positions", "description"), // -
-      new FieldWithEntityReference("positions", "customFields"), // -
+      new FieldWithEntityReference("positions", "customFields", true), // -
       new FieldWithEntityReference("reports", "text"), // -
-      new FieldWithEntityReference("reports", "customFields"), // -
+      new FieldWithEntityReference("reports", "customFields", true), // -
       new FieldWithEntityReference("reportsSensitiveInformation", "text"), // -
       new FieldWithEntityReference("tasks", "description"), // -
-      new FieldWithEntityReference("tasks", "customFields")// -
+      new FieldWithEntityReference("tasks", "customFields", true)// -
   );
 
   private final AdminDao dao;
@@ -58,8 +61,8 @@ public class MergedEntityWorker extends AbstractWorker {
   protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     final var mergedEntities = dao.getMergedEntities();
     mergedEntities.forEach(mergedEntity -> {
-      fieldsWithEntityReference.forEach(
-          tuple -> dao.updateMergedEntity(tuple.tableName(), tuple.columnName(), mergedEntity));
+      fieldsWithEntityReference.forEach(tuple -> dao.updateMergedEntity(tuple.tableName(),
+          tuple.columnName(), tuple.jsonb(), mergedEntity));
       dao.deleteMergedEntity(mergedEntity);
     });
   }

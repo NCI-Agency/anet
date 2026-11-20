@@ -138,12 +138,11 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
         final var valueParam = String.format("%s.value", keyParam);
         final var filterType = dict.getDictionaryEntry(String.format("%s.type", keyParam));
         if ("enum".equals(filterType)) {
-          filterClauses.add(String.format(
-              "assessments.\"assessmentValues\"::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
+          filterClauses.add(String.format("assessments.\"assessmentValues\"->>:%1$s IN (<%2$s>)",
+              keyParam, valueParam));
         } else if ("enumset".equals(filterType)) {
-          filterClauses
-              .add(String.format("assessments.\"assessmentValues\"::jsonb->:%1$s ??| array[<%2$s>]",
-                  keyParam, valueParam));
+          filterClauses.add(String.format(
+              "assessments.\"assessmentValues\"->:%1$s ??| array[<%2$s>]", keyParam, valueParam));
         } else {
           // Can't handle this filter type, just skip
           return;
@@ -172,8 +171,8 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     if (isOndemand) {
       // If it is an ondemand assessment, it will have an assessmentDate,
       // only the most recent one will be valid.
-      fromAssessments.append(
-          " ORDER BY (asmnt.\"assessmentValues\"::jsonb->>'assessmentDate')::date DESC LIMIT 1");
+      fromAssessments
+          .append(" ORDER BY (asmnt.\"assessmentValues\"->>'assessmentDate')::date DESC LIMIT 1");
     }
     return fromAssessments.toString();
   }
@@ -189,17 +188,16 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     final var hasExpirationDate = dict
         .getDictionaryEntry(String.format("%s.questions.expirationDate", assessmentKey)) != null;
     if (hasExpirationDate) {
-      leftClauses.add("assessments.\"assessmentValues\"::jsonb->>'expirationDate' IS NULL");
+      leftClauses.add("assessments.\"assessmentValues\"->>'expirationDate' IS NULL");
       rightClauses
-          .add("(assessments.\"assessmentValues\"::jsonb->>'expirationDate')::date > CURRENT_DATE");
+          .add("(assessments.\"assessmentValues\"->>'expirationDate')::date > CURRENT_DATE");
     }
 
     final Integer expirationDays = (Integer) dict
         .getDictionaryEntry(String.format("%s.onDemandAssessmentExpirationDays", assessmentKey));
     if (expirationDays != null) {
-      leftClauses.add(String.format(
-          "(assessments.\"assessmentValues\"::jsonb->>'assessmentDate')::date + INTERVAL '%d days' > CURRENT_DATE",
-          expirationDays));
+      leftClauses.add(String.format("(assessments.\"assessmentValues\"->>'assessmentDate')::date "
+          + "+ INTERVAL '%d days' > CURRENT_DATE", expirationDays));
     }
 
     final var expirationClause = new StringBuilder();
