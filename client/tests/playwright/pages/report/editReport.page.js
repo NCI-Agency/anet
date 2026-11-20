@@ -1,15 +1,10 @@
-import { currentPage, waitFor } from "../../support.js"
 import Page from "../page.js"
 
 const PAGE_URL = "/reports/:uuid/edit"
 
 class EditReport extends Page {
-  async getSubmitButton() {
-    return currentPage().locator("#formBottomSubmit").first()
-  }
-
   async getDeleteButton(planned) {
-    return currentPage()
+    return this.page
       .locator(
         `//div[@class='submit-buttons']//button[text()='Delete this ${planned ? "planned engagement" : "report"}']`
       )
@@ -17,25 +12,23 @@ class EditReport extends Page {
   }
 
   async getUnpublishButton() {
-    return currentPage().locator('//button[text()="Unpublish report"]').first()
+    return this.page.locator('//button[text()="Unpublish report"]').first()
   }
 
   async getConfirmModal() {
-    return currentPage()
-      .locator("div.triggerable-confirm-bootstrap-modal")
-      .first()
+    return this.page.locator("div.triggerable-confirm-bootstrap-modal").first()
   }
 
   async getReportText() {
-    return currentPage().locator(".reportTextField").first()
+    return this.page.locator(".reportTextField").first()
   }
 
   async confirmDeleteButton(uuid) {
-    return currentPage().locator('//button[text()="Yes, I am sure"]').first()
+    return this.page.locator('//button[text()="Yes, I am sure"]').first()
   }
 
   async confirmUnpublishButton(uuid) {
-    return currentPage().locator('//button[text()="Yes, I am sure"]').first()
+    return this.page.locator('//button[text()="Yes, I am sure"]').first()
   }
 
   async deleteReport(uuid, planned) {
@@ -61,9 +54,13 @@ class EditReport extends Page {
 
   async waitForEditReportToLoad() {
     if (!(await (await this.getSubmitButton()).isVisible())) {
-      await waitFor(await this.getSubmitButton(), "visible")
+      await (
+        await this.getSubmitButton()
+      ).waitFor({
+        state: "visible"
+      })
     }
   }
 }
 
-export default new EditReport()
+export default EditReport

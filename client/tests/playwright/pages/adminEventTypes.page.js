@@ -1,4 +1,3 @@
-import { currentPage } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/admin/configureEventTypes"
@@ -9,7 +8,7 @@ class AdminEventTypes extends Page {
   }
 
   async getEventTypesTable() {
-    return currentPage().locator("fieldset table").first()
+    return this.page.locator("fieldset table").first()
   }
 
   async getEventTypesRows() {
@@ -33,4 +32,4 @@ class AdminEventTypes extends Page {
   }
 }
 
-export default new AdminEventTypes()
+export default AdminEventTypes

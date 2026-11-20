@@ -1,4 +1,3 @@
-import { currentPage, waitFor } from "../support.js"
 import Page from "./page.js"
 
 const PAGE_URL = "/help"
@@ -9,17 +8,19 @@ class Help extends Page {
   }
 
   async getSuperuserLinks() {
-    return currentPage().locator(".superusers-list").getByRole("link")
+    return this.page.locator(".superusers-list").getByRole("link")
   }
 
   async getAdministratorLinks() {
-    return currentPage().locator(".admins-list").getByRole("link")
+    return this.page.locator(".admins-list").getByRole("link")
   }
 
   async getHelpText() {
-    await waitFor(currentPage().locator("fieldset").first(), "visible")
-    return currentPage().locator("fieldset .editable").first()
+    await this.page.locator("fieldset").first().waitFor({
+      state: "visible"
+    })
+    return this.page.locator("fieldset .editable").first()
   }
 }
 
-export default new Help()
+export default Help
