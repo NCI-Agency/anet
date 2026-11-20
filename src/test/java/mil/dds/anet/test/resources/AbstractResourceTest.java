@@ -111,12 +111,6 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
   private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
-  // PostgreSQL jsonb does not preserve object key order or insignificant whitespace.
-  protected static void assertJsonEquals(final String expected, final String actual) {
-    assertThat(actual == null ? null : ignoringMapper.readTree(actual))
-        .isEqualTo(expected == null ? null : ignoringMapper.readTree(expected));
-  }
-
   protected static final String adminUser = "arthur";
   protected static final String jackUser = "jack";
 
@@ -695,5 +689,11 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
   protected String getFirstMimeType() {
     final var allowedMimeTypes = AttachmentResource.getAllowedMimeTypes();
     return allowedMimeTypes.get(0);
+  }
+
+  // PostgreSQL jsonb does not preserve object key order or insignificant whitespace.
+  protected void assertJsonEquals(final String expected, final String actual) {
+    assertThat(actual == null ? null : ignoringMapper.readTree(actual))
+        .isEqualTo(expected == null ? null : ignoringMapper.readTree(expected));
   }
 }

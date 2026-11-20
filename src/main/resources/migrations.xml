@@ -7558,7 +7558,6 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
-			<!-- Traverse JSON structurally: jsonb formatting and key order are not significant. -->
 			CREATE OR REPLACE FUNCTION get_cf_referenced_objects(table_name text, column_name text)
 				RETURNS table(uuid uuid, object_table text, object_uuid text)
 			AS
@@ -7567,12 +7566,14 @@
 				RETURN QUERY EXECUTE format(
 					''
 					WITH json_values AS (
-						SELECT uuid, jsonb_path_query(%I::jsonb, ''''strict $.**'''') AS value FROM public.%I
+						SELECT uuid, jsonb_path_query(%I::jsonb, ''''strict $.**'''') AS value
+						FROM public.%I
 					), links AS (
 						SELECT uuid, value->>''''type'''' AS object_type, value->>''''uuid'''' AS object_uuid
 						FROM json_values WHERE jsonb_typeof(value) = ''''object''''
 						UNION ALL
-						SELECT uuid, arr[1], arr[2] FROM json_values
+						SELECT uuid, arr[1], arr[2]
+						FROM json_values
 						CROSS JOIN LATERAL regexp_matches(value #>> ''''{}'''',
 							''''"urn:anet:(attachments|authorizationGroups|events|eventSeries|locations|organizations|people|positions|reports|tasks):([^"]*)"'''', ''''g'''') AS arr
 						WHERE jsonb_typeof(value) = ''''string''''
