@@ -2383,10 +2383,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@googlemaps/js-api-loader@npm:^1.16.6":
-  version: 1.16.10
-  resolution: "@googlemaps/js-api-loader@npm:1.16.10"
-  checksum: 10c0/0b8eb8de6aeb7473df3ca044638356486a711910518ee4439b8c703e8b6db4b273b464b08fa5a9255cc9e96df45fc74c4b4de94de427c92d3f5f59ab60b211cb
+"@googlemaps/js-api-loader@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "@googlemaps/js-api-loader@npm:2.1.3"
+  dependencies:
+    "@types/google.maps": "npm:^3.65.3"
+  checksum: 10c0/332cddce733684d568a0643a4b6a80f91c3fbaa19a6857263c1c10862d1bbacfecbbc400d22f5f44c1a77d953a126ee25c7d42b8cb876a270ae2c10bfcbac209
   languageName: node
   linkType: hard
 
@@ -5921,10 +5923,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:*":
+"@types/geojson@npm:*, @types/geojson@npm:^7946.0.16":
   version: 7946.0.16
   resolution: "@types/geojson@npm:7946.0.16"
   checksum: 10c0/1ff24a288bd5860b766b073ead337d31d73bdc715e5b50a2cee5cb0af57a1ed02cc04ef295f5fa68dc40fe3e4f104dd31282b2b818a5ba3231bc1001ba084e3c
+  languageName: node
+  linkType: hard
+
+"@types/google.maps@npm:^3.53.1, @types/google.maps@npm:^3.65.3":
+  version: 3.66.10
+  resolution: "@types/google.maps@npm:3.66.10"
+  checksum: 10c0/0298694d701025e254ea3b786d3708ab5f44d862f2d554124b7cfd000ac9d9df25592fa23542ab8fe8f77706f443a75e2fa6c60e3ee8d6dc0ad3e5426d7ea43c
   languageName: node
   linkType: hard
 
@@ -7154,7 +7163,7 @@ __metadata:
     keycloak-js: "npm:26.2.5"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
-    leaflet-geosearch: "npm:4.4.0"
+    leaflet-geosearch: "npm:5.2.1"
     leaflet-gesture-handling: "npm:1.2.2"
     leaflet.fullscreen: "npm:5.3.3"
     leaflet.markercluster: "npm:1.5.3"
@@ -12695,18 +12704,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet-geosearch@npm:4.4.0":
-  version: 4.4.0
-  resolution: "leaflet-geosearch@npm:4.4.0"
+"leaflet-geosearch@npm:5.2.1":
+  version: 5.2.1
+  resolution: "leaflet-geosearch@npm:5.2.1"
   dependencies:
-    "@googlemaps/js-api-loader": "npm:^1.16.6"
-    leaflet: "npm:^1.6.0"
+    "@googlemaps/js-api-loader": "npm:^2.1.3"
+    "@types/google.maps": "npm:^3.53.1"
+    leaflet: "npm:^1.6.0 || ^2.0.0-alpha.1"
   dependenciesMeta:
     "@googlemaps/js-api-loader":
       optional: true
     leaflet:
       optional: true
-  checksum: 10c0/1760e11be92eba02a9ef0e0eb8f4a371b5a165f0f633aa69d5c019faae578411f87e6eb127c79a9129f5d3c1de2fccfcb37aeffaa0661daccd46dd1f1e88acf3
+  checksum: 10c0/606a92a42640840910339ecd41aaab409dbc8c0d0a2ad3d6b4f96b25b49f945a1a3d4921111cf6b91c68649d62db49100562f74a2166713abe11cc95e3fb3c45
   languageName: node
   linkType: hard
 
@@ -12735,10 +12745,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet@npm:1.9.4, leaflet@npm:^1.6.0":
+"leaflet@npm:1.9.4":
   version: 1.9.4
   resolution: "leaflet@npm:1.9.4"
   checksum: 10c0/f639441dbb7eb9ae3fcd29ffd7d3508f6c6106892441634b0232fafb9ffb1588b05a8244ec7085de2c98b5ed703894df246898477836cfd0ce5b96d4717b5ca1
+  languageName: node
+  linkType: hard
+
+"leaflet@npm:^1.6.0 || ^2.0.0-alpha.1":
+  version: 2.0.0-beta.4
+  resolution: "leaflet@npm:2.0.0-beta.4"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.16"
+  checksum: 10c0/4553b83270e032a874a8740a6bcbf94fb90e6a0859bb0783f3e90c52583cbcc6b463254963ee90ca7af280913f6411ee8c55e7a900a8235adda6b91a33f9d125
   languageName: node
   linkType: hard
 
