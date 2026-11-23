@@ -1,5 +1,5 @@
 import UltimatePagination from "components/UltimatePagination"
-import React from "react"
+import * as React from "react"
 
 interface UltimatePaginationTopDownProps {
   componentClassName?: string

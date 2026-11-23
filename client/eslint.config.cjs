@@ -76,6 +76,7 @@ module.exports = defineConfig([
       "react-hooks/exhaustive-deps": "warn",
       "react-hooks/rules-of-hooks": "error",
       "react/jsx-handler-names": "off",
+      "react/jsx-uses-react": "off",
       "react/no-did-update-set-state": "warn",
       "react/no-unescaped-entities": [
         "error",
@@ -83,6 +84,7 @@ module.exports = defineConfig([
           forbid: [">", "}"]
         }
       ],
+      "react/react-in-jsx-scope": "off",
       curly: ["error", "all"]
     }
   },

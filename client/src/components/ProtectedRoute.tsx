@@ -1,6 +1,6 @@
 import AppContext from "components/AppContext"
 import PageMissing from "pages/PageMissing"
-import React, { useContext } from "react"
+import { useContext } from "react"
 import { Outlet } from "react-router"
 
 interface ProtectedRouteProps {

@@ -1,5 +1,5 @@
-import React from "react"
+import { createContext } from "react"
 
-const ResponsiveLayoutContext = React.createContext<any>({})
+const ResponsiveLayoutContext = createContext<any>({})
 
 export default ResponsiveLayoutContext

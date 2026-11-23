@@ -2,7 +2,6 @@ import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import { Organization } from "models"
-import React from "react"
 import { Table } from "react-bootstrap"
 
 interface NoPaginationOrganizationTableProps {

@@ -25,7 +25,7 @@ import {
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { Attachment } from "models"
-import React, { useContext } from "react"
+import { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation, useParams } from "react-router"

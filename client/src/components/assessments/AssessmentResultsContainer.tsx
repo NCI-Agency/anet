@@ -5,7 +5,7 @@ import {
   RECURRENCE_TYPE,
   useResponsiveNumberOfPeriods
 } from "periodUtils"
-import React, { useState } from "react"
+import { Fragment, useState } from "react"
 import "./AssessmentResultsContainer.css"
 import InstantAssessmentResultsTable from "./instant/InstantAssessmentResultsTable"
 import OnDemandAssessment from "./ondemand/OndemandAssessment"
@@ -100,9 +100,7 @@ const AssessmentResultsContainer = ({
             />
           )
         }
-        return (
-          <React.Fragment key={assessmentKey}>{resultsTable}</React.Fragment>
-        )
+        return <Fragment key={assessmentKey}>{resultsTable}</Fragment>
       })}
     </div>
   )

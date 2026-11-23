@@ -12,7 +12,8 @@ import {
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import { Event } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
+import * as React from "react"
 import {
   Button,
   Col,

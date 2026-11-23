@@ -24,7 +24,7 @@ import {
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useParams } from "react-router"

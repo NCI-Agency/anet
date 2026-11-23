@@ -3,7 +3,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import { jumpToTop, usePageTitle } from "components/Page"
 import PreferencesFieldset from "components/preferences/PreferencesFieldSet"
-import React, { useContext, useState } from "react"
+import { useContext, useState } from "react"
 
 const GQL_UPDATE_PREFERENCES = gql`
   mutation ($preferences: [PreferenceInput]!) {

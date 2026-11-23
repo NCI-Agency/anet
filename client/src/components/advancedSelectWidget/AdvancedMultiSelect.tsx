@@ -3,7 +3,6 @@ import AdvancedSelect, {
 } from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import * as FieldHelper from "components/FieldHelper"
-import React from "react"
 
 interface AdvancedMultiSelectProps extends AdvancedSelectProps {
   value: any[]

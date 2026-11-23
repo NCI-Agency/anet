@@ -6,7 +6,6 @@ import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import { EventSeries } from "models"
-import React from "react"
 import Settings from "settings"
 
 interface EventSeriesPreviewProps {

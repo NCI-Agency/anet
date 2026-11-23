@@ -10,7 +10,6 @@ import {
   usePageTitle
 } from "components/Page"
 import { Organization } from "models"
-import React from "react"
 import { legacy_connect as connect } from "react-redux"
 import { useLocation } from "react-router"
 import Settings from "settings"

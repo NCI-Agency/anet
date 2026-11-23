@@ -9,7 +9,6 @@ import styled from "@emotion/styled"
 import API from "api"
 import { Person, Report } from "models"
 import moment from "moment"
-import React from "react"
 
 const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
   query ($uuid: String, $attendedReportsQuery: ReportSearchQueryInput) {

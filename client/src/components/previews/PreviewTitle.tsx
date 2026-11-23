@@ -1,5 +1,4 @@
 import Model from "components/Model"
-import React from "react"
 import { Badge } from "react-bootstrap"
 
 interface StatusBadgeProps {

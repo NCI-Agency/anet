@@ -1,5 +1,4 @@
 import useSearchFilter from "components/advancedSearch/hooks"
-import React from "react"
 import { Form } from "react-bootstrap"
 import { deserializeSearchFilter } from "searchUtils"
 import utils from "utils"

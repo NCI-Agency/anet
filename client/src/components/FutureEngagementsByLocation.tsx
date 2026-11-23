@@ -23,7 +23,7 @@ import * as d3 from "d3"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useResizeDetector } from "react-resize-detector"
 import Settings from "settings"
 

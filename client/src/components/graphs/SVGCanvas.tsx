@@ -1,4 +1,5 @@
-import React, { useRef } from "react"
+import { useRef } from "react"
+import * as React from "react"
 import { Button } from "react-bootstrap"
 import DEFAULT_PERSON_AVATAR from "resources/default-person-avatar.svg?inline"
 import DOWNLOAD_ICON from "resources/download.png"

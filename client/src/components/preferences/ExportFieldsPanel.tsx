@@ -1,5 +1,5 @@
 import { SEARCH_OBJECT_LABELS } from "actions"
-import React, { useMemo } from "react"
+import { memo, useMemo } from "react"
 import { Button } from "react-bootstrap"
 import utils from "utils"
 
@@ -135,4 +135,4 @@ const ExportFieldsPanel = ({
   )
 }
 
-export default React.memo(ExportFieldsPanel)
+export default memo(ExportFieldsPanel)

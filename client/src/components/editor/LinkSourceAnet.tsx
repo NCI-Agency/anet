@@ -3,7 +3,7 @@ import MultiTypeAdvancedSelectComponent, {
 } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import * as FieldHelper from "components/FieldHelper"
 import { FastField, Form, Formik } from "formik"
-import React, { useCallback } from "react"
+import { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { getSelectedParentNode } from "richTextUtils"
 import { Transforms } from "slate"

@@ -1,5 +1,4 @@
 import Prompt from "components/Prompt"
-import React from "react"
 
 const LEAVE_TITLE = "Warning: unsaved changes"
 const LEAVE_WARNING =

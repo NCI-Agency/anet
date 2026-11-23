@@ -1,6 +1,5 @@
 import { gqlAllAttachmentFields } from "constants/GraphQLDefinitions"
 import Model from "components/Model"
-import React from "react"
 import utils from "utils"
 import * as yup from "yup"
 

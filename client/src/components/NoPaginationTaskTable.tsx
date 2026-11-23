@@ -3,7 +3,6 @@ import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import { Task } from "models"
-import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 

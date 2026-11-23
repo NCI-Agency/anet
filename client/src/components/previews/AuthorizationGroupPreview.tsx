@@ -11,7 +11,6 @@ import { PreviewField } from "components/FieldHelper"
 import PositionTable from "components/PositionTable"
 import { PreviewTitle } from "components/previews/PreviewTitle"
 import { AuthorizationGroup } from "models"
-import React from "react"
 import Settings from "settings"
 import utils from "utils"
 

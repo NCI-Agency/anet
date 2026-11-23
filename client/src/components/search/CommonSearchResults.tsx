@@ -3,7 +3,8 @@ import API from "api"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import React, { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import * as React from "react"
 
 export const DEFAULT_PAGESIZE = 10
 

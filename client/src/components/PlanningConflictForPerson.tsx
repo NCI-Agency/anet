@@ -18,7 +18,6 @@ import LinkTo from "components/LinkTo"
 import { Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React from "react"
 import { Button } from "react-bootstrap"
 
 const GET_PERSON_WITH_REPORTS = gql`

@@ -12,7 +12,7 @@ import MultiTypeAdvancedSelectComponent, {
 } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import Messages from "components/Messages"
 import { Attachment } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"

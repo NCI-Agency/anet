@@ -53,7 +53,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/GuidedTour"
-import React, { useContext, useEffect, useState } from "react"
+import { cloneElement, useContext, useEffect, useState } from "react"
 import {
   Button,
   Col,
@@ -471,7 +471,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   }
 
   function cloneField([el, key], columnWidth) {
-    return React.cloneElement(el, {
+    return cloneElement(el, {
       key,
       extraColElem: extraColElems[key] || el.props.extraColElem || null,
       labelColumnWidth: columnWidth

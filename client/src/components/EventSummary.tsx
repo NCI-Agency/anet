@@ -19,7 +19,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Event, Location, PositionRole } from "models"
 import moment from "moment"
-import React, { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
@@ -248,13 +248,13 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
               <strong>{Settings.fields.event.hostRelatedObjects.label}:</strong>{" "}
               {event.hostRelatedObjects.map((host, i) => {
                 return (
-                  <React.Fragment key={host.relatedObjectUuid}>
+                  <Fragment key={host.relatedObjectUuid}>
                     {i > 0 && separator}
                     <LinkTo
                       modelType={host.relatedObjectType}
                       model={host.relatedObject}
                     />
-                  </React.Fragment>
+                  </Fragment>
                 )
               })}
             </span>
@@ -302,7 +302,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
             <span>
               <strong>{Settings.fields.event.tasks.label}:</strong>{" "}
               {event.tasks.map((task, i) => (
-                <React.Fragment key={task.uuid}>
+                <Fragment key={task.uuid}>
                   {i > 0 && separator}
                   <BreadcrumbTrail
                     modelType="Task"
@@ -310,7 +310,7 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
                     ascendantObjects={task.ascendantTasks}
                     parentField="parentTask"
                   />
-                </React.Fragment>
+                </Fragment>
               ))}
             </span>
           </Col>
@@ -322,14 +322,14 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
             <span>
               <strong>{Settings.fields.event.organizations.label}:</strong>{" "}
               {event.organizations.map((organization, i) => (
-                <React.Fragment key={organization.uuid}>
+                <Fragment key={organization.uuid}>
                   {i > 0 && separator}
                   <LinkTo
                     modelType="Organization"
                     model={organization}
                     showIcon={false}
                   />
-                </React.Fragment>
+                </Fragment>
               ))}
             </span>
           </Col>
@@ -341,10 +341,10 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
             <span>
               <strong>{Settings.fields.event.people.label}:</strong>{" "}
               {sortedAttendees.map((person, i) => (
-                <React.Fragment key={person.uuid}>
+                <Fragment key={person.uuid}>
                   {i > 0 && separator}
                   <LinkTo modelType="Person" model={person} showIcon={false} />
-                </React.Fragment>
+                </Fragment>
               ))}
               {event.people.length > PEOPLE_ATTENDING_LIMIT && (
                 <>

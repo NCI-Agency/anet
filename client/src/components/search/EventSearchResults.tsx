@@ -9,7 +9,6 @@ import {
   CommonSearchResults,
   GenericSearchResultsProps
 } from "components/search/CommonSearchResults"
-import React from "react"
 
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {

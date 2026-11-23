@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useOutsideClick } from "utils"
 

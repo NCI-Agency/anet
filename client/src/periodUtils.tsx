@@ -1,5 +1,5 @@
 import moment, { Moment } from "moment"
-import React, { useLayoutEffect } from "react"
+import { useLayoutEffect } from "react"
 import { useResizeDetector } from "react-resize-detector"
 import Settings from "settings"
 

@@ -13,7 +13,8 @@ import {
   PENDING_ASSESSMENTS_BY_POSITION
 } from "pages/insights/Show"
 import pluralize from "pluralize"
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
+import * as React from "react"
 import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { Link, useLocation, useMatch } from "react-router"

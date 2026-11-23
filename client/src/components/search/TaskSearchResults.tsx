@@ -8,7 +8,6 @@ import {
   GenericSearchResultsProps
 } from "components/search/CommonSearchResults"
 import TaskTable from "components/TaskTable"
-import React from "react"
 
 const GQL_GET_TASK_LIST = gql`
   query ($taskQuery: TaskSearchQueryInput) {

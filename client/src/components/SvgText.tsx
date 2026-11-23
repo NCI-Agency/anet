@@ -1,5 +1,6 @@
 import memoize from "lodash/memoize"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import * as React from "react"
 import reduceCSSCalc from "reduce-css-calc"
 
 const MEASUREMENT_ELEMENT_ID = "svg-text-measurement-id"

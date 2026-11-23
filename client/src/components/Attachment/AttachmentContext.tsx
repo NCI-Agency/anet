@@ -1,5 +1,5 @@
-import React from "react"
+import { createContext } from "react"
 
-const AttachmentContext = React.createContext<any>({})
+const AttachmentContext = createContext<any>({})
 
 export default AttachmentContext

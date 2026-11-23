@@ -18,7 +18,7 @@ import { RelatedObjectDisplay } from "components/RelatedObjectDisplay"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 

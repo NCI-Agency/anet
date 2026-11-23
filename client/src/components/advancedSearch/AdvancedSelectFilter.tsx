@@ -2,7 +2,6 @@ import { gql } from "@apollo/client"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import React from "react"
 
 interface AdvancedSelectFilterProps {
   // An AdvancedSingleSelect filter allows users to search the ANET database

@@ -1,7 +1,7 @@
 import classNames from "classnames"
 import { CompactRow } from "components/Compact"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
+import * as React from "react"
 import { Element } from "react-scroll"
 
 interface FieldsetProps {

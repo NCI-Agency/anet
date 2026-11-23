@@ -1,7 +1,6 @@
 import { AggregationWidgetPropType } from "components/aggregations/utils"
 import BarChart from "components/BarChart"
 import _escape from "lodash/escape"
-import React from "react"
 
 const ReportsByTaskWidget = ({
   widgetId,

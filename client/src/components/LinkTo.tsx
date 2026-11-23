@@ -6,7 +6,8 @@ import ModelPreview from "components/previews/ModelPreview"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import { Attachment } from "models"
-import React, { useContext } from "react"
+import { useContext } from "react"
+import * as React from "react"
 import { Link } from "react-router"
 
 const HOVER_OPEN_DELAY = process.env.ANET_TEST_MODE === "true" ? 60000 : 500

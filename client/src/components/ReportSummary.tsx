@@ -19,7 +19,7 @@ import _isEqual from "lodash/isEqual"
 import { Location, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
@@ -317,7 +317,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
             <span>
               <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
               {report.tasks.map((task, i) => (
-                <React.Fragment key={task.uuid}>
+                <Fragment key={task.uuid}>
                   {i > 0 && separator}
                   <BreadcrumbTrail
                     modelType="Task"
@@ -325,7 +325,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
                     ascendantObjects={task.ascendantTasks}
                     parentField="parentTask"
                   />
-                </React.Fragment>
+                </Fragment>
               ))}
             </span>
           )}

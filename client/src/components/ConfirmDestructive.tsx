@@ -1,5 +1,5 @@
 import TriggerableConfirm from "components/TriggerableConfirm"
-import React from "react"
+import * as React from "react"
 
 interface ConfirmDestructiveProps {
   onConfirm: (...args: unknown[]) => unknown

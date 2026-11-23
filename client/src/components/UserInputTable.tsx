@@ -5,7 +5,6 @@ import {
 import RemoveButton from "components/RemoveButton"
 import { Field, FieldArray } from "formik"
 import _get from "lodash/get"
-import React from "react"
 import { Button, Table } from "react-bootstrap"
 
 interface UserInputTableProps {

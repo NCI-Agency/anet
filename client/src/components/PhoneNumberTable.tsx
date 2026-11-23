@@ -1,5 +1,4 @@
 import _get from "lodash/get"
-import React from "react"
 import { Table } from "react-bootstrap"
 
 interface PhoneNumberTableProps {

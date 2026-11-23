@@ -18,7 +18,7 @@ import RichTextEditor from "components/RichTextEditor"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment/moment"
-import React, { useContext, useState } from "react"
+import { useContext, useState } from "react"
 import {
   Button,
   Offcanvas,

@@ -19,7 +19,7 @@ import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
 import pluralize from "pluralize"
-import React from "react"
+import { Fragment } from "react"
 import Settings from "settings"
 import utils from "utils"
 
@@ -227,10 +227,10 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
           extraColForValue
           label="Authors"
           value={report.authors?.map((a, index) => (
-            <React.Fragment key={a.uuid}>
+            <Fragment key={a.uuid}>
               <LinkTo modelType="Person" model={a} />
               {index !== report.authors.length - 1 ? ", " : ""}
-            </React.Fragment>
+            </Fragment>
           ))}
         />
 

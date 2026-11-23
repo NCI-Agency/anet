@@ -12,7 +12,6 @@ import {
 } from "components/Page"
 import EventSearchResults from "components/search/EventSearchResults"
 import EventSeriesSearchResults from "components/search/EventSeriesSearchResults"
-import React from "react"
 import { legacy_connect as connect } from "react-redux"
 
 const queryParams = {

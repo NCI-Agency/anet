@@ -3,7 +3,6 @@ import AggregationWidgetContainer, {
 } from "components/aggregations/AggregationWidgetContainer"
 import _isEmpty from "lodash/isEmpty"
 import { formatPeriodBoundary, PeriodsPropType } from "periodUtils"
-import React from "react"
 
 interface QuestionsRowProps {
   idSuffix: string

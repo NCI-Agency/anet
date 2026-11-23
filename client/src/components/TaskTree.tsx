@@ -4,7 +4,7 @@ import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
-import React, { useCallback, useReducer } from "react"
+import { useCallback, useReducer } from "react"
 import utils from "utils"
 
 type NodePath = number[]

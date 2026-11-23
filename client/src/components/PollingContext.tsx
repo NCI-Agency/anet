@@ -1,5 +1,5 @@
-import React from "react"
+import { createContext } from "react"
 
-const PollingContext = React.createContext<any>({})
+const PollingContext = createContext<any>({})
 
 export default PollingContext

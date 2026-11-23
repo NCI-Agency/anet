@@ -9,7 +9,8 @@ import {
   MERGE_SIDES,
   setHeightOfAField
 } from "mergeUtils"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import * as React from "react"
 
 function arraysEqualUnordered<T>(
   left: readonly T[],

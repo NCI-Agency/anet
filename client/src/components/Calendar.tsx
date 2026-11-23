@@ -6,7 +6,6 @@ import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import moment from "moment"
-import React from "react"
 import Settings from "settings"
 import "./Calendar.css"
 

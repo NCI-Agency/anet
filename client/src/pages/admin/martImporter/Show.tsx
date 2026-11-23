@@ -1,7 +1,7 @@
 import { usePageTitle } from "components/Page"
 import MartImportedReportTable from "pages/admin/martImporter/MartImportedReportTable"
 import ReportHistoryModal from "pages/admin/martImporter/ReportHistoryModal"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 

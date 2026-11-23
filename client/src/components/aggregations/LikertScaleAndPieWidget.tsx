@@ -2,7 +2,6 @@ import PieWidget from "components/aggregations/PieWidget"
 import { AggregationWidgetPropType } from "components/aggregations/utils"
 import LikertScale from "components/graphs/LikertScale"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
 
 const LikertScaleAndPieWidget = ({
   values,

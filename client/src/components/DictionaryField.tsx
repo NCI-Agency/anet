@@ -1,5 +1,5 @@
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
+import * as React from "react"
 import utils from "utils"
 
 interface DictionaryFieldProps {

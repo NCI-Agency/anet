@@ -45,7 +45,7 @@ import UserTable from "components/UserTable"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
-import React, { useContext, useState } from "react"
+import { cloneElement, useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton, Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import { useNavigate, useParams } from "react-router"
@@ -358,7 +358,7 @@ const CompactPersonView = ({ pageDispatchers }: CompactPersonViewProps) => {
           key
         ])
         .map(([el, key]) =>
-          React.cloneElement(el, {
+          cloneElement(el, {
             key,
             extraColElem: extraColElems[key] || el.props.extraColElem,
             labelColumnWidth: 4

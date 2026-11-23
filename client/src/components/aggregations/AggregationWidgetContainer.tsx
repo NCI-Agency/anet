@@ -23,7 +23,6 @@ import IqrBoxPlot from "components/graphs/IqrBoxPlot"
 import LikertScale from "components/graphs/LikertScale"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
-import React from "react"
 import { Col, Form, FormGroup } from "react-bootstrap"
 import utils from "utils"
 

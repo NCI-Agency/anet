@@ -26,7 +26,7 @@ import {
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Person } from "models"
 import moment from "moment"
-import React, { useContext } from "react"
+import { useContext } from "react"
 import { legacy_connect as connect } from "react-redux"
 import { useParams } from "react-router"
 import Settings from "settings"

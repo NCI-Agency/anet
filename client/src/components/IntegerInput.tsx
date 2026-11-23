@@ -1,5 +1,5 @@
 import { Button, InputGroup } from "@blueprintjs/core"
-import React, { useCallback, useRef } from "react"
+import { useCallback, useRef, useState } from "react"
 import utils from "utils"
 
 const ALLOWED_KEYS = [
@@ -45,7 +45,7 @@ export default function IntegerInput({
 }: IntegerInputProps) {
   const latestValue = useRef(value)
   const inputRef = useRef<HTMLInputElement>(null)
-  const [inputValue, setInputValue] = React.useState(value?.toString() ?? "")
+  const [inputValue, setInputValue] = useState(value?.toString() ?? "")
 
   const updateValue = useCallback(
     newValue => {

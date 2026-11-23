@@ -4,7 +4,6 @@ import {
   ALL_ENTITY_TYPES,
   ENTITY_TYPES
 } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
-import React from "react"
 import { getSelectedParentNode } from "richTextUtils"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"

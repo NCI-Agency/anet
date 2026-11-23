@@ -1,7 +1,6 @@
 import { PopoverInteractionKind, PopoverNext } from "@blueprintjs/core"
 import App6Symbol, { getChoices } from "components/App6Symbol"
 import { Organization } from "models"
-import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 

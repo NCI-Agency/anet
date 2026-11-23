@@ -20,7 +20,7 @@ import {
 import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
-import React, { useContext, useMemo, useState } from "react"
+import { useContext, useMemo, useState } from "react"
 import { Alert, Button, FormCheck } from "react-bootstrap"
 import { useNavigate } from "react-router"
 import POSITIONS_ICON from "resources/positions.png"

@@ -3,7 +3,6 @@ import {
   ENTITY_ON_DEMAND_EXPIRATION_DATE
 } from "components/Model"
 import moment from "moment"
-import React from "react"
 import { Badge } from "react-bootstrap"
 
 interface ValidationBarProps {

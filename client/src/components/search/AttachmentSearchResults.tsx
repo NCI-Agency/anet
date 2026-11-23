@@ -10,7 +10,6 @@ import {
   CommonSearchResults,
   GenericSearchResultsProps
 } from "components/search/CommonSearchResults"
-import React from "react"
 
 const GQL_GET_ATTACHMENT_LIST = gql`
   query ($attachmentQuery: AttachmentSearchQueryInput) {

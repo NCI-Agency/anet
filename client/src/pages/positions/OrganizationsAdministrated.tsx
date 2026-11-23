@@ -1,5 +1,4 @@
 import LinkTo from "components/LinkTo"
-import React from "react"
 import { Table } from "react-bootstrap"
 
 interface OrganizationsAdministratedProps {

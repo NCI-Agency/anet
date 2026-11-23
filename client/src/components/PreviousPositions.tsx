@@ -3,7 +3,6 @@ import { IconNames } from "@blueprintjs/icons"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
-import React from "react"
 import { Badge, Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import Settings from "settings"
 

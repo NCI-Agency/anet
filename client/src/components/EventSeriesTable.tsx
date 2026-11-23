@@ -13,7 +13,7 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { EventSeries } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"

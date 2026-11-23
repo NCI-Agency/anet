@@ -19,7 +19,7 @@ import {
   getNotifications,
   GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS
 } from "notificationsUtils"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 

@@ -1,5 +1,5 @@
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
+import * as React from "react"
 
 interface WrapperProps {
   loaderMessage?: string | React.ComponentType<unknown>

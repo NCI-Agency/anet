@@ -10,7 +10,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { legacy_connect as connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`

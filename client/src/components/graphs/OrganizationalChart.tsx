@@ -15,13 +15,7 @@ import {
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import { toPng } from "html-to-image"
 import { Organization, PositionRole } from "models"
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState
-} from "react"
+import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import ReactFlow, {

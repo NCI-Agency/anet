@@ -22,7 +22,7 @@ import RichTextEditor from "components/RichTextEditor"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
-import React, { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 
@@ -141,7 +141,7 @@ const MySubscriptionUpdates = ({
                   const at = subscriptionUpdate.auditTrail
                   const key = `${subscriptionUpdate.createdAt}:${subscription.uuid}`
                   return (
-                    <React.Fragment key={key}>
+                    <Fragment key={key}>
                       <tr>
                         <td>
                           <SubscriptionIcon
@@ -257,7 +257,7 @@ const MySubscriptionUpdates = ({
                           )}
                         </td>
                       </tr>
-                    </React.Fragment>
+                    </Fragment>
                   )
                 })}
             </tbody>

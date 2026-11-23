@@ -5,7 +5,7 @@ import * as FieldHelper from "components/FieldHelper"
 import { MessagesWithConflict } from "components/Messages"
 import Model from "components/Model"
 import { Field, Form, Formik } from "formik"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const GQL_CREATE_EVENT_TYPE = gql`

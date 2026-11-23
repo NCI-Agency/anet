@@ -5,7 +5,6 @@ import _isEmpty from "lodash/isEmpty"
 import { Event, Person, Report } from "models"
 import moment from "moment"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
-import React from "react"
 import Settings from "settings"
 
 export interface AggregationWidgetPropType {

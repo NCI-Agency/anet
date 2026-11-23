@@ -8,7 +8,8 @@ import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
 import { Person, Position } from "models"
 import pluralize from "pluralize"
-import React, { useContext } from "react"
+import { useContext } from "react"
+import * as React from "react"
 import {
   Badge,
   Form,

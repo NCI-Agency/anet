@@ -10,7 +10,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import EngagementsBetweenCommunitiesMatrix from "components/EngagementsBetweenCommunitiesMatrix"
 import Messages from "components/Messages"
 import { AuthorizationGroup } from "models"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router"
 import COMMUNITIES_ICON from "resources/communities.png"
 import Settings from "settings"

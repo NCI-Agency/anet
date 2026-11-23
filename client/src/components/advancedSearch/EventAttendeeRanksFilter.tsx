@@ -1,6 +1,5 @@
 import useSearchFilter from "components/advancedSearch/hooks"
 import _map from "lodash/map"
-import React from "react"
 import { Form } from "react-bootstrap"
 import Settings from "settings"
 

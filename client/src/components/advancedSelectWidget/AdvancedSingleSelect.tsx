@@ -4,7 +4,6 @@ import AdvancedSelect, {
 import { AdvancedSingleSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import * as FieldHelper from "components/FieldHelper"
 import _isEmpty from "lodash/isEmpty"
-import React from "react"
 import RemoveButton from "../RemoveButton"
 
 interface AdvancedSingleSelectProps extends AdvancedSelectProps {

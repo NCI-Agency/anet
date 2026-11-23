@@ -15,7 +15,7 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
 import { Location } from "models"
-import React, { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 

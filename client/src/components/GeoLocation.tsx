@@ -15,7 +15,7 @@ import {
   parseCoordinate
 } from "geoUtils"
 import { Location } from "models"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Button, Col, Form, Row, Table } from "react-bootstrap"
 import utils from "utils"
 

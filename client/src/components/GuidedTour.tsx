@@ -1,5 +1,5 @@
 import AppContext from "components/AppContext"
-import React, { useContext, useMemo, useState } from "react"
+import { useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import { ACTIONS, EVENTS, Joyride, STATUS } from "react-joyride"
 import { useNavigate } from "react-router"

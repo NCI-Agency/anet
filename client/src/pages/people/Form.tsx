@@ -37,7 +37,8 @@ import _isEqual from "lodash/isEqual"
 import { Location, Person } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
+import * as React from "react"
 import {
   Alert,
   Button,

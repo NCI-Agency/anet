@@ -12,7 +12,7 @@ import {
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
-import React, { useCallback, useEffect, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 
 export const locationFields = `
   ${gqlEntityFieldsMap.Location}
@@ -161,11 +161,11 @@ export const HierarchicalLocationOverlayTable = ({
       )
 
       return (
-        <React.Fragment key={location.uuid}>
+        <Fragment key={location.uuid}>
           <td className="locationName" onClick={handleToggleSelection}>
             {indentedLabel}
           </td>
-        </React.Fragment>
+        </Fragment>
       )
     },
     [
@@ -214,7 +214,7 @@ export const HierarchicalLocationOverlayTable = ({
     setRootLocations(newRootLocations)
   }, [items])
 
-  const flattenedItems = React.useMemo(
+  const flattenedItems = useMemo(
     // limiting the number of locations to show in the overlay table
     () => {
       sortLocations(rootLocations)

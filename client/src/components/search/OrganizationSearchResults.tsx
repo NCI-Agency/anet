@@ -9,7 +9,6 @@ import {
   CommonSearchResults,
   GenericSearchResultsWithEmailProps
 } from "components/search/CommonSearchResults"
-import React from "react"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
   query (

@@ -17,7 +17,7 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import { Position } from "models"
-import React, { useState } from "react"
+import { Fragment, useState } from "react"
 import { Table } from "react-bootstrap"
 import { legacy_connect as connect } from "react-redux"
 import Settings from "settings"
@@ -235,10 +235,10 @@ const BasePositionTable = ({
                   {showOrganizationsAdministrated && (
                     <td>
                       {pos.organizationsAdministrated?.map((o, i) => (
-                        <React.Fragment key={o.uuid}>
+                        <Fragment key={o.uuid}>
                           {i > 0 && ", "}
                           <LinkTo modelType="Organization" model={o} />
-                        </React.Fragment>
+                        </Fragment>
                       ))}
                     </td>
                   )}

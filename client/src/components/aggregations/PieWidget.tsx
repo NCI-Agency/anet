@@ -1,6 +1,6 @@
 import { AggregationWidgetPropType } from "components/aggregations/utils"
 import Pie from "components/graphs/Pie"
-import React from "react"
+import { Fragment } from "react"
 import utils from "utils"
 
 interface PieWidgetProps extends AggregationWidgetPropType {
@@ -31,7 +31,7 @@ const PieWidget = ({
           {Object.map(legend, (key, choice) => {
             const textColor = utils.getContrastYIQ(choice.color)
             return (
-              <React.Fragment key={key}>
+              <Fragment key={key}>
                 <span
                   style={{
                     backgroundColor: choice.color,
@@ -41,7 +41,7 @@ const PieWidget = ({
                 >
                   {choice.label}
                 </span>
-              </React.Fragment>
+              </Fragment>
             )
           })}
         </div>

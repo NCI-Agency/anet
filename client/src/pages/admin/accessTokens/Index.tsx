@@ -20,7 +20,7 @@ import {
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
 import moment from "moment"
-import React, { useState } from "react"
+import { useState } from "react"
 import {
   Button,
   Col,
