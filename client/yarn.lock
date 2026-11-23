@@ -1731,12 +1731,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:6.22.0, @blueprintjs/core@npm:^6.22.0":
-  version: 6.22.0
-  resolution: "@blueprintjs/core@npm:6.22.0"
+"@blueprintjs/core@npm:6.23.2, @blueprintjs/core@npm:^6.23.2":
+  version: 6.23.2
+  resolution: "@blueprintjs/core@npm:6.23.2"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/icons": "npm:^6.15.0"
+    "@blueprintjs/icons": "npm:^6.17.0"
     "@floating-ui/react": "npm:^0.27.13"
     "@popperjs/core": "npm:^2.11.8"
     classnames: "npm:^2.3.1"
@@ -1754,17 +1754,17 @@ __metadata:
   bin:
     upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
     upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10c0/80c6d36cb9c4723bc065b85d428968df91b9ba922aaa31be55bd0483bb9333cc2ec6cc74168d3deeb98c64c316087cfcd839024ddfbd999056668d8b761a2d00
+  checksum: 10c0/475ae07f2684c8905a0c9feb5cb57ddd723113818ae1bef2af82bceb1d52dee35ce075087599e0d939e05187e17675e69bf7e46c790d44ffb5e0cec8ae6a1e12
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime@npm:6.3.1":
-  version: 6.3.1
-  resolution: "@blueprintjs/datetime@npm:6.3.1"
+"@blueprintjs/datetime@npm:6.3.4":
+  version: 6.3.4
+  resolution: "@blueprintjs/datetime@npm:6.3.4"
   dependencies:
-    "@blueprintjs/core": "npm:^6.22.0"
-    "@blueprintjs/icons": "npm:^6.15.0"
-    "@blueprintjs/select": "npm:^6.4.1"
+    "@blueprintjs/core": "npm:^6.23.2"
+    "@blueprintjs/icons": "npm:^6.17.0"
+    "@blueprintjs/select": "npm:^6.4.4"
     classnames: "npm:^2.3.1"
     date-fns: "npm:^2.28.0"
     date-fns-tz: "npm:^2.0.0"
@@ -1778,13 +1778,13 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/1cdda0a40670d120b42f1d999d5fb4ef775ddf65e38e58c500944221e667f7c98a78cd16142d0e2335cc84630f010d7c9447321ea8e5dce4b105e102a2b3e788
+  checksum: 10c0/d8d5eba0cb32b5fef6daa72b2488e7f5f03329fbd28a9cc1ef04f64eb626229a0931486fc31978d5a59dd857e035391c276f6fe5a7f374466009b3452d4ae75a
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^6.15.0":
-  version: 6.15.0
-  resolution: "@blueprintjs/icons@npm:6.15.0"
+"@blueprintjs/icons@npm:^6.17.0":
+  version: 6.17.0
+  resolution: "@blueprintjs/icons@npm:6.17.0"
   dependencies:
     change-case: "npm:^4.1.2"
     classnames: "npm:^2.3.1"
@@ -1796,17 +1796,17 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/82351720fa8ded4bfdf1f06060151a2e8927554656cffeaa229cc3eb0060180e8dba4729e910725412deaaf826377a0832e5182388eb56fd8ab83e7307a0f3c4
+  checksum: 10c0/ce700cb3ca98dcac07f367588536e5c7899300679ec5a5b464c92312b207426e7f5b60680b86ad2f7a735e51f03d57c5e5c3f059ee0457719636de5b94efe50e
   languageName: node
   linkType: hard
 
-"@blueprintjs/select@npm:^6.4.1":
-  version: 6.4.1
-  resolution: "@blueprintjs/select@npm:6.4.1"
+"@blueprintjs/select@npm:^6.4.4":
+  version: 6.4.4
+  resolution: "@blueprintjs/select@npm:6.4.4"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/core": "npm:^6.22.0"
-    "@blueprintjs/icons": "npm:^6.15.0"
+    "@blueprintjs/core": "npm:^6.23.2"
+    "@blueprintjs/icons": "npm:^6.17.0"
     classnames: "npm:^2.3.1"
     tslib: "npm:~2.6.2"
   peerDependencies:
@@ -1816,7 +1816,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/8c67698cab10459bff749150b3ac6f6501909e9cfece5e7ba15dcb9a3cb404ba1410cc7afb5694b671d26f0500bd621270b15f645e11cbff1b5a793ac3c7583c
+  checksum: 10c0/df5c1167eb1330e718f4461fe5a88fca0d6e643c3a54ecb8721f84be31164520adb2b8421ffa2e47bcfa4ea72760c89ffd50ca116dbd64e1fd0cc0dcf31a236a
   languageName: node
   linkType: hard
 
@@ -7080,8 +7080,8 @@ __metadata:
     "@babel/preset-env": "npm:8.0.7"
     "@babel/preset-react": "npm:8.0.1"
     "@babel/runtime": "npm:8.1.0"
-    "@blueprintjs/core": "npm:6.22.0"
-    "@blueprintjs/datetime": "npm:6.3.1"
+    "@blueprintjs/core": "npm:6.23.2"
+    "@blueprintjs/datetime": "npm:6.3.4"
     "@colors/colors": "npm:1.6.1"
     "@cyclonedx/yarn-plugin-cyclonedx": "npm:3.4.0"
     "@emotion/react": "npm:11.14.0"
