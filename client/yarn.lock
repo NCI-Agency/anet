@@ -7201,7 +7201,7 @@ __metadata:
     slate-dom: "npm:0.147.3"
     slate-history: "npm:0.144.0"
     slate-hyperscript: "npm:0.138.3"
-    slate-react: "npm:0.147.5"
+    slate-react: "npm:0.147.6"
     style-loader: "npm:4.0.0"
     sync-fetch: "npm:0.7.1"
     thread-loader: "npm:4.0.4"
@@ -15770,9 +15770,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.147.5":
-  version: 0.147.5
-  resolution: "slate-react@npm:0.147.5"
+"slate-react@npm:0.147.6":
+  version: 0.147.6
+  resolution: "slate-react@npm:0.147.6"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -15792,7 +15792,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10c0/6a4c4ca915166dbdaf94233426fab78c5fd2eac8a6975aa4e48e54fa50a21296755725599711dc2700ca38df952cd7ea559843ae00f2375ece7480152f5a51ab
+  checksum: 10c0/121cd2615d9ae08bed7c00299a5e31f65d049a76cd3b469937dc01b4b28c3d58a82f557ed2bf170bd835a49e5f2316c80ef4d726cac17ce1f63d2067717c191f
   languageName: node
   linkType: hard
 
