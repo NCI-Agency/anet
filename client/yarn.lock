@@ -2695,9 +2695,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/visitor-plugin-common@npm:8.0.0, @graphql-codegen/visitor-plugin-common@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "@graphql-codegen/visitor-plugin-common@npm:8.0.0"
+"@graphql-codegen/visitor-plugin-common@npm:8.0.2, @graphql-codegen/visitor-plugin-common@npm:^8.0.0":
+  version: 8.0.2
+  resolution: "@graphql-codegen/visitor-plugin-common@npm:8.0.2"
   dependencies:
     "@graphql-codegen/plugin-helpers": "npm:^8.0.0"
     "@graphql-tools/optimize": "npm:^3.0.0"
@@ -2711,7 +2711,7 @@ __metadata:
     tslib: "npm:^2.8.0"
   peerDependencies:
     graphql: ^16.0.0 || ^17.0.0
-  checksum: 10c0/9d677ab9364071dd9bca7a9a3e3f7d0aa59fc6555737434de922ccd640ff9759ce63349248e54e68798fc62feaf506c83e8915189fa05c09b20831e4a6ef11e9
+  checksum: 10c0/ef4debfe2a4f092a51f7d4fbdc6ed717f35fb69e8d59b36acdb340a144ceef019842bad3c0405a2fc222726b2689288eccc32902285ede224d243d98602dc5a0
   languageName: node
   linkType: hard
 
@@ -7096,7 +7096,7 @@ __metadata:
     "@fullcalendar/timegrid": "npm:6.1.22"
     "@graphql-codegen/cli": "npm:8.0.0"
     "@graphql-codegen/schema-ast": "npm:7.0.0"
-    "@graphql-codegen/visitor-plugin-common": "npm:8.0.0"
+    "@graphql-codegen/visitor-plugin-common": "npm:8.0.2"
     "@ianvs/prettier-plugin-sort-imports": "npm:4.7.1"
     "@playwright/test": "npm:1.65.1"
     "@testing-library/dom": "npm:10.4.2"
