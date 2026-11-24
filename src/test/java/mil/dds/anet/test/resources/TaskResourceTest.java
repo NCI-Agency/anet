@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
@@ -27,7 +28,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class TaskResourceTest extends AbstractResourceTest {
+public class TaskResourceTest extends AnetApplicationTest {
 
   public static final String FIELDS =
       "{ uuid updatedAt shortName longName description category parentTask { uuid } taskedOrganizations { uuid }"

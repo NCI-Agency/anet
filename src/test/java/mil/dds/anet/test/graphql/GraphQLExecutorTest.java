@@ -7,15 +7,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.Location;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-class GraphQLExecutorTest extends AbstractResourceTest {
+class GraphQLExecutorTest extends AnetApplicationTest {
 
   private static final String LOCATION_UUID = "283797ec-7077-49b2-87b8-9afd5499b6f3";
 

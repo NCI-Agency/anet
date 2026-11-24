@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.Location;
@@ -21,7 +22,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class LocationResourceTest extends AbstractResourceTest {
+public class LocationResourceTest extends AnetApplicationTest {
 
   public static final String _LOCATION_FIELDS =
       "uuid updatedAt name type description status lat lng customFields";

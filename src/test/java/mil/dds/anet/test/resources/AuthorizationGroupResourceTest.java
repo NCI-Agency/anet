@@ -8,6 +8,7 @@ import java.util.UUID;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
@@ -21,7 +22,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-class AuthorizationGroupResourceTest extends AbstractResourceTest {
+class AuthorizationGroupResourceTest extends AnetApplicationTest {
   protected static final String FIELDS = "{ uuid updatedAt name description status"
       + " distributionList forSensitiveInformation"
       + " administrativePositions { uuid name code type role status location { uuid name }"

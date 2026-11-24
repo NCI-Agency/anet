@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.resources.AttachmentResource;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.AttachmentInput;
@@ -33,14 +34,13 @@ import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.User;
 import mil.dds.anet.test.client.UserInput;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class PersonMergeTest extends AbstractResourceTest {
+class PersonMergeTest extends AnetApplicationTest {
 
   @ParameterizedTest
   @MethodSource("provideMergeTestParameters")

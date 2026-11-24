@@ -6,6 +6,7 @@ import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.emails.ReportEmail;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Report;
 import mil.dds.anet.test.client.ReportSearchQueryInput;
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class AnetEmailResourceTest extends AbstractResourceTest {
+class AnetEmailResourceTest extends AnetApplicationTest {
 
   @Autowired
   private JobHistoryDao jobHistoryDao;

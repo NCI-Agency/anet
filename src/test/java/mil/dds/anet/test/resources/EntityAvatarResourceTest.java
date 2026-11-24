@@ -11,6 +11,7 @@ import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.EntityAvatar;
@@ -23,7 +24,7 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import org.junit.jupiter.api.Test;
 
-class EntityAvatarResourceTest extends AbstractResourceTest {
+class EntityAvatarResourceTest extends AnetApplicationTest {
 
   private static final String _ENTITY_AVATAR_FIELDS =
       "{ relatedObjectType relatedObjectUuid applyCrop attachmentUuid cropLeft cropTop cropWidth cropHeight }";

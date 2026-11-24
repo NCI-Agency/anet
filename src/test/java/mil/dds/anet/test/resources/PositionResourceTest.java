@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Position;
@@ -35,7 +36,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class PositionResourceTest extends AbstractResourceTest {
+public class PositionResourceTest extends AnetApplicationTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _ORGANIZATION_FIELDS =
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);

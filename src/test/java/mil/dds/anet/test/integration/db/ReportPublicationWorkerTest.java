@@ -39,7 +39,6 @@ import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestBeans;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.Utils;
@@ -254,8 +253,7 @@ class ReportPublicationWorkerTest extends AnetApplicationTest {
   }
 
   private Report createTestReport(final String toAddressId) {
-    final ReportPerson author =
-        AbstractResourceTest.personToReportAuthor(TestBeans.getTestPerson());
+    final ReportPerson author = AnetApplicationTest.personToReportAuthor(TestBeans.getTestPerson());
     personDao.insert(author);
     final EmailAddress emailAddress =
         new EmailAddress(Utils.getEmailNetworkForNotifications(), toAddressId + allowedEmail);

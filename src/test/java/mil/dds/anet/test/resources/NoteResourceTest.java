@@ -11,6 +11,7 @@ import java.util.UUID;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.NoteCounterDao;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Note;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-class NoteResourceTest extends AbstractResourceTest {
+class NoteResourceTest extends AnetApplicationTest {
 
   protected static final String NOTE_FIELDS = "{ uuid updatedAt text author { uuid }"
       + " noteRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";

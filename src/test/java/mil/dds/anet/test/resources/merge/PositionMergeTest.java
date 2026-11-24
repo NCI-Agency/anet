@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.resources.AttachmentResource;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
@@ -28,7 +29,6 @@ import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportPerson;
 import mil.dds.anet.test.client.Status;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.PersonResourceTest;
 import mil.dds.anet.test.resources.PositionResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class PositionMergeTest extends AbstractResourceTest {
+class PositionMergeTest extends AnetApplicationTest {
 
   @ParameterizedTest
   @MethodSource("provideMergeTestParameters")

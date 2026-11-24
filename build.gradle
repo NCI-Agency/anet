@@ -12,7 +12,7 @@ plugins {
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "4.0.2"
 	id "org.beryx.runtime" version "2.0.1"
 	id "com.netflix.nebula.rpm" version "14.0.2"
-	id "org.springframework.boot" version "4.1.2" apply false
+	id "org.springframework.boot" version "4.2.0" apply false
 	id 'io.mateo.cxf-codegen' version '3.0.0'
 	id 'org.cyclonedx.bom' version '3.6.1'
 }
@@ -35,8 +35,8 @@ boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.2.4"
 String jdbi3Version = "3.55.0"
 String poiVersion = "6.0.0"
-String simplejavamailVersion = "9.3.9"
-String springShellVersion = "4.0.3"
+String simplejavamailVersion = "9.3.10"
+String springShellVersion = "4.0.4"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"

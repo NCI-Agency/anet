@@ -3,14 +3,14 @@ package mil.dds.anet.test.resources.insights;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Report;
 import mil.dds.anet.test.client.ReportSearchQueryInput;
 import mil.dds.anet.test.client.ReportState;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
 import org.junit.jupiter.api.Test;
 
-public class ReportsByTaskTest extends AbstractResourceTest {
+public class ReportsByTaskTest extends AnetApplicationTest {
 
   @Test
   void testWithDummyTask() {

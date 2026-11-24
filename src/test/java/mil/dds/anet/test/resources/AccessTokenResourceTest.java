@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Optional;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AccessToken;
 import mil.dds.anet.test.client.AccessTokenInput;
@@ -13,7 +14,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class AccessTokenResourceTest extends AbstractResourceTest {
+public class AccessTokenResourceTest extends AnetApplicationTest {
 
   public static final String FIELDS = "{ uuid name description scope expiresAt updatedAt }";
 

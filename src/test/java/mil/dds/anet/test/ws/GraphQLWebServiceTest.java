@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.graphql.GraphQLRequest;
-import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.ws.GraphQLWebService;
 import mil.dds.anet.ws.security.AccessTokenAuthentication;
 import mil.dds.anet.ws.security.BearerTokenService;
@@ -22,7 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-class GraphQLWebServiceTest extends AbstractResourceTest {
+class GraphQLWebServiceTest extends AnetApplicationTest {
 
   private static final String REPORT_QUERY = // -
       "query ($uuid: String!) {" + // -

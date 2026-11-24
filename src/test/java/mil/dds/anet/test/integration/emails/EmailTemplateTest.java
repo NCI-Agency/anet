@@ -25,8 +25,8 @@ import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.emails.ReportRejectionEmail;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
 import org.junit.jupiter.api.AfterAll;
@@ -34,7 +34,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class EmailTemplateTest extends AbstractResourceTest {
+class EmailTemplateTest extends AnetApplicationTest {
 
   @Autowired
   private JobHistoryDao jobHistoryDao;
