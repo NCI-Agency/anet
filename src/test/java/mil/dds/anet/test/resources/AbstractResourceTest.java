@@ -690,4 +690,10 @@ public abstract class AbstractResourceTest extends AnetApplicationTest {
     final var allowedMimeTypes = AttachmentResource.getAllowedMimeTypes();
     return allowedMimeTypes.get(0);
   }
+
+  // PostgreSQL jsonb does not preserve object key order or insignificant whitespace.
+  protected void assertJsonEquals(final String expected, final String actual) {
+    assertThat(actual == null ? null : ignoringMapper.readTree(actual))
+        .isEqualTo(expected == null ? null : ignoringMapper.readTree(expected));
+  }
 }

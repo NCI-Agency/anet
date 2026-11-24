@@ -106,8 +106,8 @@ class AssessmentResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> queryExecutor.report(REPORT_FIELDS, testReport.getUuid()));
     assertThat(updatedReport.getAssessments()).hasSize(1);
     final Assessment reportAssessment = updatedReport.getAssessments().getFirst();
-    assertThat(reportAssessment.getAssessmentValues())
-        .isEqualTo(testAssessmentInput.getAssessmentValues());
+    assertJsonEquals(testAssessmentInput.getAssessmentValues(),
+        reportAssessment.getAssessmentValues());
     assertThat(reportAssessment.getAssessmentRelatedObjects()).hasSize(2);
 
     // Delete test report
@@ -159,8 +159,8 @@ class AssessmentResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> queryExecutor.report(REPORT_FIELDS, testReport.getUuid()));
     assertThat(updatedReport.getAssessments()).hasSize(1);
     final Assessment reportAssessment = updatedReport.getAssessments().getFirst();
-    assertThat(reportAssessment.getAssessmentValues())
-        .isEqualTo(testAssessmentInput.getAssessmentValues());
+    assertJsonEquals(testAssessmentInput.getAssessmentValues(),
+        reportAssessment.getAssessmentValues());
     assertThat(reportAssessment.getAssessmentRelatedObjects()).hasSize(2);
 
     // Delete test report
@@ -1353,6 +1353,17 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final List<Assessment> testAssessments = updatedReport.getAssessments();
     assertAssessments(testAssessments, createdAssessments, assessmentKey, 2);
 
+    // Re-submitting database JSON is a no-op, even after input sanitization compacts it.
+    final List<Assessment> unchangedAssessments = succeedUpdateReportAssessments(adminUser,
+        reportUuid, Iterables.toArray(getAssessmentsInput(testAssessments), AssessmentInput.class));
+    for (final Assessment unchangedAssessment : unchangedAssessments) {
+      final Assessment originalAssessment = testAssessments.stream()
+          .filter(a -> a.getUuid().equals(unchangedAssessment.getUuid())).findFirst().orElseThrow();
+      assertThat(unchangedAssessment.getUpdatedAt()).isEqualTo(originalAssessment.getUpdatedAt());
+      assertThat(unchangedAssessment.getAuthor().getUuid())
+          .isEqualTo(originalAssessment.getAuthor().getUuid());
+    }
+
     // - S: read it as approver
     final Report approverReport = withCredentials(getDomainUsername(reportApprover),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
@@ -1382,8 +1393,18 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final AssessmentInput updatedAssessmentInputAuthor = createdAssessmentsInput.get(0);
     updatedAssessmentInputAuthor
         .setAssessmentValues(createAssessmentValues("updated by author", recurrence));
-    succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
-        Iterables.toArray(createdAssessmentsInput, AssessmentInput.class));
+    final List<Assessment> changedAssessments =
+        succeedUpdateReportAssessments(getDomainUsername(reportAuthor), reportUuid,
+            Iterables.toArray(createdAssessmentsInput, AssessmentInput.class));
+    for (final Assessment changedAssessment : changedAssessments) {
+      final Assessment originalAssessment = testAssessments.stream()
+          .filter(a -> a.getUuid().equals(changedAssessment.getUuid())).findFirst().orElseThrow();
+      if (changedAssessment.getUuid().equals(updatedAssessmentInputAuthor.getUuid())) {
+        assertThat(changedAssessment.getUpdatedAt()).isAfter(originalAssessment.getUpdatedAt());
+      } else {
+        assertThat(changedAssessment.getUpdatedAt()).isEqualTo(originalAssessment.getUpdatedAt());
+      }
+    }
 
     // - S: update it as approver
     // assessment author shouldn't matter
@@ -1613,8 +1634,10 @@ class AssessmentResourceTest extends AbstractResourceTest {
         combinedHtmlTestCase.getInput().replaceAll("\"", "\\\\\""), recurrence, testPersonNroInput);
     final Assessment createdAssessment =
         succeedAssessmentCreate(getDomainUsername(getRegularUser()), testAssessmentInput);
-    assertThat(createdAssessment.getAssessmentValues()).isEqualTo(createAssessmentValues(
-        combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""), recurrence));
+    assertJsonEquals(
+        createAssessmentValues(combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""),
+            recurrence),
+        createdAssessment.getAssessmentValues());
   }
 
   @Test
@@ -1634,7 +1657,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final Assessment updated = withCredentials(adminUser,
         t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, updatedInput, false));
     assertThat(updated.getUpdatedAt()).isAfter(test.getUpdatedAt());
-    assertThat(updated.getAssessmentValues()).isEqualTo(updatedAssessmentValues);
+    assertJsonEquals(updatedAssessmentValues, updated.getAssessmentValues());
 
     // Try to update it again, with the input that is now outdated
     final AssessmentInput outdatedInput = getAssessmentInput(test);
@@ -1653,7 +1676,7 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final Assessment forceUpdated = withCredentials(adminUser,
         t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, outdatedInput, true));
     assertThat(forceUpdated.getUpdatedAt()).isAfter(updated.getUpdatedAt());
-    assertThat(forceUpdated.getAssessmentValues()).isEqualTo(test.getAssessmentValues());
+    assertJsonEquals(test.getAssessmentValues(), forceUpdated.getAssessmentValues());
   }
 
   private AssessmentInput createAssessment(final String assessmentKey, final String text,
@@ -1717,8 +1740,8 @@ class AssessmentResourceTest extends AbstractResourceTest {
     final Assessment updatedAssessment = withCredentials(username,
         t -> mutationExecutor.updateAssessment(ASSESSMENT_FIELDS, assessmentInput, false));
     assertThat(updatedAssessment).isNotNull();
-    assertThat(updatedAssessment.getAssessmentValues())
-        .isEqualTo(assessmentInput.getAssessmentValues());
+    assertJsonEquals(assessmentInput.getAssessmentValues(),
+        updatedAssessment.getAssessmentValues());
     return updatedAssessment;
   }
 
@@ -1758,22 +1781,26 @@ class AssessmentResourceTest extends AbstractResourceTest {
         testAssessments.stream().filter(n -> assessmentKey.equals(n.getAssessmentKey())).toList();
     assertThat(filteredAssessments).hasSameSizeAs(createdAssessments);
     // Each assessment should appear in the inputs
-    final Comparator<Assessment> comparator =
-        Comparator.comparing(Assessment::getUuid).thenComparing(Assessment::getAssessmentKey)
-            .thenComparing(Assessment::getAssessmentValues).thenComparing((a1, a2) -> {
-              int r = Integer.compare(a1.getAssessmentRelatedObjects().size(),
-                  a2.getAssessmentRelatedObjects().size());
-              if (r != 0) {
-                return r;
-              }
-              r = Integer.compare(a1.getAssessmentRelatedObjects().size(), nrRelatedObjects);
-              if (r != 0) {
-                return r;
-              }
-              return Integer.compare(a2.getAssessmentRelatedObjects().size(), nrRelatedObjects);
-            });
+    final Comparator<Assessment> comparator = Comparator.comparing(Assessment::getUuid)
+        .thenComparing(Assessment::getAssessmentKey).thenComparing((a1, a2) -> {
+          int r = Integer.compare(a1.getAssessmentRelatedObjects().size(),
+              a2.getAssessmentRelatedObjects().size());
+          if (r != 0) {
+            return r;
+          }
+          r = Integer.compare(a1.getAssessmentRelatedObjects().size(), nrRelatedObjects);
+          if (r != 0) {
+            return r;
+          }
+          return Integer.compare(a2.getAssessmentRelatedObjects().size(), nrRelatedObjects);
+        });
     assertThat(filteredAssessments).usingElementComparator(comparator)
         .containsExactlyInAnyOrderElementsOf(createdAssessments);
+    for (final Assessment created : createdAssessments) {
+      assertThat(filteredAssessments).filteredOn(a -> a.getUuid().equals(created.getUuid()))
+          .singleElement()
+          .satisfies(a -> assertJsonEquals(created.getAssessmentValues(), a.getAssessmentValues()));
+    }
   }
 
   private int countAssessments() {

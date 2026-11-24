@@ -29,7 +29,7 @@ public class JdbiConfig {
     // Register our plugins
     jdbi.installPlugin(new PostgresPlugin());
     jdbi.installPlugin(new SqlObjectPlugin());
-    // Let PostgreSQL infer uuid or text from the SQL context. UUIDs remain strings in our beans.
+    // Let PostgreSQL infer uuid, jsonb or text from the SQL context. API values remain strings.
     jdbi.registerArgument(ObjectArgumentFactory.create(String.class, Types.OTHER));
     // Don't map column names to lowercase
     jdbi.getConfig(MapMappers.class).setCaseChange(CaseStrategy.NOP);
