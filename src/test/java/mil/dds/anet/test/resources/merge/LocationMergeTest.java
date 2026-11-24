@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import java.util.List;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.resources.AttachmentResource;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
@@ -14,13 +15,12 @@ import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.Status;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.AttachmentResourceTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class LocationMergeTest extends AbstractResourceTest {
+public class LocationMergeTest extends AnetApplicationTest {
 
   public static final String FIELDS =
       String.format(

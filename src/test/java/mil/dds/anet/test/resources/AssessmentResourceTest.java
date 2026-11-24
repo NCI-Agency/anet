@@ -14,6 +14,7 @@ import java.util.UUID;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.AssessmentCounterDao;
 import mil.dds.anet.test.client.AnetBeanList_Task;
 import mil.dds.anet.test.client.Assessment;
@@ -33,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-class AssessmentResourceTest extends AbstractResourceTest {
+class AssessmentResourceTest extends AnetApplicationTest {
 
   protected static final String ASSESSMENT_FIELDS =
       "{ uuid updatedAt assessmentKey assessmentValues author { uuid }"

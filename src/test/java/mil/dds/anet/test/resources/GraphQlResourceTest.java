@@ -11,6 +11,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Query;
 import org.apache.commons.io.IOUtils;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
 
-class GraphQlResourceTest extends AbstractResourceTest {
+class GraphQlResourceTest extends AnetApplicationTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

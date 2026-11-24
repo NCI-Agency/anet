@@ -8,6 +8,7 @@ import java.util.Objects;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
@@ -25,7 +26,7 @@ import mil.dds.anet.test.client.PositionSearchQueryInput;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 
-class RestrictedFieldsTest extends AbstractResourceTest {
+class RestrictedFieldsTest extends AnetApplicationTest {
   private static final String EMAIL_NETWORK_INTERNET = "Internet";
   private static final String EMAIL_NETWORK_NS = "NS";
   private static final String EMAIL_NETWORK_PARAMETER = "emailNetwork";

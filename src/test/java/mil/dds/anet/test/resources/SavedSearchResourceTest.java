@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.AnetBeanList_Report;
 import mil.dds.anet.test.client.LocationSearchQueryInput;
@@ -15,7 +16,7 @@ import mil.dds.anet.test.client.SavedSearchInput;
 import mil.dds.anet.test.client.SearchObjectType;
 import org.junit.jupiter.api.Test;
 
-class SavedSearchResourceTest extends AbstractResourceTest {
+class SavedSearchResourceTest extends AnetApplicationTest {
 
   private static final String FIELDS =
       "{ uuid name objectType query displayInHomepage priority homepagePriority owner { uuid } }";

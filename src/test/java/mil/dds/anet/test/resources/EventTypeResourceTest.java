@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import java.util.UUID;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.EventType;
 import mil.dds.anet.test.client.EventTypeInput;
 import mil.dds.anet.test.client.Status;
@@ -12,7 +13,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-class EventTypeResourceTest extends AbstractResourceTest {
+class EventTypeResourceTest extends AnetApplicationTest {
   public static final String FIELDS = "{ uuid status name updatedAt relatedEventsCount }";
 
   @Test

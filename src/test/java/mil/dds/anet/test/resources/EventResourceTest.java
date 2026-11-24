@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Event;
 import mil.dds.anet.test.client.Event;
@@ -26,7 +27,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class EventResourceTest extends AbstractResourceTest {
+public class EventResourceTest extends AnetApplicationTest {
 
   private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
   private static final String TASK_FIELDS =

@@ -24,7 +24,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
-import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.Utils;
@@ -35,7 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-class AccountDeactivationWorkerTest extends AbstractResourceTest {
+class AccountDeactivationWorkerTest extends AnetApplicationTest {
 
   private MockedStatic<AnetObjectEngine> mockedAnetObjectEngine;
   private MockedStatic<AnetEmailWorker> mockedAnetEmailWorker;

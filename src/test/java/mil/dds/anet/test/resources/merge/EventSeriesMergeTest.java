@@ -8,13 +8,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
 import mil.dds.anet.database.EventSeriesDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.EventSeriesInput;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class EventSeriesMergeTest extends AbstractResourceTest {
+class EventSeriesMergeTest extends AnetApplicationTest {
 
   @ParameterizedTest
   @MethodSource("provideMergeTestParameters")

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AdminSetting;
 import mil.dds.anet.test.client.AdminSettingInput;
 import mil.dds.anet.test.client.Person;
@@ -15,7 +16,7 @@ import mil.dds.anet.utils.AnetConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class AdminResourceTest extends AbstractResourceTest {
+class AdminResourceTest extends AnetApplicationTest {
 
   @Autowired
   private PersonDao personDao;

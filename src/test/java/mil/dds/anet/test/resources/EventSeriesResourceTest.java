@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.EventSeries;
 import mil.dds.anet.test.client.EventSeriesInput;
@@ -17,7 +18,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class EventSeriesResourceTest extends AbstractResourceTest {
+public class EventSeriesResourceTest extends AnetApplicationTest {
 
   private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
   public static final String FIELDS =

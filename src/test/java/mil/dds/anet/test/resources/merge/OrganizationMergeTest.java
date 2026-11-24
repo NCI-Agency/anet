@@ -7,14 +7,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationInput;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class OrganizationMergeTest extends AbstractResourceTest {
+class OrganizationMergeTest extends AnetApplicationTest {
   @Test
   void testMergeLoop() {
     // EF 1.1

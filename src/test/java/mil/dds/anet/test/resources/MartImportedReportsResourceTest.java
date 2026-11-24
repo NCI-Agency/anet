@@ -3,6 +3,7 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.MartImportedReportSearchQueryInput;
 import mil.dds.anet.test.client.MartImportedReportSearchSortBy;
 import mil.dds.anet.test.client.Person;
@@ -10,7 +11,7 @@ import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.SortOrder;
 import org.junit.jupiter.api.Test;
 
-class MartImportedReportsResourceTest extends AbstractResourceTest {
+class MartImportedReportsResourceTest extends AnetApplicationTest {
 
   private static final String REPORT_UUID = "59be259b-30b9-4d04-9e21-e8ceb58cbe9c";
 

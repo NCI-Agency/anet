@@ -29,8 +29,8 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.services.IMailReceiver;
 import mil.dds.anet.services.IMartReportImporterService;
 import mil.dds.anet.services.IMartTransmissionLogImporterService;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.mart.MartImporterWorker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +41,7 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
 
-class MartTransmissionLogImporterWorkerTest extends AbstractResourceTest {
+class MartTransmissionLogImporterWorkerTest extends AnetApplicationTest {
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();

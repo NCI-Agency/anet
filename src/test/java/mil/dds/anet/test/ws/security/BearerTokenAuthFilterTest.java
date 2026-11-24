@@ -6,7 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import mil.dds.anet.database.AccessTokenActivityDao;
-import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.ws.security.AccessTokenAuthentication;
 import mil.dds.anet.ws.security.BearerTokenAuthFilter;
 import mil.dds.anet.ws.security.BearerTokenService;
@@ -23,7 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-class BearerTokenAuthFilterTest extends AbstractResourceTest {
+class BearerTokenAuthFilterTest extends AnetApplicationTest {
 
   private final BearerTokenAuthFilter filter;
 

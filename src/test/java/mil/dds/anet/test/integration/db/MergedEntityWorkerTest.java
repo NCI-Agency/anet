@@ -31,18 +31,18 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportSensitiveInformationInput;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
 import mil.dds.anet.threads.MergedEntityWorker;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class MergedEntityWorkerTest extends AbstractResourceTest {
+class MergedEntityWorkerTest extends AnetApplicationTest {
 
   @Autowired
   private JobHistoryDao jobHistoryDao;

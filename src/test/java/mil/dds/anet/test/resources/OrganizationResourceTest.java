@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.ApprovalStep;
@@ -29,7 +30,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class OrganizationResourceTest extends AbstractResourceTest {
+public class OrganizationResourceTest extends AnetApplicationTest {
 
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   public static final String FIELDS =

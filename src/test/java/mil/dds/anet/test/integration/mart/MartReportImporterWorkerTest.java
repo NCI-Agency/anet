@@ -29,6 +29,7 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.services.IMailReceiver;
 import mil.dds.anet.services.IMartReportImporterService;
 import mil.dds.anet.services.IMartTransmissionLogImporterService;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.Atmosphere;
@@ -37,7 +38,6 @@ import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.resources.PersonResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
 import mil.dds.anet.threads.mart.MartImporterWorker;
@@ -55,7 +55,7 @@ import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.databind.node.StringNode;
 
-class MartReportImporterWorkerTest extends AbstractResourceTest {
+class MartReportImporterWorkerTest extends AnetApplicationTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper().rebuild()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

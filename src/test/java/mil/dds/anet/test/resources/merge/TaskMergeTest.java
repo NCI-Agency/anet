@@ -8,14 +8,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class TaskMergeTest extends AbstractResourceTest {
+class TaskMergeTest extends AnetApplicationTest {
   @Test
   void testMergeLoop() {
     // 1.1

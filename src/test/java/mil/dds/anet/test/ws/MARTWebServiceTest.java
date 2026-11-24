@@ -4,7 +4,7 @@ import static mil.dds.anet.test.ws.security.BearerToken.VALID_MART_TOKEN;
 import static mil.dds.anet.test.ws.security.BearerToken.VALID_NVG_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.ws.MartWebService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-class MARTWebServiceTest extends AbstractResourceTest {
+class MARTWebServiceTest extends AnetApplicationTest {
 
   @Autowired
   private MartWebService martWebService;

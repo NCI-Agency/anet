@@ -20,6 +20,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Position;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
 import mil.dds.anet.test.client.AuthorizationGroup;
@@ -44,7 +45,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
+class SubscriptionUpdateResourceTest extends AnetApplicationTest {
 
   protected static final String FIELDS =
       "{ createdAt isNote updatedObjectType updatedObjectUuid updatedObject {"
@@ -53,7 +54,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
           + " ... on Report { uuid } ... on Task { uuid }"
           + " ... on AuthorizationGroup { uuid } ... on Event { uuid } } subscription {"
           + " __typename " // ugly work-around for issue in the graphql-java-generator
-          + _SUBSCRIPTION_FIELDS + " } }";
+          + SUBSCRIPTION_FIELDS + " } }";
 
   private final Map<String, Consumer<String>> UPDATERS = Map.of( //
       LocationDao.TABLE_NAME, this::updateLocation, //
@@ -83,7 +84,8 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     final mil.dds.anet.beans.Subscription subscriptionInput = new mil.dds.anet.beans.Subscription();
     subscriptionInput.setSubscriberUuid(foundPosition.getUuid());
     subscriptionInput.setSubscribedObjectType(LocationDao.TABLE_NAME);
-    subscriptionInput.setSubscribedObjectUuid(SUBSCRIPTION_TESTS.get(LocationDao.TABLE_NAME));
+    subscriptionInput.setSubscribedObjectUuid(
+        SubscriptionResourceTest.SUBSCRIPTION_TESTS.get(LocationDao.TABLE_NAME));
     final mil.dds.anet.beans.Subscription subscription = subscriptionDao.insert(subscriptionInput);
 
     // Update the subscribed object
@@ -104,8 +106,10 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     // Create a report using the objects we are going to subscribe to
     final String reportUuid = createReport(isCancelled);
     // Subscribe jack to all object types, where for report we use the one we just created
-    final Map<String, Subscription> subscriptions = SUBSCRIPTION_TESTS.entrySet().stream().collect(
-        Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(testCase.getKey(),
+    final Map<String, Subscription> subscriptions = SubscriptionResourceTest.SUBSCRIPTION_TESTS
+        .entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(
+            testCase.getKey(),
             ReportDao.TABLE_NAME.equals(testCase.getKey()) ? reportUuid : testCase.getValue())));
 
     // Check jack's subscription updates
@@ -142,8 +146,10 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     // Create a report using the objects we are going to subscribe to
     final String reportUuid = createReport(isCancelled);
     // Subscribe jack to all object types, where for report we use the one we just created
-    final Map<String, Subscription> subscriptions = SUBSCRIPTION_TESTS.entrySet().stream().collect(
-        Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(testCase.getKey(),
+    final Map<String, Subscription> subscriptions = SubscriptionResourceTest.SUBSCRIPTION_TESTS
+        .entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, testCase -> createTestSubscription(
+            testCase.getKey(),
             ReportDao.TABLE_NAME.equals(testCase.getKey()) ? reportUuid : testCase.getValue())));
 
     // Check jack's subscription updates
@@ -251,17 +257,20 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     // Create a DRAFT report referencing the subscribed objects
     final ReportInput reportInput = ReportInput.builder().withState(ReportState.DRAFT)
         .withIntent("Test report for subscription updates").withEngagementDate(Instant.now())
-        .withLocation(
-            getLocationInput(getLocation(getSubscribedObjectUuid(LocationDao.TABLE_NAME))))
+        .withLocation(getLocationInput(
+            getLocation(SubscriptionResourceTest.getSubscribedObjectUuid(LocationDao.TABLE_NAME))))
         .withCancelledReason(isCancelled ? ReportCancelledReason.CANCELLED_BY_ADVISOR : null)
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(getJackJackson()),
-            personToPrimaryReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
+            personToPrimaryReportPerson(
+                getPerson(SubscriptionResourceTest.getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
                 false),
             personToReportPerson(getChristopfTopferness(), true))))
-        .withReportCommunities(List.of(getAuthorizationGroupInput(
-            getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
-        .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
-        .withEvent(getEventInput(getEvent(getSubscribedObjectUuid(EventDao.TABLE_NAME))))
+        .withReportCommunities(List.of(getAuthorizationGroupInput(getAuthorizationGroup(
+            SubscriptionResourceTest.getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
+        .withTasks(List.of(getTaskInput(
+            getTask(SubscriptionResourceTest.getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
+        .withEvent(getEventInput(
+            getEvent(SubscriptionResourceTest.getSubscribedObjectUuid(EventDao.TABLE_NAME))))
         .withNextSteps("Test report next steps for subscription updates")
         .withReportText("<p>Test report intent for subscription updates</p>").build();
     final String reportUuid = withCredentials(jackUser,

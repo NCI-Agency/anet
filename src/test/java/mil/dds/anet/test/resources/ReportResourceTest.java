@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AdminSettingInput;
 import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
@@ -85,7 +86,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class ReportResourceTest extends AbstractResourceTest {
+public class ReportResourceTest extends AnetApplicationTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -2515,7 +2516,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText("I'm writing a report that I intend to delete very soon.")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
         .withReportCommunities(inactiveAgs.getList().stream()
-            .map(AbstractResourceTest::getAuthorizationGroupInput).toList())
+            .map(AnetApplicationTest::getAuthorizationGroupInput).toList())
         .withEngagementDate(Instant.now()).withDuration(15).build();
     final Report r = withCredentials(jackUser, t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(r).isNotNull();
@@ -2533,8 +2534,8 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Update the report and check the reportCommunities
     final ReportInput update = getReportInput(check);
-    update.setReportCommunities(activeAgs.getList().stream()
-        .map(AbstractResourceTest::getAuthorizationGroupInput).toList());
+    update.setReportCommunities(
+        activeAgs.getList().stream().map(AnetApplicationTest::getAuthorizationGroupInput).toList());
     final Report updated =
         withCredentials(jackUser, t -> mutationExecutor.updateReport(FIELDS, false, update, false));
     assertThat(updated).isNotNull();

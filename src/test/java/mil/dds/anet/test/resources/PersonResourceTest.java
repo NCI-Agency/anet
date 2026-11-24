@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.CustomSensitiveInformationDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
@@ -52,7 +53,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class PersonResourceTest extends AbstractResourceTest {
+public class PersonResourceTest extends AnetApplicationTest {
 
   private static final String BIRTHDAY_FIELD = "birthday";
   private static final String POLITICAL_POSITION_FIELD = "politicalPosition";

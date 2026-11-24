@@ -29,11 +29,11 @@ import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestBeans;
-import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
@@ -42,7 +42,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class FutureEngagementWorkerTest extends AbstractResourceTest {
+class FutureEngagementWorkerTest extends AnetApplicationTest {
 
   private final List<String> expectedIds = new ArrayList<>();
   private final List<String> unexpectedIds = new ArrayList<>();

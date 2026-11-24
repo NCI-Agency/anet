@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.resources.AttachmentResource;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Attachment;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
@@ -33,13 +34,10 @@ import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public class AttachmentResourceTest extends AbstractResourceTest {
+public class AttachmentResourceTest extends AnetApplicationTest {
 
   public static final String ATTACHMENT_FIELDS =
       "{ uuid updatedAt mimeType fileName description classification caption author { uuid }"
@@ -145,40 +143,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(createdAttachment.getAttachmentRelatedObjects())
         .hasSameSizeAs(testAttachmentInput2.getAttachmentRelatedObjects());
     assertThat(createdAttachment.getContentLength()).isNull();
-  }
-
-  @Nested
-  class RestrictedAttachmentsTest {
-    private static final String RESTRICT_TO_ADMINS = "restrictToAdmins";
-
-    private Object restrictToAdmins;
-
-    @BeforeEach
-    void setUp() {
-      // Set restrictToAdmins to true in dictionary
-      final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
-      restrictToAdmins = attachmentSettings.get(RESTRICT_TO_ADMINS);
-      attachmentSettings.put(RESTRICT_TO_ADMINS, true);
-    }
-
-    @AfterEach
-    void tearDown() {
-      // Restore value of restrictToAdmins in dictionary
-      final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
-      attachmentSettings.put(RESTRICT_TO_ADMINS, restrictToAdmins);
-    }
-
-    @Test
-    void testRestrictToAdmins() {
-      final AttachmentInput testAttachmentInput = AttachmentInput.builder()
-          .withFileName("testAttachment.jpg").withMimeType(getFirstMimeType())
-          .withDescription("a test attachment created by testCreateAttachment")
-          .withAttachmentRelatedObjects(List.of()).build();
-      // Fail attachment create with any user other than admin
-      failAttachmentCreate(jackUser, testAttachmentInput);
-      // Succeed attachment create as admin
-      succeedAttachmentCreate(adminUser, testAttachmentInput);
-    }
   }
 
   @Test
@@ -1131,7 +1095,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(forceUpdated.getDescription()).isEqualTo(test.getDescription());
   }
 
-
   private Attachment succeedAttachmentCreate(final String username,
       final AttachmentInput attachmentInput) {
     final String createdAttachmentUuid =
@@ -1175,12 +1138,9 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private void failAttachmentUpdate(final String username, final AttachmentInput attachmentInput) {
-    try {
-      withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput, false));
-      fail("Expected exception updating attachment");
-    } catch (Exception expectedException) {
-      // OK
-    }
+    assertThatCode(() -> withCredentials(username,
+        t -> mutationExecutor.updateAttachment("", attachmentInput, false)))
+        .withFailMessage("Expected exception updating attachment").isInstanceOf(Exception.class);
   }
 
   @Test

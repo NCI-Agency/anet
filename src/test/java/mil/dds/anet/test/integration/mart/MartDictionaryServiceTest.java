@@ -8,7 +8,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.services.IMartDictionaryService;
 import mil.dds.anet.services.MartReportImporterService;
-import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.AnetApplicationTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -19,7 +19,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.databind.node.StringNode;
 
-class MartDictionaryServiceTest extends AbstractResourceTest {
+class MartDictionaryServiceTest extends AnetApplicationTest {
 
   private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 

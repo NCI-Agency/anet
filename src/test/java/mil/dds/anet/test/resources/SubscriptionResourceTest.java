@@ -4,11 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.Lists;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.AnetApplicationTest;
 import mil.dds.anet.test.client.AnetBeanList_Subscription;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
@@ -19,9 +26,34 @@ import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Subscription;
+import mil.dds.anet.test.client.SubscriptionSearchQueryInput;
 import org.junit.jupiter.api.Test;
 
-class SubscriptionResourceTest extends SubscriptionTestHelper {
+class SubscriptionResourceTest extends AnetApplicationTest {
+
+  public static final String FIELDS = "{ " + SUBSCRIPTION_FIELDS + " }";
+
+  public static final Map<String, String> SUBSCRIPTION_TESTS = Map.of(
+      // Location: Antarctica
+      LocationDao.TABLE_NAME, "e5b3a4b9-acf7-4c79-8224-f248b9a7215d",
+      // Organization: EF 5.1 (Creed's position's organization)
+      OrganizationDao.TABLE_NAME, "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf",
+      // Person: Bratton, Creed
+      PersonDao.TABLE_NAME, "31cba227-f6c6-49e9-9483-fce441bea624",
+      // Position: EF 5.1 Advisor Quality Assurance (Creed's position)
+      PositionDao.TABLE_NAME, "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47",
+      // Report: Discuss improvements in Annual Budgeting process
+      ReportDao.TABLE_NAME, "9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5",
+      // Task: EF 5
+      TaskDao.TABLE_NAME, "242efaa3-d5de-4970-996d-50ca90ef6480",
+      // AuthorizationGroup: Inactive positions
+      AuthorizationGroupDao.TABLE_NAME, "90a5196d-acf3-4a81-8ff9-3a8c7acabdf3",
+      // Event: NMI PDT 2024-01
+      EventDao.TABLE_NAME, "e850846e-9741-40e8-bc51-4dccc30cf47f");
+
+  public static String getSubscribedObjectUuid(final String subscribedObjectType) {
+    return SUBSCRIPTION_TESTS.get(subscribedObjectType);
+  }
 
   @Test
   void testAdminSubscription() {
@@ -301,6 +333,13 @@ class SubscriptionResourceTest extends SubscriptionTestHelper {
   }
 
   // helper methods
+
+  private AnetBeanList_Subscription getAllSubscriptions(final String username) {
+    final SubscriptionSearchQueryInput ssqi =
+        SubscriptionSearchQueryInput.builder().withPageSize(0).build();
+    return withCredentials(username,
+        t -> queryExecutor.mySubscriptions(getListFields(FIELDS), ssqi));
+  }
 
   private void deleteObjectSubscription(final String username, final String subscribedObjectUuid,
       final boolean expectException) {
