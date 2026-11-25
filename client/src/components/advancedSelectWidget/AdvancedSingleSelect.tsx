@@ -10,6 +10,8 @@ interface AdvancedSingleSelectProps extends AdvancedSelectProps {
   value?: any
   valueFunc?: (...args: unknown[]) => unknown
   disabledValue?: any
+  overlayTable?: React.ReactElement // how to render the selected items
+  disabled: boolean
   showRemoveButton: boolean
 }
 
@@ -18,6 +20,7 @@ const AdvancedSingleSelect = ({
   valueFunc = (v, k) => v?.[k],
   disabledValue = {},
   overlayTable = AdvancedSingleSelectOverlayTable,
+  disabled = false,
   showRemoveButton = true,
   ...props
 }: AdvancedSingleSelectProps) => {
@@ -27,6 +30,7 @@ const AdvancedSingleSelect = ({
       valueFunc={valueFunc}
       disabledValue={disabledValue}
       overlayTable={overlayTable}
+      disabled={disabled}
       {...props}
       handleAddItem={handleAddItem}
       handleRemoveItem={handleRemoveItem}
@@ -35,7 +39,7 @@ const AdvancedSingleSelect = ({
         _isEmpty(value) ? "" : valueFunc(value, props.valueKey)
       }
       extraAddon={
-        showRemoveButton && !_isEmpty(value) ? (
+        !disabled && showRemoveButton && !_isEmpty(value) ? (
           <RemoveButton title="Clear selection" onClick={handleRemoveItem} />
         ) : null
       }

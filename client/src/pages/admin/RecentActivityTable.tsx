@@ -35,6 +35,7 @@ const RecentActivityTable = ({ text, values }: RecentActivityTableProps) => {
             <th>#</th>
             <th>Time</th>
             <th>User</th>
+            <th>Tenant</th>
             <th>IP</th>
             <th>Request</th>
           </tr>
@@ -52,6 +53,7 @@ const RecentActivityTable = ({ text, values }: RecentActivityTableProps) => {
                 <td className="nobr">
                   <LinkTo modelType="Person" model={ua.user} />
                 </td>
+                <td>{ua.user?.tenant?.name}</td>
                 <td>{ua.activity.ip}</td>
                 <td>{ua.activity.request}</td>
               </tr>

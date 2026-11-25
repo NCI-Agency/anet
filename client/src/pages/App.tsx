@@ -53,6 +53,9 @@ const GQL_GET_APP_DATA = gql`
         authorizationGroupsAdministrated {
           ${gqlEntityFieldsMap.AuthorizationGroup}
         }
+        tenantsAdministrated {
+          ${gqlEntityFieldsMap.Tenant}
+        }
         organization {
           ${gqlEntityFieldsMap.Organization}
           descendantOrgs {
@@ -113,6 +116,12 @@ const GQL_GET_APP_DATA = gql`
         authorizationGroupsAdministrated {
           ${gqlEntityFieldsMap.AuthorizationGroup}
         }
+        tenantsAdministrated {
+          ${gqlEntityFieldsMap.Tenant}
+          accessRequests {
+            uuid
+          }
+        }
       }
       additionalPositions {
         ${gqlEntityFieldsMap.Position}
@@ -135,6 +144,9 @@ const GQL_GET_APP_DATA = gql`
           }
         }
       }
+      tenant {
+        ${gqlEntityFieldsMap.Tenant}
+      }
     }
 
     topLevelOrgs: organizationList(
@@ -148,6 +160,10 @@ const GQL_GET_APP_DATA = gql`
         ${gqlEntityFieldsMap.Organization}
         app6standardIdentity
       }
+    }
+
+    allTenants: tenantList {
+      ${gqlEntityFieldsMap.Tenant}
     }
 
     preferences {
@@ -174,12 +190,14 @@ function processData(data) {
     return {}
   }
   const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
+  const allTenants = data.allTenants
   const currentUser = new Person(data.me)
   const genericPreferences = data.preferences ?? {}
   const notifications = getNotifications(currentUser.position)
   return {
     currentUser,
     allOrganizations,
+    allTenants,
     genericPreferences,
     notifications
   }
@@ -203,12 +221,14 @@ const App = ({ pageDispatchers, pageProps }: AppProps) => {
     () => ({
       currentUser: appState.currentUser,
       allOrganizations: appState.allOrganizations,
+      allTenants: appState.allTenants,
       genericPreferences: appState.genericPreferences,
       loadAppData: refetch,
       notifications: appState.notifications
     }),
     [
       appState.allOrganizations,
+      appState.allTenants,
       appState.currentUser,
       appState.genericPreferences,
       appState.notifications,

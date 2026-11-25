@@ -72,7 +72,7 @@ const AttachmentShow = ({ pageDispatchers }: AttachmentShowProps) => {
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit =
-    currentUser.isAdmin() ||
+    currentUser.isTenantAdmin() ||
     (!Settings.fields.attachment.restrictToAdmins &&
       currentUser.uuid === attachment.author.uuid)
   const { iconImage, contentMissing } =

@@ -14,6 +14,10 @@ import MergePositions from "pages/admin/merge/MergePositions"
 import MergeTasks from "pages/admin/merge/MergeTasks"
 import PendingEmailsShow from "pages/admin/pendingEmails/Show"
 import Preferences from "pages/admin/preferences/Preferences"
+import TenantEdit from "pages/admin/tenants/Edit"
+import TenantsList from "pages/admin/tenants/Index"
+import TenantNew from "pages/admin/tenants/New"
+import TenantShow from "pages/admin/tenants/Show"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
@@ -129,7 +133,7 @@ const routes = [
                         authorizationCallback={currentUser =>
                           !Settings.fields.attachment.featureDisabled &&
                           (!Settings.fields.attachment.restrictToAdmins ||
-                            currentUser.isAdmin())
+                            currentUser.isTenantAdmin())
                         }
                       />
                     ),
@@ -235,7 +239,9 @@ const routes = [
           {
             element: (
               <ProtectedRoute
-                authorizationCallback={currentUser => currentUser?.isAdmin()}
+                authorizationCallback={currentUser =>
+                  currentUser?.isTenantAdmin()
+                }
               />
             ),
             children: [{ path: "new", element: <AuthorizationGroupNew /> }]
@@ -264,7 +270,7 @@ const routes = [
       {
         element: (
           <ProtectedRoute
-            authorizationCallback={currentUser => currentUser?.isAdmin()}
+            authorizationCallback={currentUser => currentUser?.isTenantAdmin()}
           />
         ),
         children: [
@@ -275,15 +281,26 @@ const routes = [
               {
                 element: (
                   <ProtectedRoute
-                    authorizationCallback={() =>
-                      !Settings.automaticallyAllowAllNewUsers
+                    authorizationCallback={currentUser =>
+                      currentUser?.isAdmin()
                     }
                   />
                 ),
                 children: [
                   {
-                    path: "usersPendingVerification",
-                    element: <UsersPendingVerification />
+                    element: (
+                      <ProtectedRoute
+                        authorizationCallback={() =>
+                          !Settings.automaticallyAllowAllNewUsers
+                        }
+                      />
+                    ),
+                    children: [
+                      {
+                        path: "usersPendingVerification",
+                        element: <UsersPendingVerification />
+                      }
+                    ]
                   }
                 ]
               },
@@ -293,7 +310,10 @@ const routes = [
                   { path: "people", element: <MergePeople /> },
                   { path: "positions", element: <MergePositions /> },
                   { path: "locations", element: <MergeLocations /> },
-                  { path: "organizations", element: <MergeOrganizations /> },
+                  {
+                    path: "organizations",
+                    element: <MergeOrganizations />
+                  },
                   { path: "tasks", element: <MergeTasks /> },
                   { path: "eventSeries", element: <MergeEventSeries /> }
                 ]
@@ -301,16 +321,53 @@ const routes = [
               {
                 path: "userActivities",
                 children: [
-                  { path: "perPeriod", element: <UserActivitiesPerPeriod /> },
+                  {
+                    path: "perPeriod",
+                    element: <UserActivitiesPerPeriod />
+                  },
                   { path: "overTime", element: <UserActivitiesOverTime /> }
                 ]
               },
-              { path: "auditTrail", element: <AuditTrailTable /> },
-              { path: "pendingEmails", element: <PendingEmailsShow /> },
+              {
+                element: (
+                  <ProtectedRoute
+                    authorizationCallback={currentUser =>
+                      currentUser?.isAdmin()
+                    }
+                  />
+                ),
+                children: [
+                  { path: "auditTrail", element: <AuditTrailTable /> },
+                  { path: "pendingEmails", element: <PendingEmailsShow /> }
+                ]
+              },
               { path: "accessTokens", element: <AccessTokensList /> },
               {
                 path: "configureEventTypes",
                 element: <ConfigureEventTypesShow />
+              },
+              {
+                path: "tenants",
+                children: [
+                  { index: true, element: <TenantsList /> },
+                  {
+                    element: (
+                      <ProtectedRoute
+                        authorizationCallback={currentUser =>
+                          currentUser?.isAdmin()
+                        }
+                      />
+                    ),
+                    children: [{ path: "new", element: <TenantNew /> }]
+                  },
+                  {
+                    path: ":uuid",
+                    children: [
+                      { index: true, element: <TenantShow /> },
+                      { path: "edit", element: <TenantEdit /> }
+                    ]
+                  }
+                ]
               },
               {
                 element: (
@@ -322,8 +379,14 @@ const routes = [
                   { path: "martImporter", element: <MartImporterShow /> }
                 ]
               },
-              { path: "graphiql", element: <GraphiQL /> },
-              { path: "preferences", element: <Preferences /> }
+              {
+                path: "preferences",
+                element: <Preferences />
+              },
+              {
+                path: "graphiql",
+                element: <GraphiQL />
+              }
             ]
           }
         ]

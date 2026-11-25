@@ -250,7 +250,7 @@ test.describe(() => {
         )
         // Don't logout, next test continues…
       })
-      test("Should save even if endOfTourDate is not filled in", async () => {
+      test("Should not save a user without a tenant", async () => {
         // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
         await (
           await CreatePerson.getFamilyName()
@@ -259,6 +259,7 @@ test.describe(() => {
           await CreatePerson.getGivenName()
         ).fill(String(VALID_PERSON_ADVISOR.givenName))
         await (await CreatePerson.getUserTrueButton()).click()
+        await expect(await CreatePerson.getNoTenantWarning()).not.toHaveCount(0)
         for (const [
           index,
           address
@@ -296,6 +297,37 @@ test.describe(() => {
         ).waitFor({
           state: "detached"
         })
+        await CreatePerson.submitForm()
+        await expect(await CreatePerson.getAlertSuccess()).toHaveCount(0)
+        await (
+          await CreatePerson.getTenantError()
+        ).waitFor({
+          state: "visible"
+        })
+        await expect(await CreatePerson.getTenantError()).toHaveText(
+          "An active user must be a member of an active Tenant",
+          {
+            useInnerText: true
+          }
+        )
+        await (await CreatePerson.getTenantInput()).scrollIntoViewIfNeeded()
+        await (await CreatePerson.getTenantInput()).click()
+        await (
+          await CreatePerson.getTenantAdvancedSelectFirstItem()
+        ).waitFor({
+          state: "visible"
+        })
+        await (await CreatePerson.getTenantAdvancedSelectFirstItem()).click()
+        await (
+          await CreatePerson.getTenantError()
+        ).waitFor({
+          state: "detached"
+        })
+        await expect(await CreatePerson.getNoTenantWarning()).toHaveCount(0)
+        // Don't logout, next test continues…
+      })
+      test("Should save even if endOfTourDate is not filled in", async () => {
+        // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
         await (await CreatePerson.getEndOfTourDate()).fill("")
         await (await CreatePerson.getFamilyName()).click()
         for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {

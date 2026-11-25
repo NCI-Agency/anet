@@ -20,11 +20,12 @@ public class UserActivityDao extends AbstractDao {
   public int insert(final UserActivity userActivity) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createUpdate(
-          "INSERT INTO \"userActivities\" (\"personUuid\", \"organizationUuid\", \"visitedAt\") "
-              + "VALUES (:personUuid, :organizationUuid, :visitedAt) ON CONFLICT DO NOTHING")
-          .bind("personUuid", userActivity.getPersonUuid())
-          .bind("organizationUuid", userActivity.getOrganizationUuid())
+      return handle
+          .createUpdate("INSERT INTO \"userActivities\" "
+              + "(\"personUuid\", \"tenantUuid\", \"organizationUuid\", \"visitedAt\") "
+              + "VALUES (:personUuid, :tenantUuid, :organizationUuid, :visitedAt) "
+              + "ON CONFLICT DO NOTHING")
+          .bindBean(userActivity)
           .bind("visitedAt", DaoUtils.asLocalDateTime(userActivity.getVisitedAt())).execute();
     } finally {
       closeDbHandle(handle);

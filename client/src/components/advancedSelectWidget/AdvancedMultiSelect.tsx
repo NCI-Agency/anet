@@ -6,6 +6,7 @@ import * as FieldHelper from "components/FieldHelper"
 
 interface AdvancedMultiSelectProps extends AdvancedSelectProps {
   value: any[]
+  overlayTable?: React.ReactElement // how to render the selected items
 }
 
 const AdvancedMultiSelect = ({
