@@ -4,50 +4,38 @@ const PAGE_URL = "/locations/:uuid/edit"
 
 class EditLocation extends Page {
   async getSaveLocationButton() {
-    return this.page.locator('//button[text()="Save Location"]').first()
+    return this.page
+      .getByRole("button", { name: "Save Location", exact: true })
+      .first()
   }
 
   async getLocationTypeLabel() {
-    return this.page
-      .getByText("Type", {
-        exact: false
-      })
-      .first()
+    return this.page.getByText("Type").first()
   }
 
   async getLatLngLabel() {
-    return this.page
-      .getByText("Latitude", {
-        exact: false
-      })
-      .first()
+    return this.page.getByText("Latitude").first()
   }
 
   // Can't edit dictionary to change location format, so can't test this for now
   async getMgrsLabel() {
-    return this.page
-      .getByText("MGRS", {
-        exact: false
-      })
-      .first()
+    return this.page.getByText("MGRS").first()
   }
 
   async getAllFormatsPopover() {
     return this.page.locator("button#gloc-info-btn").first()
   }
 
-  // parent of MGRS table data => tr
+  // Scope format values to the row containing its copy button.
   async getAllFormatsPopoverLat() {
     return this.page
       .locator(".bp6-popover-content table")
       .first()
-      .getByRole("button", {
-        name: "Latitude",
-        exact: false
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("button", { name: "Latitude" })
       })
       .first()
-      .locator("..")
-      .locator("..")
       .locator("span:first-child")
       .first()
   }
@@ -56,29 +44,25 @@ class EditLocation extends Page {
     return this.page
       .locator(".bp6-popover-content table")
       .first()
-      .getByRole("button", {
-        name: "Latitude",
-        exact: false
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("button", { name: "Latitude" })
       })
       .first()
-      .locator("..")
-      .locator("..")
       .locator("span:nth-child(3)")
       .first()
   }
 
   async getAllFormatsPopoverMGRS() {
-    // parent of MGRS table data => tr
+    // Scope format values to the row containing its copy button.
     return this.page
       .locator(".bp6-popover-content table")
       .first()
-      .getByRole("button", {
-        name: "MGRS",
-        exact: false
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("button", { name: "MGRS" })
       })
       .first()
-      .locator("..")
-      .locator("..")
       .locator("span:first-child")
       .first()
   }

@@ -13,7 +13,9 @@ class ShowTask extends Page {
   }
 
   async getCreateSubTaskButton() {
-    return this.page.locator('//a[text()="Create sub-objective"]').first()
+    return this.page
+      .getByRole("link", { name: "Create sub-objective", exact: true })
+      .first()
   }
 
   async getForm() {
@@ -96,7 +98,9 @@ class ShowTask extends Page {
   }
 
   async getDeleteConfirmButton() {
-    return this.page.locator('//button[text()="Yes, I am sure"]').first()
+    return this.page
+      .getByRole("button", { name: "Yes, I am sure", exact: true })
+      .first()
   }
 
   async getAssessmentModalForm() {
@@ -131,17 +135,19 @@ class ShowTask extends Page {
 
   async getEditEngagementPlanningApprovalsButton() {
     return this.page
-      .locator(
-        '//button[contains(text(), "Edit Engagement planning approvals")]'
-      )
+      .getByRole("button", {
+        name: "Edit Engagement planning approvals",
+        exact: true
+      })
       .first()
   }
 
   async getEditReportPublicationApprovalsButton() {
     return this.page
-      .locator(
-        '//button[contains(text(), "Edit Report publication approvals")]'
-      )
+      .getByRole("button", {
+        name: "Edit Report publication approvals",
+        exact: true
+      })
       .first()
   }
 

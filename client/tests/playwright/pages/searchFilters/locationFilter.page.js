@@ -29,8 +29,7 @@ class LocationFilter extends Page {
 
     const withinLocationButton = this.page
       .getByRole("button", {
-        name: "Within Location",
-        exact: false
+        name: "Within Location"
       })
       .first()
     await (await withinLocationButton).click()
