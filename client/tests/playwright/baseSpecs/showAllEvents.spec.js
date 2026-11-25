@@ -18,20 +18,26 @@ test.describe(() => {
       await ShowAllEvents.open()
     })
     test("Should display all event series", async () => {
-      const eventSeries = await ShowAllEvents.getEventSeriesList()
-      expect(eventSeries.length).toBeGreaterThanOrEqual(1)
-      expect(eventSeries.length).toBeLessThanOrEqual(4)
-      const eventSeriesNames = await ShowAllEvents.getEventSeriesNames()
-      expect(eventSeriesNames).toEqual(
-        expect.arrayContaining(EVENT_SERIES_NAMES)
-      )
+      await expect
+        .poll(() => ShowAllEvents.eventSeriesNames.allInnerTexts())
+        .toEqual(expect.arrayContaining(EVENT_SERIES_NAMES))
+      await expect
+        .poll(() => ShowAllEvents.eventSeries.count())
+        .toBeGreaterThanOrEqual(1)
+      await expect
+        .poll(() => ShowAllEvents.eventSeries.count())
+        .toBeLessThanOrEqual(4)
     })
     test("Should display all events", async () => {
-      const events = await ShowAllEvents.getEventsList()
-      expect(events.length).toBeGreaterThanOrEqual(3)
-      expect(events.length).toBeLessThanOrEqual(7)
-      const eventNames = await ShowAllEvents.getEventNames()
-      expect(eventNames).toEqual(expect.arrayContaining(EVENT_NAMES))
+      await expect
+        .poll(() => ShowAllEvents.eventNames.allInnerTexts())
+        .toEqual(expect.arrayContaining(EVENT_NAMES))
+      await expect
+        .poll(() => ShowAllEvents.events.count())
+        .toBeGreaterThanOrEqual(3)
+      await expect
+        .poll(() => ShowAllEvents.events.count())
+        .toBeLessThanOrEqual(7)
     })
   })
 })
