@@ -7376,6 +7376,27 @@
 			splitStatements="false" stripComments="false" />
 	</changeSet>
 
+	<changeSet id="postgresql-postgis-geometry" author="midmarch" dbms="postgresql">
+		<comment>Replace location GeoJSON text with PostGIS geometry, preserving valid shapes and clearing invalid GeoJSON.</comment>
+		<sql splitStatements="false">
+			CREATE EXTENSION IF NOT EXISTS postgis;
+			<!-- Invalid GeoJSON becomes NULL (no shape), without aborting the migration. -->
+			CREATE FUNCTION pg_temp.anet_geojson_to_geometry(value text) RETURNS geometry
+			LANGUAGE plpgsql STRICT AS $migration$
+			BEGIN
+				RETURN ST_GeomFromGeoJSON(value);
+			EXCEPTION WHEN OTHERS THEN
+				RETURN NULL;
+			END;
+			$migration$;
+
+			ALTER TABLE locations ALTER COLUMN "geoJson" TYPE geometry
+				USING pg_temp.anet_geojson_to_geometry("geoJson");
+			ALTER TABLE locations RENAME COLUMN "geoJson" TO "geoShape";
+			DROP FUNCTION pg_temp.anet_geojson_to_geometry(text);
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

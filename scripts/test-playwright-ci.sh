@@ -44,7 +44,7 @@ ensure_service() {
   fi
 }
 
-ensure_service anet-psql-test-server dockerCreateDB dockerStartDB
+ensure_service anet-postgis-test-server dockerCreateDB dockerStartDB
 ensure_service anet-keycloak-server dockerConfigureKeycloak dockerStartKeycloak
 ensure_service anet-fake-smtp-test-server dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
 ./gradlew -PtestEnv buildClient

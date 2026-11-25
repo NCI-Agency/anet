@@ -27,9 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
   private static final String[] fields = {"uuid", "name", "status", "lat", "lng", "type", "digram",
-      "trigram", "description", "createdAt", "updatedAt", "customFields", "geoJson"};
+      "trigram", "description", "createdAt", "updatedAt", "customFields"};
   public static final String TABLE_NAME = "locations";
-  public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  // Expose the stored PostGIS geometry through the existing GeoJSON API.
+  public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true)
+      + ", ST_AsGeoJSON(\"locations\".\"geoShape\") AS \"locations_geoJson\"";
 
   public LocationDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
@@ -59,9 +61,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     final Handle handle = getDbHandle();
     try {
       handle.createUpdate(
-          "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, digram, trigram, "
+          "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, \"geoShape\", digram, trigram, "
               + "\"createdAt\", \"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :description, :status, "
-              + ":lat, :lng, :digram, :trigram, :createdAt, :updatedAt, :customFields)")
+              + ":lat, :lng, ST_GeomFromGeoJSON(:geoJson), :digram, :trigram, :createdAt, :updatedAt, :customFields)")
           .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(l.getStatus()))
@@ -78,6 +80,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     try {
       return handle.createUpdate("/* updateLocation */ UPDATE locations "
           + "SET name = :name, type = :type, description = :description, status = :status, lat = :lat, lng = :lng, "
+          + "\"geoShape\" = ST_GeomFromGeoJSON(:geoJson), "
           + "digram = :digram, trigram = :trigram, "
           + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
           .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
@@ -93,7 +96,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     try {
       return handle
           .createUpdate("/* updateLocationGeoJsonOnly */ UPDATE locations "
-              + "SET \"geoJson\" = :geoJson WHERE uuid = :uuid")
+              + "SET \"geoShape\" = ST_GeomFromGeoJSON(:geoJson) WHERE uuid = :uuid")
           .bind("uuid", uuid).bind("geoJson", geoJson).execute();
     } finally {
       closeDbHandle(handle);

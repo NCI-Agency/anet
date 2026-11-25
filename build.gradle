@@ -56,7 +56,8 @@ String TEST_DB = "testAnet"
 run.environment("VDR_FORMAT", run.environment["VDR_FORMAT"] ?: "cyclonedx-json")
 run.environment("KEYCLOAK_VERSION", run.environment["KEYCLOAK_VERSION"] ?: "latest")
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "postgresql")
-run.environment("DB_VERSION", run.environment["DB_VERSION"] ?: "latest")
+// PostGIS image tags include both the PostgreSQL and PostGIS versions.
+run.environment("DB_VERSION", run.environment["DB_VERSION"] ?: "15-3.7")
 run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhost")
 run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? TEST_DB : DEV_DB)
 run.environment("ANET_DB_USERNAME", run.environment["ANET_DB_USERNAME"] ?: isTestEnv ? "anetTestUser" : "anetDevUser")
@@ -93,7 +94,7 @@ String adminFamilyName = run.environment["ANET_ADMIN_FAMILY_NAME"] ?: "Dmin"
 String adminGivenName = run.environment["ANET_ADMIN_GIVEN_NAME"] ?: "Arthur"
 String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "arthur"
 
-String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
+String dbContainerName = isTestEnv ? "anet-postgis-test-server" : "anet-postgis-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
 
@@ -525,11 +526,11 @@ tasks.register('dbRestore', DockerExecContainer) {
 }
 dbRestore.finalizedBy('dbDropLargeObjects')
 
-// Database container (PostgreSQL)
+// Database container (PostgreSQL with PostGIS)
 
 tasks.register('dockerPullDB', DockerPullImage) {
 	group = "database container"
-	image = "postgres:${run.environment['DB_VERSION']}"
+	image = "postgis/postgis:${run.environment['DB_VERSION']}"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
