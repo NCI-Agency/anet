@@ -122,7 +122,7 @@ configurations {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.14'
+	implementation 'org.postgresql:postgresql:42.7.15'
 	implementation 'org.liquibase:liquibase-core'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
@@ -189,7 +189,7 @@ dependencies {
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:4.0.2'
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:4.0.3'
 	testImplementation "org.springframework.boot:spring-boot-starter-test"
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
