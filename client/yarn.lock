@@ -6951,7 +6951,7 @@ __metadata:
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.18.1"
-    milsymbol: "npm:3.0.5"
+    milsymbol: "npm:3.0.6"
     ml-matrix: "npm:6.15.1"
     moment: "npm:2.31.0"
     moment-timezone: "npm:0.6.6"
@@ -6972,7 +6972,7 @@ __metadata:
     react-redux: "npm:9.3.1"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:12.3.0"
-    react-router: "npm:7.18.6"
+    react-router: "npm:7.18.7"
     react-scroll: "npm:1.9.3"
     react-test-renderer: "npm:18.3.1"
     react-toastify: "npm:11.2.0"
@@ -12835,10 +12835,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"milsymbol@npm:3.0.5":
-  version: 3.0.5
-  resolution: "milsymbol@npm:3.0.5"
-  checksum: 10c0/0f2ed60a59e91a9b3018b9aebb9da3bcb496cbe38d66be9d135fb07d37b9705c6df1a9e5754dbdf54bf855a81ea2578d13193cdcf15937a87018ee5ab0888286
+"milsymbol@npm:3.0.6":
+  version: 3.0.6
+  resolution: "milsymbol@npm:3.0.6"
+  checksum: 10c0/0d70934d84178bfdad90f688e4de7c9fe653d96a6ad38d5bd076bfd9f71e31d089af0bdf7631b84ba0108a2a6e2e4605bf30177ee7a05ec63f0523adb3a7bcbb
   languageName: node
   linkType: hard
 
@@ -14521,19 +14521,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.18.6":
-  version: 7.18.6
-  resolution: "react-router@npm:7.18.6"
+"react-router@npm:7.18.7":
+  version: 7.18.7
+  resolution: "react-router@npm:7.18.7"
   dependencies:
     cookie: "npm:^1.0.1"
     set-cookie-parser: "npm:^2.6.0"
   peerDependencies:
+    "@types/react": ">=18"
     react: ">=18"
     react-dom: ">=18"
   peerDependenciesMeta:
+    "@types/react":
+      optional: true
     react-dom:
       optional: true
-  checksum: 10c0/1227a7fc566f47799a2f157213e07dcafff584b08454ec46c74ff05babe3c2adf10c25701ce546141be1b328675b658312af3ae6dcca5c551ee9a5c88732067c
+  checksum: 10c0/6c7010ae75e15d55c663921f7e7083ec2bbb4859d70158f11e24f28f97132317abf9aaa4a2545b34da35623ee26a67f0367016c1d10a9c261f5c7ae518e352d0
   languageName: node
   linkType: hard
 
